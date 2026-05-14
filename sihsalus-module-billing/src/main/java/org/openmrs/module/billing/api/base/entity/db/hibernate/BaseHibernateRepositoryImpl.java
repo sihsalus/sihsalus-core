@@ -43,13 +43,12 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 	@Override
 	public Query createQuery(String query) {
 		DbSession session = sessionFactory.getCurrentSession();
-		return session.createQuery(query);
+		return new Query(session.createQuery(query));
 	}
 	
 	@Override
 	public <E extends OpenmrsObject> Criteria createCriteria(Class<E> cls) {
-		DbSession session = sessionFactory.getCurrentSession();
-		return session.createCriteria(cls);
+		return new Criteria(sessionFactory.getHibernateSessionFactory().getCurrentSession(), cls);
 	}
 	
 	@Override
@@ -157,7 +156,7 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 		DbSession session = sessionFactory.getCurrentSession();
 		
 		try {
-			Criteria search = session.createCriteria(cls);
+			Criteria search = createCriteria(cls);
 			
 			return search.list();
 		}

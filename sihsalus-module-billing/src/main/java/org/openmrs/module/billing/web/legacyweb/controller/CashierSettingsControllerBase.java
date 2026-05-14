@@ -11,8 +11,8 @@ package org.openmrs.module.billing.web.legacyweb.controller;
 
 import org.openmrs.module.billing.web.base.controller.HeaderController;
 import org.openmrs.module.billing.ModuleSettings;
+import org.openmrs.module.billing.api.base.web.WebConstants;
 import org.openmrs.module.billing.api.model.CashierSettings;
-import org.openmrs.web.WebConstants;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

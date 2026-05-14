@@ -19,11 +19,7 @@ import org.openmrs.event.Event;
 import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.module.DaemonToken;
 import org.openmrs.module.DaemonTokenAware;
-import org.openmrs.module.Module;
-import org.openmrs.module.ModuleFactory;
 import org.openmrs.module.billing.api.billing.BillingEventListener;
-import org.openmrs.module.billing.web.CashierWebConstants;
-import org.openmrs.module.web.WebModuleUtil;
 
 /**
  * This class contains the logic that is run every time this module is either started or stopped.
@@ -59,8 +55,7 @@ public class BillingModuleActivator extends BaseModuleActivator implements Daemo
 	 */
 	@Override
 	public void stopped() {
-		Module module = ModuleFactory.getModuleById(CashierWebConstants.OPENHMIS_CASHIER_MODULE_ID);
-		WebModuleUtil.unloadFilters(module);
+		unsubscribeBillingEventListeners();
 		
 		log.info("OpenMRS Billing Module stopped");
 	}

@@ -18,6 +18,8 @@ public class WebConstants {
 	
 	protected static final String MODULE_RESOURCE_BASE = "/moduleResources/billing/";
 	
+	public static final String OPENMRS_MSG_ATTR = "openmrs_msg";
+	
 	public static final String REPORT_DOWNLOAD_URL = "/moduleServlet/jasperreport/jreportDownload";
 	
 	protected WebConstants() {

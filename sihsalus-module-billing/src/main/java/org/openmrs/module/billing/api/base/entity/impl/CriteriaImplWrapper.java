@@ -9,99 +9,29 @@
  */
 package org.openmrs.module.billing.api.base.entity.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
-import org.hibernate.Version;
 import org.hibernate.criterion.Projection;
 import org.hibernate.transform.ResultTransformer;
 
 /**
- * Wrapper class to handle differences between Hibernate 3 and 4 for the CriteriaImpl class.
+ * Wrapper class retained for the legacy service code. The billing module now uses a local
+ * compatibility Criteria wrapper that exposes projection and result transformer state directly.
  */
-@Slf4j
 public class CriteriaImplWrapper {
 	
 	public static final long serialVersionUID = 0L;
 	
-	private static final String VERSION_3_CRITERIA_CLASS = "org.hibernate.impl.CriteriaImpl";
-	
-	private static final String VERSION_4_CRITERIA_CLASS = "org.hibernate.internal.CriteriaImpl";
-	
-	private static final String PROJECTION_METHOD_NAME = "getProjection";
-	
-	private static final String RESULT_TRANSFORMER_METHOD_NAME = "getResultTransformer";
-	
-	private static Method getProjectionMethod;
-	
-	private static Method getResultTransformerMethod;
-	
-	private final Object impl;
-	
-	static {
-		Class<?> cls;
-		
-		try {
-			log.debug("Hibernate version: {}", Version.getVersionString());
-			if (org.hibernate.Version.getVersionString().startsWith("3.")) {
-				cls = Class.forName(VERSION_3_CRITERIA_CLASS);
-			} else {
-				cls = Class.forName(VERSION_4_CRITERIA_CLASS);
-			}
-			
-			getProjectionMethod = cls.getMethod(PROJECTION_METHOD_NAME);
-			getResultTransformerMethod = cls.getMethod(RESULT_TRANSFORMER_METHOD_NAME);
-		}
-		catch (ClassNotFoundException ex) {
-			getProjectionMethod = null;
-			getResultTransformerMethod = null;
-			
-			log.error("Could not determine hibernate version.", ex);
-		}
-		catch (NoSuchMethodException e) {
-			getProjectionMethod = null;
-			getResultTransformerMethod = null;
-			
-			log.error("Could not get CriteriaImpl method.", e);
-		}
-	}
+	private final Criteria criteria;
 	
 	public CriteriaImplWrapper(Criteria criteria) {
-		impl = criteria;
+		this.criteria = criteria;
 	}
 	
 	public Projection getProjection() {
-		if (getProjectionMethod != null) {
-			try {
-				return (Projection) getProjectionMethod.invoke(impl);
-			}
-			catch (IllegalAccessException e) {
-				log.error("Could not get CriteriaImpl Projection", e);
-			}
-			catch (InvocationTargetException e) {
-				log.error("Could not get CriteriaImpl Projection", e);
-			}
-			
-		}
-		
-		return null;
+		return criteria.getProjection();
 	}
 	
 	public ResultTransformer getResultTransformer() {
-		if (getResultTransformerMethod != null) {
-			try {
-				return (ResultTransformer) getResultTransformerMethod.invoke(impl);
-			}
-			catch (IllegalAccessException e) {
-				log.error("Could not get CriteriaImpl ResultTransformer", e);
-			}
-			catch (InvocationTargetException e) {
-				log.error("Could not get CriteriaImpl ResultTransformer", e);
-			}
-		}
-		
-		return null;
+		return criteria.getResultTransformer();
 	}
 }
