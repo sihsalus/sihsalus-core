@@ -13,29 +13,24 @@
  */
 package org.openmrs.event;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.MapMessage;
+import jakarta.jms.Message;
+import jakarta.jms.Topic;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.APIException;
@@ -45,8 +40,6 @@ import org.openmrs.util.OpenmrsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.openmrs.util.PrivilegeConstants;
-import org.springframework.jms.connection.SingleConnectionFactory;
-import org.springframework.jms.core.JmsTemplate;
 
 /**
  * Used by {@link Event}.
@@ -57,11 +50,7 @@ public class EventEngine {
 
 	protected static Logger log = LoggerFactory.getLogger(EventEngine.class);
 
-	protected JmsTemplate jmsTemplate = null;
-
-	protected Map<String, TopicSubscriber> subscribers = new HashMap<String, TopicSubscriber>();
-
-	protected SingleConnectionFactory connectionFactory;
+	protected Map<String, Map<String, EventListener>> subscribers = new HashMap<String, Map<String, EventListener>>();
 
     /**
      * This inner class holds the context for managing a subscription. Basically it serves to simplify using the
@@ -140,55 +129,33 @@ public class EventEngine {
 	}
 
 	private void doFireEvent(final Destination dest, final EventMessage eventMessage) {
-		initializeIfNeeded();
+		if (!enabled()) {
+			return;
+		}
 
-		jmsTemplate.send(dest, session -> {
-            if (log.isInfoEnabled())
-                log.info("Sending data " + eventMessage);
-
-            MapMessage mapMessage = session.createMapMessage();
-            if (eventMessage != null) {
-                for (Map.Entry<String, Serializable> entry : eventMessage.entrySet()) {
-                    mapMessage.setObject(entry.getKey(), entry.getValue());
-                }
-            }
-
-            return mapMessage;
-        });
+		try {
+			String topicName = getTopicName(dest);
+			Map<String, EventListener> topicSubscribers = subscribers.get(topicName);
+			if (topicSubscribers == null || topicSubscribers.isEmpty()) {
+				return;
+			}
+			Message message = createMapMessage(eventMessage, dest);
+			if (log.isInfoEnabled()) {
+				log.info("Sending data {}", eventMessage);
+			}
+			for (EventListener listener : new ArrayList<>(topicSubscribers.values())) {
+				listener.onMessage(message);
+			}
+		}
+		catch (JMSException e) {
+			throw new APIException("Exception raised while firing event", e);
+		}
 	}
 
 	private boolean enabled() {
         return !OpenmrsUtil.getApplicationDataDirectoryAsFile().toPath().resolve("activemq-data").resolve("disabled").toFile().exists();
 	}
 
-
-    private synchronized void initializeIfNeeded() {
-		if (jmsTemplate == null) {
-            log.info("creating connection factory");
-			String property = getExternalUrl();
-            String brokerURL;
-            if (property == null || property.isEmpty()) {
-				String dataDirectory = new File(OpenmrsUtil.getApplicationDataDirectory(), "activemq-data").getAbsolutePath();
-				try {
-                    dataDirectory = URLEncoder.encode(dataDirectory, "UTF-8");
-                }
-                catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException("Failed to encode URI", e);
-                }
-                brokerURL = "vm://localhost?broker.persistent=true&broker.useJmx=false&broker.dataDirectory="
-                    + dataDirectory;
-            } else {
-                brokerURL = "tcp://" + property;
-            }
-
-            ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory(brokerURL);
-            connectionFactory = new SingleConnectionFactory(cf);
-            jmsTemplate = new JmsTemplate(connectionFactory);
-        } else {
-            log.trace("messageListener already defined");
-        }
-    }
-    
     private String getExternalUrl() {
     	try {
 			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
@@ -391,31 +358,11 @@ public class EventEngine {
 	 */
 	public void subscribe(Destination destination, final EventListener listenerToRegister) {
 		if(enabled()) {
-			initializeIfNeeded();
-
-			TopicConnection conn;
-			Topic topic = (Topic) destination;
-
 			try {
-				conn = (TopicConnection) jmsTemplate.getConnectionFactory().createConnection();
-				TopicSession session = conn.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-				TopicSubscriber subscriber = session.createSubscriber(topic);
-				subscriber.setMessageListener(new MessageListener() {
-
-					@Override
-					public void onMessage(Message message) {
-						listenerToRegister.onMessage(message);
-					}
-				});
-
-				//Check if this is a duplicate and remove it
-				String key = topic.getTopicName() + DELIMITER + listenerToRegister.getClass().getName();
-				if (subscribers.containsKey(key)) {
-					unsubscribe(destination, listenerToRegister);
-				}
-
-				subscribers.put(key, subscriber);
-				conn.start();
+				String topicName = getTopicName(destination);
+				Map<String, EventListener> topicSubscribers =
+					subscribers.computeIfAbsent(topicName, key -> new LinkedHashMap<>());
+				topicSubscribers.put(listenerToRegister.getClass().getName(), listenerToRegister);
 
 			} catch (JMSException e) {
 				log.error("Exception occurred while subscribing", e);
@@ -428,16 +375,16 @@ public class EventEngine {
 	 */
 	public void unsubscribe(Destination dest, EventListener listener) {
 		if(enabled()) {
-			initializeIfNeeded();
-
 			if (dest != null) {
-				Topic topic = (Topic) dest;
 				try {
-					String key = topic.getTopicName() + DELIMITER + listener.getClass().getName();
-					if (subscribers.get(key) != null)
-						subscribers.get(key).close();
-
-					subscribers.remove(key);
+					String topicName = getTopicName(dest);
+					Map<String, EventListener> topicSubscribers = subscribers.get(topicName);
+					if (topicSubscribers != null) {
+						topicSubscribers.remove(listener.getClass().getName());
+						if (topicSubscribers.isEmpty()) {
+							subscribers.remove(topicName);
+						}
+					}
 				} catch (JMSException e) {
 					log.error("Failed to unsubscribe from the specified destination:", e);
 				}
@@ -476,7 +423,7 @@ public class EventEngine {
 			// look for delimiter and get string before that
 			String topicName;
 			try {
-				topicName = ((Topic) dest).getTopicName();
+				topicName = getTopicName(dest);
 			}
 			catch (JMSException e) {
 				// TODO fail hard here? document this in javadoc too
@@ -496,16 +443,153 @@ public class EventEngine {
 			return null;
 		}
 	}
+
+	protected String getTopicName(final Destination dest) throws JMSException {
+		if (dest instanceof Topic) {
+			return ((Topic) dest).getTopicName();
+		}
+		return String.valueOf(dest);
+	}
+
+	protected MapMessage createMapMessage(EventMessage eventMessage, Destination destination) {
+		Map<String, Object> body = new LinkedHashMap<>();
+		if (eventMessage != null) {
+			body.putAll(eventMessage);
+		}
+		Map<String, Object> properties = new HashMap<>();
+		return (MapMessage) Proxy.newProxyInstance(
+			MapMessage.class.getClassLoader(),
+			new Class<?>[] { MapMessage.class },
+			(proxy, method, args) -> handleMapMessageInvocation(method, args, body, properties, destination));
+	}
+
+	private Object handleMapMessageInvocation(Method method, Object[] args, Map<String, Object> body,
+			Map<String, Object> properties, Destination destination) {
+		String methodName = method.getName();
+		if ("toString".equals(methodName)) {
+			return body.toString();
+		}
+		if ("hashCode".equals(methodName)) {
+			return System.identityHashCode(body);
+		}
+		if ("equals".equals(methodName)) {
+			return args != null && args.length == 1 && args[0] == body;
+		}
+		if ("getMapNames".equals(methodName)) {
+			return Collections.enumeration(body.keySet());
+		}
+		if ("itemExists".equals(methodName)) {
+			return body.containsKey(args[0]);
+		}
+		if ("getObject".equals(methodName)) {
+			return body.get(args[0]);
+		}
+		if (methodName.startsWith("get") && args != null && args.length == 1 && args[0] instanceof String) {
+			return coerce(body.get(args[0]), method.getReturnType());
+		}
+		if (methodName.startsWith("set") && args != null && args.length >= 2 && args[0] instanceof String) {
+			body.put((String) args[0], args[1]);
+			return null;
+		}
+		if ("clearBody".equals(methodName)) {
+			body.clear();
+			return null;
+		}
+		if ("getPropertyNames".equals(methodName)) {
+			return Collections.enumeration(properties.keySet());
+		}
+		if ("propertyExists".equals(methodName)) {
+			return properties.containsKey(args[0]);
+		}
+		if ("getObjectProperty".equals(methodName)) {
+			return properties.get(args[0]);
+		}
+		if (methodName.startsWith("get") && methodName.endsWith("Property")) {
+			return coerce(properties.get(args[0]), method.getReturnType());
+		}
+		if (methodName.startsWith("set") && methodName.endsWith("Property")) {
+			properties.put((String) args[0], args[1]);
+			return null;
+		}
+		if ("clearProperties".equals(methodName)) {
+			properties.clear();
+			return null;
+		}
+		if ("getJMSDestination".equals(methodName)) {
+			return destination;
+		}
+		if ("getBody".equals(methodName)) {
+			Class<?> bodyType = (Class<?>) args[0];
+			return bodyType.isInstance(body) ? bodyType.cast(body) : null;
+		}
+		if ("isBodyAssignableTo".equals(methodName)) {
+			return ((Class<?>) args[0]).isInstance(body);
+		}
+		if ("acknowledge".equals(methodName) || method.getReturnType() == Void.TYPE) {
+			return null;
+		}
+		return defaultValue(method.getReturnType());
+	}
+
+	private Object coerce(Object value, Class<?> targetType) {
+		if (value == null) {
+			return defaultValue(targetType);
+		}
+		if (targetType == String.class) {
+			return value.toString();
+		}
+		if (targetType == byte[].class && value instanceof byte[]) {
+			return value;
+		}
+		if (targetType == boolean.class) {
+			return value instanceof Boolean ? value : Boolean.parseBoolean(value.toString());
+		}
+		if (targetType == char.class) {
+			return value instanceof Character ? value : value.toString().charAt(0);
+		}
+		if (value instanceof Number number) {
+			if (targetType == byte.class) {
+				return number.byteValue();
+			}
+			if (targetType == short.class) {
+				return number.shortValue();
+			}
+			if (targetType == int.class) {
+				return number.intValue();
+			}
+			if (targetType == long.class) {
+				return number.longValue();
+			}
+			if (targetType == float.class) {
+				return number.floatValue();
+			}
+			if (targetType == double.class) {
+				return number.doubleValue();
+			}
+		}
+		return value;
+	}
+
+	private Object defaultValue(Class<?> targetType) {
+		if (!targetType.isPrimitive()) {
+			return null;
+		}
+		if (targetType == boolean.class) {
+			return false;
+		}
+		if (targetType == char.class) {
+			return '\0';
+		}
+		return 0;
+	}
 	
 	/**
 	 * Closes the underlying shared connection which will close the broker too under the hood
 	 */
 	public void shutdown() {
 		if (log.isDebugEnabled())
-			log.debug("Shutting down JMS shared connection...");
+			log.debug("Clearing event subscriptions...");
 		
-		if (connectionFactory != null) {
-			connectionFactory.destroy();
-		}
+		subscribers.clear();
 	}
 }

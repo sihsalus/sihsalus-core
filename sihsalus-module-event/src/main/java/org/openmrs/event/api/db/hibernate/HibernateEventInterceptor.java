@@ -1,9 +1,7 @@
 package org.openmrs.event.api.db.hibernate;
 
 import lombok.Setter;
-import org.apache.commons.lang.BooleanUtils;
-import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Interceptor;
 import org.hibernate.Transaction;
 import org.hibernate.collection.spi.PersistentCollection;
@@ -25,9 +23,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import java.io.Serializable;
+import jakarta.transaction.Status;
+import jakarta.transaction.Synchronization;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedHashSet;
@@ -40,7 +37,7 @@ import java.util.Set;
  * a Stack here to handle any nested transactions that may occur within a single thread
  */
 @Component
-public class HibernateEventInterceptor extends EmptyInterceptor implements ApplicationEventPublisherAware {
+public class HibernateEventInterceptor implements Interceptor, ApplicationEventPublisherAware {
 
     private static final Logger log = LoggerFactory.getLogger(HibernateEventInterceptor.class);
 
@@ -65,7 +62,7 @@ public class HibernateEventInterceptor extends EmptyInterceptor implements Appli
     }
 
     /**
-     * @see EmptyInterceptor#afterTransactionBegin(Transaction)
+     * @see Interceptor#afterTransactionBegin(Transaction)
      */
     @Override
     public void afterTransactionBegin(Transaction tx) {
@@ -107,7 +104,7 @@ public class HibernateEventInterceptor extends EmptyInterceptor implements Appli
      * This is called when an entity is created, not when it is updated
      */
     @Override
-    public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
+    public boolean onSave(Object entity, Object id, Object[] state, String[] propertyNames, Type[] types) {
         log.trace("onSave: {}", entity);
         handleEntity(entity, Action.CREATED);
         return false;  //tells hibernate that there are no changes made here that need to be propagated to the persistent object and DB
@@ -118,7 +115,7 @@ public class HibernateEventInterceptor extends EmptyInterceptor implements Appli
      * The voided property is a special case that we consider generally as representing a delete/undelete operation
      */
     @Override
-    public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState, String[] propertyNames, Type[] types) {
+    public boolean onFlushDirty(Object entity, Object id, Object[] currentState, Object[] previousState, String[] propertyNames, Type[] types) {
         log.trace("onFlushDirty: {}", entity);
         handleEntity(entity, Action.UPDATED);
         if (entity instanceof Retireable || entity instanceof Voidable) {
@@ -150,7 +147,7 @@ public class HibernateEventInterceptor extends EmptyInterceptor implements Appli
      * Consider this to be an update of the object containing the collection
      */
     @Override
-    public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+    public void onCollectionRemove(Object collection, Object key) {
         log.trace("onCollectionRemove");
         if (collection instanceof PersistentCollection) {
             PersistentCollection persistentCollection = (PersistentCollection) collection;
@@ -166,7 +163,7 @@ public class HibernateEventInterceptor extends EmptyInterceptor implements Appli
      * Consider this to be an update of the object containing the collection
      */
     @Override
-    public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+    public void onCollectionRecreate(Object collection, Object key) {
         log.trace("onCollectionRecreate");
         if (collection instanceof PersistentCollection) {
             PersistentCollection persistentCollection = (PersistentCollection) collection;
@@ -182,7 +179,7 @@ public class HibernateEventInterceptor extends EmptyInterceptor implements Appli
      * Consider this to be an update of the object containing the collection
      */
     @Override
-    public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+    public void onCollectionUpdate(Object collection, Object key) {
         log.trace("onCollectionUpdate");
         if (collection instanceof PersistentCollection) {
             PersistentCollection persistentCollection = (PersistentCollection) collection;
@@ -197,7 +194,7 @@ public class HibernateEventInterceptor extends EmptyInterceptor implements Appli
      * This is called when an entity is deleted
      */
     @Override
-    public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
+    public void onDelete(Object entity, Object id, Object[] state, String[] propertyNames, Type[] types) {
         log.trace("onDelete: {}", entity);
         handleEntity(entity, Action.PURGED);
     }

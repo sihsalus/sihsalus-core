@@ -1,8 +1,6 @@
 package org.sihsalus.module.queue;
 
 import java.util.List;
-import javax.sql.DataSource;
-import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
@@ -35,22 +33,11 @@ import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 @Configuration
 public class SihsalusQueueConfiguration {
 
-    @Bean(name = "queueLiquibase")
-    @DependsOn("liquibase")
-    SpringLiquibase queueLiquibase(DataSource dataSource) {
-        SpringLiquibase liquibase = new SpringLiquibase();
-        liquibase.setDataSource(dataSource);
-        liquibase.setChangeLog("classpath:/org/openmrs/module/queue/liquibase.xml");
-        return liquibase;
-    }
-
     @Bean
-    @DependsOn("queueLiquibase")
     HibernateMappingContributor queueLiquibaseOrderingContributor() {
         return List::of;
     }

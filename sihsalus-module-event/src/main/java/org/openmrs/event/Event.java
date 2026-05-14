@@ -13,8 +13,8 @@
  */
 package org.openmrs.event;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;

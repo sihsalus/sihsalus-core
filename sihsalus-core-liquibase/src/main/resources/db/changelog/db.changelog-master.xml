@@ -18,8 +18,10 @@
     <include file="org/openmrs/module/emrapi/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/attachments/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/cohort/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/queue/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/reporting/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/stockmanagement/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/fua/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/ordertemplates/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/patientflags/liquibase.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
