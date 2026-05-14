@@ -39,6 +39,7 @@ import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
 import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationScheme;
+import org.openmrs.module.o3forms.api.O3FormsService;
 import org.openmrs.module.ordertemplates.api.OrderTemplatesService;
 import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
@@ -190,6 +191,12 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(ProcedureService.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from emrapi_procedure_type", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from emrapi_procedure", Integer.class));
+    }
+
+    @Test
+    void o3FormsIsWiredAsStaticInternalModule() throws Exception {
+        assertNotNull(Context.getService(O3FormsService.class));
+        mockMvc.perform(get("/rest/v1/o3/forms/not-a-real-form")).andExpect(status().isNotFound());
     }
 
     @Test

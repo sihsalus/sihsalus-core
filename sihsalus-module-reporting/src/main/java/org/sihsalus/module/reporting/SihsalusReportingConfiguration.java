@@ -74,6 +74,7 @@ import org.openmrs.module.reporting.report.task.RunQueuedReportsTask;
 import org.openmrs.module.reporting.serializer.ReportingSerializer;
 import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -127,7 +128,8 @@ public class SihsalusReportingConfiguration {
     }
 
     @Bean
-    ReportService reportingReportService(ReportDAO reportingReportDao, ReportingTimerTask runQueuedReportsTask) {
+    ReportService reportingReportService(
+            ReportDAO reportingReportDao, @Qualifier("runQueuedReportsTask") ReportingTimerTask runQueuedReportsTask) {
         ReportServiceImpl service = new ReportServiceImpl();
         service.setReportDAO(reportingReportDao);
         service.setRunQueuedReportsTask(runQueuedReportsTask);

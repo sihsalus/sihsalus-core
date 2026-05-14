@@ -80,9 +80,9 @@ public class ReportRequest extends BaseOpenmrsObject {
 	public ReportRequest(Mapped<ReportDefinition> reportDefinition, Mapped<CohortDefinition> baseCohort,
 	                     RenderingMode renderingMode, Priority priority, String schedule) {
 	    this();
-	    this.reportDefinition = reportDefinition;
-	    this.baseCohort = baseCohort;
-	    this.renderingMode = renderingMode;
+	    setReportDefinition(reportDefinition);
+	    setBaseCohort(baseCohort);
+	    setRenderingMode(renderingMode);
 	    this.priority = priority;
 	    this.schedule = schedule;
     }
@@ -95,11 +95,11 @@ public class ReportRequest extends BaseOpenmrsObject {
 	@Override
 	public String toString() {
         StringBuilder sb = new StringBuilder("Report Request (" + getUuid() + ")");
-        if (reportDefinition != null && reportDefinition.getParameterizable() != null) {
-            sb.append("for " + reportDefinition.getParameterizable().getName());
+        if (getReportDefinition() != null && getReportDefinition().getParameterizable() != null) {
+            sb.append("for " + getReportDefinition().getParameterizable().getName());
         }
-        if (renderingMode != null && renderingMode.getRenderer() != null) {
-            sb.append(" to " + renderingMode.getRenderer().getClass().getSimpleName());
+        if (getRenderingMode() != null && getRenderingMode().getRenderer() != null) {
+            sb.append(" to " + getRenderingMode().getRenderer().getClass().getSimpleName());
         }
         return sb.toString();
 	}

@@ -67,6 +67,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void o3FormsIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("o3forms")
+                        && module.sourceModule().equals("o3forms-omod")
+                        && module.baselineVersion().equals("2.3.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void calculationIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("calculation")

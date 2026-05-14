@@ -13,6 +13,7 @@
     <include file="org/openmrs/module/idgen/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/addresshierarchy/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/metadatamapping/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/o3forms/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/calculation/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/emrapi/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/attachments/liquibase.xml" relativeToChangelogFile="false"/>

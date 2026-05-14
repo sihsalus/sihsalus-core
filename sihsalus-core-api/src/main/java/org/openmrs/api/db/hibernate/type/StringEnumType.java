@@ -20,6 +20,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.usertype.DynamicParameterizedType;
 import org.hibernate.usertype.EnhancedUserType;
+import org.openmrs.api.context.Context;
 
 /**
  * A custom UserType for mapping Java enums as strings in Hibernate 7.x HBM XML mappings. This
@@ -46,9 +47,27 @@ public class StringEnumType implements EnhancedUserType<Enum>, DynamicParameteri
 			enumClassName = parameters.getProperty(ENTITY);
 		}
 		try {
-			enumClass = (Class<? extends Enum>) Class.forName(enumClassName);
+			enumClass = (Class<? extends Enum>) loadEnumClass(enumClassName);
 		} catch (ClassNotFoundException e) {
 			throw new HibernateException("Enum class not found: " + enumClassName, e);
+		}
+	}
+
+	private Class<?> loadEnumClass(String enumClassName) throws ClassNotFoundException {
+		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+		if (contextClassLoader != null) {
+			try {
+				return contextClassLoader.loadClass(enumClassName);
+			}
+			catch (ClassNotFoundException ignored) {
+				// Fall back to the legacy OpenMRS loader below.
+			}
+		}
+		try {
+			return Class.forName(enumClassName);
+		}
+		catch (ClassNotFoundException ignored) {
+			return Context.loadClass(enumClassName);
 		}
 	}
 

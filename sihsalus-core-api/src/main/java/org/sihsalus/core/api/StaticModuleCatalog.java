@@ -17,7 +17,7 @@ public final class StaticModuleCatalog {
                     module("attachments", "attachments-omod", "4.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("cohort", "cohort-omod", "3.7.3", SihsalusModuleStatus.PLACEHOLDER),
                     module("patientflags", "patientflags-omod", "3.0.10", SihsalusModuleStatus.PLACEHOLDER),
-                    module("o3forms", "o3forms-omod", "2.3.0", SihsalusModuleStatus.PLACEHOLDER),
+                    module("o3forms", "o3forms-omod", "2.3.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("emrapi", "emrapi-api", "3.5.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("queue", "queue-omod", "3.0.0", SihsalusModuleStatus.PLACEHOLDER),
                     module("appointments", "appointments-omod", "2.1.0-20250318.070530-1", SihsalusModuleStatus.PLACEHOLDER),
