@@ -90,7 +90,7 @@ public class HibernateBillDiscountDAO implements BillDiscountDAO {
 	
 	@Override
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
-		sessionFactory.getCurrentSession().saveOrUpdate(billDiscount);
+		sessionFactory.getCurrentSession().merge(billDiscount);
 		return billDiscount;
 	}
 }

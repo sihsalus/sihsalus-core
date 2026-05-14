@@ -134,18 +134,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <!-- TODO: Port billing to Hibernate 7/static Spring before compiling it as a converted module. -->
-                    <excludes>
-                        <exclude>org/openmrs/module/billing/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

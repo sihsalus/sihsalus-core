@@ -56,7 +56,7 @@ public class HibernateBillLineItemDAO implements BillLineItemDAO {
 	
 	@Override
 	public BillLineItem saveBillLineItem(@Nonnull BillLineItem lineItem) {
-		sessionFactory.getCurrentSession().saveOrUpdate(lineItem);
+		sessionFactory.getCurrentSession().merge(lineItem);
 		return lineItem;
 	}
 	

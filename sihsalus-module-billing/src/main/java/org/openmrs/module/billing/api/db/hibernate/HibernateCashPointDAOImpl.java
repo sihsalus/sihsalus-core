@@ -94,7 +94,7 @@ public class HibernateCashPointDAOImpl implements CashPointDAO {
 	 */
 	@Override
 	public CashPoint saveCashPoint(@Nonnull CashPoint cashPoint) {
-		sessionFactory.getCurrentSession().saveOrUpdate(cashPoint);
+		sessionFactory.getCurrentSession().merge(cashPoint);
 		return cashPoint;
 	}
 	
@@ -103,6 +103,6 @@ public class HibernateCashPointDAOImpl implements CashPointDAO {
 	 */
 	@Override
 	public void purgeCashPoint(@Nonnull CashPoint cashPoint) {
-		sessionFactory.getCurrentSession().delete(cashPoint);
+		sessionFactory.getCurrentSession().remove(cashPoint);
 	}
 }

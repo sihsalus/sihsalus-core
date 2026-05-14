@@ -106,7 +106,7 @@ public class HibernateBillRefundDAO implements BillRefundDAO {
 	
 	@Override
 	public BillRefund saveBillRefund(BillRefund billRefund) {
-		sessionFactory.getCurrentSession().saveOrUpdate(billRefund);
+		sessionFactory.getCurrentSession().merge(billRefund);
 		return billRefund;
 	}
 }

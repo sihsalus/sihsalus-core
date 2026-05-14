@@ -59,7 +59,7 @@ public class HibernatePaymentModeDAOImpl implements PaymentModeDAO {
 	 */
 	@Override
 	public PaymentMode savePaymentMode(@Nonnull PaymentMode paymentMode) {
-		sessionFactory.getCurrentSession().saveOrUpdate(paymentMode);
+		sessionFactory.getCurrentSession().merge(paymentMode);
 		return paymentMode;
 	}
 	
@@ -68,6 +68,6 @@ public class HibernatePaymentModeDAOImpl implements PaymentModeDAO {
 	 */
 	@Override
 	public void purgePaymentMode(@Nonnull PaymentMode paymentMode) {
-		sessionFactory.getCurrentSession().delete(paymentMode);
+		sessionFactory.getCurrentSession().remove(paymentMode);
 	}
 }

@@ -46,13 +46,13 @@ public class HibernateCashierItemPriceDAOImpl implements CashierItemPriceDAO {
 	/** {@inheritDoc} */
 	@Override
 	public CashierItemPrice saveCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice) {
-		sessionFactory.getCurrentSession().saveOrUpdate(cashierItemPrice);
+		sessionFactory.getCurrentSession().merge(cashierItemPrice);
 		return cashierItemPrice;
 	}
 	
 	/** {@inheritDoc} */
 	@Override
 	public void purgeCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice) {
-		sessionFactory.getCurrentSession().delete(cashierItemPrice);
+		sessionFactory.getCurrentSession().remove(cashierItemPrice);
 	}
 }

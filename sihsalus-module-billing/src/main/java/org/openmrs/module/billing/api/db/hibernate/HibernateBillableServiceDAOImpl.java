@@ -115,7 +115,7 @@ public class HibernateBillableServiceDAOImpl implements BillableServiceDAO {
 	 */
 	@Override
 	public BillableService saveBillableService(@Nonnull BillableService billableService) {
-		sessionFactory.getCurrentSession().saveOrUpdate(billableService);
+		sessionFactory.getCurrentSession().merge(billableService);
 		return billableService;
 	}
 	
@@ -124,6 +124,6 @@ public class HibernateBillableServiceDAOImpl implements BillableServiceDAO {
 	 */
 	@Override
 	public void purgeBillableService(BillableService billableService) {
-		sessionFactory.getCurrentSession().delete(billableService);
+		sessionFactory.getCurrentSession().remove(billableService);
 	}
 }

@@ -33,7 +33,7 @@ public class BillExemptionDAOImpl implements BillExemptionDAO {
 	
 	@Override
 	public BillExemption save(BillExemption billExemption) {
-		sessionFactory.getCurrentSession().saveOrUpdate(billExemption);
+		sessionFactory.getCurrentSession().merge(billExemption);
 		return billExemption;
 	}
 	

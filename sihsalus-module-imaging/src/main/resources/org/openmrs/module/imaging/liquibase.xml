@@ -16,7 +16,7 @@
     <changeSet id="400" author="weisadre">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="imaging_OrthancConfiguration"/>
+                <tableExists tableName="imaging_orthancconfiguration"/>
             </not>
         </preConditions>
         <comment>Create the Configuration table for Orthanc Server</comment>
@@ -39,9 +39,9 @@
     <changeSet id="401" author="weisadre">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="imaging_DicomStudy"/>
+                <tableExists tableName="imaging_dicomstudy"/>
             </not>
-            <tableExists tableName="imaging_OrthancConfiguration"/>
+            <tableExists tableName="imaging_orthancconfiguration"/>
         </preConditions>
         <comment>Create the DicomStudy table for imaging</comment>
         <createTable tableName="imaging_DicomStudy">
@@ -84,9 +84,9 @@
     <changeSet id="402" author="weisadre">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="imaging_RequestProcedure"/>
+                <tableExists tableName="imaging_requestprocedure"/>
             </not>
-            <tableExists tableName="imaging_OrthancConfiguration"/>
+            <tableExists tableName="imaging_orthancconfiguration"/>
         </preConditions>
         <comment>Create the requestProcedure table for imaging</comment>
         <createTable tableName="imaging_RequestProcedure">
@@ -129,9 +129,9 @@
     <changeSet id="403" author="weisadre" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="imaging_RequestProcedureStep"/>
+                <tableExists tableName="imaging_requestprocedurestep"/>
             </not>
-            <tableExists tableName="imaging_RequestProcedure"/>
+            <tableExists tableName="imaging_requestprocedure"/>
         </preConditions>
         <comment>Create the requestProcedureStep table for imaging</comment>
         <createTable tableName="imaging_RequestProcedureStep">

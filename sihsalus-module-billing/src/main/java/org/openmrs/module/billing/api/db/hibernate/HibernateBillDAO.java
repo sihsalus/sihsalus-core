@@ -130,7 +130,7 @@ public class HibernateBillDAO implements BillDAO {
 	 */
 	@Override
 	public Bill saveBill(@Nonnull Bill bill) {
-		sessionFactory.getCurrentSession().saveOrUpdate(bill);
+		sessionFactory.getCurrentSession().merge(bill);
 		return bill;
 	}
 	
