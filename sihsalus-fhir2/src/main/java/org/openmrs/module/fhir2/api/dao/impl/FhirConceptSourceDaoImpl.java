@@ -145,8 +145,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	@Override
 	@Transactional
 	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
-		sessionFactory.getCurrentSession().saveOrUpdate(fhirConceptSource);
-		return fhirConceptSource;
+		return sessionFactory.getCurrentSession().merge(fhirConceptSource);
 	}
 	
 	private OpenmrsFhirCriteriaContext<FhirConceptSource, FhirConceptSource> openmrsFhirCriteriaContext() {

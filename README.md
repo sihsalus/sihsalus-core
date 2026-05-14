@@ -56,6 +56,12 @@ sihsalus-module-*/        Static internal module placeholders for distro capabil
 
 ## Local Verification
 
+Start the local PostgreSQL dependency:
+
+```bash
+docker compose up -d postgres
+```
+
 ```bash
 mvn --batch-mode --no-transfer-progress verify
 ```

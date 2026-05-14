@@ -1,0 +1,305 @@
+/**
+ * The contents of this file are subject to the OpenMRS Public License
+ * Version 1.0 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://license.openmrs.org
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ */
+package org.openmrs.module.idgen.service;
+
+import org.openmrs.Location;
+import org.openmrs.PatientIdentifierType;
+import org.openmrs.User;
+import org.openmrs.annotation.Authorized;
+import org.openmrs.api.APIException;
+import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.idgen.AutoGenerationOption;
+import org.openmrs.module.idgen.IdentifierPool;
+import org.openmrs.module.idgen.IdentifierSource;
+import org.openmrs.module.idgen.IdgenConstants;
+import org.openmrs.module.idgen.LogEntry;
+import org.openmrs.module.idgen.PooledIdentifier;
+import org.openmrs.module.idgen.SequentialIdentifierGenerator;
+import org.openmrs.module.idgen.processor.IdentifierSourceProcessor;
+import org.openmrs.util.PrivilegeConstants;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Interface for IdentifierSource Service Methods
+ */
+public interface IdentifierSourceService extends OpenmrsService {
+	
+	/**
+	 * @return all IdentifierSource types that are supported
+	 * @should return all supported IdentifierSource types
+	 */
+	@Authorized
+	List<Class<? extends IdentifierSource>> getIdentifierSourceTypes();
+
+	/**
+	 * @param id the id to retrieve for the given type
+	 * @return the IdentifierSource that matches the given type and id
+	 * @should return a saved sequential identifier generator
+	 * @should return a saved remote identifier source
+	 * @should return a saved identifier pool
+	 */
+	@Authorized
+	IdentifierSource getIdentifierSource(Integer id) throws APIException;
+	
+	/**
+	 * @param includeRetired if true, also returns retired IdentifierSources
+	 * @return all IdentifierSources
+	 * @should return all identifier sources
+	 */
+	@Authorized
+	List<IdentifierSource> getAllIdentifierSources(boolean includeRetired) throws APIException;
+	
+	/**
+	 * Returns all IdentifierSources by PatientIdentifierType
+	 * @param includeRetired if true, also returns retired IdentifierSources
+	 * @return all IdentifierSources by PatientIdentifierType
+	 * @throws APIException
+	 * @should return all identifier sources by type
+	 */
+	@Authorized
+	Map<PatientIdentifierType, List<IdentifierSource>> getIdentifierSourcesByType(boolean includeRetired) throws APIException;
+	
+	/**
+	 * Persists a IdentifierSource, either as a save or update.
+	 * @param identifierSource
+	 * @return the IdentifierSource that was passed in
+	 * @should save a sequential identifier generator for later retrieval
+	 * @should save a rest identifier generator for later retrieval
+	 * @should save an identifier pool for later retrieval
+	 */
+	@Authorized( IdgenConstants.PRIV_MANAGE_IDENTIFIER_SOURCES )
+	IdentifierSource saveIdentifierSource(IdentifierSource identifierSource) throws APIException;
+	
+	/**
+	 * Retires the IdentifierSource, leaving it in the database, but removing it from data entry screens
+	 * 
+	 * @param identifierSource the identifierSource to retire
+	 * @param reason the retiredReason to set
+	 * @throws APIException
+	 * @should set the retired bit before saving
+	 */
+	@Authorized( IdgenConstants.PRIV_MANAGE_IDENTIFIER_SOURCES )
+	void retireIdentifierSource(IdentifierSource identifierSource, String reason) throws APIException;
+	
+	/**
+	 * Deletes a IdentifierSource from the database.
+	 * @param identifierSource the IdentifierSource to purge
+	 * @should delete an IdentifierSource from the system
+	 */
+	@Authorized( IdgenConstants.PRIV_MANAGE_IDENTIFIER_SOURCES )
+	void purgeIdentifierSource(IdentifierSource identifierSource) throws APIException;
+	
+	/**
+	 * Given a PatientIdentifierType, generates an identifier using the proper IdentifierSource for this server
+	 * Returns null if this PatientIdentifierType is not set to be auto-generated
+	 */
+	@Authorized(PrivilegeConstants.EDIT_PATIENT_IDENTIFIERS)
+	String generateIdentifier(PatientIdentifierType type, String comment);
+
+    /**
+     * Given a PatientIdentifierType and Location, generates an identifier using the proper IdentifierSource
+     * Returns null if this PatientIdentifierType is not set to be auto-generated
+     */
+	@Authorized(PrivilegeConstants.EDIT_PATIENT_IDENTIFIERS)
+    String generateIdentifier(PatientIdentifierType type, Location location, String comment);
+	
+	/**
+	 * Generates a Single Identifiers from the given source
+	 * @throws APIException
+	 */
+	@Authorized(PrivilegeConstants.EDIT_PATIENT_IDENTIFIERS)
+	String generateIdentifier(IdentifierSource source, String comment) throws APIException;
+	
+	/**
+	 * Generates a List of Identifiers from the given source in the given quantity
+	 * @throws APIException
+	 */
+	@Authorized( IdgenConstants.PRIV_GENERATE_BATCH_OF_IDENTIFIERS )
+	List<String> generateIdentifiers(IdentifierSource source, Integer batchSize, String comment) throws APIException;
+	
+	/**
+	 * Returns an appropriate IdentifierSourceProcessor for the given IdentifierSource
+	 * @param source
+	 * @return
+	 */
+	@Authorized
+	IdentifierSourceProcessor getProcessor(IdentifierSource source);
+	
+	/**
+	 * Registers a new Processor to handle a particular IdentifierSource
+	 * @param type
+	 * @param processorToRegister
+	 * @throws APIException
+	 */
+	@Authorized
+	void registerProcessor(Class<? extends IdentifierSource> type, IdentifierSourceProcessor processorToRegister) throws APIException;
+
+	/**
+	 * Returns available identifiers from a pool
+	 */
+	@Authorized
+	List<PooledIdentifier> getAvailableIdentifiers(IdentifierPool pool, int quantity) throws APIException;
+	
+	/**
+	 * Returns Pooled Identifiers for the given source, with the given status options
+	 */
+	@Authorized
+	int getQuantityInPool(IdentifierPool pool, boolean availableOnly, boolean usedOnly) throws APIException;
+	
+	/**
+	 * Adds a List of Identifiers to the given pool
+	 * @throws APIException
+	 */
+	@Authorized( IdgenConstants.PRIV_UPLOAD_BATCH_OF_IDENTIFIERS )
+	void addIdentifiersToPool(IdentifierPool pool, List<String> identifiers) throws APIException;
+	
+	/**
+	 * Adds a batch of Identifiers to the given pool, from the attached source
+	 * @throws APIException
+	 */
+	@Authorized( IdgenConstants.PRIV_UPLOAD_BATCH_OF_IDENTIFIERS )
+	void addIdentifiersToPool(IdentifierPool pool, Integer batchSize) throws APIException;
+
+    /**
+     * @param autoGenerationOptionId of auto generation option
+     * @return the AutoGenerationOption
+     */
+	@Authorized
+    AutoGenerationOption getAutoGenerationOption(Integer autoGenerationOptionId) throws APIException;
+
+    /**
+     * Gets an AutoGenerationOption by its UUID
+     * 
+     * @param uuid of auto generation option
+     * @return the AutoGenerationOption
+     * @since 4.6.0
+     */
+	@Authorized
+    AutoGenerationOption getAutoGenerationOptionByUuid(String uuid);
+    
+    /**
+	 * @param type patient identifier type
+     * @param location location
+	 * @return the AutoGenerationOption that matches the given PatientIdentifierType and Location
+     * @should return options that don't have a configured location
+	 */
+	@Authorized
+	AutoGenerationOption getAutoGenerationOption(PatientIdentifierType type, Location location) throws APIException;
+
+    /**
+     * @param type patient identifier type
+     * @return all AutoGenerationOptions that match the given patient identifier type
+     * @throws APIException
+     */
+	@Authorized
+    List<AutoGenerationOption> getAutoGenerationOptions(PatientIdentifierType type) throws APIException;
+
+    /**
+     * @param type patient identifier type
+     * @return the AutoGenerationOption that matches the given PatientIdentifierType
+     * @throws APIException non-unique exception if more than one auto-generation option for this type
+     */
+	@Authorized
+    AutoGenerationOption getAutoGenerationOption(PatientIdentifierType type) throws APIException;
+
+	/**
+	 * Persists a AutoGenerationOption, either as a save or update.
+	 * @param option
+	 * @return the AutoGenerationOption that was passed in
+	 */
+	@Authorized( IdgenConstants.PRIV_MANAGE_AUTOGENERATION_OPTIONS )
+	AutoGenerationOption saveAutoGenerationOption(AutoGenerationOption option) throws APIException;
+	
+	/**
+	 * Deletes a AutoGenerationOption from the database.
+	 * @param option the AutoGenerationOption to purge
+	 * @should delete an AutoGenerationOption from the system
+	 */
+	@Authorized( IdgenConstants.PRIV_MANAGE_AUTOGENERATION_OPTIONS )
+	void purgeAutoGenerationOption(AutoGenerationOption option) throws APIException;
+	
+	/**
+	 * Retrieves the Log Entries that match the supplied parameters.  All parameters are optional.
+	 * The identifier and comment parameters do a "like" match, the date parameters ignore time
+	 */
+	@Authorized
+	List<LogEntry> getLogEntries(IdentifierSource source, Date fromDate, Date toDate,
+								 String identifier, User generatedBy, String comment) throws APIException;
+
+	/**
+	 * Retrieves the most recent Log Entry for the given source, based on generation date and auto incremented id
+	 * @param source - the identifier source for which to return the log entry
+	 * @return LogEntry - the most recent LogEntry that matches the given source
+	 * @throws APIException
+	 */
+	@Authorized
+	LogEntry getMostRecentLogEntry(IdentifierSource source) throws APIException;
+
+	/**
+	 * Convenience method that checks a pool's level and incrementally adds identifiers in batches of 100
+	 * until the min available size is reached.  Only does something if the pool's source is a remote or sequential generator.
+	 * @param pool
+	 */
+	@Authorized
+	void checkAndRefillIdentifierPool(IdentifierPool pool);
+	
+	/**
+	 * Convenience method that returns the set of Patient Identifier Types that match certain AutoGeneration parameters
+	 */
+	@Authorized
+	List<PatientIdentifierType> getPatientIdentifierTypesByAutoGenerationOption(Boolean manualEntryEnabled, Boolean autoGenerationEnabled);
+
+    /**
+     * @param uuid
+     * @return the identifier source with the given uuid
+     */
+	@Authorized
+    IdentifierSource getIdentifierSourceByUuid(String uuid);
+    
+    /**
+     * Retrieves the identifier source(s) for a given patient identifier type. 
+     * @param patientIdentifierType the Patient Identifier Type used to retrieve the Identifier Source(s).
+     * @return the identifier source(s) with the given identifier type.
+     */
+	@Authorized
+    List<IdentifierSource> getIdentifierSourcesByType(PatientIdentifierType patientIdentifierType);
+
+    /**
+     * Updates sequenceValue of seq directly to the database via SQL, bypassing hibernate's caching
+     * @param seq
+     * @param sequenceValue
+     */
+	@Authorized
+    void saveSequenceValue(SequentialIdentifierGenerator seq, long sequenceValue);
+
+    /**
+     * Queries the database directly via SQL, bypassing hibernate's caching
+     * @param seq
+     * @return the sequence value from seq
+     */
+	@Authorized
+    Long getSequenceValue(SequentialIdentifierGenerator seq);
+
+    /**
+     * Internal method for generating identifiers; this should never be called directly--exposing it here is a
+     * hack, but because evidently the @Transactional annotation will only be picked up by service methods and we need this
+     * method to be transactional
+     */
+	@Authorized
+    List<String> generateIdentifiersInternal(Integer sourceId, Integer batchSize, String comment);
+
+}

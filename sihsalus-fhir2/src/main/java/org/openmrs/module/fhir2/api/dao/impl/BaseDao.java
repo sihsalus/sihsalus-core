@@ -18,6 +18,7 @@ import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.EntityType;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,7 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
-import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.proxy.HibernateProxy;
 import org.openmrs.module.fhir2.api.dao.internals.BaseFhirCriteriaHolder;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
@@ -251,8 +251,14 @@ public abstract class BaseDao {
 	 * @param <V> A persistent class
 	 */
 	protected <V> String getIdPropertyName(@Nonnull EntityManager entityManager, @Nonnull Class<V> clazz) {
-		return ((MetamodelImplementor) entityManager.getEntityManagerFactory().getMetamodel()).entityPersister(clazz)
-		        .getIdentifierPropertyName();
+		EntityType<V> entityType = entityManager.getMetamodel().entity(clazz);
+		if (!entityType.hasSingleIdAttribute()) {
+			throw new IllegalArgumentException("Entity must have a single id attribute: " + clazz.getName());
+		}
+
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		String idPropertyName = entityType.getId((Class) entityType.getIdType().getJavaType()).getName();
+		return idPropertyName;
 	}
 	
 	/**

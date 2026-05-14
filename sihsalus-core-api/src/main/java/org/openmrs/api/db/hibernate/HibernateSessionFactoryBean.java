@@ -34,8 +34,6 @@ import org.jspecify.annotations.NonNull;
 import org.openmrs.api.APIException;
 import org.openmrs.api.cache.CacheConfig;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.Module;
-import org.openmrs.module.ModuleFactory;
 import org.openmrs.util.EnversAuditTableInitializer;
 import org.openmrs.util.OpenmrsUtil;
 import org.slf4j.Logger;
@@ -99,9 +97,6 @@ public class HibernateSessionFactoryBean extends LocalSessionFactoryBean impleme
 	}
 
 	public Set<String> getModuleMappingResources() {
-		for (Module mod : ModuleFactory.getStartedModules()) {
-			mappingResources.addAll(mod.getMappingFiles());
-		}
 		return mappingResources;
 	}
 
@@ -112,11 +107,7 @@ public class HibernateSessionFactoryBean extends LocalSessionFactoryBean impleme
 	 * @since 1.9.2, 1.10
 	 */
 	public Set<String> getModulePackagesWithMappedClasses() {
-		Set<String> packages = new HashSet<>();
-		for (Module module : ModuleFactory.getStartedModules()) {
-			packages.addAll(module.getPackagesWithMappedClasses());
-		}
-		return packages;
+		return Collections.emptySet();
 	}
 
 	/**

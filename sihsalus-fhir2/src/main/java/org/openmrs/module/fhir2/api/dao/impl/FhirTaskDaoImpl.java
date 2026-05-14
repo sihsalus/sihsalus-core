@@ -72,12 +72,10 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	public FhirTask createOrUpdate(@Nonnull FhirTask task) throws DAOException {
 		// TODO: Refactor - and figure out why CascadeType.ALL does not take care of this.
 		if (task.getOwnerReference() != null && task.getOwnerReference().getReference() != null) {
-			getSessionFactory().getCurrentSession().saveOrUpdate(task.getOwnerReference());
+			task.setOwnerReference(getSessionFactory().getCurrentSession().merge(task.getOwnerReference()));
 		}
 		
-		getSessionFactory().getCurrentSession().saveOrUpdate(task);
-		
-		return task;
+		return getSessionFactory().getCurrentSession().merge(task);
 	}
 	
 	private Boolean validReferenceParam(ReferenceParam ref) {

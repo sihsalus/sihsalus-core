@@ -101,9 +101,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	@Transactional
 	public T createOrUpdate(@Nonnull T object) {
-		getSessionFactory().getCurrentSession().saveOrUpdate(object);
-		
-		return object;
+		return getSessionFactory().getCurrentSession().merge(object);
 	}
 	
 	@Override
@@ -121,9 +119,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			existing = retireObject(existing);
 		}
 		
-		getSessionFactory().getCurrentSession().saveOrUpdate(existing);
-		
-		return existing;
+		return getSessionFactory().getCurrentSession().merge(existing);
 	}
 	
 	@Override

@@ -122,8 +122,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 			sessionFactory.getCurrentSession().merge(existingContactPointMap);
 			return existingContactPointMap;
 		} else {
-			sessionFactory.getCurrentSession().saveOrUpdate(contactPointMap);
-			return contactPointMap;
+			return sessionFactory.getCurrentSession().merge(contactPointMap);
 		}
 	}
 	

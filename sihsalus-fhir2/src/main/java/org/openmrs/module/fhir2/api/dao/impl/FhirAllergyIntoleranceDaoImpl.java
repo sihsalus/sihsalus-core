@@ -48,7 +48,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		Allergy savedAllergy = super.createOrUpdate(allergy);
 		
 		for (AllergyReaction reaction : allergy.getReactions()) {
-			getSessionFactory().getCurrentSession().saveOrUpdate(reaction);
+			getSessionFactory().getCurrentSession().merge(reaction);
 		}
 		
 		return savedAllergy;

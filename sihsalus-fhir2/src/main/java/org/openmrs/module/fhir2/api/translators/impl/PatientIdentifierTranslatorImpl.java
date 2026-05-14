@@ -31,6 +31,7 @@ import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -45,7 +46,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 	private FhirPatientIdentifierSystemService patientIdentifierSystemService;
 	
 	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirPatientService patientService;
 	
 	@Getter(PROTECTED)

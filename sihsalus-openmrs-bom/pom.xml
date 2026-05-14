@@ -57,7 +57,7 @@
 		<infinispanVersion>15.2.6.Final</infinispanVersion>
 		<aspectjVersion>1.9.25.1</aspectjVersion>
 		<jacksonVersion>2.21.3</jacksonVersion>
-		<slf4jVersion>1.7.36</slf4jVersion>
+		<slf4jVersion>2.0.17</slf4jVersion>
 		<log4jVersion>2.26.0</log4jVersion>
 		<jbossLoggingVersion>3.6.3.Final</jbossLoggingVersion>
 		<owaspCsrfGuardVersion>4.5.0-jakarta</owaspCsrfGuardVersion>
@@ -420,7 +420,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j-impl</artifactId>
+				<artifactId>log4j-slf4j2-impl</artifactId>
 				<version>${log4jVersion}</version>
 			</dependency>
 			<dependency>

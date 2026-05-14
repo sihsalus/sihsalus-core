@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${SIHSALUS_POSTGRES_DB:-sihsalus}
+      POSTGRES_USER: ${SIHSALUS_POSTGRES_USER:-sihsalus}
+      POSTGRES_PASSWORD: ${SIHSALUS_POSTGRES_PASSWORD:-sihsalus}
+    ports:
+      - "${SIHSALUS_POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - sihsalus-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  sihsalus-postgres-data:

@@ -65,6 +65,7 @@ import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -72,47 +73,47 @@ import org.springframework.stereotype.Component;
 public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQueryInclude<U> {
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirLocationService locationService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirObservationService observationService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirEncounterService encounterService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirPatientService patientService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirPractitionerService practitionerService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirMedicationService medicationService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirDiagnosticReportService diagnosticReportService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirMedicationRequestService medicationRequestService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirServiceRequestService serviceRequestService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirAllergyIntoleranceService allergyIntoleranceService;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Lazy })
 	private FhirMedicationDispenseService medicationDispenseService;
 	
 	@SuppressWarnings("unchecked")

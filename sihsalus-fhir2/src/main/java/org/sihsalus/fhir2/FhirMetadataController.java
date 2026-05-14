@@ -1,6 +1,5 @@
 package org.sihsalus.fhir2;
 
-import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,8 +12,15 @@ public class FhirMetadataController {
         this.service = service;
     }
 
-    @GetMapping({"/api/fhir/metadata", "/api/fhir/CapabilityStatement"})
-    Map<String, Object> metadata() {
-        return service.capabilityStatement();
+    @GetMapping(
+            value = {
+                "/api/fhir/metadata",
+                "/api/fhir/CapabilityStatement",
+                "/api/fhir/r4/metadata",
+                "/ws/fhir2/R4/metadata"
+            },
+            produces = {"application/fhir+json", "application/json"})
+    String metadata() {
+        return service.capabilityStatementJson();
     }
 }

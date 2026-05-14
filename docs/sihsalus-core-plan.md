@@ -44,18 +44,20 @@ Implemented:
 
 - Maven reactor with OpenMRS Core API source imported into `sihsalus-core-api`.
 - Local OpenMRS BOM module for controlled dependency reuse.
+- Reactor dependency management aligned to Spring Boot 4.0.6, Spring Framework 7, Hibernate 7, and the imported OpenMRS `master` baseline.
 - Central Liquibase entrypoint in `sihsalus-core-liquibase` that runs the upstream OpenMRS schema snapshot, core data, and latest update changelog.
-- Spring Boot application in `sihsalus-core-boot` with datasource, healthcheck, FHIR metadata smoke endpoint, REST system status endpoint, and no `.omod` loader.
-- Boot excludes generic Hibernate JPA and Elasticsearch client auto-configuration for now. OpenMRS persistence must be wired explicitly instead of being inferred by Spring Boot scanning.
+- Spring Boot application in `sihsalus-core-boot` with datasource, healthcheck, FHIR metadata smoke endpoint, REST system status endpoint, Log4j2 boot logging, and no `.omod` loader.
+- Static OpenMRS runtime wiring in `sihsalus-core-boot`: runtime properties, OpenMRS service context, core services/DAOs, Hibernate `SessionFactory`, local storage service, cache wiring, and OpenMRS event listeners are composed by Spring at startup.
+- OpenMRS Hibernate mapping discovery has been cut away from dynamic module startup. `HibernateSessionFactoryBean` no longer asks `ModuleFactory` for started modules or module mapping packages.
 - Upstream FHIR2 API code imported into `sihsalus-fhir2` as local source and compiled against `sihsalus-core-api`. The OMOD activator was excluded.
 - Upstream Web Services REST `omod-common` code imported into `sihsalus-webservices-rest` as local source and compiled against `sihsalus-core-api`. Module install/start/stop wrappers and dynamic module enumeration were excluded.
-- Static boundary tests check that FHIR2 and REST imports do not depend on `ModuleFactory` or OMOD activators.
+- Static boundary tests check that FHIR2 and REST imports do not depend on `ModuleFactory` or OMOD activators, and that OpenMRS Hibernate mapping discovery does not use dynamic module discovery.
+- Boot tests start the Spring context against H2 in PostgreSQL compatibility mode, run Liquibase, build the OpenMRS `SessionFactory`, and validate health, FHIR metadata, and REST system status endpoints.
 
 Not yet implemented:
 
 - FHIR2 servlet/runtime wiring for the imported providers.
 - Web Services REST resource/controller wiring beyond `omod-common`.
-- Static OpenMRS service/DAO/Hibernate wiring.
 - Source conversion for the distro modules beyond the current Maven placeholders.
 
 ## Product Surface To Cover
