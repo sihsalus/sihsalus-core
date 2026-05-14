@@ -129,11 +129,21 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <OPENMRS_APPLICATION_DATA_DIRECTORY>${project.build.directory}/openmrs-application-data</OPENMRS_APPLICATION_DATA_DIRECTORY>
+                        </systemPropertyVariables>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${maven.failsafe.plugin.version}</version>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <OPENMRS_APPLICATION_DATA_DIRECTORY>${project.build.directory}/openmrs-application-data</OPENMRS_APPLICATION_DATA_DIRECTORY>
+                        </systemPropertyVariables>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>

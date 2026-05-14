@@ -9,6 +9,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
+import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.Patient;
 import org.openmrs.PersonAddress;
 import org.openmrs.api.db.DAOException;
@@ -53,7 +54,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 
 	@Override
 	public AddressHierarchyEntry getAddressHierarchyEntry(int addressHierarchyEntryId) {
-		return getCurrentSession().get(AddressHierarchyEntry.class, addressHierarchyEntryId);
+		return getCurrentSession().find(AddressHierarchyEntry.class, addressHierarchyEntryId);
 	}
 
 	@Override
@@ -149,7 +150,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 	@Override
 	public void saveAddressHierarchyEntry(AddressHierarchyEntry ah) {
 		try {
-			getCurrentSession().saveOrUpdate(ah);
+			persistOrMerge(ah);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -161,7 +162,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 		AddressHierarchyLevel top = getTopAddressHierarchyLevel();
 		if (top != null) {
 			for (AddressHierarchyEntry entry : getAddressHierarchyEntriesByLevel(top)) {
-				getCurrentSession().delete(entry);
+				remove(entry);
 			}
 		}
 	}
@@ -193,7 +194,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 
 	@Override
 	public AddressHierarchyLevel getAddressHierarchyLevel(int levelId) {
-		return getCurrentSession().get(AddressHierarchyLevel.class, levelId);
+		return getCurrentSession().find(AddressHierarchyLevel.class, levelId);
 	}
 
 	@Override
@@ -218,7 +219,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 	@Override
 	public void saveAddressHierarchyLevel(AddressHierarchyLevel level) {
 		try {
-			getCurrentSession().saveOrUpdate(level);
+			persistOrMerge(level);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -228,7 +229,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 	@Override
 	public void deleteAddressHierarchyLevel(AddressHierarchyLevel level) {
 		try {
-			getCurrentSession().delete(level);
+			remove(level);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -237,7 +238,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 
 	@Override
 	public AddressToEntryMap getAddressToEntryMap(int id) {
-		return getCurrentSession().get(AddressToEntryMap.class, id);
+		return getCurrentSession().find(AddressToEntryMap.class, id);
 	}
 
 	@Override
@@ -253,7 +254,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 	@Override
 	public void saveAddressToEntryMap(AddressToEntryMap addressToEntryMap) {
 		try {
-			getCurrentSession().saveOrUpdate(addressToEntryMap);
+			persistOrMerge(addressToEntryMap);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -263,7 +264,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 	@Override
 	public void deleteAddressToEntryMap(AddressToEntryMap addressToEntryMap) {
 		try {
-			getCurrentSession().delete(addressToEntryMap);
+			remove(addressToEntryMap);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -285,7 +286,7 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 	public void associateCoordinates(AddressHierarchyEntry ah, double latitude, double longitude) {
 		ah.setLatitude(latitude);
 		ah.setLongitude(longitude);
-		getCurrentSession().update(ah);
+		persistOrMerge(ah);
 	}
 
 	@Override
@@ -333,13 +334,12 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 		AddressHierarchyLevel umudugudu = new AddressHierarchyLevel();
 		umudugudu.setName("Umudugudu");
 
-		session.save(country);
-		session.save(province);
-		session.save(country);
-		session.save(district);
-		session.save(sector);
-		session.save(cell);
-		session.save(umudugudu);
+		session.persist(country);
+		session.persist(province);
+		session.persist(district);
+		session.persist(sector);
+		session.persist(cell);
+		session.persist(umudugudu);
 
 		province.setParent(country);
 		district.setParent(province);
@@ -455,6 +455,20 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
 
 	private Session getCurrentSession() {
 		return sessionFactory.getCurrentSession();
+	}
+
+	private void persistOrMerge(BaseOpenmrsObject object) {
+		Session session = getCurrentSession();
+		if (object.getId() == null) {
+			session.persist(object);
+		} else {
+			session.merge(object);
+		}
+	}
+
+	private void remove(BaseOpenmrsObject object) {
+		Session session = getCurrentSession();
+		session.remove(session.contains(object) ? object : session.merge(object));
 	}
 
 	private String namePredicate(String property) {

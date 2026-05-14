@@ -1,6 +1,7 @@
 package org.openmrs.module.addresshierarchy.validator;
 
 import org.openmrs.api.context.Context;
+import org.openmrs.annotation.Handler;
 import org.openmrs.module.addresshierarchy.AddressHierarchyLevel;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @Component
+@Handler(supports = { AddressHierarchyLevel.class }, order = 50)
 public class AddressHierarchyLevelValidator implements Validator {
 
 	public boolean supports(@SuppressWarnings("rawtypes") Class c) {

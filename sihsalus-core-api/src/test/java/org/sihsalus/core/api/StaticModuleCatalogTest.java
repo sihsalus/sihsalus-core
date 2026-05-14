@@ -20,4 +20,22 @@ class StaticModuleCatalogTest {
                         && module.baselineVersion().equals("6.0.0-SNAPSHOT")
                         && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
     }
+
+    @Test
+    void authenticationIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("authentication")
+                        && module.sourceModule().equals("authentication-api")
+                        && module.baselineVersion().equals("2.4.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
+    void addressHierarchyIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("addresshierarchy")
+                        && module.sourceModule().equals("addresshierarchy-api")
+                        && module.baselineVersion().equals("3.0.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
 }

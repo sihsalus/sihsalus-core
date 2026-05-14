@@ -82,7 +82,7 @@ Migration implication:
 
 ### Authentication And Security
 
-- `authentication-omod` `2.3.0`
+- `authentication-omod` `2.3.0`. The SIH Salus Core static import currently uses local `authentication-api` source from `2.4.0-SNAPSHOT`; the `2.3.0` value remains the distro dependency baseline.
 - `oauth2login-omod` `1.5.0`
 
 These are part of the login/session/authentication surface that frontend and integrations may depend on.
@@ -90,7 +90,7 @@ These are part of the login/session/authentication surface that frontend and int
 ### Patient And Clinical Data
 
 - `idgen-omod` `5.0.4`: patient or identifier generation. The SIH Salus Core static import currently uses local `idgen-api` source from `6.0.0-SNAPSHOT`; the `5.0.4` value remains the distro dependency baseline.
-- `addresshierarchy-omod` `2.21.0`: structured address hierarchy.
+- `addresshierarchy-omod` `2.21.0`: structured address hierarchy. The SIH Salus Core static import currently uses local `addresshierarchy-api` source from `3.0.0-SNAPSHOT`; the `2.21.0` value remains the distro dependency baseline.
 - `patientdocuments-omod` `1.1.0-SNAPSHOT`: patient document management.
 - `attachments-omod` `4.0.0`: generic file attachments.
 - `cohort-omod` `3.7.3`: patient cohorts.

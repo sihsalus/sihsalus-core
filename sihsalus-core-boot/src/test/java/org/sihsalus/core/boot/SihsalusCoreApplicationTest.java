@@ -1,13 +1,18 @@
 package org.sihsalus.core.boot;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
+import org.openmrs.UserSessionListener;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
+import org.openmrs.module.authentication.DelegatingAuthenticationScheme;
+import org.openmrs.module.authentication.AuthenticationUserSessionListener;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
@@ -42,6 +47,15 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void fhirR4ReadEndpointInvokesImportedProvider() throws Exception {
+        mockMvc.perform(get("/api/fhir/r4/Patient/not-a-real-patient"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+                .andExpect(jsonPath("$.resourceType").value("OperationOutcome"))
+                .andExpect(jsonPath("$.issue[0].code").value("not-found"));
+    }
+
+    @Test
     void reportsStaticModulesWithoutOmodRuntime() throws Exception {
         mockMvc.perform(get("/api/system/info"))
                 .andExpect(status().isOk())
@@ -57,5 +71,22 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getPatientService().getIdentifierValidator((Class) LuhnMod30IdentifierValidator.class));
         assertNotNull(
                 jdbcTemplate.queryForObject("select count(*) from idgen_identifier_source", Integer.class));
+    }
+
+    @Test
+    void authenticationIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getAuthenticationScheme());
+        assertNotNull(DelegatingAuthenticationScheme.class.cast(Context.getAuthenticationScheme()));
+        assertNotNull(Context.getRegisteredComponents(UserSessionListener.class).stream()
+                .filter(AuthenticationUserSessionListener.class::isInstance)
+                .findFirst()
+                .orElse(null));
+    }
+
+    @Test
+    void addressHierarchyIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(AddressHierarchyService.class));
+        assertNotNull(
+                jdbcTemplate.queryForObject("select count(*) from address_hierarchy_level", Integer.class));
     }
 }

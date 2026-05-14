@@ -9,4 +9,5 @@
     <include file="liquibase-core-data.xml" relativeToChangelogFile="false"/>
     <include file="liquibase-update-to-latest.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/idgen/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/addresshierarchy/liquibase.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
