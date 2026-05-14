@@ -1,5 +1,6 @@
 package org.sihsalus.module.idgen;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +144,7 @@ public class SihsalusIdgenConfiguration {
     @Bean
     SmartInitializingSingleton idgenGlobalPropertyListenerRegistrar(
             EventListeners eventListeners, LocationBasedPrefixProvider idgenLocationBasedPrefixProvider) {
-        return () -> eventListeners.setGlobalPropertyListeners(List.of(idgenLocationBasedPrefixProvider));
+        return () -> eventListeners.setGlobalPropertyListeners(new ArrayList<>(List.of(idgenLocationBasedPrefixProvider)));
     }
 
     @Bean(destroyMethod = "shutdown")
