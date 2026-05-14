@@ -10,7 +10,7 @@
             </generator>
         </id>
         <property name="type" column="recurrence_type">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.service.impl.RecurringAppointmentType</param>
                 <param name="useNamed">true</param>
             </type>

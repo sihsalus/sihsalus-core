@@ -1,6 +1,6 @@
 package org.openmrs.module.openconceptlab.web.rest.search;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.module.openconceptlab.Import;
 import org.openmrs.module.openconceptlab.ImportService;
 import org.openmrs.module.openconceptlab.Item;

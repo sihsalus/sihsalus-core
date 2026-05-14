@@ -5,7 +5,7 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.DateProperty;
 import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.StringProperty;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openconceptlab.Import;
 import org.openmrs.module.openconceptlab.ImportProgress;

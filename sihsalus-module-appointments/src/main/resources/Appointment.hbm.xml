@@ -25,19 +25,19 @@
         <property name="startDateTime" type="java.util.Date" column="start_date_time"/>
         <property name="endDateTime" type="java.util.Date" column="end_date_time"/>
         <property name="appointmentKind" column="appointment_kind">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentKind</param>
                 <param name="useNamed">true</param>
             </type>
         </property>
         <property name="status" column="status">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentStatus</param>
                 <param name="useNamed">true</param>
             </type>
         </property>
         <property name="priority" column="priority">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentPriority</param>
                 <param name="useNamed">true</param>
             </type>

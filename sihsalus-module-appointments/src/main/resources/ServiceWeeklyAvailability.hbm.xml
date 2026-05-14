@@ -10,7 +10,7 @@
             </generator>
         </id>
         <property name="dayOfWeek" column="day_of_week" not-null="true" length="45">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">java.time.DayOfWeek</param>
                 <param name="type">12</param>
             </type>

@@ -11,20 +11,9 @@ package org.openmrs.module.openconceptlab.client;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.auth.AuthPolicy;
-import org.apache.commons.httpclient.auth.AuthScheme;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.auth.AuthenticationException;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.util.OpenmrsUtil;
 
 import java.io.BufferedOutputStream;
@@ -34,7 +23,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,14 +64,10 @@ public class OclClient {
 
 	private long totalBytesToDownload = 0;
 
-	private final HttpClient client = new HttpClient();
-
-	{
-		AuthPolicy.registerAuthScheme("token", OclTokenAuthenticationScheme.class);
-		HttpClientParams params = client.getParams();
-		params.setSoTimeout(TIMEOUT_IN_MS);
-		params.setAuthenticationPreemptive(true);
-	}
+	private final HttpClient client = HttpClient.newBuilder()
+	        .connectTimeout(Duration.ofMillis(TIMEOUT_IN_MS))
+	        .followRedirects(HttpClient.Redirect.NORMAL)
+	        .build();
 
 	public OclClient() {
 		dataDirectory = OpenmrsUtil.getApplicationDataDirectory();
@@ -89,32 +81,21 @@ public class OclClient {
 		totalBytesToDownload = -1; //unknown yet
 		bytesDownloaded = 0;
 
-		GetMethod get = constructGetMethod(url, token);
-
-		get.addRequestHeader("Compress", "true");
-
-		List<NameValuePair> query = new ArrayList<NameValuePair>();
-		query.add(new NameValuePair("includeMappings", "true"));
-		query.add(new NameValuePair("includeConcepts", "true"));
-		query.add(new NameValuePair("includeRetired", "true"));
-		query.add(new NameValuePair("limit", "100000"));
+		List<QueryParameter> query = new ArrayList<>();
+		query.add(new QueryParameter("includeMappings", "true"));
+		query.add(new QueryParameter("includeConcepts", "true"));
+		query.add(new QueryParameter("includeRetired", "true"));
+		query.add(new QueryParameter("limit", "100000"));
 
 		if (updatedSince != null) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-			query.add(new NameValuePair("updatedSince", dateFormat.format(updatedSince)));
+			query.add(new QueryParameter("updatedSince", dateFormat.format(updatedSince)));
 		}
 
-		get.setQueryString(query.toArray(new NameValuePair[0]));
+		OclGetResponse get = executeGet(url, token, query, Map.of("Compress", "true"));
 
-		try {
-			client.executeMethod(get);
-		}
-		finally {
-			client.getState().clearCredentials();
-		}
-
-		if (get.getStatusCode() != 200) {
-			throw new IOException(get.getStatusLine().toString());
+		if (get.statusCode() != 200) {
+			throw new IOException(get.statusLine());
 		}
 
 		return extractResponse(get);
@@ -126,16 +107,16 @@ public class OclClient {
 
 		String collectionVersion = getOclReleaseVersion(url, token);
 
-		GetMethod exportUrlGet = executeExportRequest(url, collectionVersion, token);
+		OclGetResponse exportUrlGet = executeExportRequest(url, collectionVersion, token);
 
 		return extractResponse(exportUrlGet);
 	}
 
-	public GetMethod executeExportRequest(String url, String collectionVersion, String token) throws IOException {
-		GetMethod exportUrlGet = executeGetMethod(getExportUrl(url, collectionVersion), token);
+	public OclGetResponse executeExportRequest(String url, String collectionVersion, String token) throws IOException {
+		OclGetResponse exportUrlGet = executeGet(getExportUrl(url, collectionVersion), token);
 
-		if (exportUrlGet.getStatusCode() != 200) {
-			throw new IOException(exportUrlGet.getStatusLine().toString());
+		if (exportUrlGet.statusCode() != 200) {
+			throw new IOException(exportUrlGet.statusLine());
 		}
 
 		return exportUrlGet;
@@ -214,26 +195,29 @@ public class OclClient {
 		}
 	}
 
-	OclResponse extractResponse(GetMethod get) throws IOException {
-		Header dateHeader = get.getResponseHeader("Date");
+	OclResponse extractResponse(OclGetResponse get) throws IOException {
+		String dateHeader = get.header("Date");
+		if (dateHeader == null) {
+			throw new IOException("Cannot find date header");
+		}
 		Date date;
 		try {
 			SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.US);
-			date = format.parse(dateHeader.getValue());
+			date = format.parse(dateHeader);
 		}
 		catch (ParseException e) {
 			throw new IOException("Cannot parse date header", e);
 		}
 
 		File file = newFile(date);
-		download(get.getResponseBodyAsStream(), get.getResponseContentLength(), file);
+		download(get.body(), get.contentLength(), file);
 
 		InputStream response = new FileInputStream(file);
-		Header contentTypeHeader = get.getResponseHeader("Content-Type");
-		if (contentTypeHeader != null && "application/zip".equals(contentTypeHeader.getValue())) {
+		String contentTypeHeader = get.header("Content-Type");
+		if (contentTypeHeader != null && contentTypeHeader.startsWith("application/zip")) {
 			return unzipResponse(response, date);
 		} else {
-			date = parseDateFromPath(get.getPath());
+			date = parseDateFromPath(get.path());
 
 			return ungzipAndUntarResponse(response, date);
 		}
@@ -383,24 +367,24 @@ public class OclClient {
 
 		String latestVersionUrl = url + "/versions";
 
-		GetMethod versionsGet = executeGetMethod(latestVersionUrl, token);
+		OclGetResponse versionsGet = executeGet(latestVersionUrl, token);
 
-		if (versionsGet.getStatusCode() != 200) {
-			throw new IOException(versionsGet.getStatusLine().toString());
+		if (versionsGet.statusCode() != 200) {
+			throw new IOException(versionsGet.statusLine());
 		}
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		@SuppressWarnings("unchecked")
-		Map<String, Object>[] versionsResponse = objectMapper.readValue(versionsGet.getResponseBodyAsStream(), Map[].class);
+		Map<String, Object>[] versionsResponse = objectMapper.readValue(versionsGet.body(), Map[].class);
 
 		for (Map<String, Object> version : versionsResponse) {
 			String versionName = ((String) version.get("id"));
 			if (!versionName.contains("HEAD") && StringUtils.isNotBlank(versionName)) {
 				String versionUrl = url + "/" + versionName + "/export";
 
-				GetMethod exportGet = executeGetMethod(versionUrl, token);
+				OclGetResponse exportGet = executeGet(versionUrl, token);
 
-				int statusCode = exportGet.getStatusCode();
+				int statusCode = exportGet.statusCode();
 				if (statusCode == 200) {
 					return versionName;
 				}
@@ -409,97 +393,82 @@ public class OclClient {
 		throw new IllegalStateException("There is no released version of given source");
 	}
 
-	private GetMethod constructGetMethod(String url, String token) throws IOException {
+	private OclGetResponse executeGet(String url, String token) throws IOException {
+		return executeGet(url, token, List.of(), Map.of());
+	}
+
+	private OclGetResponse executeGet(String url, String token, List<QueryParameter> query, Map<String, String> headers)
+	        throws IOException {
+		URI uri = buildUri(url, query);
+		HttpRequest.Builder builder = HttpRequest.newBuilder(uri)
+		        .timeout(Duration.ofMillis(TIMEOUT_IN_MS))
+		        .GET();
 		if (!StringUtils.isBlank(token)) {
-			URL oclUrl = new URL(url);
-			client.getState().setCredentials(
-					new AuthScope(oclUrl.getHost(), oclUrl.getPort()),
-					new OclTokenCredentials(token));
+			builder.header("Authorization", "Token " + token);
 		}
-
-		return new GetMethod(url);
-	}
-
-	private GetMethod executeGetMethod(String url, String token) throws IOException {
-		GetMethod getMethod = constructGetMethod(url, token);
-
+		headers.forEach(builder::header);
 		try {
-			client.executeMethod(getMethod);
+			HttpResponse<InputStream> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofInputStream());
+			return new OclGetResponse(response);
 		}
-		finally {
-			client.getState().clearCredentials();
-		}
-
-		return getMethod;
-	}
-
-	private static final class OclTokenCredentials implements Credentials {
-
-		private final String token;
-
-		OclTokenCredentials(String token) {
-			this.token = token;
-		}
-
-		public String getToken() {
-			return token;
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException("Interrupted while calling OCL", e);
 		}
 	}
 
-	private static final class OclTokenAuthenticationScheme implements AuthScheme {
-
-		@Override
-		public void processChallenge(String challenge) {
-			// no implementation needed
+	private URI buildUri(String url, List<QueryParameter> query) throws IOException {
+		if (query.isEmpty()) {
+			return URI.create(url);
 		}
-
-		@Override
-		public String getSchemeName() {
-			return "OCL Token Auth";
-		}
-
-		@Override
-		public String getParameter(String name) {
-			return null;
-		}
-
-		@Override
-		public String getRealm() {
-			return null;
-		}
-
-		@Override
-		public String getID() {
-			return null;
-		}
-
-		@Override
-		public boolean isConnectionBased() {
-			return false;
-		}
-
-		@Override
-		public boolean isComplete() {
-			return true;
-		}
-
-		@Override
-		@Deprecated
-		public String authenticate(Credentials credentials, String method, String uri) throws AuthenticationException {
-			if (!(credentials instanceof OclTokenCredentials)) {
-				throw new AuthenticationException("credentials must be an OclTokenCredentials object");
+		StringBuilder builder = new StringBuilder(url);
+		builder.append(url.contains("?") ? "&" : "?");
+		for (int i = 0; i < query.size(); i++) {
+			QueryParameter parameter = query.get(i);
+			if (i > 0) {
+				builder.append('&');
 			}
+			builder.append(encode(parameter.name())).append('=').append(encode(parameter.value()));
+		}
+		return URI.create(builder.toString());
+	}
 
-			return "Token " + ((OclTokenCredentials) credentials).getToken();
+	private String encode(String value) {
+		return URLEncoder.encode(value, StandardCharsets.UTF_8);
+	}
+
+	public static final class OclGetResponse {
+
+		private final HttpResponse<InputStream> response;
+
+		private OclGetResponse(HttpResponse<InputStream> response) {
+			this.response = response;
 		}
 
-		@Override
-		public String authenticate(Credentials credentials, HttpMethod method) throws AuthenticationException {
-			if (!(credentials instanceof OclTokenCredentials)) {
-				throw new AuthenticationException("credentials must be an OclTokenCredentials object");
-			}
+		int statusCode() {
+			return response.statusCode();
+		}
 
-			return "Token " + ((OclTokenCredentials) credentials).getToken();
+		String statusLine() {
+			return "HTTP " + response.statusCode();
+		}
+
+		String header(String name) {
+			return response.headers().firstValue(name).orElse(null);
+		}
+
+		InputStream body() {
+			return response.body();
+		}
+
+		long contentLength() {
+			return response.headers().firstValueAsLong("Content-Length").orElse(-1L);
+		}
+
+		String path() {
+			return response.uri().getPath();
 		}
 	}
+
+	private record QueryParameter(String name, String value) {}
 }

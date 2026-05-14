@@ -31,9 +31,9 @@ public class BedTagMapDaoImpl implements BedTagMapDao {
 	@Override
 	public BedTagMap saveOrUpdate(BedTagMap bedTagMap) {
 		Session session = this.sessionFactory.getCurrentSession();
-		session.saveOrUpdate(bedTagMap);
+		BedTagMap saved = session.merge(bedTagMap);
 		session.flush();
-		return bedTagMap;
+		return saved;
 	}
 	
 	@Override

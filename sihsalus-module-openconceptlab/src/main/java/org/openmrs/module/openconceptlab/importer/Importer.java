@@ -13,9 +13,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.Daemon;
@@ -306,8 +306,8 @@ public class Importer implements Runnable {
 
 	private void processInput() throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.getDeserializationConfig().setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
-		JsonParser parser = objectMapper.getJsonFactory().createJsonParser(in);
+		objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+		JsonParser parser = objectMapper.getFactory().createParser(in);
 
 		JsonToken token = parser.nextToken();
 		if (token != JsonToken.START_OBJECT) {

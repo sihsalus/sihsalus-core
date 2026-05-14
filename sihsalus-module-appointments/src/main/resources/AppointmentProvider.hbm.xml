@@ -12,7 +12,7 @@
         <many-to-one name="appointment" class="Appointment" column="patient_appointment_id" />
         <many-to-one name="provider" class="org.openmrs.Provider" column="provider_id" />
         <property name="response" column="response">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentProviderResponse</param>
                 <param name="useNamed">true</param>
             </type>

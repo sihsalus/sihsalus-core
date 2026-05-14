@@ -10,7 +10,7 @@
             </generator>
         </id>
         <property name="status" column="status">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentStatus</param>
                 <param name="useNamed">true</param>
             </type>
