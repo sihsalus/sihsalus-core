@@ -26,15 +26,13 @@
 		<discriminator column="seq_receipt_number_generator_id" insert="false"/>
 
 		<property name="groupingType" column="grouping_type" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.SequentialReceiptNumberGenerator$GroupingType</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 		<property name="sequenceType" column="sequence_type" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.SequentialReceiptNumberGenerator$SequenceType</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 

@@ -72,9 +72,8 @@
 		</bag>
 
 		<property name="serviceStatus" column="service_status" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.model.BillableServiceStatus</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 		<!-- bi-directional many-to-one association to User -->
@@ -119,9 +118,8 @@
 		<many-to-one name="billAdjusted" class="org.openmrs.module.billing.api.model.Bill" column="adjusted_bill_id"/>
 
 		<property name="status" column="status" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.model.BillStatus</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 
@@ -183,9 +181,8 @@
 		<property name="quantity" type="int" column="quantity" not-null="true"/>
 		<property name="lineItemOrder" type="int" column="line_item_order"/>
 		<property name="paymentStatus" column="payment_status" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.model.BillStatus</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 		<!-- bi-directional many-to-one association to User -->

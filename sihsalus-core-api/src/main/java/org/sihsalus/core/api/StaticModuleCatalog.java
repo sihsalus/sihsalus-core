@@ -45,7 +45,7 @@ public final class StaticModuleCatalog {
                     module("ordertemplates", "ordertemplates-omod", "2.2.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("event", "event-omod", "4.0.0", SihsalusModuleStatus.PLACEHOLDER),
                     module("stockmanagement", "stockmanagement-api", "3.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
-                    module("billing", "billing-omod", "2.2.0", SihsalusModuleStatus.PLACEHOLDER),
+                    module("billing", "billing-omod", "2.3.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("fua", "fua-omod", "1.0.75", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("imaging", "imaging-omod", "1.2.2", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("legacyui", "legacyui-omod", "2.1.0", SihsalusModuleStatus.STATIC_INTERNAL));

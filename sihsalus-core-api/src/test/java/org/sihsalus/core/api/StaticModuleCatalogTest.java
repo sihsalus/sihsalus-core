@@ -139,6 +139,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void billingIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("billing")
+                        && module.sourceModule().equals("billing-omod")
+                        && module.baselineVersion().equals("2.3.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void attachmentsIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("attachments")
