@@ -30,11 +30,10 @@ public class SpecialityDaoImpl implements SpecialityDao{
 	            .list();
 	}
     
-    @Transactional
-	@Override
-	public Speciality save(Speciality speciality) {
-		 Session currentSession = sessionFactory.getCurrentSession();
-		 currentSession.saveOrUpdate(speciality);
-	     return speciality;
+	@Transactional
+		@Override
+		public Speciality save(Speciality speciality) {
+			 Session currentSession = sessionFactory.getCurrentSession();
+		     return currentSession.merge(speciality);
+		}
 	}
-}

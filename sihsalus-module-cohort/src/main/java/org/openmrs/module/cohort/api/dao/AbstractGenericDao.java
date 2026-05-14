@@ -81,13 +81,13 @@ public abstract class AbstractGenericDao<W extends OpenmrsObject & Auditable> im
 	
 	@Override
 	public W createOrUpdate(W entity) {
-		getCurrentSession().saveOrUpdate(entity);
-		return entity;
+		return getCurrentSession().merge(entity);
 	}
 	
 	@Override
 	public void delete(W entity) {
-		getCurrentSession().delete(entity);
+		Session session = getCurrentSession();
+		session.remove(session.contains(entity) ? entity : session.merge(entity));
 	}
 	
 	@Override

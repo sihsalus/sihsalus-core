@@ -40,6 +40,7 @@ import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod30IdentifierValidator;
+import org.openmrs.module.legacyui.api.LegacyUIService;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
@@ -230,6 +231,11 @@ class SihsalusCoreApplicationTest {
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_type", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_attribute_type", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_member_attribute_type", Integer.class));
+    }
+
+    @Test
+    void legacyUiIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(LegacyUIService.class));
     }
 
     @Test

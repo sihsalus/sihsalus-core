@@ -9,9 +9,10 @@
  */
 package org.openmrs.module.queue.api.dao.impl;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.queue.api.dao.QueueRoomDao;
 import org.openmrs.module.queue.api.search.QueueRoomSearchCriteria;
@@ -27,13 +28,13 @@ public class QueueRoomDaoImpl extends AbstractBaseQueueDaoImpl<QueueRoom> implem
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<QueueRoom> getQueueRooms(QueueRoomSearchCriteria searchCriteria) {
-		Criteria c = getCurrentSession().createCriteria(QueueRoom.class, "qr");
-		c.createAlias("queue", "q");
-		includeVoidedObjects(c, searchCriteria.isIncludeRetired());
-		limitByCollectionProperty(c, "qr.queue", searchCriteria.getQueues());
-		limitByCollectionProperty(c, "q.location", searchCriteria.getLocations());
-		limitByCollectionProperty(c, "q.service", searchCriteria.getServices());
-		return c.list();
+		StringBuilder hql = new StringBuilder("select qr from QueueRoom qr join qr.queue q where 1 = 1");
+		Map<String, Object> parameters = new LinkedHashMap<>();
+		appendDeletedFilter(hql, "qr", searchCriteria.isIncludeRetired());
+		limitByCollectionProperty(hql, parameters, "qr.queue", searchCriteria.getQueues());
+		limitByCollectionProperty(hql, parameters, "q.location", searchCriteria.getLocations());
+		limitByCollectionProperty(hql, parameters, "q.service", searchCriteria.getServices());
+		return list(hql.toString(), QueueRoom.class, parameters);
 	}
 	
 }

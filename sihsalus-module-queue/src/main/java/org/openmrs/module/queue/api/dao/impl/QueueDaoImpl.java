@@ -9,9 +9,10 @@
  */
 package org.openmrs.module.queue.api.dao.impl;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.queue.api.dao.QueueDao;
 import org.openmrs.module.queue.api.search.QueueSearchCriteria;
@@ -27,10 +28,11 @@ public class QueueDaoImpl extends AbstractBaseQueueDaoImpl<Queue> implements Que
 	
 	@Override
 	public List<Queue> getQueues(QueueSearchCriteria searchCriteria) {
-		Criteria c = getCurrentSession().createCriteria(Queue.class, "q");
-		includeVoidedObjects(c, searchCriteria.isIncludeRetired());
-		limitByCollectionProperty(c, "q.location", searchCriteria.getLocations());
-		limitByCollectionProperty(c, "q.service", searchCriteria.getServices());
-		return c.list();
+		StringBuilder hql = new StringBuilder("select q from Queue q where 1 = 1");
+		Map<String, Object> parameters = new LinkedHashMap<>();
+		appendDeletedFilter(hql, "q", searchCriteria.isIncludeRetired());
+		limitByCollectionProperty(hql, parameters, "q.location", searchCriteria.getLocations());
+		limitByCollectionProperty(hql, parameters, "q.service", searchCriteria.getServices());
+		return list(hql.toString(), Queue.class, parameters);
 	}
 }

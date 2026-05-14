@@ -44,7 +44,6 @@ public class AppointmentServiceAttributeTypeDaoImpl implements AppointmentServic
     @Override
     public AppointmentServiceAttributeType save(AppointmentServiceAttributeType attributeType) {
         Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.saveOrUpdate(attributeType);
-        return attributeType;
+        return currentSession.merge(attributeType);
     }
 }

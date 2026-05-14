@@ -173,4 +173,13 @@ class StaticModuleCatalogTest {
                         && module.baselineVersion().equals("2.0.0")
                         && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
     }
+
+    @Test
+    void legacyUiIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("legacyui")
+                        && module.sourceModule().equals("legacyui-omod")
+                        && module.baselineVersion().equals("2.1.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
 }

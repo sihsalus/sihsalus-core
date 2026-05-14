@@ -36,13 +36,12 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
 	            .list();
 	}
 
-    @Transactional
-    @Override
-    public AppointmentServiceDefinition save(AppointmentServiceDefinition appointmentServiceDefinition) {
-        Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.saveOrUpdate(appointmentServiceDefinition);
-        return appointmentServiceDefinition;
-    }
+	@Transactional
+	@Override
+	public AppointmentServiceDefinition save(AppointmentServiceDefinition appointmentServiceDefinition) {
+	    Session currentSession = sessionFactory.getCurrentSession();
+	    return currentSession.merge(appointmentServiceDefinition);
+	}
 
 	@Override
 	public AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid) {

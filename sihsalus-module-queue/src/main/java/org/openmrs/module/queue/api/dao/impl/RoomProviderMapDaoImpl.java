@@ -9,9 +9,10 @@
  */
 package org.openmrs.module.queue.api.dao.impl;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.queue.api.dao.RoomProviderMapDao;
 import org.openmrs.module.queue.api.search.RoomProviderMapSearchCriteria;
@@ -27,10 +28,11 @@ public class RoomProviderMapDaoImpl extends AbstractBaseQueueDaoImpl<RoomProvide
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<RoomProviderMap> getRoomProviderMaps(RoomProviderMapSearchCriteria searchCriteria) {
-		Criteria c = getCurrentSession().createCriteria(RoomProviderMap.class, "rpm");
-		includeVoidedObjects(c, searchCriteria.isIncludeVoided());
-		limitByCollectionProperty(c, "rpm.queueRoom", searchCriteria.getQueueRooms());
-		limitByCollectionProperty(c, "rpm.provider", searchCriteria.getProviders());
-		return c.list();
+		StringBuilder hql = new StringBuilder("select rpm from RoomProviderMap rpm where 1 = 1");
+		Map<String, Object> parameters = new LinkedHashMap<>();
+		appendDeletedFilter(hql, "rpm", searchCriteria.isIncludeVoided());
+		limitByCollectionProperty(hql, parameters, "rpm.queueRoom", searchCriteria.getQueueRooms());
+		limitByCollectionProperty(hql, parameters, "rpm.provider", searchCriteria.getProviders());
+		return list(hql.toString(), RoomProviderMap.class, parameters);
 	}
 }

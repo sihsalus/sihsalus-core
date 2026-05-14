@@ -19,7 +19,7 @@ public class AppointmentRecurringPatternDaoImpl implements AppointmentRecurringP
     @Transactional
     @Override
     public void save(AppointmentRecurringPattern appointmentRecurringPattern) {
-        session().saveOrUpdate(appointmentRecurringPattern);
+        session().merge(appointmentRecurringPattern);
     }
 
     @Override

@@ -20,7 +20,7 @@ public class AppointmentAuditDaoImpl implements AppointmentAuditDao{
 	@Transactional
 	@Override
 	public void save(AppointmentAudit appointmentAuditEvent) {
-		sessionFactory.getCurrentSession().saveOrUpdate(appointmentAuditEvent);
+		sessionFactory.getCurrentSession().merge(appointmentAuditEvent);
 	}
 
 	@Override

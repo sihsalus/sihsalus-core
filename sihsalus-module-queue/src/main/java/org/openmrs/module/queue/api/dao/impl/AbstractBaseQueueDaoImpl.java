@@ -9,23 +9,22 @@
  */
 package org.openmrs.module.queue.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import jakarta.validation.constraints.NotNull;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
@@ -58,21 +57,20 @@ public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable> imple
 	
 	@Override
 	public Optional<Q> get(@NotNull String uuid) {
-		Criteria criteria = getCurrentSession().createCriteria(getClazz());
-		includeVoidedObjects(criteria, false);
-		criteria.add(eq("uuid", uuid)).uniqueResult();
-		return Optional.ofNullable((Q) criteria.add(eq("uuid", uuid)).uniqueResult());
+		StringBuilder hql = new StringBuilder("from ").append(clazz.getName()).append(" e where e.uuid = :uuid");
+		appendDeletedFilter(hql, "e", false);
+		return Optional.ofNullable(createQuery(hql.toString(), clazz, Map.of("uuid", uuid)).uniqueResult());
 	}
 	
 	@Override
 	public Q createOrUpdate(Q queue) {
-		this.getCurrentSession().saveOrUpdate(queue);
-		return queue;
+		return this.getCurrentSession().merge(queue);
 	}
 	
 	@Override
 	public void delete(Q queue) {
-		this.getCurrentSession().delete(queue);
+		Session session = this.getCurrentSession();
+		session.remove(session.contains(queue) ? queue : session.merge(queue));
 	}
 	
 	@Override
@@ -87,9 +85,9 @@ public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable> imple
 	
 	@Override
 	public List<Q> findAll(boolean includeVoided) {
-		Criteria criteria = getCurrentSession().createCriteria(clazz);
-		includeVoidedObjects(criteria, includeVoided);
-		return criteria.list();
+		StringBuilder hql = new StringBuilder("from ").append(clazz.getName()).append(" e where 1 = 1");
+		appendDeletedFilter(hql, "e", includeVoided);
+		return list(hql.toString(), clazz, Map.of());
 	}
 	
 	protected boolean isVoidable() {
@@ -100,21 +98,11 @@ public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable> imple
 		return Retireable.class.isAssignableFrom(clazz);
 	}
 	
-	protected void handleVoidable(Criteria criteria) {
-		criteria.add(eq("voided", false));
-	}
-	
-	protected void handleRetireable(Criteria criteria) {
-		criteria.add(eq("retired", false));
-	}
-	
-	protected void includeVoidedObjects(Criteria criteria, boolean includeRetired) {
-		if (!includeRetired) {
-			if (isVoidable()) {
-				handleVoidable(criteria);
-			} else if (isRetireable()) {
-				handleRetireable(criteria);
-			}
+	protected void appendDeletedFilter(StringBuilder hql, String alias, boolean includeDeleted) {
+		if (!includeDeleted && isVoidable()) {
+			hql.append(" and ").append(alias).append(".voided = false");
+		} else if (!includeDeleted && isRetireable()) {
+			hql.append(" and ").append(alias).append(".retired = false");
 		}
 	}
 	
@@ -122,9 +110,11 @@ public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable> imple
 	 * If the passed value is null, return without limiting If the passed value is not null, add clause
 	 * that the property must be equal to the value
 	 */
-	protected void limitToEqualsProperty(Criteria criteria, String property, Object value) {
+	protected void limitToEqualsProperty(StringBuilder hql, Map<String, Object> parameters, String property, Object value) {
 		if (value != null) {
-			criteria.add(Restrictions.eq(property, value));
+			String parameter = parameterName(property, parameters.size());
+			hql.append(" and ").append(property).append(" = :").append(parameter);
+			parameters.put(parameter, value);
 		}
 	}
 	
@@ -132,9 +122,12 @@ public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable> imple
 	 * If the passed value is null, return without limiting If the passed value is not null, add clause
 	 * that the property must greater or equal to the value
 	 */
-	protected void limitToGreaterThanOrEqualToProperty(Criteria criteria, String property, Object value) {
+	protected void limitToGreaterThanOrEqualToProperty(
+	        StringBuilder hql, Map<String, Object> parameters, String property, Object value) {
 		if (value != null) {
-			criteria.add(Restrictions.ge(property, value));
+			String parameter = parameterName(property, parameters.size());
+			hql.append(" and ").append(property).append(" >= :").append(parameter);
+			parameters.put(parameter, value);
 		}
 	}
 	
@@ -142,9 +135,12 @@ public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable> imple
 	 * If the passed value is null, return without limiting If the passed value is not null, add clause
 	 * that the property must be less or equal to the value
 	 */
-	protected void limitToLessThanOrEqualToProperty(Criteria criteria, String property, Object value) {
+	protected void limitToLessThanOrEqualToProperty(
+	        StringBuilder hql, Map<String, Object> parameters, String property, Object value) {
 		if (value != null) {
-			criteria.add(Restrictions.le(property, value));
+			String parameter = parameterName(property, parameters.size());
+			hql.append(" and ").append(property).append(" <= :").append(parameter);
+			parameters.put(parameter, value);
 		}
 	}
 	
@@ -153,13 +149,36 @@ public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable> imple
 	 * that the property must be null If the passed values is not empty, add clause that the property
 	 * must be one of the given values
 	 */
-	protected void limitByCollectionProperty(Criteria criteria, String property, Collection<?> values) {
+	protected void limitByCollectionProperty(
+	        StringBuilder hql, Map<String, Object> parameters, String property, Collection<?> values) {
 		if (values != null) {
 			if (values.isEmpty()) {
-				criteria.add(Restrictions.isNull(property));
+				hql.append(" and ").append(property).append(" is null");
 			} else {
-				criteria.add(Restrictions.in(property, values));
+				String parameter = parameterName(property, parameters.size());
+				hql.append(" and ").append(property).append(" in (:").append(parameter).append(")");
+				parameters.put(parameter, values);
 			}
 		}
+	}
+
+	protected <T> List<T> list(String hql, Class<T> resultClass, Map<String, Object> parameters) {
+		return createQuery(hql, resultClass, parameters).list();
+	}
+
+	protected <T> Query<T> createQuery(String hql, Class<T> resultClass, Map<String, Object> parameters) {
+		Query<T> query = getCurrentSession().createQuery(hql, resultClass);
+		new LinkedHashMap<>(parameters).forEach((name, value) -> {
+			if (value instanceof Collection<?> collection) {
+				query.setParameterList(name, collection);
+			} else {
+				query.setParameter(name, value);
+			}
+		});
+		return query;
+	}
+
+	private String parameterName(String property, int index) {
+		return property.replaceAll("[^A-Za-z0-9]", "_") + "_" + index;
 	}
 }
