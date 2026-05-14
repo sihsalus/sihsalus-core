@@ -3,14 +3,12 @@ package org.openmrs.module.htmlwidgets.service.db;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.openmrs.api.db.hibernate.DbSessionFactory;  
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.Order;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
@@ -36,12 +34,15 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends OpenmrsMetadata> List<T> getAllMetadataByType(Class<T> type, boolean includeRetired) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(type);
+		var builder = currentSession().getCriteriaBuilder();
+		var criteria = builder.createQuery(type);
+		var root = criteria.from(type);
+		criteria.select(root);
 		if (!includeRetired) {
-			criteria.add(Expression.eq("retired", false));
+			criteria.where(builder.isFalse(root.get("retired").as(Boolean.class)));
 		}
-		criteria.addOrder(Order.asc("name"));
-		return criteria.list();
+		criteria.orderBy(builder.asc(root.get("name")));
+		return currentSession().createQuery(criteria).getResultList();
 	}
 
 	/**
@@ -50,14 +51,17 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends OpenmrsObject> List<T> getAllObjectsByType(Class<T> type) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(type);
+		var builder = currentSession().getCriteriaBuilder();
+		var criteria = builder.createQuery(type);
+		var root = criteria.from(type);
+		criteria.select(root);
 		if (Retireable.class.isAssignableFrom(type)) {
-			criteria.add(Expression.eq("retired", false));
+			criteria.where(builder.isFalse(root.get("retired").as(Boolean.class)));
 		}
 		else if (Voidable.class.isAssignableFrom(type)) {
-			criteria.add(Expression.eq("voided", false));
+			criteria.where(builder.isFalse(root.get("voided").as(Boolean.class)));
 		}
-		return criteria.list();
+		return currentSession().createQuery(criteria).getResultList();
 	}
 
 	/**
@@ -66,7 +70,7 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends OpenmrsObject> T getObject(Class<T> type, Integer id) {
-		return (T) sessionFactory.getCurrentSession().get(type, id);
+		return (T) currentSession().get(type, id);
 	}
 	
 	/**
@@ -96,14 +100,14 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 			hql.append(") ");
 		}
 		hql.append("order by	pn.preferred asc ");
-		Query q = getSessionFactory().getCurrentSession().createQuery(hql.toString());
+		Query<Object[]> q = currentSession().createQuery(hql.toString(), Object[].class);
 		if (limitUserIds != null) {
 			q.setParameterList("limitUserIds", limitUserIds);
 		}
+		bindSearchTerms(q, query);
 
 		Map<Integer, String> m = new HashMap<Integer, String>();
-		for (Object o : q.list()) {
-			Object[] row = (Object[])o;
+		for (Object[] row : q.list()) {
 			m.put((Integer)row[0], row[2] + ", " + row[1]);
 		}
 		return m;
@@ -131,19 +135,19 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 			for (int i=0; i<nameSplit.length; i++) {
 				String lc = "like '%" + nameSplit[i] + "%'";
 				hql.append((i == 0 ? "" : "or ") + "lower(pn.givenName) " + lc + " or lower(pn.middleName) " + lc + " ");
-				hql.append("or lower(u.username) " + lc + " or lower(pn.familyName) " + lc + " or lower(pn.familyName2) " + lc + " ");
+				hql.append("or lower(pn.familyName) " + lc + " or lower(pn.familyName2) " + lc + " ");
 			}
 			hql.append(") ");
 		}
 		hql.append("order by	pn.preferred asc ");
-		Query q = getSessionFactory().getCurrentSession().createQuery(hql.toString());
+		Query<Object[]> q = currentSession().createQuery(hql.toString(), Object[].class);
 		if (limitPersonIds != null) {
 			q.setParameterList("limitPersonIds", limitPersonIds);
 		}
+		bindSearchTerms(q, query);
 
 		Map<Integer, String> m = new HashMap<Integer, String>();
-		for (Object o : q.list()) {
-			Object[] row = (Object[])o;
+		for (Object[] row : q.list()) {
 			m.put((Integer)row[0], row[1] + ", " + row[2]);
 		}
 		return m;
@@ -158,9 +162,10 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 		List<Integer> limitUserIds = null;
 		if (roleNames != null && roleNames.size() > 0) {
 			String roleQuery = "select user_id from user_role where role in (:roleNames)";
-			SQLQuery sq = sessionFactory.getCurrentSession().createSQLQuery(roleQuery);
-			sq.setParameterList("roleNames", roleNames);
-			limitUserIds = (List<Integer>)sq.list();
+			limitUserIds = currentSession()
+			        .createNativeQuery(roleQuery, Integer.class)
+			        .setParameterList("roleNames", roleNames)
+			        .getResultList();
 		}
 		return limitUserIds;
 	}
@@ -174,9 +179,10 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 		List<Integer> limitPersonIds = null;
 		if (roleNames != null && roleNames.size() > 0) {
 			String roleQuery = "select u.person_id from user_role r, users u where u.user_id = r.user_id and r.role in (:roleNames)";
-			SQLQuery sq = sessionFactory.getCurrentSession().createSQLQuery(roleQuery);
-			sq.setParameterList("roleNames", roleNames);
-			limitPersonIds = (List<Integer>)sq.list();
+			limitPersonIds = currentSession()
+			        .createNativeQuery(roleQuery, Integer.class)
+			        .setParameterList("roleNames", roleNames)
+			        .getResultList();
 		}
 		return limitPersonIds;
 	}
@@ -195,5 +201,26 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 	 */
 	public void setSessionFactory(DbSessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
+	}
+
+	private Session currentSession() {
+		return sessionFactory.getHibernateSessionFactory().getCurrentSession();
+	}
+
+	private List<String> searchTerms(String query) {
+		if (StringUtils.isBlank(query)) {
+			return List.of();
+		}
+		return Stream.of(query.toLowerCase().split(" "))
+		        .filter(StringUtils::isNotBlank)
+		        .map(term -> "%" + term + "%")
+		        .toList();
+	}
+
+	private void bindSearchTerms(Query<?> queryObject, String query) {
+		List<String> terms = searchTerms(query);
+		for (int i = 0; i < terms.size(); i++) {
+			queryObject.setParameter("term" + i, terms.get(i));
+		}
 	}
 }
