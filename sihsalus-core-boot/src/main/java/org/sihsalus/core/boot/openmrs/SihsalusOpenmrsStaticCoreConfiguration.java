@@ -1,6 +1,8 @@
 package org.sihsalus.core.boot.openmrs;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.CohortService;
@@ -41,6 +43,7 @@ import org.openmrs.util.ConfigUtil;
 import org.openmrs.util.HttpClient;
 import org.openmrs.util.LocaleUtility;
 import org.openmrs.util.LocationUtility;
+import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -85,10 +88,16 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
     }
 
     @Bean(name = "sessionFactory")
-    HibernateSessionFactoryBean sessionFactory() {
+    HibernateSessionFactoryBean sessionFactory(ObjectProvider<HibernateMappingContributor> mappingContributors) {
         HibernateSessionFactoryBean sessionFactory = new HibernateSessionFactoryBean();
         sessionFactory.setConfigLocations(new ClassPathResource("hibernate.cfg.xml"));
         sessionFactory.setPackagesToScan("org.openmrs");
+        String[] mappingResources =
+                mappingContributors.orderedStream()
+                        .map(HibernateMappingContributor::mappingResources)
+                        .flatMap(List::stream)
+                        .toArray(String[]::new);
+        sessionFactory.setMappingResources(mappingResources);
         return sessionFactory;
     }
 
@@ -138,13 +147,14 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
         EventListeners eventListeners = new EventListeners();
         eventListeners.setGlobalPropertyListenersToEmpty(false);
         eventListeners.setGlobalPropertyListeners(
-                java.util.List.of(
+                new ArrayList<>(
+                        java.util.List.of(
                         localeUtility,
                         locationUtility,
                         configUtilGlobalPropertyListener,
                         personNameGlobalPropertyListener,
                         loggingConfigurationGlobalPropertyListener,
-                        globalLocaleList));
+                        globalLocaleList)));
         return eventListeners;
     }
 

@@ -18,6 +18,7 @@ import org.openmrs.module.idgen.IdgenUtil;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.Set;
 public class SequentialIdentifierGeneratorProcessor implements IdentifierSourceProcessor {
 
 	@Autowired
+	@Lazy
     private IdentifierSourceService identifierSourceService;
 
     /**

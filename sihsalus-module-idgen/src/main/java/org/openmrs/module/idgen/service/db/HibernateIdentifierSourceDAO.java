@@ -13,15 +13,10 @@
  */
 package org.openmrs.module.idgen.service.db;
 
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.type.IntegerType;
 import org.openmrs.Location;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.User;
@@ -67,12 +62,12 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<IdentifierSource> getAllIdentifierSources(boolean includeRetired) throws DAOException {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(IdentifierSource.class);
+		String hql = "from IdentifierSource source";
 		if (!includeRetired) {
-			criteria.add(Expression.eq("retired", false));
+			hql += " where source.retired = false";
 		}
-		criteria.addOrder(Order.asc("name"));
-		return criteria.list();
+		hql += " order by source.name";
+		return sessionFactory.getCurrentSession().createQuery(hql).getResultList();
 	}
 
 	/**
@@ -99,17 +94,12 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<PooledIdentifier> getAvailableIdentifiers(IdentifierPool pool, int quantity) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(PooledIdentifier.class);
-		criteria.add(Expression.isNull("dateUsed"));
-		criteria.add(Expression.eq("pool", pool));
-		criteria.setMaxResults(quantity);
-		if (pool.isSequential()) {
-			criteria.addOrder(Order.asc("identifier"));
-		}
-		else {
-			criteria.addOrder(Order.asc("uuid"));
-		}
-		List<PooledIdentifier> results = (List<PooledIdentifier>) criteria.list();
+		Query query = sessionFactory.getCurrentSession()
+		        .createQuery("from PooledIdentifier identifier where identifier.dateUsed is null and identifier.pool = :pool"
+		                + (pool.isSequential() ? " order by identifier.identifier" : " order by identifier.uuid"));
+		query.setParameter("pool", pool);
+		query.setMaxResults(quantity);
+		List<PooledIdentifier> results = query.getResultList();
 		if (results.size() < quantity) {
 			throw new EmptyIdentifierPoolException("Unable to retrieve " + quantity + " available identifiers from Pool " + pool + ".  Maybe you need to add more identifiers to your pool first.");
 		}
@@ -120,15 +110,16 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 * @see IdentifierSourceDAO#getQuantityInPool(IdentifierPool, boolean, boolean)
 	 */
 	public int getQuantityInPool(IdentifierPool pool, boolean availableOnly, boolean usedOnly) {
-		String hql = "select count(*) from PooledIdentifier where pool_id = " + pool.getId();
+		String hql = "select count(identifier) from PooledIdentifier identifier where identifier.pool = :pool";
 		if (availableOnly) {
-			hql += " and date_used is null";
+			hql += " and identifier.dateUsed is null";
 		}
 		if (usedOnly) {
-			hql += " and date_used is not null";
+			hql += " and identifier.dateUsed is not null";
 		}
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
-		return Integer.parseInt(query.uniqueResult().toString());
+		query.setParameter("pool", pool);
+		return ((Number) query.getSingleResult()).intValue();
 	}
 
     /**
@@ -136,9 +127,10 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
      */
     @Override
     public AutoGenerationOption getAutoGenerationOption(Integer autoGenerationOptionId) throws DAOException {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AutoGenerationOption.class);
-        criteria.add(Expression.eq("id", autoGenerationOptionId));
-        return (AutoGenerationOption)criteria.uniqueResult();
+        Query query = sessionFactory.getCurrentSession()
+                .createQuery("from AutoGenerationOption option where option.id = :id");
+        query.setParameter("id", autoGenerationOptionId);
+        return uniqueResult(query);
     }
 
     /**
@@ -146,37 +138,42 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 */
     @Override
 	public AutoGenerationOption getAutoGenerationOptionByUuid(String uuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AutoGenerationOption.class);
-        criteria.add(Expression.eq("uuid", uuid));
-        return (AutoGenerationOption)criteria.uniqueResult();
+        Query query = sessionFactory.getCurrentSession()
+                .createQuery("from AutoGenerationOption option where option.uuid = :uuid");
+        query.setParameter("uuid", uuid);
+        return uniqueResult(query);
 	}
     
     /**
 	 * @see IdentifierSourceDAO#getAutoGenerationOption(PatientIdentifierType,Location)
 	 */
 	public AutoGenerationOption getAutoGenerationOption(PatientIdentifierType type, Location location) throws APIException {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AutoGenerationOption.class);
-		criteria.add(Expression.eq("identifierType", type));
-        criteria.add(Restrictions.or(Expression.eq("location", location), Expression.isNull("location")));
-		return (AutoGenerationOption) criteria.uniqueResult();
+		Query query = sessionFactory.getCurrentSession()
+		        .createQuery("from AutoGenerationOption option where option.identifierType = :type"
+		                + " and (option.location = :location or option.location is null)");
+		query.setParameter("type", type);
+		query.setParameter("location", location);
+		return uniqueResult(query);
 	}
 
     /**
      * @see IdentifierSourceDAO#getAutoGenerationOption(PatientIdentifierType)
      */
     public List<AutoGenerationOption> getAutoGenerationOptions(PatientIdentifierType type) throws APIException {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AutoGenerationOption.class);
-        criteria.add(Expression.eq("identifierType", type));
-        return (List<AutoGenerationOption>) criteria.list();
+        Query query = sessionFactory.getCurrentSession()
+                .createQuery("from AutoGenerationOption option where option.identifierType = :type");
+        query.setParameter("type", type);
+        return query.getResultList();
     }
 
     /**
      * @see IdentifierSourceDAO#getAutoGenerationOption(PatientIdentifierType)
      */
     public AutoGenerationOption getAutoGenerationOption(PatientIdentifierType type) throws APIException {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AutoGenerationOption.class);
-        criteria.add(Expression.eq("identifierType", type));
-        return (AutoGenerationOption)criteria.uniqueResult();
+        Query query = sessionFactory.getCurrentSession()
+                .createQuery("from AutoGenerationOption option where option.identifierType = :type");
+        query.setParameter("type", type);
+        return uniqueResult(query);
     }
 
 	/** 
@@ -200,9 +197,9 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	@SuppressWarnings("unchecked")
 	public List<LogEntry> getLogEntries(IdentifierSource source, Date fromDate, Date toDate, 
 										String identifier, User generatedBy, String comment) throws DAOException {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(LogEntry.class);
+		StringBuilder hql = new StringBuilder("from LogEntry entry where 1 = 1");
 		if (source != null) {
-			criteria.add(Expression.eq("source", source));
+			hql.append(" and entry.source = :source");
 		}
 		if (fromDate != null) {
 			Calendar c = Calendar.getInstance();
@@ -211,7 +208,7 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 			c.set(Calendar.MINUTE, 0);
 			c.set(Calendar.SECOND, 0);
 			c.set(Calendar.MILLISECOND, 0);
-			criteria.add(Expression.ge("dateGenerated", fromDate));
+			hql.append(" and entry.dateGenerated >= :fromDate");
 		}
 		if (toDate != null) {
 			Calendar c = Calendar.getInstance();
@@ -221,19 +218,45 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 			c.set(Calendar.MINUTE, 0);
 			c.set(Calendar.SECOND, 0);
 			c.set(Calendar.MILLISECOND, 0);
-			criteria.add(Expression.lt("dateGenerated", c.getTime()));
+			hql.append(" and entry.dateGenerated < :toDate");
 		}
 		if (identifier != null) {
-			criteria.add(Expression.like("identifier", identifier, MatchMode.ANYWHERE));
+			hql.append(" and entry.identifier like :identifier");
 		}	
 		if (generatedBy != null) {
-			criteria.add(Expression.eq("generatedBy", generatedBy));
+			hql.append(" and entry.generatedBy = :generatedBy");
 		}
 		if (comment != null) {
-			criteria.add(Expression.like("comment", comment, MatchMode.ANYWHERE));
+			hql.append(" and entry.comment like :comment");
 		}	
-		criteria.addOrder(Order.desc("dateGenerated"));
-		return (List<LogEntry>) criteria.list();
+		hql.append(" order by entry.dateGenerated desc");
+		Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
+		if (source != null) {
+			query.setParameter("source", source);
+		}
+		if (fromDate != null) {
+			query.setParameter("fromDate", fromDate);
+		}
+		if (toDate != null) {
+			Calendar c = Calendar.getInstance();
+			c.setTime(toDate);
+			c.add(Calendar.DATE, 1);
+			c.set(Calendar.HOUR_OF_DAY, 0);
+			c.set(Calendar.MINUTE, 0);
+			c.set(Calendar.SECOND, 0);
+			c.set(Calendar.MILLISECOND, 0);
+			query.setParameter("toDate", c.getTime());
+		}
+		if (identifier != null) {
+			query.setParameter("identifier", "%" + identifier + "%");
+		}
+		if (generatedBy != null) {
+			query.setParameter("generatedBy", generatedBy);
+		}
+		if (comment != null) {
+			query.setParameter("comment", "%" + comment + "%");
+		}
+		return query.getResultList();
 	}
 
 	/**
@@ -241,15 +264,16 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public LogEntry getMostRecentLogEntry(IdentifierSource source) throws DAOException {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(LogEntry.class);
 		if (source == null) {
 			throw new DAOException("You must specify the Identifier Source that you wish to query");
 		}
-		criteria.add(Restrictions.eq("source", source));
-		criteria.addOrder(Order.desc("dateGenerated"));
-		criteria.addOrder(Order.desc("id"));
-		criteria.setMaxResults(1);
-		return (LogEntry) criteria.uniqueResult();
+		Query query = sessionFactory.getCurrentSession()
+		        .createQuery("from LogEntry entry where entry.source = :source"
+		                + " order by entry.dateGenerated desc, entry.id desc");
+		query.setParameter("source", source);
+		query.setMaxResults(1);
+		List<LogEntry> entries = query.getResultList();
+		return entries.isEmpty() ? null : entries.get(0);
 	}
 
     /**
@@ -257,9 +281,10 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
      */
     @Override
     public IdentifierSource getIdentifierSourceByUuid(String uuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(IdentifierSource.class);
-        criteria.add(Restrictions.eq("uuid", uuid));
-        return (IdentifierSource) criteria.uniqueResult();
+        Query query = sessionFactory.getCurrentSession()
+                .createQuery("from IdentifierSource source where source.uuid = :uuid");
+        query.setParameter("uuid", uuid);
+        return uniqueResult(query);
     }
     
     /**
@@ -267,10 +292,10 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
      */
     @Override
     public List<IdentifierSource> getIdentifierSourcesByType(PatientIdentifierType patientIdentifierType) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(IdentifierSource.class);
-        criteria.add(Expression.eq("identifierType", patientIdentifierType));
-        criteria.add(Expression.like("retired", false));
-        return (List<IdentifierSource>) criteria.list();
+        Query query = sessionFactory.getCurrentSession()
+                .createQuery("from IdentifierSource source where source.identifierType = :type and source.retired = false");
+        query.setParameter("type", patientIdentifierType);
+        return query.getResultList();
     }    
 
     /**
@@ -286,8 +311,9 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
      */
     @Override
     public void saveSequenceValue(SequentialIdentifierGenerator generator, long sequenceValue) {
-        int updated = sessionFactory.getCurrentSession()
-                .createSQLQuery("update idgen_seq_id_gen set next_sequence_value = :val where id = :id")
+        int updated = sessionFactory.getHibernateSessionFactory()
+                .getCurrentSession()
+                .createNativeMutationQuery("update idgen_seq_id_gen set next_sequence_value = :val where id = :id")
                 .setParameter("val", sequenceValue)
                 .setParameter("id", generator.getId())
                 .executeUpdate();
@@ -302,10 +328,8 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
     @Override
     public Long getSequenceValue(SequentialIdentifierGenerator generator) {
         Number val = (Number) sessionFactory.getCurrentSession()
-                .createSQLQuery("select next_sequence_value from idgen_seq_id_gen where id = :id")
-		        // Added IntegerType.INSTANCE because hibernate in case of PostgreSQL converts null ids to 
-		        // bytea type and causes error. So had to add explicit type.
-		        .setParameter("id", generator.getId(), IntegerType.INSTANCE)
+                .createSQLQuery("select next_sequence_value from idgen_seq_id_gen where id = :id", Number.class)
+                .setParameter("id", generator.getId())
                 .uniqueResult();
         return val == null ? null : val.longValue();
 	}
@@ -330,5 +354,15 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 */
 	public void setSessionFactory(DbSessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T uniqueResult(Query query) {
+		try {
+			return (T) query.getSingleResult();
+		}
+		catch (NoResultException e) {
+			return null;
+		}
 	}
 }

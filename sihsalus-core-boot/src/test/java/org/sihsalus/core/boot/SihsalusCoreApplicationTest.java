@@ -4,10 +4,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.idgen.service.IdentifierSourceService;
+import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
+import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
+import org.openmrs.module.idgen.validator.LuhnMod30IdentifierValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -17,6 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 class SihsalusCoreApplicationTest {
 
     @Autowired private MockMvc mockMvc;
+
+    @Autowired private JdbcTemplate jdbcTemplate;
 
     @Test
     void healthcheckResponds() throws Exception {
@@ -36,5 +46,16 @@ class SihsalusCoreApplicationTest {
         mockMvc.perform(get("/api/system/info"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
+    }
+
+    @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void idgenIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(IdentifierSourceService.class));
+        assertNotNull(Context.getPatientService().getIdentifierValidator((Class) LuhnMod10IdentifierValidator.class));
+        assertNotNull(Context.getPatientService().getIdentifierValidator((Class) LuhnMod25IdentifierValidator.class));
+        assertNotNull(Context.getPatientService().getIdentifierValidator((Class) LuhnMod30IdentifierValidator.class));
+        assertNotNull(
+                jdbcTemplate.queryForObject("select count(*) from idgen_identifier_source", Integer.class));
     }
 }

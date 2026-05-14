@@ -14,20 +14,19 @@
 package org.openmrs.module.idgen.processor;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.RemoteIdentifierSource;
@@ -53,7 +52,10 @@ public class RemoteIdentifierSourceProcessor implements IdentifierSourceProcesso
         try {
             response = doHttpPost(remoteIdentifierSource, batchSize);
         }
-        catch (IOException ex) {
+        catch (IOException | InterruptedException ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new RuntimeException(ex);
         }
         
@@ -67,37 +69,40 @@ public class RemoteIdentifierSourceProcessor implements IdentifierSourceProcesso
         }
     }
 
-    protected String doHttpPost(RemoteIdentifierSource source, int batchSize) throws IOException {
-        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-        nameValuePairs.add(new BasicNameValuePair("numberToGenerate", Integer.toString(batchSize)));
+    protected String doHttpPost(RemoteIdentifierSource source, int batchSize) throws IOException, InterruptedException {
+        List<FormValue> formValues = new ArrayList<>();
+        formValues.add(new FormValue("numberToGenerate", Integer.toString(batchSize)));
         if (StringUtils.isNotBlank(source.getUser())) {
-            nameValuePairs.add(new BasicNameValuePair("username", source.getUser()));
-            nameValuePairs.add(new BasicNameValuePair("password", source.getPassword()));
+            formValues.add(new FormValue("username", source.getUser()));
+            formValues.add(new FormValue("password", source.getPassword()));
         }
 
-        HttpPost post = new HttpPost(source.getUrl());
-        post.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
-
-        HttpClient client = new DefaultHttpClient();
-        HttpResponse httpResponse;
-        String responseText;
-        Integer statusCode;
-
-        try {
-            httpResponse = client.execute(post);
-            responseText = EntityUtils.toString(httpResponse.getEntity());
-            statusCode = httpResponse.getStatusLine().getStatusCode();
-        }
-        finally {
-            // always release the connection!
-            post.releaseConnection();
-        }
+        HttpRequest request = HttpRequest.newBuilder(URI.create(source.getUrl()))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(formEncode(formValues)))
+                .build();
+        HttpResponse<String> httpResponse =
+                HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        String responseText = httpResponse.body();
+        int statusCode = httpResponse.statusCode();
 
         if (statusCode != 200) {
-            throw new IOException("Unexpected response: " + httpResponse.getStatusLine().getStatusCode() + " " + httpResponse.getStatusLine().getReasonPhrase() + "\n" + responseText);
+            throw new IOException("Unexpected response: " + statusCode + "\n" + responseText);
         }
 
         return responseText;
     }
+
+    private String formEncode(List<FormValue> formValues) {
+        return formValues.stream()
+                .map(value -> encode(value.name()) + "=" + encode(value.value()))
+                .collect(Collectors.joining("&"));
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value == null ? "" : value, StandardCharsets.UTF_8);
+    }
+
+    private record FormValue(String name, String value) {}
 
 }

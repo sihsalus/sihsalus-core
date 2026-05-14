@@ -719,7 +719,8 @@ public class ServiceContext implements ApplicationContextAware {
 						Class[] interfaces = { cls };
 						ProxyFactory factory = new ProxyFactory(interfaces);
 						factory.setTarget(classInstance);
-						advisedService = (Advised) factory.getProxy(OpenmrsClassLoader.getInstance());
+						ClassLoader proxyClassLoader = classInstance.getClass().getClassLoader();
+						advisedService = (Advised) factory.getProxy(proxyClassLoader != null ? proxyClassLoader : cls.getClassLoader());
 					} else {
 						advisedService = (Advised) classInstance;
 					}

@@ -11,7 +11,7 @@ public final class StaticModuleCatalog {
                     module("webservices-rest", "webservices.rest-omod", "3.4.1", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("authentication", "authentication-omod", "2.3.0", SihsalusModuleStatus.PLACEHOLDER),
                     module("oauth2login", "oauth2login-omod", "1.5.0", SihsalusModuleStatus.PLACEHOLDER),
-                    module("idgen", "idgen-omod", "5.0.4", SihsalusModuleStatus.PLACEHOLDER),
+                    module("idgen", "idgen-api", "6.0.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("addresshierarchy", "addresshierarchy-omod", "2.21.0", SihsalusModuleStatus.PLACEHOLDER),
                     module("patientdocuments", "patientdocuments-omod", "1.1.0-SNAPSHOT", SihsalusModuleStatus.PLACEHOLDER),
                     module("attachments", "attachments-omod", "4.0.0", SihsalusModuleStatus.PLACEHOLDER),
