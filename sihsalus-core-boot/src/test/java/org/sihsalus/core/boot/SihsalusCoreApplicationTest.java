@@ -40,6 +40,10 @@ import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod30IdentifierValidator;
+import org.openmrs.module.imaging.api.DicomStudyService;
+import org.openmrs.module.imaging.api.OrthancConfigurationService;
+import org.openmrs.module.imaging.api.RequestProcedureService;
+import org.openmrs.module.imaging.api.RequestProcedureStepService;
 import org.openmrs.module.legacyui.api.LegacyUIService;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
@@ -265,6 +269,18 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(FuaService.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from fua", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from fua_estado", Integer.class));
+    }
+
+    @Test
+    void imagingIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(OrthancConfigurationService.class));
+        assertNotNull(Context.getService(DicomStudyService.class));
+        assertNotNull(Context.getService(RequestProcedureService.class));
+        assertNotNull(Context.getService(RequestProcedureStepService.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_OrthancConfiguration", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_DicomStudy", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_RequestProcedure", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_RequestProcedureStep", Integer.class));
     }
 
     @Test
