@@ -47,11 +47,14 @@ Implemented:
 - Central Liquibase entrypoint in `sihsalus-core-liquibase` that runs the upstream OpenMRS schema snapshot, core data, and latest update changelog.
 - Spring Boot application in `sihsalus-core-boot` with datasource, healthcheck, FHIR metadata smoke endpoint, REST system status endpoint, and no `.omod` loader.
 - Boot excludes generic Hibernate JPA and Elasticsearch client auto-configuration for now. OpenMRS persistence must be wired explicitly instead of being inferred by Spring Boot scanning.
+- Upstream FHIR2 API code imported into `sihsalus-fhir2` as local source and compiled against `sihsalus-core-api`. The OMOD activator was excluded.
+- Upstream Web Services REST `omod-common` code imported into `sihsalus-webservices-rest` as local source and compiled against `sihsalus-core-api`. Module install/start/stop wrappers and dynamic module enumeration were excluded.
+- Static boundary tests check that FHIR2 and REST imports do not depend on `ModuleFactory` or OMOD activators.
 
 Not yet implemented:
 
-- Full upstream FHIR2 API/OMOD conversion.
-- Full upstream Web Services REST conversion.
+- FHIR2 servlet/runtime wiring for the imported providers.
+- Web Services REST resource/controller wiring beyond `omod-common`.
 - Static OpenMRS service/DAO/Hibernate wiring.
 - Source conversion for the distro modules beyond the current Maven placeholders.
 
@@ -327,20 +330,21 @@ Acceptance:
 
 ## Immediate Next Decisions
 
-1. Choose the implementation stack for SIH Salus Core.
-2. Decide whether the first runtime should be compatible with OpenMRS database imports or start with a clean SIH Salus schema plus import tools.
-3. Pick the first vertical slice: recommended slice is patient registry plus concepts/content import.
-4. Define the minimum frontend contract that must keep working first.
-5. Decide what "OpenMRS compatible" means during migration: API compatible, database import compatible, module compatible, or only behavior compatible.
+1. Wire OpenMRS service/DAO/Hibernate statically in `sihsalus-core-boot` so imported FHIR2 and REST resources can execute against the preserved OpenMRS model.
+2. Add FHIR runtime endpoints for the imported FHIR2 providers without using the FHIR2 OMOD servlet/activator.
+3. Add REST runtime endpoints for imported Web Services REST resources without module install/start/stop APIs.
+4. Import the first clinical resource block for both APIs: patient, concept, encounter, observation.
+5. Continue distro module conversion by source ownership, starting with auth/idgen/address hierarchy because they unblock patient registry workflows.
 
 ## Recommended Next Slice
 
 Start with:
 
-- content inventory from `reference-sources/sihsalus-content`
-- concept/metadata import design
-- patient registry model
+- static OpenMRS service/DAO/Hibernate wiring
+- FHIR2 provider runtime wiring
+- REST resource runtime wiring
+- patient registry resource path in both FHIR and REST
+- concept/metadata import design from `reference-sources/sihsalus-content`
 - patient identifier strategy
-- REST API skeleton
 
-This gives SIH Salus Core a real clinical foundation without getting blocked by the full OpenMRS module ecosystem.
+This gives SIH Salus Core a real clinical foundation while keeping FHIR and REST separate over the same OpenMRS-compatible model.

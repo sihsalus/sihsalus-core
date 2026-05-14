@@ -16,6 +16,11 @@ The current architectural decision is to keep the OpenMRS data model as the cano
 
    FHIR and REST are separate adapters and contracts. They share the same OpenMRS/SIH Salus domain model and services; they should not be merged into a common transport DTO layer.
 
+   Current imported API adapters:
+
+   - `sihsalus-fhir2` contains the upstream FHIR2 API package as local source under `org.openmrs.module.fhir2.*`, adapted to the local Jakarta/Hibernate baseline and compiled without the FHIR OMOD activator.
+   - `sihsalus-webservices-rest` contains the upstream Web Services REST common package as local source under `org.openmrs.module.webservices.*`, compiled without module install/start/stop wrappers or dynamic module enumeration.
+
 3. Sihsalus backend extensions
 
    Sihsalus-specific services and modules should live behind clear package/module boundaries. New Java code should use `org.sihsalus.*` unless it is intentionally preserving an OpenMRS extension point.
