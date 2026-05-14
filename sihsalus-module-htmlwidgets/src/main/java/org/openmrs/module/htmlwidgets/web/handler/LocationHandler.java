@@ -13,18 +13,8 @@
  */
 package org.openmrs.module.htmlwidgets.web.handler;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-
-import jakarta.servlet.jsp.JspException;
-
 import org.openmrs.Location;
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.htmlwidgets.web.WidgetConfig;
-import org.openmrs.module.htmlwidgets.web.html.Widget;
-import org.openmrs.web.taglib.FieldGenTag;
 
 /**
  * FieldGenHandler for Enumerated Types
@@ -38,33 +28,5 @@ public class LocationHandler  extends OpenmrsMetadataHandler<Location> {
 	@Override
 	public Class<Location> getMetadataType() {
 		return Location.class;
-	}
-	
-	/** 
-	 * @see Widget#render(WidgetConfig)
-	 */
-	@Override
-	public void render(WidgetConfig config, Writer w) throws IOException {
-
-		w.write("<script language=\"javascript\" type=\"text/javascript\">$j = jQuery;</script>");
-		FieldGenTag fieldGenTag = new FieldGenTag();
-		fieldGenTag.setPageContext(config.getPageContext());
-		fieldGenTag.setType("org.openmrs.Location");
-		fieldGenTag.setFormFieldName(config.getAttributeValue("name"));
-		fieldGenTag.setUrl("location.field");
-		fieldGenTag.setVal(config.getDefaultValue());
-		Map<String, Object> parameterMap = fieldGenTag.getParameterMap();
-		if (parameterMap == null) {
-			parameterMap = new HashMap<String, Object>();
-		}
-		parameterMap.put("optionHeader", config.getAttributeValue("optionHeader", "[blank]"));
-		fieldGenTag.setParameterMap(parameterMap);
-		
-		try{
-			fieldGenTag.doStartTag();
-		}
-		catch (JspException ex) {
-			ex.printStackTrace();
-		}
 	}
 }

@@ -96,6 +96,6 @@ public class UserHandler extends CodedHandler {
 	 * @return
 	 */
 	protected String getUserDisplay(User u, WidgetConfig config) {
-		return StringEscapeUtils.escapeHtml(u.getFamilyName() + ", " + u.getGivenName());
+		return StringEscapeUtils.escapeHtml4(u.getFamilyName() + ", " + u.getGivenName());
 	}
 }

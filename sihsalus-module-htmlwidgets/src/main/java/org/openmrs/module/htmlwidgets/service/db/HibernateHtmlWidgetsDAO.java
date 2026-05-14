@@ -89,11 +89,11 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 		if (limitUserIds != null) {
 			hql.append("and		u.userId in (:limitUserIds) ");
 		}
-		if (StringUtils.isNotEmpty(query)) {
+		List<String> terms = searchTerms(query);
+		if (!terms.isEmpty()) {
 			hql.append("and (");
-			String[] nameSplit = query.toLowerCase().split(" ");
-			for (int i=0; i<nameSplit.length; i++) {
-				String lc = "like '%" + nameSplit[i] + "%'";
+			for (int i=0; i<terms.size(); i++) {
+				String lc = "like :term" + i;
 				hql.append((i == 0 ? "" : "or ") + "lower(pn.givenName) " + lc + " or lower(pn.middleName) " + lc + " ");
 				hql.append("or lower(u.username) " + lc + " or lower(pn.familyName) " + lc + " or lower(pn.familyName2) " + lc + " ");
 			}
@@ -104,7 +104,7 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 		if (limitUserIds != null) {
 			q.setParameterList("limitUserIds", limitUserIds);
 		}
-		bindSearchTerms(q, query);
+		bindSearchTerms(q, terms);
 
 		Map<Integer, String> m = new HashMap<Integer, String>();
 		for (Object[] row : q.list()) {
@@ -129,11 +129,11 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 		if (limitPersonIds != null) {
 			hql.append("and		p.personId in (:limitPersonIds) ");
 		}
-		if (StringUtils.isNotEmpty(query)) {
+		List<String> terms = searchTerms(query);
+		if (!terms.isEmpty()) {
 			hql.append("and (");
-			String[] nameSplit = query.toLowerCase().split(" ");
-			for (int i=0; i<nameSplit.length; i++) {
-				String lc = "like '%" + nameSplit[i] + "%'";
+			for (int i=0; i<terms.size(); i++) {
+				String lc = "like :term" + i;
 				hql.append((i == 0 ? "" : "or ") + "lower(pn.givenName) " + lc + " or lower(pn.middleName) " + lc + " ");
 				hql.append("or lower(pn.familyName) " + lc + " or lower(pn.familyName2) " + lc + " ");
 			}
@@ -144,7 +144,7 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 		if (limitPersonIds != null) {
 			q.setParameterList("limitPersonIds", limitPersonIds);
 		}
-		bindSearchTerms(q, query);
+		bindSearchTerms(q, terms);
 
 		Map<Integer, String> m = new HashMap<Integer, String>();
 		for (Object[] row : q.list()) {
@@ -217,8 +217,7 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
 		        .toList();
 	}
 
-	private void bindSearchTerms(Query<?> queryObject, String query) {
-		List<String> terms = searchTerms(query);
+	private void bindSearchTerms(Query<?> queryObject, List<String> terms) {
 		for (int i = 0; i < terms.size(); i++) {
 			queryObject.setParameter("term" + i, terms.get(i));
 		}

@@ -29,6 +29,7 @@ import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.concept.EmrConceptService;
 import org.openmrs.module.emrapi.patient.EmrPatientService;
 import org.openmrs.module.emrapi.procedure.ProcedureService;
+import org.openmrs.module.htmlwidgets.service.HtmlWidgetsService;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
@@ -185,6 +186,11 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(PatientCalculationService.class));
         assertNotNull(Context.getService(CalculationRegistrationService.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from calculation_registration", Integer.class));
+    }
+
+    @Test
+    void htmlWidgetsIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(HtmlWidgetsService.class));
     }
 
     @Test

@@ -13,8 +13,6 @@ import jakarta.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.util.OpenmrsConstants;
-import org.openmrs.web.WebConstants;
-import org.openmrs.web.taglib.HtmlIncludeTag;
 
 /**
  * This represents utility methods for writing tags
@@ -54,6 +52,14 @@ public class HtmlUtil  {
 	
 	private static final List<String> CSS_EXTENSIONS = Arrays.asList("css","style","stylesheet");
 
+	private static final String INIT_REQ_UNIQUE_ID = "__INIT_REQ_UNIQUE_ID__";
+
+	private static final String WEBAPP_NAME = "openmrs";
+
+	private static final String OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY = "org.openmrs.htmlInclude.pageName";
+
+	private static final String OPENMRS_HTML_INCLUDE_MAP_KEY = "org.openmrs.htmlInclude.includeMap";
+
 	/**
 	 * Returns true if the passed attribute is valid for the passed tagName
 	 * @param tagName the tagName to check
@@ -91,18 +97,18 @@ public class HtmlUtil  {
 		HttpSession session = request.getSession();
 		
 		if (isJs || isCss) {
-			String initialRequestId = (String) request.getAttribute(WebConstants.INIT_REQ_UNIQUE_ID);
-			String lastRequestId = (String) session.getAttribute(HtmlIncludeTag.OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY);
-			Map<String, String> m = (HashMap<String, String>) session.getAttribute(HtmlIncludeTag.OPENMRS_HTML_INCLUDE_MAP_KEY);
+			String initialRequestId = (String) request.getAttribute(INIT_REQ_UNIQUE_ID);
+			String lastRequestId = (String) session.getAttribute(OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY);
+			Map<String, String> m = (HashMap<String, String>) session.getAttribute(OPENMRS_HTML_INCLUDE_MAP_KEY);
 			if (m == null || !initialRequestId.equals(lastRequestId)) {
 				m = new HashMap<String, String>();
 			}
 			
-			String otherResource = "/" + WebConstants.WEBAPP_NAME + resource;
+			String otherResource = "/" + WEBAPP_NAME + resource;
 			if (!m.containsKey(resource) && !m.containsKey(otherResource)) {
 				m.put(resource, "true");
-				session.setAttribute(HtmlIncludeTag.OPENMRS_HTML_INCLUDE_MAP_KEY, m);
-				session.setAttribute(HtmlIncludeTag.OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY, initialRequestId);
+				session.setAttribute(OPENMRS_HTML_INCLUDE_MAP_KEY, m);
+				session.setAttribute(OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY, initialRequestId);
 				
 				String prefix = request.getContextPath();
 				if (!resource.startsWith(prefix + "/")) {
@@ -127,11 +133,7 @@ public class HtmlUtil  {
 	 * the rewrite map using reflection, so that we don't have to branch the htmlwidgets module
 	 * into pre- and post- OpenMRS 1.7 versions.
 	 */
-	@SuppressWarnings("unchecked")
     private static Map<String, String> getRewritesFromHtmlIncludeTag() {
-	    try {
-	    	return (Map<String, String>) HtmlIncludeTag.class.getField("rewrites").get(null);
-	    } catch (Exception ex) { }
 	    return null;
     }
 

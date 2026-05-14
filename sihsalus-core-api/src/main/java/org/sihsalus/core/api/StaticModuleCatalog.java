@@ -26,7 +26,7 @@ public final class StaticModuleCatalog {
                     module("reporting", "reporting-omod", "2.1.0", SihsalusModuleStatus.PLACEHOLDER),
                     module("reportingrest", "reportingrest-omod", "2.0.0", SihsalusModuleStatus.PLACEHOLDER),
                     module("calculation", "calculation-api", "2.1.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
-                    module("htmlwidgets", "htmlwidgets-omod", "2.0.1", SihsalusModuleStatus.PLACEHOLDER),
+                    module("htmlwidgets", "htmlwidgets-omod", "2.0.1", SihsalusModuleStatus.STATIC_INTERNAL),
                     module(
                             "serialization-xstream",
                             "serialization.xstream-api",

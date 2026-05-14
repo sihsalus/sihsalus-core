@@ -76,6 +76,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void htmlWidgetsIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("htmlwidgets")
+                        && module.sourceModule().equals("htmlwidgets-omod")
+                        && module.baselineVersion().equals("2.0.1")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void stockManagementIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("stockmanagement")
