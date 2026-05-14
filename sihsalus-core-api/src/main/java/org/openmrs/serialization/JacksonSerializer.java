@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -58,7 +59,7 @@ public class JacksonSerializer implements OpenmrsSerializer {
 	 * @throws SerializationException if initialization fails
 	 */
 	@Autowired
-	public JacksonSerializer(@Qualifier(value = "domainService") DomainService domainService) throws SerializationException {
+	public JacksonSerializer(@Lazy @Qualifier(value = "domainService") DomainService domainService) throws SerializationException {
 		objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new UuidReferenceModule(domainService));
 		objectMapper.registerModule(new HibernateProxyModule());
