@@ -13,9 +13,9 @@
  */
 package org.openmrs.module.stockmanagement.api.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
  * Model class that represents individual item stock actions while an operation is pending.

@@ -4,7 +4,7 @@ import org.openmrs.BaseChangeableOpenmrsData;
 import org.openmrs.BaseOpenmrsData;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Set;
 

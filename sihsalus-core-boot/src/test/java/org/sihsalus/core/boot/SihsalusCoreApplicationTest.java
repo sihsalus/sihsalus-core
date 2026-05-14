@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,9 @@ import org.openmrs.UserSessionListener;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.authentication.AuthenticationConfig;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
+import org.openmrs.module.attachments.AttachmentsService;
+import org.openmrs.module.attachments.obs.DefaultAttachmentHandler;
+import org.openmrs.module.attachments.obs.ImageAttachmentHandler;
 import org.openmrs.module.authentication.AuthenticationUserSessionListener;
 import org.openmrs.module.authentication.DelegatingAuthenticationScheme;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
@@ -21,6 +25,7 @@ import org.openmrs.module.idgen.validator.LuhnMod30IdentifierValidator;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
 import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationScheme;
+import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -111,6 +116,24 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(AddressHierarchyService.class));
         assertNotNull(
                 jdbcTemplate.queryForObject("select count(*) from address_hierarchy_level", Integer.class));
+    }
+
+    @Test
+    void stockManagementIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(StockManagementService.class));
+        assertNotNull(
+                jdbcTemplate.queryForObject("select count(*) from stockmgmt_stock_item", Integer.class));
+    }
+
+    @Test
+    void attachmentsIsWiredAsStaticInternalModule() throws Exception {
+        assertNotNull(Context.getService(AttachmentsService.class));
+        assertNotNull(Context.getObsService().getHandler(DefaultAttachmentHandler.class.getSimpleName()));
+        assertNotNull(Context.getObsService().getHandler(ImageAttachmentHandler.class.getSimpleName()));
+        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/attachment"));
+        assertEquals(1, jdbcTemplate.queryForObject(
+                "select count(*) from global_property where property = 'attachments.defaultConceptComplexUuid'",
+                Integer.class));
     }
 
     @Test

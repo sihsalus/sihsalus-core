@@ -2,7 +2,7 @@ package org.openmrs.module.stockmanagement.api.model;
 
 import org.openmrs.Location;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 
 /**

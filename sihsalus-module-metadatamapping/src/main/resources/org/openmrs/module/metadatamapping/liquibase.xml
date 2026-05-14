@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="sihsalus-metadatamapping-20260513-001" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <not><sequenceExists sequenceName="metadatamapping_metadata_source_metadata_source_id_seq"/></not>
+        </preConditions>
+        <createSequence sequenceName="metadatamapping_metadata_source_metadata_source_id_seq"/>
+    </changeSet>
+
+    <changeSet id="sihsalus-metadatamapping-20260513-002" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <not><sequenceExists sequenceName="metadatamapping_metadata_term_mapp_metadata_term_mapping_id_seq"/></not>
+        </preConditions>
+        <createSequence sequenceName="metadatamapping_metadata_term_mapp_metadata_term_mapping_id_seq"/>
+    </changeSet>
+
+    <changeSet id="sihsalus-metadatamapping-20260513-003" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <not><sequenceExists sequenceName="metadatamapping_metadata_set_metadata_set_id_seq"/></not>
+        </preConditions>
+        <createSequence sequenceName="metadatamapping_metadata_set_metadata_set_id_seq"/>
+    </changeSet>
+
+    <changeSet id="sihsalus-metadatamapping-20260513-004" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <not><sequenceExists sequenceName="metadatamapping_metadata_set_member_metadata_set_member_id_seq"/></not>
+        </preConditions>
+        <createSequence sequenceName="metadatamapping_metadata_set_member_metadata_set_member_id_seq"/>
+    </changeSet>
+
+    <changeSet id="sihsalus-metadatamapping-20260513-005" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="metadatamapping_metadata_source"/></not>
+        </preConditions>
+        <createTable tableName="metadatamapping_metadata_source">
+            <column name="metadata_source_id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1024)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false" references="users(user_id)" foreignKeyName="fk_mdm_source_creator"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int">
+                <constraints nullable="true" references="users(user_id)" foreignKeyName="fk_mdm_source_changed_by"/>
+            </column>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_by" type="int">
+                <constraints nullable="true" references="users(user_id)" foreignKeyName="fk_mdm_source_retired_by"/>
+            </column>
+            <column name="retire_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_mdm_source_uuid"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="sihsalus-metadatamapping-20260513-006" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="metadatamapping_metadata_term_mapping"/></not>
+        </preConditions>
+        <createTable tableName="metadatamapping_metadata_term_mapping">
+            <column name="metadata_term_mapping_id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="metadata_source_id" type="int">
+                <constraints nullable="false" references="metadatamapping_metadata_source(metadata_source_id)" foreignKeyName="fk_mdm_term_source"/>
+            </column>
+            <column name="code" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="metadata_class" type="varchar(1024)"/>
+            <column name="metadata_uuid" type="char(38)"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="description" type="varchar(1024)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false" references="users(user_id)" foreignKeyName="fk_mdm_term_creator"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int">
+                <constraints nullable="true" references="users(user_id)" foreignKeyName="fk_mdm_term_changed_by"/>
+            </column>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_by" type="int">
+                <constraints nullable="true" references="users(user_id)" foreignKeyName="fk_mdm_term_retired_by"/>
+            </column>
+            <column name="retire_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_mdm_term_uuid"/>
+            </column>
+        </createTable>
+        <createIndex tableName="metadatamapping_metadata_term_mapping" indexName="idx_mdm_term_source_code">
+            <column name="metadata_source_id"/>
+            <column name="code"/>
+        </createIndex>
+        <createIndex tableName="metadatamapping_metadata_term_mapping" indexName="idx_mdm_term_metadata_uuid">
+            <column name="metadata_uuid"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="sihsalus-metadatamapping-20260513-007" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="metadatamapping_metadata_set"/></not>
+        </preConditions>
+        <createTable tableName="metadatamapping_metadata_set">
+            <column name="metadata_set_id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="description" type="varchar(1024)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false" references="users(user_id)" foreignKeyName="fk_mdm_set_creator"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int">
+                <constraints nullable="true" references="users(user_id)" foreignKeyName="fk_mdm_set_changed_by"/>
+            </column>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_by" type="int">
+                <constraints nullable="true" references="users(user_id)" foreignKeyName="fk_mdm_set_retired_by"/>
+            </column>
+            <column name="retire_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_mdm_set_uuid"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="sihsalus-metadatamapping-20260513-008" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="metadatamapping_metadata_set_member"/></not>
+        </preConditions>
+        <createTable tableName="metadatamapping_metadata_set_member">
+            <column name="metadata_set_member_id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="metadata_set_id" type="int">
+                <constraints nullable="false" references="metadatamapping_metadata_set(metadata_set_id)" foreignKeyName="fk_mdm_member_set"/>
+            </column>
+            <column name="metadata_class" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="metadata_uuid" type="char(38)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_weight" type="double"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="description" type="varchar(1024)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false" references="users(user_id)" foreignKeyName="fk_mdm_member_creator"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int">
+                <constraints nullable="true" references="users(user_id)" foreignKeyName="fk_mdm_member_changed_by"/>
+            </column>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_by" type="int">
+                <constraints nullable="true" references="users(user_id)" foreignKeyName="fk_mdm_member_retired_by"/>
+            </column>
+            <column name="retire_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_mdm_member_uuid"/>
+            </column>
+        </createTable>
+        <createIndex tableName="metadatamapping_metadata_set_member" indexName="idx_mdm_member_set">
+            <column name="metadata_set_id"/>
+        </createIndex>
+        <createIndex tableName="metadatamapping_metadata_set_member" indexName="idx_mdm_member_metadata_uuid">
+            <column name="metadata_uuid"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

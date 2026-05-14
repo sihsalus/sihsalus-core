@@ -3,7 +3,7 @@ package org.openmrs.module.stockmanagement.api.model;
 import org.openmrs.Concept;
 import org.openmrs.Location;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;

@@ -47,4 +47,22 @@ class StaticModuleCatalogTest {
                         && module.baselineVersion().equals("3.0.0-SNAPSHOT")
                         && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
     }
+
+    @Test
+    void stockManagementIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("stockmanagement")
+                        && module.sourceModule().equals("stockmanagement-api")
+                        && module.baselineVersion().equals("3.0.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
+    void attachmentsIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("attachments")
+                        && module.sourceModule().equals("attachments-omod")
+                        && module.baselineVersion().equals("4.0.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
 }

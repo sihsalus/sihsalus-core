@@ -3,11 +3,11 @@ package org.openmrs.module.stockmanagement.api.utils;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 
-import javax.activation.DataHandler;
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.util.ByteArrayDataSource;
+import jakarta.activation.DataHandler;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -149,7 +149,7 @@ public class SmtpUtil {
 		for (int i = 0; i < emailAddresses.length; i++) {
 			addresses[i] = InternetAddress.parse(emailAddresses[i], false)[0];
 		}
-		mimeMessage.setRecipients(javax.mail.Message.RecipientType.TO, addresses);
+		mimeMessage.setRecipients(jakarta.mail.Message.RecipientType.TO, addresses);
 		mimeMessage.setSubject(subject);
 		mimeMessage.setHeader("Content-Transfer-Encoding", "base64");
 		mimeMessage.setDataHandler(new DataHandler(new ByteArrayDataSource(body, "text/html")));

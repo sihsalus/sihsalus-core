@@ -6,7 +6,7 @@ import org.openmrs.module.stockmanagement.api.impl.*;
 
 import java.io.Serializable;
 import java.util.Set;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * The persistent class for the stockmgmt_stock_source database table.

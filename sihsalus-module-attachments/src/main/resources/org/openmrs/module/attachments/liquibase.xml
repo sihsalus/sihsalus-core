@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="sihsalus-attachments-001-reference-data" author="sihsalus">
+        <sql>
+            insert into privilege (privilege, description, uuid)
+            select 'App: attachments.attachments.page', 'Allowed to access the main attachments page', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde401'
+            where not exists (select 1 from privilege where privilege = 'App: attachments.attachments.page');
+
+            insert into privilege (privilege, description, uuid)
+            select 'Create Attachments', 'Allowed to create attachments', '550e8400-e29b-41d4-a716-446655440000'
+            where not exists (select 1 from privilege where privilege = 'Create Attachments');
+
+            insert into privilege (privilege, description, uuid)
+            select 'View Attachments', 'Allowed to view attachments', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde402'
+            where not exists (select 1 from privilege where privilege = 'View Attachments');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.defaultConceptComplexUuid', '42ed45fd-f3f6-44b6-bfc2-8bde1bb41e00', 'UUID of the concept complex used as default attachment storage concept.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde403'
+            where not exists (select 1 from global_property where property = 'attachments.defaultConceptComplexUuid');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.conceptComplexUuidList', '["7cac8397-53cd-4f00-a6fe-028e8d743f8e","42ed45fd-f3f6-44b6-bfc2-8bde1bb41e00"]', 'List of concept complex UUIDs used when listing attachments.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde404'
+            where not exists (select 1 from global_property where property = 'attachments.conceptComplexUuidList');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.conceptComplexUuidMap', '{"IMAGE":"7cac8397-53cd-4f00-a6fe-028e8d743f8e","OTHER":"42ed45fd-f3f6-44b6-bfc2-8bde1bb41e00"}', 'Mapping between content families and concept complex UUIDs.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde405'
+            where not exists (select 1 from global_property where property = 'attachments.conceptComplexUuidMap');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.encounterTypeUuid', '5021b1a1-e7f6-44b4-ba02-da2f2bcf8718', 'UUID of the encounter type used to upload attachments.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde406'
+            where not exists (select 1 from global_property where property = 'attachments.encounterTypeUuid');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.associateWithVisit', 'true', 'Whether uploaded attachments should be associated with the current visit.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde407'
+            where not exists (select 1 from global_property where property = 'attachments.associateWithVisit');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.maxUploadFileSize', '5.0', 'Maximum size in megabytes allowed for an attachment upload.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde408'
+            where not exists (select 1 from global_property where property = 'attachments.maxUploadFileSize');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.maxStorageFileSize', '1.2', 'Maximum size in megabytes allowed for stored attachment bytes.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde409'
+            where not exists (select 1 from global_property where property = 'attachments.maxStorageFileSize');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.allowedFileExtensions', '', 'Comma-separated case-insensitive file extensions allowed for upload.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde410'
+            where not exists (select 1 from global_property where property = 'attachments.allowedFileExtensions');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.deniedFileNames', 'eicar.txt', 'Comma-separated case-insensitive file names rejected for upload.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde411'
+            where not exists (select 1 from global_property where property = 'attachments.deniedFileNames');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.encounterSavingFlow', '', 'Set to unique to have only one attachment encounter per visit.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde412'
+            where not exists (select 1 from global_property where property = 'attachments.encounterSavingFlow');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.allowNoCaption', 'false', 'Whether empty attachment captions are allowed.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde413'
+            where not exists (select 1 from global_property where property = 'attachments.allowNoCaption');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.allowWebcam', 'true', 'Whether webcam uploads are allowed.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde414'
+            where not exists (select 1 from global_property where property = 'attachments.allowWebcam');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.dashboardThumbnailCount', '4', 'Number of thumbnails to display in dashboard widgets.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde415'
+            where not exists (select 1 from global_property where property = 'attachments.dashboardThumbnailCount');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'webservices.rest.maxResultsDefault', '50', 'Default maximum number of REST results.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde416'
+            where not exists (select 1 from global_property where property = 'webservices.rest.maxResultsDefault');
+
+            insert into concept (concept_id, retired, short_name, description, form_text, datatype_id, class_id, is_set, creator, date_created, uuid)
+            select 900001, false, null, null, null, cd.concept_datatype_id, cc.concept_class_id, false, 1, current_timestamp, '42ed45fd-f3f6-44b6-bfc2-8bde1bb41e00'
+            from concept_datatype cd, concept_class cc
+            where cd.uuid = '8d4a6242-c2cc-11de-8d13-0010c6dffd0f'
+              and cc.name = 'Question'
+              and not exists (select 1 from concept where uuid = '42ed45fd-f3f6-44b6-bfc2-8bde1bb41e00');
+
+            insert into concept_complex (concept_id, handler)
+            select c.concept_id, 'DefaultAttachmentHandler'
+            from concept c
+            where c.uuid = '42ed45fd-f3f6-44b6-bfc2-8bde1bb41e00'
+              and not exists (select 1 from concept_complex cc where cc.concept_id = c.concept_id);
+
+            insert into concept_name (concept_name_id, concept_id, name, locale, locale_preferred, creator, date_created, concept_name_type, voided, uuid)
+            select 900001, c.concept_id, 'ATT DEFAULT ATTACHMENT', 'en', true, 1, current_timestamp, 'FULLY_SPECIFIED', false, '8f3a26f8-7e8f-4a53-84c7-c3ff48bde417'
+            from concept c
+            where c.uuid = '42ed45fd-f3f6-44b6-bfc2-8bde1bb41e00'
+              and not exists (select 1 from concept_name where uuid = '8f3a26f8-7e8f-4a53-84c7-c3ff48bde417');
+
+            insert into concept_description (concept_description_id, concept_id, description, locale, creator, date_created, uuid)
+            select 900001, c.concept_id, 'Concept complex for default attachment complex obs.', 'en', 1, current_timestamp, '8f3a26f8-7e8f-4a53-84c7-c3ff48bde418'
+            from concept c
+            where c.uuid = '42ed45fd-f3f6-44b6-bfc2-8bde1bb41e00'
+              and not exists (select 1 from concept_description where uuid = '8f3a26f8-7e8f-4a53-84c7-c3ff48bde418');
+
+            insert into concept (concept_id, retired, short_name, description, form_text, datatype_id, class_id, is_set, creator, date_created, uuid)
+            select 900002, false, null, null, null, cd.concept_datatype_id, cc.concept_class_id, false, 1, current_timestamp, '7cac8397-53cd-4f00-a6fe-028e8d743f8e'
+            from concept_datatype cd, concept_class cc
+            where cd.uuid = '8d4a6242-c2cc-11de-8d13-0010c6dffd0f'
+              and cc.name = 'Question'
+              and not exists (select 1 from concept where uuid = '7cac8397-53cd-4f00-a6fe-028e8d743f8e');
+
+            insert into concept_complex (concept_id, handler)
+            select c.concept_id, 'ImageAttachmentHandler'
+            from concept c
+            where c.uuid = '7cac8397-53cd-4f00-a6fe-028e8d743f8e'
+              and not exists (select 1 from concept_complex cc where cc.concept_id = c.concept_id);
+
+            insert into concept_name (concept_name_id, concept_id, name, locale, locale_preferred, creator, date_created, concept_name_type, voided, uuid)
+            select 900002, c.concept_id, 'ATT IMAGE ATTACHMENT', 'en', true, 1, current_timestamp, 'FULLY_SPECIFIED', false, '8f3a26f8-7e8f-4a53-84c7-c3ff48bde419'
+            from concept c
+            where c.uuid = '7cac8397-53cd-4f00-a6fe-028e8d743f8e'
+              and not exists (select 1 from concept_name where uuid = '8f3a26f8-7e8f-4a53-84c7-c3ff48bde419');
+
+            insert into concept_description (concept_description_id, concept_id, description, locale, creator, date_created, uuid)
+            select 900002, c.concept_id, 'Concept complex for image attachments with thumbnails.', 'en', 1, current_timestamp, '8f3a26f8-7e8f-4a53-84c7-c3ff48bde420'
+            from concept c
+            where c.uuid = '7cac8397-53cd-4f00-a6fe-028e8d743f8e'
+              and not exists (select 1 from concept_description where uuid = '8f3a26f8-7e8f-4a53-84c7-c3ff48bde420');
+
+            insert into encounter_type (encounter_type_id, name, description, creator, date_created, retired, uuid)
+            select 900001, 'Attachment Upload', 'Encounters used to record uploads of attachments.', 1, current_timestamp, false, '5021b1a1-e7f6-44b4-ba02-da2f2bcf8718'
+            where not exists (select 1 from encounter_type where uuid = '5021b1a1-e7f6-44b4-ba02-da2f2bcf8718')
+              and not exists (select 1 from encounter_type where name = 'Attachment Upload');
+        </sql>
+    </changeSet>
+</databaseChangeLog>

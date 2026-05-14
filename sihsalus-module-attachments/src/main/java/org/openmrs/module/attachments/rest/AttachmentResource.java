@@ -3,18 +3,19 @@ package org.openmrs.module.attachments.rest;
 import static org.openmrs.module.attachments.AttachmentsContext.getContentFamily;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.imageio.ImageIO;
 
+import jakarta.activation.MimetypesFileTypeMap;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.DateProperty;
@@ -23,10 +24,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tika.Tika;
-import org.apache.tika.mime.MimeType;
-import org.apache.tika.mime.MimeTypeException;
-import org.apache.tika.mime.MimeTypes;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
@@ -169,19 +166,12 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 		// Verify Content Type
 		if (allowedExtensions != null && allowedExtensions.length > 0) {
-			Tika tika = new Tika();
-			String fileType = tika.detect(file.getInputStream());
-			try {
-				MimeType mimeType = MimeTypes.getDefaultMimeTypes().forName(fileType);
-
-				List<String> mimeTypeExtensions = mimeType.getExtensions().stream()
-						.map(extension -> extension.replace(".", "")).collect(Collectors.toList());
-
-				if (!CollectionUtils.containsAny(mimeTypeExtensions, Arrays.asList(allowedExtensions))) {
+			String fileType = detectContentType(file);
+			if (fileType != null && AttachmentsContext.isMimeTypeHandled(fileType)) {
+				String detectedExtension = AttachmentsContext.getExtension(fileType);
+				if (!CollectionUtils.containsAny(List.of(detectedExtension), Arrays.asList(allowedExtensions))) {
 					throw new IllegalRequestException("The file content type " + fileType + " is not allowed");
 				}
-			} catch (MimeTypeException ex) {
-				throw new APIException("Failed to detect the file content type", ex);
 			}
 		}
 
@@ -239,6 +229,14 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 				} catch (IOException e) {
 				}
 			}
+		}
+	}
+
+	private String detectContentType(MultipartFile file) {
+		try (InputStream stream = new BufferedInputStream(file.getInputStream())) {
+			return URLConnection.guessContentTypeFromStream(stream);
+		} catch (IOException e) {
+			throw new APIException("Failed to detect the file content type", e);
 		}
 	}
 
@@ -400,8 +398,6 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 		private final long size;
 
-		private final InputStream in;
-
 		private final byte[] bytes;
 
 		public Base64MultipartFile(String base64Image, String fileName, String originalFileName) throws IOException {
@@ -412,7 +408,6 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 			this.fileName = fileName;
 			this.originalFileName = originalFileName;
-			this.in = new ByteArrayInputStream(decodedImage);
 			this.contentType = contentType;
 			this.bytes = decodedImage;
 			this.size = decodedImage.length;
@@ -450,7 +445,7 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 		@Override
 		public InputStream getInputStream() {
-			return this.in;
+			return new ByteArrayInputStream(bytes);
 		}
 
 		@Override

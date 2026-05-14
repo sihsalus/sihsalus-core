@@ -5,8 +5,8 @@ import static org.openmrs.module.attachments.AttachmentsContext.getContentFamily
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,12 +24,12 @@ import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.openmrs.obs.ComplexData;
-import org.openmrs.web.WebUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.util.HtmlUtils;
 
 @Controller
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 9.*")
@@ -38,7 +38,7 @@ public class AttachmentBytesResource extends BaseRestController {
 
 	protected final Log log = LogFactory.getLog(getClass());
 
-	@RequestMapping(value = AttachmentsConstants.ATTACHMENT_BYTES_URI, method = RequestMethod.GET)
+	@GetMapping(value = AttachmentsConstants.ATTACHMENT_BYTES_URI)
 	public void getFile(@PathVariable("uuid") String uuid, @RequestParam(required = false, value = "view") String view,
 			HttpServletResponse response) throws ResponseException {
 		AttachmentsContext context = Context.getRegisteredComponent(AttachmentsConstants.COMPONENT_ATT_CONTEXT,
@@ -74,7 +74,7 @@ public class AttachmentBytesResource extends BaseRestController {
 		try {
 			byte[] bytes = attComplexData.asByteArray();
 			if (mimeType != null && mimeType.startsWith("text/html")) {
-				String byteString = WebUtil.encodeForHtmlContent(new String(bytes, StandardCharsets.UTF_8));
+				String byteString = HtmlUtils.htmlEscape(new String(bytes, StandardCharsets.UTF_8));
 				bytes = byteString.getBytes(StandardCharsets.UTF_8);
 			}
 			response.getOutputStream().write(bytes);
@@ -89,7 +89,7 @@ public class AttachmentBytesResource extends BaseRestController {
 	public static String getExtension(String fileName, String mimeType) {
 		String ext = FilenameUtils.getExtension(fileName);
 		String extFromMimeType = AttachmentsContext.getExtension(mimeType);
-		if (!org.apache.commons.lang.StringUtils.isEmpty(ext)) {
+		if (!StringUtils.isEmpty(ext)) {
 			if (ext.length() > 6) { // this is a bit arbitrary, just to discriminate funny named files such as
 				// "uiohdz.iuhezuidhuih"
 				ext = extFromMimeType;

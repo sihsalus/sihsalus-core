@@ -16,14 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.Concept;
 import org.openmrs.ConceptComplex;
 import org.openmrs.Encounter;
@@ -48,6 +47,7 @@ import org.openmrs.module.attachments.obs.ComplexViewHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Inject this class to access services and global properties.
@@ -169,7 +169,7 @@ public class AttachmentsContext {
 		if (visit != null && isOneEncounterPerVisit()) {
 			List<Encounter> encounters = visitCompatibility.getNonVoidedEncounters(visit);
 			for (Encounter e : encounters) {
-				if (e.getEncounterType().getUuid() == getEncounterType().getUuid()) {
+				if (StringUtils.equals(e.getEncounterType().getUuid(), getEncounterType().getUuid())) {
 					encounter = e;
 					saveEncounter = false;
 					break;
@@ -312,7 +312,7 @@ public class AttachmentsContext {
 		TypeReference<ArrayList<String>> typeRef = new TypeReference<ArrayList<String>>() {
 		};
 		try {
-			list = mapper.readValue(StringEscapeUtils.unescapeHtml(globalProperty), typeRef);
+			list = mapper.readValue(HtmlUtils.htmlUnescape(globalProperty), typeRef);
 		} catch (Exception e) {
 			log.error("Could not parse global property '" + globalPropertyName + "' into a List<String>.", e);
 		}

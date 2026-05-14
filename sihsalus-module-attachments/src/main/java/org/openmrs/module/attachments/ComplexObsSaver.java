@@ -9,7 +9,9 @@
  */
 package org.openmrs.module.attachments;
 
-import net.coobird.thumbnailator.Thumbnails;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,10 +27,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-
 import static org.openmrs.module.attachments.AttachmentsContext.getCompressionRatio;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -77,12 +78,11 @@ public class ComplexObsSaver {
 		conceptComplex = context.getConceptComplex(ContentFamily.IMAGE);
 		prepareComplexObs(visit, person, encounter, fileCaption, formFieldNamespace, formFieldPath);
 
-		Object image = multipartFile.getInputStream();
+		Object image = multipartFile.getBytes();
 		double compressionRatio = getCompressionRatio(multipartFile.getSize(),
 				1000000 * context.getMaxStorageFileSize());
 		if (compressionRatio < 1) {
-			image = Thumbnails.of(ImageIO.read(multipartFile.getInputStream())).scale(compressionRatio)
-					.asBufferedImage();
+			image = scaleImage(ImageIO.read(multipartFile.getInputStream()), compressionRatio);
 		}
 		obs.setComplexData(complexDataHelper.build(instructions,
 				replacePipeCharactersInFilenameWithUnderscores(multipartFile.getOriginalFilename()), image,
@@ -107,5 +107,21 @@ public class ComplexObsSaver {
 	// since we use | as a separator in filenames, we need to replace it with _
 	private String replacePipeCharactersInFilenameWithUnderscores(String filename) {
 		return filename != null ? filename.replaceAll(Pattern.quote("|"), "_") : null;
+	}
+
+	private BufferedImage scaleImage(BufferedImage image, double ratio) {
+		int width = Math.max(1, (int) Math.round(image.getWidth() * ratio));
+		int height = Math.max(1, (int) Math.round(image.getHeight() * ratio));
+		BufferedImage scaled = new BufferedImage(width, height, image.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : image.getType());
+		Graphics2D graphics = scaled.createGraphics();
+		try {
+			graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			graphics.drawImage(image, 0, 0, width, height, null);
+		} finally {
+			graphics.dispose();
+		}
+		return scaled;
 	}
 }

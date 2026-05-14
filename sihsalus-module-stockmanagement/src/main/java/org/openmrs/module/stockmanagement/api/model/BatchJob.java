@@ -4,7 +4,7 @@ import org.openmrs.BaseChangeableOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.User;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;

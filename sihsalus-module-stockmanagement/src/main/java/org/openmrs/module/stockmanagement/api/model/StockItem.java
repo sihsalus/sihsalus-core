@@ -8,7 +8,7 @@ import org.openmrs.Concept;
 import org.openmrs.Drug;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.Set;
 

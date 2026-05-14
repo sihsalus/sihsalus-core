@@ -1,7 +1,7 @@
 package org.openmrs.module.stockmanagement.api.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 /**

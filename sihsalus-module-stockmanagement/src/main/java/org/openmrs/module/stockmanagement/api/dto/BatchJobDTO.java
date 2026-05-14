@@ -6,7 +6,7 @@ import org.openmrs.module.stockmanagement.api.model.BatchJobOwner;
 import org.openmrs.module.stockmanagement.api.model.BatchJobStatus;
 import org.openmrs.module.stockmanagement.api.model.BatchJobType;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;

@@ -10,7 +10,7 @@ import org.openmrs.module.stockmanagement.api.impl.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * The persistent class for the stockmgmt_stock_operation_type database table.

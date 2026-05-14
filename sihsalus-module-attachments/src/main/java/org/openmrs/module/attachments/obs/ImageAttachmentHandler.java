@@ -1,9 +1,11 @@
 package org.openmrs.module.attachments.obs;
 
 import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.io.IOException;
-
-import net.coobird.thumbnailator.Thumbnails;
+import javax.imageio.ImageIO;
+import org.apache.commons.io.FilenameUtils;
 import org.openmrs.Obs;
 import org.openmrs.module.attachments.AttachmentsConstants;
 import org.openmrs.obs.ComplexData;
@@ -127,9 +129,8 @@ public class ImageAttachmentHandler extends AbstractAttachmentHandler {
 								"Expected a BufferedImage, but got " + data.getClass().getName());
 					}
 					BufferedImage image = (BufferedImage) data;
-					Thumbnails.of(image).size(THUMBNAIL_MAX_HEIGHT, THUMBNAIL_MAX_WIDTH)
-							.outputFormat(obs.getComplexData().getMimeType().split("/")[1].toLowerCase())
-							.toOutputStream(outputStream);
+					BufferedImage thumbnail = scaleImage(image, THUMBNAIL_MAX_WIDTH, THUMBNAIL_MAX_HEIGHT);
+					ImageIO.write(thumbnail, getImageFormat(obs), outputStream);
 				}, null, null, key);
 				// the above is a bit of hack... we pass in the entire value we want use as a
 				// key instead of specifying the filename, module ID and key suffix and having
@@ -140,5 +141,31 @@ public class ImageAttachmentHandler extends AbstractAttachmentHandler {
 				log.error("Failed to save thumbnail file: " + key, e);
 			}
 		}
+	}
+
+	private static BufferedImage scaleImage(BufferedImage image, int maxWidth, int maxHeight) {
+		double ratio = Math.min((double) maxWidth / image.getWidth(), (double) maxHeight / image.getHeight());
+		int width = Math.max(1, (int) Math.round(image.getWidth() * ratio));
+		int height = Math.max(1, (int) Math.round(image.getHeight() * ratio));
+		BufferedImage scaled = new BufferedImage(width, height, image.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : image.getType());
+		Graphics2D graphics = scaled.createGraphics();
+		try {
+			graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			graphics.drawImage(image, 0, 0, width, height, null);
+		} finally {
+			graphics.dispose();
+		}
+		return scaled;
+	}
+
+	private static String getImageFormat(Obs obs) {
+		String mimeType = obs.getComplexData().getMimeType();
+		if (mimeType != null && mimeType.startsWith("image/")) {
+			return mimeType.substring("image/".length()).toLowerCase();
+		}
+		String extension = FilenameUtils.getExtension(obs.getComplexData().getTitle());
+		return extension == null || extension.isBlank() ? "png" : extension.toLowerCase();
 	}
 }

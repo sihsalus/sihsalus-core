@@ -21,7 +21,7 @@ import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.User;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * Base model class used by models that have transaction information.
