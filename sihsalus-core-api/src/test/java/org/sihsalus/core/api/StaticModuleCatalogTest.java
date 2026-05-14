@@ -58,6 +58,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void cohortIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("cohort")
+                        && module.sourceModule().equals("cohort-omod")
+                        && module.baselineVersion().equals("3.7.3")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void metadataMappingIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("metadatamapping")

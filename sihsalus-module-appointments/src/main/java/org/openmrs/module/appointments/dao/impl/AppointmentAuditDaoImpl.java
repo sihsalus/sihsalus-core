@@ -1,14 +1,10 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -29,19 +25,23 @@ public class AppointmentAuditDaoImpl implements AppointmentAuditDao{
 
 	@Override
 	public List<AppointmentAudit> getAppointmentHistoryForAppointment(Appointment appointment) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentAudit.class, "appointmentAudit");
-		criteria.add(Restrictions.eq("appointment", appointment));
-		return criteria.list();
+		return sessionFactory.getCurrentSession()
+				.createQuery("select aa from AppointmentAudit aa where aa.appointment = :appointment", AppointmentAudit.class)
+				.setParameter("appointment", appointment)
+				.list();
 	}
 
 	@Override
 	public AppointmentAudit getPriorStatusChangeEvent(Appointment appointment) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentAudit.class, "appointmentAudit");
-		criteria.add(Restrictions.eq("appointment", appointment));
-		criteria.add(Restrictions.ne("status", appointment.getStatus()));
-		criteria.addOrder(Order.desc("dateCreated"));
-		criteria.setMaxResults(1);
-		return (AppointmentAudit) criteria.uniqueResult();
+		Query<AppointmentAudit> query = sessionFactory.getCurrentSession()
+				.createQuery(
+						"select aa from AppointmentAudit aa where aa.appointment = :appointment"
+								+ " and aa.status <> :status order by aa.dateCreated desc",
+						AppointmentAudit.class);
+		query.setParameter("appointment", appointment);
+		query.setParameter("status", appointment.getStatus());
+		query.setMaxResults(1);
+		return query.uniqueResult();
 	}
 
 }

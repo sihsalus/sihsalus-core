@@ -30,7 +30,7 @@ import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.openmrs.Auditable;
 import org.openmrs.BaseCustomizableData;
 import org.openmrs.Location;
@@ -79,7 +79,7 @@ public class CohortM extends BaseCustomizableData<CohortAttribute> implements Au
 	private Set<CohortMember> cohortMembers;
 	
 	@OneToMany(mappedBy = "cohort", cascade = CascadeType.ALL)
-	@Where(clause = "voided = 0 and (start_date is null or start_date <= current_timestamp()) and (end_date is null or end_date >= current_timestamp())")
+	@SQLRestriction("voided = 0 and (start_date is null or start_date <= current_timestamp()) and (end_date is null or end_date >= current_timestamp())")
 	private Set<CohortMember> activeCohortMembers;
 	
 	@Column(name = "is_group_cohort")

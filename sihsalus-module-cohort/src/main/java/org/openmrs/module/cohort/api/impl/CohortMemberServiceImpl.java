@@ -16,8 +16,6 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.cohort.CohortMember;
 import org.openmrs.module.cohort.CohortMemberAttribute;
@@ -144,21 +142,21 @@ public class CohortMemberServiceImpl extends BaseOpenmrsService implements Cohor
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<CohortMember> findCohortMembersByCohortUuid(String cohortUuid) {
-		Criteria criteria = cohortMemberDao.createCriteria();
-		criteria.createAlias("cohort", "cohort");
-		criteria.add(Restrictions.eq("cohort.uuid", cohortUuid));
-		criteria.add(Restrictions.isNull("endDate"));
-		return criteria.list();
+		return cohortMemberDao.findBy(
+		                PropValue.builder().property("uuid").associationPath(Optional.of("cohort")).value(cohortUuid).build())
+		        .stream()
+		        .filter(cohortMember -> cohortMember.getEndDate() == null)
+		        .toList();
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<CohortMember> findCohortMembersByPatientUuid(String patientUuid) {
-		Criteria criteria = cohortMemberDao.createCriteria();
-		criteria.createAlias("patient", "patient");
-		criteria.add(Restrictions.eq("patient.uuid", patientUuid));
-		criteria.add(Restrictions.isNull("endDate"));
-		return criteria.list();
+		return cohortMemberDao.findBy(
+		                PropValue.builder().property("uuid").associationPath(Optional.of("patient")).value(patientUuid).build())
+		        .stream()
+		        .filter(cohortMember -> cohortMember.getEndDate() == null)
+		        .toList();
 	}
 	
 	@Override

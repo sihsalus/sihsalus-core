@@ -26,6 +26,9 @@ import org.openmrs.module.attachments.obs.DefaultAttachmentHandler;
 import org.openmrs.module.attachments.obs.ImageAttachmentHandler;
 import org.openmrs.module.authentication.AuthenticationUserSessionListener;
 import org.openmrs.module.authentication.DelegatingAuthenticationScheme;
+import org.openmrs.module.cohort.api.CohortMemberService;
+import org.openmrs.module.cohort.api.CohortService;
+import org.openmrs.module.cohort.api.CohortTypeService;
 import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.concept.EmrConceptService;
 import org.openmrs.module.emrapi.patient.EmrPatientService;
@@ -213,6 +216,20 @@ class SihsalusCoreApplicationTest {
     void patientDocumentsIsWiredAsStaticInternalModule() throws Exception {
         assertNotNull(Context.getRegisteredComponent("patientIdStickerPdfReport", PatientIdStickerPdfReport.class));
         mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void cohortIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(CohortService.class));
+        assertNotNull(Context.getService(CohortMemberService.class));
+        assertNotNull(Context.getService(CohortTypeService.class));
+        RestService restService = Context.getService(RestService.class);
+        assertNotNull(restService.getResourceByName("v1/cohortm/cohort"));
+        assertNotNull(restService.getResourceByName("v1/cohortm/cohortmember"));
+        assertNotNull(restService.getResourceByName("v1/cohortm/cohorttype"));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_type", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_attribute_type", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_member_attribute_type", Integer.class));
     }
 
     @Test

@@ -1,10 +1,8 @@
 package org.openmrs.module.appointments.dao.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceSearchParams;
@@ -29,14 +27,14 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
         this.sessionFactory = sessionFactory;
     }
 
-    @Override
-    public List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceDefinition.class, "appointmentService");
-        if(!includeVoided) {
-            criteria.add(Restrictions.eq("voided", includeVoided));
-        }
-        return criteria.list();
-    }
+	@Override
+	public List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided) {
+	    String hql = "select asd from AppointmentServiceDefinition asd"
+	            + (includeVoided ? "" : " where asd.voided = false");
+	    return sessionFactory.getCurrentSession()
+	            .createQuery(hql, AppointmentServiceDefinition.class)
+	            .list();
+	}
 
     @Transactional
     @Override
@@ -46,33 +44,42 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
         return appointmentServiceDefinition;
     }
 
-    @Override
-    public AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid) {
-        Session currentSession = sessionFactory.getCurrentSession();
-        Criteria criteria = currentSession.createCriteria(AppointmentServiceDefinition.class, "appointmentServiceDefinition");
-        criteria.add(Restrictions.eq("uuid", uuid));
-        AppointmentServiceDefinition appointmentServiceDefinition = (AppointmentServiceDefinition) criteria.uniqueResult();
-        evictObjectFromSession(currentSession, appointmentServiceDefinition);
-        return appointmentServiceDefinition;
-    }
+	@Override
+	public AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid) {
+	    Session currentSession = sessionFactory.getCurrentSession();
+	    AppointmentServiceDefinition appointmentServiceDefinition = currentSession
+	            .createQuery(
+	                    "select asd from AppointmentServiceDefinition asd where asd.uuid = :uuid",
+	                    AppointmentServiceDefinition.class)
+	            .setParameter("uuid", uuid)
+	            .uniqueResult();
+	    evictObjectFromSession(currentSession, appointmentServiceDefinition);
+	    return appointmentServiceDefinition;
+	}
 
     @Override
-    public AppointmentServiceDefinition getNonVoidedAppointmentServiceByName(String serviceName) {
-        Session currentSession = sessionFactory.getCurrentSession();
-        Criteria criteria = currentSession.createCriteria(AppointmentServiceDefinition.class, "appointmentServiceDefinition");
-        criteria.add(Restrictions.eq("name", serviceName));
-        criteria.add(Restrictions.eq("voided", false));
-        AppointmentServiceDefinition appointmentServiceDefinition = (AppointmentServiceDefinition) criteria.uniqueResult();
-        evictObjectFromSession(currentSession, appointmentServiceDefinition);
-        return appointmentServiceDefinition;
-    }
+	public AppointmentServiceDefinition getNonVoidedAppointmentServiceByName(String serviceName) {
+	    Session currentSession = sessionFactory.getCurrentSession();
+	    AppointmentServiceDefinition appointmentServiceDefinition = currentSession
+	            .createQuery(
+	                    "select asd from AppointmentServiceDefinition asd where asd.name = :serviceName"
+	                            + " and asd.voided = false",
+	                    AppointmentServiceDefinition.class)
+	            .setParameter("serviceName", serviceName)
+	            .uniqueResult();
+	    evictObjectFromSession(currentSession, appointmentServiceDefinition);
+	    return appointmentServiceDefinition;
+	}
 
     @Override
-    public AppointmentServiceType getAppointmentServiceTypeByUuid(String uuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceType.class, "appointmentServiceType");
-        criteria.add(Restrictions.eq("uuid", uuid));
-        return (AppointmentServiceType) criteria.uniqueResult();
-    }
+	public AppointmentServiceType getAppointmentServiceTypeByUuid(String uuid) {
+	    return sessionFactory.getCurrentSession()
+	            .createQuery(
+	                    "select ast from AppointmentServiceType ast where ast.uuid = :uuid",
+	                    AppointmentServiceType.class)
+	            .setParameter("uuid", uuid)
+	            .uniqueResult();
+	}
 
     @Override
     public List<AppointmentServiceDefinition> search(AppointmentServiceSearchParams searchParams) {

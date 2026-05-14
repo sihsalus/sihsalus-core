@@ -13,30 +13,29 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.openmrs.module.Extension;
-import org.openmrs.module.web.extension.AdministrationSectionExt;
 
 /**
  * This class defines the links that will appear on the administration page under the "cohort.title"
  * heading.
  */
-public class AdminList extends AdministrationSectionExt {
+public class AdminList extends Extension {
 	
 	/**
-	 * @see AdministrationSectionExt#getMediaType()
+	 * Legacy UI extension media type.
 	 */
 	public Extension.MEDIA_TYPE getMediaType() {
 		return Extension.MEDIA_TYPE.html;
 	}
 	
 	/**
-	 * @see AdministrationSectionExt#getTitle()
+	 * Legacy UI administration section title.
 	 */
 	public String getTitle() {
 		return "cohort.title";
 	}
 	
 	/**
-	 * @see AdministrationSectionExt#getLinks()
+	 * Legacy UI administration links.
 	 */
 	public Map<String, String> getLinks() {
 		LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();

@@ -1,29 +1,26 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Example;
-
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.sql.JoinType;
-import org.openmrs.module.appointments.dao.AppointmentDao;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
-import org.openmrs.module.appointments.model.AppointmentPriority;
-import org.openmrs.module.appointments.util.DateUtil;
-import org.springframework.transaction.annotation.Transactional;
-
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+import org.openmrs.Provider;
+import org.openmrs.module.appointments.dao.AppointmentDao;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentPriority;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.util.DateUtil;
+import org.springframework.transaction.annotation.Transactional;
 
 public class AppointmentDaoImpl implements AppointmentDao {
 
@@ -36,289 +33,210 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
     @Override
     public List<Appointment> getAllAppointments(Date forDate) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
+        StringBuilder hql = new StringBuilder(
+                "select a from Appointment a join a.patient p where a.voided = false"
+                        + " and p.voided = false and p.personVoided = false");
+        Map<String, Object> params = new HashMap<>();
         if (forDate != null) {
             Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
-            criteria.add(Restrictions.ge("startDateTime", forDate));
-            criteria.add(Restrictions.lt("endDateTime", maxDate));
+            hql.append(" and a.startDateTime >= :forDate and a.endDateTime < :maxDate");
+            params.put("forDate", forDate);
+            params.put("maxDate", maxDate);
         }
-        return criteria.list();
+        return listAppointments(hql.toString(), params);
     }
 
     @Override
     public List<Appointment> getAllAppointmentsReminder(String hours) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
+        StringBuilder hql = new StringBuilder(
+                "select a from Appointment a join a.patient p where p.voided = false"
+                        + " and p.personVoided = false and a.status <> :cancelled");
+        Map<String, Object> params = new HashMap<>();
+        params.put("cancelled", AppointmentStatus.Cancelled);
         if (hours != null) {
             Date minDate = new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(Integer.valueOf(hours)));
             Date maxDate = new Date(minDate.getTime() + TimeUnit.HOURS.toMillis(1));
-            criteria.add(Restrictions.ge("startDateTime", minDate));
-            criteria.add(Restrictions.lt("startDateTime", maxDate));
+            hql.append(" and a.startDateTime >= :minDate and a.startDateTime < :maxDate");
+            params.put("minDate", minDate);
+            params.put("maxDate", maxDate);
         }
-        criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
-        return criteria.list();
+        return listAppointments(hql.toString(), params);
     }
 
     @Transactional
     @Override
     public void save(Appointment appointment) {
-        sessionFactory.getCurrentSession().saveOrUpdate(appointment);
+        sessionFactory.getCurrentSession().merge(appointment);
     }
 
     @Override
     public List<Appointment> search(Appointment appointment) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class).add(
-                Example.create(appointment).excludeProperty("uuid"));
-
-        if (appointment.getPatient() != null) criteria.createCriteria("patient").add(
-                Example.create(appointment.getPatient()));
-
-        if (appointment.getLocation() != null) criteria.createCriteria("location").add(
-                Example.create(appointment.getLocation()));
-
-        if (appointment.getService() != null) criteria.createCriteria("service").add(
-                Example.create(appointment.getService()));
-
-        if (appointment.getProvider() != null) criteria.createCriteria("provider").add(
-                Example.create(appointment.getProvider()));
-
-        return criteria.list();
+        StringBuilder hql = new StringBuilder("select distinct a from Appointment a");
+        Map<String, Object> params = new HashMap<>();
+        Provider provider = appointment == null ? null : appointment.getProvider();
+        if (provider != null) {
+            hql.append(" join a.providers ap join ap.provider provider");
+        }
+        hql.append(" where 1 = 1");
+        if (appointment != null) {
+            addEqual(hql, params, "a.uuid", "uuid", appointment.getUuid());
+            addEqual(hql, params, "a.appointmentNumber", "appointmentNumber", appointment.getAppointmentNumber());
+            addEqual(hql, params, "a.patient", "patient", appointment.getPatient());
+            addEqual(hql, params, "a.location", "location", appointment.getLocation());
+            addEqual(hql, params, "a.service", "service", appointment.getService());
+            addEqual(hql, params, "a.serviceType", "serviceType", appointment.getServiceType());
+            addEqual(hql, params, "a.status", "status", appointment.getStatus());
+            addEqual(hql, params, "a.priority", "priority", appointment.getPriority());
+            addEqual(hql, params, "a.voided", "voided", appointment.getVoided());
+            if (provider != null) {
+                addEqual(hql, params, "provider", "provider", provider);
+            }
+        }
+        return listAppointments(hql.toString(), params);
     }
 
     @Override
     public List<Appointment> search(AppointmentSearchRequestModel searchQuery) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        addSearchCriteria(criteria, searchQuery);
-        return criteria.list();
+        AppointmentSearchQuery appointmentSearchQuery = buildAppointmentSearchQuery(searchQuery);
+        return listAppointments(appointmentSearchQuery.hql(), appointmentSearchQuery.params());
     }
 
     @Override
-    public List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("service", appointmentServiceDefinition));
-        criteria.add(Restrictions.gt("endDateTime", new Date()));
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
-        return criteria.list();
+    public List<Appointment> getAllFutureAppointmentsForService(
+            AppointmentServiceDefinition appointmentServiceDefinition) {
+        return listAppointments(
+                "select a from Appointment a join a.patient p where a.service = :service"
+                        + " and a.endDateTime > :now and a.voided = false and p.voided = false"
+                        + " and p.personVoided = false and a.status <> :cancelled",
+                Map.of(
+                        "service", appointmentServiceDefinition,
+                        "now", new Date(),
+                        "cancelled", AppointmentStatus.Cancelled));
     }
 
     @Override
     public List<Appointment> getAllFutureAppointmentsForServiceType(AppointmentServiceType appointmentServiceType) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("serviceType", appointmentServiceType));
-        criteria.add(Restrictions.gt("endDateTime", new Date()));
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
-        return criteria.list();
+        return listAppointments(
+                "select a from Appointment a join a.patient p where a.serviceType = :serviceType"
+                        + " and a.endDateTime > :now and a.voided = false and p.voided = false"
+                        + " and p.personVoided = false and a.status <> :cancelled",
+                Map.of(
+                        "serviceType", appointmentServiceType,
+                        "now", new Date(),
+                        "cancelled", AppointmentStatus.Cancelled));
     }
 
     @Override
-    public List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.createAlias("serviceType", "serviceType", JoinType.LEFT_OUTER_JOIN);
-        criteria.add(Restrictions.or(Restrictions.isNull("serviceType"), Restrictions.eq("serviceType.voided", false)));
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.add(Restrictions.ge("startDateTime", startDate));
-        criteria.add(Restrictions.le("startDateTime", endDate));
-        criteria.createCriteria("service").add(Example.create(appointmentServiceDefinition));
+    public List<Appointment> getAppointmentsForService(
+            AppointmentServiceDefinition appointmentServiceDefinition,
+            Date startDate,
+            Date endDate,
+            List<AppointmentStatus> appointmentStatusFilterList) {
+        StringBuilder hql = new StringBuilder(
+                "select a from Appointment a join a.patient p left join a.serviceType st"
+                        + " where (a.serviceType is null or st.voided = false) and a.voided = false"
+                        + " and p.voided = false and p.personVoided = false"
+                        + " and a.startDateTime >= :startDate and a.startDateTime <= :endDate"
+                        + " and a.service = :service");
+        Map<String, Object> params = new HashMap<>();
+        params.put("startDate", startDate);
+        params.put("endDate", endDate);
+        params.put("service", appointmentServiceDefinition);
         if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
-            criteria.add(Restrictions.in("status", appointmentStatusFilterList));
+            hql.append(" and a.status in (:statuses)");
+            params.put("statuses", appointmentStatusFilterList);
         }
-        return criteria.list();
-
+        return listAppointments(hql.toString(), params);
     }
 
     @Override
     public Appointment getAppointmentByUuid(String uuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class, "appointment");
-        criteria.add(Restrictions.eq("uuid", uuid));
-        return (Appointment) criteria.uniqueResult();
+        return uniqueAppointment(
+                "select a from Appointment a where a.uuid = :uuid",
+                Map.of("uuid", uuid));
     }
 
     @Override
     public List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
+        StringBuilder hql = new StringBuilder(
+                "select a from Appointment a join a.patient p where a.voided = false"
+                        + " and p.voided = false and p.personVoided = false");
+        Map<String, Object> params = new HashMap<>();
         if (startDate != null) {
-            criteria.add(Restrictions.ge("startDateTime", startDate));
+            hql.append(" and a.startDateTime >= :startDate");
+            params.put("startDate", startDate);
         }
         if (endDate != null) {
-            criteria.add(Restrictions.lt("endDateTime", endDate));
+            hql.append(" and a.endDateTime < :endDate");
+            params.put("endDate", endDate);
         }
-        return criteria.list();
+        return listAppointments(hql.toString(), params);
     }
 
     @Override
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.addOrder(Order.asc("startDateTime"));
-        setDateCriteria(appointmentSearchRequest, criteria);
-        setPatientCriteria(appointmentSearchRequest, criteria);
-        setLimitCriteria(appointmentSearchRequest, criteria);
-        setProviderCriteria(appointmentSearchRequest, criteria);
-        setStatusCriteria(appointmentSearchRequest, criteria);
-        setAppointmentNumberCriteria(appointmentSearchRequest, criteria);
-
-
-        return criteria.list();
-    }
-
-    private void setProviderCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        StringBuilder hql = new StringBuilder(
+                "select distinct a from Appointment a join a.patient p");
+        Map<String, Object> params = new HashMap<>();
         if (StringUtils.isNotEmpty(appointmentSearchRequest.getProviderUuid())) {
-            criteria.createAlias("providers", "providers");
-            criteria.createAlias("providers.provider", "provider");
-            criteria.add(Restrictions.eq("provider.uuid", appointmentSearchRequest.getProviderUuid()));
+            hql.append(" join a.providers aps join aps.provider provider");
         }
-    }
+        hql.append(" where a.voided = false and p.voided = false and p.personVoided = false");
 
-    private void setPatientCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        if (StringUtils.isNotEmpty(appointmentSearchRequest.getPatientUuid())) {
-            criteria.add(Restrictions.eq("patient.uuid", appointmentSearchRequest.getPatientUuid()));
-        }
-    }
-
-    private void setDateCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
         if (appointmentSearchRequest.getStartDate() != null) {
-            criteria.add(Restrictions.ge("startDateTime", appointmentSearchRequest.getStartDate()));
+            hql.append(" and a.startDateTime >= :startDate");
+            params.put("startDate", appointmentSearchRequest.getStartDate());
         }
         if (appointmentSearchRequest.getEndDate() != null) {
-            criteria.add(Restrictions.le("startDateTime", appointmentSearchRequest.getEndDate()));
+            hql.append(" and a.startDateTime <= :endDate");
+            params.put("endDate", appointmentSearchRequest.getEndDate());
         }
-    }
+        if (StringUtils.isNotEmpty(appointmentSearchRequest.getPatientUuid())) {
+            hql.append(" and p.uuid = :patientUuid");
+            params.put("patientUuid", appointmentSearchRequest.getPatientUuid());
+        }
+        if (StringUtils.isNotEmpty(appointmentSearchRequest.getProviderUuid())) {
+            hql.append(" and provider.uuid = :providerUuid");
+            params.put("providerUuid", appointmentSearchRequest.getProviderUuid());
+        }
+        if (appointmentSearchRequest.getStatus() != null) {
+            hql.append(" and a.status = :status");
+            params.put("status", appointmentSearchRequest.getStatus());
+        }
+        if (StringUtils.isNotEmpty(appointmentSearchRequest.getAppointmentNumber())) {
+            hql.append(" and a.appointmentNumber = :appointmentNumber");
+            params.put("appointmentNumber", appointmentSearchRequest.getAppointmentNumber());
+        }
+        hql.append(" order by a.startDateTime asc");
 
-    private void setLimitCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        Query<Appointment> query = createAppointmentQuery(hql.toString(), params);
         if (appointmentSearchRequest.getLimit() > 0) {
-            criteria.setMaxResults(appointmentSearchRequest.getLimit());
+            query.setMaxResults(appointmentSearchRequest.getLimit());
         } else if (appointmentSearchRequest.getEndDate() == null) {
-            criteria.setMaxResults(APPOINTMENT_SEARCH_DEFAULT_LIMIT);
+            query.setMaxResults(APPOINTMENT_SEARCH_DEFAULT_LIMIT);
         }
-    }
-
-    private void setStatusCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
-        if(appointmentSearchRequest.getStatus() != null) {
-            criteria.add(Restrictions.eq("status", appointmentSearchRequest.getStatus()));
-        }
+        return query.list();
     }
 
     @Override
     public List<Appointment> getAppointmentsForPatient(Integer patientId) {
-
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.patientId", patientId));
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.add(Restrictions.ge("startDateTime", DateUtil.getStartOfDay()));
-
-        return criteria.list();
+        return listAppointments(
+                "select a from Appointment a join a.patient p where p.patientId = :patientId"
+                        + " and a.voided = false and p.voided = false and p.personVoided = false"
+                        + " and a.startDateTime >= :startOfDay",
+                Map.of("patientId", patientId, "startOfDay", DateUtil.getStartOfDay()));
     }
 
     @Override
     public List<Appointment> getAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery, Integer limit) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        addSearchCriteria(criteria, searchQuery);
-        criteria.add(Restrictions.isNull("startDateTime"));
-        criteria.add(Restrictions.isNull("endDateTime"));
-        criteria.addOrder(Order.asc("dateCreated"));
+        AppointmentSearchQuery appointmentSearchQuery = buildAppointmentSearchQuery(searchQuery);
+        String hql = appointmentSearchQuery.hql()
+                + " and a.startDateTime is null and a.endDateTime is null order by a.dateCreated asc";
+        Query<Appointment> query = createAppointmentQuery(hql, appointmentSearchQuery.params());
         if (limit != null) {
-            criteria.setMaxResults(limit);
+            query.setMaxResults(limit);
         }
-        return criteria.list();
-    }
-
-    private void addSearchCriteria(Criteria criteria, AppointmentSearchRequestModel searchQuery) {
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.createAlias("service", "service");
-
-        if (searchQuery != null) {
-            if (searchQuery.getPatientUuids() != null && !searchQuery.getPatientUuids().isEmpty()) {
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getPatientUuids().stream()
-                        .map(patientUuid -> Restrictions.eq("patient.uuid", patientUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
-
-            if (searchQuery.getServiceUuids() != null && !searchQuery.getServiceUuids().isEmpty()) {
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getServiceUuids().stream()
-                        .map(serviceUuid -> Restrictions.eq("service.uuid", serviceUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
-
-            if (searchQuery.getServiceTypeUuids() != null && !searchQuery.getServiceTypeUuids().isEmpty()) {
-                criteria.createAlias("serviceType", "serviceType");
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getServiceTypeUuids().stream()
-                        .map(serviceTypeUuid -> Restrictions.eq("serviceType.uuid", serviceTypeUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
-
-            if (searchQuery.getStatus() != null) {
-                criteria.add(Restrictions.eq("status", AppointmentStatus.valueOf(searchQuery.getStatus())));
-            }
-
-            if (searchQuery.getProviderUuids() != null && !searchQuery.getProviderUuids().isEmpty()) {
-                criteria.createAlias("providers", "providers");
-                criteria.createAlias("providers.provider", "provider");
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getProviderUuids().stream()
-                        .map(providerUuid -> Restrictions.eq("provider.uuid", providerUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
-
-            if (searchQuery.getLocationUuids() != null && !searchQuery.getLocationUuids().isEmpty()) {
-                criteria.createAlias("location", "location");
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getLocationUuids().stream()
-                        .map(locationUuid -> Restrictions.eq("location.uuid", locationUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
-
-            if (searchQuery.getPriorities() != null && !searchQuery.getPriorities().isEmpty()) {
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getPriorities().stream()
-                        .map(priority -> Restrictions.eq("priority", AppointmentPriority.valueOf(priority)))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
-        }
-    }
-
-    private void setAppointmentNumberCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
-        if (StringUtils.isNotEmpty(appointmentSearchRequest.getAppointmentNumber())) {
-            criteria.add(Restrictions.eq("appointmentNumber", appointmentSearchRequest.getAppointmentNumber()));
-        }
+        return query.list();
     }
 
     @Override
@@ -326,10 +244,84 @@ public class AppointmentDaoImpl implements AppointmentDao {
         if (uuids == null || uuids.isEmpty()) {
             return Collections.emptyList();
         }
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.in("uuid", uuids));
-        criteria.add(Restrictions.eq("voided", false));
-        return criteria.list();
+        return listAppointments(
+                "select a from Appointment a where a.uuid in (:uuids) and a.voided = false",
+                Map.of("uuids", uuids));
     }
 
+    private AppointmentSearchQuery buildAppointmentSearchQuery(AppointmentSearchRequestModel searchQuery) {
+        StringBuilder hql = new StringBuilder("select distinct a from Appointment a join a.patient p join a.service s");
+        Map<String, Object> params = new HashMap<>();
+        if (searchQuery != null) {
+            if (searchQuery.getServiceTypeUuids() != null && !searchQuery.getServiceTypeUuids().isEmpty()) {
+                hql.append(" join a.serviceType st");
+            }
+            if (searchQuery.getProviderUuids() != null && !searchQuery.getProviderUuids().isEmpty()) {
+                hql.append(" join a.providers aps join aps.provider provider");
+            }
+            if (searchQuery.getLocationUuids() != null && !searchQuery.getLocationUuids().isEmpty()) {
+                hql.append(" join a.location location");
+            }
+        }
+        hql.append(" where p.voided = false and p.personVoided = false");
+        if (searchQuery != null) {
+            addCollectionFilter(hql, params, "p.uuid", "patientUuids", searchQuery.getPatientUuids());
+            addCollectionFilter(hql, params, "s.uuid", "serviceUuids", searchQuery.getServiceUuids());
+            addCollectionFilter(hql, params, "st.uuid", "serviceTypeUuids", searchQuery.getServiceTypeUuids());
+            addCollectionFilter(hql, params, "provider.uuid", "providerUuids", searchQuery.getProviderUuids());
+            addCollectionFilter(hql, params, "location.uuid", "locationUuids", searchQuery.getLocationUuids());
+            if (searchQuery.getStatus() != null) {
+                hql.append(" and a.status = :status");
+                params.put("status", AppointmentStatus.valueOf(searchQuery.getStatus()));
+            }
+            if (searchQuery.getPriorities() != null && !searchQuery.getPriorities().isEmpty()) {
+                hql.append(" and a.priority in (:priorities)");
+                params.put(
+                        "priorities",
+                        searchQuery.getPriorities().stream().map(AppointmentPriority::valueOf).toList());
+            }
+        }
+        return new AppointmentSearchQuery(hql.toString(), params);
+    }
+
+    private void addEqual(StringBuilder hql, Map<String, Object> params, String property, String name, Object value) {
+        if (value != null) {
+            hql.append(" and ").append(property).append(" = :").append(name);
+            params.put(name, value);
+        }
+    }
+
+    private void addCollectionFilter(
+            StringBuilder hql, Map<String, Object> params, String property, String name, Collection<?> value) {
+        if (value != null && !value.isEmpty()) {
+            hql.append(" and ").append(property).append(" in (:").append(name).append(")");
+            params.put(name, value);
+        }
+    }
+
+    private List<Appointment> listAppointments(String hql, Map<String, Object> params) {
+        return createAppointmentQuery(hql, params).list();
+    }
+
+    private Appointment uniqueAppointment(String hql, Map<String, Object> params) {
+        return createAppointmentQuery(hql, params).uniqueResult();
+    }
+
+    private Query<Appointment> createAppointmentQuery(String hql, Map<String, Object> params) {
+        Query<Appointment> query = sessionFactory.getCurrentSession().createQuery(hql, Appointment.class);
+        bindParameters(query, params);
+        return query;
+    }
+
+    private void bindParameters(Query<?> query, Map<String, Object> params) {
+        params.forEach((name, value) -> {
+            if (value instanceof Collection<?> collection) {
+                query.setParameterList(name, collection);
+            } else {
+                query.setParameter(name, value);
+            }
+        });
+    }
+
+    private record AppointmentSearchQuery(String hql, Map<String, Object> params) {}
 }

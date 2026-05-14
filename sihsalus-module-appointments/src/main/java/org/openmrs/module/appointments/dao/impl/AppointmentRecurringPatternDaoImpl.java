@@ -24,7 +24,8 @@ public class AppointmentRecurringPatternDaoImpl implements AppointmentRecurringP
 
     @Override
     public List<AppointmentRecurringPattern> getAllAppointmentRecurringPatterns() {
-        return session().createCriteria(AppointmentRecurringPattern.class).list();
+        return session().createQuery("select pattern from AppointmentRecurringPattern pattern", AppointmentRecurringPattern.class)
+                .list();
     }
 
     private Session session() {

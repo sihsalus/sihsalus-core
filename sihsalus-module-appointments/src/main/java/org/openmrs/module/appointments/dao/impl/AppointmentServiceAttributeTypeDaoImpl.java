@@ -1,9 +1,7 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentServiceAttributeTypeDao;
 import org.openmrs.module.appointments.model.AppointmentServiceAttributeType;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,19 +17,22 @@ public class AppointmentServiceAttributeTypeDaoImpl implements AppointmentServic
 
     @Override
     public List<AppointmentServiceAttributeType> getAllAttributeTypes(boolean includeRetired) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceAttributeType.class);
-        if (!includeRetired) {
-            criteria.add(Restrictions.eq("retired", false));
-        }
-        return criteria.list();
+        String hql = "select type from AppointmentServiceAttributeType type"
+                + (includeRetired ? "" : " where type.retired = false");
+        return sessionFactory.getCurrentSession()
+                .createQuery(hql, AppointmentServiceAttributeType.class)
+                .list();
     }
 
     @Override
     public AppointmentServiceAttributeType getAttributeTypeByUuid(String uuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceAttributeType.class);
-        criteria.add(Restrictions.eq("uuid", uuid));
-        List list = criteria.list();
-        return list.size() > 0 ? (AppointmentServiceAttributeType) list.get(0) : null;
+        return sessionFactory.getCurrentSession()
+                .createQuery(
+                        "select type from AppointmentServiceAttributeType type where type.uuid = :uuid",
+                        AppointmentServiceAttributeType.class)
+                .setParameter("uuid", uuid)
+                .setMaxResults(1)
+                .uniqueResult();
     }
 
     @Override
