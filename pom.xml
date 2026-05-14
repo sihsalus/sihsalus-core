@@ -14,6 +14,7 @@
     <url>https://github.com/sihsalus/sihsalus-core</url>
 
     <modules>
+        <module>sihsalus-openmrs-bom</module>
         <module>sihsalus-core-api</module>
         <module>sihsalus-core-liquibase</module>
         <module>sihsalus-fhir2</module>

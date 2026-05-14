@@ -6,7 +6,7 @@ spring:
     username: ${SIHSALUS_DATASOURCE_USERNAME:sihsalus}
     password: ${SIHSALUS_DATASOURCE_PASSWORD:sihsalus}
   liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    change-log: classpath:/db/changelog/db.changelog-master.xml
 
 management:
   endpoints:

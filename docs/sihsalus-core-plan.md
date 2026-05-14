@@ -4,26 +4,25 @@ Date: 2026-05-14
 
 ## Goal
 
-Build SIH Salus Core as our own health information system core, using OpenMRS and the current SIH Salus distro as references, not as boundaries that must be preserved forever.
+Build SIH Salus Core as our own health information system core, using OpenMRS and the current SIH Salus distro as local source, not as dynamic runtime modules.
 
-The objective is not to produce a cosmetic fork. The objective is to understand the useful clinical, operational, and interoperability behavior from OpenMRS, then design a SIH Salus-owned backend that can evolve independently.
+The objective is not to produce a cosmetic fork. The objective is to own the backend runtime, development velocity, and deployment model while preserving the OpenMRS data model as the shared clinical core.
 
 ## Working Principle
 
-OpenMRS is reference material.
+OpenMRS Core is source material for the core domain and persistence model.
 
 SIH Salus Core owns:
 
-- domain model decisions
+- runtime composition
 - API shape
-- database ownership
 - module boundaries
 - security model
 - deployment model
 - migration strategy
 - frontend contracts
 
-Compatibility with OpenMRS can be useful during migration, but it is not the final architecture constraint unless we explicitly decide it is.
+The OpenMRS data model is preserved for the first core. FHIR and REST must stay separate API contracts, but both must use the same underlying domain model, services, tables, and Liquibase history.
 
 ## Reference Sources
 
@@ -38,6 +37,23 @@ Reference docs:
 - `docs/sihsalus-distro-baseline.md`
 - `docs/architecture.md`
 - `docs/migration-plan.md`
+
+## Current Cut
+
+Implemented:
+
+- Maven reactor with OpenMRS Core API source imported into `sihsalus-core-api`.
+- Local OpenMRS BOM module for controlled dependency reuse.
+- Central Liquibase entrypoint in `sihsalus-core-liquibase` that runs the upstream OpenMRS schema snapshot, core data, and latest update changelog.
+- Spring Boot application in `sihsalus-core-boot` with datasource, healthcheck, FHIR metadata smoke endpoint, REST system status endpoint, and no `.omod` loader.
+- Boot excludes generic Hibernate JPA and Elasticsearch client auto-configuration for now. OpenMRS persistence must be wired explicitly instead of being inferred by Spring Boot scanning.
+
+Not yet implemented:
+
+- Full upstream FHIR2 API/OMOD conversion.
+- Full upstream Web Services REST conversion.
+- Static OpenMRS service/DAO/Hibernate wiring.
+- Source conversion for the distro modules beyond the current Maven placeholders.
 
 ## Product Surface To Cover
 
@@ -94,7 +110,7 @@ Initial bounded contexts:
 
 ### API First
 
-Define APIs around SIH Salus workflows, not around OpenMRS class names.
+Define API adapters around SIH Salus workflows and interoperability needs without merging FHIR and REST contracts.
 
 Required API groups:
 
@@ -164,7 +180,7 @@ Deliverables:
 Acceptance:
 
 - app starts locally from a clean checkout
-- database boots and migrates
+- database boots and migrates using the OpenMRS schema, core-data, and latest update changelogs
 - healthcheck passes
 - CI can compile and test
 
