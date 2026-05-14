@@ -1,6 +1,7 @@
 package org.sihsalus.module.stockmanagement;
 
 import java.lang.reflect.Proxy;
+import org.hibernate.SessionFactory;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.module.stockmanagement.StockManagementConfig;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
@@ -14,6 +15,7 @@ import org.openmrs.module.stockmanagement.api.validator.UserRoleScopeDTOValidato
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.TransactionManager;
 
 @Configuration
 public class SihsalusStockManagementConfiguration {
@@ -24,10 +26,13 @@ public class SihsalusStockManagementConfiguration {
     }
 
     @Bean
-    StockManagementService stockManagementService() {
+    StockManagementService stockManagementService(
+            SessionFactory sessionFactory, TransactionManager transactionManager) {
         ClassLoader classLoader = StockManagementService.class.getClassLoader();
         return (StockManagementService) Proxy.newProxyInstance(
-                classLoader, new Class<?>[] {StockManagementService.class}, new UnsupportedStockManagementService());
+                classLoader,
+                new Class<?>[] {StockManagementService.class},
+                new PartialStockManagementService(sessionFactory, transactionManager));
     }
 
     @Bean

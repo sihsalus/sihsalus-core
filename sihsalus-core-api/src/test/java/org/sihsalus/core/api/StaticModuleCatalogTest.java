@@ -49,6 +49,24 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void metadataMappingIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("metadatamapping")
+                        && module.sourceModule().equals("metadatamapping-api")
+                        && module.baselineVersion().equals("2.1.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
+    void emrApiIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("emrapi")
+                        && module.sourceModule().equals("emrapi-api")
+                        && module.baselineVersion().equals("3.5.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void stockManagementIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("stockmanagement")

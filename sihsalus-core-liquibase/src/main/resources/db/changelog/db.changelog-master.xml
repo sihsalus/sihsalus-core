@@ -8,6 +8,8 @@
     <include file="liquibase-schema-only.xml" relativeToChangelogFile="false"/>
     <include file="liquibase-core-data.xml" relativeToChangelogFile="false"/>
     <include file="liquibase-update-to-latest.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/sihsalus-core-compatibility.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/fhir2/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/idgen/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/addresshierarchy/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/metadatamapping/liquibase.xml" relativeToChangelogFile="false"/>

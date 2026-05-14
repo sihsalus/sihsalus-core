@@ -13,6 +13,7 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.trimToNull;
 
 import javax.annotation.Nonnull;
 
@@ -98,7 +99,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		notNull(openmrsPatient, "The Openmrs Patient object should not be null");
 		
 		Patient patient = new Patient();
-		patient.setId(openmrsPatient.getUuid());
+		patient.setId(trimToNull(openmrsPatient.getUuid()));
 		patient.setActive(!openmrsPatient.getVoided());
 		
 		for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {

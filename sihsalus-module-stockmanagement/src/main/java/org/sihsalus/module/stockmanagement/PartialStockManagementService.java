@@ -1,0 +1,1412 @@
+package org.sihsalus.module.stockmanagement;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.openmrs.BaseOpenmrsData;
+import org.openmrs.BaseOpenmrsObject;
+import org.openmrs.Concept;
+import org.openmrs.ConceptName;
+import org.openmrs.Drug;
+import org.openmrs.Location;
+import org.openmrs.LocationTag;
+import org.openmrs.Role;
+import org.openmrs.User;
+import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.HibernateUtil;
+import org.openmrs.module.stockmanagement.StockLocationTags;
+import org.openmrs.module.stockmanagement.api.StockManagementException;
+import org.openmrs.module.stockmanagement.api.dto.BatchJobSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.PartyDTO;
+import org.openmrs.module.stockmanagement.api.dto.PartySearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.PrivilegeScope;
+import org.openmrs.module.stockmanagement.api.dto.Result;
+import org.openmrs.module.stockmanagement.api.dto.SessionInfo;
+import org.openmrs.module.stockmanagement.api.dto.StockItemDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockSourceSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeDTO;
+import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeLocationDTO;
+import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeOperationTypeDTO;
+import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeSearchFilter;
+import org.openmrs.module.stockmanagement.api.model.BatchJob;
+import org.openmrs.module.stockmanagement.api.model.BatchJobStatus;
+import org.openmrs.module.stockmanagement.api.model.LocationTree;
+import org.openmrs.module.stockmanagement.api.model.OrderItem;
+import org.openmrs.module.stockmanagement.api.model.Party;
+import org.openmrs.module.stockmanagement.api.model.StockBatch;
+import org.openmrs.module.stockmanagement.api.model.StockItem;
+import org.openmrs.module.stockmanagement.api.model.StockItemPackagingUOM;
+import org.openmrs.module.stockmanagement.api.model.StockItemReference;
+import org.openmrs.module.stockmanagement.api.model.StockOperation;
+import org.openmrs.module.stockmanagement.api.model.StockOperationItem;
+import org.openmrs.module.stockmanagement.api.model.StockOperationType;
+import org.openmrs.module.stockmanagement.api.model.StockOperationTypeLocationScope;
+import org.openmrs.module.stockmanagement.api.model.StockRule;
+import org.openmrs.module.stockmanagement.api.model.StockSource;
+import org.openmrs.module.stockmanagement.api.model.UserRoleScope;
+import org.openmrs.module.stockmanagement.api.model.UserRoleScopeLocation;
+import org.openmrs.module.stockmanagement.api.model.UserRoleScopeOperationType;
+import org.openmrs.module.stockmanagement.api.reporting.Report;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+
+@SuppressWarnings({ "unchecked", "rawtypes" })
+class PartialStockManagementService implements InvocationHandler {
+
+    private final SessionFactory sessionFactory;
+
+    private final PlatformTransactionManager transactionManager;
+
+    PartialStockManagementService(SessionFactory sessionFactory, TransactionManager transactionManager) {
+        this.sessionFactory = sessionFactory;
+        if (!(transactionManager instanceof PlatformTransactionManager platformTransactionManager)) {
+            throw new IllegalArgumentException(
+                    "Stock Management requires a PlatformTransactionManager-compatible transaction manager");
+        }
+        this.transactionManager = platformTransactionManager;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) {
+        Object[] safeArgs = args == null ? new Object[0] : args;
+        String methodName = method.getName();
+        if ("onStartup".equals(methodName) || "onShutdown".equals(methodName)) {
+            return null;
+        }
+        if ("toString".equals(methodName)) {
+            return "Static StockManagementService Hibernate 7 partial implementation";
+        }
+        if ("hashCode".equals(methodName)) {
+            return System.identityHashCode(proxy);
+        }
+        if ("equals".equals(methodName)) {
+            return safeArgs.length == 1 && proxy == safeArgs[0];
+        }
+
+        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+        Transactional annotation = method.getAnnotation(Transactional.class);
+        transaction.setReadOnly(annotation != null ? annotation.readOnly() : looksReadOnly(methodName));
+        return transaction.execute(status -> dispatch(method, safeArgs));
+    }
+
+    private Object dispatch(Method method, Object[] args) {
+        String name = method.getName();
+        switch (name) {
+            case "getCompleteLocationTree":
+                return args.length == 0 ? listAll(LocationTree.class) : getCompleteLocationTree((Integer) args[0]);
+            case "deleteLocationTreeNodes":
+                deleteLocationTreeNodes((List<LocationTree>) args[0]);
+                return null;
+            case "saveLocationTreeNodes":
+                saveAll((List<LocationTree>) args[0]);
+                return null;
+            case "getCompletePartyList":
+                return getCompletePartyList((Integer) args[0], false);
+            case "getCompleteStockDispensingLocationPartyList":
+                return getCompletePartyList((Integer) args[0], true);
+            case "getMainPharmacyLocations":
+                return getLocationsByTag(StockLocationTags.MAIN_PHARMACY_LOCATION_TAG);
+            case "getMainPharmacyPartyList":
+                return partiesForLocations(getMainPharmacyLocationIds());
+            case "getAllStockHoldingPartyList":
+                return getAllStockHoldingPartyList();
+            case "findUserRoleScopes":
+                return findUserRoleScopes((UserRoleScopeSearchFilter) args[0]);
+            case "getStockOperationByUuid":
+                return byUuid(StockOperation.class, (String) args[0]);
+            case "getStockOperationItemsByStockOperation":
+                return getStockOperationItemsByStockOperation((Integer) args[0]);
+            case "getStockOperationTypeByUuid":
+                return byUuid(StockOperationType.class, (String) args[0]);
+            case "getStockOperationTypeByType":
+                return stockOperationTypeByType((String) args[0]);
+            case "getAllStockOperationTypes":
+                return sortedById(listAll(StockOperationType.class));
+            case "getStockOperationTypeLocationScopeByUuid":
+                return byUuid(StockOperationTypeLocationScope.class, (String) args[0]);
+            case "getAllStockOperationTypeLocationScopes":
+                return sortedById(listAll(StockOperationTypeLocationScope.class));
+            case "getUserRoleScopeOperationTypeByUuid":
+                return byUuid(UserRoleScopeOperationType.class, (String) args[0]);
+            case "getUserRoleScopeByUuid":
+                return byUuid(UserRoleScope.class, (String) args[0]);
+            case "saveUserRoleScope":
+                if (args[0] instanceof UserRoleScope) {
+                    return saveOrUpdate(args[0]);
+                }
+                throw unsupported(method);
+            case "saveUserRoleScopeLocation":
+            case "saveUserRoleScopeOperationType":
+            case "saveOrderItem":
+            case "saveStockItemReference":
+                return saveOrUpdate(args[0]);
+            case "voidUserRoleScopes":
+                voidByUuids(UserRoleScope.class, (List<String>) args[0], (String) args[1], (Integer) args[2]);
+                return null;
+            case "voidUserRoleScopeLocations":
+                voidByUuids(UserRoleScopeLocation.class, (List<String>) args[0], (String) args[1], (Integer) args[2]);
+                return null;
+            case "voidUserRoleScopeOperationTypes":
+                voidByUuids(UserRoleScopeOperationType.class, (List<String>) args[0], (String) args[1], (Integer) args[2]);
+                return null;
+            case "findStockItemEntities":
+                return findStockItemEntities((StockItemSearchFilter) args[0]);
+            case "searchStockItemCommonName":
+                return searchStockItemCommonName((String) args[0], (Boolean) args[1], (Boolean) args[2],
+                    (Integer) args[3]);
+            case "findStockItems":
+                return findStockItems((StockItemSearchFilter) args[0]);
+            case "saveStockItem":
+                return saveStockItem(args);
+            case "getStockRuleByUuid":
+                return byUuid(StockRule.class, (String) args[0]);
+            case "voidStockRules":
+                voidByUuids(StockRule.class, (List<String>) args[0], (String) args[1], (Integer) args[2]);
+                return null;
+            case "getStockItemByUuid":
+                return byUuid(StockItem.class, (String) args[0]);
+            case "getStockSourceByUuid":
+                return byUuid(StockSource.class, (String) args[0]);
+            case "findStockSources":
+                return findStockSources((StockSourceSearchFilter) args[0]);
+            case "saveStockSource":
+                return saveOrUpdate(args[0]);
+            case "voidStockSources":
+                voidByUuids(StockSource.class, (List<String>) args[0], (String) args[1], (Integer) args[2]);
+                return null;
+            case "getPartyByStockSource":
+                return firstByEntity(Party.class, "stockSource", args[0]);
+            case "getPartyByLocation":
+                return firstByEntity(Party.class, "location", args[0]);
+            case "saveParty":
+                return saveOrUpdate(args[0]);
+            case "findParty":
+                if (args[0] instanceof PartySearchFilter) {
+                    return findParty((PartySearchFilter) args[0]);
+                }
+                return findParty((Boolean) args[0], (Boolean) args[1]);
+            case "getPartyByUuid":
+                return byUuid(Party.class, (String) args[0]);
+            case "getAllParties":
+                return getAllParties();
+            case "getCurrentUserSessionInfo":
+                return getCurrentUserSessionInfo();
+            case "findStockItemPackagingUOMs":
+                return findStockItemPackagingUOMs((StockItemPackagingUOMSearchFilter) args[0]);
+            case "saveStockItemPackagingUOM":
+                return saveStockItemPackagingUOM(args[0]);
+            case "userHasStockManagementPrivilege":
+                return userHasStockManagementPrivilege((User) args[0], (String) args[3]);
+            case "getPrivilegeScopes":
+                return getPrivilegeScopes((User) args[0], args[3]);
+            case "getStockItemPackagingUOMByUuid":
+                return byUuid(StockItemPackagingUOM.class, (String) args[0]);
+            case "voidStockItemPackagingUOM":
+                voidByUuid(StockItemPackagingUOM.class, (String) args[0], (String) args[1], (Integer) args[2]);
+                return null;
+            case "getExistingStockItemIds":
+                return getExistingStockItemIds((Collection<StockItemSearchFilter.ItemGroupFilter>) args[0]);
+            case "getDrugs":
+                return listByIds(Drug.class, "drugId", (Collection<Integer>) args[0]);
+            case "getConcepts":
+                return listByIds(Concept.class, "conceptId", (Collection<Integer>) args[0]);
+            case "getStockItems":
+                return listByIds(StockItem.class, "id", (Collection<Integer>) args[0]);
+            case "getStockItemPackagingUOMs":
+                return getStockItemPackagingUOMs((List<StockItemPackagingUOMSearchFilter.ItemGroupFilter>) args[0]);
+            case "getStockItemByDrug":
+                return stockItemsByDrug((Integer) args[0]);
+            case "getStockItemByConcept":
+                return stockItemsByConcept((Integer) args[0]);
+            case "getStockItemPackagingUOMByConcept":
+                return stockItemPackagingUOMByConcept(args);
+            case "getOrderItemsByOrder":
+                return getOrderItemsByOrder((Integer[]) args[0]);
+            case "getOrderItemsByEncounter":
+                return getOrderItemsByEncounter((Integer[]) args[0]);
+            case "getStockItemNames":
+                return getStockItemNames((List<Integer>) args[0]);
+            case "getConceptNames":
+                return getConceptNames((List<Integer>) args[0]);
+            case "getLocationNames":
+                return getLocationNames((List<Integer>) args[0]);
+            case "getHealthCenterName":
+                return Context.getAdministrationService().getGlobalProperty("site.name", "");
+            case "updateStockBatchExpiryNotificationDate":
+                updateStockBatchExpiryNotificationDate((Collection<Integer>) args[0], (Date) args[1]);
+                return null;
+            case "updateStockRuleJobNextEvaluationDate":
+                updateStockRuleDate((List<Integer>) args[0], (Date) args[1], true);
+                return null;
+            case "updateStockRuleJobNextActionDate":
+                updateStockRuleDate((List<Integer>) args[0], (Date) args[1], false);
+                return null;
+            case "saveBatchJob":
+                if (args[0] instanceof BatchJob) {
+                    saveOrUpdate(args[0]);
+                    return null;
+                }
+                throw unsupported(method);
+            case "findBatchJobs":
+                return findBatchJobs((BatchJobSearchFilter) args[0]);
+            case "getReports":
+                return new ArrayList<Report>();
+            case "getNextActiveBatchJob":
+                return getNextActiveBatchJob();
+            case "getBatchJobByUuid":
+                return byUuid(BatchJob.class, (String) args[0]);
+            case "updateBatchJobRunning":
+                updateBatchJobStatus((String) args[0], BatchJobStatus.Running, null);
+                return null;
+            case "updateBatchJobExecutionState":
+                updateBatchJobExecutionState((String) args[0], (String) args[1]);
+                return null;
+            case "getExpiredBatchJobs":
+                return getExpiredBatchJobs();
+            case "deleteBatchJob":
+                remove(args[0]);
+                return null;
+            case "getStockItemByReference":
+                return getStockItemByReference((StockSource) args[0], (String) args[1]);
+            case "voidStockItemReference":
+                voidByUuid(StockItemReference.class, (String) args[0], (String) args[1], (Integer) args[2]);
+                return null;
+            case "getStockItemReferenceByUuid":
+                return byUuid(StockItemReference.class, (String) args[0]);
+            case "getStockItemReferenceByStockItem":
+                return getStockItemReferenceByStockItem((String) args[0]);
+            default:
+                throw unsupported(method);
+        }
+    }
+
+    private boolean looksReadOnly(String methodName) {
+        return methodName.startsWith("get") || methodName.startsWith("find") || methodName.startsWith("search")
+                || methodName.startsWith("check");
+    }
+
+    private UnsupportedOperationException unsupported(Method method) {
+        return new UnsupportedOperationException(
+                "Stock Management service method " + method.getName() + " requires the Hibernate 7 DAO migration");
+    }
+
+    private Session session() {
+        return sessionFactory.getCurrentSession();
+    }
+
+    private <T> List<T> listAll(Class<T> type) {
+        return query(type, (cb, root) -> new ArrayList<>());
+    }
+
+    private List<LocationTree> getCompleteLocationTree(Integer atLocationId) {
+        if (atLocationId == null) {
+            return listAll(LocationTree.class);
+        }
+        return query(LocationTree.class, (cb, root) -> predicates(cb.equal(root.get("parentLocationId"), atLocationId)));
+    }
+
+    private void deleteLocationTreeNodes(List<LocationTree> nodes) {
+        if (nodes == null) {
+            return;
+        }
+        for (LocationTree node : nodes) {
+            remove(node);
+        }
+    }
+
+    private void saveAll(List<? extends Object> entities) {
+        if (entities == null) {
+            return;
+        }
+        for (Object entity : entities) {
+            saveOrUpdate(entity);
+        }
+    }
+
+    private List<PartyDTO> getCompletePartyList(Integer atLocationId, boolean onlyDispensingLocations) {
+        List<Integer> locationIds = getCompleteLocationTree(atLocationId).stream()
+                .map(LocationTree::getChildLocationId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (locationIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        if (onlyDispensingLocations) {
+            Set<Integer> dispensingLocationIds = new HashSet<>(getMainPharmacyLocationIds());
+            dispensingLocationIds.addAll(getLocationIdsByTag(StockLocationTags.DISPENSARY_LOCATION_TAG));
+            locationIds.removeIf(id -> !dispensingLocationIds.contains(id));
+        }
+        return partiesForLocations(locationIds);
+    }
+
+    private List<PartyDTO> partiesForLocations(List<Integer> locationIds) {
+        if (locationIds == null || locationIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        PartySearchFilter filter = new PartySearchFilter();
+        filter.setLocationIds(locationIds);
+        filter.setIncludeVoided(false);
+        return findParty(filter).getData();
+    }
+
+    private List<PartyDTO> getAllStockHoldingPartyList() {
+        Set<Integer> locationIds = new HashSet<>();
+        locationIds.addAll(getLocationIdsByTag(StockLocationTags.MAIN_PHARMACY_LOCATION_TAG));
+        locationIds.addAll(getLocationIdsByTag(StockLocationTags.DISPENSARY_LOCATION_TAG));
+        locationIds.addAll(getLocationIdsByTag(StockLocationTags.MAIN_STORE_LOCATION_TAG));
+        return partiesForLocations(new ArrayList<>(locationIds));
+    }
+
+    private List<Location> getLocationsByTag(String tagName) {
+        LocationTag tag = Context.getLocationService().getLocationTagByName(tagName);
+        if (tag == null) {
+            return new ArrayList<>();
+        }
+        return Context.getLocationService().getLocationsByTag(tag).stream()
+                .filter(location -> !Boolean.TRUE.equals(location.getRetired()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Integer> getMainPharmacyLocationIds() {
+        return getLocationIdsByTag(StockLocationTags.MAIN_PHARMACY_LOCATION_TAG);
+    }
+
+    private List<Integer> getLocationIdsByTag(String tagName) {
+        return getLocationsByTag(tagName).stream().map(Location::getId).collect(Collectors.toList());
+    }
+
+    private Result<UserRoleScopeDTO> findUserRoleScopes(UserRoleScopeSearchFilter filter) {
+        UserRoleScopeSearchFilter safeFilter = filter == null ? new UserRoleScopeSearchFilter() : filter;
+        List<UserRoleScope> scopes = query(UserRoleScope.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.isNotBlank(safeFilter.getUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), safeFilter.getUuid()));
+            }
+            if (!safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            if (safeFilter.getUsers() != null && !safeFilter.getUsers().isEmpty()) {
+                predicates.add(root.get("user").in(safeFilter.getUsers()));
+            }
+            if (safeFilter.getLocation() != null) {
+                Join<UserRoleScope, UserRoleScopeLocation> locationJoin = root.join("userRoleScopeLocations",
+                    JoinType.LEFT);
+                predicates.add(cb.equal(locationJoin.get("location"), safeFilter.getLocation()));
+                predicates.add(cb.isFalse(locationJoin.get("voided")));
+            }
+            if (safeFilter.getOperationType() != null) {
+                Join<UserRoleScope, UserRoleScopeOperationType> operationJoin = root.join(
+                    "userRoleScopeOperationTypes", JoinType.LEFT);
+                predicates.add(cb.equal(operationJoin.get("stockOperationType"), safeFilter.getOperationType()));
+                predicates.add(cb.isFalse(operationJoin.get("voided")));
+            }
+            return predicates;
+        });
+        scopes.sort(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)));
+        List<UserRoleScopeDTO> dtos = scopes.stream().map(this::userRoleScopeToDto).collect(Collectors.toList());
+        return resultFromList(dtos, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private UserRoleScopeDTO userRoleScopeToDto(UserRoleScope scope) {
+        UserRoleScopeDTO dto = new UserRoleScopeDTO();
+        dto.setId(scope.getId() == null ? 0 : scope.getId());
+        dto.setUuid(scope.getUuid());
+        dto.setActiveFrom(scope.getActiveFrom());
+        dto.setActiveTo(scope.getActiveTo());
+        dto.setEnabled(scope.getEnabled());
+        dto.setPermanent(scope.getPermanent());
+        User user = scope.getUser();
+        if (user != null) {
+            dto.setUserUuid(user.getUuid());
+            dto.setUserName(user.getUsername());
+            dto.setUserGivenName(user.getGivenName());
+            dto.setUserFamilyName(user.getFamilyName());
+        }
+        Role role = scope.getRole();
+        if (role != null) {
+            dto.setRole(role.getRole());
+        }
+        Set<UserRoleScopeLocation> locations = scope.getUserRoleScopeLocations();
+        if (locations != null) {
+            dto.setLocations(locations.stream().filter(location -> !Boolean.TRUE.equals(location.getVoided()))
+                    .map(this::userRoleScopeLocationToDto).collect(Collectors.toList()));
+        }
+        Set<UserRoleScopeOperationType> operationTypes = scope.getUserRoleScopeOperationTypes();
+        if (operationTypes != null) {
+            dto.setOperationTypes(operationTypes.stream()
+                    .filter(operationType -> !Boolean.TRUE.equals(operationType.getVoided()))
+                    .map(this::userRoleScopeOperationTypeToDto).collect(Collectors.toList()));
+        }
+        return dto;
+    }
+
+    private UserRoleScopeLocationDTO userRoleScopeLocationToDto(UserRoleScopeLocation location) {
+        UserRoleScopeLocationDTO dto = new UserRoleScopeLocationDTO();
+        dto.setUuid(location.getUuid());
+        dto.setUserRoleScopeId(location.getUserRoleScope() == null ? null : location.getUserRoleScope().getId());
+        dto.setEnableDescendants(location.getEnableDescendants());
+        if (location.getLocation() != null) {
+            dto.setLocationUuid(location.getLocation().getUuid());
+            dto.setLocationName(location.getLocation().getName());
+        }
+        return dto;
+    }
+
+    private UserRoleScopeOperationTypeDTO userRoleScopeOperationTypeToDto(UserRoleScopeOperationType operationType) {
+        UserRoleScopeOperationTypeDTO dto = new UserRoleScopeOperationTypeDTO();
+        dto.setUuid(operationType.getUuid());
+        dto.setUserRoleScopeId(
+            operationType.getUserRoleScope() == null ? null : operationType.getUserRoleScope().getId());
+        if (operationType.getStockOperationType() != null) {
+            dto.setOperationTypeUuid(operationType.getStockOperationType().getUuid());
+            dto.setOperationTypeName(operationType.getStockOperationType().getName());
+        }
+        return dto;
+    }
+
+    private List<StockOperationItem> getStockOperationItemsByStockOperation(Integer stockOperationId) {
+        if (stockOperationId == null) {
+            return new ArrayList<>();
+        }
+        return query(StockOperationItem.class, (cb, root) -> predicates(
+            cb.equal(root.get("stockOperation").get("id"), stockOperationId),
+            cb.isFalse(root.get("voided"))));
+    }
+
+    private StockOperationType stockOperationTypeByType(String type) {
+        return first(query(StockOperationType.class,
+            (cb, root) -> predicates(cb.equal(root.get("operationType"), type))));
+    }
+
+    private Result<StockItem> findStockItemEntities(StockItemSearchFilter filter) {
+        StockItemSearchFilter safeFilter = filter == null ? new StockItemSearchFilter() : filter;
+        List<StockItem> stockItems = queryStockItems(safeFilter);
+        stockItems.sort(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)));
+        return resultFromList(stockItems, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private Result<StockItemDTO> findStockItems(StockItemSearchFilter filter) {
+        StockItemSearchFilter safeFilter = filter == null ? new StockItemSearchFilter() : filter;
+        List<StockItemDTO> dtos = queryStockItems(safeFilter).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::stockItemToDto)
+                .collect(Collectors.toList());
+        return resultFromList(dtos, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private List<StockItem> queryStockItems(StockItemSearchFilter filter) {
+        return query(StockItem.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockItem, Drug> drug = root.join("drug", JoinType.LEFT);
+            Join<StockItem, Concept> concept = root.join("concept", JoinType.LEFT);
+            Join<StockItem, Concept> category = root.join("category", JoinType.LEFT);
+            if (StringUtils.isNotBlank(filter.getUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), filter.getUuid()));
+            }
+            if (!filter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            if (filter.getDrugId() != null) {
+                predicates.add(cb.equal(drug.get("drugId"), filter.getDrugId()));
+            }
+            if (filter.getConceptId() != null) {
+                predicates.add(cb.equal(concept.get("conceptId"), filter.getConceptId()));
+            }
+            if (filter.getIsDrug() != null) {
+                predicates.add(filter.getIsDrug() ? cb.isNotNull(drug.get("drugId")) : cb.isNull(drug.get("drugId")));
+            }
+            if (filter.getStockItemIds() != null && !filter.getStockItemIds().isEmpty()) {
+                predicates.add(root.get("id").in(filter.getStockItemIds()));
+            }
+            List<Predicate> drugConceptPredicates = new ArrayList<>();
+            if (filter.getDrugs() != null && !filter.getDrugs().isEmpty()) {
+                drugConceptPredicates.add(root.get("drug").in(filter.getDrugs()));
+            }
+            if (filter.getConcepts() != null && !filter.getConcepts().isEmpty()) {
+                drugConceptPredicates.add(root.get("concept").in(filter.getConcepts()));
+            }
+            if (!drugConceptPredicates.isEmpty()) {
+                predicates.add(filter.getSearchEitherDrugsOrConcepts()
+                        ? cb.or(drugConceptPredicates.toArray(new Predicate[0]))
+                        : cb.and(drugConceptPredicates.toArray(new Predicate[0])));
+            }
+            List<Integer> categoryIds = new ArrayList<>();
+            if (filter.getCategoryId() != null) {
+                categoryIds.add(filter.getCategoryId());
+            }
+            if (filter.getCategories() != null) {
+                categoryIds.addAll(filter.getCategories().stream().map(Concept::getConceptId).collect(Collectors.toList()));
+            }
+            if (!categoryIds.isEmpty()) {
+                predicates.add(category.get("conceptId").in(categoryIds));
+            }
+            return predicates;
+        });
+    }
+
+    private List<Integer> searchStockItemCommonName(String text, Boolean isDrugSearch, boolean includeAll, int maxItems) {
+        if (StringUtils.isBlank(text) || maxItems <= 0) {
+            return new ArrayList<>();
+        }
+        String term = "%" + text.trim().toLowerCase(Locale.ROOT).replace("%", "") + "%";
+        List<StockItem> matches = query(StockItem.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.or(
+                cb.like(cb.lower(root.get("commonName").as(String.class)), term),
+                cb.like(cb.lower(root.get("acronym").as(String.class)), term)));
+            if (isDrugSearch != null) {
+                predicates.add(cb.equal(root.get("isDrug"), isDrugSearch));
+            }
+            if (!includeAll) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            return predicates;
+        });
+        return matches.stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .limit(maxItems)
+                .map(StockItem::getId)
+                .collect(Collectors.toList());
+    }
+
+    private Object saveStockItem(Object[] args) {
+        if (args.length == 1 && args[0] instanceof StockItemDTO) {
+            return saveStockItem((StockItemDTO) args[0]);
+        }
+        if (args.length == 1 && args[0] instanceof StockItem) {
+            return saveOrUpdate(args[0]);
+        }
+        if (args.length == 2 && args[0] instanceof StockItem && args[1] instanceof StockItemPackagingUOM) {
+            StockItem stockItem = saveOrUpdate((StockItem) args[0]);
+            StockItemPackagingUOM uom = (StockItemPackagingUOM) args[1];
+            uom.setStockItem(stockItem);
+            saveOrUpdate(uom);
+            return stockItem;
+        }
+        throw new UnsupportedOperationException("Unsupported saveStockItem signature");
+    }
+
+    private StockItem saveStockItem(StockItemDTO dto) {
+        StockItem stockItem;
+        boolean isNew = StringUtils.isBlank(dto.getUuid());
+        if (isNew) {
+            stockItem = new StockItem();
+            stockItem.setCreator(authenticatedUser());
+            stockItem.setDateCreated(new Date());
+            if (StringUtils.isNotBlank(dto.getDrugUuid())) {
+                Drug drug = byUuid(Drug.class, dto.getDrugUuid());
+                if (drug == null) {
+                    throw new StockManagementException("Stock item drug does not exist");
+                }
+                ensureNoExistingStockItemForDrug(drug);
+                stockItem.setDrug(drug);
+                stockItem.setConcept(drug.getConcept());
+                stockItem.setIsDrug(true);
+            } else if (StringUtils.isNotBlank(dto.getConceptUuid())) {
+                Concept concept = byUuid(Concept.class, dto.getConceptUuid());
+                if (concept == null) {
+                    throw new StockManagementException("Stock item concept does not exist");
+                }
+                ensureNoExistingStockItemForConcept(concept);
+                stockItem.setConcept(concept);
+                stockItem.setIsDrug(false);
+            } else {
+                throw new StockManagementException("Stock item requires a drug or concept");
+            }
+        } else {
+            stockItem = byUuid(StockItem.class, dto.getUuid());
+            if (stockItem == null) {
+                throw new StockManagementException("Stock item not found");
+            }
+            stockItem.setChangedBy(authenticatedUser());
+            stockItem.setDateChanged(new Date());
+            if (stockItem.getIsDrug() == null) {
+                stockItem.setIsDrug(stockItem.getDrug() != null);
+            }
+        }
+        stockItem.setCommonName(dto.getCommonName());
+        stockItem.setAcronym(dto.getAcronym());
+        stockItem.setHasExpiration(Boolean.TRUE.equals(dto.getHasExpiration()));
+        stockItem.setExpiryNotice(dto.getExpiryNotice());
+        stockItem.setPreferredVendor(StringUtils.isBlank(dto.getPreferredVendorUuid()) ? null
+                : requireByUuid(StockSource.class, dto.getPreferredVendorUuid(), "Stock source not found"));
+        stockItem.setDispensingUnit(StringUtils.isBlank(dto.getDispensingUnitUuid()) ? null
+                : requireByUuid(Concept.class, dto.getDispensingUnitUuid(), "Dispensing unit concept not found"));
+        stockItem.setCategory(StringUtils.isBlank(dto.getCategoryUuid()) ? null
+                : requireByUuid(Concept.class, dto.getCategoryUuid(), "Category concept not found"));
+        if (!isNew) {
+            stockItem.setPurchasePrice(dto.getPurchasePrice());
+            stockItem.setPurchasePriceUoM(StringUtils.isBlank(dto.getPurchasePriceUoMUuid()) ? null
+                    : requireRelatedUom(dto.getPurchasePriceUoMUuid(), stockItem));
+            stockItem.setReorderLevel(dto.getReorderLevel());
+            stockItem.setReorderLevelUOM(StringUtils.isBlank(dto.getReorderLevelUoMUuid()) ? null
+                    : requireRelatedUom(dto.getReorderLevelUoMUuid(), stockItem));
+            stockItem.setDispensingUnitPackagingUoM(StringUtils.isBlank(dto.getDispensingUnitPackagingUoMUuid()) ? null
+                    : requireRelatedUom(dto.getDispensingUnitPackagingUoMUuid(), stockItem));
+            stockItem.setDefaultStockOperationsUoM(StringUtils.isBlank(dto.getDefaultStockOperationsUoMUuid()) ? null
+                    : requireRelatedUom(dto.getDefaultStockOperationsUoMUuid(), stockItem));
+        }
+        return saveOrUpdate(stockItem);
+    }
+
+    private void ensureNoExistingStockItemForDrug(Drug drug) {
+        if (!stockItemsByDrug(drug.getDrugId()).stream().filter(item -> !Boolean.TRUE.equals(item.getVoided())).toList()
+                .isEmpty()) {
+            throw new StockManagementException("Stock item for drug already exists");
+        }
+    }
+
+    private void ensureNoExistingStockItemForConcept(Concept concept) {
+        if (!stockItemsByConcept(concept.getConceptId()).stream()
+                .filter(item -> !Boolean.TRUE.equals(item.getVoided())).toList().isEmpty()) {
+            throw new StockManagementException("Stock item for concept already exists");
+        }
+    }
+
+    private StockItemPackagingUOM requireRelatedUom(String uuid, StockItem stockItem) {
+        StockItemPackagingUOM uom = requireByUuid(StockItemPackagingUOM.class, uuid, "Stock item UOM not found");
+        if (uom.getStockItem() == null || !Objects.equals(uom.getStockItem().getId(), stockItem.getId())) {
+            throw new StockManagementException("Stock item UOM is not related to the stock item");
+        }
+        return uom;
+    }
+
+    private Result<StockSource> findStockSources(StockSourceSearchFilter filter) {
+        StockSourceSearchFilter safeFilter = filter == null ? new StockSourceSearchFilter() : filter;
+        List<StockSource> sources = query(StockSource.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.isNotBlank(safeFilter.getUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), safeFilter.getUuid()));
+            }
+            if (safeFilter.getSourceType() != null) {
+                predicates.add(cb.equal(root.get("sourceType"), safeFilter.getSourceType()));
+            }
+            if (!safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getTextSearch())) {
+                String term = safeFilter.getTextSearch().replace("%", "").toLowerCase(Locale.ROOT) + "%";
+                predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("name").as(String.class)), term),
+                    cb.like(cb.lower(root.get("acronym").as(String.class)), term)));
+            }
+            return predicates;
+        });
+        sources.sort(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)));
+        return resultFromList(sources, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private Result<PartyDTO> findParty(PartySearchFilter filter) {
+        PartySearchFilter safeFilter = filter == null ? new PartySearchFilter() : filter;
+        List<Party> parties = query(Party.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<Party, Location> location = root.join("location", JoinType.LEFT);
+            Join<Party, StockSource> stockSource = root.join("stockSource", JoinType.LEFT);
+            if (safeFilter.getPartyIds() != null && !safeFilter.getPartyIds().isEmpty()) {
+                predicates.add(root.get("id").in(safeFilter.getPartyIds()));
+            }
+            if (safeFilter.getPartyUuids() != null && !safeFilter.getPartyUuids().isEmpty()) {
+                predicates.add(root.get("uuid").in(safeFilter.getPartyUuids()));
+            }
+            if (safeFilter.getLocationIds() != null && !safeFilter.getLocationIds().isEmpty()) {
+                predicates.add(location.get("locationId").in(safeFilter.getLocationIds()));
+            }
+            if (safeFilter.getLocationUuids() != null && !safeFilter.getLocationUuids().isEmpty()) {
+                predicates.add(location.get("uuid").in(safeFilter.getLocationUuids()));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getSearchText())) {
+                String term = "%" + safeFilter.getSearchText().replace("%", "").toLowerCase(Locale.ROOT) + "%";
+                predicates.add(cb.or(
+                    cb.like(cb.lower(location.get("name").as(String.class)), term),
+                    cb.like(cb.lower(stockSource.get("name").as(String.class)), term)));
+            }
+            if (safeFilter.getIncludeVoided() == null || !safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            return predicates;
+        });
+        List<PartyDTO> dtos = parties.stream()
+                .map(this::partyToDto)
+                .sorted(Comparator.comparing(PartyDTO::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .collect(Collectors.toList());
+        return resultFromList(dtos, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private List<Party> findParty(Boolean hasLocation, Boolean hasStockSource) {
+        return query(Party.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (hasLocation != null) {
+                predicates.add(hasLocation ? cb.isNotNull(root.get("location")) : cb.isNull(root.get("location")));
+            }
+            if (hasStockSource != null) {
+                predicates.add(hasStockSource ? cb.isNotNull(root.get("stockSource")) : cb.isNull(root.get("stockSource")));
+            }
+            return predicates;
+        });
+    }
+
+    private List<PartyDTO> getAllParties() {
+        return sortedById(listAll(Party.class)).stream().map(this::partyToDto).collect(Collectors.toList());
+    }
+
+    private PartyDTO partyToDto(Party party) {
+        PartyDTO dto = new PartyDTO();
+        dto.setId(party.getId());
+        dto.setUuid(party.getUuid());
+        dto.setVoided(Boolean.TRUE.equals(party.getVoided()));
+        if (party.getLocation() != null) {
+            dto.setName(party.getLocation().getName());
+            dto.setLocationUuid(party.getLocation().getUuid());
+            dto.setLocationId(party.getLocation().getId());
+            dto.setTags(party.getLocation().getTags().stream().map(LocationTag::getName).collect(Collectors.toList()));
+        }
+        if (party.getStockSource() != null) {
+            dto.setName(party.getStockSource().getName());
+            dto.setAcronym(party.getStockSource().getAcronym());
+            dto.setStockSourceUuid(party.getStockSource().getUuid());
+            dto.setStockSourceId(party.getStockSource().getId());
+        }
+        return dto;
+    }
+
+    private SessionInfo getCurrentUserSessionInfo() {
+        SessionInfo sessionInfo = new SessionInfo();
+        sessionInfo.setPrivileges(getPrivilegeScopes(authenticatedUser(), null));
+        return sessionInfo;
+    }
+
+    private boolean userHasStockManagementPrivilege(User user, String privilege) {
+        return user != null && (StringUtils.isBlank(privilege) || user.hasPrivilege(privilege));
+    }
+
+    private HashSet<PrivilegeScope> getPrivilegeScopes(User user, Object privileges) {
+        HashSet<PrivilegeScope> scopes = new HashSet<>();
+        if (user == null) {
+            return scopes;
+        }
+        List<String> privilegeNames = new ArrayList<>();
+        if (privileges instanceof String && StringUtils.isNotBlank((String) privileges)) {
+            privilegeNames.add((String) privileges);
+        } else if (privileges instanceof List) {
+            privilegeNames.addAll((List<String>) privileges);
+        }
+        if (privilegeNames.isEmpty()) {
+            privilegeNames = user.getAllRoles().stream()
+                    .flatMap(role -> role.getPrivileges().stream())
+                    .map(privilege -> privilege.getPrivilege())
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+        for (String privilegeName : privilegeNames) {
+            if (user.hasPrivilege(privilegeName)) {
+                PrivilegeScope scope = new PrivilegeScope();
+                scope.setPrivilege(privilegeName);
+                scopes.add(scope);
+            }
+        }
+        return scopes;
+    }
+
+    private Result<StockItemPackagingUOMDTO> findStockItemPackagingUOMs(StockItemPackagingUOMSearchFilter filter) {
+        StockItemPackagingUOMSearchFilter safeFilter = filter == null ? new StockItemPackagingUOMSearchFilter() : filter;
+        List<StockItemPackagingUOMDTO> dtos = query(StockItemPackagingUOM.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockItemPackagingUOM, StockItem> stockItem = root.join("stockItem", JoinType.LEFT);
+            if (StringUtils.isNotBlank(safeFilter.getUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), safeFilter.getUuid()));
+            }
+            if (safeFilter.getStockItemIds() != null && !safeFilter.getStockItemIds().isEmpty()) {
+                predicates.add(stockItem.get("id").in(safeFilter.getStockItemIds()));
+            }
+            if (safeFilter.getStockItemUuids() != null && !safeFilter.getStockItemUuids().isEmpty()) {
+                predicates.add(stockItem.get("uuid").in(safeFilter.getStockItemUuids()));
+            }
+            if (!safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(uom -> stockItemPackagingUomToDto(uom, safeFilter.includingDispensingUnit()))
+                .collect(Collectors.toList());
+        return resultFromList(dtos, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private Object saveStockItemPackagingUOM(Object arg) {
+        if (arg instanceof StockItemPackagingUOM) {
+            return saveOrUpdate(arg);
+        }
+        StockItemPackagingUOMDTO dto = (StockItemPackagingUOMDTO) arg;
+        StockItemPackagingUOM uom;
+        if (StringUtils.isNotBlank(dto.getUuid())) {
+            uom = requireByUuid(StockItemPackagingUOM.class, dto.getUuid(), "Stock item UOM not found");
+            uom.setChangedBy(authenticatedUser());
+            uom.setDateChanged(new Date());
+        } else {
+            uom = new StockItemPackagingUOM();
+            uom.setCreator(authenticatedUser());
+            uom.setDateCreated(new Date());
+            uom.setStockItem(requireByUuid(StockItem.class, dto.getStockItemUuid(), "Stock item not found"));
+        }
+        uom.setPackagingUom(requireByUuid(Concept.class, dto.getPackagingUomUuid(), "Packaging UOM concept not found"));
+        uom.setFactor(dto.getFactor());
+        return saveOrUpdate(uom);
+    }
+
+    private StockItemPackagingUOMDTO stockItemPackagingUomToDto(StockItemPackagingUOM uom, boolean includeDispensingUnit) {
+        StockItemPackagingUOMDTO dto = new StockItemPackagingUOMDTO();
+        dto.setId(uom.getId());
+        dto.setUuid(uom.getUuid());
+        dto.setVoided(Boolean.TRUE.equals(uom.getVoided()));
+        dto.setFactor(uom.getFactor());
+        if (uom.getPackagingUom() != null) {
+            dto.setPackagingUomId(uom.getPackagingUom().getConceptId());
+            dto.setPackagingUomUuid(uom.getPackagingUom().getUuid());
+            dto.setPackagingUomName(conceptName(uom.getPackagingUom()));
+        }
+        StockItem stockItem = uom.getStockItem();
+        if (stockItem != null) {
+            dto.setStockItemId(stockItem.getId());
+            dto.setStockItemUuid(stockItem.getUuid());
+            dto.setIsDispensingUnit(stockItem.getDispensingUnitPackagingUoM() != null
+                    && Objects.equals(stockItem.getDispensingUnitPackagingUoM().getId(), uom.getId()));
+            dto.setIsDefaultStockOperationsUoM(stockItem.getDefaultStockOperationsUoM() != null
+                    && Objects.equals(stockItem.getDefaultStockOperationsUoM().getId(), uom.getId()));
+            if (includeDispensingUnit && stockItem.getDispensingUnit() != null) {
+                dto.setStockItemDispensingUnitId(stockItem.getDispensingUnit().getConceptId());
+                dto.setStockItemDispensingUnitName(conceptName(stockItem.getDispensingUnit()));
+            }
+        }
+        return dto;
+    }
+
+    private List<StockItemDTO> getExistingStockItemIds(
+            Collection<StockItemSearchFilter.ItemGroupFilter> stockItemFilters) {
+        if (stockItemFilters == null || stockItemFilters.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<StockItemDTO> result = new ArrayList<>();
+        for (StockItem item : listAll(StockItem.class)) {
+            for (StockItemSearchFilter.ItemGroupFilter filter : stockItemFilters) {
+                if (matchesItemGroup(item, filter)) {
+                    result.add(stockItemToDto(item));
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    private boolean matchesItemGroup(StockItem item, StockItemSearchFilter.ItemGroupFilter filter) {
+        if (filter.getIsDrug() != null && !Objects.equals(Boolean.TRUE.equals(item.getIsDrug()), filter.getIsDrug())) {
+            return false;
+        }
+        if (filter.getDrugId() != null
+                && (item.getDrug() == null || !Objects.equals(item.getDrug().getDrugId(), filter.getDrugId()))) {
+            return false;
+        }
+        return filter.getConceptId() == null
+                || (item.getConcept() != null && Objects.equals(item.getConcept().getConceptId(), filter.getConceptId()));
+    }
+
+    private List<StockItemPackagingUOM> getStockItemPackagingUOMs(
+            List<StockItemPackagingUOMSearchFilter.ItemGroupFilter> filters) {
+        if (filters == null || filters.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return listAll(StockItemPackagingUOM.class).stream()
+                .filter(uom -> filters.stream().anyMatch(filter -> uomMatchesFilter(uom, filter)))
+                .collect(Collectors.toList());
+    }
+
+    private boolean uomMatchesFilter(StockItemPackagingUOM uom, StockItemPackagingUOMSearchFilter.ItemGroupFilter filter) {
+        if (uom.getStockItem() == null || !Objects.equals(uom.getStockItem().getId(), filter.getStockItemId())) {
+            return false;
+        }
+        return filter.getPackagingUomIds() == null || filter.getPackagingUomIds().isEmpty()
+                || (uom.getPackagingUom() != null
+                        && filter.getPackagingUomIds().contains(uom.getPackagingUom().getConceptId()));
+    }
+
+    private List<StockItem> stockItemsByDrug(Integer drugId) {
+        if (drugId == null) {
+            return new ArrayList<>();
+        }
+        return query(StockItem.class, (cb, root) -> {
+            Join<StockItem, Drug> drug = root.join("drug", JoinType.LEFT);
+            return predicates(cb.equal(drug.get("drugId"), drugId));
+        });
+    }
+
+    private List<StockItem> stockItemsByConcept(Integer conceptId) {
+        if (conceptId == null) {
+            return new ArrayList<>();
+        }
+        return query(StockItem.class, (cb, root) -> {
+            Join<StockItem, Drug> drug = root.join("drug", JoinType.LEFT);
+            Join<StockItem, Concept> concept = root.join("concept", JoinType.LEFT);
+            return predicates(cb.isNull(drug.get("drugId")), cb.equal(concept.get("conceptId"), conceptId));
+        });
+    }
+
+    private StockItemPackagingUOM stockItemPackagingUOMByConcept(Object[] args) {
+        Integer stockItemId = args[0] instanceof Integer ? (Integer) args[0] : null;
+        if (stockItemId == null) {
+            StockItem stockItem = byUuid(StockItem.class, (String) args[0]);
+            stockItemId = stockItem == null ? null : stockItem.getId();
+        }
+        Integer conceptId = args[1] instanceof Integer ? (Integer) args[1] : null;
+        if (conceptId == null) {
+            Concept concept = byUuid(Concept.class, (String) args[1]);
+            conceptId = concept == null ? null : concept.getConceptId();
+        }
+        if (stockItemId == null || conceptId == null) {
+            return null;
+        }
+        Integer finalStockItemId = stockItemId;
+        Integer finalConceptId = conceptId;
+        List<StockItemPackagingUOM> matches = query(StockItemPackagingUOM.class, (cb, root) -> {
+            Join<StockItemPackagingUOM, StockItem> stockItem = root.join("stockItem", JoinType.LEFT);
+            Join<StockItemPackagingUOM, Concept> packaging = root.join("packagingUom", JoinType.LEFT);
+            return predicates(cb.equal(stockItem.get("id"), finalStockItemId),
+                cb.equal(packaging.get("conceptId"), finalConceptId));
+        });
+        matches.sort(Comparator.comparing(StockItemPackagingUOM::getVoided, Comparator.nullsFirst(Boolean::compareTo))
+                .reversed());
+        return first(matches);
+    }
+
+    private List<OrderItem> getOrderItemsByOrder(Integer... orderIds) {
+        if (orderIds == null || orderIds.length == 0) {
+            return new ArrayList<>();
+        }
+        List<Integer> ids = List.of(orderIds);
+        return query(OrderItem.class, (cb, root) -> predicates(root.get("order").get("orderId").in(ids)));
+    }
+
+    private List<OrderItem> getOrderItemsByEncounter(Integer... encounterIds) {
+        if (encounterIds == null || encounterIds.length == 0) {
+            return new ArrayList<>();
+        }
+        List<Integer> ids = List.of(encounterIds);
+        return query(OrderItem.class, (cb, root) -> predicates(root.get("order").get("encounter").get("encounterId")
+                .in(ids)));
+    }
+
+    private Map<Integer, String> getStockItemNames(List<Integer> stockItemIds) {
+        return listByIds(StockItem.class, "id", stockItemIds).stream()
+                .collect(Collectors.toMap(StockItem::getId, this::stockItemName, (a, b) -> a));
+    }
+
+    private Map<Integer, String> getConceptNames(List<Integer> conceptIds) {
+        return listByIds(Concept.class, "conceptId", conceptIds).stream()
+                .collect(Collectors.toMap(Concept::getConceptId, this::conceptName, (a, b) -> a));
+    }
+
+    private Map<Integer, String> getLocationNames(List<Integer> locationIds) {
+        return listByIds(Location.class, "locationId", locationIds).stream()
+                .collect(Collectors.toMap(Location::getId, Location::getName, (a, b) -> a));
+    }
+
+    private void updateStockBatchExpiryNotificationDate(Collection<Integer> stockBatchIds, Date notificationDate) {
+        for (StockBatch batch : listByIds(StockBatch.class, "id", stockBatchIds)) {
+            batch.setExpiryNotificationDate(notificationDate);
+            saveOrUpdate(batch);
+        }
+    }
+
+    private void updateStockRuleDate(List<Integer> stockRuleIds, Date nextEvaluationDate, boolean evaluationDate) {
+        for (StockRule rule : listByIds(StockRule.class, "id", stockRuleIds)) {
+            if (evaluationDate) {
+                rule.setNextEvaluation(nextEvaluationDate);
+            } else {
+                rule.setNextActionDate(nextEvaluationDate);
+            }
+            saveOrUpdate(rule);
+        }
+    }
+
+    private Result findBatchJobs(BatchJobSearchFilter filter) {
+        BatchJobSearchFilter safeFilter = filter == null ? new BatchJobSearchFilter() : filter;
+        List<BatchJob> jobs = query(BatchJob.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (safeFilter.getBatchJobIds() != null && !safeFilter.getBatchJobIds().isEmpty()) {
+                predicates.add(root.get("id").in(safeFilter.getBatchJobIds()));
+            }
+            if (safeFilter.getBatchJobUuids() != null && !safeFilter.getBatchJobUuids().isEmpty()) {
+                predicates.add(root.get("uuid").in(safeFilter.getBatchJobUuids()));
+            }
+            if (safeFilter.getBatchJobType() != null) {
+                predicates.add(cb.equal(root.get("batchJobType"), safeFilter.getBatchJobType()));
+            }
+            if (safeFilter.getBatchJobStatus() != null && !safeFilter.getBatchJobStatus().isEmpty()) {
+                predicates.add(root.get("status").in(safeFilter.getBatchJobStatus()));
+            }
+            if (safeFilter.getDateCreatedMin() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("dateCreated"), safeFilter.getDateCreatedMin()));
+            }
+            if (safeFilter.getDateCreatedMax() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("dateCreated"), safeFilter.getDateCreatedMax()));
+            }
+            if (safeFilter.getCompletedDateMin() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("completedDate"), safeFilter.getCompletedDateMin()));
+            }
+            if (safeFilter.getCompletedDateMax() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("completedDate"), safeFilter.getCompletedDateMax()));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getParameters())) {
+                predicates.add(cb.equal(root.get("parameters"), safeFilter.getParameters()));
+            }
+            if (safeFilter.getLocationScopeIds() != null && !safeFilter.getLocationScopeIds().isEmpty()) {
+                predicates.add(root.get("locationScope").get("locationId").in(safeFilter.getLocationScopeIds()));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getPrivilegeScope())) {
+                predicates.add(cb.equal(root.get("privilegeScope"), safeFilter.getPrivilegeScope()));
+            }
+            if (!safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            return predicates;
+        });
+        jobs.sort(Comparator.comparing(BatchJob::getDateCreated, Comparator.nullsLast(Date::compareTo)).reversed());
+        return resultFromList(jobs, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private BatchJob getNextActiveBatchJob() {
+        List<BatchJob> jobs = query(BatchJob.class, (cb, root) -> predicates(
+            cb.equal(root.get("status"), BatchJobStatus.Pending),
+            cb.isFalse(root.get("voided"))));
+        jobs.sort(Comparator.comparing(BatchJob::getDateCreated, Comparator.nullsLast(Date::compareTo)));
+        return first(jobs);
+    }
+
+    private void updateBatchJobStatus(String uuid, BatchJobStatus status, String reason) {
+        BatchJob job = byUuid(BatchJob.class, uuid);
+        if (job == null) {
+            return;
+        }
+        job.setStatus(status);
+        if (reason != null) {
+            job.setExitMessage(reason);
+        }
+        saveOrUpdate(job);
+    }
+
+    private void updateBatchJobExecutionState(String uuid, String executionState) {
+        BatchJob job = byUuid(BatchJob.class, uuid);
+        if (job != null) {
+            job.setExecutionState(executionState);
+            saveOrUpdate(job);
+        }
+    }
+
+    private List<BatchJob> getExpiredBatchJobs() {
+        Date now = new Date();
+        return query(BatchJob.class, (cb, root) -> predicates(
+            cb.lessThan(root.get("expiration"), now),
+            root.get("status").in(List.of(BatchJobStatus.Pending, BatchJobStatus.Running)),
+            cb.isFalse(root.get("voided"))));
+    }
+
+    private StockItem getStockItemByReference(StockSource stockSource, String code) {
+        if (stockSource == null || StringUtils.isBlank(code)) {
+            return null;
+        }
+        StockItemReference reference = first(query(StockItemReference.class, (cb, root) -> predicates(
+            cb.equal(root.get("referenceSource"), stockSource),
+            cb.equal(root.get("stockReferenceCode"), code),
+            cb.isFalse(root.get("voided")))));
+        return reference == null ? null : reference.getStockItem();
+    }
+
+    private List<StockItemReference> getStockItemReferenceByStockItem(String uuid) {
+        StockItem stockItem = byUuid(StockItem.class, uuid);
+        if (stockItem == null) {
+            return null;
+        }
+        return query(StockItemReference.class, (cb, root) -> predicates(
+            cb.equal(root.get("stockItem"), stockItem),
+            cb.isFalse(root.get("voided"))));
+    }
+
+    private StockItemDTO stockItemToDto(StockItem item) {
+        StockItemDTO dto = new StockItemDTO();
+        dto.setId(item.getId());
+        dto.setUuid(item.getUuid());
+        dto.setVoided(Boolean.TRUE.equals(item.getVoided()));
+        dto.setHasExpiration(item.getHasExpiration());
+        dto.setCommonName(item.getCommonName());
+        dto.setAcronym(item.getAcronym());
+        dto.setReorderLevel(item.getReorderLevel());
+        dto.setPurchasePrice(item.getPurchasePrice());
+        dto.setExpiryNotice(item.getExpiryNotice());
+        dto.setCreator(item.getCreator() == null ? null : item.getCreator().getId());
+        dto.setDateCreated(item.getDateCreated());
+        if (item.getCreator() != null) {
+            dto.setCreatorGivenName(item.getCreator().getGivenName());
+            dto.setCreatorFamilyName(item.getCreator().getFamilyName());
+        }
+        if (item.getDrug() != null) {
+            dto.setDrugId(item.getDrug().getDrugId());
+            dto.setDrugUuid(item.getDrug().getUuid());
+            dto.setDrugName(item.getDrug().getName());
+            dto.setDrugStrength(item.getDrug().getStrength());
+        }
+        if (item.getConcept() != null) {
+            dto.setConceptId(item.getConcept().getConceptId());
+            dto.setConceptUuid(item.getConcept().getUuid());
+            dto.setConceptName(conceptName(item.getConcept()));
+        }
+        if (item.getPreferredVendor() != null) {
+            dto.setPreferredVendorId(item.getPreferredVendor().getId());
+            dto.setPreferredVendorUuid(item.getPreferredVendor().getUuid());
+            dto.setPreferredVendorName(item.getPreferredVendor().getName());
+        }
+        if (item.getDispensingUnit() != null) {
+            dto.setDispensingUnitId(item.getDispensingUnit().getConceptId());
+            dto.setDispensingUnitUuid(item.getDispensingUnit().getUuid());
+            dto.setDispensingUnitName(conceptName(item.getDispensingUnit()));
+        }
+        setUomFields(dto, item.getPurchasePriceUoM(), "purchase");
+        setUomFields(dto, item.getDispensingUnitPackagingUoM(), "dispensing");
+        setUomFields(dto, item.getDefaultStockOperationsUoM(), "default");
+        setUomFields(dto, item.getReorderLevelUOM(), "reorder");
+        if (item.getCategory() != null) {
+            dto.setCategoryId(item.getCategory().getConceptId());
+            dto.setCategoryUuid(item.getCategory().getUuid());
+            dto.setCategoryName(conceptName(item.getCategory()));
+        }
+        if (item.getReferences() != null) {
+            dto.setStockItemReferences(new ArrayList<>(item.getReferences()));
+        }
+        return dto;
+    }
+
+    private void setUomFields(StockItemDTO dto, StockItemPackagingUOM uom, String target) {
+        if (uom == null) {
+            return;
+        }
+        Concept concept = uom.getPackagingUom();
+        if ("purchase".equals(target)) {
+            dto.setPurchasePriceUoMId(uom.getId());
+            dto.setPurchasePriceUoMUuid(uom.getUuid());
+            dto.setPurchasePriceUoMFactor(uom.getFactor());
+            if (concept != null) {
+                dto.setPurchasePriceConceptId(concept.getConceptId());
+                dto.setPurchasePriceUoMName(conceptName(concept));
+            }
+        } else if ("dispensing".equals(target)) {
+            dto.setDispensingUnitPackagingUoMId(uom.getId());
+            dto.setDispensingUnitPackagingUoMUuid(uom.getUuid());
+            dto.setDispensingUnitPackagingUoMFactor(uom.getFactor());
+            if (concept != null) {
+                dto.setDispensingUnitPackagingConceptId(concept.getConceptId());
+                dto.setDispensingUnitPackagingUoMName(conceptName(concept));
+            }
+        } else if ("default".equals(target)) {
+            dto.setDefaultStockOperationsUoMId(uom.getId());
+            dto.setDefaultStockOperationsUoMUuid(uom.getUuid());
+            dto.setDefaultStockOperationsUoMFactor(uom.getFactor());
+            if (concept != null) {
+                dto.setDefaultStockOperationsConceptId(concept.getConceptId());
+                dto.setDefaultStockOperationsUoMName(conceptName(concept));
+            }
+        } else if ("reorder".equals(target)) {
+            dto.setReorderLevelUoMId(uom.getId());
+            dto.setReorderLevelUoMUuid(uom.getUuid());
+            dto.setReorderLevelUoMFactor(uom.getFactor());
+            if (concept != null) {
+                dto.setReorderLevelConceptId(concept.getConceptId());
+                dto.setReorderLevelUoMName(conceptName(concept));
+            }
+        }
+    }
+
+    private String stockItemName(StockItem stockItem) {
+        if (StringUtils.isNotBlank(stockItem.getCommonName())) {
+            return stockItem.getCommonName();
+        }
+        if (stockItem.getDrug() != null) {
+            return stockItem.getDrug().getName();
+        }
+        return stockItem.getConcept() == null ? null : conceptName(stockItem.getConcept());
+    }
+
+    private String conceptName(Concept concept) {
+        if (concept == null) {
+            return null;
+        }
+        ConceptName name = concept.getName(Context.getLocale());
+        if (name == null) {
+            name = concept.getName();
+        }
+        return name == null ? null : name.getName();
+    }
+
+    private <T> T byUuid(Class<T> type, String uuid) {
+        if (StringUtils.isBlank(uuid)) {
+            return null;
+        }
+        return first(query(type, (cb, root) -> predicates(cb.equal(root.get("uuid"), uuid))));
+    }
+
+    private <T> T requireByUuid(Class<T> type, String uuid, String message) {
+        T value = byUuid(type, uuid);
+        if (value == null) {
+            throw new StockManagementException(message);
+        }
+        return value;
+    }
+
+    private <T> T firstByEntity(Class<T> type, String property, Object value) {
+        if (value == null) {
+            return null;
+        }
+        return first(query(type, (cb, root) -> predicates(cb.equal(root.get(property), value))));
+    }
+
+    private <T> List<T> listByIds(Class<T> type, String property, Collection<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return query(type, (cb, root) -> predicates(root.get(property).in(ids)));
+    }
+
+    private <T> List<T> query(Class<T> type, BiFunction<CriteriaBuilder, Root<T>, List<Predicate>> predicateFactory) {
+        CriteriaBuilder cb = session().getCriteriaBuilder();
+        CriteriaQuery<T> criteria = cb.createQuery(type);
+        Root<T> root = criteria.from(type);
+        List<Predicate> predicates = predicateFactory.apply(cb, root);
+        if (predicates != null && !predicates.isEmpty()) {
+            criteria.where(predicates.toArray(new Predicate[0]));
+        }
+        criteria.distinct(true);
+        return session().createQuery(criteria).getResultList();
+    }
+
+    private List<Predicate> predicates(Predicate... predicates) {
+        return new ArrayList<>(List.of(predicates));
+    }
+
+    private <T> Result<T> resultFromList(List<T> data, Integer startIndex, Integer limit) {
+        Result<T> result = new Result<>();
+        List<T> safeData = data == null ? new ArrayList<>() : data;
+        if (limit != null) {
+            int fromIndex = startIndex == null ? 0 : Math.max(0, startIndex);
+            int toIndex = Math.min(safeData.size(), fromIndex + Math.max(0, limit));
+            result.setPageIndex(fromIndex);
+            result.setPageSize(limit);
+            result.setData(fromIndex >= safeData.size() ? new ArrayList<>() : new ArrayList<>(safeData.subList(fromIndex, toIndex)));
+        } else {
+            result.setData(new ArrayList<>(safeData));
+        }
+        result.setTotalRecordCount((long) safeData.size());
+        return result;
+    }
+
+    private <T> T saveOrUpdate(T entity) {
+        touch(entity);
+        return HibernateUtil.saveOrUpdate(session(), entity);
+    }
+
+    private void remove(Object entity) {
+        if (entity == null) {
+            return;
+        }
+        Object target = entity;
+        if (entity instanceof BaseOpenmrsObject && ((BaseOpenmrsObject) entity).getId() != null) {
+            target = session().find(entity.getClass(), ((BaseOpenmrsObject) entity).getId());
+        }
+        if (target != null) {
+            session().remove(target);
+        }
+    }
+
+    private void touch(Object entity) {
+        if (!(entity instanceof BaseOpenmrsData)) {
+            return;
+        }
+        BaseOpenmrsData data = (BaseOpenmrsData) entity;
+        User user = authenticatedUser();
+        Date now = new Date();
+        if (data.getId() == null) {
+            if (data.getCreator() == null) {
+                data.setCreator(user);
+            }
+            if (data.getDateCreated() == null) {
+                data.setDateCreated(now);
+            }
+        } else {
+            data.setChangedBy(user);
+            data.setDateChanged(now);
+        }
+    }
+
+    private <T> void voidByUuids(Class<T> type, List<String> uuids, String reason, Integer voidedBy) {
+        if (uuids == null) {
+            return;
+        }
+        for (String uuid : uuids) {
+            voidByUuid(type, uuid, reason, voidedBy);
+        }
+    }
+
+    private <T> void voidByUuid(Class<T> type, String uuid, String reason, Integer voidedBy) {
+        Object entity = byUuid(type, uuid);
+        if (!(entity instanceof BaseOpenmrsData)) {
+            return;
+        }
+        BaseOpenmrsData data = (BaseOpenmrsData) entity;
+        data.setVoided(true);
+        data.setDateVoided(new Date());
+        data.setVoidReason(reason);
+        data.setVoidedBy(voidedBy == null ? authenticatedUser() : session().find(User.class, voidedBy));
+        HibernateUtil.saveOrUpdate(session(), data);
+    }
+
+    private User authenticatedUser() {
+        try {
+            return Context.getAuthenticatedUser();
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private <T> T first(List<T> values) {
+        return values == null || values.isEmpty() ? null : values.get(0);
+    }
+
+    private <T> List<T> sortedById(List<T> values) {
+        values.sort(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)));
+        return values;
+    }
+
+    private Integer objectId(Object object) {
+        return object instanceof BaseOpenmrsObject ? ((BaseOpenmrsObject) object).getId() : null;
+    }
+}

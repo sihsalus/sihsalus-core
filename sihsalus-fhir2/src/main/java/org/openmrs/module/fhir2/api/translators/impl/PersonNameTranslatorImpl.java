@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.trimToNull;
+
 import javax.annotation.Nonnull;
 
 import java.util.List;
@@ -32,7 +34,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 		}
 		
 		HumanName humanName = new HumanName();
-		humanName.setId(name.getUuid());
+		humanName.setId(trimToNull(name.getUuid()));
 		if (name.getGivenName() != null) {
 			humanName.addGiven(name.getGivenName());
 		}

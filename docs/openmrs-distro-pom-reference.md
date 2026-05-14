@@ -66,7 +66,7 @@ Migration implication:
 ### Bootstrap And Configuration
 
 - `initializer-omod` `2.11.0`: loads metadata/configuration into OpenMRS.
-- `metadatamapping-omod` `2.0.0`: maps metadata identifiers across systems.
+- `metadatamapping-omod` `2.0.0`: maps metadata identifiers across systems. SIH Salus Core now uses local `metadatamapping-api` source from `2.1.0-SNAPSHOT`; the `2.0.0` value remains the distro dependency baseline.
 - `openconceptlab-omod` `3.0.0`: concept dictionary integration with OCL.
 - Content packages:
   - `sihsalus-content` `1.8.30`
@@ -96,7 +96,7 @@ These are part of the login/session/authentication surface that frontend and int
 - `cohort-omod` `3.7.3`: patient cohorts.
 - `patientflags-omod` `3.0.10`: patient alerts/flags.
 - `o3forms-omod` `2.3.0`: OpenMRS 3 form support.
-- `emrapi-omod` `3.4.0`: EMR service APIs.
+- `emrapi-omod` `3.4.0`: EMR service APIs. SIH Salus Core now uses local `emrapi-api` source from `3.5.0-SNAPSHOT`; the `3.4.0` value remains the distro dependency baseline.
 - `ordertemplates-omod` `2.2.0`: order templates are versioned in properties, though no dependency is listed in the provided POM.
 
 ### Care Delivery Workflow

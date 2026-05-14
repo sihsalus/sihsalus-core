@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static lombok.AccessLevel.PROTECTED;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.trimToNull;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
 import javax.annotation.Nonnull;
@@ -61,7 +62,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		
 		Identifier patientIdentifier = new Identifier();
 		
-		patientIdentifier.setValue(identifier.getIdentifier()).setId(identifier.getUuid());
+		patientIdentifier.setValue(identifier.getIdentifier()).setId(trimToNull(identifier.getUuid()));
 		
 		if (identifier.getPreferred() != null) {
 			if (identifier.getPreferred()) {
@@ -74,7 +75,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		if (identifier.getIdentifierType() != null) {
 			PatientIdentifierType identifierType = identifier.getIdentifierType();
 			patientIdentifier.setSystem(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifierType));
-			patientIdentifier.setType(new CodeableConcept(new Coding().setCode(identifierType.getUuid()))
+			patientIdentifier.setType(new CodeableConcept(new Coding().setCode(trimToNull(identifierType.getUuid())))
 			        .setText(getMetadataTranslation(identifierType)));
 		}
 		

@@ -15,6 +15,15 @@ import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 
 public class FhirTranslatorUtils {
+
+	public static String trimToNull(String value) {
+		if (value == null) {
+			return null;
+		}
+		
+		String trimmed = value.trim();
+		return trimmed.isEmpty() ? null : trimmed;
+	}
 	
 	public static Date getLastUpdated(OpenmrsObject object) {
 		if (object instanceof Auditable) {

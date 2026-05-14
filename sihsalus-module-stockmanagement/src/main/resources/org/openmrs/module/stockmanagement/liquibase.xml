@@ -783,7 +783,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-21">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_operation_type_location_scope_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_operation_type_location_scope_uuid" tableName="stockmgmt_operation_type_location_scope" unique="true">
@@ -823,7 +823,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-25">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_party_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_party_uuid" tableName="stockmgmt_party" unique="true">
@@ -896,7 +896,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-32">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_batch_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_batch_uuid" tableName="stockmgmt_stock_batch" unique="true">
@@ -1027,7 +1027,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-45">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_item_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_item_uuid" tableName="stockmgmt_stock_item" unique="true">
@@ -1087,7 +1087,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-51">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_item_packaging_uom_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_item_packaging_uom_uuid" tableName="stockmgmt_stock_item_packaging_uom" unique="true">
@@ -1209,7 +1209,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-63">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_item_transaction_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_item_transaction_uuid" tableName="stockmgmt_stock_item_transaction" unique="true">
@@ -1299,7 +1299,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-72">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_reservation_transaction_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_reservation_transaction_uuid" tableName="stockmgmt_reservation_transaction" unique="true">
@@ -1439,7 +1439,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-86">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_operation_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_operation_uuid" tableName="stockmgmt_stock_operation" unique="true">
@@ -1539,7 +1539,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-96">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_operation_item_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_operation_item_uuid" tableName="stockmgmt_stock_operation_item" unique="true">
@@ -1579,7 +1579,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-100">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_operation_type_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_operation_type_uuid" tableName="stockmgmt_stock_operation_type" unique="true">
@@ -1639,7 +1639,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-106">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_operation_link_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_operation_link_uuid" tableName="stockmgmt_stock_operation_link" unique="true">
@@ -1690,7 +1690,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-111">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_source_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_source_uuid" tableName="stockmgmt_stock_source" unique="true">
@@ -1730,7 +1730,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-115">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_stock_rule_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_stock_rule_uuid" tableName="stockmgmt_stock_rule" unique="true">
@@ -1770,7 +1770,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-119">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_user_role_scope_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_user_role_scope_uuid" tableName="stockmgmt_user_role_scope" unique="true">
@@ -1810,7 +1810,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-123">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_user_role_scope_location_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_user_role_scope_location_uuid" tableName="stockmgmt_user_role_scope_location" unique="true">
@@ -1850,7 +1850,7 @@
   <changeSet author="dev" id="stockmanagement-1758855877841-127">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_user_role_scope_operation_type_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_user_role_scope_operation_type_uuid" tableName="stockmgmt_user_role_scope_operation_type" unique="true">
@@ -3036,8 +3036,8 @@ CREATE TRIGGER stockmgmt_location_after_delete
     </preConditions>
     <comment>Creating the Pharmacy location</comment>
     <sql>
-      INSERT INTO location(name,description,creator,date_created,parent_location,uuid)
-      SELECT 'Main Pharmacy', null,1,NOW(), (SELECT parent_location from location group by parent_location order by COUNT(*) DESC LIMIT 1),'7f65d926-57d6-4402-ae10-a5b3bcbf7986'
+      INSERT INTO location(location_id,name,description,creator,date_created,parent_location,uuid)
+      SELECT (SELECT COALESCE(MAX(location_id), 0) + 1 FROM location), 'Main Pharmacy', null,1,NOW(), (SELECT parent_location from location group by parent_location order by COUNT(*) DESC LIMIT 1),'7f65d926-57d6-4402-ae10-a5b3bcbf7986'
     </sql>
   </changeSet>
   <changeSet id="stockmanagement-1758855877841-237" author="dev">
@@ -3046,8 +3046,8 @@ CREATE TRIGGER stockmgmt_location_after_delete
     </preConditions>
     <comment>Creating the Main Store location</comment>
     <sql>
-      INSERT INTO location(name,description,creator,date_created,parent_location,uuid)
-      SELECT 'Main Store', null,1,NOW(), (SELECT parent_location from location group by parent_location order by COUNT(*) DESC LIMIT 1),'19dbe2c0-289d-11ed-bdcb-507b9dea1806'
+      INSERT INTO location(location_id,name,description,creator,date_created,parent_location,uuid)
+      SELECT (SELECT COALESCE(MAX(location_id), 0) + 1 FROM location), 'Main Store', null,1,NOW(), (SELECT parent_location from location group by parent_location order by COUNT(*) DESC LIMIT 1),'19dbe2c0-289d-11ed-bdcb-507b9dea1806'
     </sql>
   </changeSet>
   <changeSet id="stockmanagement-1758855877841-238" author="dev">
@@ -3810,7 +3810,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
   <changeSet author="dev" id="stockmanagement-1758855877841-277">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_order_item_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_order_item_uuid" tableName="stockmgmt_order_item" unique="true">
@@ -3924,16 +3924,12 @@ CREATE TRIGGER stockmgmt_location_after_delete
   <changeSet author="dev" id="stockmanagement-1758855877841-290">
     <preConditions onFail="MARK_RAN">
       <tableExists tableName="stockmgmt_stock_item"/>
-      <not>
-        <columnExists tableName="stockmgmt_stock_item" columnName="category_id"/>
-      </not>
     </preConditions>
-    <addColumn tableName="stockmgmt_stock_item">
-      <column name="category_id" type="int"/>
-    </addColumn>
+    <sql>ALTER TABLE stockmgmt_stock_item ADD COLUMN IF NOT EXISTS category_id int</sql>
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-291">
     <preConditions onFail="MARK_RAN">
+      <columnExists tableName="stockmgmt_stock_item" columnName="category_id"/>
       <not>
         <indexExists indexName="stockmgmt_stock_item_category_id_fk" />
       </not>
@@ -3944,6 +3940,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-292">
     <preConditions onFail="MARK_RAN">
+      <columnExists tableName="stockmgmt_stock_item" columnName="category_id"/>
       <not>
         <foreignKeyConstraintExists foreignKeyName="stockmgmt_stock_item_category_id_fk" />
       </not>
@@ -3952,22 +3949,18 @@ CREATE TRIGGER stockmgmt_location_after_delete
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-293">
     <preConditions onFail="MARK_RAN">
-        <indexExists indexName="stockmgmt_stock_item_transaction_itemsearch_fk" />
+      <tableExists tableName="stockmgmt_stock_item_transaction"/>
     </preConditions>
-    <dropIndex tableName="stockmgmt_stock_item_transaction" indexName="stockmgmt_stock_item_transaction_itemsearch_fk" />
+    <sql>DROP INDEX IF EXISTS stockmgmt_stock_item_transaction_itemsearch_fk</sql>
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-294">
     <preConditions onFail="MARK_RAN">
-      <not>
-        <indexExists indexName="stockmgmt_stock_item_transaction_itemsearch_fk" />
-      </not>
+      <tableExists tableName="stockmgmt_stock_item_transaction"/>
     </preConditions>
-    <createIndex indexName="stockmgmt_stock_item_transaction_itemsearch_fk" tableName="stockmgmt_stock_item_transaction" unique="false">
-      <column name="party_id" />
-      <column name="stock_item_id" />
-      <column name="stock_batch_id" />
-      <column name="date_created" />
-    </createIndex>
+    <sql>
+      CREATE INDEX IF NOT EXISTS stockmgmt_stock_item_transaction_itemsearch_fk
+      ON stockmgmt_stock_item_transaction(party_id, stock_item_id, stock_batch_id, date_created)
+    </sql>
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-295">
     <preConditions onFail="MARK_RAN">
@@ -4056,13 +4049,8 @@ CREATE TRIGGER stockmgmt_location_after_delete
   <changeSet author="dev" id="stockmanagement-1758855877841-303">
     <preConditions onFail="MARK_RAN">
       <tableExists tableName="stockmgmt_stock_batch"/>
-      <not>
-        <columnExists tableName="stockmgmt_stock_batch" columnName="expiry_notification_date"/>
-      </not>
     </preConditions>
-    <addColumn tableName="stockmgmt_stock_batch">
-      <column name="expiry_notification_date" type="DATETIME"/>
-    </addColumn>
+    <sql>ALTER TABLE stockmgmt_stock_batch ADD COLUMN IF NOT EXISTS expiry_notification_date DATETIME</sql>
   </changeSet>
   <changeSet id="stockmanagement-1758855877841-304" author="dev">
     <preConditions onFail="MARK_RAN">
@@ -4193,6 +4181,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-308">
     <preConditions onFail="MARK_RAN">
+      <columnExists tableName="stockmgmt_stock_batch" columnName="expiry_notification_date"/>
       <not>
         <indexExists indexName="stockmgmt_stock_batch_expiration_ix" />
       </not>
@@ -4212,19 +4201,11 @@ CREATE TRIGGER stockmgmt_location_after_delete
     </preConditions>
     <sql>DELETE FROM scheduler_task_config where uuid='5a0b041a-5796-11ed-a495-00155dc81c72'</sql>
     <comment>Inserting Stock Rules Evaluation Job into 'schedule_task_config' table</comment>
-    <insert tableName="scheduler_task_config">
-      <column name="name" value="Stock Rules Evaluation Job" />
-      <column name="description" value="Checks the stock rules against the item quantity and notifies when quantity is at or below threshold" />
-      <column name="schedulable_class" value="org.openmrs.module.stockmanagement.api.jobs.StockRuleEvaluationJob" />
-      <column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
-      <column name="start_time" valueDate="2022-10-01T00:59:59" />
-      <column name="repeat_interval" value="86400" />
-      <column name="date_created" valueDate="CURRENT_TIMESTAMP" />
-      <column name="created_by" value="1" />
-      <column name="start_on_startup" value="0"/>
-      <column name="started" value="1"/>
-      <column name="uuid" value="5a0b041a-5796-11ed-a495-00155dc81c72" />
-    </insert>
+    <sql>
+      INSERT INTO scheduler_task_config(task_config_id, name, description, schedulable_class, start_time_pattern, start_time, repeat_interval, date_created, created_by, start_on_startup, started, uuid)
+      SELECT COALESCE(MAX(task_config_id), 0) + 1, 'Stock Rules Evaluation Job', 'Checks the stock rules against the item quantity and notifies when quantity is at or below threshold', 'org.openmrs.module.stockmanagement.api.jobs.StockRuleEvaluationJob', 'MM/dd/yyyy HH:mm:ss', '2022-10-01 00:59:59', 86400, NOW(), 1, false, true, '5a0b041a-5796-11ed-a495-00155dc81c72'
+      FROM scheduler_task_config
+    </sql>
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-310">
     <preConditions onFail="MARK_RAN">
@@ -4235,19 +4216,11 @@ CREATE TRIGGER stockmgmt_location_after_delete
     </preConditions>
     <sql>DELETE FROM scheduler_task_config where uuid='911fc382-5797-11ed-a495-00155dc81c72'</sql>
     <comment>Inserting Stock Batch Expiry Job into 'schedule_task_config' table</comment>
-    <insert tableName="scheduler_task_config">
-      <column name="name" value="Stock Batch Expiry Job" />
-      <column name="description" value="Checks for stock items expiring soon and notifies inventory manager and clerk" />
-      <column name="schedulable_class" value="org.openmrs.module.stockmanagement.api.jobs.StockBatchExpiryJob" />
-      <column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
-      <column name="start_time" valueDate="2022-10-01T00:00:00" />
-      <column name="repeat_interval" value="86400" />
-      <column name="date_created" valueDate="CURRENT_TIMESTAMP" />
-      <column name="created_by" value="1" />
-      <column name="start_on_startup" value="0"/>
-      <column name="started" value="1"/>
-      <column name="uuid" value="911fc382-5797-11ed-a495-00155dc81c72" />
-    </insert>
+    <sql>
+      INSERT INTO scheduler_task_config(task_config_id, name, description, schedulable_class, start_time_pattern, start_time, repeat_interval, date_created, created_by, start_on_startup, started, uuid)
+      SELECT COALESCE(MAX(task_config_id), 0) + 1, 'Stock Batch Expiry Job', 'Checks for stock items expiring soon and notifies inventory manager and clerk', 'org.openmrs.module.stockmanagement.api.jobs.StockBatchExpiryJob', 'MM/dd/yyyy HH:mm:ss', '2022-10-01 00:00:00', 86400, NOW(), 1, false, true, '911fc382-5797-11ed-a495-00155dc81c72'
+      FROM scheduler_task_config
+    </sql>
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-311">
     <validCheckSum>9:f0f081c00e44bd0dec8ae1b5b105ba2e</validCheckSum>
@@ -4421,7 +4394,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
   <changeSet author="dev" id="stockmanagement-1758855877841-318">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_batch_job_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_batch_job_uuid" tableName="stockmgmt_batch_job" unique="true">
@@ -4508,7 +4481,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
   <changeSet author="dev" id="stockmanagement-1758855877841-326">
     <preConditions onFail="MARK_RAN">
       <not>
-        <indexExists indexName="stockmgmt_legacy_uuid" />
+        <indexExists indexName="stockmgmt_batch_job_owner_uuid" />
       </not>
     </preConditions>
     <createIndex indexName="stockmgmt_batch_job_owner_uuid" tableName="stockmgmt_batch_job_owner" unique="true">
@@ -4560,19 +4533,11 @@ CREATE TRIGGER stockmgmt_location_after_delete
     </preConditions>
     <sql>DELETE FROM scheduler_task_config where uuid='73eb1d31-6e5e-11ed-9a5b-00155db5005a'</sql>
     <comment>Inserting Asynchronous Report Generation And Batch Jobs into 'schedule_task_config' table</comment>
-    <insert tableName="scheduler_task_config">
-      <column name="name" value="Asynchronous Report Generation And Batch Jobs" />
-      <column name="description" value="Runs report generation and batch jobs asynchronously" />
-      <column name="schedulable_class" value="org.openmrs.module.stockmanagement.api.jobs.AsyncTasksBatchJob" />
-      <column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
-      <column name="start_time" valueDate="2022-10-01T00:59:59" />
-      <column name="repeat_interval" value="60" />
-      <column name="date_created" valueDate="CURRENT_TIMESTAMP" />
-      <column name="created_by" value="1" />
-      <column name="start_on_startup" value="1"/>
-      <column name="started" value="1"/>
-      <column name="uuid" value="73eb1d31-6e5e-11ed-9a5b-00155db5005a" />
-    </insert>
+    <sql>
+      INSERT INTO scheduler_task_config(task_config_id, name, description, schedulable_class, start_time_pattern, start_time, repeat_interval, date_created, created_by, start_on_startup, started, uuid)
+      SELECT COALESCE(MAX(task_config_id), 0) + 1, 'Asynchronous Report Generation And Batch Jobs', 'Runs report generation and batch jobs asynchronously', 'org.openmrs.module.stockmanagement.api.jobs.AsyncTasksBatchJob', 'MM/dd/yyyy HH:mm:ss', '2022-10-01 00:59:59', 60, NOW(), 1, true, true, '73eb1d31-6e5e-11ed-9a5b-00155db5005a'
+      FROM scheduler_task_config
+    </sql>
   </changeSet>
   <changeSet author="dev" id="stockmanagement-1758855877841-332">
     <validCheckSum>9:4bb3d291b287b86b92dedbb3e17dee5e</validCheckSum>
@@ -4644,7 +4609,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
         <column name="date_changed" type="date">
           <constraints nullable="true"/>
         </column>
-        <column name="voided" type="tinyint(1)">
+        <column name="voided" type="BOOLEAN">
           <constraints nullable="true"/>
         </column>
         <column name="date_voided" type="date">
@@ -4687,6 +4652,9 @@ CREATE TRIGGER stockmgmt_location_after_delete
                                referencedTableName="users"
                                referencedColumnNames="user_id"
                                constraintName="stock_item_reference_users_voided_by_id_fk"/>
+      <modifySql dbms="h2">
+        <replace replace="voided TINYINT" with="voided BOOLEAN"/>
+      </modifySql>
     </changeSet>
 
   <changeSet author="slubwama" id="stockmanagement-24-02-0700">

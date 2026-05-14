@@ -39,7 +39,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.hl7v2.app.Application;
 import ca.uhn.hl7v2.app.MessageTypeRouter;
@@ -57,7 +57,7 @@ import ca.uhn.hl7v2.parser.GenericParser;
 public class OpenmrsApplicationContextConfig {
 
 	@Bean
-	public TransactionManager transactionManager(SessionFactory sessionFactory) {
+	public PlatformTransactionManager transactionManager(SessionFactory sessionFactory) {
 		return new HibernateTransactionManager(sessionFactory);
 	}
 

@@ -9,6 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
+import org.openmrs.PersonName;
+import org.openmrs.User;
 import org.openmrs.UserSessionListener;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.authentication.AuthenticationConfig;
@@ -18,15 +23,21 @@ import org.openmrs.module.attachments.obs.DefaultAttachmentHandler;
 import org.openmrs.module.attachments.obs.ImageAttachmentHandler;
 import org.openmrs.module.authentication.AuthenticationUserSessionListener;
 import org.openmrs.module.authentication.DelegatingAuthenticationScheme;
+import org.openmrs.module.emrapi.adt.AdtService;
+import org.openmrs.module.emrapi.concept.EmrConceptService;
+import org.openmrs.module.emrapi.patient.EmrPatientService;
+import org.openmrs.module.emrapi.procedure.ProcedureService;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod30IdentifierValidator;
+import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
 import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationScheme;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.webservices.rest.web.api.RestService;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -38,6 +49,12 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class SihsalusCoreApplicationTest {
+
+    private static final String TEST_PATIENT_UUID = "2e29f6cc-14e4-44f5-bf57-c5cf0d7659f3";
+
+    private static final String TEST_IDENTIFIER = "SIH-REST-FHIR-001";
+
+    private static final String TEST_IDENTIFIER_TYPE_UUID = "f7c1c7d2-cf2d-45fd-9660-e81975cf50da";
 
     @Autowired private MockMvc mockMvc;
 
@@ -81,6 +98,27 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void patientRegistryPatientIsReadableThroughRestAndFhir() throws Exception {
+        String patientUuid = ensureTestPatient();
+
+        mockMvc.perform(get("/rest/v1/patient/{uuid}", patientUuid))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.uuid").value(patientUuid))
+                .andExpect(jsonPath("$.identifier").value(TEST_IDENTIFIER))
+                .andExpect(jsonPath("$.givenName").value("Sihsalus"))
+                .andExpect(jsonPath("$.familyName").value("Paciente"));
+
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from fhir_patient_identifier_system", Integer.class));
+
+        mockMvc.perform(get("/api/fhir/r4/Patient/{uuid}", patientUuid))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+                .andExpect(jsonPath("$.resourceType").value("Patient"))
+                .andExpect(jsonPath("$.id").value(patientUuid))
+                .andExpect(jsonPath("$.identifier[0].value").value(TEST_IDENTIFIER));
+    }
+
+    @Test
     @SuppressWarnings({"rawtypes", "unchecked"})
     void idgenIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(IdentifierSourceService.class));
@@ -119,6 +157,25 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void metadataMappingIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(MetadataMappingService.class));
+        assertNotNull(jdbcTemplate.queryForObject(
+                "select count(*) from metadatamapping_metadata_source", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject(
+                "select count(*) from metadatamapping_metadata_term_mapping", Integer.class));
+    }
+
+    @Test
+    void emrApiIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(EmrConceptService.class));
+        assertNotNull(Context.getService(EmrPatientService.class));
+        assertNotNull(Context.getService(AdtService.class));
+        assertNotNull(Context.getService(ProcedureService.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from emrapi_procedure_type", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from emrapi_procedure", Integer.class));
+    }
+
+    @Test
     void stockManagementIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(StockManagementService.class));
         assertNotNull(
@@ -139,5 +196,108 @@ class SihsalusCoreApplicationTest {
     @Test
     void webservicesRestServiceIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(RestService.class));
+    }
+
+    private String ensureTestPatient() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        Context.addProxyPrivilege(
+                PrivilegeConstants.ADD_PATIENTS,
+                PrivilegeConstants.EDIT_PATIENTS,
+                PrivilegeConstants.ADD_PATIENT_IDENTIFIERS,
+                PrivilegeConstants.GET_IDENTIFIER_TYPES,
+                PrivilegeConstants.MANAGE_IDENTIFIER_TYPES);
+        try {
+            restartOpenmrsIdentityColumnsForH2();
+
+            Patient existing = Context.getPatientService().getPatientByUuid(TEST_PATIENT_UUID);
+            if (existing != null) {
+                return existing.getUuid();
+            }
+
+            User systemUser = new User(1);
+            ensureTestIdentifierTypeExists();
+            PatientIdentifierType identifierType =
+                    Context.getPatientService().getPatientIdentifierTypeByUuid(TEST_IDENTIFIER_TYPE_UUID);
+            assertNotNull(identifierType);
+
+            java.util.Date now = new java.util.Date();
+            Patient patient = new Patient();
+            patient.setUuid(TEST_PATIENT_UUID);
+            patient.setGender("M");
+            patient.setBirthdate(java.sql.Date.valueOf("1990-01-02"));
+            patient.setCreator(systemUser);
+            patient.setDateCreated(now);
+            patient.setPersonCreator(systemUser);
+            patient.setPersonDateCreated(now);
+            patient.setPersonVoided(false);
+
+            PersonName name = new PersonName("Sihsalus", null, "Paciente");
+            name.setCreator(systemUser);
+            name.setDateCreated(now);
+            patient.addName(name);
+
+            PatientIdentifier identifier = new PatientIdentifier(TEST_IDENTIFIER, identifierType, null);
+            identifier.setPreferred(true);
+            identifier.setCreator(systemUser);
+            identifier.setDateCreated(now);
+            patient.addIdentifier(identifier);
+
+            return Context.getPatientService().savePatient(patient).getUuid();
+        } finally {
+            Context.removeProxyPrivilege(
+                    PrivilegeConstants.ADD_PATIENTS,
+                    PrivilegeConstants.EDIT_PATIENTS,
+                    PrivilegeConstants.ADD_PATIENT_IDENTIFIERS,
+                    PrivilegeConstants.GET_IDENTIFIER_TYPES,
+                    PrivilegeConstants.MANAGE_IDENTIFIER_TYPES);
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    private void restartOpenmrsIdentityColumnsForH2() {
+        jdbcTemplate.execute("alter table person_attribute add column if not exists value varchar(50)");
+        restartIdentityAfterSeedData("patient_identifier_type", "patient_identifier_type_id");
+        restartIdentityAfterSeedData("person", "person_id");
+        restartIdentityAfterSeedData("person_name", "person_name_id");
+        restartIdentityAfterSeedData("patient_identifier", "patient_identifier_id");
+    }
+
+    private void ensureTestIdentifierTypeExists() {
+        Integer existingCount = jdbcTemplate.queryForObject(
+                "select count(*) from patient_identifier_type where uuid = ?",
+                Integer.class,
+                TEST_IDENTIFIER_TYPE_UUID);
+        if (existingCount != null && existingCount > 0) {
+            return;
+        }
+
+        Integer nextIdentifierTypeId = jdbcTemplate.queryForObject(
+                "select coalesce(max(patient_identifier_type_id), 0) + 1 from patient_identifier_type",
+                Integer.class);
+        jdbcTemplate.update(
+                "insert into patient_identifier_type "
+                        + "(patient_identifier_type_id, name, description, format, check_digit, creator, "
+                        + "date_created, required, format_description, validator, location_behavior, "
+                        + "retired, uuid, uniqueness_behavior) "
+                        + "values (?, ?, ?, null, false, ?, current_timestamp, false, null, null, ?, false, ?, ?)",
+                nextIdentifierTypeId,
+                "SIH Salus test identifier",
+                "Identifier type used by REST/FHIR boot smoke tests",
+                1,
+                PatientIdentifierType.LocationBehavior.NOT_USED.name(),
+                TEST_IDENTIFIER_TYPE_UUID,
+                PatientIdentifierType.UniquenessBehavior.UNIQUE.name());
+    }
+
+    private void restartIdentityAfterSeedData(String tableName, String columnName) {
+        Integer nextValue = jdbcTemplate.queryForObject(
+                "select coalesce(max(" + columnName + "), 0) + 1000 from " + tableName, Integer.class);
+        jdbcTemplate.execute("alter table " + tableName + " alter column " + columnName + " restart with " + nextValue);
     }
 }
