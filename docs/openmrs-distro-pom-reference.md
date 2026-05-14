@@ -110,11 +110,11 @@ These are part of the login/session/authentication surface that frontend and int
 
 - `reporting-omod` `2.1.0`
 - `reportingrest-omod` `2.0.0`
-- `calculation-omod` `2.0.0`
+- `calculation-omod` `2.0.0`: calculation engine. SIH Salus Core now uses local `calculation-api` source from `2.1.0-SNAPSHOT`; the `2.0.0` value remains the distro dependency baseline.
 - `htmlwidgets-omod` `2.0.1`
 - `serialization.xstream-api` `0.3.0`
 
-The calculation, htmlwidgets, and xstream modules are required by reporting.
+The calculation, htmlwidgets, and xstream modules are required by reporting. Calculation and XStream are now static internal imports; htmlwidgets remains a later reporting dependency slice.
 
 ### Billing, Stock, Imaging, And Local Extensions
 

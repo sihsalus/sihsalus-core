@@ -55,14 +55,16 @@ Implemented:
 - Upstream OAuth2 Login API code imported into `sihsalus-module-oauth2login` as local source from `oauth2login-api` `1.6.0-SNAPSHOT`, replacing the placeholder with static Spring registration for the OAuth2 user-info authentication scheme. The OMOD activator, `ModuleFactory` unload path, daemon-token lifecycle, and legacy web filters/controllers are intentionally outside the runtime entrypoint for this cut.
 - Upstream ID Generation API code imported into `sihsalus-module-idgen` as local source from `idgen-api` `6.0.0-SNAPSHOT`, replacing the placeholder with static Spring wiring, Hibernate mapping contribution, centralized Liquibase, identifier validators, processors, and optional refill scheduling without OMOD lifecycle.
 - Upstream Address Hierarchy API code imported into `sihsalus-module-addresshierarchy` as local source from `addresshierarchy-api` `3.0.0-SNAPSHOT`, replacing the placeholder with static Spring wiring, Hibernate 7 DAO queries, Hibernate mapping contribution, centralized Liquibase, cache listener, disabled i18n cache fallback, validator registration, and optional cache scheduling without OMOD lifecycle.
+- Upstream Calculation API code is present in `sihsalus-module-calculation` as local source from `calculation-api` `2.1.0-SNAPSHOT`, with static Spring service registration, Hibernate mapping contribution, centralized Liquibase, and Hibernate 7 DAO queries without OMOD lifecycle.
+- Serialization XStream is statically wired as a local module and registered lazily through `SerializationService`, avoiding eager serializer creation cycles while keeping module serializers discoverable after boot.
 - Static boundary tests check that FHIR2 and REST imports do not depend on `ModuleFactory` or OMOD activators, and that OpenMRS Hibernate mapping discovery does not use dynamic module discovery.
-- Boot tests start the Spring context against H2 in PostgreSQL compatibility mode, run Liquibase, build the OpenMRS `SessionFactory`, and validate health, FHIR metadata and R4 read wiring, REST system status and v1 controller wiring, Authentication/OAuth2 wiring, ID Generation wiring, Address Hierarchy wiring, and Web Services REST service registration.
+- Boot tests start the Spring context against H2 in PostgreSQL compatibility mode, run Liquibase, build the OpenMRS `SessionFactory`, and validate health, FHIR metadata and R4 read wiring, REST system status and v1 controller wiring, Authentication/OAuth2 wiring, ID Generation wiring, Address Hierarchy wiring, Calculation wiring, Serialization XStream wiring, and Web Services REST service registration.
 
 Not yet implemented:
 
 - Full FHIR2 servlet parity, search/write operations, and broader FHIR provider coverage beyond the current R4 read adapter.
 - Concrete Web Services REST resource imports beyond the common v1 controller/service framework.
-- Source conversion for the remaining distro modules beyond FHIR2, REST common, Authentication API, OAuth2 Login API, ID Generation, and Address Hierarchy.
+- Source conversion for the remaining distro modules beyond FHIR2, REST common, Authentication API, OAuth2 Login API, ID Generation, Address Hierarchy, Calculation, Serialization XStream, and the currently wired clinical/support imports.
 
 ## Product Surface To Cover
 
@@ -340,7 +342,7 @@ Acceptance:
 2. Expand the current FHIR R4 read adapter into the required search/write coverage, or introduce a Jakarta-compatible HAPI servlet bridge if that becomes cleaner than adapter endpoints.
 3. Import concrete Web Services REST resources into the static REST v1 framework without module install/start/stop APIs.
 4. Define the compatibility surface for frontend-facing patient registry routes over `/api/patients`, REST v1, and FHIR.
-5. Continue distro module conversion by source ownership, starting with OAuth/login web boundaries and the patient registry dependencies that are still placeholders. `authentication`, `oauth2login`, `idgen`, and `addresshierarchy` are no longer placeholders: the local imports use `authentication-api` `2.4.0-SNAPSHOT`, `oauth2login-api` `1.6.0-SNAPSHOT`, `idgen-api` `6.0.0-SNAPSHOT`, and `addresshierarchy-api` `3.0.0-SNAPSHOT`, while the distro baselines remain `authentication-omod` `2.3.0`, `oauth2login-omod` `1.5.0`, `idgen-omod` `5.0.4`, and `addresshierarchy-omod` `2.21.0`.
+5. Continue distro module conversion by source ownership, starting with OAuth/login web boundaries and the patient registry dependencies that are still placeholders. `authentication`, `oauth2login`, `idgen`, `addresshierarchy`, and `calculation` are no longer placeholders: the local imports use `authentication-api` `2.4.0-SNAPSHOT`, `oauth2login-api` `1.6.0-SNAPSHOT`, `idgen-api` `6.0.0-SNAPSHOT`, `addresshierarchy-api` `3.0.0-SNAPSHOT`, and `calculation-api` `2.1.0-SNAPSHOT`, while the distro baselines remain `authentication-omod` `2.3.0`, `oauth2login-omod` `1.5.0`, `idgen-omod` `5.0.4`, `addresshierarchy-omod` `2.21.0`, and `calculation-omod` `2.0.0`.
 
 ## Recommended Next Slice
 

@@ -24,8 +24,8 @@ import org.openmrs.serialization.SimpleXStreamSerializer;
 import org.openmrs.util.OpenmrsConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,9 +42,11 @@ public class SerializationServiceImpl extends BaseOpenmrsService implements Seri
 	//***** Properties (set by spring)
 	private Map<Class<? extends OpenmrsSerializer>, OpenmrsSerializer> serializerMap;
 
+	private ObjectProvider<OpenmrsSerializer> serializerProvider;
+
 	@Autowired
-	public void initializeSerializerMap(@Qualifier("serializerList") List<? extends OpenmrsSerializer> serializerList) {
-		setSerializers(serializerList);
+	public void initializeSerializerProvider(ObjectProvider<OpenmrsSerializer> serializerProvider) {
+		this.serializerProvider = serializerProvider;
 	}
 
 	//***** Service method implementations *****
@@ -54,6 +56,7 @@ public class SerializationServiceImpl extends BaseOpenmrsService implements Seri
 	 */
 	@Override
 	public OpenmrsSerializer getSerializer(Class<? extends OpenmrsSerializer> serializationClass) {
+		initializeSerializerMapIfNecessary();
 		if (serializerMap != null) {
 			return serializerMap.get(serializationClass);
 		}
@@ -66,6 +69,7 @@ public class SerializationServiceImpl extends BaseOpenmrsService implements Seri
 	@Override
 	@Transactional(readOnly = true)
 	public OpenmrsSerializer getDefaultSerializer() {
+		initializeSerializerMapIfNecessary();
 		String prop = Context.getAdministrationService()
 		        .getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_SERIALIZER);
 		if (StringUtils.isNotEmpty(prop)) {
@@ -133,6 +137,7 @@ public class SerializationServiceImpl extends BaseOpenmrsService implements Seri
 	 */
 	@Override
 	public List<? extends OpenmrsSerializer> getSerializers() {
+		initializeSerializerMapIfNecessary();
 		if (serializerMap == null) {
 			serializerMap = new LinkedHashMap<>();
 		}
@@ -153,6 +158,12 @@ public class SerializationServiceImpl extends BaseOpenmrsService implements Seri
 			for (OpenmrsSerializer s : serializers) {
 				serializerMap.put(s.getClass(), s);
 			}
+		}
+	}
+
+	private void initializeSerializerMapIfNecessary() {
+		if (serializerMap == null && serializerProvider != null) {
+			setSerializers(serializerProvider.orderedStream().toList());
 		}
 	}
 }

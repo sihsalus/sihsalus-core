@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -92,8 +91,10 @@ public class OpenmrsApplicationContextConfig {
 	}
 
 	@Bean
-	public List<OpenmrsSerializer> serializerList(ObjectProvider<OpenmrsSerializer> serializers) {
-		return serializers.orderedStream().toList();
+	public List<OpenmrsSerializer> serializerList(SimpleXStreamSerializer simpleXStreamSerializer) {
+		List<OpenmrsSerializer> serializers = new ArrayList<>();
+		serializers.add(simpleXStreamSerializer);
+		return serializers;
 	}
 
 	@Bean
