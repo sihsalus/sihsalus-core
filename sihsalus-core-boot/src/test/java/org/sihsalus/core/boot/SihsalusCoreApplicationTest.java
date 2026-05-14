@@ -277,10 +277,10 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(DicomStudyService.class));
         assertNotNull(Context.getService(RequestProcedureService.class));
         assertNotNull(Context.getService(RequestProcedureStepService.class));
-        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_OrthancConfiguration", Integer.class));
-        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_DicomStudy", Integer.class));
-        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_RequestProcedure", Integer.class));
-        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_RequestProcedureStep", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_orthancconfiguration", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_dicomstudy", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_requestprocedure", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_requestprocedurestep", Integer.class));
     }
 
     @Test

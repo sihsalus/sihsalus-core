@@ -33,5 +33,9 @@ public class CashPointSearch {
 	 * Whether to include retired cash points in the results.
 	 */
 	private boolean includeRetired;
+
+	public boolean getIncludeRetired() {
+		return includeRetired;
+	}
 	
 }

@@ -73,6 +73,11 @@ public final class Restrictions {
 	public static Criterion le(String propertyName, Comparable value) {
 		return (builder, root) -> builder.lessThanOrEqualTo(path(root, propertyName).as(value.getClass()), value);
 	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static Criterion between(String propertyName, Comparable low, Comparable high) {
+		return (builder, root) -> builder.between(path(root, propertyName).as(low.getClass()), low, high);
+	}
 	
 	public static Criterion and(Criterion... criteria) {
 		return (builder, root) -> builder.and(predicates(builder, root, criteria));

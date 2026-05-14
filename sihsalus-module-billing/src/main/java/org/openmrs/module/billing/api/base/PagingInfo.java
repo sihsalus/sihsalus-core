@@ -31,6 +31,10 @@ public class PagingInfo {
 	private Long totalRecordCount;
 	
 	private boolean loadRecordCount;
+
+	public boolean getLoadRecordCount() {
+		return loadRecordCount;
+	}
 	
 	/**
 	 * Creates a new {@link PagingInfo} instance.

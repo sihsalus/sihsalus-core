@@ -41,7 +41,6 @@
             <not>
                 <tableExists tableName="imaging_dicomstudy"/>
             </not>
-            <tableExists tableName="imaging_orthancconfiguration"/>
         </preConditions>
         <comment>Create the DicomStudy table for imaging</comment>
         <createTable tableName="imaging_DicomStudy">
@@ -86,7 +85,6 @@
             <not>
                 <tableExists tableName="imaging_requestprocedure"/>
             </not>
-            <tableExists tableName="imaging_orthancconfiguration"/>
         </preConditions>
         <comment>Create the requestProcedure table for imaging</comment>
         <createTable tableName="imaging_RequestProcedure">
@@ -131,7 +129,6 @@
             <not>
                 <tableExists tableName="imaging_requestprocedurestep"/>
             </not>
-            <tableExists tableName="imaging_requestprocedure"/>
         </preConditions>
         <comment>Create the requestProcedureStep table for imaging</comment>
         <createTable tableName="imaging_RequestProcedureStep">
