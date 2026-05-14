@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<!DOCTYPE hibernate-configuration PUBLIC
+		"-//Hibernate/Hibernate Configuration DTD//EN"
+		"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+		<property name="connection.url"/>
+		<property name="connection.driver_class"/>
+		<property name="connection.username"/>
+		<property name="connection.password"/>
+
+		<!-- DB schema will be updated if needed -->
+		<!-- <property name="hbm2ddl.auto">update</property> -->
+
+		<mapping resource="Bill.hbm.xml"/>
+		<mapping resource="Cashier.hbm.xml"/>
+		<mapping resource="SequentialReceiptNumberGenerator.hbm.xml"/>
+	</session-factory>
+</hibernate-configuration>

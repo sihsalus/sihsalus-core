@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!-- Services accessible via Context.getService() -->
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.ItemPriceService</value>
+				<ref bean="itemPriceService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillLineItemService</value>
+				<ref bean="billLineItemService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.PaymentModeService</value>
+				<ref bean="paymentModeService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.IPaymentModeAttributeTypeService</value>
+				<ref bean="cashierPaymentModeAttributeTypeService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.CashPointService</value>
+				<ref bean="cashPointService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.ITimesheetService</value>
+				<ref bean="cashierTimesheetService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService</value>
+				<ref bean="seqReceiptNumberGeneratorService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.ICashierOptionsService</value>
+				<ref bean="cashierOptionsService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillableServiceService</value>
+				<ref bean="billableServiceService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.CashierItemPriceService</value>
+				<ref bean="cashierItemPriceService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillService</value>
+				<ref bean="billService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillExemptionService</value>
+				<ref bean="billingExemptionService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillDiscountService</value>
+				<ref bean="billDiscountService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillRefundService</value>
+				<ref bean="billRefundService"/>
+			</list>
+		</property>
+	</bean>
+
+	<!-- Service Bean Definitions -->
+	<bean id="itemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.ItemPriceServiceImpl">
+				<property name="repository" ref="genericRepositoryDao"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="paymentModeService"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.PaymentModeServiceImpl">
+				<property name="paymentModeDAO" ref="paymentModeDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="cashierPaymentModeAttributeTypeService"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.PaymentModeAttributeTypeServiceImpl">
+				<property name="repository" ref="genericRepositoryDao"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="cashPointService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.CashPointServiceImpl">
+				<property name="cashPointDAO" ref="cashPointDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="cashierTimesheetService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.TimesheetServiceImpl">
+				<property name="repository" ref="genericRepositoryDao"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="seqReceiptNumberGeneratorService"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.SequentialReceiptNumberGeneratorServiceImpl">
+				<property name="repository" ref="genericRepositoryDao"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="cashierOptionsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.CashierOptionsServiceGpImpl"/>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="billableServiceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillableServiceServiceImpl">
+				<property name="billableServiceDAO" ref="billableServiceDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="cashierItemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.CashierItemPriceServiceImpl">
+				<property name="cashierItemPriceDAO" ref="cashierItemPriceDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="billService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillServiceImpl">
+				<property name="billDAO" ref="billDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="billLineItemService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillLineItemServiceImpl">
+				<property name="billLineItemDAO" ref="billLineItemDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="billingExemptionService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillExemptionServiceImpl">
+				<constructor-arg name="billExemptionDAO" ref="billExemptionDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="billDiscountService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillDiscountServiceImpl">
+				<constructor-arg name="billDiscountDAO" ref="billDiscountDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="billRefundService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillRefundServiceImpl">
+				<constructor-arg name="billRefundDAO" ref="billRefundDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+
+
+	<bean id="genericRepositoryDao"
+	      class="org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
+		<constructor-arg name="sessionFactory" ref="dbSessionFactory"/>
+	</bean>
+	<bean id="billLineItemDAO" class="org.openmrs.module.billing.api.db.hibernate.HibernateBillLineItemDAO">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillDAO">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billExemptionDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.BillExemptionDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billDiscountDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillDiscountDAO">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billRefundDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillRefundDAO">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billableServiceDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillableServiceDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="paymentModeDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernatePaymentModeDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="cashPointDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateCashPointDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="cashierItemPriceDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateCashierItemPriceDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+
+	<bean id="billValidator" class="org.openmrs.module.billing.validator.BillValidator"/>
+	<bean id="billDiscountValidator" class="org.openmrs.module.billing.validator.BillDiscountValidator"/>
+	<bean id="billRefundValidator" class="org.openmrs.module.billing.validator.BillRefundValidator"/>
+
+	<!-- Order Billing: Event Listener and Strategies -->
+	<bean id="orderBillingEventListener"
+		  class="org.openmrs.module.billing.api.billing.OrderBillingEventListener"/>
+
+	<bean id="drugOrderBillingStrategy"
+		  class="org.openmrs.module.billing.api.billing.impl.DrugOrderBillingStrategy"/>
+
+	<bean id="testOrderBillingStrategy"
+		  class="org.openmrs.module.billing.api.billing.impl.TestOrderBillingStrategy"/>
+
+	<bean id="ruleEngine"
+		  class="org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine">
+		<constructor-arg>
+			<list>
+				<bean id="javascriptRuleEvaluator"
+					  class="org.openmrs.module.billing.api.evaluator.impl.JSExemptionEvaluator"/>
+			</list>
+		</constructor-arg>
+	</bean>
+
+</beans>

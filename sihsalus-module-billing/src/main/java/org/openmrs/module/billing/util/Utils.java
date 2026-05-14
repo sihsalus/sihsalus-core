@@ -1,0 +1,244 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.billing.util;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
+import org.openmrs.EncounterType;
+import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.api.context.Context;
+
+public class Utils {
+	
+	public static String UNIQUE_PATIENT_NUMBER = "05ee9cf4-7242-4a17-b4d4-00f707265c8a";
+	
+	public static final String HEI_UNIQUE_NUMBER = "0691f522-dd67-4eeb-92c8-af5083baf338";
+	
+	public static final String KDOD_NUMBER = "b51ffe55-3e76-44f8-89a2-14f5eaf11079";
+	
+	static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
+	
+	public static final String MCH_MOTHER_SERVICE_PROGRAM = "b5d9e05f-f5ab-4612-98dd-adb75438ed34";
+	
+	public static final String RECENCY_ID = "fd52829a-75d2-4732-8e43-4bff8e5b4f1a";
+	
+	public static SimpleDateFormat getSimpleDateFormat(String pattern) {
+		return new SimpleDateFormat(pattern);
+	}
+	
+	/**
+	 * Creates a node factory
+	 *
+	 * @return
+	 */
+	public static JsonNodeFactory getJsonNodeFactory() {
+		return JsonNodeFactory.instance;
+	}
+	
+	/**
+	 * Extracts the request body and return it as string
+	 *
+	 * @param reader
+	 * @return
+	 */
+	public static String fetchRequestBody(BufferedReader reader) {
+		StringBuilder requestBodyJsonStr = new StringBuilder();
+		try {
+			
+			String output;
+			while ((output = reader.readLine()) != null) {
+				requestBodyJsonStr.append(output);
+			}
+		}
+		catch (IOException e) {
+			
+		}
+		return requestBodyJsonStr.toString();
+	}
+	
+	/**
+	 * Used to strip off unicode literals from string
+	 */
+	public static void stripUnicodeLiterals() {
+		//String fullName = result.get("full_names").getAsString();
+		
+		/*for (int j = 0; j < fullName.length(); j++) {
+		    if (Character.UnicodeBlock.of(fullName.charAt(j)) != Character.UnicodeBlock.BASIC_LATIN) {
+		        fullName = "Replaced name";//result.addProperty("full_names", "Replaced Name");
+		        break;
+		        // replace with Y
+		    }
+		}
+		
+		String escapeName = StringEscapeUtils.escapeJava(fullName);
+		String stripUnicode = new UnicodeUnescaper().translate(escapeName);
+		
+		String cleanedName = StringEscapeUtils.unescapeJava(stripUnicode);*/
+	}
+	
+	/**
+	 * Finds the last encounter during the program enrollment with the given encounter type Picked for
+	 * EmrUtils
+	 *
+	 * @param type the encounter type
+	 * @return the encounter
+	 */
+	public static Encounter lastEncounter(Patient patient, EncounterType type) {
+		List<Encounter> encounters = Context.getEncounterService().getEncounters(patient, null, null, null, null,
+		    Collections.singleton(type), null, null, null, false);
+		return !encounters.isEmpty() ? encounters.get(encounters.size() - 1) : null;
+	}
+	
+	/**
+	 * Check latest obs values for given obs
+	 *
+	 * @param patient
+	 * @return latest obs
+	 */
+	public static Obs getLatestObs(Patient patient, String conceptIdentifier) {
+		Concept concept = Context.getConceptService().getConceptByUuid(conceptIdentifier);
+		List<Obs> obs = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (!obs.isEmpty()) {
+			// these are in reverse chronological order
+			return obs.get(0);
+		}
+		return null;
+	}
+	
+	/**
+	 * Get date difference between two dates (in days)
+	 *
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	public static int daysBetween(Date date1, Date date2) {
+		DateTime d1 = new DateTime(date1.getTime());
+		DateTime d2 = new DateTime(date2.getTime());
+		return Days.daysBetween(d1, d2).getDays();
+	}
+	
+	/**
+	 * Gets the integer value of a string, otherwise returns zero
+	 *
+	 * @param val
+	 * @return
+	 */
+	public static int getIntegerValue(String val) {
+		int ret = 0;
+		try {
+			ret = (int) Math.ceil(Double.parseDouble(val));
+		}
+		catch (Exception ex) {}
+		return (ret);
+	}
+	
+	/**
+	 * Gets the long value of a string, otherwise returns zero
+	 *
+	 * @param val
+	 * @return
+	 */
+	public static long getLongValue(String val) {
+		long ret = 0;
+		try {
+			ret = (long) Math.ceil(Double.parseDouble(val));
+		}
+		catch (Exception ex) {}
+		return (ret);
+	}
+	
+	/**
+	 * Builds an SSL context for disabling/bypassing SSL verification
+	 *
+	 * @return
+	 */
+	public static SSLConnectionSocketFactory sslConnectionSocketFactoryWithDisabledSSLVerification() {
+		SSLContextBuilder builder = SSLContexts.custom();
+		try {
+			builder.loadTrustMaterial(null, new TrustStrategy() {
+				
+				@Override
+				public boolean isTrusted(X509Certificate[] chain, String authType) {
+					return true;
+				}
+			});
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		catch (KeyStoreException e) {
+			throw new RuntimeException(e);
+		}
+		SSLContext sslContext;
+		try {
+			sslContext = builder.build();
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		catch (KeyManagementException e) {
+			throw new RuntimeException(e);
+		}
+		return new SSLConnectionSocketFactory(sslContext, new X509HostnameVerifier() {
+			
+			@Override
+			public void verify(String host, SSLSocket ssl) {
+			}
+			
+			@Override
+			public void verify(String host, X509Certificate cert) {
+			}
+			
+			@Override
+			public void verify(String host, String[] cns, String[] subjectAlts) {
+			}
+			
+			@Override
+			public boolean verify(String s, SSLSession sslSession) {
+				return true;
+			}
+		});
+	}
+	
+	/**
+	 * Default SSL context
+	 *
+	 * @return
+	 */
+	public static SSLConnectionSocketFactory sslConnectionSocketFactoryDefault() {
+		return new SSLConnectionSocketFactory(SSLContexts.createDefault(), new String[] { "TLSv1.2" }, null,
+		        SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+	}
+	
+}

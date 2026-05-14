@@ -2,6 +2,7 @@ package org.sihsalus.module.event;
 
 import org.openmrs.event.EventActivator;
 import org.openmrs.event.JmsEventPublisher;
+import org.openmrs.event.TransactionEventListener;
 import org.openmrs.event.api.db.hibernate.HibernateEventInterceptor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -20,7 +21,10 @@ public class SihsalusEventConfiguration {
 
     @Bean
     SmartInitializingSingleton eventActivatorStarter(EventActivator eventActivator) {
-        return eventActivator::started;
+        return () -> {
+            TransactionEventListener.setDaemonToken(null);
+            eventActivator.started();
+        };
     }
 
     @Bean

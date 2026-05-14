@@ -1,0 +1,56 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.billing.api;
+
+import org.openmrs.Order;
+import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.billing.api.model.BillLineItem;
+
+import javax.annotation.Nullable;
+import java.util.List;
+
+public interface BillLineItemService extends OpenmrsService {
+	
+	/**
+	 * Retrieves the IDs of line items currently persisted in the database for a bill.
+	 *
+	 * @param billId the ID of the bill
+	 * @return a list of line item IDs, or an empty list if the bill has no line items
+	 */
+	List<Integer> getPersistedLineItemIds(Integer billId);
+	
+	/**
+	 * Retrieves a bill line item by its UUID.
+	 *
+	 * @param uuid the UUID of the bill line item
+	 * @return the bill line item with the specified UUID, or null if not found
+	 */
+	@Nullable
+	BillLineItem getBillLineItemByUuid(String uuid);
+	
+	/**
+	 * Retrieves the active (non-voided) bill line item linked to the given order.
+	 *
+	 * @param order the order to look up
+	 * @return the bill line item for that order, or null if none exists
+	 */
+	@Nullable
+	BillLineItem getBillLineItemByOrder(Order order);
+	
+	/**
+	 * Voids a bill line item. The OpenMRS {@code BaseVoidHandler} AOP handles setting the void metadata
+	 * (voided, voidReason, dateVoided, voidedBy) automatically.
+	 *
+	 * @param lineItem the line item to void
+	 * @param reason the void reason
+	 */
+	void voidBillLineItem(BillLineItem lineItem, String reason);
+	
+}

@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.Daemon;
 import org.openmrs.module.DaemonToken;
+import org.openmrs.module.ModuleFactory;
 import org.springframework.context.ApplicationListener;
 
 /**
@@ -44,7 +45,7 @@ public abstract class TransactionEventListener implements ApplicationListener<Tr
 	}
 
 	private void runAfterCompletion(Runnable runnable) {
-		if (daemonToken != null) {
+		if (daemonToken != null && ModuleFactory.isTokenValid(daemonToken)) {
 			try {
 				Daemon.runInDaemonThreadAndWait(runnable, daemonToken);
 				return;

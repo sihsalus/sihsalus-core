@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+
+<module configVersion="1.2">
+
+	<!-- Module Properties -->
+	<id>${project.parent.artifactId}</id>
+	<name>${project.parent.name}</name>
+	<version>${project.parent.version}</version>
+	<package>${project.parent.groupId}.${project.parent.artifactId}</package>
+	<author>OpenMRS</author>
+	<description>
+		${project.parent.description}
+	</description>
+	<updateURL>https://modules.openmrs.org/modules/download/${project.parent.artifactId}/update.rdf</updateURL>
+	<require_version>${openmrsPlatformVersion}</require_version>
+	<!-- / Module Properties -->
+
+	<aware_of_modules>
+		<aware_of_module version="2.8">org.openmrs.module.idgen</aware_of_module>
+		<aware_of_module version="${uiframeworkVersion}">org.openmrs.module.uiframework</aware_of_module>
+		<aware_of_module version="${appframeworkVersion}">org.openmrs.module.appframework</aware_of_module>
+		<aware_of_module version="${providerManagementVersion}">org.openmrs.module.providermanagement</aware_of_module>
+		<aware_of_module version="1.7">org.openmrs.module.uicommons</aware_of_module>
+	</aware_of_modules>
+
+	<require_modules>
+		<require_module version="2.9">org.openmrs.module.webservices.rest</require_module>
+		<aware_of_module version="2.8">org.openmrs.module.idgen</aware_of_module>
+		<require_module version="${stockmanagementVersion}">org.openmrs.module.stockmanagement</require_module>
+		<require_module version="${fhir2Version}">org.openmrs.module.fhir2</require_module>
+		<require_module version="${eventVersion}">org.openmrs.event</require_module>
+	</require_modules>
+
+	<!-- Module Activator -->
+	<activator>org.openmrs.module.billing.BillingModuleActivator</activator>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.defaultReceiptReportId</property>
+		<description>ID of the default Jasper report to use for generating a receipt on the Bill page</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.defaultShiftReportId</property>
+		<description>ID of the Jasper Cashier Shift report.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.timesheetRequired</property>
+		<description>Whether or not to require an active timesheet when creating a new bill. True or false.
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.roundingMode</property>
+		<description>How to do rounding to bill totals (FLOOR, MID, CEILING)</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.roundToNearest</property>
+		<description>Nearest unit to round to. Can be a decimal number.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.systemReceiptNumberGenerator</property>
+		<description>Fully qualified class name of the receipt number generator to be used.</description>
+		<defaultValue>org.openmrs.module.billing.api.SequentialReceiptNumberGenerator</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.roundingItemId</property>
+		<description>ID of the item used to account for bill total rounding.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.roundingDeptId</property>
+		<description>ID of the department of the rounding item.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.adjustmentReasonField</property>
+		<description>true/false whether or not the adjustment reason field should be used.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.allowBillAdjustments</property>
+		<description>True/false weather or not the adjustment field feature should be turned on.</description>
+		<defaultValue>true</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.discountEnabled</property>
+		<description>true/false whether or not the discount feature is enabled at the facility level.</description>
+		<defaultValue>false</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.refundEnabled</property>
+		<description>true/false whether or not the refund feature is enabled at the facility level.</description>
+		<defaultValue>false</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.autofillPaymentAmount</property>
+		<description>
+			True/false weather or not the payment amount should be automatically filled with the remaining balance.
+		</description>
+		<defaultValue>false</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.patientDashboard2BillCount</property>
+		<description>
+			Number of Bills to show up on the OpenMRS 2.x patientDashboard.
+		</description>
+		<defaultValue>5</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.reports.departmentCollections</property>
+		<description>
+			The ID of the Department Collections report.
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.reports.departmentRevenue</property>
+		<description>
+			The ID of the Department Revenue report.
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.reports.shiftSummary</property>
+		<description>
+			The ID of the Shift Summary report.
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.reports.dailyShiftSummary</property>
+		<description>
+			The ID of the Daily Shift Summary report.
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.reports.paymentsByPaymentMode</property>
+		<description>
+			The ID of the Payments by Payment Mode report.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>${project.parent.artifactId}.receipt.logoPath</property>
+		<description>
+			Path for the Bill Reciept Logo
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>${project.parent.artifactId}.currencySymbol</property>
+		<description>
+			Currency symbol for billing receipts (e.g., "USD", "KES", or custom text). Falls back to locale default if not set.
+		</description>
+	</globalProperty>
+
+
+	<!-- Extensions -->
+	<!--	<extension>-->
+	<!--		<point>org.openmrs.admin.list</point>-->
+	<!--		<class>org.openmrs.module.billing.html.extension.cashier.AdminList</class>-->
+	<!--	</extension>-->
+	<!--	<extension>-->
+	<!--		<point>org.openmrs.gutter.tools</point>-->
+	<!--		<class>org.openmrs.module.billing.html.extension.cashier.CashierMenuItem</class>-->
+	<!--	</extension>-->
+	<!--	<extension>-->
+	<!--		<point>org.openmrs.patientDashboardTab</point>-->
+	<!--		<class>org.openmrs.module.billing.html.extension.cashier.CashierPatientBilHistoryExt</class>-->
+	<!--	</extension>-->
+	<!--	<extension>-->
+	<!--		<point>org.openmrs.headerFull.userBar</point>-->
+	<!--		<class>org.openmrs.module.billing.html.extension.cashier.CashierLinkExt</class>-->
+	<!--	</extension>-->
+
+	<!-- Privileges -->
+	<!--  Bills  -->
+	<privilege>
+		<name>View Cashier Bills</name>
+		<description>Able to view bills</description>
+	</privilege>
+
+	<privilege>
+		<name>Manage Cashier Bills</name>
+		<description>Able to add/edit/delete bills</description>
+	</privilege>
+
+	<privilege>
+		<name>Adjust Cashier Bills</name>
+		<description>Able to adjust bills</description>
+	</privilege>
+
+	<privilege>
+		<name>Refund Money</name>
+		<description>Able to create/adjust a bill so that it refunds money.</description>
+	</privilege>
+
+	<privilege>
+		<name>Reprint Receipt</name>
+		<description>Able to print bill receipts more than once.</description>
+	</privilege>
+
+	<privilege>
+		<name>Purge Cashier Bills</name>
+		<description>Able to purge bills</description>
+	</privilege>
+
+	<!--  Discounts  -->
+	<privilege>
+		<name>Manage Bill Discounts</name>
+		<description>Able to apply and manage discounts on bills</description>
+	</privilege>
+
+	<privilege>
+		<name>Approve Bill Discounts</name>
+		<description>Able to approve or reject pending bill discounts</description>
+	</privilege>
+
+	<privilege>
+		<name>View Bill Discounts</name>
+		<description>Able to view bill discounts</description>
+	</privilege>
+
+	<!--  Refunds  -->
+	<privilege>
+		<name>Request Bill Refunds</name>
+		<description>Able to raise a refund request against a paid bill</description>
+	</privilege>
+
+	<privilege>
+		<name>Approve Bill Refunds</name>
+		<description>Able to approve or reject pending bill refund requests</description>
+	</privilege>
+
+	<privilege>
+		<name>Complete Bill Refunds</name>
+		<description>Able to record completion of an approved refund (cash or electronic disbursement)</description>
+	</privilege>
+
+	<privilege>
+		<name>View Bill Refunds</name>
+		<description>Able to view bill refunds</description>
+	</privilege>
+
+	<!--  Metadata  -->
+	<privilege>
+		<name>View Cashier Metadata</name>
+		<description>Able to view cashier module metadata</description>
+	</privilege>
+
+	<privilege>
+		<name>Manage Cashier Metadata</name>
+		<description>Able to add/edit/delete cashier module metadata</description>
+	</privilege>
+
+	<privilege>
+		<name>Purge Cashier Metadata</name>
+		<description>Able to purge cashier module metadata</description>
+	</privilege>
+
+	<!--  Timesheets  -->
+	<privilege>
+		<name>View Cashier Timesheets</name>
+		<description>Able to view timesheets</description>
+	</privilege>
+
+	<privilege>
+		<name>Manage Cashier Timesheets</name>
+		<description>Able to add/edit/delete timesheets</description>
+	</privilege>
+
+	<privilege>
+		<name>Purge Cashier Timesheets</name>
+		<description>Able to purge timesheets</description>
+	</privilege>
+
+	<!-- App privileges for OpenMRS 2.x -->
+	<privilege>
+		<name>App: View Cashier App</name>
+		<description>Able to see the Cashier App Icon on the home page</description>
+	</privilege>
+
+	<privilege>
+		<name>App: Access Cashier Tasks</name>
+		<description>Able to access cashier tasks page</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: Create new bill</name>
+		<description>Able to access bill page</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: Adjust Cashier Bills</name>
+		<description>Able to adjust cashier bills</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: Cashier Timesheets</name>
+		<description>Able to access timesheets page</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: Manage Cashier Module</name>
+		<description>Able to access the management page</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: Manage Cashier Metadata</name>
+		<description>Able to add/edit/delete cashier module metadata</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: View Cashier Reports</name>
+		<description>Able to view the cashier reports</description>
+	</privilege>
+
+	<!-- Maps hibernate files, if present -->
+	<mappingFiles>
+		Bill.hbm.xml
+		Cashier.hbm.xml
+		SequentialReceiptNumberGenerator.hbm.xml
+	</mappingFiles>
+
+	<!-- Internationalization -->
+	<!-- All message codes should start with ${project.parent.artifactId}. -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	<messages>
+		<lang>fr</lang>
+		<file>messages_fr.properties</file>
+	</messages>
+	<messages>
+		<lang>es</lang>
+		<file>messages_es.properties</file>
+	</messages>
+	<!-- /Internationalization -->
+
+	<filter>
+		<filter-name>cashierLogoutFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>cashierLogoutFilter</filter-name>
+		<url-pattern>/logout</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>cashierLogoutFilter</filter-name>
+		<url-pattern>/appui/header/logout.action</url-pattern>
+	</filter-mapping>
+
+</module>

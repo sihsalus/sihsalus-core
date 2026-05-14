@@ -1,0 +1,143 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.billing.web.rest.resource;
+
+import org.apache.commons.lang3.BooleanUtils;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
+import org.openmrs.module.billing.api.CashierItemPriceService;
+import org.openmrs.module.billing.api.model.CashierItemPrice;
+import org.openmrs.module.stockmanagement.api.StockManagementService;
+import org.openmrs.module.stockmanagement.api.model.StockItem;
+import org.openmrs.module.webservices.rest.web.RequestContext;
+import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
+import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
+import org.openmrs.module.webservices.rest.web.annotation.Resource;
+import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
+import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
+import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
+import org.openmrs.module.webservices.rest.web.response.ResponseException;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
+        + "/cashierItemPrice", supportedClass = CashierItemPrice.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+public class CashierItemPriceResource extends MetadataDelegatingCrudResource<CashierItemPrice> {
+	
+	private final CashierItemPriceService cashierItemPriceService = Context.getService(CashierItemPriceService.class);
+	
+	@Override
+	public CashierItemPrice newDelegate() {
+		return new CashierItemPrice();
+	}
+	
+	@Override
+	public CashierItemPrice save(CashierItemPrice cashierItemPrice) {
+		return cashierItemPriceService.saveCashierItemPrice(cashierItemPrice);
+	}
+	
+	@Override
+	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			description.addProperty("name");
+			description.addProperty("price");
+			description.addProperty("paymentMode");
+			description.addProperty("item");
+			description.addProperty("billableService", Representation.REF);
+		} else if (rep instanceof CustomRepresentation) {
+			//For custom representation, must be null
+			// - let the user decide which properties should be included in the response
+			description = null;
+		}
+		return description;
+	}
+	
+	@Override
+	public CashierItemPrice getByUniqueId(String uuid) {
+		return cashierItemPriceService.getCashierItemPriceByUuid(uuid);
+	}
+	
+	@Override
+	public void purge(CashierItemPrice cashierItemPrice, RequestContext requestContext) throws ResponseException {
+		cashierItemPriceService.purgeCashierItemPrice(cashierItemPrice);
+	}
+	
+	@Override
+	public DelegatingResourceDescription getCreatableProperties() {
+		DelegatingResourceDescription description = new DelegatingResourceDescription();
+		description.addProperty("name");
+		description.addProperty("price");
+		description.addProperty("paymentMode");
+		description.addProperty("item");
+		description.addProperty("billableService");
+		return description;
+	}
+	
+	@Override
+	public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
+		return getCreatableProperties();
+	}
+	
+	@PropertySetter("price")
+	public void setPrice(CashierItemPrice instance, Object price) {
+		double amount;
+		if (price instanceof Integer) {
+			amount = (int) (Integer) price;
+			instance.setPrice(BigDecimal.valueOf(amount));
+		} else {
+			instance.setPrice(BigDecimal.valueOf((Double) price));
+		}
+	}
+	
+	@PropertySetter(value = "item")
+	public void setItem(CashierItemPrice instance, Object item) {
+		StockManagementService service = Context.getService(StockManagementService.class);
+		String itemUuid = (String) item;
+		instance.setItem(service.getStockItemByUuid(itemUuid));
+	}
+	
+	@PropertyGetter(value = "item")
+	public String getItem(CashierItemPrice instance) {
+		try {
+			StockItem stockItem = instance.getItem();
+			return stockItem.getDrug().getName();
+		}
+		catch (Exception e) {
+			log.error(e);
+			return "";
+		}
+	}
+	
+	@Override
+	public void delete(CashierItemPrice cashierItemPrice, String reason, RequestContext context) throws ResponseException {
+		cashierItemPriceService.retireCashierItemPrice(cashierItemPrice, reason);
+	}
+	
+	@Override
+	public CashierItemPrice undelete(CashierItemPrice cashierItemPrice, RequestContext context) throws ResponseException {
+		return cashierItemPriceService.unretireCashierItemPrice(cashierItemPrice);
+	}
+	
+	@Override
+	protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+		boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
+		List<CashierItemPrice> results = cashierItemPriceService.getCashierItemPrices(includeRetired);
+		return new NeedsPaging<>(results, context);
+	}
+}
