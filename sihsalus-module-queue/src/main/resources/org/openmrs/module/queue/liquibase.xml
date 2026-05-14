@@ -1,0 +1,752 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="add_queue_20220125" author="corneliouzbett">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="queue"/>
+            </not>
+        </preConditions>
+        <createTable tableName="queue">
+            <column name="queue_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="location_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="service" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)"/>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="creator"
+                                 constraintName="queue_creator_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="changed_by"
+                                 constraintName="queue_changed_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="retired_by"
+                                 constraintName="queue_retired_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="location_id"
+                                 constraintName="queue_location_id_fk"
+                                 referencedTableName="location" referencedColumnNames="location_id"/>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="service"
+                                 constraintName="queue_service_fk"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
+    </changeSet>
+
+    <changeSet id="add_queue_entry_20220125" author="corneliouzbett">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="queue_entry"/>
+            </not>
+        </preConditions>
+        <createTable tableName="queue_entry">
+            <column name="queue_entry_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="queue_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="patient_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority_comment" type="varchar(255)"/>
+            <column name="status" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_weight" type="double"/>
+            <column name="location_waiting_for" type="int"/>
+            <column name="provider_waiting_for" type="int"/>
+            <column name="started_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ended_at" type="datetime"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="creator"
+                                 constraintName="queue_entry_creator_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="changed_by"
+                                 constraintName="queue_entry_changed_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="voided_by"
+                                 constraintName="queue_entry_voided_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="queue_id"
+                                 constraintName="queue_entry_queue_id_fk"
+                                 referencedTableName="queue" referencedColumnNames="queue_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="patient_id"
+                                 constraintName="queue_entry_patient_id_fk"
+                                 referencedTableName="patient" referencedColumnNames="patient_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="priority"
+                                 constraintName="queue_entry_priority_fk"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="status"
+                                 constraintName="queue_entry_status_fk"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="location_waiting_for"
+                                 constraintName="queue_entry_location_waiting_for_fk"
+                                 referencedTableName="location" referencedColumnNames="location_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="provider_waiting_for"
+                                 constraintName="queue_entry_provider_waiting_for_fk"
+                                 referencedTableName="provider" referencedColumnNames="provider_id"/>
+    </changeSet>
+
+    <changeSet id="add_visit_queue_entries_20220202" author="corneliouzbett">
+        <preConditions onError="WARN" onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="visit_queue_entries"/>
+            </not>
+        </preConditions>
+        <createTable tableName="visit_queue_entries">
+            <column name="visit_queue_entry_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="visit_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="queue_entry_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="visit_queue_entries_creator_fk"
+                                 baseTableName="visit_queue_entries" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="visit_queue_entries_changed_by_fk"
+                                 baseTableName="visit_queue_entries" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="visit_queue_entries_voided_by_fk"
+                                 baseTableName="visit_queue_entries" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="visit_queue_entries" baseColumnNames="queue_entry_id"
+                                 constraintName="visit_queue_entries_queue_entry_fk" referencedTableName="queue_entry"
+                                 referencedColumnNames="queue_entry_id"/>
+        <addForeignKeyConstraint baseTableName="visit_queue_entries" baseColumnNames="visit_id"
+                                 constraintName="visit_queue_entries_visit_fk" referencedTableName="visit"
+                                 referencedColumnNames="visit_id"/>
+    </changeSet>
+
+    <changeSet id="queue_202301161833" author="makombe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM location_tag where name='Queue Location';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add Queue Location Tag if not already added.</comment>
+        <sql>
+
+            INSERT INTO location_tag (name, description, creator, date_created, uuid) VALUES
+            ('Queue Location',
+            'When a user creates a queue service and chooses a location, they may only choose one with this tag',
+            1,
+            now(),
+            uuid());
+        </sql>
+    </changeSet>
+    
+    <changeSet id="add_queue_room_20230221" author="jecihjoy">
+        <preConditions onError="WARN" onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="queue_room"/>
+            </not>
+        </preConditions>
+        <createTable tableName="queue_room">
+            <column name="queue_room_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="queue_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="queue_room_creator_fk"
+                                 baseTableName="queue_room" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="queue_room_changed_by_fk"
+                                 baseTableName="queue_room" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="queue_room_voided_by_fk"
+                                 baseTableName="queue_room" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="queue_room" baseColumnNames="queue_id"
+                                 constraintName="queue_room_queue_id_fk"
+                                 referencedTableName="queue" referencedColumnNames="queue_id"/>
+    </changeSet>
+
+    <changeSet id="add_room_provider_map_20230222" author="jecihjoy">
+        <preConditions onError="WARN" onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="room_provider_map"/>
+            </not>
+        </preConditions>
+        <createTable tableName="room_provider_map">
+            <column name="room_provider_map_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="queue_room_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="room_provider_map_creator_fk"
+                                 baseTableName="room_provider_map" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="room_provider_map_changed_by_fk"
+                                 baseTableName="room_provider_map" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="room_provider_map_voided_by_fk"
+                                 baseTableName="room_provider_map" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="room_provider_map" baseColumnNames="queue_room_id"
+                                 constraintName="room_provider_map_queue_room_fk" referencedTableName="queue_room"
+                                 referencedColumnNames="queue_room_id"/>
+        <addForeignKeyConstraint baseTableName="room_provider_map" baseColumnNames="provider_id"
+                                 constraintName="room_provider_map_provider_id_fk" referencedTableName="provider"
+                                 referencedColumnNames="provider_id"/>
+    </changeSet>
+
+    <changeSet id="create-auto-close-queue-entry-task-20230616" author="makombe">
+        <validCheckSum>8:6614a6aa5f2fd2e14304b48bff8c4b6d</validCheckSum>
+        <preConditions>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = 'Auto close queue entries Task';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="scheduler_task_config">
+            <column name="name" value="Auto close queue entries Task"/>
+            <column name="description" value="Auto close queue entries Task"/>
+            <column name="schedulable_class" value="org.openmrs.module.queue.tasks.AutoCloseQueueEntryTask"/>
+            <column name="start_time" valueDate="NOW()"/>
+            <column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss"/>
+            <column name="repeat_interval" valueNumeric="86400"/>
+            <column name="start_on_startup" valueBoolean="true"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="date_created" valueDate="NOW()"/>
+            <column name="uuid" valueComputed="UUID()"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="add_location_coming_from_column_to_queue_entry_20230809" author="cynthiakamau">
+        <preConditions onError="WARN" onFail="MARK_RAN">
+            <tableExists tableName="queue_entry"/>
+            <not><columnExists tableName="queue_entry" columnName="location_coming_from"/></not>
+        </preConditions>
+        <comment>
+            Add column location_coming_from to queue entry table
+        </comment>
+        <addColumn tableName="queue_entry">
+            <column name="location_coming_from" type="int">
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_queue_entry_location_coming_from_fk_20230809" author="cynthiakamau">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="queue_entry" columnName="location_coming_from"/>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="location_coming_from" baseTableName="queue_entry" constraintName="queue_entry_location_coming_from_id_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="queue_id" referencedTableName="queue"/>
+    </changeSet>
+
+    <changeSet id="rename_queue_entry_location_coming_from_column_20230914" author="cynthiakamau">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="queue_entry" columnName="location_coming_from"/>
+        </preConditions>
+        <comment>Rename location_coming_from to queue_coming_from</comment>
+        <renameColumn tableName="queue_entry" oldColumnName="location_coming_from" newColumnName="queue_coming_from" columnDataType="int" />
+    </changeSet>
+
+    <changeSet id="drop_queue_entry_location_coming_from_fk_20230914" author="cynthiakamau">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyTableName="queue_entry" foreignKeyName="queue_entry_location_coming_from_id_fk" />
+        </preConditions>
+        <comment>Dropping foreign key on location_coming_from in queue_entry table</comment>
+        <dropForeignKeyConstraint baseTableName="queue_entry" constraintName="queue_entry_location_coming_from_id_fk"/>
+    </changeSet>
+
+    <changeSet id="add_queue_entry_queue_coming_from_fk_20230914" author="cynthiakamau">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="queue_entry" columnName="queue_coming_from"/>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="queue_coming_from" baseTableName="queue_entry" constraintName="queue_entry_queue_coming_from_id_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="queue_id" referencedTableName="queue"/>
+    </changeSet>
+
+    <changeSet id="delete-auto-close-queue-entry-task-20230926" author="mseaton">
+        <preConditions>
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM scheduler_task_config WHERE name = 'Auto close queue entries Task';
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <delete tableName="scheduler_task_config">
+            <where>schedulable_class = 'org.openmrs.module.queue.tasks.AutoCloseQueueEntryTask'</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="add_visit_id_to_queue_entry_20231025" author="mseaton">
+        <preConditions onError="WARN" onFail="MARK_RAN">
+            <tableExists tableName="queue_entry"/>
+            <not><columnExists tableName="queue_entry" columnName="visit_id"/></not>
+        </preConditions>
+        <comment>
+            Add column visit_id to queue entry table
+        </comment>
+        <addColumn tableName="queue_entry">
+            <column name="visit_id" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="visit_id" baseTableName="queue_entry" constraintName="queue_entry_visit_id_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="visit_id" referencedTableName="visit"/>
+    </changeSet>
+
+    <changeSet id="migrate_visit_id_to_queue_entry_20231025" author="mseaton" dbms="mysql,mariadb">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="visit_queue_entries"/>
+        </preConditions>
+        <sql>
+            update queue_entry qe
+            inner join visit_queue_entries vqe on qe.queue_entry_id = vqe.queue_entry_id
+            set qe.visit_id = vqe.visit_id;
+        </sql>
+    </changeSet>
+
+    <changeSet id="migrate_visit_id_to_queue_entry_20231025_postgres" author="wikumChamith" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="visit_queue_entries"/>
+        </preConditions>
+        <sql>
+            UPDATE queue_entry qe
+            SET visit_id = (
+                SELECT vqe.visit_id
+                FROM visit_queue_entries vqe
+                WHERE qe.queue_entry_id = vqe.queue_entry_id
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="drop_visit_queue_entries_20231025" author="mseaton">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="visit_queue_entries"/>
+        </preConditions>
+        <dropTable tableName="visit_queue_entries"/>
+    </changeSet>
+
+    <changeSet id="add_priority_concept_set_to_queue_20240102" author="mseaton">
+        <preConditions onError="WARN" onFail="MARK_RAN">
+            <tableExists tableName="queue"/>
+            <not><columnExists tableName="queue" columnName="priority_concept_set"/></not>
+        </preConditions>
+        <comment>
+            Add column priority_concept_set to queue table
+        </comment>
+        <addColumn tableName="queue">
+            <column name="priority_concept_set" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="priority_concept_set" baseTableName="queue" constraintName="queue_priority_concept_set_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="concept_id" referencedTableName="concept"/>
+    </changeSet>
+
+    <changeSet id="add_status_concept_set_to_queue_20240102" author="mseaton">
+        <preConditions onError="WARN" onFail="MARK_RAN">
+            <tableExists tableName="queue"/>
+            <not><columnExists tableName="queue" columnName="status_concept_set"/></not>
+        </preConditions>
+        <comment>
+            Add column status_concept_set to queue table
+        </comment>
+        <addColumn tableName="queue">
+            <column name="status_concept_set" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="status_concept_set" baseTableName="queue" constraintName="queue_status_concept_set_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="concept_id" referencedTableName="concept"/>
+    </changeSet>
+
+    <changeSet id="sort_weight_default_to_zero_20240305" author="mseaton">
+        <preConditions onError="WARN" onFail="MARK_RAN">
+            <not><sqlCheck expectedResult="0">
+                select count(*) from queue_entry where sort_weight is null;
+            </sqlCheck></not>
+        </preConditions>
+        <comment>
+            Set all queue entry sort_weight to 0 if they are null
+        </comment>
+        <sql>
+            update queue_entry qe set qe.sort_weight = 0 where qe.sort_weight is null;
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050701" author="mujuzi" >
+        <validCheckSum>8:c3b62f0ec22f00b70c3562ef55318511</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Get Queues';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Get Queues" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Get Queues" />
+            <column name="description" value="Able to get/view queues" />
+            <column name="uuid" value="6ccefb68-2803-11ef-b40b-0242ac120002" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050701_fix" author="mseaton" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT count(*) FROM privilege WHERE privilege='Get Queues' and uuid='4e7bdbc8-3975-11e6-899a-a4d646d86a8a';
+            </sqlCheck>
+        </preConditions>
+        <comment>Update uuid for "Get Queues" privilege</comment>
+        <update tableName="privilege">
+            <column name="uuid" value="6ccefb68-2803-11ef-b40b-0242ac120002" />
+            <where>
+                privilege='Get Queues' and uuid='4e7bdbc8-3975-11e6-899a-a4d646d86a8a'
+            </where>
+        </update>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050702" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Get Queue Entries';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Get Queue Entries" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Get Queue Entries" />
+            <column name="description" value="Able to get/view queue entries" />
+            <column name="uuid" value="h9a9m0i6-15e6-467c-9d4b-mbi7teu9lav2" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050703" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Get Queue Rooms';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Get Queue Rooms" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Get Queue Rooms" />
+            <column name="description" value="Able to get/view queue rooms" />
+            <column name="uuid" value="dd901f80-eac7-22e0-aadd-00248140a5ed" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050704" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Manage Queues';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Manage Queues" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Manage Queues" />
+            <column name="description" value="Able to add/edit/retire queues" />
+            <column name="uuid" value="9f41142f-a605-4247-9fa2-30ec8adcf7fb" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050705" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Manage Queue Entries';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Manage Queue Entries" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Manage Queue Entries" />
+            <column name="description" value="Able to add/edit/retire queue entries" />
+            <column name="uuid" value="598756b4-9676-4b54-8a35-6b368088c505" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050706" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Manage Queue Rooms';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Manage Queue Rooms" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Manage Queue Rooms" />
+            <column name="description" value="Able to add/edit/retire queue rooms" />
+            <column name="uuid" value="a72dac37-b593-46a1-a24b-e3da6dbcc521" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050707" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Purge Queues';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Purge Queues" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Purge Queues" />
+            <column name="description" value="Able to delete queues from the database" />
+            <column name="uuid" value="1cb903f2-90df-11e0-9c16-705abgfds24r" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050708" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Purge Queue Entries';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Purge Queue Entries" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Purge Queue Entries" />
+            <column name="description" value="Able to delete queue entries from the database" />
+            <column name="uuid" value="22a5ea24-f755-42c2-ae56-b0d23gt567r4" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_2024050709" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM privilege WHERE privilege='Purge Queue Rooms';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Purge Queue Rooms" privilege</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Purge Queue Rooms" />
+            <column name="description" value="Able to delete queue rooms from the database" />
+            <column name="uuid" value="9h8d710b-d333-40b7-b449-6e0e739d15d0" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507010" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Get Queue Entries';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Get Queue Entries" privilege to the roles having "Get Visits"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT role, 'Get Queue Entries' from role_privilege rp
+            WHERE rp.privilege = 'Get Visits';
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507011" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Manage Queue Entries';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Manage Queue Entries" privilege to the roles having "Add Visits" and "Edit Visits"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT distinct role, 'Manage Queue Entries' from role_privilege rp
+            WHERE rp.privilege in ('Add Visits', 'Edit Visits');
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507012" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Purge Queue Entries';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Purge Queue Entries" privilege to the roles having "Delete Visits"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT role, 'Purge Queue Entries' from role_privilege rp
+            WHERE rp.privilege = 'Delete Visits';
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507013" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Get Queue Rooms';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Get Queue Rooms" privilege to the roles having "Get Visits"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT role, 'Get Queue Rooms' from role_privilege rp
+            WHERE rp.privilege = 'Get Visits';
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507014" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Manage Queue Rooms';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Manage Queue Rooms" privilege to the roles having "Add Visits" and "Edit Visits"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT distinct role, 'Manage Queue Rooms' from role_privilege rp
+            WHERE rp.privilege in ('Add Visits', 'Edit Visits');
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507015" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Purge Queue Rooms';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Purge Queue Rooms" privilege to the roles having "Delete Visits"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT role, 'Purge Queue Rooms' from role_privilege rp
+            WHERE rp.privilege = 'Delete Visits';
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507016" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Get Queues';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Get Queues" privilege to the roles having "Get Visit Types"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT role, 'Get Queues' from role_privilege rp
+            WHERE rp.privilege = 'Get Visit Types';
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507017" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Manage Queues';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Manage Queues" privilege to the roles having "Manage Visit Types"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT role, 'Manage Queues' from role_privilege rp
+            WHERE rp.privilege = 'Manage Visit Types';
+        </sql>
+    </changeSet>
+
+    <changeSet id="rest_endpoints_accessed_without_authentication_20240507018" author="mujuzi" >
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM role_privilege WHERE privilege='Purge Queues';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add "Purge Queues" privilege to the roles having "Manage Visit Types"</comment>
+        <sql>
+            INSERT INTO role_privilege (role, privilege)
+            SELECT role, 'Purge Queues' from role_privilege rp
+            WHERE rp.privilege = 'Manage Visit Types';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

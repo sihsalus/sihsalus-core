@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="slubwama" id="patientflags-1554735240623-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patientflags_displaypoint"/>
+            </not>
+        </preConditions>
+        <comment>Create Table patientflags_displaypoint</comment>
+        <createTable tableName="patientflags_displaypoint">
+            <column autoIncrement="true" name="displaypoint_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)"/>
+            <column defaultValueNumeric="0" name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column defaultValueBoolean="false" name="retired" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="VARCHAR(255)"/>
+            <column name="uuid" type="CHAR(38)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patientflags_flag"/>
+            </not>
+        </preConditions>
+        <comment>Create Table patientflags_flag</comment>
+        <createTable tableName="patientflags_flag">
+            <column autoIncrement="true" name="flag_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="criteria" type="VARCHAR(5000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="evaluator" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)"/>
+            <column defaultValueNumeric="0" name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column defaultValueBoolean="false" name="retired" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="VARCHAR(255)"/>
+            <column name="uuid" type="CHAR(38)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patientflags_flag_tag"/>
+            </not>
+        </preConditions>
+        <comment>Create Table patientflags_flag_tag</comment>
+        <createTable tableName="patientflags_flag_tag">
+            <column name="flag_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-4">
+        <validCheckSum>8:f9220202f1e6b3e33784e132be742f77</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patientflags_priority"/>
+            </not>
+        </preConditions>
+        <comment>Create Table patientflags_priority</comment>
+        <createTable tableName="patientflags_priority">
+            <column autoIncrement="true" name="priority_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="style" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rank" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)"/>
+            <column defaultValueNumeric="0" name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column defaultValueBoolean="false" name="retired" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="VARCHAR(255)"/>
+            <column name="uuid" type="CHAR(38)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patientflags_tag"/>
+            </not>
+        </preConditions>
+        <comment>Create Table patientflags_tag</comment>
+        <createTable tableName="patientflags_tag">
+            <column autoIncrement="true" name="tag_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(1000)"/>
+            <column defaultValueNumeric="0" name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column defaultValueBoolean="false" name="retired" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="VARCHAR(255)"/>
+            <column name="uuid" type="CHAR(38)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-6">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patientflags_tag_displaypoint"/>
+            </not>
+        </preConditions>
+        <comment>Create Table patientflags_tag_displaypoint</comment>
+        <createTable tableName="patientflags_tag_displaypoint">
+            <column name="tag_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="displaypoint_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patientflags_tag_role"/>
+            </not>
+        </preConditions>
+        <comment>Create Table patientflags_tag_role</comment>
+        <createTable tableName="patientflags_tag_role">
+            <column name="tag_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false" foreignKeyName="patientflags_tag_role_ibfk_2" references="role(role)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-12">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="flag_id"/>
+            </not>
+        </preConditions>
+        <comment>Add an index constraint flag_id to table patientflags_flag_tag on column flag_id</comment>
+        <createIndex indexName="flag_id" tableName="patientflags_flag_tag">
+            <column name="flag_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-13">
+    	<validCheckSum>3:3da6a06d3efc63e8a2d74e3897a486a4</validCheckSum> <!-- old checksum before changing role to patientflags_role -->
+    	<validCheckSum>3:7b9b1c32b280d38e7db301a93991962c</validCheckSum> <!-- new checksum after changing role to patientflags_role -->
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="patientflags_role"/>
+            </not>
+        </preConditions>
+        <comment>Add an index constraint role to table patientflags_tag_role on column role</comment>
+        <createIndex indexName="patientflags_role" tableName="patientflags_tag_role">
+            <column name="role"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-14">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="tag_id"/>
+            </not>
+        </preConditions>
+        <comment>Add an index constraint tag_id to table patientflags_flag_tag on column tag_id</comment>
+        <createIndex indexName="tag_id" tableName="patientflags_flag_tag">
+            <column name="tag_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-15">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="tag_displaypoint_id"/>
+            </not>
+        </preConditions>
+        <comment>Add an index constraint tag_displaypoint_id to table patientflags_tag_displaypoint on column tag_id</comment>
+        <createIndex indexName="tag_displaypoint_id" tableName="patientflags_tag_displaypoint">
+            <column name="tag_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-16">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="tag_role_id"/>
+            </not>
+        </preConditions>
+        <comment>Add an index  tag_id to table patientflags_tag_role on column tag_id</comment>
+        <createIndex indexName="tag_role_id" tableName="patientflags_tag_role">
+            <column name="tag_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-17">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="patientflags_flag_tag" foreignKeyName="patientflags_flag_tag_ibfk_1" />
+            </not>
+        </preConditions>
+        <comment>Add a foreign key constraint patientflags_flag_tag_ibfk_1 to table patientflags_flag_tag on column flag_id</comment>
+        <addForeignKeyConstraint baseColumnNames="flag_id" baseTableName="patientflags_flag_tag" constraintName="patientflags_flag_tag_ibfk_1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="flag_id" referencedTableName="patientflags_flag"/>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-18">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="patientflags_flag_tag" foreignKeyName="patientflags_flag_tag_ibfk_2" />
+            </not>
+        </preConditions>
+        <comment>Add a foreign key constraint patientflags_flag_tag_ibfk_2 to table patientflags_flag_tag on column tag_id</comment>
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="patientflags_flag_tag" constraintName="patientflags_flag_tag_ibfk_2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="tag_id" referencedTableName="patientflags_tag"/>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-19">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="patientflags_tag_displaypoint" foreignKeyName="patientflags_tag_displaypoint_ibfk_1" />
+            </not>
+        </preConditions>
+        <comment>Add a foreign key constraint patientflags_tag_displaypoint_ibfk_1 to table patientflags_tag_displaypoint on column tag_id</comment>
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="patientflags_tag_displaypoint" constraintName="patientflags_tag_displaypoint_ibfk_1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="tag_id" referencedTableName="patientflags_tag"/>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-20">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="patientflags_tag_displaypoint" foreignKeyName="patientflags_tag_displaypoint_ibfk_2" />
+            </not>
+        </preConditions>
+        <comment>Add a foreign key constraint patientflags_tag_displaypoint_ibfk_2 to table patientflags_tag_displaypoint on column displaypoint_id</comment>
+        <addForeignKeyConstraint baseColumnNames="displaypoint_id" baseTableName="patientflags_tag_displaypoint" constraintName="patientflags_tag_displaypoint_ibfk_2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="displaypoint_id" referencedTableName="patientflags_displaypoint"/>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientflags-1554735240623-21">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="patientflags_tag_role" foreignKeyName="patientflags_tag_role_ibfk_1" />
+            </not>
+        </preConditions>
+        <comment>Add a foreign key constraint patientflags_tag_role_ibfk_1 to table patientflags_tag_role on column tag_id</comment>
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="patientflags_tag_role" constraintName="patientflags_tag_role_ibfk_1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="tag_id" referencedTableName="patientflags_tag"/>
+    </changeSet>
+
+    <changeSet id="patientflags-unique-flagname-20171115-1600" author="ssmusoke">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="patientflags_flag_name_unique"></indexExists>
+            </not>
+        </preConditions>
+        <comment>Add a unique constraint to the name of the flag</comment>
+        <addUniqueConstraint tableName="patientflags_flag" columnNames="name" constraintName="patientflags_flag_name_unique"></addUniqueConstraint>
+    </changeSet>
+
+    <changeSet id="patientflags-unique-priorityname-20171115-1600" author="ssmusoke">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="patientflags_priority_name_unique"></indexExists>
+            </not>
+        </preConditions>
+        <comment>Add a unique constraint to the name of the priority</comment>
+        <addUniqueConstraint tableName="patientflags_priority" columnNames="name"  constraintName="patientflags_priority_name_unique"></addUniqueConstraint>
+    </changeSet>
+
+    <changeSet id="patientflags-unique-tagname-20171115-1600" author="ssmusoke">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="patientflags_tag_name_unique"></indexExists>
+            </not>
+        </preConditions>
+        <comment>Add a unique constraint to the name of the tag</comment>
+        <addUniqueConstraint tableName="patientflags_tag" columnNames="name"  constraintName="patientflags_tag_name_unique"></addUniqueConstraint>
+    </changeSet>
+    
+    <changeSet author="dkayiwa" id="patientflags_patient_flag">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patientflags_patient_flag"/>
+            </not>
+        </preConditions>
+        <comment>Create table patientflags_patient_flag</comment>
+        <createTable tableName="patientflags_patient_flag">
+            <column autoIncrement="true" name="patient_flag_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="patient_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flag_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uuid" type="CHAR(38)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="flag_id" baseTableName="patientflags_patient_flag" constraintName="patientflags_patient_flag_flag_id_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="flag_id" referencedTableName="patientflags_flag"/> 
+        <addForeignKeyConstraint baseColumnNames="patient_id" baseTableName="patientflags_patient_flag" constraintName="patientflags_patient_flag_patient_id_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="patient_id" referencedTableName="patient"/> 
+    </changeSet>
+    
+    <changeSet id="patientflags_priority_rename_rank_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="patientflags_priority" />
+			<and>
+				<columnExists tableName="patientflags_priority" columnName="rank" />
+			</and>
+		</preConditions>
+		<comment>Renaming column rank to p_rank because rank is a reserved word in MySQL 8.0.2 and later</comment>
+		<renameColumn columnDataType="int"
+		              newColumnName="p_rank"
+		              oldColumnName="rank"
+		              tableName="patientflags_priority" />
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_message_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="message"/>
+			</not>
+		</preConditions>
+		<comment>Adding 'message' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column name="message" type="VARCHAR(255)"/>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_voided_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="voided"/>
+			</not>
+		</preConditions>
+		<comment>Adding the 'voided' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column defaultValueBoolean="false" name="voided" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_voided_by_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="voided_by"/>
+			</not>
+		</preConditions>
+		<comment>Adding the 'voided_by' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column name="voided_by" type="int"/>
+		</addColumn>
+		<addForeignKeyConstraint baseColumnNames="voided_by" baseTableName="patientflags_patient_flag" constraintName="patientflags_patient_flag_voided_by_fk" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="user_id" referencedTableName="users"/> 
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_date_voided_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="date_voided"/>
+			</not>
+		</preConditions>
+		<comment>Adding the 'date_voided' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column name="date_voided" type="datetime"/>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_void_reason_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="void_reason"/>
+			</not>
+		</preConditions>
+		<comment>Adding the 'void_reason' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column name="void_reason" type="varchar(255)"/>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_creator_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="creator"/>
+			</not>
+		</preConditions>
+		<comment>Adding the 'creator' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column name="creator" type="int"> 
+		        <constraints nullable="false"/> 
+		      </column> 
+		</addColumn>
+		<addForeignKeyConstraint baseColumnNames="creator" baseTableName="patientflags_patient_flag" constraintName="patientflags_patient_flag_creator_fk" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="user_id" referencedTableName="users"/> 
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_date_created_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="date_created"/>
+			</not>
+		</preConditions>
+		<comment>Adding the 'date_created' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column name="date_created" type="datetime"/>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_changed_by_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="changed_by"/>
+			</not>
+		</preConditions>
+		<comment>Adding the 'changed_by' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column name="changed_by" type="int"/>
+		</addColumn>
+		<addForeignKeyConstraint baseColumnNames="changed_by" baseTableName="patientflags_patient_flag" constraintName="patientflags_patient_flag_changed_by_fk" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="user_id" referencedTableName="users"/> 
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_date_changed_column" author="dkayiwa">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="patientflags_patient_flag" columnName="date_changed"/>
+			</not>
+		</preConditions>
+		<comment>Adding the 'date_changed' column to 'patientflags_patient_flag' table</comment>
+		<addColumn tableName="patientflags_patient_flag">
+			<column name="date_changed" type="datetime"/>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="patientflags_patient_flag_clean_up_for_schema_change" author="dkayiwa">
+		<sql>delete from patientflags_patient_flag</sql>
+    </changeSet>
+
+	<changeSet id="patientflags_priority_style_nullable" author="bistenes">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<tableExists tableName="patientflags_priority"/>
+				<columnExists tableName="patientflags_priority" columnName="style"/>
+			</and>
+		</preConditions>
+		<comment>Make Priority.style nullable (legacy field, not used in OpenMRS 3+)</comment>
+		<dropNotNullConstraint columnName="style" columnDataType="VARCHAR(255)" tableName="patientflags_priority"/>
+	</changeSet>
+
+</databaseChangeLog>

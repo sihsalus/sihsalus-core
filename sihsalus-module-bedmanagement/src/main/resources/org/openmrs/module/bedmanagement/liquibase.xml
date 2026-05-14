@@ -1,0 +1,754 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="arathy" id="08102013_1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bed"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create bed table
+        </comment>
+        <createTable tableName="bed">
+            <column autoIncrement="true" name="bed_id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="bed_number" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="arathy" id="08102013_2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bed_patient_assignment_map"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create bed_patient_assignment_map table
+        </comment>
+        <createTable tableName="bed_patient_assignment_map">
+            <column autoIncrement="true" name="bed_patient_assignment_map_id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="patient_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bed_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_started" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_stopped" type="datetime"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="arathy" id="08102013_3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="bed_patient_assignment_map" foreignKeyName="bed_id_fk"/>
+            </not>
+        </preConditions>
+        <comment>
+            Added foreign key reference on bed_id in bed_patient_assignment_map table
+        </comment>
+        <addForeignKeyConstraint constraintName="bed_id_fk"
+                                 baseTableName="bed_patient_assignment_map" baseColumnNames="bed_id"
+                                 referencedTableName="bed" referencedColumnNames="bed_id"/>
+    </changeSet>
+
+    <changeSet author="arathy" id="08102013_4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="bed_patient_assignment_map" foreignKeyName="bed_patient_assignment_map_patient_fk"/>
+            </not>
+        </preConditions>
+        <comment>
+            Added foreign key reference on patient_id in bed_patient_assignment_map table
+        </comment>
+        <addForeignKeyConstraint constraintName="bed_patient_assignment_map_patient_fk"
+                                 baseTableName="bed_patient_assignment_map" baseColumnNames="patient_id"
+                                 referencedTableName="patient" referencedColumnNames="patient_id"/>
+    </changeSet>
+
+    <changeSet author="arathy" id="08102013_5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bed_location_map"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create bed_location_map table
+        </comment>
+        <createTable tableName="bed_location_map">
+            <column autoIncrement="true" name="bed_location_map_id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="location_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="row_number" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="column_number" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bed_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="arathy" id="08102013_6">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="bed_location_map" foreignKeyName="bed_location_map_location_fk"/>
+            </not>
+        </preConditions>
+        <comment>
+            Added foreign key reference on location_id in bed_location_map table
+        </comment>
+        <addForeignKeyConstraint constraintName="bed_location_map_location_fk"
+                                 baseTableName="bed_location_map" baseColumnNames="location_id"
+                                 referencedTableName="location" referencedColumnNames="location_id"/>
+    </changeSet>
+
+    <changeSet author="arathy" id="08102013_7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="status" tableName="bed"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="bed">
+            <column name="status" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="arathy" id="08102013_8">
+        <addDefaultValue
+                columnDataType="varchar(255)"
+                columnName="status"
+                defaultValue="AVAILABLE"
+                tableName="bed"/>
+    </changeSet>
+
+    <changeSet author="Arathy,Banka" id="bed_management_module_18112013_1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bed_type"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create bed_type table
+        </comment>
+        <createTable tableName="bed_type">
+            <column autoIncrement="true" name="bed_type_id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_name" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Arathy,Banka" id="bed_management_module_18112013_2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="bed" columnName="bed_type_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="bed">
+            <column name="bed_type_id" type="int"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="Arathy,Banka" id="bed_management_module_18112013_3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="bed" foreignKeyName="bed_bed_type_fk"/>
+            </not>
+        </preConditions>
+        <comment>
+            Added foreign key reference on bed_type_id in bed table
+        </comment>
+        <addForeignKeyConstraint constraintName="bed_bed_type_fk"
+                                 baseTableName="bed" baseColumnNames="bed_type_id"
+                                 referencedTableName="bed_type" referencedColumnNames="bed_type_id"/>
+    </changeSet>
+
+    <changeSet author="tw" id="27112013_1">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="encounter_id" type="int">
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint constraintName="bed_patient_assignment_map_encounter_fk"
+                                 baseTableName="bed_patient_assignment_map" baseColumnNames="encounter_id"
+                                 referencedTableName="encounter" referencedColumnNames="encounter_id"/>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_1">
+        <addColumn tableName="bed">
+            <column name="uuid" type="char(38)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_2">
+        <addColumn tableName="bed">
+            <column name="creator" type="int" valueNumeric="1"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_3">
+        <addColumn tableName="bed">
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_4">
+        <addColumn tableName="bed">
+            <column name="changed_by" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_5">
+        <addColumn tableName="bed">
+            <column name="date_changed" type="datetime"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_6">
+        <addColumn tableName="bed">
+            <column name="voided" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="tw" id="28112013_7">
+        <addColumn tableName="bed">
+            <column name="voided_by" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_8">
+        <addColumn tableName="bed">
+            <column name="date_voided" type="datetime"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_9">
+        <addColumn tableName="bed">
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_10">
+        <addUniqueConstraint tableName="bed"
+                             columnNames="uuid" constraintName="bed_unique_uuid"/>
+        <addForeignKeyConstraint constraintName="bed_creator"
+                                 baseTableName="bed" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_changed_by_fk"
+                                 baseTableName="bed" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_voided_by_fk"
+                                 baseTableName="bed" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
+
+
+    <changeSet author="tw" id="28112013_11">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="uuid" type="char(38)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_12">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="creator" type="int" valueNumeric="1"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_13">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="tw" id="28112013_14">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="changed_by" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_15">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="date_changed" type="datetime"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_16">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="voided" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_17">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="voided_by" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_18">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="date_voided" type="datetime"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tw" id="28112013_19">
+        <addColumn tableName="bed_patient_assignment_map">
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- note bed_patient_assignment_map_bed_unique_uuid constraint was originally called bed_unique_uuid -->
+    <changeSet author="tw" id="28112013_20">
+        <validCheckSum>9:76deb800a39aee496eb70e572bac5d20</validCheckSum>
+        <validCheckSum>8:d7d99c44b6450a9ccd30ad053409e8ed</validCheckSum>
+        <addUniqueConstraint tableName="bed_patient_assignment_map"
+                             columnNames="uuid" constraintName="bed_patient_assignment_map_bed_unique_uuid"/>
+        <addForeignKeyConstraint constraintName="bed_patient_assignment_map_creator"
+                                 baseTableName="bed_patient_assignment_map" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_patient_assignment_map_changed_by_fk"
+                                 baseTableName="bed_patient_assignment_map" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_patient_assignment_map_voided_by_fk"
+                                 baseTableName="bed_patient_assignment_map" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet id="bedmanagement-201401171410" author="banka-tw">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege = 'app:adt'</sqlCheck>
+        </preConditions>
+        <insert tableName="privilege">
+            <column name="privilege" value="app:adt"/>
+            <column name="description" value="Admission Discharge Transfer app access privilege"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="bedmanagement-201514101449" author="padma">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Get Beds'</sqlCheck>
+        </preConditions>
+        <insert tableName="privilege">
+            <column name="privilege" value="Get Beds"/>
+            <column name="description" value="Able to view available beds"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="bedmanagement-201514101455" author="padma">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Assign Beds'</sqlCheck>
+        </preConditions>
+        <insert tableName="privilege">
+            <column name="privilege" value="Assign Beds"/>
+            <column name="description" value="Able to assign bed to patient"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="bedmanagement-201514101836" author="padma">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Get Admission Locations'</sqlCheck>
+        </preConditions>
+        <insert tableName="privilege">
+            <column name="privilege" value="Get Admission Locations"/>
+            <column name="description" value="Able to view admission locations"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="bedmanagement-20151410183" author="padma">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Edit Admission Locations'</sqlCheck>
+        </preConditions>
+        <insert tableName="privilege">
+            <column name="privilege" value="Edit Admission Locations"/>
+            <column name="description" value="Able to Edit admission locations"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="bedmanagement-201625111153" author="Sourav, Chethan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bed_tag"/>
+            </not>
+        </preConditions>
+        <comment>Creating bed_tag table</comment>
+        <createTable tableName="bed_tag">
+            <column name="bed_tag_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="bed_tag_creator_fk"
+                                 baseTableName="bed_tag" baseColumnNames="creator"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_tag_changed_by_fk"
+                                 baseTableName="bed_tag" baseColumnNames="changed_by"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_tag_voided_by_fk"
+                                 baseTableName="bed_tag" baseColumnNames="voided_by"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet id="201625111155" author="Sourav, Chethan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bed_tag_map"/>
+            </not>
+        </preConditions>
+        <comment>Creating bed_tag_map table</comment>
+        <createTable tableName="bed_tag_map">
+            <column name="bed_tag_map_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bed_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bed_tag_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+        </createTable>
+        <addForeignKeyConstraint constraintName="bed_tag_map_bed_fk"
+                                 baseTableName="bed_tag_map" baseColumnNames="bed_id"
+                                 referencedTableName="bed"
+                                 referencedColumnNames="bed_id"/>
+        <addForeignKeyConstraint constraintName="bed_tag_map_tag_fk"
+                                 baseTableName="bed_tag_map" baseColumnNames="bed_tag_id"
+                                 referencedTableName="bed_tag"
+                                 referencedColumnNames="bed_tag_id"/>
+        <addForeignKeyConstraint constraintName="bed_tag_map_creator_fk"
+                                 baseTableName="bed_tag_map" baseColumnNames="creator" referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_tag_map_changed_by_fk"
+                                 baseTableName="bed_tag_map" baseColumnNames="changed_by"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_tag_map_voided_by_fk"
+                                 baseTableName="bed_tag_map" baseColumnNames="voided_by"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+    </changeSet>
+    <changeSet id="bedmanagement-201703221515" author="Santhosh, Maharjun">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Get Tags'</sqlCheck>
+        </preConditions>
+        <insert tableName="privilege">
+            <column name="privilege" value="Get Tags"/>
+            <column name="description" value="Able to get the tags"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="bedmanagement-201703221516" author="Santhosh, Maharjun">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Edit Tags'</sqlCheck>
+        </preConditions>
+        <insert tableName="privilege">
+            <column name="privilege" value="Edit Tags"/>
+            <column name="description" value="Able to associate tags to the bed"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet author="SanishMaharjan" id="bedmanagement-201802121200">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="bed_type"/>
+        </preConditions>
+        <comment>
+            Add bed type additional columns
+        </comment>
+        <addColumn tableName="bed_type">
+            <column name="uuid" type="char(38)" valueComputed="uuid()"/>
+            <column name="creator" type="int" valueNumeric="1"/>
+            <column name="date_created" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+        </addColumn>
+        <addForeignKeyConstraint constraintName="bed_type_creator_fk"
+                                 baseTableName="bed_type" baseColumnNames="creator"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_type_changed_by_fk"
+                                 baseTableName="bed_type" baseColumnNames="changed_by"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="bed_type_retired_by_fk"
+                                 baseTableName="bed_type" baseColumnNames="retired_by"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"/>
+    </changeSet>
+    <changeSet author="Mahitha, Swathi" id="201809040219">
+        <preConditions onFailMessage="There should not be any dangling records(null values or other values which are not in bed table for bed_id) for the bed_id in bed_location_map">
+            <and>
+                <sqlCheck expectedResult="0">select count(bed_id) from bed_location_map where bed_id is null</sqlCheck>
+                <sqlCheck expectedResult="0">select count(bed_id) from bed_location_map where bed_id not in (select distinct bed_id from bed)</sqlCheck>
+            </and>
+        </preConditions>
+        <comment>Adds not null constraint to bed_id column in bed_location_map</comment>
+        <addNotNullConstraint tableName="bed_location_map" columnName="bed_id" columnDataType="int"/>
+    </changeSet>
+    <changeSet author="Mahitha" id="201807041155">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="bed_location_map" foreignKeyName="bed_location_map_bed_id_fk"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds foreign key reference on bed_id in bed_location_map table
+        </comment>
+        <addForeignKeyConstraint constraintName="bed_location_map_bed_id_fk"
+                                 baseTableName="bed_location_map" baseColumnNames="bed_id"
+                                 referencedTableName="bed" referencedColumnNames="bed_id"/>
+    </changeSet>
+    <changeSet id="201806272055" author="Saikumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'atomfeed.publish.eventsForBedTagMapChange';
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding global property to act as switch for raising bed_tag_map events</comment>
+        <insert tableName="global_property">
+            <column name="property" value="atomfeed.publish.eventsForBedTagMapChange"/>
+            <column name="property_value" value="true"/>
+            <column name="uuid" valueComputed="UUID()"/>
+            <column name="description" value="If set true, events related to bed tag map changes are published"/>
+        </insert>
+    </changeSet>
+    <changeSet id="201806272357" author="Saikumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'atomfeed.event.urlPatternForBedTagMap';
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding global property to specify the URL pattern for published bed_tag_map events</comment>
+        <insert tableName="global_property">
+            <column name="property" value="atomfeed.event.urlPatternForBedTagMap"/>
+            <column name="property_value" value="/openmrs/ws/rest/v1/bedTagMap/{uuid}"/>
+            <column name="uuid" valueComputed="UUID()"/>
+            <column name="description"
+                    value="URL pattern to use for published bed tag map events. Default is /openmrs/ws/rest/v1/bedTagMap/{uuid}. If you change default value, please add your custom implementation for the given URL."/>
+        </insert>
+    </changeSet>
+    <changeSet id="BM-201808291611" author="Angshu" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'bedManagement.sqlGet.patientListForAdmissionLocation';
+            </sqlCheck>
+        </preConditions>
+        <comment>SQL query for Get Patient Details in Ward</comment>
+
+        <insert tableName="global_property">
+            <column name="property" value="bedManagement.sqlGet.patientListForAdmissionLocation"/>
+            <column name="property_value">SELECT
+                    bed.bed_number AS 'Bed Number',
+                    bed_tags.bed_tags AS 'Bed Tags',
+                    bed.status as 'Bed Status',
+                    patient_identifier.identifier AS 'Patient ID',
+                    CONCAT(pn.given_name, ' ', pn.family_name)  AS 'Patient Name',
+                    TIMESTAMPDIFF(YEAR, p.birthdate, CURDATE()) AS 'Age'
+                FROM bed
+                    INNER JOIN bed_location_map blm ON blm.bed_id = bed.bed_id
+                    INNER JOIN location l ON l.location_id = blm.location_id AND l.retired IS FALSE
+                    LEFT OUTER JOIN bed_patient_assignment_map bpam ON bpam.bed_id = bed.bed_id AND bpam.date_stopped IS NULL
+                    LEFT OUTER JOIN person p ON p.person_id = bpam.patient_id AND p.voided IS FALSE
+                    LEFT OUTER JOIN person_name pn ON pn.person_id = p.person_id AND pn.voided IS FALSE
+                    LEFT OUTER JOIN patient_identifier ON patient_identifier.patient_id = p.person_id AND patient_identifier.voided IS FALSE
+                    LEFT OUTER JOIN person_address address ON address.person_id = p.person_id AND address.voided IS FALSE
+                    LEFT OUTER JOIN (
+                        SELECT bed_tag_map.bed_id AS 'bed_id', GROUP_CONCAT(DISTINCT bed_tag.name ORDER BY bed_tag.name) AS 'bed_tags'
+                        FROM bed_tag_map
+                        INNER JOIN bed_tag ON bed_tag.bed_tag_id = bed_tag_map.bed_tag_id AND bed_tag_map.voided IS FALSE
+                        GROUP BY bed_tag_map.bed_id
+                    ) bed_tags ON bed_tags.bed_id = bed.bed_id
+                WHERE l.name = ${location_name}
+                GROUP BY bed.bed_number;</column>
+            <column name="description" value="Sql query to get admitted patients details in an Admission Location"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="BM-201810051013" author="Dubey" runOnChange="true">
+        <comment>Drop not null constraint for bed_id in bed_location_map table</comment>
+        <dropNotNullConstraint tableName="bed_location_map" columnName="bed_id" columnDataType="int"/>
+    </changeSet>
+
+    <changeSet id="BM-201810051512" author="angshu" runOnChange="true" context="r0.92">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Edit Beds'</sqlCheck>
+        </preConditions>
+        <comment>Create privilege - Edit Beds</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Edit Beds"/>
+            <column name="description" value="Ability to edit bed details"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="BM-201810051515" author="angshu" runOnChange="true" context="r0.92">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Get Bed Type'</sqlCheck>
+        </preConditions>
+        <comment>Create privilege - Get Bed Type</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Get Bed Type"/>
+            <column name="description" value="Ability to view bed types"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="BM-201810051518" author="angshu" runOnChange="true" context="r0.92">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Edit Bed Type'</sqlCheck>
+        </preConditions>
+        <comment>Create privilege - Edit Bed Type</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Edit Bed Type"/>
+            <column name="description" value="Ability to edit bed types"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+
+    <!--
+     The privileges  - Get Tags, Edit Tags - should be renamed to Get Bed Tags, Edit Bed Tags
+     create new privileges - Get Bed Tags, Edit Bed Tags
+     update existing role-privilege association
+     delete the older Privileges - Get Tags, Edit Tags
+    -->
+
+    <changeSet id="BM-201810051531" author="angshu" runOnChange="true" context="r0.92">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Get Bed Tags'</sqlCheck>
+        </preConditions>
+        <comment>Create privilege - Get Bed Tags</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Get Bed Tags"/>
+            <column name="description" value="Ability to view bed tags"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="BM-201810051532" author="angshu" runOnChange="true" context="r0.92">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Edit Bed Tags'</sqlCheck>
+        </preConditions>
+        <comment>Create privilege - Edit Bed Tags</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Edit Bed Tags"/>
+            <column name="description" value="Ability to edit bed tags"/>
+            <column name="uuid" valueComputed="uuid()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="BM-201810051533" author="angshu" runOnChange="true" context="r0.92">
+        <comment>Update existing role-privilege Get Tags to Get Bed Tags</comment>
+        <update tableName="role_privilege">
+            <column name="privilege" value="Get Bed Tags"/>
+            <where>privilege = 'Get Tags'</where>
+        </update>
+    </changeSet>
+    <changeSet id="BM-201810051534" author="angshu" runOnChange="true" context="r0.92">
+        <comment>Update existing role-privilege Edit Tags to Edit Bed Tags</comment>
+        <update tableName="role_privilege">
+            <column name="privilege" value="Edit Bed Tags"/>
+            <where>privilege = 'Edit Tags'</where>
+        </update>
+    </changeSet>
+    <changeSet id="BM-201810051535" author="angshu" runOnChange="true" context="r0.92">
+        <comment>Delete privilege Get Tags</comment>
+        <sql>
+            delete from privilege where privilege='Get Tags';
+        </sql>
+    </changeSet>
+    <changeSet id="BM-201810051536" author="angshu" runOnChange="true" context="r0.92">
+        <comment>Delete privilege Edit Tags</comment>
+        <sql>
+            delete from privilege where privilege='Edit Tags';
+        </sql>
+    </changeSet>
+
+    <changeSet id="BM_202308131856" author="slubwama">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="bed_location_map" />
+            <and>
+                <columnExists tableName="bed_location_map" columnName="row_number" />
+            </and>
+        </preConditions>
+        <comment>Renaming column row_number to bed_row_number in table bed_location_map because row_number is a reserved word in MySQL 8.0.2 and later</comment>
+        <renameColumn columnDataType="int" newColumnName="bed_row_number" oldColumnName="row_number" tableName="bed_location_map" />
+    </changeSet>
+
+    <changeSet id="BM_202308131857" author="slubwama">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="bed_location_map" />
+            <and>
+                <columnExists tableName="bed_location_map" columnName="column_number" />
+            </and>
+        </preConditions>
+        <comment>Renaming column column_number to bed_column_number in table bed_location_map because column_number is a reserved word in MySQL 8.0.2 and later</comment>
+        <renameColumn columnDataType="int" newColumnName="bed_column_number" oldColumnName="column_number" tableName="bed_location_map" />
+    </changeSet>
+</databaseChangeLog>

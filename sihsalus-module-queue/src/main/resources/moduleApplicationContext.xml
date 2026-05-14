@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+
+<!-- Beans to add to the current Application context definition -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+  		    http://www.springframework.org/schema/context
+  		    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:annotation-config/>
+    <context:component-scan base-package="org.openmrs.module.queue"/>
+
+    <!-- Wraps QueueService methods in DB transactions and OpenMRS interceptors,
+    which set audit info like dateCreated, changedBy, etc.-->
+    <bean id="queue.QueueService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target">
+            <bean class="org.openmrs.module.queue.api.impl.QueueServiceImpl">
+                <property name="dao" ref="queueDao"/>
+            </bean>
+        </property>
+        <property name="preInterceptors" ref="serviceInterceptors"/>
+        <property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+    </bean>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.module.queue.api.QueueService</value>
+                <ref bean="queue.QueueService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="queue.QueueEntryService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target">
+            <bean class="org.openmrs.module.queue.api.impl.QueueEntryServiceImpl">
+                <property name="dao" ref="queueEntryDao"/>
+                <property name="visitService" ref="visitService"/>
+                <property name="administrationService" ref="adminService"/>
+            </bean>
+        </property>
+        <property name="preInterceptors" ref="serviceInterceptors"/>
+        <property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+    </bean>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.module.queue.api.QueueEntryService</value>
+                <ref bean="queue.QueueEntryService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="queue.QueueRoomService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target">
+            <bean class="org.openmrs.module.queue.api.impl.QueueRoomServiceImpl">
+                <property name="dao" ref="queueRoomDao"/>
+            </bean>
+        </property>
+        <property name="preInterceptors" ref="serviceInterceptors"/>
+        <property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+    </bean>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.module.queue.api.QueueRoomService</value>
+                <ref bean="queue.QueueRoomService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="queue.RoomProviderMapService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target">
+            <bean class="org.openmrs.module.queue.api.impl.RoomProviderMapServiceImpl">
+                <property name="dao" ref="roomProviderMapDao"/>
+            </bean>
+        </property>
+        <property name="preInterceptors" ref="serviceInterceptors"/>
+        <property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+    </bean>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.module.queue.api.RoomProviderMapService</value>
+                <ref bean="queue.RoomProviderMapService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="queueDao" class="org.openmrs.module.queue.api.dao.impl.QueueDaoImpl">
+        <constructor-arg ref="sessionFactory"/>
+    </bean>
+    <bean id="queueEntryDao" class="org.openmrs.module.queue.api.dao.impl.QueueEntryDaoImpl">
+        <constructor-arg ref="sessionFactory"/>
+    </bean>
+    <bean id="queueRoomDao" class="org.openmrs.module.queue.api.dao.impl.QueueRoomDaoImpl">
+        <constructor-arg ref="sessionFactory"/>
+    </bean>
+    <bean id="roomProviderMapDao" class="org.openmrs.module.queue.api.dao.impl.RoomProviderMapDaoImpl">
+        <constructor-arg ref="sessionFactory"/>
+    </bean>
+</beans>

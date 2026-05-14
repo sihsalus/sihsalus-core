@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<module configVersion="1.2">
+
+	<!-- Module Properties -->
+	<id>${project.parent.artifactId}</id>
+	<name>${project.parent.name}</name>
+	<version>${project.parent.version}</version>
+	<package>${project.parent.groupId}.${project.parent.artifactId}</package>
+	<author>Nicholas Ingosi Magaja</author>
+	<description>
+		${project.parent.description}
+	</description>
+	<updateURL>https://modules.openmrs.org/modules/download/${project.parent.artifactId}/anImport.rdf</updateURL>
+	<require_version>${openmrsVersion}</require_version>
+	<!-- / Module Properties -->
+	<require_modules>
+		<require_module version="${webservices.restVersion}">org.openmrs.module.webservices.rest</require_module>
+	</require_modules>
+
+	<aware_of_modules>
+		<aware_of_module>org.openmrs.module.owa</aware_of_module>
+		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
+	</aware_of_modules>
+	
+	<!-- Module Activator -->
+	<activator>${project.parent.groupId}.${project.parent.artifactId}.OpenConceptLabActivator</activator>
+	
+	<!-- Adds link to admin page -->
+	<extension>
+		<point>org.openmrs.admin.list</point>
+		<class>${project.parent.groupId}.${project.parent.artifactId}.extension.html.AdminList</class>
+	</extension>
+
+	<!-- Adds a link to the concept page to check if a concept is subscribed or not -->
+	<extension>
+		<point>org.openmrs.dictionary.conceptHeader</point>
+		<class>${project.parent.groupId}.${project.parent.artifactId}.extension.html.HighlightSubscribedConcept</class>
+	</extension>
+
+	<globalProperty>
+		<property>openconceptlab.subscriptionUrl</property>
+		<description>The OCL subscription URL</description>
+	</globalProperty>
+	<globalProperty>
+		<property>openconceptlab.scheduledDays</property>
+		<description>Interval in days when the process is repeated</description>
+	</globalProperty>
+	<globalProperty>
+		<property>openconceptlab.scheduledTime</property>
+		<description>The the time when the process should be carried on</description>
+	</globalProperty>
+	<globalProperty>
+		<property>openconceptlab.token</property>
+		<description>The OCL API Token</description>
+	</globalProperty>
+
+	<!-- Maps hibernate file's, if present -->
+	<mappingFiles>
+				
+	</mappingFiles>
+	
+	<packagesWithMappedClasses>
+		org.openmrs.module.openconceptlab
+	</packagesWithMappedClasses>
+
+	<!-- Internationalization -->
+	<!-- All message codes should start with ${project.parent.artifactId}. -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	<messages>
+		<lang>fr</lang>
+		<file>messages_fr.properties</file>
+	</messages>
+	<messages>
+		<lang>es</lang>
+		<file>messages_es.properties</file>
+	</messages>
+	<!-- /Internationalization -->
+
+</module>
+
