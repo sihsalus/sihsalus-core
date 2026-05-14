@@ -1,5 +1,6 @@
 package org.sihsalus.module.reporting;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.annotation.Handler;
@@ -254,7 +255,7 @@ public class SihsalusReportingConfiguration {
     @Bean
     SmartInitializingSingleton reportingGlobalPropertyListenerRegistrar(
             EventListeners eventListeners, ReportingConstants reportingConstants) {
-        return () -> eventListeners.setGlobalPropertyListeners(List.of(reportingConstants));
+        return () -> eventListeners.setGlobalPropertyListeners(new ArrayList<>(List.of(reportingConstants)));
     }
 
     @Bean
