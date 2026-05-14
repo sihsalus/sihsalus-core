@@ -9,6 +9,7 @@
 package org.openmrs.event;
 
 import lombok.Setter;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.Daemon;
 import org.openmrs.module.DaemonToken;
 import org.springframework.context.ApplicationListener;
@@ -33,15 +34,26 @@ public abstract class TransactionEventListener implements ApplicationListener<Tr
 				beforeTransactionCompletion((TransactionBeforeCompletionEvent) transactionEvent);
 			}
 			else if (transactionEvent instanceof TransactionCommittedEvent) {
-				Daemon.runInDaemonThreadAndWait(() ->
-					transactionCommitted((TransactionCommittedEvent) transactionEvent), daemonToken);
+				runAfterCompletion(() -> transactionCommitted((TransactionCommittedEvent) transactionEvent));
 			}
 			else if (transactionEvent instanceof TransactionNotCommittedEvent) {
-				Daemon.runInDaemonThreadAndWait(() ->
-					transactionNotCommitted((TransactionNotCommittedEvent) transactionEvent), daemonToken);
+				runAfterCompletion(() -> transactionNotCommitted((TransactionNotCommittedEvent) transactionEvent));
 			}
 			transactionEvent(transactionEvent);
 		}
+	}
+
+	private void runAfterCompletion(Runnable runnable) {
+		if (daemonToken != null) {
+			try {
+				Daemon.runInDaemonThreadAndWait(runnable, daemonToken);
+				return;
+			}
+			catch (ContextAuthenticationException ignored) {
+				// Static modules do not receive daemon tokens from the OMOD runtime.
+			}
+		}
+		runnable.run();
 	}
 
 	public void afterTransactionBegin(TransactionAfterBeginEvent transactionEvent) {
