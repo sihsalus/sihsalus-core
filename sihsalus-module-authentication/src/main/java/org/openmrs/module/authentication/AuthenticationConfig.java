@@ -18,8 +18,10 @@ import org.openmrs.util.OpenmrsUtil;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class provides access to all authentication configuration settings
@@ -107,6 +109,8 @@ public class AuthenticationConfig implements Serializable {
 
     private static final List<ClassLoader> classLoaders = new ArrayList<>();
 
+    private static final Map<String, AuthenticationScheme> authenticationSchemes = new ConcurrentHashMap<>();
+
     /**
      * @return the configured properties, loading from runtime properties if necessary
      */
@@ -121,7 +125,24 @@ public class AuthenticationConfig implements Serializable {
      * @param classLoader a classLoader to add to the list of classLoaders that can resolve classes for instantiation
      */
     public static void registerClassLoader(ClassLoader classLoader) {
-        AuthenticationConfig.classLoaders.add(classLoader);
+        if (classLoader != null) {
+            AuthenticationConfig.classLoaders.add(classLoader);
+        }
+    }
+
+    /**
+     * Registers a statically-wired authentication scheme that can be selected by
+     * {@link #SCHEME} without relying on module classloading or dynamic OMOD lifecycle.
+     */
+    public static void registerAuthenticationScheme(String schemeId, AuthenticationScheme authenticationScheme) {
+        if (StringUtils.isBlank(schemeId)) {
+            throw new IllegalArgumentException("schemeId is required");
+        }
+        if (authenticationScheme == null) {
+            authenticationSchemes.remove(schemeId);
+        } else {
+            authenticationSchemes.put(schemeId, authenticationScheme);
+        }
     }
 
     /**
@@ -318,14 +339,23 @@ public class AuthenticationConfig implements Serializable {
      * @return a configured AuthenticationScheme given configuration properties
      */
     public static AuthenticationScheme getAuthenticationScheme(String schemeId) {
+        AuthenticationScheme registeredScheme = authenticationSchemes.get(schemeId);
+        if (registeredScheme != null) {
+            configureAuthenticationScheme(schemeId, registeredScheme);
+            return registeredScheme;
+        }
         String schemeTypeProperty = SCHEME_TYPE_TEMPLATE.replace(SCHEME_ID, schemeId);
-        String schemeConfigPropertyPrefix = SCHEME_CONFIG_PREFIX_TEMPLATE.replace(SCHEME_ID, schemeId);
         AuthenticationScheme scheme = getClassInstance(schemeTypeProperty, AuthenticationScheme.class);
+        configureAuthenticationScheme(schemeId, scheme);
+        return scheme;
+    }
+
+    private static void configureAuthenticationScheme(String schemeId, AuthenticationScheme scheme) {
         if (scheme instanceof ConfigurableAuthenticationScheme) {
             ConfigurableAuthenticationScheme configScheme = (ConfigurableAuthenticationScheme) scheme;
+            String schemeConfigPropertyPrefix = SCHEME_CONFIG_PREFIX_TEMPLATE.replace(SCHEME_ID, schemeId);
             configScheme.configure(schemeId, getSubsetWithPrefix(schemeConfigPropertyPrefix, true));
         }
-        return scheme;
     }
 
     /**
