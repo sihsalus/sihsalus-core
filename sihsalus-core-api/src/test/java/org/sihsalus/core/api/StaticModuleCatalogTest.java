@@ -119,4 +119,22 @@ class StaticModuleCatalogTest {
                         && module.baselineVersion().equals("2.2.0")
                         && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
     }
+
+    @Test
+    void reportingIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("reporting")
+                        && module.sourceModule().equals("reporting-omod")
+                        && module.baselineVersion().equals("2.1.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
+    void reportingRestIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("reportingrest")
+                        && module.sourceModule().equals("reportingrest-omod")
+                        && module.baselineVersion().equals("2.0.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
 }

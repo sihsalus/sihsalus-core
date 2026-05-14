@@ -40,10 +40,20 @@ import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
 import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationScheme;
 import org.openmrs.module.ordertemplates.api.OrderTemplatesService;
+import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
+import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
+import org.openmrs.module.reporting.dataset.definition.service.DataSetDefinitionService;
+import org.openmrs.module.reporting.definition.evaluator.DefinitionEvaluator;
+import org.openmrs.module.reporting.definition.service.SerializedDefinitionService;
+import org.openmrs.module.reporting.evaluation.service.EvaluationService;
+import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
+import org.openmrs.module.reporting.report.service.ReportService;
+import org.openmrs.module.reporting.serializer.ReportingSerializer;
 import org.openmrs.module.serialization.xstream.XStreamSerializer;
 import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.webservices.rest.web.api.RestService;
+import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -231,6 +241,21 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(OrderTemplatesService.class));
         assertNotNull(Context.getService(RestService.class).getResourceByName("v1/ordertemplates/orderTemplate"));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from order_template", Integer.class));
+    }
+
+    @Test
+    void reportingRestIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(SerializedDefinitionService.class));
+        assertNotNull(Context.getService(EvaluationService.class));
+        assertNotNull(Context.getService(ReportDefinitionService.class));
+        assertNotNull(Context.getService(ReportService.class));
+        assertNotNull(Context.getService(CohortDefinitionService.class));
+        assertNotNull(Context.getService(DataSetDefinitionService.class));
+        assertNotNull(Context.getSerializationService().getSerializer(ReportingSerializer.class));
+        assertNotNull(HandlerUtil.getPreferredHandler(DefinitionEvaluator.class, AllPatientsCohortDefinition.class));
+        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/reportingrest/reportDefinition"));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from reporting_report_design", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from reporting_report_request", Integer.class));
     }
 
     private String ensureTestPatient() {
