@@ -34,6 +34,7 @@ import org.openmrs.ConceptNameTag;
 import org.openmrs.Person;
 import org.openmrs.User;
 import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.SerializationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.serialization.xstream.converter.CustomCGLIBEnhancedConverter;
@@ -49,6 +50,7 @@ import org.openmrs.module.serialization.xstream.mapper.NullValueMapper;
 import org.openmrs.module.serialization.xstream.strategy.CustomReferenceByIdMarshallingStrategy;
 import org.openmrs.serialization.OpenmrsSerializer;
 import org.openmrs.serialization.SerializationException;
+import org.openmrs.serialization.SimpleXStreamSerializer;
 import org.openmrs.util.OpenmrsClassLoader;
 
 import com.thoughtworks.xstream.XStream;
@@ -63,7 +65,7 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Provides serialization using XStream. <br/>
@@ -85,6 +87,9 @@ public class XStreamSerializer implements OpenmrsSerializer {
 
     @Autowired
     private HibernateCollectionConverter collectionConverter;
+
+    @Autowired
+    private AdministrationService adminService;
 	
 	/**
 	 * Default Constructor
@@ -169,6 +174,7 @@ public class XStreamSerializer implements OpenmrsSerializer {
 
     @PostConstruct
     private void init(){
+        SimpleXStreamSerializer.setupXStreamSecurity(xstream, adminService);
 		/*
 		 * Converters so that we can better deal with the serialization/deserializtion
 		 * of cglib, sql-timestamp, hibernate collections, etc

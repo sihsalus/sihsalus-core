@@ -16,6 +16,8 @@ import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.UserSessionListener;
 import org.openmrs.api.context.Context;
+import org.openmrs.calculation.api.CalculationRegistrationService;
+import org.openmrs.calculation.patient.PatientCalculationService;
 import org.openmrs.module.authentication.AuthenticationConfig;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 import org.openmrs.module.attachments.AttachmentsService;
@@ -35,6 +37,8 @@ import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
 import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationScheme;
+import org.openmrs.module.serialization.xstream.XStreamSerializer;
+import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.util.PrivilegeConstants;
@@ -176,6 +180,13 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void calculationIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(PatientCalculationService.class));
+        assertNotNull(Context.getService(CalculationRegistrationService.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from calculation_registration", Integer.class));
+    }
+
+    @Test
     void stockManagementIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(StockManagementService.class));
         assertNotNull(
@@ -196,6 +207,12 @@ class SihsalusCoreApplicationTest {
     @Test
     void webservicesRestServiceIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(RestService.class));
+    }
+
+    @Test
+    void serializationXstreamIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getSerializationService().getSerializer(XStreamSerializer.class));
+        assertNotNull(Context.getSerializationService().getSerializer(XStreamShortSerializer.class));
     }
 
     private String ensureTestPatient() {

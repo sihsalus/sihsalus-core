@@ -15,11 +15,11 @@ package org.openmrs.calculation.db;
 
 import java.util.List;
 
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.calculation.CalculationRegistration;
@@ -63,8 +63,9 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
 	@Override
 	@Transactional(readOnly = true)
 	public CalculationRegistration getCalculationRegistrationByUuid(String uuid) {
-		return (CalculationRegistration) getCurrentSession().createQuery("FROM CalculationRegistration tr WHERE tr.uuid = :uuid")
-		        .setString("uuid", uuid).uniqueResult();
+		Query query = getCurrentSession().createQuery("from CalculationRegistration tr where tr.uuid = :uuid");
+		query.setParameter("uuid", uuid);
+		return uniqueResult(query);
 	}
 	
 	/**
@@ -73,9 +74,10 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
 	@Override
 	@Transactional(readOnly = true)
 	public CalculationRegistration getCalculationRegistrationByToken(String token) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(CalculationRegistration.class);
-		criteria.add(Restrictions.ilike("token", token, MatchMode.EXACT));
-		return (CalculationRegistration) criteria.uniqueResult();
+		Query query = getCurrentSession()
+		        .createQuery("from CalculationRegistration tr where lower(tr.token) = lower(:token)");
+		query.setParameter("token", token);
+		return uniqueResult(query);
 	}
 	
 	/**
@@ -85,7 +87,7 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
 	@Override
 	@Transactional(readOnly = true)
 	public List<CalculationRegistration> getAllCalculationRegistrations() {
-		return getCurrentSession().createCriteria(CalculationRegistration.class).list();
+		return getCurrentSession().createQuery("from CalculationRegistration tr order by tr.token").getResultList();
 	}
 
 	/**
@@ -94,9 +96,10 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
 	@Override
 	@Transactional(readOnly = true)
 	public List<CalculationRegistration> getCalculationRegistrationsByProviderClassname(String providerClassname) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(CalculationRegistration.class);
-		criteria.add(Restrictions.eq("providerClassName", providerClassname));
-		return criteria.list();
+		Query query = getCurrentSession()
+		        .createQuery("from CalculationRegistration tr where tr.providerClassName = :providerClassName");
+		query.setParameter("providerClassName", providerClassname);
+		return query.getResultList();
 	}
 
 	/**
@@ -106,9 +109,10 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
 	@Override
 	@Transactional(readOnly = true)
 	public List<CalculationRegistration> findCalculationRegistrations(String partialToken) {
-		Criteria criteria = getCurrentSession().createCriteria(CalculationRegistration.class);
-		criteria.add(Restrictions.ilike("token", partialToken, MatchMode.ANYWHERE));
-		return criteria.list();
+		Query query = getCurrentSession()
+		        .createQuery("from CalculationRegistration tr where lower(tr.token) like lower(:partialToken)");
+		query.setParameter("partialToken", "%" + partialToken + "%");
+		return query.getResultList();
 	}
 	
 	/**
@@ -128,5 +132,15 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
 	@Transactional
 	public void deleteCalculationRegistration(CalculationRegistration calculationRegistration) {
 		getCurrentSession().delete(calculationRegistration);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T uniqueResult(Query query) {
+		try {
+			return (T) query.getSingleResult();
+		}
+		catch (NoResultException e) {
+			return null;
+		}
 	}
 }

@@ -67,6 +67,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void calculationIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("calculation")
+                        && module.sourceModule().equals("calculation-api")
+                        && module.baselineVersion().equals("2.1.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void stockManagementIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("stockmanagement")
@@ -81,6 +90,15 @@ class StaticModuleCatalogTest {
                 .anyMatch(module -> module.id().equals("attachments")
                         && module.sourceModule().equals("attachments-omod")
                         && module.baselineVersion().equals("4.0.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
+    void serializationXstreamIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("serialization-xstream")
+                        && module.sourceModule().equals("serialization.xstream-api")
+                        && module.baselineVersion().equals("0.3.0")
                         && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
     }
 }
