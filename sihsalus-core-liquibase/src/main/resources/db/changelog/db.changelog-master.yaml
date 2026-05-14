@@ -1,0 +1,161 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0001-sihsalus-foundation
+      author: sihsalus
+      changes:
+        - createTable:
+            tableName: sihsalus_runtime_status
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: runtime_name
+                  type: varchar(80)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - insert:
+            tableName: sihsalus_runtime_status
+            columns:
+              - column:
+                  name: id
+                  value: core
+              - column:
+                  name: runtime_name
+                  value: SIH Salus Core
+
+  - changeSet:
+      id: 0002-openmrs-essential-shape
+      author: sihsalus
+      changes:
+        - createTable:
+            tableName: person
+            columns:
+              - column:
+                  name: person_id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: uuid
+                  type: varchar(38)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: gender
+                  type: varchar(50)
+              - column:
+                  name: birthdate
+                  type: date
+              - column:
+                  name: voided
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: patient
+            columns:
+              - column:
+                  name: patient_id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_patient_person
+                    references: person(person_id)
+              - column:
+                  name: voided
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: concept
+            columns:
+              - column:
+                  name: concept_id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: uuid
+                  type: varchar(38)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: retired
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: encounter
+            columns:
+              - column:
+                  name: encounter_id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: patient_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_encounter_patient
+                    references: patient(patient_id)
+              - column:
+                  name: uuid
+                  type: varchar(38)
+                  constraints:
+                    nullable: false
+                    unique: true
+        - createTable:
+            tableName: obs
+            columns:
+              - column:
+                  name: obs_id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: person_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_obs_person
+                    references: person(person_id)
+              - column:
+                  name: concept_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_obs_concept
+                    references: concept(concept_id)
+              - column:
+                  name: encounter_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_obs_encounter
+                    references: encounter(encounter_id)
+              - column:
+                  name: uuid
+                  type: varchar(38)
+                  constraints:
+                    nullable: false
+                    unique: true

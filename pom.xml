@@ -13,6 +13,43 @@
     <description>Modernized Sihsalus core foundation with OpenMRS compatibility boundaries.</description>
     <url>https://github.com/sihsalus/sihsalus-core</url>
 
+    <modules>
+        <module>sihsalus-core-api</module>
+        <module>sihsalus-core-liquibase</module>
+        <module>sihsalus-fhir2</module>
+        <module>sihsalus-webservices-rest</module>
+        <module>sihsalus-initializer</module>
+        <module>sihsalus-module-authentication</module>
+        <module>sihsalus-module-oauth2login</module>
+        <module>sihsalus-module-idgen</module>
+        <module>sihsalus-module-addresshierarchy</module>
+        <module>sihsalus-module-emrapi</module>
+        <module>sihsalus-module-o3forms</module>
+        <module>sihsalus-module-reporting</module>
+        <module>sihsalus-module-billing</module>
+        <module>sihsalus-module-stockmanagement</module>
+        <module>sihsalus-module-fua</module>
+        <module>sihsalus-module-imaging</module>
+        <module>sihsalus-module-attachments</module>
+        <module>sihsalus-module-patientdocuments</module>
+        <module>sihsalus-module-cohort</module>
+        <module>sihsalus-module-queue</module>
+        <module>sihsalus-module-appointments</module>
+        <module>sihsalus-module-teleconsultation</module>
+        <module>sihsalus-module-bedmanagement</module>
+        <module>sihsalus-module-metadatamapping</module>
+        <module>sihsalus-module-openconceptlab</module>
+        <module>sihsalus-module-event</module>
+        <module>sihsalus-module-calculation</module>
+        <module>sihsalus-module-htmlwidgets</module>
+        <module>sihsalus-module-reportingrest</module>
+        <module>sihsalus-module-serialization-xstream</module>
+        <module>sihsalus-module-ordertemplates</module>
+        <module>sihsalus-module-patientflags</module>
+        <module>sihsalus-module-legacyui</module>
+        <module>sihsalus-core-boot</module>
+    </modules>
+
     <licenses>
         <license>
             <name>Mozilla Public License 2.0</name>
@@ -40,7 +77,32 @@
         <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
         <spotbugs.plugin.version>4.8.6.6</spotbugs.plugin.version>
         <spotless.plugin.version>2.43.0</spotless.plugin.version>
+        <spring.boot.version>3.3.5</spring.boot.version>
+        <postgresql.version>42.7.4</postgresql.version>
+        <h2.version>2.3.232</h2.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
@@ -117,4 +179,3 @@
         </plugins>
     </build>
 </project>
-

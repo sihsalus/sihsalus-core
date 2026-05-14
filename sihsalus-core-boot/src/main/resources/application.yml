@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: sihsalus-core
+  datasource:
+    url: ${SIHSALUS_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sihsalus}
+    username: ${SIHSALUS_DATASOURCE_USERNAME:sihsalus}
+    password: ${SIHSALUS_DATASOURCE_PASSWORD:sihsalus}
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true

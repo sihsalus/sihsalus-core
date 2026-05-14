@@ -6,15 +6,15 @@ This repository is intentionally small at the beginning. Code is brought in only
 
 ## Current Phase
 
-Phase 0: repository foundation and technical baseline.
+Phase 1: static modular monolith skeleton.
 
 Goals:
 
-- document the architecture direction before importing code
-- keep OpenMRS runtime contracts compatible
-- define the Java modernization baseline
-- establish security and migration rules
-- prepare CI and deployment structure incrementally
+- keep a Java 21 Maven reactor as the build boundary
+- compose SIH Salus modules as internal Maven jars instead of runtime `.omod` packages
+- provide a Spring Boot executable runtime
+- run centralized Liquibase migrations
+- expose technical health and first FHIR metadata endpoints
 
 ## Compatibility Rule
 
@@ -46,8 +46,30 @@ baseline/   Version pins from the current Sihsalus distro
 docs/       Architecture, migration, and security decisions
 ops/        Deployment and operations notes
 scripts/    Local automation scripts
+sihsalus-core-api/        Shared SIH Salus core contracts
+sihsalus-core-liquibase/  Centralized database changelogs
+sihsalus-core-boot/       Spring Boot executable runtime
+sihsalus-fhir2/           First FHIR API surface
+sihsalus-webservices-rest/ REST compatibility surface
+sihsalus-module-*/        Static internal module placeholders for distro capabilities
 ```
+
+## Local Verification
+
+```bash
+mvn --batch-mode --no-transfer-progress verify
+```
+
+The default boot configuration targets PostgreSQL:
+
+```text
+SIHSALUS_DATASOURCE_URL=jdbc:postgresql://localhost:5432/sihsalus
+SIHSALUS_DATASOURCE_USERNAME=sihsalus
+SIHSALUS_DATASOURCE_PASSWORD=sihsalus
+```
+
+Tests use H2 in PostgreSQL compatibility mode.
 
 ## First Milestone
 
-The first milestone is not a fork dump. It is a runnable minimal core profile with documented compatibility boundaries, CI, and a clear module import process.
+The first milestone is a runnable minimal core profile with documented compatibility boundaries, CI, static module composition, centralized migrations, and a first FHIR endpoint.

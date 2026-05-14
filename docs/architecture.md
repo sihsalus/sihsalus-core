@@ -8,25 +8,27 @@ The first architectural decision is to avoid a broad fork dump. Code enters this
 
 1. Platform compatibility
 
-   OpenMRS runtime contracts remain stable unless a migration plan exists. This includes module identifiers, REST paths, database expectations, extension configuration, and authentication/session behavior consumed by the existing frontend.
+   OpenMRS data and API contracts remain useful migration references. Package names and database assumptions from imported code should remain stable until an explicit migration exists.
 
-2. Sihsalus backend extensions
+2. Static modular monolith
+
+   SIH Salus modules are Maven reactor modules loaded by normal Spring/application composition. Runtime module install, unload, refresh, `.omod` packaging, and dynamic discovery are not part of the target runtime.
+
+3. Sihsalus backend extensions
 
    Sihsalus-specific services and modules should live behind clear package/module boundaries. New Java code should use `org.sihsalus.*` unless it is intentionally preserving an OpenMRS extension point.
 
-3. Operations
+4. Operations
 
    Local development, CI, container builds, secrets, backups, and observability are first-class concerns. A module is not production-ready just because it compiles.
 
-## Non-Goals For Phase 0
+## Non-Goals For The Initial Skeleton
 
 - rename OpenMRS core packages
-- import all backend code
+- complete all backend behavior
 - rewrite authentication
-- change database schema ownership
-- replace the OpenMRS module system
+- finish database schema ownership decisions
 
 ## Compatibility Rule
 
 Branding can be Sihsalus. Technical contracts remain OpenMRS-compatible until explicitly migrated.
-
