@@ -49,6 +49,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void patientDocumentsIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("patientdocuments")
+                        && module.sourceModule().equals("patientdocuments-omod")
+                        && module.baselineVersion().equals("1.1.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void metadataMappingIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("metadatamapping")

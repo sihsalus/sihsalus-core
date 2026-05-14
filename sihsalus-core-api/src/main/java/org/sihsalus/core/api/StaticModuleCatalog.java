@@ -13,7 +13,11 @@ public final class StaticModuleCatalog {
                     module("oauth2login", "oauth2login-api", "1.6.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("idgen", "idgen-api", "6.0.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("addresshierarchy", "addresshierarchy-api", "3.0.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
-                    module("patientdocuments", "patientdocuments-omod", "1.1.0-SNAPSHOT", SihsalusModuleStatus.PLACEHOLDER),
+                    module(
+                            "patientdocuments",
+                            "patientdocuments-omod",
+                            "1.1.0-SNAPSHOT",
+                            SihsalusModuleStatus.STATIC_INTERNAL),
                     module("attachments", "attachments-omod", "4.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("cohort", "cohort-omod", "3.7.3", SihsalusModuleStatus.PLACEHOLDER),
                     module("patientflags", "patientflags-omod", "3.0.10", SihsalusModuleStatus.PLACEHOLDER),

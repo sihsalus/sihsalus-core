@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -41,18 +42,26 @@ import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
 import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationScheme;
 import org.openmrs.module.o3forms.api.O3FormsService;
 import org.openmrs.module.ordertemplates.api.OrderTemplatesService;
+import org.openmrs.module.patientdocuments.reports.PatientIdStickerPdfReport;
 import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
+import org.openmrs.module.reporting.dataset.DataSetMetaData;
 import org.openmrs.module.reporting.dataset.definition.service.DataSetDefinitionService;
 import org.openmrs.module.reporting.definition.evaluator.DefinitionEvaluator;
 import org.openmrs.module.reporting.definition.service.SerializedDefinitionService;
+import org.openmrs.module.reporting.evaluation.EvaluationContext;
+import org.openmrs.module.reporting.evaluation.parameter.Mapped;
+import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
+import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.module.reporting.serializer.ReportingSerializer;
+import org.openmrs.module.reportingrest.adhoc.AdHocExportManager;
 import org.openmrs.module.serialization.xstream.XStreamSerializer;
 import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
+import org.openmrs.module.webservices.rest.web.resource.api.Converter;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.PrivilegeConstants;
@@ -200,6 +209,12 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void patientDocumentsIsWiredAsStaticInternalModule() throws Exception {
+        assertNotNull(Context.getRegisteredComponent("patientIdStickerPdfReport", PatientIdStickerPdfReport.class));
+        mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker")).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void calculationIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(PatientCalculationService.class));
         assertNotNull(Context.getService(CalculationRegistrationService.class));
@@ -251,6 +266,7 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     void reportingRestIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(SerializedDefinitionService.class));
         assertNotNull(Context.getService(EvaluationService.class));
@@ -260,7 +276,33 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(DataSetDefinitionService.class));
         assertNotNull(Context.getSerializationService().getSerializer(ReportingSerializer.class));
         assertNotNull(HandlerUtil.getPreferredHandler(DefinitionEvaluator.class, AllPatientsCohortDefinition.class));
-        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/reportingrest/reportDefinition"));
+
+        assertNotNull(Context.getRegisteredComponents(AdHocExportManager.class).stream()
+                .findFirst()
+                .orElse(null));
+        assertNotNull(HandlerUtil.getPreferredHandler(Converter.class, DataSetMetaData.class));
+        assertNotNull(HandlerUtil.getPreferredHandler(Converter.class, EvaluationContext.class));
+        assertNotNull(HandlerUtil.getPreferredHandler(Converter.class, Mapped.class));
+        assertNotNull(HandlerUtil.getPreferredHandler(Converter.class, Parameter.class));
+        assertNotNull(HandlerUtil.getPreferredHandler(Converter.class, RenderingMode.class));
+
+        RestService restService = Context.getService(RestService.class);
+        for (String resourceName : List.of(
+                "v1/reportingrest/adhocdataset",
+                "v1/reportingrest/adhocquery",
+                "v1/reportingrest/cohort",
+                "v1/reportingrest/cohortDefinition",
+                "v1/reportingrest/dataSet",
+                "v1/reportingrest/dataSetDefinition",
+                "v1/reportingrest/definitionlibrary",
+                "v1/reportingrest/reportdata",
+                "v1/reportingrest/reportDefinition",
+                "v1/reportingrest/reportDefinitionsWithScheduledRequests",
+                "v1/reportingrest/reportDesign",
+                "v1/reportingrest/reportRequest")) {
+            assertNotNull(restService.getResourceByName(resourceName));
+        }
+
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from reporting_report_design", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from reporting_report_request", Integer.class));
     }

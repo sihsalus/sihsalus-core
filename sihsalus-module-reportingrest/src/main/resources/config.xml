@@ -2,19 +2,19 @@
 <module configVersion="1.2">
 	
 	<!-- Base Module Properties -->
-	<id>${project.parent.artifactId}</id>
-	<name>${project.parent.name}</name>
-	<version>${project.parent.version}</version>
-	<package>${project.parent.groupId}.${project.parent.artifactId}</package>
+	<id>reportingrest</id>
+	<name>Reporting REST</name>
+	<version>2.1.0-SNAPSHOT</version>
+	<package>org.openmrs.module.reportingrest</package>
 	<author>Partners In Health</author>
 	<description>RESTful Web Services for the reporting module</description>
-	<activator>${project.parent.groupId}.${project.parent.artifactId}.ModuleActivator</activator>
-	<require_version>${openMRSVersion}</require_version>
+	<activator>org.openmrs.module.reportingrest.ModuleActivator</activator>
+	<require_version>2.7.0</require_version>
 	
 	<require_modules>
-	   	<require_module version="${serializationxstreamVersion}">org.openmrs.module.serialization.xstream</require_module>
-	   	<require_module version="${reportingVersion}">org.openmrs.module.reporting</require_module>
-	   	<require_module version="${webservicesRestVersion}">org.openmrs.module.webservices.rest</require_module>
+	   	<require_module version="0.3.0">org.openmrs.module.serialization.xstream</require_module>
+	   	<require_module version="2.0.0">org.openmrs.module.reporting</require_module>
+	   	<require_module version="2.50.0">org.openmrs.module.webservices.rest</require_module>
 	</require_modules>
 	
 </module>
