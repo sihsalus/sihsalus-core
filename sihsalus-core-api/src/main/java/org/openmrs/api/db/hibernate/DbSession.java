@@ -12,7 +12,6 @@ package org.openmrs.api.db.hibernate;
 import java.io.Serializable;
 import java.sql.Connection;
 
-import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaQuery;
 
 import org.hibernate.CacheMode;
@@ -37,6 +36,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.hibernate.procedure.ProcedureCall;
 import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.hibernate.stat.SessionStatistics;
 
 /**
@@ -110,6 +110,16 @@ public class DbSession {
 	 */
 	public Query createQuery(String queryString) {
 		return getSession().createQuery(queryString);
+	}
+
+	/**
+	 * Create a {@link NativeQuery} instance for the given SQL query string.
+	 *
+	 * @param queryString The SQL query
+	 * @return The native query instance for manipulation and execution
+	 */
+	public NativeQuery<?> createSQLQuery(String queryString) {
+		return getSession().createNativeQuery(queryString);
 	}
 
 	/**

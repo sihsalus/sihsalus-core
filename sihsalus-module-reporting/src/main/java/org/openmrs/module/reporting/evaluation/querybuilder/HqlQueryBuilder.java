@@ -11,9 +11,8 @@ package org.openmrs.module.reporting.evaluation.querybuilder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
-import org.hibernate.type.Type;
 import org.openmrs.Cohort;
 import org.openmrs.Voidable;
 import org.openmrs.module.reporting.common.DateUtil;
@@ -456,15 +455,12 @@ public class HqlQueryBuilder implements QueryBuilder {
 	@Override
 	public List<DataSetColumn> getColumns(DbSessionFactory sessionFactory) {
 		List<DataSetColumn> l = new ArrayList<DataSetColumn>();
-		Query q = buildQuery(sessionFactory);
-		String[] returnAliases = q.getReturnAliases();
-		Type[] returnTypes = q.getReturnTypes();
-		for (int i=0; i < returnAliases.length; i++) {
+		for (int i = 0; i < columns.size(); i++) {
 			DataSetColumn column = new DataSetColumn();
-			String returnAlias = ObjectUtil.nvl(returnAliases[i], "" + i);
+			String returnAlias = getColumnAlias(columns.get(i), i);
 			column.setName(returnAlias);
 			column.setLabel(returnAlias);
-			column.setDataType(returnTypes[i].getReturnedClass());
+			column.setDataType(Object.class);
 			l.add(column);
 		}
 		return l;
@@ -626,6 +622,19 @@ public class HqlQueryBuilder implements QueryBuilder {
 
 	protected String lastPositionIndex() {
 		return "param"+(positionIndex-1);
+	}
+
+	private String getColumnAlias(String columnExpression, int index) {
+		String[] split = columnExpression.split("\\:");
+		if (split.length > 1) {
+			return split[1];
+		}
+		String column = split[0];
+		if (ObjectUtil.containsWhitespace(column)) {
+			return "" + index;
+		}
+		String[] propertySplit = column.split("\\.");
+		return propertySplit[propertySplit.length - 1].replace("(", "").replace(")", "");
 	}
 
 	protected String prepareBaseIdProperty(String pathToStrip, String idToStripIfPresent) {

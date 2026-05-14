@@ -11,9 +11,10 @@ package org.openmrs.module.reporting.dataset.query.service.db;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Query;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.persister.entity.EntityPersister;
+import org.hibernate.query.Query;
 import org.openmrs.api.db.hibernate.DbSessionFactory;  
-import org.hibernate.metadata.ClassMetadata;
 import org.openmrs.Cohort;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
@@ -84,8 +85,7 @@ public class HibernateDataSetQueryDAO implements DataSetQueryDAO {
 			return ret;
 		}
 		
-		ClassMetadata metadata = sessionFactory.getHibernateSessionFactory().getClassMetadata(type);
-		String idPropertyName = metadata.getIdentifierPropertyName();
+		String idPropertyName = getIdentifierPropertyName(type);
 		String entityName = type.getSimpleName();
 		String alias = entityName.toLowerCase();
 		
@@ -148,13 +148,11 @@ public class HibernateDataSetQueryDAO implements DataSetQueryDAO {
             return new HashMap<Integer, Integer>();
         }
 
-        ClassMetadata fromMetadata = sessionFactory.getHibernateSessionFactory().getClassMetadata(fromType);
-        String fromIdProperty = (Patient.class.isAssignableFrom(fromType) ? "patientId" : fromMetadata.getIdentifierPropertyName());
+        String fromIdProperty = (Patient.class.isAssignableFrom(fromType) ? "patientId" : getIdentifierPropertyName(fromType));
         String fromEntity = fromType.getSimpleName();
         String fromAlias = fromEntity.toLowerCase();
 
-        ClassMetadata toMetadata = sessionFactory.getHibernateSessionFactory().getClassMetadata(toType);
-        String toIdProperty = toMetadata.getIdentifierPropertyName();
+        String toIdProperty = getIdentifierPropertyName(toType);
         String toEntity = toType.getSimpleName();
         String toAlias = toEntity.toLowerCase();
 
@@ -200,5 +198,13 @@ public class HibernateDataSetQueryDAO implements DataSetQueryDAO {
 	 */
 	public void setSessionFactory(DbSessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
+	}
+
+	private String getIdentifierPropertyName(Class<?> type) {
+		SessionFactoryImplementor sessionFactoryImplementor =
+		        sessionFactory.getHibernateSessionFactory().unwrap(SessionFactoryImplementor.class);
+		EntityPersister entityDescriptor =
+		        sessionFactoryImplementor.getRuntimeMetamodels().getMappingMetamodel().getEntityDescriptor(type);
+		return entityDescriptor.getIdentifierPropertyName();
 	}
 }

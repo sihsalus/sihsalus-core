@@ -10,7 +10,6 @@
 package org.openmrs.module.reporting.report.service.db;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
 import org.openmrs.api.context.Context;
@@ -26,12 +25,12 @@ import java.sql.Types;
 /**
  *  A report definition type
  */
-public class ReportDefinitionType implements UserType {
+public class ReportDefinitionType implements UserType<ReportDefinition> {
 
 	/** 
 	 * @see UserType#assemble(Serializable, Object)
 	 */
-	public Object assemble(Serializable cached, Object owner) throws HibernateException {
+	public ReportDefinition assemble(Serializable cached, Object owner) throws HibernateException {
 		if(cached == null){
 			return null;
 		}
@@ -41,31 +40,31 @@ public class ReportDefinitionType implements UserType {
 	/** 
 	 * @see UserType#deepCopy(Object)
 	 */
-	public Object deepCopy(Object value) throws HibernateException {
+	public ReportDefinition deepCopy(ReportDefinition value) throws HibernateException {
 		return value;
 	}
 
 	/** 
 	 * @see UserType#disassemble(Object)
 	 */
-	public Serializable disassemble(Object value) throws HibernateException {
+	public Serializable disassemble(ReportDefinition value) throws HibernateException {
 		if (value == null) {
 			return null;
 		}
-		return ((ReportDefinition)value).getUuid();
+		return value.getUuid();
 	}
 
 	/** 
 	 * @see UserType#equals(Object, Object)
 	 */
-	public boolean equals(Object x, Object y) throws HibernateException {
+	public boolean equals(ReportDefinition x, ReportDefinition y) throws HibernateException {
 		return x != null && x.equals(y);
 	}
 
 	/** 
 	 * @see UserType#hashCode(Object)
 	 */
-	public int hashCode(Object x) throws HibernateException {
+	public int hashCode(ReportDefinition x) throws HibernateException {
 		return x.hashCode();
 	}
 
@@ -79,8 +78,8 @@ public class ReportDefinitionType implements UserType {
 	/** 
 	 * @see UserType#nullSafeGet(ResultSet, String[], Object)
 	 */
-	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
-		String uuid = rs.getString(names[0]);
+	public ReportDefinition nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
+		String uuid = rs.getString(position);
 		if (uuid == null) {
 			return null;
 		}
@@ -88,33 +87,31 @@ public class ReportDefinitionType implements UserType {
 	}
 
 	/** 
-	 * @see UserType#nullSafeSet(PreparedStatement, Object, int, SessionImplementor)
+	 * @see UserType#nullSafeSet(PreparedStatement, Object, int, SharedSessionContractImplementor)
 	 */
-	public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
-		ReportDefinition d = (ReportDefinition) value;
-		String val = (d == null ? null : d.getUuid());
+	public void nullSafeSet(PreparedStatement st, ReportDefinition value, int index, SharedSessionContractImplementor session) throws SQLException {
+		String val = (value == null ? null : value.getUuid());
 		st.setString(index, val);
 	}
 
 	/** 
 	 * @see UserType#replace(Object, Object, Object)
 	 */
-	public Object replace(Object original, Object target, Object owner) throws HibernateException {
+	public ReportDefinition replace(ReportDefinition original, ReportDefinition target, Object owner) throws HibernateException {
 		return original;
 	}
 
 	/** 
 	 * @see UserType#returnedClass()
 	 */
-	@SuppressWarnings("rawtypes")
-	public Class returnedClass() {
+	public Class<ReportDefinition> returnedClass() {
 		return ReportDefinition.class;
 	}
 
 	/** 
 	 * @see UserType#sqlTypes()
 	 */
-	public int[] sqlTypes() {
-		return new int[] { Types.VARCHAR };
+	public int getSqlType() {
+		return Types.VARCHAR;
 	}
 }

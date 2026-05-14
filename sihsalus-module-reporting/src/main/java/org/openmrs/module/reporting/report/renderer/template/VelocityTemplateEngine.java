@@ -14,8 +14,6 @@ import java.util.Map;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.log.CommonsLogLogChute;
 
 /**
  * Velocity-based template engine
@@ -36,8 +34,6 @@ public class VelocityTemplateEngine implements TemplateEngine {
 	public String evaluate(String template, Map<String, Object> bindings) throws TemplateEvaluationException {
 		try {
 			VelocityEngine ve = new VelocityEngine();
-			ve.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.CommonsLogLogChute");
-			ve.setProperty(CommonsLogLogChute.LOGCHUTE_COMMONS_LOG_NAME, "reporttemplate_velocity");
 			ve.init();
 			VelocityContext velocityContext = new VelocityContext();
 			for (Map.Entry<String, Object> e : bindings.entrySet()) {

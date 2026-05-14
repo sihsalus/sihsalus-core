@@ -30,6 +30,7 @@ import org.openmrs.module.emrapi.concept.EmrConceptService;
 import org.openmrs.module.emrapi.patient.EmrPatientService;
 import org.openmrs.module.emrapi.procedure.ProcedureService;
 import org.openmrs.module.htmlwidgets.service.HtmlWidgetsService;
+import org.openmrs.module.htmlwidgets.web.handler.WidgetHandler;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
@@ -191,6 +192,9 @@ class SihsalusCoreApplicationTest {
     @Test
     void htmlWidgetsIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(HtmlWidgetsService.class));
+        assertNotNull(Context.getRegisteredComponents(WidgetHandler.class).stream()
+                .findFirst()
+                .orElse(null));
     }
 
     @Test

@@ -11,12 +11,7 @@ package org.openmrs.module.reporting.report.service.db;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.reporting.report.ReportDesign;
@@ -49,7 +44,7 @@ public class HibernateReportDAO implements ReportDAO {
 	 */
 	public ReportDesign getReportDesignByUuid(String uuid) throws DAOException {
 		Query q = sessionFactory.getCurrentSession().createQuery("from ReportDesign r where r.uuid = :uuid");
-		return (ReportDesign) q.setString("uuid", uuid).uniqueResult();
+		return (ReportDesign) q.setParameter("uuid", uuid).uniqueResult();
 	}
 	
 	/**
@@ -72,17 +67,24 @@ public class HibernateReportDAO implements ReportDAO {
 	@SuppressWarnings("unchecked")
 	public List<ReportDesign> getReportDesigns(ReportDefinition reportDefinition, Class<? extends ReportRenderer> rendererType, 
 											   boolean includeRetired) throws DAOException {
-		Criteria crit = sessionFactory.getCurrentSession().createCriteria(ReportDesign.class);
+		StringBuilder hql = new StringBuilder("from ReportDesign r where 1 = 1");
 		if (reportDefinition != null) {
-			crit.add(Expression.eq("reportDefinition", reportDefinition));
+			hql.append(" and r.reportDefinition = :reportDefinition");
 		}
 		if (rendererType != null) {
-			crit.add(Expression.eq("rendererType", rendererType));
+			hql.append(" and r.rendererType = :rendererType");
 		}
 		if (includeRetired == false) {
-			crit.add(Expression.eq("retired", false));
+			hql.append(" and r.retired = false");
 		}
-		return crit.list();
+		Query q = sessionFactory.getCurrentSession().createQuery(hql.toString());
+		if (reportDefinition != null) {
+			q.setParameter("reportDefinition", reportDefinition);
+		}
+		if (rendererType != null) {
+			q.setParameter("rendererType", rendererType);
+		}
+		return q.list();
 	}
 	
 	/**
@@ -129,7 +131,7 @@ public class HibernateReportDAO implements ReportDAO {
 	 */
 	public ReportProcessorConfiguration getReportProcessorConfigurationByUuid(String uuid) {
 		Query q = sessionFactory.getCurrentSession().createQuery("from ReportProcessorConfiguration r where r.uuid = :uuid");
-		return (ReportProcessorConfiguration) q.setString("uuid", uuid).uniqueResult();
+		return (ReportProcessorConfiguration) q.setParameter("uuid", uuid).uniqueResult();
 	}
 	
 	/**
@@ -137,11 +139,8 @@ public class HibernateReportDAO implements ReportDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<ReportProcessorConfiguration> getAllReportProcessorConfigurations(boolean includeRetired) {
-		Criteria crit = sessionFactory.getCurrentSession().createCriteria(ReportProcessorConfiguration.class);
-		if (includeRetired == false) {
-			crit.add(Expression.eq("retired", false));
-		}
-		return crit.list();
+		String hql = "from ReportProcessorConfiguration r" + (includeRetired ? "" : " where r.retired = false");
+		return sessionFactory.getCurrentSession().createQuery(hql).list();
 	}
 	
 	/**
@@ -149,10 +148,8 @@ public class HibernateReportDAO implements ReportDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<ReportProcessorConfiguration> getGlobalReportProcessorConfigurations() {
-		Criteria crit = sessionFactory.getCurrentSession().createCriteria(ReportProcessorConfiguration.class);
-		crit.add(Expression.eq("retired", false));
-		crit.add(Expression.isNull("reportDesign"));
-		return crit.list();
+		String hql = "from ReportProcessorConfiguration r where r.retired = false and r.reportDesign is null";
+		return sessionFactory.getCurrentSession().createQuery(hql).list();
 	}
 	
 	/**
@@ -184,7 +181,7 @@ public class HibernateReportDAO implements ReportDAO {
 	 */
 	public ReportRequest getReportRequestByUuid(String uuid) {
 		Query q = sessionFactory.getCurrentSession().createQuery("from ReportRequest r where r.uuid = :uuid");
-		return (ReportRequest) q.setString("uuid", uuid).uniqueResult();
+		return (ReportRequest) q.setParameter("uuid", uuid).uniqueResult();
 	}
 
 	/**
@@ -192,29 +189,34 @@ public class HibernateReportDAO implements ReportDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<ReportRequest> getReportRequests(ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Integer firstResult, Integer maxResults, Status...statuses) {
-		final Criteria criteria = createReportRequestsBaseCriteria(reportDefinition, requestOnOrAfter, requestOnOrBefore, statuses);
-
-		criteria.addOrder(Order.desc("requestDate"));
-		criteria.addOrder(Order.desc("evaluateStartDatetime"));
-		criteria.addOrder(Order.desc("evaluateCompleteDatetime"));
-		criteria.addOrder(Order.desc("priority"));
+		final Query query = createReportRequestsBaseQuery(
+				"from ReportRequest r",
+				reportDefinition,
+				requestOnOrAfter,
+				requestOnOrBefore,
+				statuses);
+		query.setComment("ReportRequest list");
 
 		if (firstResult != null) {
-			criteria.setFirstResult(firstResult);
+			query.setFirstResult(firstResult);
 		}
 
 		if(maxResults != null) {
-			criteria.setMaxResults(maxResults);
+			query.setMaxResults(maxResults);
 		}
 
-		return criteria.list();
+		return query.list();
 	}
 
 	@Override
 	public long getReportRequestsCount(ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Status... statuses) {
-		final Criteria criteria = createReportRequestsBaseCriteria(reportDefinition, requestOnOrAfter, requestOnOrBefore, statuses);
-		criteria.setProjection(Projections.rowCount());
-		return ((Number) criteria.uniqueResult()).longValue();
+		final Query query = createReportRequestsBaseQuery(
+				"select count(r) from ReportRequest r",
+				reportDefinition,
+				requestOnOrAfter,
+				requestOnOrBefore,
+				statuses);
+		return ((Number) query.uniqueResult()).longValue();
 	}
 
 	/**
@@ -231,7 +233,7 @@ public class HibernateReportDAO implements ReportDAO {
 	public void purgeReportRequestsForReportDefinition(String reportDefinitionUuid) {
 		String hql = "delete from ReportRequest r where r.reportDefinition.definition=:uuid";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
-		query.setString("uuid", reportDefinitionUuid);
+		query.setParameter("uuid", reportDefinitionUuid);
 		query.executeUpdate();
 	}
 
@@ -243,7 +245,7 @@ public class HibernateReportDAO implements ReportDAO {
 	public void purgeReportDesignsForReportDefinition(String reportDefinitionUuid) {
 		String hql = "delete from ReportDesign r where r.reportDefinition=:uuid";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
-		query.setString("uuid", reportDefinitionUuid);
+		query.setParameter("uuid", reportDefinitionUuid);
 		query.executeUpdate();
 	}
 
@@ -254,7 +256,7 @@ public class HibernateReportDAO implements ReportDAO {
 	public List<String> getReportRequestUuids(String reportDefinitionUuid) {
 		String hql = "select uuid from ReportRequest r where r.reportDefinition.definition=:uuid";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
-		query.setString("uuid", reportDefinitionUuid);
+		query.setParameter("uuid", reportDefinitionUuid);
 		return query.list();
 	}
 
@@ -274,23 +276,36 @@ public class HibernateReportDAO implements ReportDAO {
 		this.sessionFactory = sessionFactory;
 	}
 
-	private Criteria createReportRequestsBaseCriteria(ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Status... statuses) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(ReportRequest.class);
-
+	private Query createReportRequestsBaseQuery(String select, ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Status... statuses) {
+		StringBuilder hql = new StringBuilder(select).append(" where 1 = 1");
 		if (reportDefinition != null) {
-			criteria.add(Restrictions.eq("reportDefinition.definition", reportDefinition.getUuid()));
+			hql.append(" and r.reportDefinition.definition = :reportDefinitionUuid");
 		}
 		if (requestOnOrAfter != null) {
-			criteria.add(Restrictions.ge("requestDate", requestOnOrAfter));
+			hql.append(" and r.requestDate >= :requestOnOrAfter");
 		}
 		if (requestOnOrBefore != null) {
-			criteria.add(Restrictions.le("requestDate", requestOnOrBefore));
+			hql.append(" and r.requestDate <= :requestOnOrBefore");
 		}
 		if (statuses != null && statuses.length > 0) {
-			criteria.add(Restrictions.in("status", statuses));
+			hql.append(" and r.status in (:statuses)");
 		}
-
-		return criteria;
+		if (select.startsWith("from ")) {
+			hql.append(" order by r.requestDate desc, r.evaluateStartDatetime desc, r.evaluateCompleteDatetime desc, r.priority desc");
+		}
+		Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
+		if (reportDefinition != null) {
+			query.setParameter("reportDefinitionUuid", reportDefinition.getUuid());
+		}
+		if (requestOnOrAfter != null) {
+			query.setParameter("requestOnOrAfter", requestOnOrAfter);
+		}
+		if (requestOnOrBefore != null) {
+			query.setParameter("requestOnOrBefore", requestOnOrBefore);
+		}
+		if (statuses != null && statuses.length > 0) {
+			query.setParameterList("statuses", statuses);
+		}
+		return query;
 	}
 }
-

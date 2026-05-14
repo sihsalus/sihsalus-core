@@ -54,8 +54,6 @@ public class HtmlUtil  {
 
 	private static final String INIT_REQ_UNIQUE_ID = "__INIT_REQ_UNIQUE_ID__";
 
-	private static final String WEBAPP_NAME = "openmrs";
-
 	private static final String OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY = "org.openmrs.htmlInclude.pageName";
 
 	private static final String OPENMRS_HTML_INCLUDE_MAP_KEY = "org.openmrs.htmlInclude.includeMap";
@@ -98,19 +96,22 @@ public class HtmlUtil  {
 		
 		if (isJs || isCss) {
 			String initialRequestId = (String) request.getAttribute(INIT_REQ_UNIQUE_ID);
+			if (initialRequestId == null) {
+				initialRequestId = String.valueOf(System.identityHashCode(request));
+			}
 			String lastRequestId = (String) session.getAttribute(OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY);
 			Map<String, String> m = (HashMap<String, String>) session.getAttribute(OPENMRS_HTML_INCLUDE_MAP_KEY);
 			if (m == null || !initialRequestId.equals(lastRequestId)) {
 				m = new HashMap<String, String>();
 			}
 			
-			String otherResource = "/" + WEBAPP_NAME + resource;
+			String prefix = request.getContextPath();
+			String otherResource = prefix + resource;
 			if (!m.containsKey(resource) && !m.containsKey(otherResource)) {
 				m.put(resource, "true");
 				session.setAttribute(OPENMRS_HTML_INCLUDE_MAP_KEY, m);
 				session.setAttribute(OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY, initialRequestId);
 				
-				String prefix = request.getContextPath();
 				if (!resource.startsWith(prefix + "/")) {
 					resource = prefix + resource;
 				}

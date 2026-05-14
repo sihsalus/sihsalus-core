@@ -28,12 +28,12 @@ import static java.sql.Types.VARCHAR;
 /**
  *  A report definition type
  */
-public class PropertiesType implements UserType {
+public class PropertiesType implements UserType<Properties> {
 
 	/** 
 	 * @see UserType#assemble(Serializable, Object)
 	 */
-	public Object assemble(Serializable cached, Object owner) throws HibernateException {
+	public Properties assemble(Serializable cached, Object owner) throws HibernateException {
         if (cached == null) {
             return null;
         }
@@ -51,11 +51,10 @@ public class PropertiesType implements UserType {
 	/** 
 	 * @see UserType#deepCopy(Object)
 	 */
-	public Object deepCopy(Object value) throws HibernateException {
+	public Properties deepCopy(Properties value) throws HibernateException {
 		if (value != null) {
-			Properties val = (Properties) value;
 			Properties copy = new Properties();
-			for ( Map.Entry<Object, Object> e : val.entrySet() ) {
+			for (Map.Entry<Object, Object> e : value.entrySet()) {
 				copy.setProperty((String) e.getKey(), (String) e.getValue());
 			}
 			return copy;
@@ -67,7 +66,7 @@ public class PropertiesType implements UserType {
 	/** 
 	 * @see UserType#disassemble(Object)
 	 */
-	public Serializable disassemble(Object value) throws HibernateException {
+	public Serializable disassemble(Properties value) throws HibernateException {
         if (value == null) {
             return null;
         }
@@ -85,14 +84,14 @@ public class PropertiesType implements UserType {
 	/** 
 	 * @see UserType#equals(Object, Object)
 	 */
-	public boolean equals(Object x, Object y) throws HibernateException {
+	public boolean equals(Properties x, Properties y) throws HibernateException {
 		return x != null && x.equals(y);
 	}
 
 	/** 
 	 * @see UserType#hashCode(Object)
 	 */
-	public int hashCode(Object x) throws HibernateException {
+	public int hashCode(Properties x) throws HibernateException {
 		return x.hashCode();
 	}
 
@@ -106,15 +105,15 @@ public class PropertiesType implements UserType {
 	/** 
 	 * @see UserType#nullSafeGet(ResultSet, String[], Object)
 	 */
-	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
-		String s = rs.getString(names[0]);
+	public Properties nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
+		String s = rs.getString(position);
         return assemble(s, null);
 	}
 
 	/** 
 	 * @see UserType#nullSafeSet(PreparedStatement, Object, int)
 	 */
-	public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+	public void nullSafeSet(PreparedStatement st, Properties value, int index, SharedSessionContractImplementor session) throws SQLException {
 		String val = (String) disassemble(value);
 		st.setString(index, val);
 	}
@@ -122,22 +121,21 @@ public class PropertiesType implements UserType {
 	/** 
 	 * @see UserType#replace(Object, Object, Object)
 	 */
-	public Object replace(Object original, Object target, Object owner) throws HibernateException {
+	public Properties replace(Properties original, Properties target, Object owner) throws HibernateException {
 		return original;
 	}
 
 	/** 
 	 * @see UserType#returnedClass()
 	 */
-	@SuppressWarnings("unchecked")
-	public Class returnedClass() {
+	public Class<Properties> returnedClass() {
 		return Properties.class;
 	}
 
 	/** 
 	 * @see UserType#sqlTypes()
 	 */
-	public int[] sqlTypes() {
-		return new int[] { VARCHAR };
+	public int getSqlType() {
+		return VARCHAR;
 	}
 }

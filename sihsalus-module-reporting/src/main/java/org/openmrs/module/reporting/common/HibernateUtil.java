@@ -16,7 +16,6 @@ import java.util.Properties;
 import org.hibernate.Hibernate;
 import org.openmrs.api.db.hibernate.DbSessionFactory;  
 import org.hibernate.type.Type;
-import org.hibernate.type.TypeFactory;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.context.Context;
 
