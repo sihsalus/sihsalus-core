@@ -231,7 +231,7 @@ public class HibernateReportDAO implements ReportDAO {
 	 */
 	@Override
 	public void purgeReportRequestsForReportDefinition(String reportDefinitionUuid) {
-		String hql = "delete from ReportRequest r where r.reportDefinition.definition=:uuid";
+		String hql = "delete from ReportRequest r where r.reportDefinitionUuid=:uuid";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
 		query.setParameter("uuid", reportDefinitionUuid);
 		query.executeUpdate();
@@ -254,7 +254,7 @@ public class HibernateReportDAO implements ReportDAO {
 	 */
 	@Override
 	public List<String> getReportRequestUuids(String reportDefinitionUuid) {
-		String hql = "select uuid from ReportRequest r where r.reportDefinition.definition=:uuid";
+		String hql = "select uuid from ReportRequest r where r.reportDefinitionUuid=:uuid";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
 		query.setParameter("uuid", reportDefinitionUuid);
 		return query.list();
@@ -279,7 +279,7 @@ public class HibernateReportDAO implements ReportDAO {
 	private Query createReportRequestsBaseQuery(String select, ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Status... statuses) {
 		StringBuilder hql = new StringBuilder(select).append(" where 1 = 1");
 		if (reportDefinition != null) {
-			hql.append(" and r.reportDefinition.definition = :reportDefinitionUuid");
+			hql.append(" and r.reportDefinitionUuid = :reportDefinitionUuid");
 		}
 		if (requestOnOrAfter != null) {
 			hql.append(" and r.requestDate >= :requestOnOrAfter");
