@@ -15,9 +15,9 @@ import org.openmrs.Order;
 import org.openmrs.module.billing.api.db.BillLineItemDAO;
 import org.openmrs.module.billing.api.model.BillLineItem;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.TypedQuery;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 
 /**

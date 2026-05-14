@@ -14,8 +14,8 @@ import org.hibernate.SessionFactory;
 import org.openmrs.module.billing.api.db.PaymentModeDAO;
 import org.openmrs.module.billing.api.model.PaymentMode;
 
-import javax.annotation.Nonnull;
-import javax.persistence.TypedQuery;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 
 /**
