@@ -31,6 +31,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void oauth2LoginIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("oauth2login")
+                        && module.sourceModule().equals("oauth2login-api")
+                        && module.baselineVersion().equals("1.6.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void addressHierarchyIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("addresshierarchy")

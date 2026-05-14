@@ -46,22 +46,23 @@ Implemented:
 - Local OpenMRS BOM module for controlled dependency reuse.
 - Reactor dependency management aligned to Spring Boot 4.0.6, Spring Framework 7, Hibernate 7, and the imported OpenMRS `master` baseline.
 - Central Liquibase entrypoint in `sihsalus-core-liquibase` that runs the upstream OpenMRS schema snapshot, core data, and latest update changelog.
-- Spring Boot application in `sihsalus-core-boot` with datasource, healthcheck, FHIR metadata smoke endpoint, REST system status endpoint, Log4j2 boot logging, and no `.omod` loader.
+- Spring Boot application in `sihsalus-core-boot` with datasource, healthcheck, FHIR metadata/read endpoints, REST system status and REST v1 controller wiring, Log4j2 boot logging, request `Context` session filtering, and no `.omod` loader.
 - Static OpenMRS runtime wiring in `sihsalus-core-boot`: runtime properties, OpenMRS service context, core services/DAOs, Hibernate `SessionFactory`, local storage service, cache wiring, and OpenMRS event listeners are composed by Spring at startup.
 - OpenMRS Hibernate mapping discovery has been cut away from dynamic module startup. `HibernateSessionFactoryBean` no longer asks `ModuleFactory` for started modules or module mapping packages.
-- Upstream FHIR2 API code imported into `sihsalus-fhir2` as local source and compiled against `sihsalus-core-api`. The OMOD activator was excluded.
-- Upstream Web Services REST `omod-common` code imported into `sihsalus-webservices-rest` as local source and compiled against `sihsalus-core-api`. Module install/start/stop wrappers and dynamic module enumeration were excluded.
+- Upstream FHIR2 API code imported into `sihsalus-fhir2` as local source and compiled against `sihsalus-core-api`. The OMOD activator was excluded. Imported R4 providers are reachable through a Spring MVC read adapter at `/api/fhir/r4/{resourceType}/{id}` and `/ws/fhir2/R4/{resourceType}/{id}`.
+- Upstream Web Services REST `omod-common` code imported into `sihsalus-webservices-rest` as local source and compiled against `sihsalus-core-api`. Module install/start/stop wrappers and dynamic module enumeration were excluded. The REST v1 controller and `RestService`/`RestHelperService` framework are statically wired.
 - Upstream Authentication API code imported into `sihsalus-module-authentication` as local source from `authentication-api` `2.4.0-SNAPSHOT`, replacing the placeholder with static Spring wiring for the OpenMRS `AuthenticationScheme` override and `UserSessionListener`. The servlet filters and OMOD activator are intentionally outside the runtime entrypoint for this cut.
+- Upstream OAuth2 Login API code imported into `sihsalus-module-oauth2login` as local source from `oauth2login-api` `1.6.0-SNAPSHOT`, replacing the placeholder with static Spring registration for the OAuth2 user-info authentication scheme. The OMOD activator, `ModuleFactory` unload path, daemon-token lifecycle, and legacy web filters/controllers are intentionally outside the runtime entrypoint for this cut.
 - Upstream ID Generation API code imported into `sihsalus-module-idgen` as local source from `idgen-api` `6.0.0-SNAPSHOT`, replacing the placeholder with static Spring wiring, Hibernate mapping contribution, centralized Liquibase, identifier validators, processors, and optional refill scheduling without OMOD lifecycle.
 - Upstream Address Hierarchy API code imported into `sihsalus-module-addresshierarchy` as local source from `addresshierarchy-api` `3.0.0-SNAPSHOT`, replacing the placeholder with static Spring wiring, Hibernate 7 DAO queries, Hibernate mapping contribution, centralized Liquibase, cache listener, disabled i18n cache fallback, validator registration, and optional cache scheduling without OMOD lifecycle.
 - Static boundary tests check that FHIR2 and REST imports do not depend on `ModuleFactory` or OMOD activators, and that OpenMRS Hibernate mapping discovery does not use dynamic module discovery.
-- Boot tests start the Spring context against H2 in PostgreSQL compatibility mode, run Liquibase, build the OpenMRS `SessionFactory`, and validate health, FHIR metadata, REST system status, Authentication wiring, ID Generation wiring, and Address Hierarchy wiring.
+- Boot tests start the Spring context against H2 in PostgreSQL compatibility mode, run Liquibase, build the OpenMRS `SessionFactory`, and validate health, FHIR metadata and R4 read wiring, REST system status and v1 controller wiring, Authentication/OAuth2 wiring, ID Generation wiring, Address Hierarchy wiring, and Web Services REST service registration.
 
 Not yet implemented:
 
-- FHIR2 servlet/runtime wiring for the imported providers.
-- Web Services REST resource/controller wiring beyond `omod-common`.
-- Source conversion for the remaining distro modules beyond FHIR2, REST common, Authentication API, ID Generation, and Address Hierarchy.
+- Full FHIR2 servlet parity, search/write operations, and broader FHIR provider coverage beyond the current R4 read adapter.
+- Concrete Web Services REST resource imports beyond the common v1 controller/service framework.
+- Source conversion for the remaining distro modules beyond FHIR2, REST common, Authentication API, OAuth2 Login API, ID Generation, and Address Hierarchy.
 
 ## Product Surface To Cover
 
@@ -335,21 +336,20 @@ Acceptance:
 
 ## Immediate Next Decisions
 
-1. Wire OpenMRS service/DAO/Hibernate statically in `sihsalus-core-boot` so imported FHIR2 and REST resources can execute against the preserved OpenMRS model.
-2. Add FHIR runtime endpoints for the imported FHIR2 providers without using the FHIR2 OMOD servlet/activator.
-3. Add REST runtime endpoints for imported Web Services REST resources without module install/start/stop APIs.
-4. Import the first clinical resource block for both APIs: patient, concept, encounter, observation.
-5. Continue distro module conversion by source ownership, starting with OAuth/login web boundaries and the patient registry dependencies that are still placeholders. `authentication`, `idgen`, and `addresshierarchy` are no longer placeholders: the local imports use `authentication-api` `2.4.0-SNAPSHOT`, `idgen-api` `6.0.0-SNAPSHOT`, and `addresshierarchy-api` `3.0.0-SNAPSHOT`, while the distro baselines remain `authentication-omod` `2.3.0`, `idgen-omod` `5.0.4`, and `addresshierarchy-omod` `2.21.0`.
+1. Import the first clinical resource block for both APIs: patient, concept, encounter, observation.
+2. Expand the current FHIR R4 read adapter into the required search/write coverage, or introduce a Jakarta-compatible HAPI servlet bridge if that becomes cleaner than adapter endpoints.
+3. Import concrete Web Services REST resources into the static REST v1 framework without module install/start/stop APIs.
+4. Define the compatibility surface for frontend-facing patient registry routes over `/api/patients`, REST v1, and FHIR.
+5. Continue distro module conversion by source ownership, starting with OAuth/login web boundaries and the patient registry dependencies that are still placeholders. `authentication`, `oauth2login`, `idgen`, and `addresshierarchy` are no longer placeholders: the local imports use `authentication-api` `2.4.0-SNAPSHOT`, `oauth2login-api` `1.6.0-SNAPSHOT`, `idgen-api` `6.0.0-SNAPSHOT`, and `addresshierarchy-api` `3.0.0-SNAPSHOT`, while the distro baselines remain `authentication-omod` `2.3.0`, `oauth2login-omod` `1.5.0`, `idgen-omod` `5.0.4`, and `addresshierarchy-omod` `2.21.0`.
 
 ## Recommended Next Slice
 
 Start with:
 
-- static OpenMRS service/DAO/Hibernate wiring
-- FHIR2 provider runtime wiring
-- REST resource runtime wiring
 - patient registry resource path in both FHIR and REST
 - concept/metadata import design from `reference-sources/sihsalus-content`
 - patient identifier strategy
+- FHIR search/write scope for Patient and Concept
+- concrete REST v1 Patient and Concept resource imports
 
 This gives SIH Salus Core a real clinical foundation while keeping FHIR and REST separate over the same OpenMRS-compatible model.

@@ -11,11 +11,13 @@ import org.openmrs.module.authentication.DelegatingAuthenticationScheme;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class SihsalusAuthenticationConfiguration {
 
     @Bean
+    @Primary
     AuthenticationScheme authenticationScheme() {
         AuthenticationConfig.registerClassLoader(getClass().getClassLoader());
         return new DelegatingAuthenticationScheme();

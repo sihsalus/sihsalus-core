@@ -10,7 +10,7 @@ public final class StaticModuleCatalog {
                     module("fhir2", "fhir2-omod", "4.0.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("webservices-rest", "webservices.rest-omod", "3.4.1", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("authentication", "authentication-api", "2.4.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
-                    module("oauth2login", "oauth2login-omod", "1.5.0", SihsalusModuleStatus.PLACEHOLDER),
+                    module("oauth2login", "oauth2login-api", "1.6.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("idgen", "idgen-api", "6.0.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("addresshierarchy", "addresshierarchy-api", "3.0.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("patientdocuments", "patientdocuments-omod", "1.1.0-SNAPSHOT", SihsalusModuleStatus.PLACEHOLDER),

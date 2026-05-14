@@ -75,15 +75,15 @@ Migration implication:
 
 ### APIs And Interoperability
 
-- `webservices.rest-omod` `3.4.1`: REST API support.
-- `fhir2-omod` `4.0.0-SNAPSHOT`: FHIR API support.
+- `webservices.rest-omod` `3.4.1`: REST API support. SIH Salus Core has statically wired the common REST v1 controller/service framework; concrete resource imports remain a migration item.
+- `fhir2-omod` `4.0.0-SNAPSHOT`: FHIR API support. SIH Salus Core has statically wired an R4 read adapter for imported providers; full servlet/search/write parity remains a migration item.
 - `event-omod` `4.0.0`: eventing/integration support.
 - `sihsalusinterop-omod` is present but commented out.
 
 ### Authentication And Security
 
 - `authentication-omod` `2.3.0`. The SIH Salus Core static import currently uses local `authentication-api` source from `2.4.0-SNAPSHOT`; the `2.3.0` value remains the distro dependency baseline.
-- `oauth2login-omod` `1.5.0`
+- `oauth2login-omod` `1.5.0`. The SIH Salus Core static import currently uses local `oauth2login-api` source from `1.6.0-SNAPSHOT`; the `1.5.0` value remains the distro dependency baseline, and the OMOD web layer is not part of runtime composition yet.
 
 These are part of the login/session/authentication surface that frontend and integrations may depend on.
 
