@@ -105,7 +105,7 @@
 			<column name="min_pool_size" type="int(11)">
 				<constraints nullable="true"/>
 			</column>
-			<column name="sequential" type="tinyint(1)" defaultValue="0">
+			<column name="sequential" type="boolean" defaultValue="0">
 				<constraints nullable="false"/>
 			</column>
 		</createTable>
@@ -211,7 +211,7 @@
 			<not><columnExists tableName="idgen_id_pool" columnName="refill_with_scheduled_task"/></not>
 		</preConditions>
 		<addColumn tableName="idgen_id_pool">
-			<column name="refill_with_scheduled_task" type="tinyint(1)" defaultValue="1">
+			<column name="refill_with_scheduled_task" type="boolean" defaultValue="1">
 				<constraints nullable="false"/>
 			</column>
 		</addColumn>
@@ -312,7 +312,11 @@
 
 	<changeSet id="0f79a646-4f62-4fef-b035-421ad8f73ba2" author="Partners In Health">
 		<preConditions onFail="MARK_RAN">
-			<not><foreignKeyConstraintExists foreignKeyName="identifier_type for idgen_auto_generation_option" foreignKeyTableName="idgen_auto_generation_option"/></not>
+			<and>
+				<not><dbms type="h2"/></not>
+				<not><foreignKeyConstraintExists foreignKeyName="identifier_type for idgen_auto_generation_option" foreignKeyTableName="idgen_auto_generation_option"/></not>
+				<not><foreignKeyConstraintExists foreignKeyName="IDENTIFIER_TYPE FOR IDGEN_AUTO_GENERATION_OPTION" foreignKeyTableName="idgen_auto_generation_option"/></not>
+			</and>
 		</preConditions>
 		<addForeignKeyConstraint
 				constraintName="identifier_type for idgen_auto_generation_option"

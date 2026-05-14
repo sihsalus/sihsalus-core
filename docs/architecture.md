@@ -20,6 +20,7 @@ The current architectural decision is to keep the OpenMRS data model as the cano
 
    - `sihsalus-fhir2` contains the upstream FHIR2 API package as local source under `org.openmrs.module.fhir2.*`, adapted to the local Jakarta/Hibernate baseline and compiled without the FHIR OMOD activator.
    - `sihsalus-webservices-rest` contains the upstream Web Services REST common package as local source under `org.openmrs.module.webservices.*`, compiled without module install/start/stop wrappers or dynamic module enumeration.
+   - `sihsalus-module-idgen` contains the upstream ID Generation API package as local source under `org.openmrs.module.idgen.*`, currently sourced from idgen `6.0.0-SNAPSHOT` even though the distro dependency baseline lists `idgen-omod` `5.0.4`. It is wired as a static internal module, with Java Spring configuration, centralized Liquibase, and no OMOD activator.
    - `sihsalus-core-boot` wires OpenMRS services, DAOs, Hibernate mappings, storage, cache, and Liquibase through static Spring configuration. Hibernate mapping discovery no longer asks the OpenMRS module runtime for started modules.
 
    The runtime baseline is Spring Boot 4 plus Spring Framework 7 and Hibernate 7, aligned with the imported OpenMRS `master` source. Boot logging uses Log4j2 to avoid mixing the OpenMRS Log4j binding with Boot's default Logback bridge.

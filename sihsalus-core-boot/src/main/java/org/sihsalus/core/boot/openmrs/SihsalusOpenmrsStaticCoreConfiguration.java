@@ -3,6 +3,8 @@ package org.sihsalus.core.boot.openmrs;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.sql.DataSource;
+import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.CohortService;
@@ -49,6 +51,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
@@ -87,7 +90,16 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
         return new OpenmrsRuntimePropertiesConfigurer();
     }
 
+    @Bean(name = "liquibase")
+    SpringLiquibase liquibase(DataSource dataSource) {
+        SpringLiquibase liquibase = new SpringLiquibase();
+        liquibase.setDataSource(dataSource);
+        liquibase.setChangeLog("classpath:/db/changelog/db.changelog-master.xml");
+        return liquibase;
+    }
+
     @Bean(name = "sessionFactory")
+    @DependsOn("liquibase")
     HibernateSessionFactoryBean sessionFactory(ObjectProvider<HibernateMappingContributor> mappingContributors) {
         HibernateSessionFactoryBean sessionFactory = new HibernateSessionFactoryBean();
         sessionFactory.setConfigLocations(new ClassPathResource("hibernate.cfg.xml"));

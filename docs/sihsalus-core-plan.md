@@ -336,7 +336,7 @@ Acceptance:
 2. Add FHIR runtime endpoints for the imported FHIR2 providers without using the FHIR2 OMOD servlet/activator.
 3. Add REST runtime endpoints for imported Web Services REST resources without module install/start/stop APIs.
 4. Import the first clinical resource block for both APIs: patient, concept, encounter, observation.
-5. Continue distro module conversion by source ownership, starting with auth/idgen/address hierarchy because they unblock patient registry workflows.
+5. Continue distro module conversion by source ownership, starting with auth/address hierarchy because they unblock patient registry workflows. `idgen` is no longer a placeholder: the local import uses `idgen-api` source from `6.0.0-SNAPSHOT` while the distro baseline remains `idgen-omod` `5.0.4`.
 
 ## Recommended Next Slice
 
