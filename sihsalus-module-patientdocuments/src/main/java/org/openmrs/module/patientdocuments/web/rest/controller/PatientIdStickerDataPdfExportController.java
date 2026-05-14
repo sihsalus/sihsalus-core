@@ -70,8 +70,11 @@ public class PatientIdStickerDataPdfExportController extends BaseRestController 
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<byte[]> getPatientIdSticker(HttpServletResponse response,
-	        @RequestParam(value = "patientUuid") String patientUuid,
+	        @RequestParam(value = "patientUuid", required = false) String patientUuid,
 	        @RequestParam(value = "inline", required = false, defaultValue = "true") boolean inline) {
+		if (patientUuid == null || patientUuid.isBlank()) {
+			return ResponseEntity.badRequest().build();
+		}
 		
 		Patient patient = ps.getPatientByUuid(patientUuid);
 		if (patient == null) {

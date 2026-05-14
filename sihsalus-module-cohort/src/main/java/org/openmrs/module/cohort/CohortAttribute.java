@@ -21,6 +21,16 @@ public class CohortAttribute extends BaseAttribute<CohortAttributeType, CohortM>
 	@Getter
 	@Setter
 	private Integer cohortAttributeId;
+
+	@Override
+	public CohortM getOwner() {
+		return super.getOwner();
+	}
+
+	@Override
+	public void setOwner(CohortM owner) {
+		super.setOwner(owner);
+	}
 	
 	/**
 	 * @return id - The unique Identifier for the object

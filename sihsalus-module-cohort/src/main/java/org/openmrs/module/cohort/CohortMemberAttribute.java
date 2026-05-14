@@ -21,6 +21,16 @@ public class CohortMemberAttribute extends BaseAttribute<CohortMemberAttributeTy
 	@Getter
 	@Setter
 	private Integer id;
+
+	@Override
+	public CohortMember getOwner() {
+		return super.getOwner();
+	}
+
+	@Override
+	public void setOwner(CohortMember owner) {
+		super.setOwner(owner);
+	}
 	
 	public CohortMember getCohortMember() {
 		return this.getOwner();

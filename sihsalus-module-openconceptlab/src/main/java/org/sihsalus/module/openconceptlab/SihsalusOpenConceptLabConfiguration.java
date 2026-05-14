@@ -58,7 +58,7 @@ public class SihsalusOpenConceptLabConfiguration {
         return saver;
     }
 
-    @Bean(destroyMethod = "shutdown")
+    @Bean(destroyMethod = "shutdown", autowireCandidate = false)
     ThreadPoolTaskScheduler openConceptLabTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(1);
@@ -84,11 +84,10 @@ public class SihsalusOpenConceptLabConfiguration {
 
     @Bean
     UpdateScheduler openConceptLabUpdateScheduler(
-            ThreadPoolTaskScheduler openConceptLabTaskScheduler,
             Importer openConceptLabImporter,
             ImportService openConceptLabImportService) {
         UpdateScheduler scheduler = new UpdateScheduler();
-        scheduler.setScheduler(openConceptLabTaskScheduler);
+        scheduler.setScheduler(openConceptLabTaskScheduler());
         scheduler.setImporter(openConceptLabImporter);
         scheduler.setImportService(openConceptLabImportService);
         return scheduler;
