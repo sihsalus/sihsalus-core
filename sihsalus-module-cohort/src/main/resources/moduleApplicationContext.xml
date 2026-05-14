@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+  		    http://www.springframework.org/schema/context
+  		    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:annotation-config />
+    <context:component-scan base-package="org.openmrs.module.cohort"/>
+
+    <bean id="cohort.cohortService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target">
+			<bean class="org.openmrs.module.cohort.api.impl.CohortServiceImpl">
+				<constructor-arg ref="cohortDao" />
+				<constructor-arg ref="cohortAttributeDao" />
+				<constructor-arg ref="cohortAttributeTypeDao" />
+			</bean>
+		</property>
+        <property name="preInterceptors" ref="serviceInterceptors"/>
+        <property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+    </bean>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="false">
+                <value>org.openmrs.module.cohort.api.CohortService</value>
+                <ref bean="cohort.cohortService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="cohort.cohortMemberService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target">
+			<bean class="org.openmrs.module.cohort.api.impl.CohortMemberServiceImpl">
+				<constructor-arg ref="cohortMemberDao" />
+				<constructor-arg ref="cohortMemberAttributeTypeDao" />
+				<constructor-arg ref="cohortMemberAttributeDao" />
+			</bean>
+		</property>
+        <property name="preInterceptors" ref="serviceInterceptors"/>
+        <property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+    </bean>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
+                <value>org.openmrs.module.cohort.api.CohortMemberService</value>
+                <ref bean="cohort.cohortMemberService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="cohort.cohortTypeService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target">
+			<bean class="org.openmrs.module.cohort.api.impl.CohortTypeServiceImpl">
+				<constructor-arg ref="cohortTypeDao" />
+			</bean>
+		</property>
+        <property name="preInterceptors" ref="serviceInterceptors"/>
+        <property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+    </bean>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
+                <value>org.openmrs.module.cohort.api.CohortTypeService</value>
+                <ref bean="cohort.cohortTypeService"/>
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="cohortDao" class="org.openmrs.module.cohort.api.dao.CohortDao">
+    	<constructor-arg ref="sessionFactory" />
+		<constructor-arg ref="cohort.search.cohortSearchHandler" />
+	</bean>	
+	<bean id="cohortAttributeDao" class="org.openmrs.module.cohort.api.dao.CohortAttributeDao">
+    	<constructor-arg ref="sessionFactory" />
+		<constructor-arg ref="cohort.search.cohortSearchHandler" />
+	</bean>	
+	<bean id="cohortAttributeTypeDao" class="org.openmrs.module.cohort.api.dao.CohortAttributeTypeDao">
+    	<constructor-arg ref="sessionFactory" />
+		<constructor-arg ref="cohort.search.cohortSearchHandler" />
+	</bean>	
+    <bean id="cohortMemberDao" class="org.openmrs.module.cohort.api.dao.CohortMemberDao">
+    	<constructor-arg ref="sessionFactory" />
+		<constructor-arg ref="cohort.search.cohortSearchHandler" />
+	</bean>	
+	<bean id="cohortMemberAttributeTypeDao" class="org.openmrs.module.cohort.api.dao.CohortMemberAttributeTypeDao">
+    	<constructor-arg ref="sessionFactory" />
+		<constructor-arg ref="cohort.search.cohortSearchHandler" />
+	</bean>
+	<bean id="cohortMemberAttributeDao" class="org.openmrs.module.cohort.api.dao.CohortMemberAttributeDao">
+    	<constructor-arg ref="sessionFactory" />
+		<constructor-arg ref="cohort.search.cohortSearchHandler" />
+	</bean>
+    <bean id="cohortTypeDao" class="org.openmrs.module.cohort.api.dao.CohortTypeDao">
+    	<constructor-arg ref="sessionFactory" />
+		<constructor-arg ref="cohort.search.cohortSearchHandler" />
+	</bean>	
+	
+</beans>

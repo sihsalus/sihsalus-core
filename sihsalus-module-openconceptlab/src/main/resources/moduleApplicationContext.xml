@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+  		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+  		    http://www.springframework.org/schema/task
+  		    http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+	<!-- Add here beans related to the API context -->
+	
+	<task:scheduler id="openconceptlab.scheduler" pool-size="1"/>
+	
+	<bean id="openconceptlab.importService"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.openconceptlab.ImportServiceImpl">
+				<property name="sessionFactory" ref="dbSessionFactory" />
+				<property name="adminService" ref="adminService" />
+				<property name="conceptService" ref="conceptService"/>
+				<property name="oclConceptService" ref="openconceptlab.conceptService" />
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list>
+				<value>org.openmrs.module.openconceptlab.ImportService</value>
+				<ref bean="openconceptlab.importService"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="openconceptlab.conceptService"
+		  class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.openconceptlab.OclConceptServiceImpl">
+				<property name="dbSessionFactory" ref="dbSessionFactory" />
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list>
+				<value>org.openmrs.module.openconceptlab.OclConceptService</value>
+				<ref bean="openconceptlab.conceptService"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="openconceptlab.oclClient" class="org.openmrs.module.openconceptlab.client.OclClient" />
+	
+	<bean id="openconceptlab.saver" class="org.openmrs.module.openconceptlab.importer.Saver">
+		<property name="conceptService" ref="conceptService" />
+		<property name="importService" ref="openconceptlab.importService" />
+	</bean>
+	
+	<bean id="openconceptlab.importer" class="org.openmrs.module.openconceptlab.importer.Importer">
+		<property name="importService" ref="openconceptlab.importService" />
+		<property name="conceptService" ref="conceptService" />
+		<property name="oclConceptService" ref="openconceptlab.conceptService" />
+		<property name="oclClient" ref="openconceptlab.oclClient" />
+		<property name="saver" ref="openconceptlab.saver" />
+	</bean>
+	
+	<bean id="openconceptlab.updateScheduler" class="org.openmrs.module.openconceptlab.scheduler.UpdateScheduler">
+		<property name="scheduler" ref="openconceptlab.scheduler"/>
+		<property name="importer" ref="openconceptlab.importer" />
+		<property name="importService" ref="openconceptlab.importService" />
+	</bean>
+</beans>
