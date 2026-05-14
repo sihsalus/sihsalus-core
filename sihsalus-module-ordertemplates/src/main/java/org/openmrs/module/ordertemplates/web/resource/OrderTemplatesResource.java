@@ -32,10 +32,9 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import jakarta.validation.constraints.NotNull;
 
-import javax.validation.constraints.NotNull;
-
-@Resource(name = RestConstants.VERSION_1 + OrderTemplatesRestController.ORDER_TEMPLATES_REST_NAMESPACE + "/orderTemplate", supportedClass = OrderTemplate.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+@Resource(name = RestConstants.VERSION_1 + OrderTemplatesRestController.ORDER_TEMPLATES_REST_NAMESPACE + "/orderTemplate", supportedClass = OrderTemplate.class, supportedOpenmrsVersions = { "2.0.* - 9.*" })
 public class OrderTemplatesResource extends DelegatingCrudResource<OrderTemplate> {
 	
 	@Override

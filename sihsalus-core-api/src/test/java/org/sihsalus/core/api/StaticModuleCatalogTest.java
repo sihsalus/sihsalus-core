@@ -101,4 +101,13 @@ class StaticModuleCatalogTest {
                         && module.baselineVersion().equals("0.3.0")
                         && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
     }
+
+    @Test
+    void orderTemplatesIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("ordertemplates")
+                        && module.sourceModule().equals("ordertemplates-omod")
+                        && module.baselineVersion().equals("2.2.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
 }

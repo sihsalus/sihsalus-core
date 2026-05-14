@@ -1,11 +1,16 @@
 package org.openmrs.module.ordertemplates.model;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
-
-import javax.persistence.*;
 
 @Entity
 @Table(name = "order_template")
@@ -35,7 +40,6 @@ public class OrderTemplate extends BaseOpenmrsMetadata {
 	private Drug drug;
 	
 	@Column(name = "template", length = 10000)
-	@Type(type = "text")
 	private String template;
 	
 	@Override

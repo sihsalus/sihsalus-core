@@ -38,7 +38,7 @@ public final class StaticModuleCatalog {
                             "2.1.0-SNAPSHOT",
                             SihsalusModuleStatus.STATIC_INTERNAL),
                     module("openconceptlab", "openconceptlab-omod", "3.0.0", SihsalusModuleStatus.PLACEHOLDER),
-                    module("ordertemplates", "ordertemplates-omod", "2.2.0", SihsalusModuleStatus.PLACEHOLDER),
+                    module("ordertemplates", "ordertemplates-omod", "2.2.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("event", "event-omod", "4.0.0", SihsalusModuleStatus.PLACEHOLDER),
                     module("stockmanagement", "stockmanagement-api", "3.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("billing", "billing-omod", "2.2.0", SihsalusModuleStatus.PLACEHOLDER),

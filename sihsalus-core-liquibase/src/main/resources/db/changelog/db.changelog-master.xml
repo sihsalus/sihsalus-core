@@ -17,4 +17,5 @@
     <include file="org/openmrs/module/emrapi/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/attachments/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/stockmanagement/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/ordertemplates/liquibase.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

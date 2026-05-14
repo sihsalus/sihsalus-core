@@ -1,15 +1,13 @@
 package org.openmrs.module.ordertemplates.api.dao.impl;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
+import java.util.List;
+import org.hibernate.Session;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.ordertemplates.api.dao.OrderTemplatesDao;
-import org.openmrs.module.ordertemplates.parameter.OrderTemplateCriteria;
 import org.openmrs.module.ordertemplates.model.OrderTemplate;
-
-import java.util.List;
+import org.openmrs.module.ordertemplates.parameter.OrderTemplateCriteria;
 
 /**
  * Hibernate implementation of the OrderTemplatesDao
@@ -27,8 +25,9 @@ public class HibernateOrderTemplatesDao implements OrderTemplatesDao {
 	
 	@Override
 	public OrderTemplate getOrderTemplateByUuid(String uuid) {
-		return (OrderTemplate) sessionFactory.getCurrentSession()
-		        .createQuery("select ot from OrderTemplate ot where ot.uuid = :uuid").setParameter("uuid", uuid)
+		return currentSession()
+		        .createQuery("select ot from OrderTemplate ot where ot.uuid = :uuid", OrderTemplate.class)
+		        .setParameter("uuid", uuid)
 		        .uniqueResult();
 	}
 	
@@ -39,12 +38,15 @@ public class HibernateOrderTemplatesDao implements OrderTemplatesDao {
 			throw new IllegalArgumentException("Drug is required");
 		}
 		
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(OrderTemplate.class);
 		if (drug.getDrugId() != null) {
-			criteria.add(Restrictions.eq("drug", drug));
+			return currentSession()
+			        .createQuery(
+			                "select ot from OrderTemplate ot where ot.drug = :drug order by ot.orderTemplateId desc",
+			                OrderTemplate.class)
+			        .setParameter("drug", drug)
+			        .getResultList();
 		}
-		criteria.addOrder(org.hibernate.criterion.Order.desc("orderTemplateId"));
-		return criteria.list();
+		return List.of();
 	}
 	
 	@Override
@@ -54,42 +56,51 @@ public class HibernateOrderTemplatesDao implements OrderTemplatesDao {
 			throw new IllegalArgumentException("Concept is required");
 		}
 		
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(OrderTemplate.class);
 		if (concept.getConceptId() != null) {
-			criteria.add(Restrictions.eq("concept", concept));
+			return currentSession()
+			        .createQuery(
+			                "select ot from OrderTemplate ot where ot.concept = :concept order by ot.orderTemplateId desc",
+			                OrderTemplate.class)
+			        .setParameter("concept", concept)
+			        .getResultList();
 		}
-		criteria.addOrder(org.hibernate.criterion.Order.desc("orderTemplateId"));
-		return criteria.list();
+		return List.of();
 	}
 	
 	@Override
 	public List<OrderTemplate> getOrderTemplateByCriteria(OrderTemplateCriteria searchCriteria) {
 		
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(OrderTemplate.class);
 		Concept concept = searchCriteria.getConcept();
 		Drug drug = searchCriteria.getDrug();
-		
+
+		StringBuilder hql = new StringBuilder("select ot from OrderTemplate ot where 1 = 1");
 		if (drug != null && drug.getDrugId() != null) {
-			criteria.add(Restrictions.eq("drug", drug));
+			hql.append(" and ot.drug = :drug");
 		}
 		if (concept != null && concept.getConceptId() != null) {
-			criteria.add(Restrictions.eq("concept", concept));
+			hql.append(" and ot.concept = :concept");
 		}
 		if (!searchCriteria.isIncludeRetired()) {
-			criteria.add(Restrictions.eq("retired", false));
+			hql.append(" and ot.retired = false");
 		}
-		
-		criteria.addOrder(org.hibernate.criterion.Order.desc("orderTemplateId"));
-		return criteria.list();
+		hql.append(" order by ot.orderTemplateId desc");
+
+		var query = currentSession().createQuery(hql.toString(), OrderTemplate.class);
+		if (drug != null && drug.getDrugId() != null) {
+			query.setParameter("drug", drug);
+		}
+		if (concept != null && concept.getConceptId() != null) {
+			query.setParameter("concept", concept);
+		}
+		return query.getResultList();
 	}
 	
 	@Override
 	public List<OrderTemplate> getAllOrderTemplates(boolean includeRetired) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(OrderTemplate.class);
-		if (!includeRetired) {
-			criteria.add(Restrictions.eq("retired", false));
-		}
-		return criteria.list();
+		String hql = includeRetired
+		        ? "select ot from OrderTemplate ot"
+		        : "select ot from OrderTemplate ot where ot.retired = false";
+		return currentSession().createQuery(hql, OrderTemplate.class).getResultList();
 	}
 	
 	@Override
@@ -109,5 +120,9 @@ public class HibernateOrderTemplatesDao implements OrderTemplatesDao {
 	
 	public void setSessionFactory(DbSessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
+	}
+
+	private Session currentSession() {
+		return sessionFactory.getHibernateSessionFactory().getCurrentSession();
 	}
 }

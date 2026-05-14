@@ -37,6 +37,7 @@ import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
 import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationScheme;
+import org.openmrs.module.ordertemplates.api.OrderTemplatesService;
 import org.openmrs.module.serialization.xstream.XStreamSerializer;
 import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
@@ -213,6 +214,13 @@ class SihsalusCoreApplicationTest {
     void serializationXstreamIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getSerializationService().getSerializer(XStreamSerializer.class));
         assertNotNull(Context.getSerializationService().getSerializer(XStreamShortSerializer.class));
+    }
+
+    @Test
+    void orderTemplatesIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(OrderTemplatesService.class));
+        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/ordertemplates/orderTemplate"));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from order_template", Integer.class));
     }
 
     private String ensureTestPatient() {
