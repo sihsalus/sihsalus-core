@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.queue.api.dao.impl;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -130,7 +130,7 @@ public class QueueEntryDaoImpl extends AbstractBaseQueueDaoImpl<QueueEntry> impl
 			jpql.append("AND qe.dateChanged = :expectedDateChanged");
 		}
 		
-		javax.persistence.Query query = session.createQuery(jpql.toString());
+		jakarta.persistence.Query query = session.createQuery(jpql.toString());
 		query.setParameter("endedAt", endedAt);
 		query.setParameter("id", queueEntry.getQueueEntryId());
 		if (expectedDateChanged != null) {

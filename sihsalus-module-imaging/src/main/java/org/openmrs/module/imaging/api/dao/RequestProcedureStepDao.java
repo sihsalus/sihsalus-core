@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.imaging.api.dao;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.imaging.api.worklist.RequestProcedure;
@@ -46,13 +44,14 @@ public class RequestProcedureStepDao {
 	
 	@SuppressWarnings("unchecked")
 	public List<RequestProcedureStep> getAll() {
-		return getSession().createCriteria(RequestProcedureStep.class).list();
+		return getSession().createQuery("FROM RequestProcedureStep").getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<RequestProcedureStep> getAllStepByRequestProcedure(RequestProcedure requestProcedure) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(RequestProcedureStep.class);
-		return criteria.add(Restrictions.eq("requestProcedure", requestProcedure)).list();
+		return getSession().createQuery("FROM RequestProcedureStep s WHERE s.requestProcedure = :requestProcedure")
+		        .setParameter("requestProcedure", requestProcedure)
+		        .getResultList();
 	}
 	
 	public void save(RequestProcedureStep requestProcedureStep) {

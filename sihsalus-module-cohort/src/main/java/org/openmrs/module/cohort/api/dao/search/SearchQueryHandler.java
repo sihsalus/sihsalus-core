@@ -9,17 +9,11 @@
  */
 package org.openmrs.module.cohort.api.dao.search;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.cohort.CohortM;
 import org.openmrs.module.cohort.CohortMember;
 import org.openmrs.module.cohort.CohortType;
@@ -31,50 +25,87 @@ public class SearchQueryHandler extends AbstractSearchHandler implements ISearch
 	
 	public List<CohortM> findCohorts(String nameMatching, Map<String, String> attributes, CohortType cohortType,
 	        boolean includeVoided) {
-		Criteria criteria = getCurrentSession().createCriteria(CohortM.class);
-		criteria.add(eq("voided", includeVoided));
+		StringBuilder hql = new StringBuilder(
+		        "select distinct c from org.openmrs.module.cohort.CohortM c where 1 = 1");
 		
+		if (!includeVoided) {
+			hql.append(" and c.voided = false");
+		}
 		if (StringUtils.isNotBlank(nameMatching)) {
-			criteria.add(Restrictions.ilike("name", nameMatching, MatchMode.ANYWHERE));
+			hql.append(" and lower(c.name) like :nameMatching");
 		}
-		
 		if (attributes != null && !attributes.isEmpty()) {
-			Criteria attributeCriteria = criteria.createCriteria("attributes").add(Restrictions.eq("voided", false))
-			        .createAlias("attributeType", "attrType");
-			
-			Disjunction disjunction = Restrictions.disjunction();
-			for (String attribute : attributes.keySet()) {
-				disjunction.add(Restrictions.conjunction(Restrictions.eq("attrType.name", attribute),
-				    Restrictions.like("value", attributes.get(attribute), MatchMode.ANYWHERE)));
+			hql.append(" and exists (select a.id from org.openmrs.module.cohort.CohortAttribute a "
+			        + "where a.cohort = c and a.voided = false and (");
+			int index = 0;
+			for (String ignored : attributes.keySet()) {
+				if (index > 0) {
+					hql.append(" or ");
+				}
+				hql.append("(a.attributeType.name = :attributeName")
+				        .append(index)
+				        .append(" and lower(a.valueReference) like :attributeValue")
+				        .append(index)
+				        .append(")");
+				index++;
 			}
-			
-			attributeCriteria.add(disjunction);
+			hql.append("))");
 		}
-		
 		if (cohortType != null) {
-			criteria.add(Restrictions.eq("cohortType.cohortTypeId", cohortType.getCohortTypeId()));
+			hql.append(" and c.cohortType.cohortTypeId = :cohortTypeId");
 		}
 		
-		criteria.setProjection(null).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-		
-		return criteria.list();
+		org.hibernate.query.Query<CohortM> query = getCurrentSession().createQuery(hql.toString(), CohortM.class);
+		if (StringUtils.isNotBlank(nameMatching)) {
+			query.setParameter("nameMatching", "%" + nameMatching.toLowerCase() + "%");
+		}
+		if (attributes != null && !attributes.isEmpty()) {
+			int index = 0;
+			for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+				query.setParameter("attributeName" + index, attribute.getKey());
+				query.setParameter("attributeValue" + index, "%" + attribute.getValue().toLowerCase() + "%");
+				index++;
+			}
+		}
+		if (cohortType != null) {
+			query.setParameter("cohortTypeId", cohortType.getCohortTypeId());
+		}
+		return query.list();
 	}
 	
 	@Override
 	public Collection<CohortMember> findCohortMembersByPatientNames(String name) {
-		String patientAlias = "_p";
-		Criteria criteria = getCurrentSession().createCriteria(CohortMember.class).createCriteria("patient", patientAlias);
-		return handleNames(criteria, patientAlias, name).list();
+		return getCurrentSession()
+		        .createQuery("""
+		                select distinct cm
+		                from org.openmrs.module.cohort.CohortMember cm
+		                join cm.patient p
+		                join p.names n
+		                where lower(n.givenName) like :name
+		                    or lower(n.familyName) like :name
+		                    or lower(n.middleName) like :name
+		                """, CohortMember.class)
+		        .setParameter("name", startsWith(name))
+		        .list();
 	}
 	
 	@Override
 	public Collection<CohortMember> findCohortMembersByCohortAndPatient(String cohortUuid, String query) {
-		String patientAlias = "_p21";
-		Criteria criteria = getCurrentSession().createCriteria(CohortMember.class);
-		criteria.createCriteria("cohort", "c").add(Restrictions.eq("c.uuid", cohortUuid));
-		Criteria patientCriteria = criteria.createCriteria("patient", patientAlias);
-		handleNames(patientCriteria, patientAlias, query);
-		
-		return criteria.list();
+		return getCurrentSession()
+		        .createQuery("""
+		                select distinct cm
+		                from org.openmrs.module.cohort.CohortMember cm
+		                join cm.patient p
+		                join p.names n
+		                where cm.cohort.uuid = :cohortUuid
+		                    and (
+		                        lower(n.givenName) like :name
+		                        or lower(n.familyName) like :name
+		                        or lower(n.middleName) like :name
+		                    )
+		                """, CohortMember.class)
+		        .setParameter("cohortUuid", cohortUuid)
+		        .setParameter("name", startsWith(query))
+		        .list();
 	}
 }

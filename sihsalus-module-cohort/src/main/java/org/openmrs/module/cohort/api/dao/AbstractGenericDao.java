@@ -9,31 +9,23 @@
  */
 package org.openmrs.module.cohort.api.dao;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.or;
-
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
+import org.openmrs.module.cohort.api.dao.search.ISearchQuery;
 import org.openmrs.module.cohort.api.dao.search.PropValue;
 import org.openmrs.module.cohort.api.dao.search.SearchQueryHandler;
 
-@Slf4j
 @SuppressWarnings("unchecked")
-@Getter
-@Setter
 public abstract class AbstractGenericDao<W extends OpenmrsObject & Auditable> implements GenericDao<W> {
 	
 	private final SessionFactory sessionFactory;
@@ -47,6 +39,11 @@ public abstract class AbstractGenericDao<W extends OpenmrsObject & Auditable> im
 		this.searchHandler = searchHandler;
 		
 		clazz = (Class<W>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+	}
+
+	@Override
+	public ISearchQuery getSearchHandler() {
+		return searchHandler;
 	}
 	
 	protected Session getCurrentSession() {
@@ -65,9 +62,9 @@ public abstract class AbstractGenericDao<W extends OpenmrsObject & Auditable> im
 	
 	@Override
 	public W get(String uuid, boolean includeVoided) {
-		Criteria criteria = getCurrentSession().createCriteria(clazz);
-		includeDeletedObjects(criteria, includeVoided);
-		return (W) criteria.add(eq("uuid", uuid)).uniqueResult();
+		StringBuilder hql = new StringBuilder(entityAlias()).append(" where e.uuid = :uuid");
+		appendDeletedFilter(hql, includeVoided);
+		return getCurrentSession().createQuery(hql.toString(), clazz).setParameter("uuid", uuid).uniqueResult();
 	}
 	
 	@Override
@@ -77,9 +74,9 @@ public abstract class AbstractGenericDao<W extends OpenmrsObject & Auditable> im
 	
 	@Override
 	public Collection<W> findAll(boolean includeRetired) {
-		Criteria criteria = getCurrentSession().createCriteria(clazz);
-		includeDeletedObjects(criteria, includeRetired);
-		return criteria.list();
+		StringBuilder hql = new StringBuilder(entityAlias());
+		appendWhereDeletedFilter(hql, includeRetired);
+		return getCurrentSession().createQuery(hql.toString(), clazz).list();
 	}
 	
 	@Override
@@ -111,12 +108,8 @@ public abstract class AbstractGenericDao<W extends OpenmrsObject & Auditable> im
 	
 	@Override
 	public Collection<W> findBy(PropValue propValue, boolean includeRetired) {
-		Criteria criteria = getCurrentSession().createCriteria(clazz);
-		includeDeletedObjects(criteria, includeRetired);
-		return propValue.getAssociationPath().isPresent()
-		        ? criteria.createCriteria(propValue.getAssociationPath().get(), "_pv2021")
-		                .add(eq("_pv2021." + propValue.getProperty(), propValue.getValue())).list()
-		        : criteria.add(eq(propValue.getProperty(), propValue.getValue())).list();
+		QueryParts queryParts = queryPartsFor(propValue, includeRetired);
+		return queryParts.applyParameters(getCurrentSession().createQuery(queryParts.hql(), clazz)).list();
 	}
 	
 	@Override
@@ -126,24 +119,8 @@ public abstract class AbstractGenericDao<W extends OpenmrsObject & Auditable> im
 	
 	@Override
 	public W findByUniqueProp(PropValue propValue, boolean includeRetired) {
-		Criteria criteria = getCurrentSession().createCriteria(clazz);
-		includeDeletedObjects(criteria, includeRetired);
-		return (W) (propValue.getAssociationPath().isPresent()
-		        ? criteria.createCriteria(propValue.getAssociationPath().get(), "_cu2021")
-		                .add(eq("_cu2021." + propValue.getProperty(), propValue.getValue())).uniqueResult()
-		        : criteria.add(eq(propValue.getProperty(), propValue.getValue())).uniqueResult());
-	}
-	
-	@Override
-	public Collection<W> findByOr(Criterion... predicates) {
-		Criteria orByCriteria = getCurrentSession().createCriteria(clazz);
-		return orByCriteria.add(or(predicates)).list();
-	}
-	
-	@Override
-	public Collection<W> findByAnd(Criterion... predicates) {
-		Criteria andByCriteria = getCurrentSession().createCriteria(clazz);
-		return andByCriteria.add(and(predicates)).list();
+		QueryParts queryParts = queryPartsFor(propValue, includeRetired);
+		return queryParts.applyParameters(getCurrentSession().createQuery(queryParts.hql(), clazz)).uniqueResult();
 	}
 	
 	protected boolean isVoidable() {
@@ -154,26 +131,48 @@ public abstract class AbstractGenericDao<W extends OpenmrsObject & Auditable> im
 		return Retireable.class.isAssignableFrom(clazz);
 	}
 	
-	protected void handleVoidable(Criteria criteria) {
-		criteria.add(eq("voided", false));
+	private QueryParts queryPartsFor(PropValue propValue, boolean includeDeleted) {
+		Objects.requireNonNull(propValue, "propValue must not be null");
+		String path = propValue.getAssociationPath().map(association -> "e." + association + ".")
+		        .orElse("e.") + propValue.getProperty();
+		StringBuilder hql = new StringBuilder(entityAlias()).append(" where ").append(path).append(" = :value");
+		appendDeletedFilter(hql, includeDeleted);
+		return new QueryParts(hql.toString(), List.of(new Parameter("value", propValue.getValue())));
 	}
-	
-	protected void handleRetireable(Criteria criteria) {
-		criteria.add(eq("retired", false));
+
+	private String entityAlias() {
+		return "from " + clazz.getName() + " e";
 	}
-	
-	protected void includeDeletedObjects(Criteria criteria, boolean includeDeleted) {
+
+	private void appendWhereDeletedFilter(StringBuilder hql, boolean includeDeleted) {
 		if (!includeDeleted) {
 			if (isVoidable()) {
-				handleVoidable(criteria);
+				hql.append(" where e.voided = false");
 			} else if (isRetireable()) {
-				handleRetireable(criteria);
+				hql.append(" where e.retired = false");
 			}
 		}
 	}
-	
-	@Override
-	public Criteria createCriteria() {
-		return getCurrentSession().createCriteria(clazz);
+
+	private void appendDeletedFilter(StringBuilder hql, boolean includeDeleted) {
+		if (!includeDeleted) {
+			if (isVoidable()) {
+				hql.append(" and e.voided = false");
+			} else if (isRetireable()) {
+				hql.append(" and e.retired = false");
+			}
+		}
+	}
+
+	private record Parameter(String name, Object value) {}
+
+	private record QueryParts(String hql, List<Parameter> parameters) {
+		<T> org.hibernate.query.Query<T> applyParameters(org.hibernate.query.Query<T> query) {
+			List<Parameter> safeParameters = new ArrayList<>(parameters);
+			for (Parameter parameter : safeParameters) {
+				query.setParameter(parameter.name(), parameter.value());
+			}
+			return query;
+		}
 	}
 }

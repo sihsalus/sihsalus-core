@@ -11,8 +11,6 @@ package org.openmrs.module.cohort.api.dao;
 
 import java.util.Collection;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.cohort.api.dao.search.ISearchQuery;
@@ -45,10 +43,4 @@ public interface GenericDao<W extends OpenmrsObject & Auditable> {
 	W findByUniqueProp(PropValue propValue);
 	
 	W findByUniqueProp(PropValue propValue, boolean includeRetired);
-	
-	Collection<W> findByOr(Criterion... predicates);
-	
-	Collection<W> findByAnd(Criterion... predicates);
-	
-	Criteria createCriteria();
 }

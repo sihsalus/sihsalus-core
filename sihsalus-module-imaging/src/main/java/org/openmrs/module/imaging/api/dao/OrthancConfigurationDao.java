@@ -14,7 +14,6 @@
 
 package org.openmrs.module.imaging.api.dao;
 
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.imaging.OrthancConfiguration;
@@ -41,7 +40,7 @@ public class OrthancConfigurationDao {
 	
 	@SuppressWarnings("unchecked")
 	public List<OrthancConfiguration> getAll() {
-		return getSession().createCriteria(OrthancConfiguration.class).list();
+		return getSession().createQuery("FROM OrthancConfiguration").getResultList();
 	}
 	
 	/**
@@ -55,8 +54,11 @@ public class OrthancConfigurationDao {
 	 * @ return Orthanc configuration
 	 */
 	public void saveNew(OrthancConfiguration config) {
-		if (!getSession().createCriteria(OrthancConfiguration.class)
-		        .add(Restrictions.eq("orthancBaseUrl", config.getOrthancBaseUrl())).list().isEmpty()) {
+		if (!getSession()
+		        .createQuery("FROM OrthancConfiguration c WHERE c.orthancBaseUrl = :orthancBaseUrl")
+		        .setParameter("orthancBaseUrl", config.getOrthancBaseUrl())
+		        .getResultList()
+		        .isEmpty()) {
 			throw new IllegalArgumentException("A configuration with the same base URL already exists");
 		}
 		getSession().saveOrUpdate(config);

@@ -30,6 +30,7 @@ import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.concept.EmrConceptService;
 import org.openmrs.module.emrapi.patient.EmrPatientService;
 import org.openmrs.module.emrapi.procedure.ProcedureService;
+import org.openmrs.module.fua.api.FuaService;
 import org.openmrs.module.htmlwidgets.service.HtmlWidgetsService;
 import org.openmrs.module.htmlwidgets.web.handler.WidgetHandler;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
@@ -234,6 +235,13 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(StockManagementService.class));
         assertNotNull(
                 jdbcTemplate.queryForObject("select count(*) from stockmgmt_stock_item", Integer.class));
+    }
+
+    @Test
+    void fuaIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(FuaService.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from fua", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from fua_estado", Integer.class));
     }
 
     @Test

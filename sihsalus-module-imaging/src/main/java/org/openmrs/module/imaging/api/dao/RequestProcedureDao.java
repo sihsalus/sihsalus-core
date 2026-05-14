@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.imaging.api.dao;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.Patient;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
@@ -46,30 +44,34 @@ public class RequestProcedureDao {
 	
 	@SuppressWarnings("unchecked")
 	public List<RequestProcedure> getAll() {
-		return getSession().createCriteria(RequestProcedure.class).list();
+		return getSession().createQuery("FROM RequestProcedure").getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<RequestProcedure> getAllByStudyInstanceUID(String studyInstanceUID) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(RequestProcedure.class);
-		return criteria.add(Restrictions.eq("studyInstanceUID", studyInstanceUID)).list();
+		return getSession().createQuery("FROM RequestProcedure r WHERE r.studyInstanceUID = :studyInstanceUID")
+		        .setParameter("studyInstanceUID", studyInstanceUID)
+		        .getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<RequestProcedure> getAllByProcedureStatus(String status) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(RequestProcedure.class);
-		return criteria.add(Restrictions.eq("status", status)).list();
+		return getSession().createQuery("FROM RequestProcedure r WHERE r.status = :status")
+		        .setParameter("status", status)
+		        .getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<RequestProcedure> getByPatient(Patient patient) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(RequestProcedure.class);
-		return criteria.add(Restrictions.eq("mrsPatient", patient)).list();
+		return getSession().createQuery("FROM RequestProcedure r WHERE r.mrsPatient = :patient")
+		        .setParameter("patient", patient)
+		        .getResultList();
 	}
 	
 	public RequestProcedure getByAccessionNumber(String accessionNumber) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(RequestProcedure.class);
-		return (RequestProcedure) criteria.add(Restrictions.eq("accessionNumber", accessionNumber)).uniqueResult();
+		return (RequestProcedure) getSession().createQuery("FROM RequestProcedure r WHERE r.accessionNumber = :accessionNumber")
+		        .setParameter("accessionNumber", accessionNumber)
+		        .uniqueResult();
 	}
 	
 	public void save(RequestProcedure requestProcedure) {
@@ -86,7 +88,8 @@ public class RequestProcedureDao {
 	
 	@SuppressWarnings("unchecked")
 	public List<RequestProcedure> getRequestProcedureByConfig(OrthancConfiguration orthancConfiguration) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(RequestProcedure.class);
-		return criteria.add(Restrictions.eq("orthancConfiguration", orthancConfiguration)).list();
+		return getSession().createQuery("FROM RequestProcedure r WHERE r.orthancConfiguration = :orthancConfiguration")
+		        .setParameter("orthancConfiguration", orthancConfiguration)
+		        .getResultList();
 	}
 }

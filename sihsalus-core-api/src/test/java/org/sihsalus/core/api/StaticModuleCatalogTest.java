@@ -112,6 +112,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void fuaIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("fua")
+                        && module.sourceModule().equals("fua-omod")
+                        && module.baselineVersion().equals("1.0.75")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void attachmentsIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("attachments")

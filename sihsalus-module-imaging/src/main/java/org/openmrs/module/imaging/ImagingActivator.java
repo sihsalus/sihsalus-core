@@ -11,9 +11,7 @@ package org.openmrs.module.imaging;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
@@ -26,11 +24,7 @@ public class ImagingActivator extends BaseModuleActivator {
 	 * @see #started()
 	 */
 	public void started() {
-		log.error("Started Imaging");
-		ImagingProperties imageProps = Context.getRegisteredComponent("imagingProperties", ImagingProperties.class);
-		long maxUploadImageDataSize = imageProps.getMaxUploadImageDataSize();
-		Context.getRegisteredComponent("multipartResolver", CommonsMultipartResolver.class).setMaxUploadSize(
-		    maxUploadImageDataSize);
+		log.info("Started Imaging");
 	}
 	
 	/**

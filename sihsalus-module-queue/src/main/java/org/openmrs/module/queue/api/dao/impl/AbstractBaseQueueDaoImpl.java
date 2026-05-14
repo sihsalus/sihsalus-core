@@ -11,7 +11,7 @@ package org.openmrs.module.queue.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;

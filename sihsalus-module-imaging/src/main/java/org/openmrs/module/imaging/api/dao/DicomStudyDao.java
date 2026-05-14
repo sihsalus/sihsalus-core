@@ -14,8 +14,6 @@
 
 package org.openmrs.module.imaging.api.dao;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.Patient;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
@@ -49,25 +47,30 @@ public class DicomStudyDao {
 	
 	@SuppressWarnings("unchecked")
 	public List<DicomStudy> getAll() {
-		return getSession().createCriteria(DicomStudy.class).list();
+		return getSession().createQuery("FROM DicomStudy").getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<DicomStudy> getByPatient(Patient patient) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(DicomStudy.class);
-		return criteria.add(Restrictions.eq("mrsPatient", patient)).list();
+		return getSession().createQuery("FROM DicomStudy d WHERE d.mrsPatient = :patient")
+		        .setParameter("patient", patient)
+		        .getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<DicomStudy> getByConfiguration(OrthancConfiguration config) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(DicomStudy.class);
-		return criteria.add(Restrictions.eq("orthancConfiguration", config)).list();
+		return getSession().createQuery("FROM DicomStudy d WHERE d.orthancConfiguration = :config")
+		        .setParameter("config", config)
+		        .getResultList();
 	}
 	
 	public DicomStudy getByStudyInstanceUID(OrthancConfiguration config, String studyInstanceUID) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(DicomStudy.class);
-		return (DicomStudy) criteria.add(Restrictions.eq("studyInstanceUID", studyInstanceUID))
-		        .add(Restrictions.eq("orthancConfiguration", config)).uniqueResult();
+		return (DicomStudy) getSession()
+		        .createQuery("FROM DicomStudy d WHERE d.studyInstanceUID = :studyInstanceUID "
+		                + "AND d.orthancConfiguration = :config")
+		        .setParameter("studyInstanceUID", studyInstanceUID)
+		        .setParameter("config", config)
+		        .uniqueResult();
 	}
 	
 	public void save(DicomStudy study) {
