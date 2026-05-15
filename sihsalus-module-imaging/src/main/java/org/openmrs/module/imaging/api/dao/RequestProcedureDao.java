@@ -79,7 +79,7 @@ public class RequestProcedureDao {
 	}
 	
 	public void update(RequestProcedure requestProcedure) {
-		getSession().update(requestProcedure);
+		getSession().merge(requestProcedure);
 	}
 	
 	public void remove(RequestProcedure requestProcedure) {

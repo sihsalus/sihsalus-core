@@ -59,15 +59,15 @@ public class RequestProcedureStepDao {
 	}
 	
 	public void update(RequestProcedureStep requestProcedureStep) {
-		getSession().update(requestProcedureStep);
+		getSession().merge(requestProcedureStep);
 	}
-	
+
 	public void remove(RequestProcedureStep requestProcedureStep) {
 		getSession().delete(requestProcedureStep);
 	}
-	
+
 	public void updatePerformedProcedureStepStatus(RequestProcedureStep step, String newStatus) {
 		step.setPerformedProcedureStepStatus(newStatus);
-		getSession().update(step);
+		getSession().merge(step);
 	}
 }
