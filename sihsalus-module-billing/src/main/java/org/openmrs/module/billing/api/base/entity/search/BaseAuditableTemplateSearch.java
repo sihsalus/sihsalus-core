@@ -9,9 +9,9 @@
  */
 package org.openmrs.module.billing.api.base.entity.search;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.Auditable;
+import org.openmrs.module.billing.api.base.criteria.BillingCriteria;
+import org.openmrs.module.billing.api.base.criteria.BillingRestrictions;
 
 /**
  * Base template search class for {@link org.openmrs.Auditable} models.
@@ -19,52 +19,53 @@ import org.openmrs.Auditable;
  * @param <T> The model class.
  */
 public class BaseAuditableTemplateSearch<T extends Auditable> extends BaseObjectTemplateSearch<T> {
-	
+
 	public static final long serialVersionUID = 0L;
-	
+
 	private DateComparisonType dateCreatedComparisonType;
-	
+
 	private DateComparisonType dateChangedComparisonType;
-	
+
 	public BaseAuditableTemplateSearch(T template) {
 		super(template);
-		
 		this.dateCreatedComparisonType = DateComparisonType.EQUAL;
 		this.dateChangedComparisonType = DateComparisonType.EQUAL;
 	}
-	
+
 	public DateComparisonType getDateCreatedComparisonType() {
 		return dateCreatedComparisonType;
 	}
-	
+
 	public void setDateCreatedComparisonType(DateComparisonType dateCreatedComparisonType) {
 		this.dateCreatedComparisonType = dateCreatedComparisonType;
 	}
-	
+
 	public DateComparisonType getDateChangedComparisonType() {
 		return dateChangedComparisonType;
 	}
-	
+
 	public void setDateChangedComparisonType(DateComparisonType dateChangedComparisonType) {
 		this.dateChangedComparisonType = dateChangedComparisonType;
 	}
-	
+
 	@Override
-	public void updateCriteria(Criteria criteria) {
+	public void updateCriteria(BillingCriteria criteria) {
 		super.updateCriteria(criteria);
-		
+
 		T t = getTemplate();
 		if (t.getCreator() != null) {
-			criteria.add(Restrictions.eq("creator", t.getCreator()));
+			criteria.add(BillingRestrictions.eq("creator", t.getCreator()));
 		}
 		if (t.getDateCreated() != null) {
-			criteria.add(createCriterion("dateCreated", t.getDateCreated(), dateCreatedComparisonType));
+			criteria.add((cb, root) -> createPredicate(cb, root, "dateCreated", t.getDateCreated(),
+			    dateCreatedComparisonType));
 		}
 		if (t.getChangedBy() != null) {
-			criteria.add(Restrictions.eq("changedBy", t.getChangedBy()));
+			criteria.add(BillingRestrictions.eq("changedBy", t.getChangedBy()));
 		}
 		if (t.getDateChanged() != null) {
-			criteria.add(createCriterion("dateChanged", t.getDateChanged(), dateChangedComparisonType));
+			criteria.add((cb, root) -> createPredicate(cb, root, "dateChanged", t.getDateChanged(),
+			    dateChangedComparisonType));
 		}
 	}
 }
