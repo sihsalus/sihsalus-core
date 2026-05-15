@@ -75,7 +75,7 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 */
 	public IdentifierSource saveIdentifierSource(IdentifierSource identifierSource) throws APIException {
 		DbSession currentSession = sessionFactory.getCurrentSession();
-		currentSession.saveOrUpdate(identifierSource);
+		currentSession.merge(identifierSource);
 		currentSession.flush();
 		refreshIdentifierSource(identifierSource);
 		return identifierSource;
@@ -180,7 +180,7 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 * @see IdentifierSourceDAO#saveAutoGenerationOption(AutoGenerationOption)
 	 */
 	public AutoGenerationOption saveAutoGenerationOption(AutoGenerationOption option) throws APIException {
-		sessionFactory.getCurrentSession().saveOrUpdate(option);
+		sessionFactory.getCurrentSession().merge(option);
 		return option;
 	}
 
@@ -302,7 +302,7 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
 	 * @see org.openmrs.module.idgen.service.db.IdentifierSourceDAO#saveLogEntry(LogEntry)
 	 */
 	public LogEntry saveLogEntry(LogEntry logEntry) throws DAOException {
-		sessionFactory.getCurrentSession().saveOrUpdate(logEntry);
+		sessionFactory.getCurrentSession().merge(logEntry);
 		return logEntry;
 	}
 

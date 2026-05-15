@@ -121,7 +121,7 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
 	@Override
 	@Transactional
 	public CalculationRegistration saveCalculationRegistration(CalculationRegistration calculationRegistration) {
-		getCurrentSession().saveOrUpdate(calculationRegistration);
+		getCurrentSession().merge(calculationRegistration);
 		return calculationRegistration;
 	}
 	

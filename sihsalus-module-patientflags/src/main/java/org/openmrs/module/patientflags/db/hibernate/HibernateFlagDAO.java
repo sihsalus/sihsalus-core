@@ -104,7 +104,7 @@ public class HibernateFlagDAO implements FlagDAO {
 	 */
 	public void saveFlag(Flag flag) throws DAOException {
 		try {
-			sessionFactory.getCurrentSession().saveOrUpdate(flag);
+			sessionFactory.getCurrentSession().merge(flag);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -208,7 +208,7 @@ public class HibernateFlagDAO implements FlagDAO {
 	 */
 	public void saveTag(Tag tag) throws DAOException {
 		try {
-			sessionFactory.getCurrentSession().saveOrUpdate(tag);
+			sessionFactory.getCurrentSession().merge(tag);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -228,7 +228,7 @@ public class HibernateFlagDAO implements FlagDAO {
 		        .setParameter("tagId", tagId).list();
 		flags.forEach(flag -> {
 			flag.removeTag(tag);
-			sessionFactory.getCurrentSession().saveOrUpdate(flag);
+			sessionFactory.getCurrentSession().merge(flag);
 		});
 		
 		// then we can delete the tag itself
@@ -279,7 +279,7 @@ public class HibernateFlagDAO implements FlagDAO {
 	 */
 	public void savePriority(Priority priority) throws DAOException {
 		try {
-			sessionFactory.getCurrentSession().saveOrUpdate(priority);
+			sessionFactory.getCurrentSession().merge(priority);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -333,7 +333,7 @@ public class HibernateFlagDAO implements FlagDAO {
 	 */
 	public void saveDisplayPoint(DisplayPoint displayPoint) throws DAOException {
 		try {
-			sessionFactory.getCurrentSession().saveOrUpdate(displayPoint);
+			sessionFactory.getCurrentSession().merge(displayPoint);
 		}
 		catch (Throwable t) {
 			throw new DAOException(t);
@@ -367,7 +367,7 @@ public class HibernateFlagDAO implements FlagDAO {
 	 * @see org.openmrs.module.patientflags.db.FlagDAO#savePatientFlag(PatientFlag)
 	 */
 	public void savePatientFlag(PatientFlag patientFlag) throws DAOException {
-		sessionFactory.getCurrentSession().saveOrUpdate(patientFlag);
+		sessionFactory.getCurrentSession().merge(patientFlag);
 	}
 	
 	/**
