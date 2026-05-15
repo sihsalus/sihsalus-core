@@ -63,8 +63,7 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
 
     @Override
     public MetadataSource saveMetadataSource(MetadataSource metadataSource) {
-        getCurrentSession().saveOrUpdate(metadataSource);
-        return metadataSource;
+        return (MetadataSource) getCurrentSession().merge(metadataSource);
     }
 
     @Override
@@ -219,8 +218,7 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
 
     @Override
     public MetadataSet saveMetadataSet(MetadataSet metadataSet) {
-        sessionFactory.getCurrentSession().saveOrUpdate(metadataSet);
-        return metadataSet;
+        return (MetadataSet) sessionFactory.getCurrentSession().merge(metadataSet);
     }
 
     @Override
@@ -295,13 +293,11 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
     }
 
     private MetadataTermMapping internalSaveMetadataTermMapping(MetadataTermMapping metadataTermMapping) {
-        getCurrentSession().saveOrUpdate(metadataTermMapping);
-        return metadataTermMapping;
+        return (MetadataTermMapping) getCurrentSession().merge(metadataTermMapping);
     }
 
     private MetadataSetMember internalSaveMetadataSetMember(MetadataSetMember metadataSetMember) {
-        sessionFactory.getCurrentSession().saveOrUpdate(metadataSetMember);
-        return metadataSetMember;
+        return (MetadataSetMember) sessionFactory.getCurrentSession().merge(metadataSetMember);
     }
 
     private <T extends OpenmrsObject> T internalGetByUuid(Class<T> openmrsObjectClass, String uuid) {

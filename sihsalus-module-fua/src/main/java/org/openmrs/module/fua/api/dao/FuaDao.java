@@ -37,8 +37,7 @@ public class FuaDao {
 	}
 	
 	public Fua saveFua(Fua fua) {
-		getSession().saveOrUpdate(fua);
-		return fua;
+		return (Fua) getSession().merge(fua);
 	}
 	
 	public void purgeFua(Fua fua) {

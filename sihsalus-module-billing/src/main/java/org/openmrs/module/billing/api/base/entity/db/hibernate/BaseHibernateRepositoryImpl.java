@@ -53,10 +53,11 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <E extends OpenmrsObject> E save(E entity) {
 		DbSession session = sessionFactory.getCurrentSession();
 		try {
-			session.saveOrUpdate(entity);
+			entity = (E) session.merge(entity);
 		}
 		catch (Exception ex) {
 			throw new APIException(
@@ -73,7 +74,7 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 		try {
 			if (collection != null && !collection.isEmpty()) {
 				for (OpenmrsObject obj : collection) {
-					session.saveOrUpdate(obj);
+					session.merge(obj);
 				}
 			}
 		}

@@ -61,11 +61,11 @@ public class OrthancConfigurationDao {
 		        .isEmpty()) {
 			throw new IllegalArgumentException("A configuration with the same base URL already exists");
 		}
-		getSession().saveOrUpdate(config);
+		getSession().merge(config);
 	}
-	
+
 	public void updateExisting(OrthancConfiguration config) {
-		getSession().update(config);
+		getSession().merge(config);
 	}
 	
 	/**

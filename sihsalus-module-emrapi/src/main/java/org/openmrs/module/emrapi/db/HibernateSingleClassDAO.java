@@ -58,18 +58,18 @@ public abstract class HibernateSingleClassDAO<T> implements SingleClassDAO<T> {
 	
 	@Override
 	@Transactional
+	@SuppressWarnings("unchecked")
 	public T saveOrUpdate(T object) {
-		sessionFactory.getCurrentSession().saveOrUpdate(object);
-		return object;
+		return (T) sessionFactory.getCurrentSession().merge(object);
 	}
-	
+
 	@Override
 	@Transactional
+	@SuppressWarnings("unchecked")
 	public T update(T object) {
-		sessionFactory.getCurrentSession().update(object);
-		return object;
+		return (T) sessionFactory.getCurrentSession().merge(object);
 	}
-	
+
 	@Override
 	@Transactional
 	public void delete(T object) {

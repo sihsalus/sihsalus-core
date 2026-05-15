@@ -32,8 +32,7 @@ public class FuaEstadoDao {
 	}
 	
 	public FuaEstado saveEstado(FuaEstado estado) {
-		getSession().saveOrUpdate(estado);
-		return estado;
+		return (FuaEstado) getSession().merge(estado);
 	}
 	
 	public void purgeEstado(FuaEstado estado) {
