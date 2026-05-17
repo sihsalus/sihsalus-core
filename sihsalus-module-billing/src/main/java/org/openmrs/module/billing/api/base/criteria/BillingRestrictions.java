@@ -95,7 +95,7 @@ public final class BillingRestrictions {
 		return (builder, root) -> builder.or(predicates(builder, root, criteria));
 	}
 
-	static Path<?> path(Root<?> root, String propertyName) {
+	public static Path<?> path(Root<?> root, String propertyName) {
 		Path<?> path = root;
 		for (String segment : propertyName.split("\\.")) {
 			path = path.get(segment);
