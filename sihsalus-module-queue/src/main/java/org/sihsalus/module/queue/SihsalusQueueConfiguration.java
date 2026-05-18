@@ -29,12 +29,15 @@ import org.openmrs.module.queue.api.impl.RoomProviderMapServiceImpl;
 import org.openmrs.module.queue.api.sort.BasicPrioritySortWeightGenerator;
 import org.openmrs.module.queue.api.sort.ExistingValueSortWeightGenerator;
 import org.openmrs.module.queue.api.sort.SortWeightGenerator;
+import org.openmrs.module.queue.web.Legacy1xRestController;
 import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ComponentScan(basePackageClasses = Legacy1xRestController.class)
 public class SihsalusQueueConfiguration {
 
     @Bean
