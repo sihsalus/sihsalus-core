@@ -72,7 +72,7 @@ public class ReportingRestController extends MainResourceController {
 
     @RequestMapping(value = "/saveReport", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> saveReport(@RequestParam String reportRequestUuid) {
+    public ResponseEntity<String> saveReport(@RequestParam("reportRequestUuid") String reportRequestUuid) {
         ReportService reportService = getReportService();
         ReportRequest reportRequest = reportService.getReportRequestByUuid(reportRequestUuid);
 
@@ -89,13 +89,13 @@ public class ReportingRestController extends MainResourceController {
 
     @RequestMapping(value = "/downloadReport", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public ReportFile downloadReport(@RequestParam String reportRequestUuid) {
+    public ReportFile downloadReport(@RequestParam("reportRequestUuid") String reportRequestUuid) {
         return processAndDownloadReport(reportRequestUuid, getReportService());
     }
 
     @RequestMapping(value = "/downloadMultipleReports", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public List<ReportFile> downloadMultipleReports(@RequestParam String reportRequestUuids) {
+    public List<ReportFile> downloadMultipleReports(@RequestParam("reportRequestUuids") String reportRequestUuids) {
         List<ReportFile> fileDownloadList = new ArrayList<ReportFile>();
         ReportService reportService = getReportService();
         for (String reportRequestUuid : reportRequestUuids.split(",")) {
@@ -110,8 +110,8 @@ public class ReportingRestController extends MainResourceController {
     @ResponseBody
     public SimpleObject evaluateReportDataSet(HttpServletRequest request,
                                               HttpServletResponse response,
-                                              @PathVariable String reportDefinitionUuid,
-                                              @PathVariable String dataSetKey) {
+                                              @PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
+                                              @PathVariable("dataSetKey") String dataSetKey) {
         ReportDefinition reportDefinition = DefinitionContext.getReportDefinitionService().getDefinitionByUuid(reportDefinitionUuid);
         if (reportDefinition == null) {
             throw new ObjectNotFoundException("Report definition not found: " +  reportDefinitionUuid);
@@ -150,7 +150,7 @@ public class ReportingRestController extends MainResourceController {
 
     @RequestMapping(value = "/runReport/{reportDefinitionUuid}", method = RequestMethod.POST)
     @ResponseBody
-    public SimpleObject runReportAsJson(@PathVariable String reportDefinitionUuid,
+    public SimpleObject runReportAsJson(@PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
                                         HttpServletRequest request,
                                         HttpServletResponse response) throws Exception {
         ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
@@ -161,8 +161,8 @@ public class ReportingRestController extends MainResourceController {
     }
 
     @RequestMapping(value = "/runReport/{reportDefinitionUuid}/{reportDesignUuid}", method = RequestMethod.POST)
-    public void runReportWithDesign(@PathVariable String reportDefinitionUuid,
-                                    @PathVariable String reportDesignUuid,
+    public void runReportWithDesign(@PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
+                                    @PathVariable("reportDesignUuid") String reportDesignUuid,
                                     HttpServletRequest request,
                                     HttpServletResponse response) throws Exception {
         ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);

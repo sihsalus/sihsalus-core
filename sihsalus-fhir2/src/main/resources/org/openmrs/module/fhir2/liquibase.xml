@@ -1201,4 +1201,26 @@
                                  referencedTableName="orders" referencedColumnNames="order_id"/>
     </changeSet>
 
+
+    <changeSet id="sihsalus-h2-ensure-fhir-task-runtime-columns-20260518" author="sihsalus" dbms="h2">
+        <comment>Ensure H2 static schema has all FHIR Task columns mapped by the current Hibernate model.</comment>
+        <sql>
+            ALTER TABLE fhir_task ADD COLUMN IF NOT EXISTS location_reference_id INT;
+            ALTER TABLE fhir_task ADD COLUMN IF NOT EXISTS execution_start_time DATETIME;
+            ALTER TABLE fhir_task ADD COLUMN IF NOT EXISTS execution_end_time DATETIME;
+            ALTER TABLE fhir_task ADD COLUMN IF NOT EXISTS task_code INT;
+            ALTER TABLE fhir_task ADD COLUMN IF NOT EXISTS comment VARCHAR(255);
+        </sql>
+    </changeSet>
+
+    <changeSet id="sihsalus-h2-ensure-fhir-diagnostic-report-runtime-columns-20260518" author="sihsalus" dbms="h2">
+        <comment>Ensure H2 static schema has all FHIR DiagnosticReport columns and join tables mapped by the current Hibernate model.</comment>
+        <sql>
+            ALTER TABLE fhir_diagnostic_report ADD COLUMN IF NOT EXISTS conclusion VARCHAR(1024);
+            CREATE TABLE IF NOT EXISTS fhir_diagnostic_report_service_request (
+                diagnostic_report_id INT NOT NULL,
+                order_id INT NOT NULL
+            );
+        </sql>
+    </changeSet>
 </databaseChangeLog>
