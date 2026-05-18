@@ -55,7 +55,7 @@ import org.springframework.web.client.RestClientException;
  * REST resource representing a {@link Bill}.
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/bill", supportedClass = Bill.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/bill", supportedClass = Bill.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@Override

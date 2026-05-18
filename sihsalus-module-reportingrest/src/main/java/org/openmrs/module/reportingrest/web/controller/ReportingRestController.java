@@ -72,7 +72,7 @@ public class ReportingRestController extends MainResourceController {
 
     @RequestMapping(value = "/saveReport", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> saveReport(@RequestParam("reportRequestUuid") String reportRequestUuid) {
+    public ResponseEntity<String> saveReport(@RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
         ReportService reportService = getReportService();
         ReportRequest reportRequest = reportService.getReportRequestByUuid(reportRequestUuid);
 
@@ -89,20 +89,26 @@ public class ReportingRestController extends MainResourceController {
 
     @RequestMapping(value = "/downloadReport", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public ReportFile downloadReport(@RequestParam("reportRequestUuid") String reportRequestUuid) {
-        return processAndDownloadReport(reportRequestUuid, getReportService());
+    public ResponseEntity<?> downloadReport(@RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
+        if (StringUtils.isBlank(reportRequestUuid)) {
+            return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<ReportFile>(processAndDownloadReport(reportRequestUuid, getReportService()), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/downloadMultipleReports", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public List<ReportFile> downloadMultipleReports(@RequestParam("reportRequestUuids") String reportRequestUuids) {
+    public ResponseEntity<?> downloadMultipleReports(@RequestParam(value = "reportRequestUuids", required = false) String reportRequestUuids) {
+        if (StringUtils.isBlank(reportRequestUuids)) {
+            return new ResponseEntity<String>("reportRequestUuids is required", HttpStatus.BAD_REQUEST);
+        }
         List<ReportFile> fileDownloadList = new ArrayList<ReportFile>();
         ReportService reportService = getReportService();
         for (String reportRequestUuid : reportRequestUuids.split(",")) {
             fileDownloadList.add(processAndDownloadReport(reportRequestUuid, reportService));
         }
 
-        return fileDownloadList;
+        return new ResponseEntity<List<ReportFile>>(fileDownloadList, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/reportDataSet/{reportDefinitionUuid}/{dataSetKey}", method = RequestMethod.GET)

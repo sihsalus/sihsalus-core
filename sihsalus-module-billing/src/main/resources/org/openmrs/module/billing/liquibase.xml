@@ -1304,4 +1304,18 @@
             </column>
         </modifyColumn>
     </changeSet>
+
+    <changeSet id="sihsalus-h2-ensure-billing-runtime-metadata-columns-20260518" author="sihsalus" dbms="h2">
+        <comment>Ensure H2 static billing schema has metadata columns expected by Hibernate mappings.</comment>
+        <sql>
+            ALTER TABLE cashier_billable_service ADD COLUMN IF NOT EXISTS retired BOOLEAN DEFAULT FALSE NOT NULL;
+            ALTER TABLE cashier_billable_service ADD COLUMN IF NOT EXISTS retired_by INT;
+            ALTER TABLE cashier_billable_service ADD COLUMN IF NOT EXISTS date_retired DATETIME;
+            ALTER TABLE cashier_billable_service ADD COLUMN IF NOT EXISTS retire_reason VARCHAR(255);
+            ALTER TABLE cashier_item_price ADD COLUMN IF NOT EXISTS retired BOOLEAN DEFAULT FALSE NOT NULL;
+            ALTER TABLE cashier_item_price ADD COLUMN IF NOT EXISTS retired_by INT;
+            ALTER TABLE cashier_item_price ADD COLUMN IF NOT EXISTS date_retired DATETIME;
+            ALTER TABLE cashier_item_price ADD COLUMN IF NOT EXISTS retire_reason VARCHAR(255);
+        </sql>
+    </changeSet>
 </databaseChangeLog>
