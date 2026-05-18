@@ -41,6 +41,7 @@
         <module>sihsalus-module-bedmanagement</module>
         <module>sihsalus-module-metadatamapping</module>
         <module>sihsalus-module-openconceptlab</module>
+        <module>sihsalus-module-sihsalusinterop</module>
         <module>sihsalus-module-event</module>
         <module>sihsalus-module-calculation</module>
         <module>sihsalus-module-htmlwidgets</module>
