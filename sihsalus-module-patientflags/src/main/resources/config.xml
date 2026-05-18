@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module configVersion="1.0">
+	
+	<!-- Patient Flags Module Properties -->
+	<id>@MODULE_ID@</id>
+	<name>@MODULE_NAME@</name>
+	<version>@MODULE_VERSION@</version>
+	<package>@MODULE_PACKAGE@</package>
+	<author>Mark Goodrich</author>
+	<description>Adds the ability to flag patient records</description>
+	<activator>@MODULE_PACKAGE@.PatientFlagsModuleActivator</activator>
+
+	<require_version>1.11.4, 1.10.2 - 1.10.*, 1.9.9 - 1.9.*</require_version>
+
+	<!-- /Patient Flags Module Properties -->
+	
+	<!-- Required Modules -->
+
+	<require_modules>
+		<require_module>org.openmrs.module.webservices.rest</require_module>
+	</require_modules>
+
+	<!-- Aware of Modules-->
+	<aware_of_modules>
+		<aware_of_module>org.openmrs.module.uiframework</aware_of_module>
+		<aware_of_module>org.openmrs.module.metadatadeploy</aware_of_module>
+		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
+		<aware_of_module>org.openmrs.module.owa</aware_of_module>
+		<aware_of_module>org.openmrs.module.cql</aware_of_module>
+		<aware_of_module>org.openmrs.module.fhir2</aware_of_module>
+	</aware_of_modules>
+	
+	<advice>
+		<point>org.openmrs.api.EncounterService</point>
+		<class>org.openmrs.module.patientflags.aop.EncounterServiceAdvice</class>
+	</advice>
+	
+	<advice>
+		<point>org.openmrs.api.ObsService</point>
+		<class>org.openmrs.module.patientflags.aop.ObsServiceAdvice</class>
+	</advice>
+	
+	<advice>
+		<point>org.openmrs.api.OrderService</point>
+		<class>org.openmrs.module.patientflags.aop.OrderServiceAdvice</class>
+	</advice>
+	
+	<advice>
+		<point>org.openmrs.api.PatientService</point>
+		<class>org.openmrs.module.patientflags.aop.PatientServiceAdvice</class>
+	</advice>
+	
+	<advice>
+		<point>org.openmrs.api.ConditionService</point>
+		<class>org.openmrs.module.patientflags.aop.ConditionServiceAdvice</class>
+	</advice>
+
+	<advice>
+		<point>org.openmrs.api.ProgramWorkflowService</point>
+		<class>org.openmrs.module.patientflags.aop.ProgramWorkflowServiceAdvice</class>
+	</advice>
+
+	<!-- Internationalization -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	<messages>
+		<lang>fr</lang>
+		<file>messages_fr.properties</file>
+	</messages>
+	
+	<!-- Mapping File for the Flag Table -->
+	<mappingFiles>
+		DisplayPoint.hbm.xml Flag.hbm.xml Priority.hbm.xml Tag.hbm.xml PatientFlag.hbm.xml
+	</mappingFiles>
+	
+	<!--  Extension Points -->
+
+<!--  Handling extension in the activator now so that they can be configured/activated via global properties -->
+	<!--  
+	<extension>
+		<point>org.openmrs.patientDashboard.afterLastEncounter</point>
+		<class>org.openmrs.module.patientflags.extension.html.FlagPatientDashboardHeaderExt</class>
+	</extension> 
+
+	<extension>
+		<point>org.openmrs.patientDashboard.overviewBox</point>
+		<class>org.openmrs.module.patientflags.extension.html.FlagPatientOverviewExt</class>
+	</extension> 
+
+	<extension>
+		<point>org.openmrs.admin.list</point>
+		<class>org.openmrs.module.patientflags.extension.html.FlagAdminExt</class>
+	</extension> -->
+
+	
+	<!-- Required Privileges -->
+	<privilege>
+		<name>Manage Flags</name>
+		<description>Allows user add, edit, and remove flags</description>
+	</privilege>
+	
+	<privilege>
+		<name>Test Flags</name>
+		<description>Allows the user to test a flag, or set of flags, against a Patient set</description>
+	</privilege>
+
+	<!-- Internationalization -->
+	<!-- All message codes should start with @MODULE_ID@.* -->
+	<messages>
+		<lang>en</lang>
+		<file>messages.properties</file>
+	</messages>
+	
+	<conditionalResources>
+	    <conditionalResource>
+	        <path>/lib/patientflags-api-metadata.*</path>
+	        <modules>
+	            <module>
+	                <moduleId>metadatadeploy</moduleId>
+	                <version>1.*</version>
+	            </module>
+	        </modules>
+	    </conditionalResource>
+		<conditionalResource>
+			<path>/lib/patientflags-fhir.*</path>
+			<modules>
+				<module>
+					<moduleId>fhir2</moduleId>
+					<version>${fhirversion}</version>
+				</module>
+			</modules>
+		</conditionalResource>
+	</conditionalResources>
+
+</module>

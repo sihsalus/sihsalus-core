@@ -4,6 +4,71 @@ Date: 2026-05-14
 
 This file tracks distro module source that has been converted from runtime `.omod` loading into SIH Salus static internal modules.
 
+## Triage Status
+
+The Maven reactor is the source of truth for build participation. The compatibility baseline remains `baseline/sihsalus-distro.properties`.
+
+### Reactor Integrity
+
+Status: repaired in-tree.
+
+- `sihsalus-module-identitylookup` is a Sihsalus-planned patient registry capability, not a module from the current distro baseline.
+- It is declared in the Maven reactor and `sihsalus-core-boot`, so it must exist even while the feature is still pending.
+- The module currently exists as a placeholder Maven jar to keep IDE import and reactor resolution stable.
+
+### Operational Status Model
+
+Use these levels when reporting module progress:
+
+- `placeholder`: Maven module exists, no imported runtime behavior.
+- `source imported`: upstream or distro source exists locally, but static Spring/runtime wiring is incomplete.
+- `spring wired`: module has static configuration and can participate in application composition.
+- `service registered`: module services are registered in OpenMRS `ServiceContext` or equivalent static registry.
+- `endpoint wired`: REST/FHIR/web endpoints are statically exposed.
+- `postgres verified`: module schema and minimum workflow have been smoke-tested on PostgreSQL.
+
+### Current Porting Queue
+
+High priority:
+
+- `sihsalus-module-identitylookup`: implement Sihsalus patient identity lookup/search capability; no distro source baseline exists.
+- `sihsalus-module-o3forms`: finish acceptance checks for service registration and `/rest/v1/o3/forms/{formNameOrUuid}`.
+- `sihsalus-module-billing`: confirm static service registration, Hibernate mappings, Liquibase order, and REST surface.
+- `sihsalus-module-stockmanagement`: confirm service registration, metadata loading, Liquibase order, and billing integration.
+- `sihsalus-module-fua`: confirm Sihsalus-specific workflow ownership and API compatibility.
+
+Medium priority:
+
+- `sihsalus-module-appointments`
+- `sihsalus-module-queue`
+- `sihsalus-module-bedmanagement`
+- `sihsalus-module-patientflags`
+- `sihsalus-module-openconceptlab`
+- `sihsalus-module-event`
+- `sihsalus-module-teleconsultation`
+
+Already substantially imported, but still requiring workflow/PostgreSQL verification:
+
+- `sihsalus-fhir2`
+- `sihsalus-webservices-rest`
+- `sihsalus-module-authentication`
+- `sihsalus-module-oauth2login`
+- `sihsalus-module-idgen`
+- `sihsalus-module-addresshierarchy`
+- `sihsalus-module-emrapi`
+- `sihsalus-module-reporting`
+- `sihsalus-module-reportingrest`
+- `sihsalus-module-calculation`
+- `sihsalus-module-htmlwidgets`
+- `sihsalus-module-serialization-xstream`
+- `sihsalus-module-metadatamapping`
+- `sihsalus-module-attachments`
+- `sihsalus-module-cohort`
+- `sihsalus-module-imaging`
+- `sihsalus-module-ordertemplates`
+- `sihsalus-module-patientdocuments`
+- `sihsalus-module-legacyui`
+
 ## Completed Blocks
 
 ### Reporting

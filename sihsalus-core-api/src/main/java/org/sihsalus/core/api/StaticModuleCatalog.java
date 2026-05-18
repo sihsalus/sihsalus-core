@@ -48,6 +48,7 @@ public final class StaticModuleCatalog {
                     module("billing", "billing-omod", "2.3.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("fua", "fua-omod", "1.0.75", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("imaging", "imaging-omod", "1.2.2", SihsalusModuleStatus.STATIC_INTERNAL),
+                    module("identitylookup", "sihsalus-core-planned", "0.1.0-SNAPSHOT", SihsalusModuleStatus.PLACEHOLDER),
                     module("legacyui", "legacyui-omod", "2.1.0", SihsalusModuleStatus.STATIC_INTERNAL));
 
     private StaticModuleCatalog() {}
