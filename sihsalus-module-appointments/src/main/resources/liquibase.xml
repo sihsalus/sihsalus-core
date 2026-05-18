@@ -167,6 +167,7 @@
             appointment_service_type_id INT          NULL,
             status                      VARCHAR(45)  NOT NULL
             COMMENT 'scheduled, checked in, started, completed, cancelled, missed',
+            priority                    VARCHAR(45)  NULL,
             location_id                 INT          NULL,
             appointment_kind            VARCHAR(45)  NOT NULL
             COMMENT 'scheduled, walk in',
@@ -180,6 +181,7 @@
             voided_by                   INT,
             date_voided                 DATETIME,
             void_reason                 VARCHAR(255),
+            tele_health_video_link      VARCHAR(255) NULL,
             PRIMARY KEY (`patient_appointment_id`),
             CONSTRAINT fk_patient_appointment_patient FOREIGN KEY (`patient_id`)
             REFERENCES patient (`patient_id`),

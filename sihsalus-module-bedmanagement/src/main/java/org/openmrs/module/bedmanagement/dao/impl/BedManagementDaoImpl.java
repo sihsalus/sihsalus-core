@@ -162,7 +162,7 @@ public class BedManagementDaoImpl implements BedManagementDao {
 	@Override
 	public List<AdmissionLocation> getAdmissionLocations(List<Location> locations) {
 		String sql = "select l from Location l " + "where l in :locations and "
-		        + "(l.parentLocation not in :locations or l.parentLocation is null) and " + "l.retired=0";
+		        + "(l.parentLocation not in :locations or l.parentLocation is null) and " + "l.retired = false";
 		Query query = sessionFactory.getCurrentSession().createQuery(sql);
 		query.setParameterList("locations", locations);
 		List<Location> locationList = query.list();

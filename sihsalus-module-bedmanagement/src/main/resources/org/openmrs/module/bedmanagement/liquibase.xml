@@ -155,6 +155,19 @@
                 <constraints nullable="false"/>
             </column>
             <column name="description" type="varchar(255)"/>
+            <column name="uuid" type="char(38)" defaultValueComputed="uuid()"/>
+            <column name="creator" type="int" defaultValueNumeric="1"/>
+            <column name="date_created" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retire_reason" type="varchar(255)"/>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
         </createTable>
     </changeSet>
 
@@ -514,6 +527,9 @@
     <changeSet author="SanishMaharjan" id="bedmanagement-201802121200">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="bed_type"/>
+            <not>
+                <columnExists tableName="bed_type" columnName="uuid"/>
+            </not>
         </preConditions>
         <comment>
             Add bed type additional columns

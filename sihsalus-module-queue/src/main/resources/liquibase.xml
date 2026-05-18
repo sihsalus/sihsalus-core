@@ -34,6 +34,8 @@
             <column name="service" type="int">
                 <constraints nullable="false"/>
             </column>
+            <column name="priority_concept_set" type="int"/>
+            <column name="status_concept_set" type="int"/>
             <column name="creator" type="int">
                 <constraints nullable="false"/>
             </column>
@@ -66,6 +68,12 @@
                                  referencedTableName="location" referencedColumnNames="location_id"/>
         <addForeignKeyConstraint baseTableName="queue" baseColumnNames="service"
                                  constraintName="queue_service_fk"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="priority_concept_set"
+                                 constraintName="queue_priority_concept_set_fk"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="status_concept_set"
+                                 constraintName="queue_status_concept_set_fk"
                                  referencedTableName="concept" referencedColumnNames="concept_id"/>
     </changeSet>
 
