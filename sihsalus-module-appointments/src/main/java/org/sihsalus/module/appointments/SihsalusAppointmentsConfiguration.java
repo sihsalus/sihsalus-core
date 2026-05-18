@@ -9,20 +9,27 @@ import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavaila
 import org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
+import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceAttributeTypeDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
+import org.openmrs.module.appointments.dao.SpecialityDao;
 import org.openmrs.module.appointments.dao.impl.AppointmentAuditDaoImpl;
 import org.openmrs.module.appointments.dao.impl.AppointmentDaoImpl;
+import org.openmrs.module.appointments.dao.impl.AppointmentRecurringPatternDaoImpl;
 import org.openmrs.module.appointments.dao.impl.AppointmentServiceAttributeTypeDaoImpl;
 import org.openmrs.module.appointments.dao.impl.AppointmentServiceDaoImpl;
+import org.openmrs.module.appointments.dao.impl.SpecialityDaoImpl;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
 import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
+import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.RecurringAppointmentNumberGenerator;
+import org.openmrs.module.appointments.service.SpecialityService;
+import org.openmrs.module.appointments.service.impl.AppointmentRecurringPatternServiceImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentServiceAttributeTypeServiceImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentServiceDefinitionServiceImpl;
@@ -30,6 +37,7 @@ import org.openmrs.module.appointments.service.impl.AppointmentsServiceImpl;
 import org.openmrs.module.appointments.service.impl.DefaultAppointmentNumberGeneratorImpl;
 import org.openmrs.module.appointments.service.impl.DefaultRecurringAppointmentNumberGeneratorImpl;
 import org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService;
+import org.openmrs.module.appointments.service.impl.SpecialityServiceImpl;
 import org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -37,6 +45,9 @@ import org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusCh
 import org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator;
 import org.openmrs.module.appointments.validator.impl.DefaultEditAppointmentValidator;
 import org.openmrs.module.appointments.web.controller.AppointmentsController;
+import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsService;
+import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
 import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +55,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackageClasses = {Appointment.class, AppointmentsController.class})
+@ComponentScan(basePackageClasses = {
+        Appointment.class,
+        AppointmentsController.class,
+        AppointmentMapper.class,
+        AppointmentSearchValidator.class,
+        AbstractRecurringAppointmentsService.class
+})
 public class SihsalusAppointmentsConfiguration {
 
     @Bean
@@ -87,6 +104,20 @@ public class SihsalusAppointmentsConfiguration {
     @Bean
     AppointmentServiceAttributeTypeDao appointmentServiceAttributeTypeDao(SessionFactory sessionFactory) {
         AppointmentServiceAttributeTypeDaoImpl dao = new AppointmentServiceAttributeTypeDaoImpl();
+        dao.setSessionFactory(sessionFactory);
+        return dao;
+    }
+
+    @Bean
+    SpecialityDao specialityDao(SessionFactory sessionFactory) {
+        SpecialityDaoImpl dao = new SpecialityDaoImpl();
+        dao.setSessionFactory(sessionFactory);
+        return dao;
+    }
+
+    @Bean
+    AppointmentRecurringPatternDao appointmentRecurringPatternDao(SessionFactory sessionFactory) {
+        AppointmentRecurringPatternDaoImpl dao = new AppointmentRecurringPatternDaoImpl();
         dao.setSessionFactory(sessionFactory);
         return dao;
     }
@@ -195,15 +226,45 @@ public class SihsalusAppointmentsConfiguration {
     }
 
     @Bean
+    SpecialityService specialityService(SpecialityDao specialityDao) {
+        SpecialityServiceImpl service = new SpecialityServiceImpl();
+        service.setSpecialityDao(specialityDao);
+        return service;
+    }
+
+    @Bean
+    AppointmentRecurringPatternService appointmentRecurringPatternService(
+            AppointmentRecurringPatternDao appointmentRecurringPatternDao,
+            AppointmentDao appointmentDao,
+            AppointmentServiceHelper appointmentServiceHelper,
+            List<AppointmentValidator> appointmentValidators,
+            List<AppointmentStatusChangeValidator> statusChangeValidators,
+            AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
+        AppointmentRecurringPatternServiceImpl service = new AppointmentRecurringPatternServiceImpl();
+        service.setAppointmentRecurringPatternDao(appointmentRecurringPatternDao);
+        service.setAppointmentDao(appointmentDao);
+        service.setAppointmentServiceHelper(appointmentServiceHelper);
+        service.setAppointmentValidators(appointmentValidators);
+        service.setEditAppointmentValidators(appointmentValidators);
+        service.setStatusChangeValidators(statusChangeValidators);
+        service.setAppointmentNumberGeneratorLocator(appointmentNumberGeneratorLocator);
+        return service;
+    }
+
+    @Bean
     SmartInitializingSingleton appointmentsServiceRegistrar(
             ServiceContext serviceContext,
             AppointmentsService appointmentsService,
             AppointmentServiceDefinitionService appointmentServiceDefinitionService,
-            AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService) {
+            AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService,
+            SpecialityService specialityService,
+            AppointmentRecurringPatternService appointmentRecurringPatternService) {
         return () -> {
             serviceContext.setService(AppointmentsService.class, appointmentsService);
             serviceContext.setService(AppointmentServiceDefinitionService.class, appointmentServiceDefinitionService);
             serviceContext.setService(AppointmentServiceAttributeTypeService.class, appointmentServiceAttributeTypeService);
+            serviceContext.setService(SpecialityService.class, specialityService);
+            serviceContext.setService(AppointmentRecurringPatternService.class, appointmentRecurringPatternService);
         };
     }
 }

@@ -23,7 +23,7 @@
             uuid  VARCHAR(38) NOT NULL UNIQUE,
             voided TINYINT NULL ,
             PRIMARY KEY (speciality_id) ,
-            UNIQUE INDEX name_UNIQUE (name ASC) )
+            UNIQUE INDEX appointment_speciality_name_unique (name ASC) )
 
         </sql>
     </changeSet>
@@ -58,7 +58,7 @@
             PRIMARY KEY (appointment_service_id) ,
             INDEX fk_appointment_service_speciality_idx (speciality_id ASC) ,
             INDEX fk_appointment_service_location_idx (location_id ASC) ,
-            UNIQUE INDEX name_UNIQUE (name ASC) ,
+            UNIQUE INDEX appointment_service_name_unique (name ASC) ,
             CONSTRAINT fk_appointment_service_speciality
             FOREIGN KEY (speciality_id )
             REFERENCES appointment_speciality (speciality_id )
@@ -211,9 +211,9 @@
     <changeSet id="drop_index_on_appointment_service_table-201707251710" author="Santhosh, Maharjun">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="appointment_service"/>
-            <indexExists indexName="name_UNIQUE"/>
+            <indexExists indexName="appointment_service_name_unique"/>
         </preConditions>
-        <dropIndex tableName="appointment_service" indexName="name_UNIQUE"/>
+        <dropIndex tableName="appointment_service" indexName="appointment_service_name_unique"/>
     </changeSet>
 
     <changeSet id="add_color_column_to_appointment_service_table-201707251432" author="Santhosh, Maharjun">
@@ -269,7 +269,7 @@
     <changeSet id="create-appointment-status-change-task-20170912101533" author="Kaustav">
         <preConditions>
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Mark Appointment As Missed Or Complete Task";
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = 'Mark Appointment As Missed Or Complete Task';
             </sqlCheck>
         </preConditions>
         <sql>
@@ -278,21 +278,21 @@
             start_on_startup, created_by, date_created, uuid)
             VALUES
             ('Mark Appointment As Missed Task', 'Mark appointments as missed task', 'org.openmrs.module.appointments.scheduler.tasks.MarkAppointmentAsMissedTask',
-            TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
+            CURRENT_TIMESTAMP, 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
 
             INSERT INTO
             scheduler_task_config(name, description, schedulable_class, start_time, start_time_pattern, repeat_interval,
             start_on_startup, created_by, date_created, uuid)
             VALUES
             ('Mark Appointment As Complete Task', 'Mark appointments as complete task', 'org.openmrs.module.appointments.scheduler.tasks.MarkAppointmentAsCompleteTask',
-            TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
+            CURRENT_TIMESTAMP, 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
         </sql>
     </changeSet>
 
     <changeSet id="create-appointment-status-change-task-201709121099999" author="Bahmni">
         <preConditions>
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Reminder of scheduled appointment";
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = 'Reminder of scheduled appointment';
             </sqlCheck>
         </preConditions>
         <sql>
@@ -301,7 +301,7 @@
                                       start_on_startup, created_by, date_created, uuid)
             VALUES
                 ('Reminder of scheduled appointment', 'Reminder of scheduled appointment', 'org.openmrs.module.appointments.scheduler.tasks.ReminderForAppointment',
-                 TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 3600, TRUE, 1, NOW(), UUID());
+                 CURRENT_TIMESTAMP, 'MM/dd/yyyy HH:mm:ss', 3600, TRUE, 1, NOW(), UUID());
         </sql>
     </changeSet>
 
@@ -406,15 +406,15 @@
     <changeSet id="Create-Available-for-appointments-201712121212-2" author="Maharjun, Saikumar">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT count(*) FROM provider_attribute_type where name="Available for appointments";
+                SELECT count(*) FROM provider_attribute_type where name='Available for appointments';
             </sqlCheck>
         </preConditions>
         <comment>Adding provider attribute type for Appointments</comment>
         <sql>
             INSERT INTO provider_attribute_type (name, description, datatype, min_occurs, creator, date_created,
             retired, uuid)
-            VALUES ("Available for appointments","providers will be available for appointments",
-            "org.openmrs.customdatatype.datatype.BooleanDatatype", 0, 1, NOW(), 0, UUID());
+            VALUES ('Available for appointments','providers will be available for appointments',
+            'org.openmrs.customdatatype.datatype.BooleanDatatype', 0, 1, NOW(), 0, UUID());
         </sql>
     </changeSet>
 
@@ -592,11 +592,14 @@
                 <columnExists columnName="related_appointment_id" tableName="patient_appointment"/>
             </not>
         </preConditions>
-        <sql>
-            ALTER TABLE patient_appointment
-            ADD COLUMN related_appointment_id INT NULL,
-            ADD CONSTRAINT patient_appointment_id_fk FOREIGN KEY(related_appointment_id) REFERENCES patient_appointment(patient_appointment_id);
-        </sql>
+        <addColumn tableName="patient_appointment">
+            <column name="related_appointment_id" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="patient_appointment"
+                                 baseColumnNames="related_appointment_id"
+                                 constraintName="patient_appointment_id_fk"
+                                 referencedTableName="patient_appointment"
+                                 referencedColumnNames="patient_appointment_id"/>
 
     </changeSet>
     <changeSet id="add_initial_appointment_status_appointment_service" author="Dubey">

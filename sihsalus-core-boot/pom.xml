@@ -60,6 +60,7 @@
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-bedmanagement</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-metadatamapping</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-openconceptlab</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-sihsalusinterop</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-event</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-calculation</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-htmlwidgets</artifactId><version>${project.version}</version></dependency>

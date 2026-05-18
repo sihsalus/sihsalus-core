@@ -58,7 +58,7 @@
         <many-to-one name="relatedAppointment" class="org.openmrs.module.appointments.model.Appointment"
                     column="related_appointment_id" unique="true"/>
 
-        <set name="appointmentAudits" cascade="save-update" table="patient_appointment_audit" lazy="true">
+        <set name="appointmentAudits" cascade="persist,merge" table="patient_appointment_audit" lazy="true">
             <key foreign-key="patient_appointment_id" column="appointment_id"/>
             <one-to-many class="AppointmentAudit"/>
         </set>

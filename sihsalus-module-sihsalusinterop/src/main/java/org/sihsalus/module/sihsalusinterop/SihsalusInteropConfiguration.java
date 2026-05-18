@@ -1,6 +1,5 @@
 package org.sihsalus.module.sihsalusinterop;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.module.sihsalusinterop.api.DyakuSenderService;
@@ -23,11 +22,6 @@ public class SihsalusInteropConfiguration {
     @Bean
     HibernateMappingContributor sihsalusInteropHibernateMappingContributor() {
         return () -> List.of("SihSalusInterop.hbm.xml");
-    }
-
-    @Bean("fhirR4")
-    FhirContext fhirR4() {
-        return FhirContext.forR4();
     }
 
     @Bean("sihsalusinterop.InteropQueueDao")
