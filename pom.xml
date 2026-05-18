@@ -30,6 +30,7 @@
         <module>sihsalus-module-billing</module>
         <module>sihsalus-module-stockmanagement</module>
         <module>sihsalus-module-fua</module>
+        <module>sihsalus-module-identitylookup</module>
         <module>sihsalus-module-imaging</module>
         <module>sihsalus-module-attachments</module>
         <module>sihsalus-module-patientdocuments</module>
