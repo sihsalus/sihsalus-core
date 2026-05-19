@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
@@ -152,6 +153,7 @@ public class PatientIdStickerPdfReport {
 			FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
 			Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, outStream);
 			TransformerFactory factory = TransformerFactory.newInstance();
+			configureSecureTransformerFactory(factory);
 			Transformer transformer = factory.newTransformer(xslSource);
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
@@ -162,6 +164,17 @@ public class PatientIdStickerPdfReport {
 		catch (TransformerConfigurationException e) {
 			log.error("Error creating transformer. Check XSL source for BOM or invalid characters", e);
 			throw e;
+		}
+	}
+
+	private void configureSecureTransformerFactory(TransformerFactory factory) throws TransformerConfigurationException {
+		factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		try {
+			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+		}
+		catch (IllegalArgumentException e) {
+			log.warn("TransformerFactory does not support external access restrictions", e);
 		}
 	}
 }

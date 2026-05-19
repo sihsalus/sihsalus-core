@@ -1,6 +1,7 @@
 package org.sihsalus.core.boot;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,6 +79,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -131,6 +133,22 @@ class SihsalusCoreApplicationTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error.message").exists())
                 .andExpect(jsonPath("$.error.rawMessage").value("Unknown resource: v1/not-a-resource"));
+    }
+
+    @Test
+    void queueEntryNumberLegacyEndpointRespondsSafelyWithoutParameters() throws Exception {
+        mockMvc.perform(get("/rest/v1/queue-entry-number"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serviceType").value(""))
+                .andExpect(jsonPath("$.visitQueueNumber").value(""));
+    }
+
+    @Test
+    void queueTicketAssignmentRejectsIncompletePayload() throws Exception {
+        mockMvc.perform(post("/rest/v1/queueutil/assignticket")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ticketNumber\":\"A-001\"}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

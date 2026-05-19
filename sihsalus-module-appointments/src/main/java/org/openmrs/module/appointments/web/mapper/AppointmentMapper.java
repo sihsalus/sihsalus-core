@@ -103,8 +103,11 @@ public class AppointmentMapper {
 
     public void mapAppointmentRequestToAppointment(AppointmentRequest appointmentRequest, Appointment appointment) {
         AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
+        if (appointmentServiceDefinition == null) {
+            throw new ConversionException("Bad Request. No appointment service found with UUID: " + appointmentRequest.getServiceUuid());
+        }
         AppointmentServiceType appointmentServiceType = null;
-        if (appointmentRequest.getServiceTypeUuid() != null) {
+        if (StringUtils.isNotBlank(appointmentRequest.getServiceTypeUuid())) {
             appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentRequest.getServiceTypeUuid());
         }
         if (StringUtils.isNotBlank(appointmentRequest.getStatus())){
@@ -124,8 +127,8 @@ public class AppointmentMapper {
         appointment.setEndDateTime(appointmentRequest.getEndDateTime());
         appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
         appointment.setComments(appointmentRequest.getComments());
-        if (appointmentRequest.getPriority() != null || StringUtils.isNotBlank(appointmentRequest.getPriority())) {
-                appointment.setPriority(AppointmentPriority.valueOf(appointmentRequest.getPriority()));
+        if (StringUtils.isNotBlank(appointmentRequest.getPriority())) {
+            appointment.setPriority(AppointmentPriority.valueOf(appointmentRequest.getPriority()));
         }
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
         mapReasonsForAppointment(appointment, appointmentRequest.getReasonConceptUuids());
@@ -243,7 +246,9 @@ public class AppointmentMapper {
 
     private AppointmentServiceType getServiceTypeByUuid(Set<AppointmentServiceType> serviceTypes, String serviceTypeUuid) {
         return serviceTypes.stream()
-                .filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
+                .filter(avb -> avb.getUuid().equals(serviceTypeUuid))
+                .findAny()
+                .orElseThrow(() -> new ConversionException("Bad Request. No appointment service type found with UUID: " + serviceTypeUuid));
     }
 
     public Appointment mapQueryToAppointment(AppointmentQuery searchQuery) {

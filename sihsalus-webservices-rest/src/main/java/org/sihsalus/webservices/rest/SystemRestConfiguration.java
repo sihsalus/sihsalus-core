@@ -17,12 +17,15 @@ import org.openmrs.module.webservices.rest.web.api.RestHelperService;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.module.webservices.rest.web.api.impl.RestHelperServiceImpl;
 import org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl;
+import org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter;
+import org.openmrs.module.webservices.rest.web.filter.ContentTypeFilter;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.core.Ordered;
 
 @Configuration
 @ComponentScan(basePackageClasses = MainResourceController.class)
@@ -36,6 +39,16 @@ public class SystemRestConfiguration {
     @Bean
     Filter openmrsRestContextSessionFilter() {
         return new OpenmrsRestContextSessionFilter();
+    }
+
+    @Bean
+    Filter restContentTypeFilter() {
+        return new RestScopedFilter(new ContentTypeFilter(), 1);
+    }
+
+    @Bean
+    Filter restAuthorizationFilter() {
+        return new RestScopedFilter(new AuthorizationFilter(), 2);
     }
 
     @Bean
@@ -108,7 +121,7 @@ public class SystemRestConfiguration {
         }
     }
 
-    static final class OpenmrsRestContextSessionFilter implements Filter {
+    static final class OpenmrsRestContextSessionFilter implements Filter, Ordered {
 
         @Override
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -127,9 +140,48 @@ public class SystemRestConfiguration {
             }
         }
 
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
         private boolean isRestRequest(ServletRequest request) {
             return request instanceof HttpServletRequest httpRequest
-                    && httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/rest/");
+                    && (httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/rest/")
+                            || httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/ws/rest/"));
+        }
+    }
+
+    static final class RestScopedFilter implements Filter, Ordered {
+
+        private final Filter delegate;
+
+        private final int order;
+
+        RestScopedFilter(Filter delegate, int order) {
+            this.delegate = delegate;
+            this.order = order;
+        }
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+            if (isRestRequest(request)) {
+                delegate.doFilter(request, response, chain);
+                return;
+            }
+            chain.doFilter(request, response);
+        }
+
+        @Override
+        public int getOrder() {
+            return order;
+        }
+
+        private boolean isRestRequest(ServletRequest request) {
+            return request instanceof HttpServletRequest httpRequest
+                    && (httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/rest/")
+                            || httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/ws/rest/"));
         }
     }
 }

@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -32,6 +33,13 @@ public class AdhocTeleconsultationController extends BaseRestController {
     @RequestMapping(value = "/generateAdhocTeleconsultationLink", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<AdhocTeleconsultationResponse> generateAdhocTeleconsultationLink(@RequestParam(value = "patientUuid", required = true) String patientUuid, @RequestParam(value = "provider", required = true) String provider) {
-        return new ResponseEntity<>(teleconsultationAppointmentService.generateAdhocTeleconsultationLink(patientUuid, provider), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(teleconsultationAppointmentService.generateAdhocTeleconsultationLink(patientUuid, provider), HttpStatus.OK);
+        } catch (ContextAuthenticationException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid adhoc teleconsultation request", e);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

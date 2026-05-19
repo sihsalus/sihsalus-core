@@ -10,12 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -89,11 +84,6 @@ public class FhirCapabilityService {
     private Set<TypeRestfulInteraction> providerInteractions(IResourceProvider provider) {
         Set<TypeRestfulInteraction> interactions = new LinkedHashSet<>();
         addInteractionIfPresent(provider, interactions, Read.class, TypeRestfulInteraction.READ);
-        addInteractionIfPresent(provider, interactions, Search.class, TypeRestfulInteraction.SEARCHTYPE);
-        addInteractionIfPresent(provider, interactions, Create.class, TypeRestfulInteraction.CREATE);
-        addInteractionIfPresent(provider, interactions, Update.class, TypeRestfulInteraction.UPDATE);
-        addInteractionIfPresent(provider, interactions, Patch.class, TypeRestfulInteraction.PATCH);
-        addInteractionIfPresent(provider, interactions, Delete.class, TypeRestfulInteraction.DELETE);
         return interactions;
     }
 

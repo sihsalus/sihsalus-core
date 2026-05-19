@@ -20,7 +20,10 @@ import org.openmrs.module.imaging.api.OrthancConfigurationService;
 import org.openmrs.module.imaging.api.dao.OrthancConfigurationDao;
 import org.openmrs.module.imaging.api.client.OrthancHttpClient;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Locale;
 
 public class OrthancConfigurationServiceImpl extends BaseOpenmrsService implements OrthancConfigurationService {
 	
@@ -54,6 +57,7 @@ public class OrthancConfigurationServiceImpl extends BaseOpenmrsService implemen
 	
 	@Override
 	public void saveOrthancConfiguration(OrthancConfiguration config) {
+		validateOrthancBaseUrl(config);
 		if (httpClient.isOrthancReachable(config)) {
 			dao.saveNew(config);
 		} else {
@@ -68,7 +72,27 @@ public class OrthancConfigurationServiceImpl extends BaseOpenmrsService implemen
 	
 	@Override
 	public void updateOrthancConfiguration(OrthancConfiguration orthancConfiguration) {
+		validateOrthancBaseUrl(orthancConfiguration);
 		dao.updateExisting(orthancConfiguration);
+	}
+
+	private void validateOrthancBaseUrl(OrthancConfiguration orthancConfiguration) {
+		String baseUrl = orthancConfiguration == null ? null : orthancConfiguration.getOrthancBaseUrl();
+		if (baseUrl == null || baseUrl.trim().isEmpty()) {
+			throw new IllegalArgumentException("Orthanc base URL is required");
+		}
+		try {
+			URI uri = new URI(baseUrl.trim());
+			String scheme = uri.getScheme();
+			if (scheme == null || uri.getHost() == null ||
+			        !("http".equals(scheme.toLowerCase(Locale.ROOT)) ||
+			                "https".equals(scheme.toLowerCase(Locale.ROOT)))) {
+				throw new IllegalArgumentException("Orthanc base URL must be a valid HTTP(S) URL");
+			}
+		}
+		catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Orthanc base URL must be a valid HTTP(S) URL", e);
+		}
 	}
 	
 }

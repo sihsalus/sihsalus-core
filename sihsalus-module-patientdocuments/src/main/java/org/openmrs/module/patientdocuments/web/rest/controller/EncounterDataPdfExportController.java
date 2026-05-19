@@ -131,8 +131,9 @@ public class EncounterDataPdfExportController extends BaseRestController {
 			String filename = dateStr + "_PatientReport.pdf";
 
 			response.setContentType("application/pdf");
-			response.setContentLength((int) file.length());
+			response.setContentLengthLong(file.length());
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+			response.setHeader("X-Content-Type-Options", "nosniff");
 
 			try (FileInputStream fis = new FileInputStream(file);
 					OutputStream out = response.getOutputStream()) {

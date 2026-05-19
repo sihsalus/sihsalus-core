@@ -4,6 +4,9 @@ import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 
 public class TeleconsultationServiceImpl extends BaseOpenmrsService implements TeleconsultationService {
@@ -14,11 +17,23 @@ public class TeleconsultationServiceImpl extends BaseOpenmrsService implements T
 
 	@Override
 	public String generateTeleconsultationLink(String uuid) {
+		if (uuid == null || uuid.trim().isEmpty()) {
+			throw new IllegalArgumentException("Teleconsultation uuid is required");
+		}
 		String tcServerUrl = Context.getAdministrationService().getGlobalProperty(PROP_TC_SERVER);
 		if ((tcServerUrl == null) || "".equals(tcServerUrl)) {
 			tcServerUrl = DEFAULT_TC_SERVER_URL_PATTERN;
 		}
-		return new MessageFormat(tcServerUrl).format(new Object[] { uuid });
+		return new MessageFormat(tcServerUrl).format(new Object[] { encodeRoomId(uuid.trim()) });
+	}
+
+	private String encodeRoomId(String roomId) {
+		try {
+			return URLEncoder.encode(roomId, StandardCharsets.UTF_8.name()).replace("+", "%20");
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException("UTF-8 is not available", e);
+		}
 	}
 	
 }

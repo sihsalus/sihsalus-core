@@ -21,6 +21,7 @@ import org.openmrs.module.attachments.obs.ValueComplex;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
+import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.openmrs.obs.ComplexData;
@@ -46,6 +47,9 @@ public class AttachmentBytesResource extends BaseRestController {
 
 		// Getting the Core/Platform complex data object
 		Obs obs = context.getObsService().getObsByUuid(uuid);
+		if (obs == null) {
+			throw new ObjectNotFoundException("Attachment obs not found: " + uuid);
+		}
 
 		if (!obs.isComplex()) {
 			throw new IllegalRequestException(
@@ -70,6 +74,7 @@ public class AttachmentBytesResource extends BaseRestController {
 		response.addHeader("Content-Family", getContentFamily(mimeType).name());
 		response.addHeader("File-Name", attComplexData.getTitle());
 		response.addHeader("File-Ext", getExtension(attComplexData.getTitle(), mimeType));
+		response.addHeader("X-Content-Type-Options", "nosniff");
 
 		try {
 			byte[] bytes = attComplexData.asByteArray();

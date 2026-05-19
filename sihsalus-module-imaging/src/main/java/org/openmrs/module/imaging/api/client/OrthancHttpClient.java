@@ -23,15 +23,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class OrthancHttpClient {
+
+	private static final int CONNECT_TIMEOUT_MS = 5000;
+
+	private static final int READ_TIMEOUT_MS = 30000;
 	
 	public HttpURLConnection createConnection(String method, String url, String path, String username, String password)
 	        throws IOException {
-		String encoding = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+		String encoding = Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
 		URL serverURL = URI.create(url).resolve(path).toURL();
 		HttpURLConnection con = (HttpURLConnection) serverURL.openConnection();
 		con.setRequestMethod(method);
 		con.setRequestProperty("Authorization", "Basic " + encoding);
 		con.setUseCaches(false);
+		con.setConnectTimeout(CONNECT_TIMEOUT_MS);
+		con.setReadTimeout(READ_TIMEOUT_MS);
 		return con;
 	}
 	
@@ -83,8 +89,8 @@ public class OrthancHttpClient {
 			URL url = new URL(config.getOrthancBaseUrl() + "/system"); // `/system` is a common endpoint in Orthanc
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
-			connection.setConnectTimeout(3000); // 3 seconds timeout
-			connection.setReadTimeout(3000);
+			connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+			connection.setReadTimeout(CONNECT_TIMEOUT_MS);
 			
 			String auth = config.getOrthancUsername() + ":" + config.getOrthancPassword();
 			String encodeAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));

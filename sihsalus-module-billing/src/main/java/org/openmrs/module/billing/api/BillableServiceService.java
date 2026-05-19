@@ -9,10 +9,12 @@
  */
 package org.openmrs.module.billing.api;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 import java.util.List;
 
@@ -34,6 +36,7 @@ public interface BillableServiceService extends OpenmrsService {
 	 * @param id the database ID of the billable service
 	 * @return the billable service with the specified ID, or null if not found
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	BillableService getBillableService(Integer id);
 	
 	/**
@@ -42,6 +45,7 @@ public interface BillableServiceService extends OpenmrsService {
 	 * @param uuid the UUID of the billable service
 	 * @return the billable service with the specified UUID, or null if not found
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	BillableService getBillableServiceByUuid(String uuid);
 	
 	/**
@@ -57,6 +61,7 @@ public interface BillableServiceService extends OpenmrsService {
 	 * @return a list of billable services matching the search criteria, or an empty list if none found
 	 * @see BillableServiceSearch
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	List<BillableService> getBillableServices(BillableServiceSearch billableServiceSearch, PagingInfo pagingInfo);
 	
 	/**
@@ -70,6 +75,7 @@ public interface BillableServiceService extends OpenmrsService {
 	 * @return the saved billable service with updated metadata
 	 * @throws IllegalArgumentException if the billable service is null or invalid
 	 */
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	BillableService saveBillableService(BillableService billableService);
 	
 	/**
@@ -82,9 +88,12 @@ public interface BillableServiceService extends OpenmrsService {
 	 *
 	 * @param billableService the billable service to permanently delete
 	 */
+	@Authorized(PrivilegeConstants.PURGE_METADATA)
 	void purgeBillableService(BillableService billableService);
 	
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	BillableService retireBillableService(BillableService billableService, String reason);
 	
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	BillableService unretireBillableService(BillableService billableService);
 }

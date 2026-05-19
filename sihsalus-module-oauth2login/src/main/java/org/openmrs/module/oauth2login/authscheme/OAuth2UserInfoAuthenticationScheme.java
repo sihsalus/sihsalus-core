@@ -75,6 +75,9 @@ public class OAuth2UserInfoAuthenticationScheme extends DaoAuthenticationScheme 
 			
 			postProcessor.process(creds.getUserInfo());
 		}
+		if (user == null) {
+			throw new ContextAuthenticationException("No OpenMRS user found for OAuth2 client: " + credentials.getClientName());
+		}
 		return new BasicAuthenticated(user, credentials.getAuthenticationScheme());
 	}
 	

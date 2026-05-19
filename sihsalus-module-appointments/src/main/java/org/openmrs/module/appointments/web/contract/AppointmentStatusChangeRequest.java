@@ -9,7 +9,7 @@ import java.util.List;
 public class AppointmentStatusChangeRequest {
     
     @NotNull(message = "List of appointment UUIDs is required")
-    @Size(min = 1, message = "At least one appointment UUID must be specified")
+    @Size(min = 1, max = 200, message = "Between 1 and 200 appointment UUIDs must be specified")
     private List<String> appointmentUuids;
     
     @NotNull(message = "toStatus is required")

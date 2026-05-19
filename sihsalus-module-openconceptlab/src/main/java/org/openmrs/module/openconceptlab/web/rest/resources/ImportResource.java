@@ -49,6 +49,10 @@ import java.util.zip.ZipFile;
         supportedOpenmrsVersions = { "1.8.* - 2.*" }
 )
 public class ImportResource extends DelegatingCrudResource<Import> implements Uploadable {
+    private static final String GP_MAX_IMPORT_UPLOAD_BYTES = "openconceptlab.import.maxUploadBytes";
+
+    private static final long DEFAULT_MAX_IMPORT_UPLOAD_BYTES = 100L * 1024L * 1024L;
+
     private static final Set<String> ALLOWED_MIME_TYPES = new HashSet<>(Arrays.asList(
         "application/zip", "application/x-zip-compressed", "application/x-zip", "application/octet-stream"
     ));
@@ -275,26 +279,38 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
             throw new IllegalRequestException("File uploaded cannot be empty");
         } else if (!isZipFileType(multipartFile)) {
             throw new IllegalRequestException("Supplied file must be a zip file");
+        } else if (multipartFile.getSize() > getMaxImportUploadBytes()) {
+            throw new IllegalRequestException("Supplied file exceeds the maximum allowed upload size");
         }
 
         ImportService importService = getImportService();
         Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
 
         File tempFile = File.createTempFile("ocl", "zip");
-        multipartFile.transferTo(tempFile);
-
-        ZipFile zipFile;
+        ZipFile zipFile = null;
+        boolean scheduled = false;
         try {
+            multipartFile.transferTo(tempFile);
             zipFile = new ZipFile(tempFile);
+            importer.setZipFile(zipFile);
+
+            UpdateScheduler updateScheduler = Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
+            updateScheduler.scheduleNow();
+            scheduled = true;
         } catch (ZipException e) {
-            tempFile.delete();
             throw new IllegalRequestException("Supplied file is not a valid zip file");
+        } finally {
+            if (!scheduled) {
+                importer.setZipFile(null);
+                if (zipFile != null) {
+                    try {
+                        zipFile.close();
+                    } catch (IOException ignored) {
+                    }
+                }
+                tempFile.delete();
+            }
         }
-
-        importer.setZipFile(zipFile);
-
-        UpdateScheduler updateScheduler = Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
-        updateScheduler.scheduleNow();
 
         return importService.getLastImport();
     }
@@ -302,5 +318,16 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
     private static boolean isZipFileType(MultipartFile multipartFile) {
         String contentType = multipartFile.getContentType();
         return contentType != null && ALLOWED_MIME_TYPES.contains(contentType.toLowerCase());
+    }
+
+    private static long getMaxImportUploadBytes() {
+        String configuredValue = Context.getAdministrationService().getGlobalProperty(
+                GP_MAX_IMPORT_UPLOAD_BYTES, String.valueOf(DEFAULT_MAX_IMPORT_UPLOAD_BYTES));
+        try {
+            long parsedValue = Long.parseLong(configuredValue);
+            return parsedValue > 0 ? parsedValue : DEFAULT_MAX_IMPORT_UPLOAD_BYTES;
+        } catch (NumberFormatException e) {
+            return DEFAULT_MAX_IMPORT_UPLOAD_BYTES;
+        }
     }
 }

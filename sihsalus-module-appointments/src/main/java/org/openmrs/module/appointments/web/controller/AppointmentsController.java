@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
@@ -74,6 +75,8 @@ public class AppointmentsController extends BaseRestController {
             appointmentRequest.setUuid(null);
             Appointment appointment = appointmentsService.validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
+        } catch (ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         }catch (RuntimeException e) {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -132,6 +135,8 @@ public class AppointmentsController extends BaseRestController {
             appointmentProviderProvider.setAppointment(appointment);
             appointmentsService.updateAppointmentProviderResponse(appointmentProviderProvider);
             return new ResponseEntity<>(HttpStatus.OK);
+        } catch (ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         }catch (RuntimeException e) {
             log.error("Runtime error while trying to update appointment provider response", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -151,6 +156,8 @@ public class AppointmentsController extends BaseRestController {
                 appointmentUuids, request.getToStatus());
             
             return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
+        } catch (ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to update appointments by UUIDs", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);

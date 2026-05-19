@@ -190,7 +190,8 @@ public class Legacy1xRestController extends BaseRestController {
 	public Object getQueueMetrics(HttpServletRequest request) {
 		SimpleObject results = (SimpleObject) getQueueEntryMetrics(request);
 		String queueUuid = request.getParameter("queue");
-		String queueName = (StringUtils.isNotBlank(queueUuid) ? services.getQueue(queueUuid).getName() : "");
+		Queue queue = (StringUtils.isNotBlank(queueUuid) ? services.getQueue(queueUuid) : null);
+		String queueName = (queue != null ? queue.getName() : "");
 		return new GenericSingleObjectResult(Arrays.asList(new PropValue("queue", queueName),
 		    new PropValue("averageWaitTime", results.get(AVERAGE_WAIT_TIME))));
 	}
@@ -208,11 +209,11 @@ public class Legacy1xRestController extends BaseRestController {
 				return new ResponseEntity<Object>(msg, new HttpHeaders(), HttpStatus.OK);
 			}
 			
-			String servicePointName = actualObj.get("servicePointName").textValue();
-			String ticketNumber = actualObj.get("ticketNumber").textValue();
-			String status = actualObj.get("status").textValue();
+			String servicePointName = actualObj.path("servicePointName").asText("");
+			String ticketNumber = actualObj.path("ticketNumber").asText("");
+			String status = actualObj.path("status").asText("");
 			
-			if (servicePointName.isEmpty() || ticketNumber.isEmpty() || status.isEmpty()) {
+			if (StringUtils.isBlank(servicePointName) || StringUtils.isBlank(ticketNumber) || StringUtils.isBlank(status)) {
 				return new ResponseEntity<Object>("One of the required fields is empty", new HttpHeaders(), BAD_REQUEST);
 			}
 			
@@ -245,8 +246,10 @@ public class Legacy1xRestController extends BaseRestController {
 				}
 			}
 		}
-		return new GenericSingleObjectResult(Arrays.asList(new PropValue("serviceType", serviceType),
-		    new PropValue("visitQueueNumber", visitQueueNumber)));
+		SimpleObject result = new SimpleObject();
+		result.add("serviceType", serviceType);
+		result.add("visitQueueNumber", visitQueueNumber);
+		return result;
 	}
 	
 	@Data

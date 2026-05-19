@@ -3,8 +3,8 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
@@ -40,14 +40,22 @@ import javax.validation.Valid;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_OWN_APPOINTMENTS;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.VIEW_APPOINTMENTS;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/recurring-appointments")
 public class RecurringAppointmentsController extends BaseRestController {
+
+    private static final int MAX_RECURRING_APPOINTMENTS = 500;
 
     private Log log = LogFactory.getLog(this.getClass());
 
@@ -85,8 +93,10 @@ public class RecurringAppointmentsController extends BaseRestController {
     @ResponseBody
     public ResponseEntity<Object> save(@RequestBody RecurringAppointmentRequest recurringAppointmentRequest) {
         try {
+            requireAnyPrivilege(MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS);
             RecurringPattern recurringPattern = recurringAppointmentRequest.getRecurringPattern();
             validateRecurringPattern(recurringPattern);
+            validateRecurringAppointmentLimit(recurringAppointmentRequest);
             AppointmentRecurringPattern appointmentRecurringPattern = recurringPatternMapper.fromRequest(recurringPattern);
             List<Appointment> appointmentsList = recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest);
             appointmentRecurringPattern.setAppointments(new LinkedHashSet<>(appointmentsList));
@@ -95,6 +105,8 @@ public class RecurringAppointmentsController extends BaseRestController {
             appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
             return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(
                     new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
+        } catch (ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to create recurring appointments", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -105,6 +117,7 @@ public class RecurringAppointmentsController extends BaseRestController {
     @ResponseBody
     public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid") String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
         try {
+            requireAnyPrivilege(MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS);
             String clientTimeZone = statusDetails.get("timeZone");
             validateTimeZone(clientTimeZone);
             String toStatus = statusDetails.get("toStatus");
@@ -115,6 +128,8 @@ public class RecurringAppointmentsController extends BaseRestController {
             } else {
                 throw new RuntimeException("Appointment does not exist");
             }
+        } catch (ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to validateAndUpdate appointment status", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -125,8 +140,10 @@ public class RecurringAppointmentsController extends BaseRestController {
     @ResponseBody
     public ResponseEntity<Object> editAppointment(@Valid @RequestBody RecurringAppointmentRequest recurringAppointmentRequest) {
         try {
+            requireAnyPrivilege(MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS);
             validateRecurringPattern(recurringAppointmentRequest.getRecurringPattern());
-            if (recurringAppointmentRequest.getApplyForAll()) {
+            validateRecurringAppointmentLimit(recurringAppointmentRequest);
+            if (Boolean.TRUE.equals(recurringAppointmentRequest.getApplyForAll())) {
                 validateTimeZone(recurringAppointmentRequest.getTimeZone());
                 AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
                 Appointment editedAppointment = appointmentRecurringPattern.getAppointments().stream()
@@ -140,6 +157,8 @@ public class RecurringAppointmentsController extends BaseRestController {
                         Arrays.asList(appointmentToBeUpdated, appointmentToBeUpdated.getRelatedAppointment()));
                 return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(Arrays.asList(updatedAppointment)), HttpStatus.OK);
             }
+        } catch (ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to validateAndUpdate an appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -161,13 +180,17 @@ public class RecurringAppointmentsController extends BaseRestController {
     @ResponseBody
     public ResponseEntity<Object> getConflicts(@RequestBody RecurringAppointmentRequest recurringAppointmentRequest) {
         try {
+            requireAnyPrivilege(VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS);
             validateRecurringPattern(recurringAppointmentRequest.getRecurringPattern());
+            validateRecurringAppointmentLimit(recurringAppointmentRequest);
             List<Appointment> appointments = getValidAppointments(recurringAppointmentRequest);
             Map<Enum, List<Appointment>> appointmentsConflicts = appointmentsService.getAppointmentsConflicts(appointments);
             if (appointmentsConflicts.isEmpty())
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             return new ResponseEntity<>(appointmentMapper.constructConflictResponse(appointmentsConflicts),
                     HttpStatus.OK);
+        } catch (ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to get getConflicts for recurring appointments", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -189,6 +212,56 @@ public class RecurringAppointmentsController extends BaseRestController {
         if (!errors.getAllErrors().isEmpty()) {
             throw new APIException(errors.getAllErrors().get(0).getDefaultMessage());
         }
+    }
+
+    private void validateRecurringAppointmentLimit(RecurringAppointmentRequest recurringAppointmentRequest) {
+        if (recurringAppointmentRequest == null || recurringAppointmentRequest.getRecurringPattern() == null
+                || recurringAppointmentRequest.getAppointmentRequest() == null) {
+            throw new APIException("Recurring appointment request is incomplete");
+        }
+
+        RecurringPattern recurringPattern = recurringAppointmentRequest.getRecurringPattern();
+        Integer frequency = recurringPattern.getFrequency();
+        if (frequency != null && frequency > MAX_RECURRING_APPOINTMENTS) {
+            throw new APIException("Recurring appointments cannot exceed " + MAX_RECURRING_APPOINTMENTS + " occurrences");
+        }
+
+        if (frequency == null && recurringPattern.getEndDate() != null) {
+            Date startDateTime = recurringAppointmentRequest.getAppointmentRequest().getStartDateTime();
+            if (startDateTime == null) {
+                throw new APIException("Appointment start date is required for recurring appointments");
+            }
+            if (estimateOccurrenceCount(recurringPattern, startDateTime) > MAX_RECURRING_APPOINTMENTS) {
+                throw new APIException("Recurring appointments cannot exceed " + MAX_RECURRING_APPOINTMENTS + " occurrences");
+            }
+        }
+    }
+
+    private int estimateOccurrenceCount(RecurringPattern recurringPattern, Date startDateTime) {
+        long durationMillis = recurringPattern.getEndDate().getTime() - startDateTime.getTime();
+        if (durationMillis < 0) {
+            return 0;
+        }
+        long days = TimeUnit.MILLISECONDS.toDays(durationMillis);
+        int period = Math.max(recurringPattern.getPeriod(), 1);
+        long occurrenceCount;
+        if ("WEEK".equalsIgnoreCase(recurringPattern.getType())) {
+            int daysPerWeek = recurringPattern.getDaysOfWeek() == null ? 1 : Math.max(recurringPattern.getDaysOfWeek().size(), 1);
+            long recurringWeeks = (days / 7L) / period + 1L;
+            occurrenceCount = recurringWeeks * daysPerWeek;
+        } else {
+            occurrenceCount = days / period + 1L;
+        }
+        return occurrenceCount > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) occurrenceCount;
+    }
+
+    private void requireAnyPrivilege(String... privileges) {
+        for (String privilege : privileges) {
+            if (Context.hasPrivilege(privilege)) {
+                return;
+            }
+        }
+        Context.requirePrivilege(privileges[0]);
     }
 
     private List<Appointment> getValidAppointments(RecurringAppointmentRequest recurringAppointmentRequest) {

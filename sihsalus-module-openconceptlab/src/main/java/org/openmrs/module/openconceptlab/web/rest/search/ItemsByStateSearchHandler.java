@@ -12,8 +12,8 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchConfig;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
 import org.openmrs.module.webservices.rest.web.resource.api.SubResourceSearchHandler;
+import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.EmptySearchResult;
-import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,8 +21,9 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 @Component
 public class ItemsByStateSearchHandler implements SubResourceSearchHandler {
@@ -54,19 +55,23 @@ public class ItemsByStateSearchHandler implements SubResourceSearchHandler {
         if(StringUtils.isBlank(itemState) || StringUtils.isBlank(parentUuid)){
             return new EmptySearchResult();
         }
-        List<Item> itemList = new LinkedList<Item>();
         Import anImport = importService.getImport(parentUuid);
-        Integer importItemsCount = importService.getImportItemsCount(anImport, new HashSet<ItemState>());
-        List<Item> importItems = importService.getImportItems(anImport, 0, importItemsCount, new HashSet<ItemState>());
-        for(Item item : importItems){
-            if(itemState.equals(item.getState().name())){
-                itemList.add(item);
-            }
-        }
-        if(!itemList.isEmpty()){
-            return new NeedsPaging<Item>(itemList, requestContext);
-        } else {
+        if (anImport == null) {
             return new EmptySearchResult();
         }
+        ItemState state;
+        try {
+            state = ItemState.valueOf(itemState.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return new EmptySearchResult();
+        }
+        Set<ItemState> states = new HashSet<ItemState>(Collections.singletonList(state));
+        Integer importItemsCount = importService.getImportItemsCount(anImport, states);
+        if (requestContext.getStartIndex() >= importItemsCount) {
+            return new AlreadyPaged<Item>(requestContext, Collections.emptyList(), false, importItemsCount.longValue());
+        }
+        List<Item> importItems = importService.getImportItems(anImport, requestContext.getStartIndex(), requestContext.getLimit(), states);
+        boolean hasMoreResults = requestContext.getStartIndex() + requestContext.getLimit() < importItemsCount;
+        return new AlreadyPaged<Item>(requestContext, importItems, hasMoreResults, importItemsCount.longValue());
     }
 }

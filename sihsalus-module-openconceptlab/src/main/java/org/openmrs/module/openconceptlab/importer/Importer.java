@@ -201,13 +201,6 @@ public class Importer implements Runnable {
 					Collections.singletonList(ItemState.ERROR)));
 			if (errors > 0) {
 				importService.failImport(anImport);
-			} else {
-				if (zipFile != null) {
-					File file = new File(zipFile.getName());
-					if (file.exists()) {
-						file.delete();
-					}
-				}
 			}
 		}
 		catch (Throwable e) {
@@ -215,9 +208,14 @@ public class Importer implements Runnable {
 			throw new ImportException(e);
 		}
 		finally {
+			File zipFileOnDisk = zipFile != null ? new File(zipFile.getName()) : null;
 			IOUtils.closeQuietly(in);
+			IOUtils.closeQuietly(zipFile);
 
 			zipFile = null;
+			if (zipFileOnDisk != null && zipFileOnDisk.exists() && !zipFileOnDisk.delete()) {
+				log.warn("Failed to delete temporary Open Concept Lab import file {}", zipFileOnDisk.getAbsolutePath());
+			}
 
 			try {
 				if (anImport != null && anImport.getImportId() != null) {
