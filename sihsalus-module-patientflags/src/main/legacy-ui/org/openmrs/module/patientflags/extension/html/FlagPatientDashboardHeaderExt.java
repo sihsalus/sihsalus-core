@@ -29,7 +29,12 @@ public class FlagPatientDashboardHeaderExt extends Extension {
 	public MEDIA_TYPE getMediaType() {
 		return Extension.MEDIA_TYPE.html;
 	}
-	
+
+	@Override
+	public String getRequiredPrivilege() {
+		return "View Patients,View Patient Flags";
+	}
+
 	public String getOverrideContent(String test) {
 		
 		FlagService flagService = Context.getService(FlagService.class);

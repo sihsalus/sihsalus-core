@@ -57,6 +57,41 @@
             </sql>
     </changeSet>
 
+    <changeSet id="sihsalus-core-compatibility-20260518-05-h2-person-attribute-value" author="sihsalus" dbms="h2">
+        <comment>Ensure H2 has the PersonAttribute value column even when Liquibase table preconditions miss the default schema.</comment>
+        <sql>ALTER TABLE IF EXISTS person_attribute ADD COLUMN IF NOT EXISTS value VARCHAR(50) DEFAULT '' NOT NULL</sql>
+    </changeSet>
+
+    <changeSet id="sihsalus-core-compatibility-20260518-05-postgres-person-attribute-value" author="sihsalus" dbms="postgresql">
+        <comment>Ensure PostgreSQL has the PersonAttribute value column required by the JPA mapping.</comment>
+        <sql>ALTER TABLE IF EXISTS person_attribute ADD COLUMN IF NOT EXISTS value VARCHAR(50) DEFAULT '' NOT NULL</sql>
+    </changeSet>
+
+    <changeSet id="sihsalus-core-compatibility-20260518-06-postgres-person-attribute-value-backfill" author="sihsalus" dbms="postgresql">
+        <comment>Backfill PersonAttribute value from value_reference when both columns exist.</comment>
+        <sql><![CDATA[
+            DO $$
+            BEGIN
+                IF EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'person_attribute'
+                      AND column_name = 'value'
+                ) AND EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'person_attribute'
+                      AND column_name = 'value_reference'
+                ) THEN
+                    UPDATE person_attribute
+                    SET value = LEFT(value_reference, 50)
+                    WHERE (value IS NULL OR value = '')
+                      AND value_reference IS NOT NULL;
+                END IF;
+            END $$;
+        ]]></sql>
+    </changeSet>
+
     <changeSet id="sihsalus-core-compatibility-20260513-04-fhir-patient-identifier-system" author="sihsalus">
         <preConditions onFail="MARK_RAN">
             <not>

@@ -27,7 +27,7 @@ public class FlagPatientOverviewExt extends BoxExt {
 	}
 	
 	public String getRequiredPrivilege() {
-		return "View Patients";
+		return "View Patients,View Patient Flags";
 	}
 	
 	@Override

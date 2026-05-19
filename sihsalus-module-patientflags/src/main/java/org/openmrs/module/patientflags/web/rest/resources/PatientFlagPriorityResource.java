@@ -3,6 +3,7 @@ package org.openmrs.module.patientflags.web.rest.resources;
 import static org.openmrs.module.patientflags.web.rest.util.WebUtils.getStringFilter;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
@@ -122,7 +123,8 @@ public class PatientFlagPriorityResource extends MetadataDelegatingCrudResource<
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
 		String q = getStringFilter("q", context);
-		return new NeedsPaging<Priority>(Arrays.asList(Context.getService(FlagService.class).getPriorityByName(q)), context);
+		Priority priority = Context.getService(FlagService.class).getPriorityByName(q);
+		return new NeedsPaging<Priority>(priority == null ? Collections.emptyList() : Arrays.asList(priority), context);
 	}
 	
 	@Override

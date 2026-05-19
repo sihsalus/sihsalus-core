@@ -132,7 +132,10 @@ public class PatientFlagTagResource extends MetadataDelegatingCrudResource<Tag> 
 		
 		List<Tag> tags = new ArrayList<Tag>();
 		
-		tags.add(getService().getTag(q));
+		Tag tag = getService().getTag(q);
+		if (tag != null) {
+			tags.add(tag);
+		}
 		return new NeedsPaging<Tag>(tags, context);
 	}
 	

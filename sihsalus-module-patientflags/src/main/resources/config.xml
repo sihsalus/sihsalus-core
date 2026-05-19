@@ -100,6 +100,21 @@
 		<name>Manage Flags</name>
 		<description>Allows user add, edit, and remove flags</description>
 	</privilege>
+
+	<privilege>
+		<name>View Flags</name>
+		<description>Allows user to view flag definitions</description>
+	</privilege>
+
+	<privilege>
+		<name>Manage Patient Flags</name>
+		<description>Allows user to add, edit, remove, and rebuild patient flags</description>
+	</privilege>
+
+	<privilege>
+		<name>View Patient Flags</name>
+		<description>Allows user to view flags assigned to patients</description>
+	</privilege>
 	
 	<privilege>
 		<name>Test Flags</name>

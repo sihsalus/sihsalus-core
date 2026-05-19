@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
+import org.openmrs.annotation.AuthorizedAnnotationAttributes;
+import org.openmrs.api.OpenmrsService;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,18 +24,18 @@ import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAttributeSource;
 
 /**
  * AOPConfig registers AOP advisors used across the OpenMRS service layer. It enables method-level
  * interception using AspectJ-style pointcuts and integrates multiple aspects such as authorization,
  * logging, required data handling, and caching.
  * <p>
- * The advisors apply to all classes annotated with {@link Service}.
+ * The advisors apply to classes annotated with {@link Service}, OpenMRS service
+ * implementations, and methods that declare supported advice annotations.
  * <p>
  * The configured advisors include:
  * <ul>
@@ -62,6 +64,8 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class AOPConfig {
 
+	private static final AuthorizedAnnotationAttributes AUTHORIZED_ATTRIBUTES = new AuthorizedAnnotationAttributes();
+
 	/**
 	 * Added for backwards compatibility with services defined in xml with TransactionProxyFactoryBean
 	 *
@@ -81,17 +85,6 @@ public class AOPConfig {
 		interceptors.add(requiredDataAdvice);
 		interceptors.add(cacheInterceptor);
 		return interceptors;
-	}
-
-	/**
-	 * Added for backwards compatibility with services defined in xml with TransactionProxyFactoryBean
-	 *
-	 * @return transactionAttributeSource
-	 * @deprecated since 3.0.0 use {@link Service} annotation instead
-	 */
-	@Bean
-	public TransactionAttributeSource transactionAttributeSource() {
-		return new AnnotationTransactionAttributeSource();
 	}
 
 	@Bean
@@ -114,12 +107,22 @@ public class AOPConfig {
 
 			@Override
 			public boolean matches(Method method, Class<?> targetClass) {
-				return targetClass.isAnnotationPresent(Service.class);
+				return isServiceClass(targetClass) || hasMethodLevelAdvice(method);
 			}
 		};
 		if (order != null) {
 			advisor.setOrder(order);
 		}
 		return advisor;
+	}
+
+	private static boolean isServiceClass(Class<?> targetClass) {
+		return targetClass.isAnnotationPresent(Service.class) || OpenmrsService.class.isAssignableFrom(targetClass);
+	}
+
+	private static boolean hasMethodLevelAdvice(Method method) {
+		return AUTHORIZED_ATTRIBUTES.hasAuthorizedAnnotation(method)
+		        || AnnotationUtils.findAnnotation(method, Transactional.class) != null
+		        || AnnotationUtils.findAnnotation(method, Cacheable.class) != null;
 	}
 }

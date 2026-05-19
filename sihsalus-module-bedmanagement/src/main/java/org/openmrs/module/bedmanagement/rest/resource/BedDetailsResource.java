@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.bedmanagement.rest.resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Encounter;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
@@ -31,6 +32,8 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
+import org.openmrs.module.webservices.rest.web.response.IllegalPropertyException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
@@ -40,7 +43,7 @@ import java.util.List;
 @Resource(name = RestConstants.VERSION_1 + "/beds", supportedClass = BedDetails.class, supportedOpenmrsVersions = {
         "1.9.* - 9.*" })
 public class BedDetailsResource extends DelegatingCrudResource<BedDetails> {
-	
+
 	@Override
 	public BedDetails getByUniqueId(String id) {
 		BedDetails bedDetails = getBedManagementService().getBedDetailsById(id);
@@ -49,35 +52,36 @@ public class BedDetailsResource extends DelegatingCrudResource<BedDetails> {
 		}
 		return bedDetails;
 	}
-	
+
 	@Override
 	public void delete(String id, String reason, RequestContext requestContext) throws ResponseException {
 		String patientUuid = requestContext.getParameter("patientUuid");
-		getBedManagementService().unAssignPatientFromBed(Context.getPatientService().getPatientByUuid(patientUuid));
+		Patient patient = getPatientByUuid(patientUuid);
+		getBedManagementService().unAssignPatientFromBed(patient);
 	}
-	
+
 	@Override
 	protected void delete(BedDetails bedDetails, String s, RequestContext requestContext) throws ResponseException {
 		// we use the (String, String, RequestContext) method instead to avoid the error
 		// reported here: https://openmrs.atlassian.net/browse/BED-14
 		throw new ResourceDoesNotSupportOperationException("not supported");
 	}
-	
+
 	@Override
 	public BedDetails newDelegate() {
 		return new BedDetails();
 	}
-	
+
 	@Override
 	public BedDetails save(BedDetails bedDetails) {
 		throw new ResourceDoesNotSupportOperationException("save of bed not supported");
 	}
-	
+
 	@Override
 	public void purge(BedDetails bedDetails, RequestContext requestContext) throws ResponseException {
 		throw new ResourceDoesNotSupportOperationException("purge of bed not supported");
 	}
-	
+
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		if ((rep instanceof DefaultRepresentation) || (rep instanceof RefRepresentation)) {
@@ -100,23 +104,32 @@ public class BedDetailsResource extends DelegatingCrudResource<BedDetails> {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public Object update(String bedId, SimpleObject propertiesToUpdate, RequestContext context) throws ResponseException {
-		Patient patient = Context.getPatientService().getPatientByUuid((String) propertiesToUpdate.get("patientUuid"));
+		Patient patient = getPatientByUuid(propertiesToUpdate.get("patientUuid"));
 		Object encounterUuid = propertiesToUpdate.get("encounterUuid");
 		Encounter encounter = null;
-		if (encounterUuid != null) {
-			encounter = Context.getEncounterService().getEncounterByUuid((String) encounterUuid);
+		if (encounterUuid != null && StringUtils.isNotBlank(encounterUuid.toString())) {
+			encounter = Context.getEncounterService().getEncounterByUuid(encounterUuid.toString());
+			if (encounter == null) {
+				throw new IllegalPropertyException("Encounter not exist");
+			}
 		}
 		BedDetails bedRes = getBedManagementService().assignPatientToBed(patient, encounter, bedId);
 		return ConversionUtil.convertToRepresentation(bedRes, Representation.DEFAULT);
 	}
-	
+
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
 		String patientUuid = context.getParameter("patientUuid");
+		if (StringUtils.isBlank(patientUuid)) {
+			return new NeedsPaging<>(Collections.emptyList(), context);
+		}
 		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
+		if (patient == null) {
+			return new NeedsPaging<>(Collections.emptyList(), context);
+		}
 		BedDetails bedDetails = getBedManagementService().getBedAssignmentDetailsByPatient(patient);
 		List<BedDetails> ret = Collections.emptyList();
 		if (bedDetails != null && bedDetails.getBedId() != 0) {
@@ -124,8 +137,19 @@ public class BedDetailsResource extends DelegatingCrudResource<BedDetails> {
 		}
 		return new NeedsPaging<>(ret, context);
 	}
-	
+
 	BedManagementService getBedManagementService() {
 		return Context.getService(BedManagementService.class);
+	}
+
+	private Patient getPatientByUuid(Object patientUuid) {
+		if (patientUuid == null || StringUtils.isBlank(patientUuid.toString())) {
+			throw new ConversionException("The patientUuid property is missing");
+		}
+		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid.toString());
+		if (patient == null) {
+			throw new IllegalPropertyException("Patient not exist");
+		}
+		return patient;
 	}
 }

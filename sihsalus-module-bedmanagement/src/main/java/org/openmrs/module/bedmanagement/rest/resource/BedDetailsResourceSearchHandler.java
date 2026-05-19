@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.bedmanagement.rest.resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.bedmanagement.BedDetails;
 import org.openmrs.module.bedmanagement.service.BedManagementService;
@@ -45,6 +46,9 @@ public class BedDetailsResourceSearchHandler implements SearchHandler {
 	@Override
 	public PageableResult search(RequestContext requestContext) throws ResponseException {
 		String visitUuid = requestContext.getParameter("visitUuid");
+		if (StringUtils.isBlank(visitUuid)) {
+			return new NeedsPaging<>(Collections.emptyList(), requestContext);
+		}
 		BedDetails bedDetails = Context.getService(BedManagementService.class).getLatestBedDetailsByVisit(visitUuid);
 		List<BedDetails> ret = Collections.emptyList();
 		if (bedDetails != null) {

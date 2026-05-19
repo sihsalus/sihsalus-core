@@ -151,7 +151,7 @@ public class PatientFlagResource extends DataDelegatingCrudResource<PatientFlag>
 
 	@Override
 	public void purge(PatientFlag delegate, RequestContext context) throws ResponseException {
-		throw new UnsupportedOperationException("PatientFlag cannot be purged");
+		throw new ResourceDoesNotSupportOperationException("PatientFlag cannot be purged");
 	}
 	
 	@PropertyGetter("display")

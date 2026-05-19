@@ -43,12 +43,12 @@ public class SystemRestConfiguration {
 
     @Bean
     Filter restContentTypeFilter() {
-        return new RestScopedFilter(new ContentTypeFilter(), 1);
+        return new PathScopedFilter(new ContentTypeFilter(), 1, "/rest/", "/ws/rest/");
     }
 
     @Bean
     Filter restAuthorizationFilter() {
-        return new RestScopedFilter(new AuthorizationFilter(), 2);
+        return new PathScopedFilter(new AuthorizationFilter(), 2, "/rest/", "/ws/rest/", "/api/fhir/");
     }
 
     @Bean
@@ -127,7 +127,7 @@ public class SystemRestConfiguration {
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
                 throws IOException, ServletException {
             boolean openedSession = false;
-            if (isRestRequest(request) && !Context.isSessionOpen()) {
+            if (isOpenmrsWebRequest(request) && !Context.isSessionOpen()) {
                 Context.openSession();
                 openedSession = true;
             }
@@ -145,32 +145,48 @@ public class SystemRestConfiguration {
             return 0;
         }
 
-        private boolean isRestRequest(ServletRequest request) {
+        private boolean isOpenmrsWebRequest(ServletRequest request) {
             return request instanceof HttpServletRequest httpRequest
                     && (httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/rest/")
-                            || httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/ws/rest/"));
+                            || httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/ws/rest/")
+                            || httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/api/fhir/"));
         }
     }
 
-    static final class RestScopedFilter implements Filter, Ordered {
+    static final class PathScopedFilter implements Filter, Ordered {
 
         private final Filter delegate;
 
         private final int order;
 
-        RestScopedFilter(Filter delegate, int order) {
+        private final String[] pathPrefixes;
+
+        PathScopedFilter(Filter delegate, int order, String... pathPrefixes) {
             this.delegate = delegate;
             this.order = order;
+            this.pathPrefixes = pathPrefixes;
         }
 
         @Override
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
                 throws IOException, ServletException {
-            if (isRestRequest(request)) {
-                delegate.doFilter(request, response, chain);
+            if (!matchesPath(request)) {
+                chain.doFilter(request, response);
                 return;
             }
-            chain.doFilter(request, response);
+
+            boolean openedSession = false;
+            if (!Context.isSessionOpen()) {
+                Context.openSession();
+                openedSession = true;
+            }
+            try {
+                delegate.doFilter(request, response, chain);
+            } finally {
+                if (openedSession) {
+                    Context.closeSession();
+                }
+            }
         }
 
         @Override
@@ -178,10 +194,20 @@ public class SystemRestConfiguration {
             return order;
         }
 
-        private boolean isRestRequest(ServletRequest request) {
-            return request instanceof HttpServletRequest httpRequest
-                    && (httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/rest/")
-                            || httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/ws/rest/"));
+        private boolean matchesPath(ServletRequest request) {
+            if (!(request instanceof HttpServletRequest httpRequest)) {
+                return false;
+            }
+
+            String contextPath = httpRequest.getContextPath();
+            String requestUri = httpRequest.getRequestURI();
+            for (String pathPrefix : pathPrefixes) {
+                if (requestUri.startsWith(contextPath + pathPrefix)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

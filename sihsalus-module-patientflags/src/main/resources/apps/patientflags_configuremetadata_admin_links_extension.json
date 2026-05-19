@@ -5,6 +5,7 @@
     "type": "link",
     "label": "patientflags.manageFlags",
     "url": "owa/patientflags/index.html",
+    "requiredPrivilege": "Manage Flags",
     "extensionParams":{
       "group": "${project.parent.groupId}.${project.parent.artifactId}.patientflags.group"
     }

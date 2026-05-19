@@ -22,6 +22,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 @Resource(name = RestConstants.VERSION_1 + PatientFlagsRestController.PATIENT_FLAGS_REST_NAMESPACE + "/displaypoint", supportedClass = DisplayPoint.class, supportedOpenmrsVersions = {
@@ -33,7 +34,7 @@ public class PatientFlagDisplayPointResource extends MetadataDelegatingCrudResou
 	}
 	
 	public DisplayPoint save(DisplayPoint displayPoint) {
-		throw new UnsupportedOperationException();
+		throw new ResourceDoesNotSupportOperationException("save of display point not supported");
 	}
 	
 	@Override
@@ -46,7 +47,7 @@ public class PatientFlagDisplayPointResource extends MetadataDelegatingCrudResou
 	
 	@Override
 	public void purge(DisplayPoint displayPoint, RequestContext arg1) throws ResponseException {
-		throw new UnsupportedOperationException();
+		throw new ResourceDoesNotSupportOperationException("purge of display point not supported");
 	}
 	
 	@Override
@@ -96,7 +97,10 @@ public class PatientFlagDisplayPointResource extends MetadataDelegatingCrudResou
 		
 		List<DisplayPoint> displayPoints = new ArrayList<DisplayPoint>();
 		
-		displayPoints.add(getService().getDisplayPoint(q));
+		DisplayPoint displayPoint = getService().getDisplayPoint(q);
+		if (displayPoint != null) {
+			displayPoints.add(displayPoint);
+		}
 		return new NeedsPaging<DisplayPoint>(displayPoints, context);
 	}
 	

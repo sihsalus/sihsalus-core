@@ -8,7 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
@@ -17,6 +20,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.UserSessionListener;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.calculation.api.CalculationRegistrationService;
 import org.openmrs.calculation.patient.PatientCalculationService;
@@ -94,6 +98,8 @@ class SihsalusCoreApplicationTest {
 
     private static final String TEST_IDENTIFIER_TYPE_UUID = "f7c1c7d2-cf2d-45fd-9660-e81975cf50da";
 
+    private static final String ADMIN_BASIC_AUTH = basicAuth("admin", "test");
+
     @Autowired private MockMvc mockMvc;
 
     @Autowired private JdbcTemplate jdbcTemplate;
@@ -113,7 +119,7 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void fhirR4ReadEndpointInvokesImportedProvider() throws Exception {
-        mockMvc.perform(get("/api/fhir/r4/Patient/not-a-real-patient"))
+        mockMvc.perform(get("/api/fhir/r4/Patient/not-a-real-patient").header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
                 .andExpect(jsonPath("$.resourceType").value("OperationOutcome"))
@@ -155,7 +161,7 @@ class SihsalusCoreApplicationTest {
     void patientRegistryPatientIsReadableThroughRestAndFhir() throws Exception {
         String patientUuid = ensureTestPatient();
 
-        mockMvc.perform(get("/rest/v1/patient/{uuid}", patientUuid))
+        mockMvc.perform(get("/rest/v1/patient/{uuid}", patientUuid).header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.uuid").value(patientUuid))
                 .andExpect(jsonPath("$.identifier").value(TEST_IDENTIFIER))
@@ -164,7 +170,7 @@ class SihsalusCoreApplicationTest {
 
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from fhir_patient_identifier_system", Integer.class));
 
-        mockMvc.perform(get("/api/fhir/r4/Patient/{uuid}", patientUuid))
+        mockMvc.perform(get("/api/fhir/r4/Patient/{uuid}", patientUuid).header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
                 .andExpect(jsonPath("$.resourceType").value("Patient"))
@@ -181,6 +187,25 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getPatientService().getIdentifierValidator((Class) LuhnMod30IdentifierValidator.class));
         assertNotNull(
                 jdbcTemplate.queryForObject("select count(*) from idgen_identifier_source", Integer.class));
+    }
+
+    @Test
+    void staticModuleServicesPreserveOpenmrsAuthorizationInterceptors() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            IdentifierSourceService identifierSourceService = Context.getService(IdentifierSourceService.class);
+
+            assertThrows(APIAuthenticationException.class, identifierSourceService::getIdentifierSourceTypes);
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test
@@ -232,7 +257,8 @@ class SihsalusCoreApplicationTest {
     @Test
     void o3FormsIsWiredAsStaticInternalModule() throws Exception {
         assertNotNull(Context.getService(O3FormsService.class));
-        mockMvc.perform(get("/rest/v1/o3/forms/not-a-real-form")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/rest/v1/o3/forms/not-a-real-form").header("Authorization", ADMIN_BASIC_AUTH))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -381,6 +407,7 @@ class SihsalusCoreApplicationTest {
         Context.addProxyPrivilege(
                 PrivilegeConstants.ADD_PATIENTS,
                 PrivilegeConstants.EDIT_PATIENTS,
+                PrivilegeConstants.GET_PATIENTS,
                 PrivilegeConstants.ADD_PATIENT_IDENTIFIERS,
                 PrivilegeConstants.GET_IDENTIFIER_TYPES,
                 PrivilegeConstants.MANAGE_IDENTIFIER_TYPES);
@@ -425,6 +452,7 @@ class SihsalusCoreApplicationTest {
             Context.removeProxyPrivilege(
                     PrivilegeConstants.ADD_PATIENTS,
                     PrivilegeConstants.EDIT_PATIENTS,
+                    PrivilegeConstants.GET_PATIENTS,
                     PrivilegeConstants.ADD_PATIENT_IDENTIFIERS,
                     PrivilegeConstants.GET_IDENTIFIER_TYPES,
                     PrivilegeConstants.MANAGE_IDENTIFIER_TYPES);
@@ -467,6 +495,11 @@ class SihsalusCoreApplicationTest {
                 PatientIdentifierType.LocationBehavior.NOT_USED.name(),
                 TEST_IDENTIFIER_TYPE_UUID,
                 PatientIdentifierType.UniquenessBehavior.UNIQUE.name());
+    }
+
+    private static String basicAuth(String username, String password) {
+        String token = Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
+        return "Basic " + token;
     }
 
     private void restartIdentityAfterSeedData(String tableName, String columnName) {

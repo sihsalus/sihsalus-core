@@ -44,6 +44,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
@@ -186,7 +187,7 @@ public class CohortResource extends DataDelegatingCrudResource<CohortM> {
 	
 	@Override
 	public CohortM save(CohortM cohort) {
-		if (cohort.getVoided()) {
+		if (cohort.getVoided() && cohort.getCohortMembers() != null) {
 			//end memberships if cohort is voided.
 			for (CohortMember cohortMember : cohort.getCohortMembers()) {
 				cohortMember.setVoided(true);
@@ -252,7 +253,7 @@ public class CohortResource extends DataDelegatingCrudResource<CohortM> {
 			}
 			
 			if (type == null) {
-				throw new RuntimeException(
+				throw new InvalidSearchException(
 				        "Could not find a Cohort Type matching '" + cohortType + "' either by name or UUID");
 			}
 		}
