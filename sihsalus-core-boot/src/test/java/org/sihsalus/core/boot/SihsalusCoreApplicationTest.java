@@ -121,6 +121,8 @@ import org.openmrs.module.patientflags.aop.PatientServiceAdvice;
 import org.openmrs.module.patientflags.aop.ProgramWorkflowServiceAdvice;
 import org.openmrs.module.patientflags.api.FlagService;
 import org.openmrs.module.patientflags.task.PatientFlagTask;
+import org.openmrs.module.patientdocuments.common.PatientDocumentsPrivilegeConstants;
+import org.openmrs.module.patientdocuments.reports.EncounterPdfReport;
 import org.openmrs.module.patientdocuments.reports.PatientIdStickerPdfReport;
 import org.openmrs.module.queue.api.QueueEntryService;
 import org.openmrs.module.queue.api.QueueRoomService;
@@ -490,8 +492,21 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void patientDocumentsIsWiredAsStaticInternalModule() throws Exception {
+        assertNotNull(Context.getRegisteredComponent("encounterPdfReport", EncounterPdfReport.class));
         assertNotNull(Context.getRegisteredComponent("patientIdStickerPdfReport", PatientIdStickerPdfReport.class));
+        assertEquals(2, jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (?, ?)",
+                Integer.class,
+                PatientDocumentsPrivilegeConstants.VIEW_PATIENT_ID_STICKER,
+                PatientDocumentsPrivilegeConstants.PRINT_ENCOUNTER_FORMS_PRIVILEGE));
         mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker")).andExpect(status().isBadRequest());
+        mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker")
+                        .param("patientUuid", TEST_PATIENT_UUID))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/rest/v1/patientdocuments/encounters")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[\"" + TEST_PATIENT_UUID + "\"]"))
+                .andExpect(status().isForbidden());
     }
 
     @Test

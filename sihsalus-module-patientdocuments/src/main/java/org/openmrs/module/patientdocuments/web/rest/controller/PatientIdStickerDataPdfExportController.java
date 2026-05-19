@@ -15,7 +15,9 @@ import static org.openmrs.module.patientdocuments.common.PatientDocumentsConstan
 import org.openmrs.Patient;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
+import org.openmrs.module.patientdocuments.common.PatientDocumentsPrivilegeConstants;
 import org.openmrs.module.patientdocuments.reports.PatientIdStickerPdfReport;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
@@ -81,6 +83,7 @@ public class PatientIdStickerDataPdfExportController extends BaseRestController 
 				return ResponseEntity.badRequest().build();
 			}
 
+			Context.requirePrivilege(PatientDocumentsPrivilegeConstants.VIEW_PATIENT_ID_STICKER);
 			Patient patient = ps.getPatientByUuid(patientUuid);
 			if (patient == null) {
 				return ResponseEntity.notFound().build();
