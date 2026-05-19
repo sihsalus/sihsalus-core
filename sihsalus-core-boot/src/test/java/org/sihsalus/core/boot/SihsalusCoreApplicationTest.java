@@ -798,7 +798,7 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
-    void bedManagementIsWiredAsStaticInternalModule() {
+    void bedManagementIsWiredAsStaticInternalModule() throws Exception {
         assertNotNull(Context.getService(BedManagementService.class));
         assertNotNull(Context.getService(BedTagMapService.class));
 
@@ -878,6 +878,9 @@ class SihsalusCoreApplicationTest {
             BedManagementService bedManagementService = Context.getService(BedManagementService.class);
 
             assertThrows(APIAuthenticationException.class, bedManagementService::getAdmissionLocations);
+            assertThrows(APIAuthenticationException.class, () -> bedManagementService.getBedById(1));
+            mockMvc.perform(get("/rest/v1/bedPatientAssignment/not-a-real-assignment"))
+                    .andExpect(status().isUnauthorized());
         } finally {
             if (openedSession) {
                 Context.closeSession();

@@ -63,9 +63,7 @@ public class BedPatientAssignmentResource extends DelegatingCrudResource<BedPati
 	
 	@Override
 	public BedPatientAssignment getByUniqueId(String uuid) {
-		BedManagementService bedManagementService = (BedManagementService) Context
-		        .getModuleOpenmrsServices(BedManagementService.class.getName()).get(0);
-		return bedManagementService.getBedPatientAssignmentByUuid(uuid);
+		return Context.getService(BedManagementService.class).getBedPatientAssignmentByUuid(uuid);
 	}
 	
 	@Override
