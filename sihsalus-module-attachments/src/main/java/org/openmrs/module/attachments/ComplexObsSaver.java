@@ -12,6 +12,7 @@ package org.openmrs.module.attachments;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,10 +83,14 @@ public class ComplexObsSaver {
 		double compressionRatio = getCompressionRatio(multipartFile.getSize(),
 				1000000 * context.getMaxStorageFileSize());
 		if (compressionRatio < 1) {
-			image = scaleImage(ImageIO.read(multipartFile.getInputStream()), compressionRatio);
+			BufferedImage sourceImage = ImageIO.read(multipartFile.getInputStream());
+			if (sourceImage == null) {
+				throw new IOException("Failed to read the uploaded image.");
+			}
+			image = scaleImage(sourceImage, compressionRatio);
 		}
 		obs.setComplexData(complexDataHelper.build(instructions,
-				replacePipeCharactersInFilenameWithUnderscores(multipartFile.getOriginalFilename()), image,
+				sanitizeFilename(multipartFile.getOriginalFilename()), image,
 				multipartFile.getContentType()).asComplexData());
 		obs = context.getObsService().saveObs(obs, getClass().toString());
 		return obs;
@@ -98,15 +103,16 @@ public class ComplexObsSaver {
 		prepareComplexObs(visit, person, encounter, fileCaption, formFieldNamespace, formFieldPath);
 
 		obs.setComplexData(complexDataHelper.build(instructions,
-				replacePipeCharactersInFilenameWithUnderscores(multipartFile.getOriginalFilename()),
+				sanitizeFilename(multipartFile.getOriginalFilename()),
 				multipartFile.getBytes(), multipartFile.getContentType()).asComplexData());
 		obs = context.getObsService().saveObs(obs, getClass().toString());
 		return obs;
 	}
 
 	// since we use | as a separator in filenames, we need to replace it with _
-	private String replacePipeCharactersInFilenameWithUnderscores(String filename) {
-		return filename != null ? filename.replaceAll(Pattern.quote("|"), "_") : null;
+	private String sanitizeFilename(String filename) {
+		String safeName = FilenameUtils.getName(filename);
+		return safeName != null ? safeName.replaceAll(Pattern.quote("|"), "_") : null;
 	}
 
 	private BufferedImage scaleImage(BufferedImage image, double ratio) {

@@ -36,6 +36,7 @@ import org.openmrs.Visit;
 import org.openmrs.api.APIException;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.UserContext;
 import org.openmrs.api.db.hibernate.HibernateSessionFactoryBean;
 import org.openmrs.api.handler.SaveHandler;
@@ -48,9 +49,12 @@ import org.openmrs.event.JmsEventPublisher;
 import org.openmrs.event.api.db.hibernate.HibernateEventInterceptor;
 import org.openmrs.module.authentication.AuthenticationConfig;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
+import org.openmrs.module.attachments.AttachmentsConstants;
 import org.openmrs.module.attachments.AttachmentsService;
 import org.openmrs.module.attachments.obs.DefaultAttachmentHandler;
 import org.openmrs.module.attachments.obs.ImageAttachmentHandler;
+import org.openmrs.module.attachments.rest.AttachmentBytesResource;
+import org.openmrs.module.attachments.rest.AttachmentResource;
 import org.openmrs.module.authentication.AuthenticationUserSessionListener;
 import org.openmrs.module.authentication.DelegatingAuthenticationScheme;
 import org.openmrs.module.appointments.events.advice.AppointmentEventsAdvice;
@@ -208,6 +212,7 @@ import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
 import org.openmrs.module.stockmanagement.api.Privileges;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.webservices.rest.web.resource.api.Converter;
+import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.PrivilegeConstants;
@@ -219,6 +224,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.Validator;
@@ -1337,13 +1344,57 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void attachmentsIsWiredAsStaticInternalModule() throws Exception {
-        assertNotNull(Context.getService(AttachmentsService.class));
+        AttachmentsService attachmentsService = Context.getService(AttachmentsService.class);
+        assertNotNull(attachmentsService);
         assertNotNull(Context.getObsService().getHandler(DefaultAttachmentHandler.class.getSimpleName()));
         assertNotNull(Context.getObsService().getHandler(ImageAttachmentHandler.class.getSimpleName()));
-        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/attachment"));
+        AttachmentResource attachmentResource =
+                (AttachmentResource) Context.getService(RestService.class).getResourceByName("v1/attachment");
+        assertNotNull(attachmentResource);
+        AttachmentBytesResource attachmentBytesResource = applicationContext.getBean(AttachmentBytesResource.class);
+        assertNotNull(attachmentBytesResource);
+        assertEquals(AttachmentsConstants.VIEW_ATTACHMENTS, attachmentResource.getRequiredGetPrivilege());
+        assertEquals(2, jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (?, ?)",
+                Integer.class,
+                AttachmentsConstants.CREATE_ATTACHMENTS,
+                AttachmentsConstants.VIEW_ATTACHMENTS));
         assertEquals(1, jdbcTemplate.queryForObject(
                 "select count(*) from global_property where property = 'attachments.defaultConceptComplexUuid'",
                 Integer.class));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        UserContext originalUserContext = openedSession ? null : Context.getUserContext();
+        try {
+            Context.setUserContext(new UserContext(Context.getAuthenticationScheme()));
+            assertThrows(APIAuthenticationException.class, () -> attachmentsService.getAttachments((Patient) null, false));
+            assertThrows(ContextAuthenticationException.class, () -> attachmentResource.getByUniqueId("not-a-real-uuid"));
+            assertThrows(ContextAuthenticationException.class,
+                    () -> attachmentBytesResource.getFile("not-a-real-uuid", null, new MockHttpServletResponse()));
+            assertThrows(ContextAuthenticationException.class,
+                    () -> attachmentResource.upload(
+                            new MockMultipartFile(
+                                    "file",
+                                    "../unsafe|name.txt",
+                                    "text/plain",
+                                    "hello".getBytes(StandardCharsets.UTF_8)),
+                            new RequestContext()));
+            mockMvc.perform(get("/rest/v1/attachment/not-a-real-uuid"))
+                    .andExpect(status().isUnauthorized());
+            mockMvc.perform(get("/rest/v1/attachment/not-a-real-uuid/bytes"))
+                    .andExpect(status().isUnauthorized());
+        } finally {
+            if (originalUserContext != null) {
+                Context.setUserContext(originalUserContext);
+            }
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test

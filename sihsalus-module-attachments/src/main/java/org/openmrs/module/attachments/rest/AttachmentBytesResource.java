@@ -42,6 +42,8 @@ public class AttachmentBytesResource extends BaseRestController {
 	@GetMapping(value = AttachmentsConstants.ATTACHMENT_BYTES_URI)
 	public void getFile(@PathVariable("uuid") String uuid, @RequestParam(required = false, value = "view") String view,
 			HttpServletResponse response) throws ResponseException {
+		Context.requirePrivilege(AttachmentsConstants.VIEW_ATTACHMENTS);
+
 		AttachmentsContext context = Context.getRegisteredComponent(AttachmentsConstants.COMPONENT_ATT_CONTEXT,
 				AttachmentsContext.class);
 

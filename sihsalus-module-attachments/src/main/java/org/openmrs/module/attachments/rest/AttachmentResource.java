@@ -9,9 +9,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
@@ -21,7 +23,7 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.DateProperty;
 import io.swagger.models.properties.StringProperty;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Encounter;
@@ -53,6 +55,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.EmptySearchResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
+import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -70,6 +73,8 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 	@Override
 	public Attachment save(Attachment delegate) {
+		Context.requirePrivilege(AttachmentsConstants.CREATE_ATTACHMENTS);
+
 		Obs obs = Context.getObsService().saveObs(delegate.getObs(), REASON);
 		return new Attachment(obs,
 				Context.getRegisteredComponent(AttachmentsConstants.COMPONENT_ATT_CONTEXT, AttachmentsContext.class)
@@ -77,8 +82,18 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 	}
 
 	@Override
+	public String getRequiredGetPrivilege() {
+		return AttachmentsConstants.VIEW_ATTACHMENTS;
+	}
+
+	@Override
 	public Attachment getByUniqueId(String uniqueId) {
+		Context.requirePrivilege(AttachmentsConstants.VIEW_ATTACHMENTS);
+
 		Obs obs = Context.getObsService().getObsByUuid(uniqueId);
+		if (obs == null) {
+			throw new ObjectNotFoundException("Attachment obs not found: " + uniqueId);
+		}
 		if (!obs.isComplex())
 			throw new GenericRestException(uniqueId + " does not identify a complex obs.", null);
 		else {
@@ -90,6 +105,8 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 	@Override
 	protected void delete(Attachment delegate, String reason, RequestContext context) throws ResponseException {
+		Context.requirePrivilege(AttachmentsConstants.CREATE_ATTACHMENTS);
+
 		String encounterUuid = delegate.getObs().getEncounter() != null
 				? delegate.getObs().getEncounter().getUuid()
 				: null;
@@ -99,6 +116,8 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 	@Override
 	public void purge(Attachment delegate, RequestContext context) throws ResponseException {
+		Context.requirePrivilege(AttachmentsConstants.CREATE_ATTACHMENTS);
+
 		String encounterUuid = delegate.getObs().getEncounter() != null
 				? delegate.getObs().getEncounter().getUuid()
 				: null;
@@ -108,6 +127,12 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 	@Override
 	public Object upload(MultipartFile file, RequestContext context) throws ResponseException, IOException {
+		Context.requirePrivilege(AttachmentsConstants.CREATE_ATTACHMENTS);
+
+		if (file == null) {
+			throw new IllegalRequestException("A file parameter must be provided when uploading an attachment.");
+		}
+
 		// Prepare Parameters
 		Patient patient = Context.getPatientService().getPatientByUuid(context.getParameter("patient"));
 		Visit visit = Context.getVisitService().getVisitByUuid(context.getParameter("visit"));
@@ -122,29 +147,29 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 		AttachmentsContext ctx = Context.getRegisteredComponent(AttachmentsConstants.COMPONENT_ATT_CONTEXT,
 				AttachmentsContext.class);
 
+		String fileName = getSafeOriginalFilename(file.getOriginalFilename());
+
 		if (base64Content != null) {
-			file = new Base64MultipartFile(base64Content, file.getName(), file.getOriginalFilename());
+			file = new Base64MultipartFile(base64Content, file.getName(), fileName);
 		}
+		file = new OriginalFilenameMultipartFile(file, fileName);
+
 		// Verify File Size
 		if (ctx.getMaxUploadFileSize() * 1024 * 1024 < (double) file.getSize()) {
 			throw new IllegalRequestException("The file exceeds the maximum size");
 		}
 
 		// Verify file extension
-		String fileName = file.getOriginalFilename();
-		int idx = fileName.lastIndexOf(".");
-		String fileExtension = idx > 0 && idx < fileName.length() - 1 ? fileName.substring(idx + 1) : "";
+		String fileExtension = normalizeExtension(FilenameUtils.getExtension(fileName));
 
-		String[] allowedExtensions = ctx.getAllowedFileExtensions();
-		if (allowedExtensions != null && allowedExtensions.length > 0 && Arrays.stream(allowedExtensions)
-				.filter(s -> s != null && !s.isEmpty()).noneMatch(fileExtension::equalsIgnoreCase)) {
+		List<String> allowedExtensions = normalizeExtensions(ctx.getAllowedFileExtensions());
+		if (!allowedExtensions.isEmpty() && !allowedExtensions.contains(fileExtension)) {
 			throw new IllegalRequestException("The extension " + fileExtension + " is not valid");
 		}
 
 		// Verify file name
-		String[] deniedFileNames = ctx.getDeniedFileNames();
-		if (deniedFileNames != null && deniedFileNames.length > 0 && Arrays.stream(deniedFileNames)
-				.filter(s -> s != null && !s.isEmpty()).anyMatch(fileName::equalsIgnoreCase)) {
+		List<String> deniedFileNames = normalizeFileNames(ctx.getDeniedFileNames());
+		if (deniedFileNames.contains(fileName.toLowerCase(Locale.ROOT))) {
 			throw new IllegalRequestException("The file name is not valid");
 		}
 
@@ -158,18 +183,18 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 		// Verify Parameters
 		if (encounter != null && visit != null) {
-			if (encounter.getVisit() != visit) {
+			if (encounter.getVisit() == null || !StringUtils.equals(encounter.getVisit().getUuid(), visit.getUuid())) {
 				throw new IllegalRequestException(
 						"The specified encounter does not belong to the provided visit, upload aborted.");
 			}
 		}
 
 		// Verify Content Type
-		if (allowedExtensions != null && allowedExtensions.length > 0) {
+		if (!allowedExtensions.isEmpty()) {
 			String fileType = detectContentType(file);
 			if (fileType != null && AttachmentsContext.isMimeTypeHandled(fileType)) {
-				String detectedExtension = AttachmentsContext.getExtension(fileType);
-				if (!CollectionUtils.containsAny(List.of(detectedExtension), Arrays.asList(allowedExtensions))) {
+				String detectedExtension = normalizeExtension(AttachmentsContext.getExtension(fileType));
+				if (!allowedExtensions.contains(detectedExtension)) {
 					throw new IllegalRequestException("The file content type " + fileType + " is not allowed");
 				}
 			}
@@ -217,9 +242,7 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 	private boolean isValidImage(InputStream fileStream) {
 		try {
 			BufferedImage image = ImageIO.read(fileStream);
-			image.getHeight();
-			image.getWidth();
-			return true;
+			return image != null && image.getHeight() > 0 && image.getWidth() > 0;
 		} catch (IOException e) {
 			return false;
 		} finally {
@@ -230,6 +253,50 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 				}
 			}
 		}
+	}
+
+	private String getSafeOriginalFilename(String originalFilename) {
+		String fileName = FilenameUtils.getName(originalFilename);
+		if (StringUtils.isBlank(fileName)) {
+			throw new IllegalRequestException("A file name must be provided when uploading an attachment.");
+		}
+		return fileName;
+	}
+
+	private List<String> normalizeExtensions(String[] extensions) {
+		if (extensions == null || extensions.length == 0) {
+			return List.of();
+		}
+		List<String> normalized = new ArrayList<>();
+		Arrays.stream(extensions)
+				.filter(StringUtils::isNotBlank)
+				.map(this::normalizeExtension)
+				.filter(StringUtils::isNotBlank)
+				.forEach(normalized::add);
+		return normalized;
+	}
+
+	private String normalizeExtension(String extension) {
+		String normalized = StringUtils.trimToEmpty(extension);
+		if (normalized.startsWith(".")) {
+			normalized = normalized.substring(1);
+		}
+		return normalized.toLowerCase(Locale.ROOT);
+	}
+
+	private List<String> normalizeFileNames(String[] fileNames) {
+		if (fileNames == null || fileNames.length == 0) {
+			return List.of();
+		}
+		List<String> normalized = new ArrayList<>();
+		Arrays.stream(fileNames)
+				.filter(StringUtils::isNotBlank)
+				.map(FilenameUtils::getName)
+				.map(StringUtils::trimToEmpty)
+				.filter(StringUtils::isNotBlank)
+				.map(fileName -> fileName.toLowerCase(Locale.ROOT))
+				.forEach(normalized::add);
+		return normalized;
 	}
 
 	private String detectContentType(MultipartFile file) {
@@ -352,6 +419,7 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 	 */
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
+		Context.requirePrivilege(AttachmentsConstants.VIEW_ATTACHMENTS);
 
 		// Prepare Parameters
 		Patient patient = Context.getPatientService().getPatientByUuid(context.getParameter("patient"));
@@ -402,9 +470,22 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 
 		public Base64MultipartFile(String base64Image, String fileName, String originalFileName) throws IOException {
 			String[] parts = base64Image.split(",", 2);
-			String contentType = parts[0].split(":")[1].split(";")[0].trim();
+			if (parts.length != 2 || !parts[0].startsWith("data:") || !parts[0].contains(";base64")) {
+				throw new IllegalRequestException("The base64Content parameter must be a data URL.");
+			}
+			String contentType = StringUtils.substringBetween(parts[0], "data:", ";");
+			if (StringUtils.isBlank(contentType)) {
+				throw new IllegalRequestException("The base64Content parameter must declare a content type.");
+			}
 			String contents = parts[1].trim();
-			byte[] decodedImage = Base64.decodeBase64(contents.getBytes());
+			byte[] encodedBytes = contents.getBytes(StandardCharsets.US_ASCII);
+			if (contents.isEmpty() || !Base64.isBase64(encodedBytes)) {
+				throw new IllegalRequestException("The base64Content parameter is not valid base64.");
+			}
+			byte[] decodedImage = Base64.decodeBase64(encodedBytes);
+			if (decodedImage.length == 0) {
+				throw new IllegalRequestException("The base64Content parameter is empty.");
+			}
 
 			this.fileName = fileName;
 			this.originalFileName = originalFileName;
@@ -451,6 +532,58 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment> i
 		@Override
 		public void transferTo(File dest) throws IllegalStateException {
 			throw new APIException("Operation transferTo is not supported for Base64MultipartFile");
+		}
+	}
+
+	static final class OriginalFilenameMultipartFile implements MultipartFile {
+
+		private final MultipartFile delegate;
+
+		private final String originalFilename;
+
+		OriginalFilenameMultipartFile(MultipartFile delegate, String originalFilename) {
+			this.delegate = delegate;
+			this.originalFilename = originalFilename;
+		}
+
+		@Override
+		public String getName() {
+			return delegate.getName();
+		}
+
+		@Override
+		public String getOriginalFilename() {
+			return originalFilename;
+		}
+
+		@Override
+		public String getContentType() {
+			return delegate.getContentType();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return delegate.isEmpty();
+		}
+
+		@Override
+		public long getSize() {
+			return delegate.getSize();
+		}
+
+		@Override
+		public byte[] getBytes() throws IOException {
+			return delegate.getBytes();
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return delegate.getInputStream();
+		}
+
+		@Override
+		public void transferTo(File dest) throws IOException, IllegalStateException {
+			delegate.transferTo(dest);
 		}
 	}
 
