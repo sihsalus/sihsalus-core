@@ -18,6 +18,7 @@ import java.io.Writer;
 
 import org.openmrs.annotation.Handler;
 import org.openmrs.module.htmlwidgets.web.WidgetConfig;
+import org.openmrs.module.htmlwidgets.web.html.HtmlUtil;
 
 /**
  * FieldGenHandler for String Types
@@ -30,7 +31,7 @@ public class ObjectHandler extends WidgetHandler {
 	 */
 	@Override
 	public void render(WidgetConfig config, Writer w) throws IOException {
-		w.write("There is no handler for type: " + config.getType().getSimpleName());
+		w.write("There is no handler for type: " + HtmlUtil.escapeHtml(config.getType().getSimpleName()));
 	}
 
 	/** 

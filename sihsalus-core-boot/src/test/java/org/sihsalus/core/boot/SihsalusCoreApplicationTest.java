@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
@@ -114,7 +115,13 @@ import org.openmrs.module.fua.api.FuaEstadoVersionService;
 import org.openmrs.module.fua.api.FuaService;
 import org.openmrs.module.fua.api.FuaVersionService;
 import org.openmrs.module.htmlwidgets.service.HtmlWidgetsService;
+import org.openmrs.module.htmlwidgets.web.WidgetConfig;
 import org.openmrs.module.htmlwidgets.web.handler.WidgetHandler;
+import org.openmrs.module.htmlwidgets.web.html.Attribute;
+import org.openmrs.module.htmlwidgets.web.html.HtmlUtil;
+import org.openmrs.module.htmlwidgets.web.html.Option;
+import org.openmrs.module.htmlwidgets.web.html.OptionGroup;
+import org.openmrs.module.htmlwidgets.web.html.SelectWidget;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
@@ -668,11 +675,51 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
-    void htmlWidgetsIsWiredAsStaticInternalModule() {
-        assertNotNull(Context.getService(HtmlWidgetsService.class));
+    void htmlWidgetsIsWiredAsStaticInternalModule() throws Exception {
+        HtmlWidgetsService htmlWidgetsService = Context.getService(HtmlWidgetsService.class);
+        assertNotNull(htmlWidgetsService);
         assertNotNull(Context.getRegisteredComponents(WidgetHandler.class).stream()
                 .findFirst()
                 .orElse(null));
+
+        StringWriter tagWriter = new StringWriter();
+        HtmlUtil.renderSimpleTag(
+                tagWriter,
+                "input",
+                List.of(new Attribute("value", "\"><script>alert(1)</script>", null, null)));
+        assertEquals("<input value=\"&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;\"/>", tagWriter.toString());
+
+        assertEquals("\\u003C/script\\u003E\\u0026\\\"\\'", HtmlUtil.escapeJavaScriptString("</script>&\"'"));
+
+        SelectWidget selectWidget = new SelectWidget();
+        OptionGroup group = new OptionGroup("Group \"<x>", null);
+        selectWidget.getOptions().add(new Option("a\"<", "<b>A</b>", null, "a", group));
+        selectWidget.getOptions().add(new Option("b", "B", null, "b"));
+        WidgetConfig config = new WidgetConfig();
+        config.setFixedAttribute("name", "choice");
+        config.setDefaultValue("a");
+        StringWriter selectWriter = new StringWriter();
+        selectWidget.render(config, selectWriter);
+        assertTrue(selectWriter.toString().contains("<optgroup label=\"Group &quot;&lt;x&gt;\">"));
+        assertTrue(selectWriter.toString()
+                .contains("<option value=\"a&quot;&lt;\" selected=\"true\">&lt;b&gt;A&lt;/b&gt;</option>"));
+        assertTrue(selectWriter.toString().contains("</optgroup><option value=\"b\">B</option>"));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class, () -> htmlWidgetsService.getAllObjectsByType(User.class));
+            assertThrows(APIAuthenticationException.class, () -> htmlWidgetsService.getUserNamesById("admin", List.of()));
+            assertThrows(APIAuthenticationException.class, () -> htmlWidgetsService.getPersonNamesById("admin", List.of()));
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test

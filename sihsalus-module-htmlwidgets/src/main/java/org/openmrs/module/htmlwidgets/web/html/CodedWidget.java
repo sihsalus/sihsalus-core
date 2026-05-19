@@ -44,7 +44,7 @@ public abstract class CodedWidget implements Widget {
 			}
 
 			HtmlUtil.renderSimpleTag(w, "input", clonedConfig.getAttributes());
-			w.write("&nbsp;"+option.getLabel());
+			w.write("&nbsp;" + HtmlUtil.escapeHtml(option.getLabel()));
 			if ((i+1) < num) {
 				w.write(getSeparator() == null ? "&nbsp;" : getSeparator());
 			}

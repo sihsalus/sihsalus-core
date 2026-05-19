@@ -41,6 +41,10 @@ public class SelectWidget extends CodedWidget {
 				inGroup = true;
 			}
 			else {
+				if (inGroup) {
+					HtmlUtil.renderCloseTag(w, "optgroup");
+					currentGroup = null;
+				}
 				inGroup = false;
 			}
 			
@@ -52,7 +56,7 @@ public class SelectWidget extends CodedWidget {
 				atts.add(new Attribute("selected", "true", null, null));
 			}
 			HtmlUtil.renderOpenTag(w, "option", atts);
-			w.write(option.getLabel());
+			w.write(HtmlUtil.escapeHtml(option.getLabel()));
 			HtmlUtil.renderCloseTag(w, "option");
 			
 		}

@@ -18,7 +18,9 @@ import java.util.Map;
 
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.OpenmrsObject;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -30,30 +32,35 @@ public interface HtmlWidgetsService extends OpenmrsService {
 	 * @return all OpenmrsMetadata of the passed type
 	 * @should return only unretired
 	 */
+	@Authorized
 	@Transactional(readOnly = true)
 	public <T extends OpenmrsMetadata> List<T> getAllMetadataByType(Class<T> type, boolean includeRetired);
-	
+
 	/**
 	 * @return all OpenmrsObjects of the passed type
 	 */
+	@Authorized
 	@Transactional(readOnly = true)
 	public <T extends OpenmrsObject> List<T> getAllObjectsByType(Class<T> type);
-	
+
 	/**
 	 * @return the object with the passed id
 	 */
+	@Authorized
 	@Transactional(readOnly = true)
 	public <T extends OpenmrsObject> T getObject(Class<T> type, Integer id);
 
 	/**
 	 * @return a Map of user ids to names, ordered by name
 	 */
+	@Authorized(PrivilegeConstants.GET_USERS)
 	@Transactional(readOnly = true)
 	public Map<Integer, String> getUserNamesById(String query, List<String> roleNames);
-	
+
 	/**
 	 * @return a Map of person ids to names, ordered by name
 	 */
+	@Authorized(PrivilegeConstants.GET_PERSONS)
 	@Transactional(readOnly = true)
 	public Map<Integer, String> getPersonNamesById(String query, List<String> roleNames);
 }

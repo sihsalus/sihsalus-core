@@ -33,7 +33,7 @@ public class FileUploadWidget implements Widget {
 		HtmlUtil.renderOpenTag(w, "span", "class=currentResourceSection" + (config.getDefaultValue() != null ? "" : "|style=display:none;"));
 		if (uploadName != null) {
 			HtmlUtil.renderOpenTag(w, "a", "href="+config.getAttributeValue("linkUrl", "#"));
-			w.write(uploadName);
+			w.write(HtmlUtil.escapeHtml(uploadName));
 			HtmlUtil.renderCloseTag(w, "a");
 		}
 		HtmlUtil.renderSimpleTag(w, "input", "name=foo|type=button|value=Change|onclick=showResourceChange_"+id+"(this, 'show');");

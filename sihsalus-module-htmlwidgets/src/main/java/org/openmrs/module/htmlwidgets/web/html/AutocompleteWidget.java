@@ -19,8 +19,8 @@ public class AutocompleteWidget extends CodedWidget {
 		for (Iterator<Option> i = getOptions().iterator(); i.hasNext();) {
 			Option o = i.next();
 			w.write("{");
-			w.write("code: \"" + o.getCode() + "\"");
-			w.write(", label: \"" + o.getLabel() + "\"");
+			w.write("code: \"" + HtmlUtil.escapeJavaScriptString(o.getCode()) + "\"");
+			w.write(", label: \"" + HtmlUtil.escapeJavaScriptString(o.getLabel()) + "\"");
 			w.write("}");
 			if (i.hasNext()) {
 				w.write(",");

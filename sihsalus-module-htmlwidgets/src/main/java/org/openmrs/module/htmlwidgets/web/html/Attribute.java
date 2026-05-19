@@ -61,7 +61,7 @@ public class Attribute {
 	 */
 	@Override
 	public String toString() {
-		return " " + name + "=\"" + (getValue() == null ? "" : getValue()) + "\"";
+		return " " + name + "=\"" + HtmlUtil.escapeAttribute(getValue()) + "\"";
 	}
 	
 	/**
