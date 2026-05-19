@@ -40,6 +40,7 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 
 /** REST resource for {@link BillRefund}. */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
@@ -76,7 +77,7 @@ public class BillRefundResource extends DataDelegatingCrudResource<BillRefund> {
 	
 	@Override
 	public void purge(BillRefund delegate, RequestContext context) throws ResponseException {
-		throw new UnsupportedOperationException("Purge is not supported for BillRefund");
+		throw new ResourceDoesNotSupportOperationException("Purge is not supported for BillRefund");
 	}
 	
 	@Override

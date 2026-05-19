@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.base.exception.PrivilegeException;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.billing.api.base.f.Func1;
 
 /**
@@ -51,7 +51,7 @@ public class PrivilegeUtil {
 	 */
 	public static boolean hasPrivileges(final User user, String... privileges) {
 		if (user == null) {
-			throw new IllegalArgumentException("The user to check must be defined.");
+			throw new ContextAuthenticationException("The user to check must be defined.");
 		}
 		
 		if (privileges == null || privileges.length == 0) {
@@ -94,7 +94,7 @@ public class PrivilegeUtil {
 		boolean hasPrivileges = hasPrivileges(user, privileges);
 		if (!hasPrivileges) {
 			log.error("Privileges are missing. The required privilege is <{}>", privileges);
-			throw new PrivilegeException();
+			throw new ContextAuthenticationException("Required privilege(s): " + privileges);
 		}
 	}
 	

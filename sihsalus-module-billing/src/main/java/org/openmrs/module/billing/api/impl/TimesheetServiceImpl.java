@@ -72,6 +72,7 @@ public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet> i
 	@Override
 	@SuppressWarnings("unchecked")
 	public Timesheet getCurrentTimesheet(Provider cashier) {
+		Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
 		return (Timesheet) getRepository()
 		        .createQuery("FROM Timesheet WHERE cashier = :cashier AND clockOut IS NULL ORDER BY clockIn DESC")
 		        .setParameter("cashier", cashier)
@@ -82,6 +83,7 @@ public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet> i
 	@Override
 	@SuppressWarnings("unchecked")
 	public void closeOpenTimesheets() {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_TIMESHEETS);
 		List<Timesheet> timesheets = (List<Timesheet>) getRepository()
 		        .createQuery("FROM Timesheet WHERE clockOut IS NULL ORDER BY clockIn DESC")
 		        .list();
@@ -102,6 +104,10 @@ public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet> i
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Timesheet> getTimesheetsByDate(Provider cashier, Date date) {
+		Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
+		if (date == null) {
+			throw new IllegalArgumentException("The date must be defined.");
+		}
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);

@@ -25,7 +25,9 @@ import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 
 import java.util.List;
 
@@ -53,7 +55,7 @@ public class BillExemptionResource extends MetadataDelegatingCrudResource<BillEx
 	
 	@Override
 	public void delete(BillExemption delegate, String reason, RequestContext context) throws ResponseException {
-		if (delegate.getRetired()) {
+		if (Boolean.TRUE.equals(delegate.getRetired())) {
 			return;
 		}
 		delegate.setRetired(true);
@@ -63,7 +65,7 @@ public class BillExemptionResource extends MetadataDelegatingCrudResource<BillEx
 	
 	@Override
 	public void purge(BillExemption delegate, RequestContext context) throws ResponseException {
-		throw new UnsupportedOperationException("Purge is not supported for BillingExemption");
+		throw new ResourceDoesNotSupportOperationException("Purge is not supported for BillingExemption");
 	}
 	
 	@Override
@@ -128,7 +130,12 @@ public class BillExemptionResource extends MetadataDelegatingCrudResource<BillEx
 	@PropertySetter("exemptionType")
 	public void setExemptionType(BillExemption instance, String exemptionType) {
 		if (exemptionType != null) {
-			instance.setExemptionType(ExemptionType.valueOf(exemptionType));
+			try {
+				instance.setExemptionType(ExemptionType.valueOf(exemptionType));
+			}
+			catch (IllegalArgumentException e) {
+				throw new ConversionException("Unknown exemption type: '" + exemptionType + "'", e);
+			}
 		}
 	}
 	

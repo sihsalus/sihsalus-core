@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -89,6 +90,7 @@ import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.CashierItemPriceService;
+import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.billing.BillingEventListener;
 import org.openmrs.module.billing.api.handler.BillReceiptNumberHandler;
@@ -1095,8 +1097,27 @@ class SihsalusCoreApplicationTest {
                     () -> Context.getService(BillExemptionService.class).getBillingExemptionById(1));
             assertThrows(APIAuthenticationException.class,
                     () -> Context.getService(BillLineItemService.class).getBillLineItemByUuid("not-a-real-line-item"));
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(ITimesheetService.class).getCurrentTimesheet(null));
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(ITimesheetService.class).getTimesheetsByDate(null, new Date()));
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(ITimesheetService.class).closeOpenTimesheets());
             mockMvc.perform(get("/rest/v1/billing/bill/not-a-real-bill"))
                     .andExpect(status().isUnauthorized());
+            mockMvc.perform(get("/rest/v2/billing/timesheet/not-a-real-timesheet"))
+                    .andExpect(status().isUnauthorized());
+            mockMvc.perform(get("/rest/v2/billing/timesheet")
+                    .param("date", "01/01/2026"))
+                    .andExpect(status().isUnauthorized());
+            mockMvc.perform(post("/rest/v1/billing/bill")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{}"))
+                    .andExpect(status().isUnauthorized());
+            mockMvc.perform(get("/rest/v1/billing/bill")
+                    .header("Authorization", ADMIN_BASIC_AUTH)
+                    .param("status", "not-a-real-status"))
+                    .andExpect(status().isBadRequest());
         } finally {
             if (openedSession) {
                 Context.closeSession();

@@ -21,6 +21,7 @@ import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.PaymentAttribute;
 import org.openmrs.module.billing.api.model.PaymentMode;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
@@ -32,6 +33,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubResource;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 
 import java.math.BigDecimal;
@@ -103,6 +105,9 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 	
 	@PropertySetter("attributes")
 	public void setPaymentAttributes(Payment instance, Set<PaymentAttribute> attributes) {
+		if (attributes == null) {
+			attributes = Set.of();
+		}
 		if (instance.getAttributes() == null) {
 			instance.setAttributes(new HashSet<PaymentAttribute>());
 		}
@@ -115,37 +120,22 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 	
 	@PropertySetter("amount")
 	public void setPaymentAmount(Payment instance, Object price) {
-		// TODO Conversion logic
-		double amount;
-		if (price instanceof Integer) {
-			int rawAmount = (Integer) price;
-			amount = Double.valueOf(rawAmount);
-			instance.setAmount(BigDecimal.valueOf(amount));
-		} else {
-			instance.setAmount(BigDecimal.valueOf((Double) price));
-		}
+		instance.setAmount(toBigDecimal(price));
 	}
 	
 	@PropertySetter("amountTendered")
 	public void setPaymentAmountTendered(Payment instance, Object price) {
-		// TODO Conversion logic
-		double amount;
-		if (price instanceof Integer) {
-			int rawAmount = (Integer) price;
-			amount = Double.valueOf(rawAmount);
-			instance.setAmountTendered(BigDecimal.valueOf(amount));
-		} else {
-			instance.setAmountTendered(BigDecimal.valueOf((Double) price));
-		}
+		instance.setAmountTendered(toBigDecimal(price));
 	}
 	
 	@PropertyGetter("dateCreated")
 	public Long getPaymentDate(Payment instance) {
-		return instance.getDateCreated().getTime();
+		return instance.getDateCreated() == null ? null : instance.getDateCreated().getTime();
 	}
 	
 	@Override
 	public Payment save(Payment delegate) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_BILLS);
 		if (delegate.getCashier() == null) {
 			Provider cashier = ProviderUtil.getCurrentProvider();
 			if (cashier == null) {
@@ -165,11 +155,13 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 	
 	@Override
 	protected void delete(Payment delegate, String reason, RequestContext context) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_BILLS);
 		delete(delegate.getBill().getUuid(), delegate.getUuid(), reason, context);
 	}
 	
 	@Override
 	public void delete(String parentUniqueId, final String uuid, String reason, RequestContext context) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_BILLS);
 		BillService service = Context.getService(BillService.class);
 		Bill bill = findBill(service, parentUniqueId);
 		Payment payment = findPayment(bill, uuid);
@@ -183,11 +175,13 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 	
 	@Override
 	public void purge(Payment delegate, RequestContext context) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_BILLS);
 		purge(delegate.getBill().getUuid(), delegate.getUuid(), context);
 	}
 	
 	@Override
 	public void purge(String parentUniqueId, String uuid, RequestContext context) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_BILLS);
 		BillService service = Context.getService(BillService.class);
 		Bill bill = findBill(service, parentUniqueId);
 		Payment payment = findPayment(bill, uuid);
@@ -233,10 +227,25 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 	private Payment findPayment(Bill bill, final String paymentUUID) {
 		
 		for (Payment payment : bill.getPayments()) {
-			if (payment != null && payment.getUuid().equals(paymentUUID)) {
+			if (payment != null && paymentUUID != null && paymentUUID.equals(payment.getUuid())) {
 				return payment;
 			}
 		}
 		throw new ObjectNotFoundException();
+	}
+
+	private BigDecimal toBigDecimal(Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof BigDecimal) {
+			return (BigDecimal) value;
+		}
+		try {
+			return new BigDecimal(value.toString());
+		}
+		catch (NumberFormatException e) {
+			throw new ConversionException("Cannot convert '" + value + "' to BigDecimal", e);
+		}
 	}
 }

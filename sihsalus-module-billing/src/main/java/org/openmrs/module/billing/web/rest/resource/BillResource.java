@@ -33,6 +33,7 @@ import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.billing.api.util.RoundingUtil;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.base.resource.PagingUtil;
@@ -48,6 +49,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
@@ -112,6 +114,9 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@PropertySetter("lineItems")
 	public void setBillLineItems(Bill instance, List<BillLineItem> lineItems) {
+		if (lineItems == null) {
+			lineItems = List.of();
+		}
 		if (instance.getLineItems() == null) {
 			instance.setLineItems(new ArrayList<>(lineItems.size()));
 		}
@@ -123,6 +128,10 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@PropertySetter("payments")
 	public void setBillPayments(Bill instance, Set<Payment> payments) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_BILLS);
+		if (payments == null) {
+			payments = Set.of();
+		}
 		if (instance.getPayments() == null) {
 			instance.setPayments(new HashSet<Payment>(payments.size()));
 		}
@@ -145,6 +154,10 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@PropertySetter("billAdjusted")
 	public void setBillAdjusted(Bill instance, Bill billAdjusted) {
+		if (billAdjusted == null) {
+			instance.setBillAdjusted(null);
+			return;
+		}
 		billAdjusted.addAdjustedBy(instance);
 		instance.setBillAdjusted(billAdjusted);
 	}
@@ -163,13 +176,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@PropertySetter("adjustmentReason")
 	public void setAdjustReason(Bill instance, String adjustReason) {
-		if (instance.getBillAdjusted().getUuid() != null) {
+		if (instance.getBillAdjusted() != null && instance.getBillAdjusted().getUuid() != null) {
 			instance.getBillAdjusted().setAdjustmentReason(adjustReason);
 		}
 	}
 	
 	@Override
 	public Bill save(Bill bill) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_BILLS);
 		//TODO: Test all the ways that this could fail
 		
 		if (bill.getId() == null) {
@@ -200,6 +214,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@Override
 	protected AlreadyPaged<Bill> doSearch(RequestContext context) {
+		Context.requirePrivilege(PrivilegeConstants.VIEW_BILLS);
 		BillSearch billSearch = buildBillSearchFromRequest(context);
 		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 		
@@ -226,11 +241,13 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@Override
 	protected void delete(Bill bill, String s, RequestContext requestContext) throws ResponseException {
+		Context.requirePrivilege(PrivilegeConstants.DELETE_BILLS);
 		Context.getService(BillService.class).voidBill(bill, s);
 	}
 	
 	@Override
 	public void purge(Bill bill, RequestContext requestContext) throws ResponseException {
+		Context.requirePrivilege(PrivilegeConstants.PURGE_BILLS);
 		Context.getService(BillService.class).purgeBill(bill);
 	}
 	
@@ -290,7 +307,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		String status = context.getRequest().getParameter("status");
 		if (StringUtils.isNotBlank(status)) {
 			List<BillStatus> statuses = Arrays.stream(status.split(",")).map(String::trim).filter(StringUtils::isNotBlank)
-			        .map(s -> BillStatus.valueOf(s.toUpperCase())).collect(Collectors.toList());
+			        .map(s -> {
+				        try {
+					        return BillStatus.valueOf(s.toUpperCase());
+				        }
+				        catch (IllegalArgumentException e) {
+					        throw new InvalidSearchException("Unknown bill status: " + s, e);
+				        }
+			        }).collect(Collectors.toList());
 			billSearch.setStatuses(statuses);
 		}
 		

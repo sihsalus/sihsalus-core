@@ -40,6 +40,7 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 
 /**
  * REST resource representing a {@link BillDiscount}.
@@ -68,7 +69,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	
 	@Override
 	protected void delete(BillDiscount delegate, String reason, RequestContext context) throws ResponseException {
-		if (delegate.getVoided()) {
+		if (Boolean.TRUE.equals(delegate.getVoided())) {
 			return;
 		}
 		delegate.setVoided(true);
@@ -78,7 +79,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	
 	@Override
 	public void purge(BillDiscount delegate, RequestContext context) throws ResponseException {
-		throw new UnsupportedOperationException("Purge is not supported for BillDiscount");
+		throw new ResourceDoesNotSupportOperationException("Purge is not supported for BillDiscount");
 	}
 	
 	@Override
@@ -156,14 +157,24 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	@PropertySetter("discountType")
 	public void setDiscountType(BillDiscount instance, String discountType) {
 		if (discountType != null) {
-			instance.setDiscountType(DiscountType.valueOf(discountType));
+			try {
+				instance.setDiscountType(DiscountType.valueOf(discountType));
+			}
+			catch (IllegalArgumentException e) {
+				throw new ConversionException("Unknown discount type: '" + discountType + "'", e);
+			}
 		}
 	}
 	
 	@PropertySetter("status")
 	public void setStatus(BillDiscount instance, String status) {
 		if (status != null) {
-			instance.setStatus(DiscountStatus.valueOf(status));
+			try {
+				instance.setStatus(DiscountStatus.valueOf(status));
+			}
+			catch (IllegalArgumentException e) {
+				throw new ConversionException("Unknown discount status: '" + status + "'", e);
+			}
 		}
 	}
 	
