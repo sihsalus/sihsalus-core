@@ -141,6 +141,7 @@ import org.openmrs.module.openconceptlab.OpenConceptLabConstants;
 import org.openmrs.module.openconceptlab.Subscription;
 import org.openmrs.module.openconceptlab.importer.Importer;
 import org.openmrs.module.openconceptlab.scheduler.UpdateScheduler;
+import org.openmrs.module.ordertemplates.OrderTemplatesConstants;
 import org.openmrs.module.ordertemplates.api.OrderTemplatesService;
 import org.openmrs.module.patientflags.aop.ConditionServiceAdvice;
 import org.openmrs.module.patientflags.aop.EncounterServiceAdvice;
@@ -1328,10 +1329,33 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
-    void orderTemplatesIsWiredAsStaticInternalModule() {
-        assertNotNull(Context.getService(OrderTemplatesService.class));
+    void orderTemplatesIsWiredAsStaticInternalModule() throws Exception {
+        OrderTemplatesService orderTemplatesService = Context.getService(OrderTemplatesService.class);
+        assertNotNull(orderTemplatesService);
         assertNotNull(Context.getService(RestService.class).getResourceByName("v1/ordertemplates/orderTemplate"));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from order_template", Integer.class));
+        assertEquals(2, jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (?, ?)",
+                Integer.class,
+                OrderTemplatesConstants.VIEW_ORDER_TEMPLATES,
+                OrderTemplatesConstants.MANAGE_ORDER_TEMPLATES));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(OrderTemplatesService.class).getAllOrderTemplates(false));
+            mockMvc.perform(get("/rest/v1/ordertemplates/orderTemplate/not-a-real-template"))
+                    .andExpect(status().isUnauthorized());
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test

@@ -54,4 +54,32 @@
         <addForeignKeyConstraint constraintName="order_template_changed_by_fk" baseTableName="order_template" baseColumnNames="changed_by" referencedTableName="users" referencedColumnNames="user_id"/>
         <addForeignKeyConstraint constraintName="order_template_retired_by_fk" baseTableName="order_template" baseColumnNames="retired_by" referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+
+    <changeSet id="ordertemplates-create-view-order-templates-privilege" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from privilege where privilege = 'View OrderTemplates'
+            </sqlCheck>
+        </preConditions>
+        <comment>Create Order Templates privilege - View OrderTemplates</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="View OrderTemplates"/>
+            <column name="description" value="Able to view order templates"/>
+            <column name="uuid" value="7f053681-94b2-4ee1-aed5-612a7461577c"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="ordertemplates-create-manage-order-templates-privilege" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from privilege where privilege = 'Manage OrderTemplates'
+            </sqlCheck>
+        </preConditions>
+        <comment>Create Order Templates privilege - Manage OrderTemplates</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Manage OrderTemplates"/>
+            <column name="description" value="Able to manage order templates"/>
+            <column name="uuid" value="48935903-4b31-4501-bf6f-fdd97e5d9ebd"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
