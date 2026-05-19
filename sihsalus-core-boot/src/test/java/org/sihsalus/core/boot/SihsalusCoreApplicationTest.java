@@ -7,11 +7,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -19,6 +21,9 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -140,6 +145,7 @@ import org.openmrs.module.imaging.api.OrthancConfigurationService;
 import org.openmrs.module.imaging.api.RequestProcedureService;
 import org.openmrs.module.imaging.api.RequestProcedureStepService;
 import org.openmrs.module.imaging.api.client.OrthancHttpClient;
+import org.openmrs.module.initializer.api.InitializerService;
 import org.openmrs.module.sihsalusinterop.api.DyakuSenderService;
 import org.openmrs.module.sihsalusinterop.api.advice.EncounterSavedAdvice;
 import org.openmrs.module.sihsalusinterop.api.model.InteropQueueItem;
@@ -221,6 +227,7 @@ import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.PrivilegeConstants;
 import org.sihsalus.core.api.StaticModuleTaskRunner;
+import org.sihsalus.initializer.InitializerBoundary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.aop.framework.Advised;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -244,6 +251,11 @@ class SihsalusCoreApplicationTest {
     private static final String TEST_IDENTIFIER = "SIH-REST-FHIR-001";
 
     private static final String TEST_IDENTIFIER_TYPE_UUID = "f7c1c7d2-cf2d-45fd-9660-e81975cf50da";
+
+    private static final String TEST_REQUIRED_IDENTIFIER =
+            new LuhnMod30IdentifierValidator().getValidIdentifier("HC000001");
+
+    private static final String REQUIRED_IDENTIFIER_TYPE_UUID = "05a29f94-c0ed-11e2-94be-8c13b969e334";
 
     private static final String ADMIN_BASIC_AUTH = basicAuth("admin", "test");
 
@@ -285,6 +297,101 @@ class SihsalusCoreApplicationTest {
         mockMvc.perform(get("/api/system/info"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
+    }
+
+    @Test
+    void sihsalusContentPackageIsLoadedIntoStaticBootDatabase() {
+        assumeTrue(
+                sihsalusContentConfigurationAvailable(),
+                "reference-sources/sihsalus-content is a local reference clone and is not present in this checkout");
+
+        assertSihsalusContentPackageLoaded();
+
+        assertDoesNotThrow(() -> applicationContext.getBean(InitializerService.class).loadUnsafe(true, true));
+
+        assertSihsalusContentPackageLoaded();
+    }
+
+    private void assertSihsalusContentPackageLoaded() {
+        assertEquals(
+                1,
+                countRows("select count(*) from location where uuid = ?", "35d2234e-129a-4c40-abb2-1ae0b72c1602"));
+        assertEquals(1, countRows("select count(*) from role where role = ?", "Organizational: Doctor"));
+        assertEquals(1, countRows("select count(*) from privilege where privilege = ?", "O3 Implementer Tools"));
+        assertEquals(
+                "SIH SALUS",
+                jdbcTemplate.queryForObject(
+                        "select property_value from global_property where property = ?",
+                        String.class,
+                        "application.name"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from patient_identifier_type where uuid = ?",
+                        "05a29f94-c0ed-11e2-94be-8c13b969e334"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from relationship_type where uuid = ?",
+                        "057de23f-3d9c-4314-9391-4452970739c6"));
+        assertEquals(
+                1,
+                countRows("select count(*) from visit_type where uuid = ?", "b1f0e8a1-9c5d-4f0e-8892-81f3140fbc09"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from encounter_type where uuid = ?",
+                        "186c1e78-a99f-4cd0-86de-b8c4ee27a2b5"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from encounter_role where uuid = ?",
+                        "240b26f9-dd88-4172-823d-4a8bfeb7841f"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from concept_class where uuid = ?",
+                        "b4535251-9183-4175-959e-9ee67dc71e78"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from concept_reference_source where uuid = ?",
+                        "1ADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"));
+        assertEquals(
+                1,
+                countRows("select count(*) from order_type where uuid = ?", "f9c5d0b8-8b5a-11e5-8e9b-12345678a01a"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from visit_attribute_type where uuid = ?",
+                        "3a988e33-a6c0-4b76-b924-01abb998944b"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from provider_attribute_type where uuid = ?",
+                        "0da4d3db-4385-40de-a4b0-fd8d89c4ec10"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from person_attribute_type where uuid = ?",
+                        "14d4f066-15f5-102d-96e4-000c29c2a5d7"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from cashier_billable_service where uuid = ?",
+                        "5689a516-f9e4-4a88-b068-2ac0d132953e"));
+    }
+
+    private boolean sihsalusContentConfigurationAvailable() {
+        Path sourceLayout = Paths.get(InitializerBoundary.sourceLayout());
+        Path current = Paths.get("").toAbsolutePath().normalize();
+        for (Path candidate = current; candidate != null; candidate = candidate.getParent()) {
+            Path configRoot = candidate.resolve(sourceLayout).resolve("configuration/backend_configuration").normalize();
+            if (Files.isDirectory(configRoot)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Test
@@ -1323,7 +1430,11 @@ class SihsalusCoreApplicationTest {
                     "FHIR_BUNDLE",
                     "{\"resourceType\":\"Bundle\",\"type\":\"transaction\"}",
                     "http://request-controlled.example/fhir");
-            assertEquals("http://hapi-fhir-server:8080/fhir", queuedItem.getTargetEndpoint());
+            String configuredEndpoint = jdbcTemplate.queryForObject(
+                    "select property_value from global_property where property = ?",
+                    String.class,
+                    "sihsalusinterop.renhice.endpoint");
+            assertEquals(configuredEndpoint, queuedItem.getTargetEndpoint());
         } finally {
             try {
                 if (queuedItem != null) {
@@ -1641,18 +1752,28 @@ class SihsalusCoreApplicationTest {
         try {
             restartOpenmrsIdentityColumnsForH2();
 
-            Patient existing = Context.getPatientService().getPatientByUuid(TEST_PATIENT_UUID);
-            if (existing != null) {
-                return existing.getUuid();
-            }
-
             User systemUser = new User(1);
             ensureTestIdentifierTypeExists();
             PatientIdentifierType identifierType =
                     Context.getPatientService().getPatientIdentifierTypeByUuid(TEST_IDENTIFIER_TYPE_UUID);
             assertNotNull(identifierType);
+            PatientIdentifierType requiredIdentifierType =
+                    Context.getPatientService().getPatientIdentifierTypeByUuid(REQUIRED_IDENTIFIER_TYPE_UUID);
 
             java.util.Date now = new java.util.Date();
+            Patient existing = Context.getPatientService().getPatientByUuid(TEST_PATIENT_UUID);
+            if (existing != null) {
+                boolean changed = addIdentifierIfMissing(existing, TEST_IDENTIFIER, identifierType, true, systemUser, now);
+                if (requiredIdentifierType != null) {
+                    changed |= addIdentifierIfMissing(
+                            existing, TEST_REQUIRED_IDENTIFIER, requiredIdentifierType, false, systemUser, now);
+                }
+                if (changed) {
+                    return Context.getPatientService().savePatient(existing).getUuid();
+                }
+                return existing.getUuid();
+            }
+
             Patient patient = new Patient();
             patient.setUuid(TEST_PATIENT_UUID);
             patient.setGender("M");
@@ -1668,11 +1789,10 @@ class SihsalusCoreApplicationTest {
             name.setDateCreated(now);
             patient.addName(name);
 
-            PatientIdentifier identifier = new PatientIdentifier(TEST_IDENTIFIER, identifierType, null);
-            identifier.setPreferred(true);
-            identifier.setCreator(systemUser);
-            identifier.setDateCreated(now);
-            patient.addIdentifier(identifier);
+            addIdentifierIfMissing(patient, TEST_IDENTIFIER, identifierType, true, systemUser, now);
+            if (requiredIdentifierType != null) {
+                addIdentifierIfMissing(patient, TEST_REQUIRED_IDENTIFIER, requiredIdentifierType, false, systemUser, now);
+            }
 
             return Context.getPatientService().savePatient(patient).getUuid();
         } finally {
@@ -1687,6 +1807,29 @@ class SihsalusCoreApplicationTest {
                 Context.closeSession();
             }
         }
+    }
+
+    private boolean addIdentifierIfMissing(
+            Patient patient,
+            String identifierValue,
+            PatientIdentifierType identifierType,
+            boolean preferred,
+            User creator,
+            java.util.Date now) {
+        boolean hasIdentifier = patient.getActiveIdentifiers().stream()
+                .anyMatch(identifier -> identifierValue.equals(identifier.getIdentifier())
+                        && identifier.getIdentifierType() != null
+                        && identifierType.getUuid().equals(identifier.getIdentifierType().getUuid()));
+        if (hasIdentifier) {
+            return false;
+        }
+
+        PatientIdentifier identifier = new PatientIdentifier(identifierValue, identifierType, null);
+        identifier.setPreferred(preferred);
+        identifier.setCreator(creator);
+        identifier.setDateCreated(now);
+        patient.addIdentifier(identifier);
+        return true;
     }
 
     private void restartOpenmrsIdentityColumnsForH2() {
@@ -1736,6 +1879,11 @@ class SihsalusCoreApplicationTest {
                 () -> supportedClass.getSimpleName() + " Validators: " + validators.stream()
                         .map(validator -> validator.getClass().getName())
                         .toList());
+    }
+
+    private int countRows(String sql, Object... args) {
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, args);
+        return count == null ? 0 : count;
     }
 
     private void restartIdentityAfterSeedData(String tableName, String columnName) {
