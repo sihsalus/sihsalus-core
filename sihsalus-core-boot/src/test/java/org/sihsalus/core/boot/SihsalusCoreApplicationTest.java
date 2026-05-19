@@ -21,6 +21,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
+import org.openmrs.Cohort;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
@@ -29,6 +30,7 @@ import org.openmrs.User;
 import org.openmrs.UserSessionListener;
 import org.openmrs.Encounter;
 import org.openmrs.Visit;
+import org.openmrs.api.APIException;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
@@ -89,9 +91,17 @@ import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.validator.BillDiscountValidator;
 import org.openmrs.module.billing.validator.BillRefundValidator;
 import org.openmrs.module.billing.validator.BillValidator;
+import org.openmrs.module.cohort.CohortAttributeType;
+import org.openmrs.module.cohort.CohortM;
+import org.openmrs.module.cohort.CohortType;
 import org.openmrs.module.cohort.api.CohortMemberService;
 import org.openmrs.module.cohort.api.CohortService;
 import org.openmrs.module.cohort.api.CohortTypeService;
+import org.openmrs.module.cohort.definition.CohortDefinitionHandler;
+import org.openmrs.module.cohort.definition.handler.DefaultCohortDefinitionHandler;
+import org.openmrs.module.cohort.validators.CohortAttributeTypeValidator;
+import org.openmrs.module.cohort.validators.CohortMValidator;
+import org.openmrs.module.cohort.validators.CohortTypeValidator;
 import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.concept.EmrConceptService;
 import org.openmrs.module.emrapi.patient.EmrPatientService;
@@ -538,7 +548,7 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
-    void cohortIsWiredAsStaticInternalModule() {
+    void cohortIsWiredAsStaticInternalModule() throws Exception {
         assertNotNull(Context.getService(CohortService.class));
         assertNotNull(Context.getService(CohortMemberService.class));
         assertNotNull(Context.getService(CohortTypeService.class));
@@ -546,9 +556,41 @@ class SihsalusCoreApplicationTest {
         assertNotNull(restService.getResourceByName("v1/cohortm/cohort"));
         assertNotNull(restService.getResourceByName("v1/cohortm/cohortmember"));
         assertNotNull(restService.getResourceByName("v1/cohortm/cohorttype"));
+        assertNotNull(restService.getResourceByName("v1/cohortm/cohortattributetype"));
+        assertNotNull(restService.getResourceByName("v1/cohortm/cohort-member-attribute-type"));
+        assertOpenmrsValidatorRegistered(CohortM.class, CohortMValidator.class);
+        assertOpenmrsValidatorRegistered(Cohort.class, CohortMValidator.class);
+        assertOpenmrsValidatorRegistered(CohortType.class, CohortTypeValidator.class);
+        assertOpenmrsValidatorRegistered(CohortAttributeType.class, CohortAttributeTypeValidator.class);
+        assertTrue(Context.getRegisteredComponents(CohortDefinitionHandler.class).stream()
+                .anyMatch(DefaultCohortDefinitionHandler.class::isInstance));
+        assertTrue(new CohortM().getDefinitionHandler() instanceof DefaultCohortDefinitionHandler);
+        CohortM cohortWithInvalidHandler = new CohortM();
+        cohortWithInvalidHandler.setDefinitionHandlerClassname(String.class.getName());
+        assertThrows(APIException.class, cohortWithInvalidHandler::getDefinitionHandler);
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_type", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_attribute_type", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from cohort_member_attribute_type", Integer.class));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class, () -> Context.getService(CohortService.class).findAll());
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(CohortMemberService.class).findAllCohortMembers());
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(CohortTypeService.class).findAllCohortTypes());
+            mockMvc.perform(get("/rest/v1/cohortm/cohort/not-a-real-cohort"))
+                    .andExpect(status().isUnauthorized());
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test

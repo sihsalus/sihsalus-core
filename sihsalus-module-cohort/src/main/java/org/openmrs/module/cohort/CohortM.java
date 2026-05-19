@@ -237,7 +237,6 @@ public class CohortM extends BaseCustomizableData<CohortAttribute> implements Au
 	 * @return CohortDefinitionHandler
 	 * @throws org.openmrs.api.APIException If fails to load cohortDefinitionHandlerClass
 	 */
-	@SuppressWarnings("unchecked")
 	public CohortDefinitionHandler getDefinitionHandler() {
 		String definitionHandlerClassname = getDefinitionHandlerClassname();
 		if (StringUtils.isBlank(definitionHandlerClassname)) {
@@ -260,10 +259,18 @@ public class CohortM extends BaseCustomizableData<CohortAttribute> implements Au
 			        new Object[] { getDefinitionHandlerClassname() });
 		}
 		
+		if (!CohortDefinitionHandler.class.isAssignableFrom(definitionHandlerClass)) {
+			log.error("Class {} is not a CohortDefinitionHandler", getDefinitionHandlerClassname());
+			throw new APIException("CohortM.failed.load.definitionHandlerClass",
+			        new Object[] { getDefinitionHandlerClassname() });
+		}
+
+		Class<? extends CohortDefinitionHandler> handlerClass = definitionHandlerClass.asSubclass(
+		    CohortDefinitionHandler.class);
 		List<? extends CohortDefinitionHandler> handlers;
 		
 		try {
-			handlers = (List<? extends CohortDefinitionHandler>) Context.getRegisteredComponents(definitionHandlerClass);
+			handlers = Context.getRegisteredComponents(handlerClass);
 		}
 		catch (NullPointerException e) {
 			handlers = Collections.emptyList();
@@ -280,7 +287,7 @@ public class CohortM extends BaseCustomizableData<CohortAttribute> implements Au
 		}
 		
 		try {
-			return (CohortDefinitionHandler) definitionHandlerClass.getDeclaredConstructor().newInstance();
+			return handlerClass.getDeclaredConstructor().newInstance();
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			throw new APIException("CohortM.failed.load.definitionHandlerClass",
