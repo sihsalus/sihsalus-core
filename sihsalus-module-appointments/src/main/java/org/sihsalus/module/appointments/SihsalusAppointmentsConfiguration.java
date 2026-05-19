@@ -54,6 +54,7 @@ import org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusCh
 import org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator;
 import org.openmrs.module.appointments.validator.impl.DefaultEditAppointmentValidator;
 import org.sihsalus.core.api.HibernateMappingContributor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -202,7 +203,8 @@ public class SihsalusAppointmentsConfiguration {
             AppointmentDao appointmentDao,
             AppointmentAuditDao appointmentAuditDao,
             AppointmentServiceHelper appointmentServiceHelper,
-            List<AppointmentValidator> appointmentValidators,
+            @Qualifier("defaultAppointmentValidator") AppointmentValidator defaultAppointmentValidator,
+            @Qualifier("defaultEditAppointmentValidator") AppointmentValidator defaultEditAppointmentValidator,
             List<AppointmentStatusChangeValidator> statusChangeValidators,
             List<AppointmentConflict> appointmentConflicts,
             TeleconsultationAppointmentService teleconsultationAppointmentService,
@@ -212,8 +214,8 @@ public class SihsalusAppointmentsConfiguration {
         service.setAppointmentDao(appointmentDao);
         service.setAppointmentAuditDao(appointmentAuditDao);
         service.setAppointmentServiceHelper(appointmentServiceHelper);
-        service.setAppointmentValidators(appointmentValidators);
-        service.setEditAppointmentValidators(appointmentValidators);
+        service.setAppointmentValidators(List.of(defaultAppointmentValidator));
+        service.setEditAppointmentValidators(List.of(defaultEditAppointmentValidator));
         service.setStatusChangeValidators(statusChangeValidators);
         service.setAppointmentConflicts(appointmentConflicts);
         service.setTeleconsultationAppointmentService(teleconsultationAppointmentService);
@@ -251,15 +253,16 @@ public class SihsalusAppointmentsConfiguration {
             AppointmentRecurringPatternDao appointmentRecurringPatternDao,
             AppointmentDao appointmentDao,
             AppointmentServiceHelper appointmentServiceHelper,
-            List<AppointmentValidator> appointmentValidators,
+            @Qualifier("defaultAppointmentValidator") AppointmentValidator defaultAppointmentValidator,
+            @Qualifier("defaultEditAppointmentValidator") AppointmentValidator defaultEditAppointmentValidator,
             List<AppointmentStatusChangeValidator> statusChangeValidators,
             AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
         AppointmentRecurringPatternServiceImpl service = new AppointmentRecurringPatternServiceImpl();
         service.setAppointmentRecurringPatternDao(appointmentRecurringPatternDao);
         service.setAppointmentDao(appointmentDao);
         service.setAppointmentServiceHelper(appointmentServiceHelper);
-        service.setAppointmentValidators(appointmentValidators);
-        service.setEditAppointmentValidators(appointmentValidators);
+        service.setAppointmentValidators(List.of(defaultAppointmentValidator));
+        service.setEditAppointmentValidators(List.of(defaultEditAppointmentValidator));
         service.setStatusChangeValidators(statusChangeValidators);
         service.setAppointmentNumberGeneratorLocator(appointmentNumberGeneratorLocator);
         return service;

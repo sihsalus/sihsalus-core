@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.nio.charset.StandardCharsets;
@@ -58,7 +59,11 @@ import org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeSe
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.SpecialityService;
+import org.openmrs.module.appointments.service.impl.AppointmentRecurringPatternServiceImpl;
+import org.openmrs.module.appointments.service.impl.AppointmentsServiceImpl;
 import org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService;
+import org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator;
+import org.openmrs.module.appointments.validator.impl.DefaultEditAppointmentValidator;
 import org.openmrs.module.Extension;
 import org.openmrs.module.ModuleFactory;
 import org.openmrs.module.bedmanagement.BedLayout;
@@ -688,7 +693,7 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
-    void appointmentsIsWiredAsStaticInternalModule() {
+    void appointmentsIsWiredAsStaticInternalModule() throws Exception {
         AppointmentsService appointmentsService = Context.getService(AppointmentsService.class);
         AppointmentRecurringPatternService recurringPatternService =
                 Context.getService(AppointmentRecurringPatternService.class);
@@ -701,6 +706,22 @@ class SihsalusCoreApplicationTest {
 
         assertAdviceRegistered(appointmentsService, AppointmentEventsAdvice.class);
         assertAdviceRegistered(recurringPatternService, RecurringAppointmentEventsAdvice.class);
+        assertValidatorList(
+                getAdvisedTarget(appointmentsService, AppointmentsServiceImpl.class),
+                "appointmentValidators",
+                DefaultAppointmentValidator.class);
+        assertValidatorList(
+                getAdvisedTarget(appointmentsService, AppointmentsServiceImpl.class),
+                "editAppointmentValidators",
+                DefaultEditAppointmentValidator.class);
+        assertValidatorList(
+                getAdvisedTarget(recurringPatternService, AppointmentRecurringPatternServiceImpl.class),
+                "appointmentValidators",
+                DefaultAppointmentValidator.class);
+        assertValidatorList(
+                getAdvisedTarget(recurringPatternService, AppointmentRecurringPatternServiceImpl.class),
+                "editAppointmentValidators",
+                DefaultEditAppointmentValidator.class);
         assertNotNull(Context.getRegisteredComponent("appointmentEventPublisher", AppointmentEventPublisher.class));
         assertNotNull(Context.getRegisteredComponent("AppointmentsAsyncThreadExecutor", Executor.class));
         assertNotNull(Context.getRegisteredComponents(AppointmentSMSEventListener.class).stream()
@@ -1413,5 +1434,20 @@ class SihsalusCoreApplicationTest {
         assertTrue(service instanceof Advised);
         assertTrue(Arrays.stream(((Advised) service).getAdvisors())
                 .anyMatch(advisor -> adviceClass.isInstance(advisor.getAdvice())));
+    }
+
+    private <T> T getAdvisedTarget(Object service, Class<T> targetClass) throws Exception {
+        assertTrue(service instanceof Advised);
+        Object target = ((Advised) service).getTargetSource().getTarget();
+        assertTrue(targetClass.isInstance(target));
+        return targetClass.cast(target);
+    }
+
+    private void assertValidatorList(Object target, String fieldName, Class<?> validatorClass) throws Exception {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        List<?> validators = (List<?>) field.get(target);
+        assertEquals(1, validators.size());
+        assertTrue(validatorClass.isInstance(validators.get(0)));
     }
 }
