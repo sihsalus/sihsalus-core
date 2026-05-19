@@ -28,10 +28,12 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
+
 @Resource(
         name = RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE + "/importaction",
         supportedClass = ImportAction.class,
-        supportedOpenmrsVersions = { "1.8.* - 2.*" }
+        supportedOpenmrsVersions = { "1.8.* - 9.*" }
 )
 public class ImportActionResource extends DelegatingCrudResource<ImportAction> {
     @Override
@@ -51,6 +53,7 @@ public class ImportActionResource extends DelegatingCrudResource<ImportAction> {
 
     @Override
     public ImportAction save(ImportAction importAction) {
+        requireManageConcepts();
         Import anImport = importAction.getAnImport();
         ImportService importService = getImportService();
         if (importAction.isIgnoreAllErrors()) {

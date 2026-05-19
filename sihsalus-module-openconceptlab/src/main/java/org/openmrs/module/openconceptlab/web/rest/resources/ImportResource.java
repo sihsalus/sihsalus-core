@@ -5,6 +5,13 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.DateProperty;
 import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.StringProperty;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openconceptlab.Import;
@@ -32,21 +39,14 @@ import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-import org.openmrs.util.PrivilegeConstants;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
 
 @Resource(
         name = RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE + "/import",
         supportedClass = Import.class,
-        supportedOpenmrsVersions = { "1.8.* - 2.*" }
+        supportedOpenmrsVersions = { "1.8.* - 9.*" }
 )
 public class ImportResource extends DelegatingCrudResource<Import> implements Uploadable {
     private static final String GP_MAX_IMPORT_UPLOAD_BYTES = "openconceptlab.import.maxUploadBytes";
@@ -59,6 +59,7 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
 
     @Override
     public Import getByUniqueId(String uniqueId) {
+        requireManageConcepts();
         return getImportService().getImport(uniqueId);
     }
 
@@ -74,6 +75,7 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
 
     @Override
     public Import save(Import delegate) {
+        requireManageConcepts();
         if (delegate != null) {
             UpdateScheduler updateScheduler = getUpdateScheduler();
             updateScheduler.scheduleNow();
@@ -177,6 +179,7 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
 
     @Override
     protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+        requireManageConcepts();
         return new NeedsPaging<Import>(getImportService().getImportsInOrder(0, 20), context);
     }
 
@@ -273,7 +276,7 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
 
     @Override
     public Object upload(MultipartFile multipartFile, RequestContext requestContext) throws ResponseException, IOException {
-        Context.requirePrivilege(PrivilegeConstants.MANAGE_CONCEPTS);
+        requireManageConcepts();
 
         if (multipartFile.isEmpty()) {
             throw new IllegalRequestException("File uploaded cannot be empty");

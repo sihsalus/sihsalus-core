@@ -1318,4 +1318,94 @@
             ALTER TABLE cashier_item_price ADD COLUMN IF NOT EXISTS retire_reason VARCHAR(255);
         </sql>
     </changeSet>
+
+    <changeSet id="sihsalus-billing-create-static-privileges-20260519" author="sihsalus">
+        <comment>Create billing privileges normally loaded from config.xml by the OMOD runtime.</comment>
+        <sql splitStatements="true">
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'View Cashier Bills', 'Able to view bills', 'f3d303b0-800f-4904-a986-c5a1eae22ead'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'View Cashier Bills');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Manage Cashier Bills', 'Able to add/edit/delete bills', '9452992b-298d-4b90-ad11-558a17f086f1'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Manage Cashier Bills');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Adjust Cashier Bills', 'Able to adjust bills', '449472f9-8fe4-4f24-b1f9-b6583aa934dc'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Adjust Cashier Bills');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Delete Cashier Bills', 'Able to delete bills', '5d0117fc-db2a-43e6-9073-d64e6ccfb939'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Delete Cashier Bills');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Refund Money', 'Able to create/adjust a bill so that it refunds money.', '7ead987d-b19c-49d0-8127-80cdf2d24223'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Refund Money');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Reprint Receipt', 'Able to print bill receipts more than once.', 'fde25009-5448-4c9a-9ed5-b939bf41ac5e'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Reprint Receipt');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Purge Cashier Bills', 'Able to purge bills', '26efc17d-1b72-41b8-b460-d2767ea31886'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Purge Cashier Bills');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Manage Bill Discounts', 'Able to apply and manage discounts on bills', '478a9ef3-d80a-4825-b1f7-09c300bc0e5f'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Manage Bill Discounts');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Approve Bill Discounts', 'Able to approve or reject pending bill discounts', '46f63847-07c3-4f96-817d-aff2aa751acc'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Approve Bill Discounts');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'View Bill Discounts', 'Able to view bill discounts', 'ea5601dd-4363-4c80-a19b-c3e05e4a6c20'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'View Bill Discounts');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Request Bill Refunds', 'Able to raise a refund request against a paid bill', '59094be4-1963-4bf1-b8d4-0b512ca7e211'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Request Bill Refunds');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Approve Bill Refunds', 'Able to approve or reject pending bill refund requests', '3ed629ed-5447-4bb3-952f-0d5597590141'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Approve Bill Refunds');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Complete Bill Refunds', 'Able to record completion of an approved refund (cash or electronic disbursement)', 'bc14237f-e5a5-4820-afb2-f29f2c8fd13c'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Complete Bill Refunds');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'View Bill Refunds', 'Able to view bill refunds', '17a339f2-43bc-4ed5-9064-31996927b491'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'View Bill Refunds');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'View Cashier Metadata', 'Able to view cashier module metadata', '709ebbc9-7e88-4644-b0fc-faa124f7aed0'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'View Cashier Metadata');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Manage Cashier Metadata', 'Able to add/edit/delete cashier module metadata', '8dbe2c4a-65d6-41e7-966a-33f9c01f1f49'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Manage Cashier Metadata');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Purge Cashier Metadata', 'Able to purge cashier module metadata', 'b8f419ff-0e44-4a44-9319-8f86457e7d7a'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Purge Cashier Metadata');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'View Cashier Timesheets', 'Able to view timesheets', '49c3dbde-c9a0-4f93-a975-0a8178e8e36f'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'View Cashier Timesheets');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Manage Cashier Timesheets', 'Able to add/edit/delete timesheets', '9b17ca82-8cc1-4b67-8704-a4c4d75d0588'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Manage Cashier Timesheets');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Purge Cashier Timesheets', 'Able to purge timesheets', '80f56c6b-f608-4de6-9226-c201c5056e3a'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Purge Cashier Timesheets');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'App: View Cashier App', 'Able to see the Cashier App Icon on the home page', '64444c81-bc24-4fa1-85fd-ba4b3d327ea7'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: View Cashier App');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'App: Access Cashier Tasks', 'Able to access cashier tasks page', 'd9e1dbab-2a33-43b0-ba78-8b7a88e53c5a'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: Access Cashier Tasks');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Task: Create new bill', 'Able to access bill page', '2cb66289-7853-4b95-a1c5-573f574a15e6'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: Create new bill');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Task: Adjust Cashier Bills', 'Able to adjust cashier bills', '63880ff6-f397-4f51-b3b7-facfb211cc13'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: Adjust Cashier Bills');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Task: Cashier Timesheets', 'Able to access timesheets page', '85770455-3657-4b59-b734-853694b39bcd'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: Cashier Timesheets');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Task: Manage Cashier Module', 'Able to access the management page', '19659fa5-7584-453b-8b70-f552293ad98a'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: Manage Cashier Module');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Task: Manage Cashier Metadata', 'Able to add/edit/delete cashier module metadata', 'be89f642-7633-4073-a590-1ee409d8cc74'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: Manage Cashier Metadata');
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Task: View Cashier Reports', 'Able to view the cashier reports', '0a585308-013a-4478-8b23-b59171230f58'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: View Cashier Reports');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

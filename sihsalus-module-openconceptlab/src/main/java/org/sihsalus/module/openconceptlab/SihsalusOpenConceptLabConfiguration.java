@@ -24,7 +24,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @ComponentScan(basePackageClasses = {OpenConceptLabRestController.class, ImportResource.class})
 public class SihsalusOpenConceptLabConfiguration {
 
-    @Bean
+    @Bean(name = "openconceptlab.importService")
     ImportService openConceptLabImportService(
             DbSessionFactory dbSessionFactory,
             AdministrationService administrationService,
@@ -38,19 +38,19 @@ public class SihsalusOpenConceptLabConfiguration {
         return service;
     }
 
-    @Bean
+    @Bean(name = "openconceptlab.conceptService")
     OclConceptService openConceptLabConceptService(DbSessionFactory dbSessionFactory) {
         OclConceptServiceImpl service = new OclConceptServiceImpl();
         service.setDbSessionFactory(dbSessionFactory);
         return service;
     }
 
-    @Bean
+    @Bean(name = "openconceptlab.oclClient")
     OclClient openConceptLabOclClient() {
         return new OclClient();
     }
 
-    @Bean
+    @Bean(name = "openconceptlab.saver")
     Saver openConceptLabSaver(ConceptService conceptService, ImportService openConceptLabImportService) {
         Saver saver = new Saver();
         saver.setConceptService(conceptService);
@@ -58,7 +58,7 @@ public class SihsalusOpenConceptLabConfiguration {
         return saver;
     }
 
-    @Bean(destroyMethod = "shutdown", autowireCandidate = false)
+    @Bean(name = "openconceptlab.scheduler", destroyMethod = "shutdown", autowireCandidate = false)
     ThreadPoolTaskScheduler openConceptLabTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(1);
@@ -66,7 +66,7 @@ public class SihsalusOpenConceptLabConfiguration {
         return scheduler;
     }
 
-    @Bean
+    @Bean(name = "openconceptlab.importer")
     Importer openConceptLabImporter(
             ImportService openConceptLabImportService,
             ConceptService conceptService,
@@ -82,7 +82,7 @@ public class SihsalusOpenConceptLabConfiguration {
         return importer;
     }
 
-    @Bean
+    @Bean(name = "openconceptlab.updateScheduler")
     UpdateScheduler openConceptLabUpdateScheduler(
             Importer openConceptLabImporter,
             ImportService openConceptLabImportService) {

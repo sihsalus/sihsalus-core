@@ -910,4 +910,80 @@
             <column name="appointment_number"/>
         </createIndex>
     </changeSet>
+    <changeSet id="appointments-static-config-metadata-20260519" author="SIHSalus">
+        <comment>Restore config.xml metadata required when appointments runs as a static internal module.</comment>
+        <sql>
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'app:appointments:manageServiceAvailability', 'Able to Edit Appointment Service Availability in Appointments module', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'app:appointments:manageServiceAvailability');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'app:appointments:manageServices', 'Able to Manage Appointment Services in Appointments module', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'app:appointments:manageServices');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'disableDefaultAppointmentValidations', 'false', 'Disable default appointment validations', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'disableDefaultAppointmentValidations');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'SchedulerMarksComplete', 'false', 'Scheduler marks checked in appointments as complete when it turned on', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'SchedulerMarksComplete');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'SchedulerMarksMissed', 'false', 'Scheduler marks scheduled appointments as missed when it is turned on', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'SchedulerMarksMissed');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'SchedulerReminderBeforeHours', '24', 'How many hours before the appointment should the reminder SMS be sent', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'SchedulerReminderBeforeHours');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'bahmni.appointment.teleConsultation.patientEmailNotificationSubject', 'Teleconsultation appointment confirmed', 'Subject that will be used in the mail sent to patients for Teleconsultation', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.appointment.teleConsultation.patientEmailNotificationSubject');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'bahmni.appointment.teleConsultation.patientEmailNotificationTemplate', 'Hi {0}, Your tele-consultation appointment with {1} for {2} has been scheduled! Please use this link {3}. If you have any questions, please reach out to administration for assistance. See you soon!', 'Template to use while sending mail. Format is define like in Java MessageFormat', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.appointment.teleConsultation.patientEmailNotificationTemplate');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'bahmni.appointment.teleConsultation.serverUrlPattern', 'https://meet.jit.si/{0}', 'Pattern of the URL for the meeting server. Notice the placeholder {0} for appointment UUID', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.appointment.teleConsultation.serverUrlPattern');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'bahmni.appointment.teleConsultation.sendEmail', 'false', 'Whether email should be sent for tele-consultation', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.appointment.teleConsultation.sendEmail');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'bahmni.appointment.adhocTeleConsultation.patientEmailNotificationSubject', 'Teleconsultation started', 'Subject that will be used in the mail sent to patients for AdhocTeleconsultation', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.appointment.adhocTeleConsultation.patientEmailNotificationSubject');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'bahmni.appointment.adhocTeleConsultation.patientEmailNotificationTemplate', 'Hi {0}, {1} has started a tele-consultation with you! Please use this link {2}. If you have any questions, please reach out to administration for assistance. See you soon!', 'Template to use while sending mail for AdhocTeleconsultation. Format is define like in Java MessageFormat', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.appointment.adhocTeleConsultation.patientEmailNotificationTemplate');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'bahmni.appointment.adhocTeleConsultation.bccEmails', '', 'BCC Emails for AdhocTeleconsultation', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.appointment.adhocTeleConsultation.bccEmails');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'bahmni.adhoc.teleConsultation.id', 'Patient Identifier', 'Identifier type of patient to generate AdhocTeleconsultation link eg: ''Patient Identifier'' or ''National ID'' etc', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.adhoc.teleConsultation.id');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'sms.enableAppointmentBookingSMSAlert', 'false', 'Whether SMS should be sent for appointment booking', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sms.enableAppointmentBookingSMSAlert');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'sms.enableAppointmentReminderSMSAlert', 'false', 'Whether SMS should be sent for appointment reminders', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sms.enableAppointmentReminderSMSAlert');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'sms.timezone', 'IST', 'Timezone used for appointment SMS messages', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sms.timezone');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'sms.dateformat', 'dd-MM-yyyy'' Time ''HH:mm', 'Date format used for appointment SMS messages', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sms.dateformat');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -15,6 +15,7 @@ import org.openmrs.module.reporting.report.ReportDesign;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 import org.openmrs.module.reporting.report.service.ReportService;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.reportingrest.web.controller.ReportingRestController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -45,11 +46,13 @@ public class ReportDesignResource extends DelegatingCrudResource<ReportDesign> {
 
   @Override
   public ReportDesign getByUniqueId(String uuid) {
+    ReportingRestPrivileges.requireViewReportObjects();
     return getReportService().getReportDesignByUuid(uuid);
   }
 
   @Override
   protected PageableResult doSearch(RequestContext context) {
+    ReportingRestPrivileges.requireViewReportObjects();
     String reportDefinitionUuid = context.getParameter("reportDefinitionUuid");
     if (StringUtils.isBlank(reportDefinitionUuid)) {
       throw new IllegalArgumentException("reportDefinitionUuid parameter is required");
@@ -71,11 +74,17 @@ public class ReportDesignResource extends DelegatingCrudResource<ReportDesign> {
 
   @Override
   public ReportDesign save(ReportDesign reportDesign) {
+    if (reportDesign.getId() == null) {
+      ReportingRestPrivileges.requireAddReportObjects();
+    } else {
+      ReportingRestPrivileges.requireEditReportObjects();
+    }
     return getReportService().saveReportDesign(reportDesign);
   }
 
   @Override
   public void purge(ReportDesign reportDesign, RequestContext requestContext) throws ResponseException {
+      ReportingRestPrivileges.requireDeleteReportObjects();
       getReportService().purgeReportDesign(reportDesign);
   }
 

@@ -35,6 +35,9 @@ import org.openmrs.module.openconceptlab.client.OclClient.OclResponse;
 import org.openmrs.module.openconceptlab.client.OclConcept;
 import org.openmrs.module.openconceptlab.client.OclMapping;
 import org.openmrs.module.openconceptlab.scheduler.UpdateScheduler;
+import org.openmrs.module.DaemonToken;
+import org.openmrs.module.ModuleFactory;
+import org.openmrs.util.PrivilegeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +58,23 @@ public class Importer implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(Importer.class);
 
 	public final static int BATCH_SIZE = 256;
+
+	private static final String[] STATIC_IMPORT_PRIVILEGES = {
+		PrivilegeConstants.GET_CONCEPTS,
+		PrivilegeConstants.GET_CONCEPT_CLASSES,
+		PrivilegeConstants.GET_CONCEPT_DATATYPES,
+		PrivilegeConstants.GET_CONCEPT_SOURCES,
+		PrivilegeConstants.GET_CONCEPT_MAP_TYPES,
+		PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS,
+		PrivilegeConstants.GET_GLOBAL_PROPERTIES,
+		PrivilegeConstants.MANAGE_CONCEPTS,
+		PrivilegeConstants.MANAGE_CONCEPT_CLASSES,
+		PrivilegeConstants.MANAGE_CONCEPT_DATATYPES,
+		PrivilegeConstants.MANAGE_CONCEPT_SOURCES,
+		PrivilegeConstants.MANAGE_CONCEPT_MAP_TYPES,
+		PrivilegeConstants.MANAGE_CONCEPT_REFERENCE_TERMS,
+		PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES
+	};
 
 	private ImportService importService;
 
@@ -117,12 +137,12 @@ public class Importer implements Runnable {
 		if (zipFile != null) {
 			run(zipFile);
 		} else {
-			Daemon.runInDaemonThreadAndWait(new Runnable() {
+			runWithOpenmrsDaemonContext(new Runnable() {
 				@Override
 				public void run() {
 					runTask();
 				}
-			}, OpenConceptLabActivator.getDaemonToken());
+			});
 		}
 	}
 
@@ -174,7 +194,7 @@ public class Importer implements Runnable {
 	 * This run is used to update sources from zip file
 	 */
 	public void run(final ZipFile zipPackage) {
-		Daemon.runInDaemonThreadAndWait(() -> runAndHandleErrors(() -> {
+		runWithOpenmrsDaemonContext(() -> runAndHandleErrors(() -> {
             InputStream zipInputStream = Utils.extractExportInputStreamFromZip(zipPackage);
             try {
                 in = new CountingInputStream(zipInputStream);
@@ -185,7 +205,33 @@ public class Importer implements Runnable {
             } finally {
                 in.close();
             }
-        }), OpenConceptLabActivator.getDaemonToken());
+        }));
+	}
+
+	private void runWithOpenmrsDaemonContext(Runnable task) {
+		DaemonToken daemonToken = OpenConceptLabActivator.getDaemonToken();
+		if (ModuleFactory.isTokenValid(daemonToken)) {
+			Daemon.runInDaemonThreadAndWait(task, daemonToken);
+			return;
+		}
+		runWithStaticModulePrivileges(task);
+	}
+
+	private void runWithStaticModulePrivileges(Runnable task) {
+		boolean openedSession = !Context.isSessionOpen();
+		if (openedSession) {
+			Context.openSession();
+		}
+
+		Context.addProxyPrivilege(STATIC_IMPORT_PRIVILEGES);
+		try {
+			task.run();
+		} finally {
+			Context.removeProxyPrivilege(STATIC_IMPORT_PRIVILEGES);
+			if (openedSession) {
+				Context.closeSession();
+			}
+		}
 	}
 
 	private void runAndHandleErrors(Task task) {

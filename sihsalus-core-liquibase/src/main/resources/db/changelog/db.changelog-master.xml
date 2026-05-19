@@ -31,4 +31,5 @@
     <include file="org/openmrs/module/imaging/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/ordertemplates/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/patientflags/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/legacyui/liquibase.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

@@ -525,4 +525,64 @@
 		<dropNotNullConstraint columnName="style" columnDataType="VARCHAR(255)" tableName="patientflags_priority"/>
 	</changeSet>
 
+	<changeSet id="patientflags-create-manage-flags-privilege" author="sihsalus">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">select count(*) from privilege where privilege = 'Manage Flags'</sqlCheck>
+		</preConditions>
+		<comment>Create Patient Flags privilege - Manage Flags</comment>
+		<insert tableName="privilege">
+			<column name="privilege" value="Manage Flags"/>
+			<column name="description" value="Allows user add, edit, and remove flags"/>
+			<column name="uuid" value="f2cd5a05-7c1f-4390-803a-52d9a76d707c"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="patientflags-create-view-flags-privilege" author="sihsalus">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">select count(*) from privilege where privilege = 'View Flags'</sqlCheck>
+		</preConditions>
+		<comment>Create Patient Flags privilege - View Flags</comment>
+		<insert tableName="privilege">
+			<column name="privilege" value="View Flags"/>
+			<column name="description" value="Allows user to view flag definitions"/>
+			<column name="uuid" value="49687b77-c713-49b3-a3dd-a4138438ca9c"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="patientflags-create-manage-patient-flags-privilege" author="sihsalus">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">select count(*) from privilege where privilege = 'Manage Patient Flags'</sqlCheck>
+		</preConditions>
+		<comment>Create Patient Flags privilege - Manage Patient Flags</comment>
+		<insert tableName="privilege">
+			<column name="privilege" value="Manage Patient Flags"/>
+			<column name="description" value="Allows user to add, edit, remove, and rebuild patient flags"/>
+			<column name="uuid" value="637db999-3a16-41a1-9eb8-da154d14c9de"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="patientflags-create-view-patient-flags-privilege" author="sihsalus">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">select count(*) from privilege where privilege = 'View Patient Flags'</sqlCheck>
+		</preConditions>
+		<comment>Create Patient Flags privilege - View Patient Flags</comment>
+		<insert tableName="privilege">
+			<column name="privilege" value="View Patient Flags"/>
+			<column name="description" value="Allows user to view flags assigned to patients"/>
+			<column name="uuid" value="d5d90cad-22b9-4aae-bb2f-bef37d83e9d9"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="patientflags-create-test-flags-privilege" author="sihsalus">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">select count(*) from privilege where privilege = 'Test Flags'</sqlCheck>
+		</preConditions>
+		<comment>Create Patient Flags privilege - Test Flags</comment>
+		<insert tableName="privilege">
+			<column name="privilege" value="Test Flags"/>
+			<column name="description" value="Allows the user to test a flag, or set of flags, against a patient set"/>
+			<column name="uuid" value="74dfa6ca-4c0f-4be8-a6f9-5edf1c0d5fc2"/>
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

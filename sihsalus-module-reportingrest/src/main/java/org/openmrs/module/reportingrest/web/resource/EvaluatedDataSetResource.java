@@ -34,6 +34,7 @@ import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.indicator.IndicatorResult;
 import org.openmrs.module.reporting.query.IdSet;
 import org.openmrs.module.reporting.serializer.ReportingSerializer;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -66,6 +67,7 @@ public class EvaluatedDataSetResource extends EvaluatedResource<DataSet> {
 	@Override
 	public Object retrieve(String uuid, RequestContext requestContext)
 			throws ResponseException {
+		ReportingRestPrivileges.requireViewReports();
 
 		DataSetDefinitionService dataSetDefinitionService = DefinitionContext.getDataSetDefinitionService();
 		DataSetDefinition definition = getDefinitionByUniqueId(dataSetDefinitionService, DataSetDefinition.class, uuid);
@@ -95,6 +97,7 @@ public class EvaluatedDataSetResource extends EvaluatedResource<DataSet> {
 	 */
 	@Override
 	public Object update(String uniqueId, SimpleObject postBody, RequestContext requestContext) throws ResponseException {
+		ReportingRestPrivileges.requireViewReports();
 		DataSetDefinitionService dataSetDefinitionService = DefinitionContext.getDataSetDefinitionService();
 		DataSetDefinition definition = getDefinitionByUniqueId(dataSetDefinitionService, DataSetDefinition.class, uniqueId);
 		if (definition == null) {
@@ -143,6 +146,7 @@ public class EvaluatedDataSetResource extends EvaluatedResource<DataSet> {
 	 */
 	@Override
 	public Object create(SimpleObject postBody, RequestContext context) throws ResponseException {
+		ReportingRestPrivileges.requireViewReports();
 		Object serializedXml = postBody.get("serializedXml");
 		DataSetDefinition definition;
 		try {

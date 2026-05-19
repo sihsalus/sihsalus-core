@@ -3,6 +3,7 @@ package org.bahmni.module.teleconsultation.api.impl;
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.util.PrivilegeConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -20,11 +21,27 @@ public class TeleconsultationServiceImpl extends BaseOpenmrsService implements T
 		if (uuid == null || uuid.trim().isEmpty()) {
 			throw new IllegalArgumentException("Teleconsultation uuid is required");
 		}
-		String tcServerUrl = Context.getAdministrationService().getGlobalProperty(PROP_TC_SERVER);
+		String tcServerUrl = getTeleconsultationServerUrl();
 		if ((tcServerUrl == null) || "".equals(tcServerUrl)) {
 			tcServerUrl = DEFAULT_TC_SERVER_URL_PATTERN;
 		}
 		return new MessageFormat(tcServerUrl).format(new Object[] { encodeRoomId(uuid.trim()) });
+	}
+
+	private String getTeleconsultationServerUrl() {
+		boolean addedProxyPrivilege = Context.isAuthenticated()
+		        && !Context.hasPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		if (addedProxyPrivilege) {
+			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		}
+		try {
+			return Context.getAdministrationService().getGlobalProperty(PROP_TC_SERVER);
+		}
+		finally {
+			if (addedProxyPrivilege) {
+				Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+			}
+		}
 	}
 
 	private String encodeRoomId(String roomId) {

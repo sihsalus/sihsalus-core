@@ -16,6 +16,7 @@ import org.openmrs.module.reporting.report.ReportData;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 import org.openmrs.module.reporting.serializer.ReportingSerializer;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -101,6 +102,7 @@ public class EvaluatedReportDefinitionResource extends EvaluatedResource<ReportD
 	@Override
     public Object retrieve(String uuid, RequestContext requestContext)
             throws ResponseException {
+        ReportingRestPrivileges.requireViewReports();
 
         ReportDefinitionService reportDefinitionService = DefinitionContext.getReportDefinitionService();
         ReportDefinition definition = getDefinitionByUniqueId(reportDefinitionService, ReportDefinition.class, uuid);
@@ -121,6 +123,7 @@ public class EvaluatedReportDefinitionResource extends EvaluatedResource<ReportD
     
     @Override
     public Object update(String uniqueId, SimpleObject postBody, RequestContext requestContext) throws ResponseException {
+        ReportingRestPrivileges.requireViewReports();
         ReportDefinitionService reportDefinitionService = DefinitionContext.getReportDefinitionService();
         ReportDefinition definition = getDefinitionByUniqueId(reportDefinitionService, ReportDefinition.class, uniqueId);
         if (definition == null) {
@@ -164,6 +167,7 @@ public class EvaluatedReportDefinitionResource extends EvaluatedResource<ReportD
      */
     @Override
     public Object create(SimpleObject postBody, RequestContext context) throws ResponseException {
+        ReportingRestPrivileges.requireViewReports();
         Object serializedXml = postBody.get("serializedXml");
         ReportDefinition definition;
         try {

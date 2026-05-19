@@ -22,6 +22,7 @@ import org.openmrs.api.ConceptNameType;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.api.impl.BaseOpenmrsService;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,7 +36,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-public class ImportServiceImpl implements ImportService {
+public class ImportServiceImpl extends BaseOpenmrsService implements ImportService {
 
 	DbSessionFactory sessionFactory;
 

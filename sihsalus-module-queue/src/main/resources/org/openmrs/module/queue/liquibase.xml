@@ -805,4 +805,25 @@
         </sql>
     </changeSet>
 
+    <changeSet id="queue-static-config-metadata-20260519" author="sihsalus">
+        <comment>Add queue global properties previously contributed by config.xml</comment>
+        <sql>
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'queue.statusConceptSetName', 'Status', 'Set status conceptSet name', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'queue.statusConceptSetName');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'queue.priorityConceptSetName', 'Priority', 'Set priority conceptSet name', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'queue.priorityConceptSetName');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'queue.serviceConceptSetName', 'Service', 'Set service conceptSet name', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'queue.serviceConceptSetName');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'queue.sortWeightGenerator', '', 'The bean name of a registered component that provides an algorithm to set a queue entry sort weight when saved', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'queue.sortWeightGenerator');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

@@ -26,6 +26,7 @@ import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.reportingrest.web.controller.ReportingRestController;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -72,12 +73,14 @@ public class ReportRequestResource extends DelegatingCrudResource<ReportRequest>
 	 */
 	@Override
 	public ReportRequest getByUniqueId(String uuid) {
+		ReportingRestPrivileges.requireViewReports();
 		return getReportService().getReportRequestByUuid(uuid);
 	}
 
 
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
+		ReportingRestPrivileges.requireViewReports();
 		List<ReportRequest.Status> statuses = findAppropriateStatuses(context);
 		ReportDefinition reportDefinition = findReportDefinition(context);
 
@@ -151,6 +154,7 @@ public class ReportRequestResource extends DelegatingCrudResource<ReportRequest>
 	 */
 	@Override
 	public ReportRequest save(ReportRequest reportRequestParam) {
+		ReportingRestPrivileges.requireAddReports();
 		ReportDefinition reportDefinition = Context.getService(ReportDefinitionService.class)
 				.getDefinitionByUuid(reportRequestParam.getReportDefinition().getParameterizable().getUuid());
 
@@ -240,6 +244,7 @@ public class ReportRequestResource extends DelegatingCrudResource<ReportRequest>
 	 */
 	@Override
 	public void purge(ReportRequest reportRequest, RequestContext context) throws ResponseException {
+		ReportingRestPrivileges.requireDeleteReports();
 		if (reportRequest != null) {
 			getReportService().purgeReportRequest(reportRequest);
 		}

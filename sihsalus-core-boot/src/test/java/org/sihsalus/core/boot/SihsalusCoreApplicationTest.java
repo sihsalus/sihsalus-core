@@ -9,19 +9,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.Executor;
 import org.junit.jupiter.api.Test;
+import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.UserSessionListener;
+import org.openmrs.Encounter;
+import org.openmrs.Visit;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.handler.SaveHandler;
 import org.openmrs.calculation.api.CalculationRegistrationService;
 import org.openmrs.calculation.patient.PatientCalculationService;
 import org.openmrs.module.authentication.AuthenticationConfig;
@@ -31,6 +39,33 @@ import org.openmrs.module.attachments.obs.DefaultAttachmentHandler;
 import org.openmrs.module.attachments.obs.ImageAttachmentHandler;
 import org.openmrs.module.authentication.AuthenticationUserSessionListener;
 import org.openmrs.module.authentication.DelegatingAuthenticationScheme;
+import org.openmrs.module.appointments.events.advice.AppointmentEventsAdvice;
+import org.openmrs.module.appointments.events.advice.RecurringAppointmentEventsAdvice;
+import org.openmrs.module.appointments.events.eventListener.AppointmentSMSEventListener;
+import org.openmrs.module.appointments.events.publisher.AppointmentEventPublisher;
+import org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier;
+import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
+import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
+import org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeService;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
+import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.service.SpecialityService;
+import org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService;
+import org.openmrs.module.Extension;
+import org.openmrs.module.ModuleFactory;
+import org.openmrs.module.bedmanagement.BedLayout;
+import org.openmrs.module.bedmanagement.aop.BedPatientAssignmentValidator;
+import org.openmrs.module.bedmanagement.aop.EncounterWithBedPatientAssignmentSaveHandler;
+import org.openmrs.module.bedmanagement.aop.VisitWithBedPatientAssignmentSaveHandler;
+import org.openmrs.module.bedmanagement.aop.VisitWithBedPatientAssignmentValidator;
+import org.openmrs.module.bedmanagement.constants.BedManagementProperties;
+import org.openmrs.module.bedmanagement.entity.BedPatientAssignment;
+import org.openmrs.module.bedmanagement.extension.html.AdminList;
+import org.openmrs.module.bedmanagement.service.BedManagementService;
+import org.openmrs.module.bedmanagement.service.BedTagMapService;
+import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.PaymentModeService;
+import org.openmrs.module.billing.api.billing.BillingEventListener;
 import org.openmrs.module.cohort.api.CohortMemberService;
 import org.openmrs.module.cohort.api.CohortService;
 import org.openmrs.module.cohort.api.CohortTypeService;
@@ -49,14 +84,48 @@ import org.openmrs.module.imaging.api.DicomStudyService;
 import org.openmrs.module.imaging.api.OrthancConfigurationService;
 import org.openmrs.module.imaging.api.RequestProcedureService;
 import org.openmrs.module.imaging.api.RequestProcedureStepService;
+import org.openmrs.module.sihsalusinterop.api.DyakuSenderService;
+import org.openmrs.module.sihsalusinterop.api.advice.EncounterSavedAdvice;
+import org.openmrs.module.sihsalusinterop.api.service.BundleBuilderService;
 import org.openmrs.module.legacyui.api.LegacyUIService;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.module.oauth2login.authscheme.OAuth2TokenCredentials;
 import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationScheme;
 import org.openmrs.module.o3forms.api.O3FormsService;
+import org.openmrs.module.openconceptlab.ImportService;
+import org.openmrs.module.openconceptlab.OclConceptService;
+import org.openmrs.module.openconceptlab.importer.Importer;
+import org.openmrs.module.openconceptlab.scheduler.UpdateScheduler;
 import org.openmrs.module.ordertemplates.api.OrderTemplatesService;
+import org.openmrs.module.patientflags.aop.ConditionServiceAdvice;
+import org.openmrs.module.patientflags.aop.EncounterServiceAdvice;
+import org.openmrs.module.patientflags.aop.ObsServiceAdvice;
+import org.openmrs.module.patientflags.aop.OrderServiceAdvice;
+import org.openmrs.module.patientflags.aop.PatientServiceAdvice;
+import org.openmrs.module.patientflags.aop.ProgramWorkflowServiceAdvice;
+import org.openmrs.module.patientflags.api.FlagService;
+import org.openmrs.module.patientflags.task.PatientFlagTask;
 import org.openmrs.module.patientdocuments.reports.PatientIdStickerPdfReport;
+import org.openmrs.module.queue.api.QueueEntryService;
+import org.openmrs.module.queue.api.QueueRoomService;
+import org.openmrs.module.queue.api.QueueService;
+import org.openmrs.module.queue.api.QueueServicesWrapper;
+import org.openmrs.module.queue.api.RoomProviderMapService;
+import org.openmrs.module.queue.api.VisitWithQueueEntriesSaveHandler;
+import org.openmrs.module.queue.api.sort.BasicPrioritySortWeightGenerator;
+import org.openmrs.module.queue.api.sort.ExistingValueSortWeightGenerator;
+import org.openmrs.module.queue.model.Queue;
+import org.openmrs.module.queue.model.QueueEntry;
+import org.openmrs.module.queue.model.QueueRoom;
+import org.openmrs.module.queue.model.RoomProviderMap;
+import org.openmrs.module.queue.tasks.QueueTimerTask;
+import org.openmrs.module.queue.tasks.QueueTaskExecutor;
+import org.openmrs.module.queue.validators.QueueEntryValidator;
+import org.openmrs.module.queue.validators.QueueRoomValidation;
+import org.openmrs.module.queue.validators.QueueValidator;
+import org.openmrs.module.queue.validators.RoomProviderMapValidator;
+import org.openmrs.module.queue.validators.VisitWithQueueEntriesValidator;
 import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.dataset.DataSetMetaData;
@@ -70,6 +139,7 @@ import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
+import org.openmrs.module.reporting.report.task.ReportingTimerTask;
 import org.openmrs.module.reporting.serializer.ReportingSerializer;
 import org.openmrs.module.reportingrest.adhoc.AdHocExportManager;
 import org.openmrs.module.serialization.xstream.XStreamSerializer;
@@ -79,13 +149,17 @@ import org.openmrs.module.webservices.rest.web.resource.api.Converter;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.PrivilegeConstants;
+import org.sihsalus.core.api.StaticModuleTaskRunner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.aop.framework.Advised;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.validation.Validator;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -101,6 +175,8 @@ class SihsalusCoreApplicationTest {
     private static final String ADMIN_BASIC_AUTH = basicAuth("admin", "test");
 
     @Autowired private MockMvc mockMvc;
+
+    @Autowired private ApplicationContext applicationContext;
 
     @Autowired private JdbcTemplate jdbcTemplate;
 
@@ -134,6 +210,28 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void staticModuleBackgroundTasksUseSchedulerUserWithoutDaemonToken() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            StaticModuleTaskRunner.runAndWait(
+                    null, () -> {
+                        assertTrue(Context.isAuthenticated());
+                        assertNotNull(Context.getAuthenticatedUser());
+                    });
+            assertTrue(!Context.isAuthenticated());
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
     void restV1ControllerIsWiredWithoutOmodRuntime() throws Exception {
         mockMvc.perform(get("/rest/v1/not-a-resource/not-a-real-uuid"))
                 .andExpect(status().isNotFound())
@@ -143,6 +241,8 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void queueEntryNumberLegacyEndpointRespondsSafelyWithoutParameters() throws Exception {
+        assertTrue(QueueTimerTask.isEnabled());
+
         mockMvc.perform(get("/rest/v1/queue-entry-number"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serviceType").value(""))
@@ -156,6 +256,107 @@ class SihsalusCoreApplicationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"ticketNumber\":\"A-001\"}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void queueIsWiredAsStaticInternalModule() {
+        QueueService queueService = Context.getService(QueueService.class);
+        QueueEntryService queueEntryService = Context.getService(QueueEntryService.class);
+        assertNotNull(queueService);
+        assertNotNull(queueEntryService);
+        assertNotNull(Context.getService(QueueRoomService.class));
+        assertNotNull(Context.getService(RoomProviderMapService.class));
+        assertNotNull(Context.getRegisteredComponent("queue.QueueServicesWrapper", QueueServicesWrapper.class));
+        assertNotNull(Context.getRegisteredComponent("existingValueSortWeightGenerator", ExistingValueSortWeightGenerator.class));
+        assertNotNull(Context.getRegisteredComponent("basicPrioritySortWeightGenerator", BasicPrioritySortWeightGenerator.class));
+        assertNotNull(applicationContext.getBean("&queueTaskExecutor", QueueTaskExecutor.class));
+        assertTrue(QueueTimerTask.isEnabled());
+
+        RestService restService = Context.getService(RestService.class);
+        for (String resourceName : List.of(
+                "v1/queue",
+                "v1/queue-entry",
+                "v1/queue-room",
+                "v1/queue-room-provider")) {
+            assertNotNull(restService.getResourceByName(resourceName));
+        }
+
+        List<SaveHandler> visitSaveHandlers = HandlerUtil.getHandlersForType(SaveHandler.class, Visit.class);
+        assertTrue(
+                visitSaveHandlers.stream().anyMatch(VisitWithQueueEntriesSaveHandler.class::isInstance),
+                () -> "Visit SaveHandlers: " + visitSaveHandlers.stream()
+                        .map(handler -> handler.getClass().getName())
+                        .toList());
+        assertQueueValidatorRegistered(Queue.class, QueueValidator.class);
+        assertQueueValidatorRegistered(QueueEntry.class, QueueEntryValidator.class);
+        assertQueueValidatorRegistered(QueueRoom.class, QueueRoomValidation.class);
+        assertQueueValidatorRegistered(RoomProviderMap.class, RoomProviderMapValidator.class);
+        assertQueueValidatorRegistered(Visit.class, VisitWithQueueEntriesValidator.class);
+
+        List<String> queuePrivileges = List.of(
+                "Get Queues",
+                "Get Queue Entries",
+                "Get Queue Rooms",
+                "Manage Queues",
+                "Manage Queue Entries",
+                "Manage Queue Rooms",
+                "Purge Queues",
+                "Purge Queue Entries",
+                "Purge Queue Rooms");
+        String privilegePlaceholders = String.join(",", Collections.nCopies(queuePrivileges.size(), "?"));
+        assertEquals(queuePrivileges.size(), jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (" + privilegePlaceholders + ")",
+                Integer.class,
+                queuePrivileges.toArray()));
+
+        List<String> queueGlobalProperties = List.of(
+                "queue.statusConceptSetName",
+                "queue.priorityConceptSetName",
+                "queue.serviceConceptSetName",
+                "queue.sortWeightGenerator");
+        String globalPropertyPlaceholders = String.join(",", Collections.nCopies(queueGlobalProperties.size(), "?"));
+        assertEquals(queueGlobalProperties.size(), jdbcTemplate.queryForObject(
+                "select count(*) from global_property where property in (" + globalPropertyPlaceholders + ")",
+                Integer.class,
+                queueGlobalProperties.toArray()));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from queue_entry", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from queue_room", Integer.class));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from room_provider_map", Integer.class));
+
+        jdbcTemplate.update(
+                "update global_property set property_value = ? where property = ?",
+                "basicPrioritySortWeightGenerator",
+                "queue.sortWeightGenerator");
+        queueEntryService.setSortWeightGenerator(null);
+        try {
+            StaticModuleTaskRunner.runAndWait(
+                    null,
+                    () -> assertTrue(
+                            queueEntryService.getSortWeightGenerator() instanceof BasicPrioritySortWeightGenerator));
+        } finally {
+            jdbcTemplate.update(
+                    "update global_property set property_value = ? where property = ?",
+                    "",
+                    "queue.sortWeightGenerator");
+            queueEntryService.setSortWeightGenerator(null);
+        }
+        StaticModuleTaskRunner.runAndWait(
+                null,
+                () -> assertTrue(queueEntryService.getSortWeightGenerator() instanceof ExistingValueSortWeightGenerator));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class, queueService::getAllQueues);
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test
@@ -283,8 +484,30 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void legacyUiIsWiredAsStaticInternalModule() {
-        assertNotNull(Context.getService(LegacyUIService.class));
+        LegacyUIService legacyUIService = Context.getService(LegacyUIService.class);
+        assertNotNull(legacyUIService);
+
+        assertEquals(2, jdbcTemplate.queryForObject(
+                "select count(*) from global_property where property in (?, ?)",
+                Integer.class,
+                "legacyui.enableExitFromCare",
+                "dashboard.formEntry.maximumNumberEncountersToShow"));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class, () -> legacyUIService.exitFromCare(null, null, null));
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test
@@ -330,6 +553,286 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void teleconsultationIsWiredAsStaticInternalModule() throws Exception {
+        TeleconsultationService teleconsultationService = Context.getService(TeleconsultationService.class);
+        assertNotNull(teleconsultationService);
+        assertEquals(1, jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege = ?",
+                Integer.class,
+                "Create Teleconsultation"));
+        assertEquals("https://meet.jit.si/{0}", jdbcTemplate.queryForObject(
+                "select property_value from global_property where property = ?",
+                String.class,
+                "bahmni.appointment.teleConsultation.serverUrlPattern"));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class,
+                    () -> teleconsultationService.generateTeleconsultationLink("not-a-real-appointment"));
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+
+        mockMvc.perform(get("/rest/v1/teleconsultation/generateLink").param("uuid", "not-a-real-appointment"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/rest/v1/teleconsultation/generateLink")
+                        .header("Authorization", ADMIN_BASIC_AUTH)
+                        .param("uuid", "room 123"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("https://meet.jit.si/room%20123"));
+        mockMvc.perform(get("/rest/v1/teleconsultation/generateLink")
+                        .header("Authorization", ADMIN_BASIC_AUTH)
+                        .param("uuid", " "))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void appointmentsIsWiredAsStaticInternalModule() {
+        AppointmentsService appointmentsService = Context.getService(AppointmentsService.class);
+        AppointmentRecurringPatternService recurringPatternService =
+                Context.getService(AppointmentRecurringPatternService.class);
+        assertNotNull(appointmentsService);
+        assertNotNull(Context.getService(AppointmentServiceDefinitionService.class));
+        assertNotNull(Context.getService(AppointmentServiceAttributeTypeService.class));
+        assertNotNull(Context.getService(SpecialityService.class));
+        assertNotNull(recurringPatternService);
+        assertNotNull(Context.getService(AppointmentArgumentsMapper.class));
+
+        assertAdviceRegistered(appointmentsService, AppointmentEventsAdvice.class);
+        assertAdviceRegistered(recurringPatternService, RecurringAppointmentEventsAdvice.class);
+        assertNotNull(Context.getRegisteredComponent("appointmentEventPublisher", AppointmentEventPublisher.class));
+        assertNotNull(Context.getRegisteredComponent("AppointmentsAsyncThreadExecutor", Executor.class));
+        assertNotNull(Context.getRegisteredComponents(AppointmentSMSEventListener.class).stream()
+                .findFirst()
+                .orElse(null));
+
+        PatientAppointmentNotifierService notifierService =
+                Context.getRegisteredComponent("patientAppointmentNotifierService", PatientAppointmentNotifierService.class);
+        assertTrue(notifierService.getEventNotifiers().stream()
+                .anyMatch(DefaultTCAppointmentPatientEmailNotifier.class::isInstance));
+
+        List<String> appointmentPrivileges = List.of(
+                "View Appointments",
+                "Manage Appointments",
+                "View Appointment Services",
+                "Manage Appointment Services",
+                "Manage Appointment Specialities",
+                "Manage Own Appointments",
+                "Reset Appointment Status",
+                "Appointments: Invite Providers",
+                "app:appointments:manageServiceAvailability",
+                "app:appointments:manageServices");
+        String privilegePlaceholders = String.join(",", Collections.nCopies(appointmentPrivileges.size(), "?"));
+        assertEquals(appointmentPrivileges.size(), jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (" + privilegePlaceholders + ")",
+                Integer.class,
+                appointmentPrivileges.toArray()));
+
+        List<String> appointmentGlobalProperties = List.of(
+                "disableDefaultAppointmentValidations",
+                "SchedulerMarksComplete",
+                "SchedulerMarksMissed",
+                "SchedulerReminderBeforeHours",
+                "bahmni.appointment.teleConsultation.patientEmailNotificationSubject",
+                "bahmni.appointment.teleConsultation.patientEmailNotificationTemplate",
+                "bahmni.appointment.teleConsultation.serverUrlPattern",
+                "bahmni.appointment.teleConsultation.sendEmail",
+                "bahmni.appointment.adhocTeleConsultation.patientEmailNotificationSubject",
+                "bahmni.appointment.adhocTeleConsultation.patientEmailNotificationTemplate",
+                "bahmni.appointment.adhocTeleConsultation.bccEmails",
+                "bahmni.adhoc.teleConsultation.id",
+                "sms.enableAppointmentBookingSMSAlert",
+                "sms.enableAppointmentReminderSMSAlert",
+                "sms.timezone",
+                "sms.dateformat");
+        String globalPropertyPlaceholders =
+                String.join(",", Collections.nCopies(appointmentGlobalProperties.size(), "?"));
+        assertEquals(appointmentGlobalProperties.size(), jdbcTemplate.queryForObject(
+                "select count(*) from global_property where property in (" + globalPropertyPlaceholders + ")",
+                Integer.class,
+                appointmentGlobalProperties.toArray()));
+
+        assertEquals(3, jdbcTemplate.queryForObject(
+                "select count(*) from scheduler_task_config where name in (?, ?, ?)",
+                Integer.class,
+                "Mark Appointment As Missed Task",
+                "Mark Appointment As Complete Task",
+                "Reminder of scheduled appointment"));
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from patient_appointment", Integer.class));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class, () -> appointmentsService.getAllAppointments(null));
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
+    void bedManagementIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(BedManagementService.class));
+        assertNotNull(Context.getService(BedTagMapService.class));
+
+        RestService restService = Context.getService(RestService.class);
+        for (String resourceName : List.of(
+                "v1/admissionLocation",
+                "v1/bed",
+                "v1/beds",
+                "v1/bedPatientAssignment",
+                "v1/bedTag",
+                "v1/bedTagMap",
+                "v1/bedtype")) {
+            assertNotNull(restService.getResourceByName(resourceName));
+        }
+        assertNotNull(HandlerUtil.getPreferredHandler(Converter.class, BedLayout.class));
+
+        List<SaveHandler> encounterSaveHandlers = HandlerUtil.getHandlersForType(SaveHandler.class, Encounter.class);
+        assertTrue(
+                encounterSaveHandlers.stream().anyMatch(EncounterWithBedPatientAssignmentSaveHandler.class::isInstance),
+                () -> "Encounter SaveHandlers: " + encounterSaveHandlers.stream()
+                        .map(handler -> handler.getClass().getName())
+                        .toList());
+        List<SaveHandler> visitSaveHandlers = HandlerUtil.getHandlersForType(SaveHandler.class, Visit.class);
+        assertTrue(
+                visitSaveHandlers.stream().anyMatch(VisitWithBedPatientAssignmentSaveHandler.class::isInstance),
+                () -> "Visit SaveHandlers: " + visitSaveHandlers.stream()
+                        .map(handler -> handler.getClass().getName())
+                        .toList());
+        List<Validator> bedPatientAssignmentValidators =
+                HandlerUtil.getHandlersForType(Validator.class, BedPatientAssignment.class);
+        assertTrue(
+                bedPatientAssignmentValidators.stream().anyMatch(BedPatientAssignmentValidator.class::isInstance),
+                () -> "BedPatientAssignment Validators: " + bedPatientAssignmentValidators.stream()
+                        .map(handler -> handler.getClass().getName())
+                        .toList());
+        List<Validator> visitValidators = HandlerUtil.getHandlersForType(Validator.class, Visit.class);
+        assertTrue(
+                visitValidators.stream().anyMatch(VisitWithBedPatientAssignmentValidator.class::isInstance),
+                () -> "Visit Validators: " + visitValidators.stream()
+                        .map(handler -> handler.getClass().getName())
+                        .toList());
+
+        assertEquals(1, jdbcTemplate.queryForObject(
+                "select count(*) from global_property where property = ? and property_value = ?",
+                Integer.class,
+                "bedmanagement.owa.enableManagingLocations",
+                "true"));
+        List<String> bedManagementPrivileges = List.of(
+                "app:adt",
+                "Get Beds",
+                "Assign Beds",
+                "Get Admission Locations",
+                "Edit Admission Locations",
+                "Edit Beds",
+                "Get Bed Type",
+                "Edit Bed Type",
+                "Get Bed Tags",
+                "Edit Bed Tags");
+        String placeholders = String.join(",", Collections.nCopies(bedManagementPrivileges.size(), "?"));
+        assertEquals(bedManagementPrivileges.size(), jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (" + placeholders + ")",
+                Integer.class,
+                bedManagementPrivileges.toArray()));
+
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from bed", Integer.class));
+        assertEquals("/owa", BedManagementProperties.getProperty("appBaseUrl"));
+        assertTrue(ModuleFactory.getExtensions("org.openmrs.admin.list", Extension.MEDIA_TYPE.html).stream()
+                .anyMatch(AdminList.class::isInstance));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            BedManagementService bedManagementService = Context.getService(BedManagementService.class);
+
+            assertThrows(APIAuthenticationException.class, bedManagementService::getAdmissionLocations);
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
+    void billingIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(BillService.class));
+        assertNotNull(Context.getService(PaymentModeService.class));
+        assertNotNull(Context.getRegisteredComponents(BillingEventListener.class).stream()
+                .findFirst()
+                .orElse(null));
+
+        RestService restService = Context.getService(RestService.class);
+        for (String resourceName : List.of(
+                "v1/billing/attributetype",
+                "v1/billing/bill",
+                "v1/billing/billDiscount",
+                "v1/billing/billExemption",
+                "v1/billing/billLineItem",
+                "v1/billing/billRefund",
+                "v1/billing/billableService",
+                "v1/billing/cashPoint",
+                "v1/billing/cashierItemPrice",
+                "v1/billing/paymentAttribute",
+                "v1/billing/paymentMode",
+                "v1/billing/paymentModeAttributeType",
+                "v2/billing/timesheet")) {
+            assertNotNull(restService.getResourceByName(resourceName));
+        }
+
+        List<String> billingPrivileges = List.of(
+                "Manage Cashier Bills",
+                "Adjust Cashier Bills",
+                "View Cashier Bills",
+                "Delete Cashier Bills",
+                "Purge Cashier Bills",
+                "Refund Money",
+                "Reprint Receipt",
+                "Manage Bill Discounts",
+                "Approve Bill Discounts",
+                "View Bill Discounts",
+                "Request Bill Refunds",
+                "Approve Bill Refunds",
+                "Complete Bill Refunds",
+                "View Bill Refunds",
+                "Manage Cashier Timesheets",
+                "View Cashier Timesheets",
+                "Purge Cashier Timesheets",
+                "Manage Cashier Metadata",
+                "View Cashier Metadata",
+                "Purge Cashier Metadata",
+                "App: View Cashier App",
+                "App: Access Cashier Tasks",
+                "Task: Create new bill",
+                "Task: Adjust Cashier Bills",
+                "Task: Cashier Timesheets",
+                "Task: Manage Cashier Module",
+                "Task: Manage Cashier Metadata",
+                "Task: View Cashier Reports");
+        String placeholders = String.join(",", Collections.nCopies(billingPrivileges.size(), "?"));
+        assertEquals(billingPrivileges.size(), jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (" + placeholders + ")",
+                Integer.class,
+                billingPrivileges.toArray()));
+    }
+
+    @Test
     void fuaIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(FuaService.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from fua", Integer.class));
@@ -349,6 +852,51 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void sihsalusInteropIsWiredAsStaticInternalModule() throws Exception {
+        assertNotNull(Context.getService(DyakuSenderService.class));
+        assertNotNull(Context.getRegisteredComponent("sihsalusinterop.BundleBuilderService", BundleBuilderService.class));
+        assertAdviceRegistered(Context.getEncounterService(), EncounterSavedAdvice.class);
+        assertNotNull(jdbcTemplate.queryForObject("select count(*) from sihsalus_interop_queue", Integer.class));
+
+        List<String> interopPrivileges = List.of(
+                "SIH SALUS Interop Privilege",
+                "Manage Interop Queue",
+                "Send FHIR Messages",
+                "Generate FUA",
+                "View Interop Logs",
+                "View Interop Queue");
+        String privilegePlaceholders = String.join(",", Collections.nCopies(interopPrivileges.size(), "?"));
+        assertEquals(interopPrivileges.size(), jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (" + privilegePlaceholders + ")",
+                Integer.class,
+                interopPrivileges.toArray()));
+
+        List<String> interopGlobalProperties = List.of(
+                "sihsalusinterop.renhice.endpoint",
+                "sihsalusinterop.renhice.enabled",
+                "sihsalusinterop.queue.maxRetries",
+                "sihsalusinterop.queue.retryInterval");
+        String globalPropertyPlaceholders = String.join(",", Collections.nCopies(interopGlobalProperties.size(), "?"));
+        assertEquals(interopGlobalProperties.size(), jdbcTemplate.queryForObject(
+                "select count(*) from global_property where property in (" + globalPropertyPlaceholders + ")",
+                Integer.class,
+                interopGlobalProperties.toArray()));
+
+        assertEquals(1, jdbcTemplate.queryForObject(
+                "select count(*) from scheduler_task_config "
+                        + "where name = ? and schedulable_class = ? and repeat_interval = ?",
+                Integer.class,
+                "SIH SALUS Interop Queue Processor",
+                "org.openmrs.module.sihsalusinterop.api.tasks.QueueProcessorTask",
+                300L));
+
+        Context.logout();
+        mockMvc.perform(get("/module/sihsalusinterop/api/queue/items"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
     void attachmentsIsWiredAsStaticInternalModule() throws Exception {
         assertNotNull(Context.getService(AttachmentsService.class));
         assertNotNull(Context.getObsService().getHandler(DefaultAttachmentHandler.class.getSimpleName()));
@@ -357,6 +905,31 @@ class SihsalusCoreApplicationTest {
         assertEquals(1, jdbcTemplate.queryForObject(
                 "select count(*) from global_property where property = 'attachments.defaultConceptComplexUuid'",
                 Integer.class));
+    }
+
+    @Test
+    void patientFlagsIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(FlagService.class));
+        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/flag"));
+        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/tag"));
+        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/priority"));
+        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/displaypoint"));
+        assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/patientflag"));
+
+        assertEquals(5, jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in ('Manage Flags', 'View Flags', "
+                        + "'Manage Patient Flags', 'View Patient Flags', 'Test Flags')",
+                Integer.class));
+
+        assertAdviceRegistered(Context.getEncounterService(), EncounterServiceAdvice.class);
+        assertAdviceRegistered(Context.getObsService(), ObsServiceAdvice.class);
+        assertAdviceRegistered(Context.getOrderService(), OrderServiceAdvice.class);
+        assertAdviceRegistered(Context.getPatientService(), PatientServiceAdvice.class);
+        assertAdviceRegistered(Context.getConditionService(), ConditionServiceAdvice.class);
+        assertAdviceRegistered(Context.getProgramWorkflowService(), ProgramWorkflowServiceAdvice.class);
+
+        PatientFlagTask.setDaemonToken(null);
+        PatientFlagTask.evaluateAllFlags().run();
     }
 
     @Test
@@ -378,6 +951,35 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void openConceptLabIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getService(ImportService.class));
+        assertNotNull(Context.getService(OclConceptService.class));
+        assertNotNull(Context.getRegisteredComponent("openconceptlab.importer", Importer.class));
+        assertNotNull(Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class));
+
+        RestService restService = Context.getService(RestService.class);
+        assertNotNull(restService.getResourceByName("v1/openconceptlab/import"));
+        assertNotNull(restService.getResourceByName("v1/openconceptlab/importaction"));
+        assertNotNull(restService.getResourceByName("v1/openconceptlab/subscription"));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            ImportService importService = Context.getService(ImportService.class);
+
+            assertThrows(APIAuthenticationException.class, importService::getSubscription);
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
     @SuppressWarnings({"rawtypes", "unchecked"})
     void reportingRestIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(SerializedDefinitionService.class));
@@ -388,6 +990,7 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(DataSetDefinitionService.class));
         assertNotNull(Context.getSerializationService().getSerializer(ReportingSerializer.class));
         assertNotNull(HandlerUtil.getPreferredHandler(DefinitionEvaluator.class, AllPatientsCohortDefinition.class));
+        assertTrue(ReportingTimerTask.isEnabled());
 
         assertNotNull(Context.getRegisteredComponents(AdHocExportManager.class).stream()
                 .findFirst()
@@ -523,9 +1126,24 @@ class SihsalusCoreApplicationTest {
         return "Basic " + token;
     }
 
+    private void assertQueueValidatorRegistered(Class<?> supportedClass, Class<? extends Validator> validatorClass) {
+        List<Validator> validators = HandlerUtil.getHandlersForType(Validator.class, supportedClass);
+        assertTrue(
+                validators.stream().anyMatch(validatorClass::isInstance),
+                () -> supportedClass.getSimpleName() + " Validators: " + validators.stream()
+                        .map(validator -> validator.getClass().getName())
+                        .toList());
+    }
+
     private void restartIdentityAfterSeedData(String tableName, String columnName) {
         Integer nextValue = jdbcTemplate.queryForObject(
                 "select coalesce(max(" + columnName + "), 0) + 1000 from " + tableName, Integer.class);
         jdbcTemplate.execute("alter table " + tableName + " alter column " + columnName + " restart with " + nextValue);
+    }
+
+    private void assertAdviceRegistered(Object service, Class<?> adviceClass) {
+        assertTrue(service instanceof Advised);
+        assertTrue(Arrays.stream(((Advised) service).getAdvisors())
+                .anyMatch(advisor -> adviceClass.isInstance(advisor.getAdvice())));
     }
 }

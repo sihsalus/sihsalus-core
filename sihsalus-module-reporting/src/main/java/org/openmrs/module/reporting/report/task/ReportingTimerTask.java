@@ -12,8 +12,8 @@ package org.openmrs.module.reporting.report.task;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.db.hibernate.DbSessionFactory;  
-import org.openmrs.api.context.Daemon;
 import org.openmrs.module.DaemonToken;
+import org.sihsalus.core.api.StaticModuleTaskRunner;
 
 import java.util.TimerTask;
 
@@ -37,11 +37,11 @@ public class ReportingTimerTask extends TimerTask {
 	 */
 	@Override
 	public final void run() {
-		if (daemonToken != null && enabled) {
+		if (enabled) {
 			createAndRunTask();
 		}
 		else {
-			log.debug("Not running scheduled task. DaemonToken = " + daemonToken + "; enabled = " + enabled);
+			log.debug("Not running scheduled task. enabled = " + enabled);
 		}
 	}
 
@@ -54,7 +54,7 @@ public class ReportingTimerTask extends TimerTask {
 			task = getTaskClass().newInstance();
 			task.setScheduledExecutionTime(System.currentTimeMillis());
 			task.setSessionFactory(sessionFactory);
-			Daemon.runInDaemonThread(task, daemonToken);
+			StaticModuleTaskRunner.runInBackground(daemonToken, task);
 		}
 		catch (Exception e) {
 			log.error("An error occurred while running scheduled reporting task", e);

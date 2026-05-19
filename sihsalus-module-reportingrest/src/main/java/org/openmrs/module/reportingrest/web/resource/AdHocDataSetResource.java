@@ -20,6 +20,7 @@ import org.openmrs.module.reporting.dataset.definition.RowPerObjectDataSetDefini
 import org.openmrs.module.reporting.definition.library.AllDefinitionLibraries;
 import org.openmrs.module.reportingrest.adhoc.AdHocDataSet;
 import org.openmrs.module.reportingrest.adhoc.AdHocExportManager;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.reportingrest.web.controller.ReportingRestController;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -55,6 +56,7 @@ public class AdHocDataSetResource implements Creatable, Purgeable {
 
     @Override
     public Object create(SimpleObject post, RequestContext requestContext) throws ResponseException {
+        ReportingRestPrivileges.requireAddReportObjects();
         AdHocDataSet adHocDataSet = jackson.convertValue(post, AdHocDataSet.class);
 
         try {
@@ -82,6 +84,7 @@ public class AdHocDataSetResource implements Creatable, Purgeable {
 
     @Override
     public void purge(String uuid, RequestContext context) throws ResponseException {
+        ReportingRestPrivileges.requireDeleteReportObjects();
         RowPerObjectDataSetDefinition dsd = getManager().getAdHocDataSetByUuid(uuid);
         getManager().purgeAdHocDataSet(dsd);
     }

@@ -1,28 +1,40 @@
 package org.sihsalus.module.bedmanagement;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.SessionFactory;
+import org.openmrs.annotation.Handler;
 import org.openmrs.api.LocationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ServiceContext;
+import org.openmrs.module.Extension;
+import org.openmrs.module.ModuleFactory;
+import org.openmrs.module.bedmanagement.BedManagementActivator;
+import org.openmrs.module.bedmanagement.constants.BedManagementProperties;
 import org.openmrs.module.bedmanagement.dao.BedManagementDao;
 import org.openmrs.module.bedmanagement.dao.BedTagMapDao;
 import org.openmrs.module.bedmanagement.dao.impl.BedManagementDaoImpl;
 import org.openmrs.module.bedmanagement.dao.impl.BedTagMapDaoImpl;
-import org.openmrs.module.bedmanagement.entity.Bed;
-import org.openmrs.module.bedmanagement.rest.resource.BedResource;
+import org.openmrs.module.bedmanagement.extension.html.AdminList;
 import org.openmrs.module.bedmanagement.service.BedManagementService;
 import org.openmrs.module.bedmanagement.service.BedTagMapService;
 import org.openmrs.module.bedmanagement.service.impl.BedManagementServiceImpl;
 import org.openmrs.module.bedmanagement.service.impl.BedTagMapServiceImpl;
+import org.openmrs.util.PrivilegeConstants;
 import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 
 @Configuration
-@ComponentScan(basePackageClasses = {Bed.class, BedResource.class})
+@ComponentScan(
+        basePackageClasses = BedManagementActivator.class,
+        includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Handler.class))
 public class SihsalusBedManagementConfiguration {
+
+    private static final String ADMIN_LIST_EXTENSION_POINT = "org.openmrs.admin.list";
 
     @Bean
     HibernateMappingContributor bedManagementHibernateMappingContributor() {
@@ -73,5 +85,40 @@ public class SihsalusBedManagementConfiguration {
             serviceContext.setService(BedManagementService.class, bedManagementService);
             serviceContext.setService(BedTagMapService.class, bedTagMapService);
         };
+    }
+
+    @Bean
+    SmartInitializingSingleton bedManagementStaticInitializer() {
+        return () -> {
+            initializeBedManagementProperties();
+            registerAdminListExtension();
+        };
+    }
+
+    private static void initializeBedManagementProperties() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+        try {
+            BedManagementProperties.initalize();
+        } finally {
+            Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    private static void registerAdminListExtension() {
+        AdminList adminList = new AdminList();
+        adminList.setPointId(ADMIN_LIST_EXTENSION_POINT);
+        List<Extension> extensions = ModuleFactory.getExtensionMap()
+                .computeIfAbsent(adminList.getExtensionId(), key -> new ArrayList<>());
+        if (extensions.stream().noneMatch(AdminList.class::isInstance)) {
+            extensions.add(adminList);
+        }
     }
 }

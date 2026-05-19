@@ -29,11 +29,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
+
 @SubResource(
         parent = ImportResource.class,
         path = "item",
         supportedClass = Item.class,
-        supportedOpenmrsVersions = { "1.8.* - 2.*" }
+        supportedOpenmrsVersions = { "1.8.* - 9.*" }
 )
 public class ItemResource extends DelegatingSubResource<Item, Import, ImportResource>{
 
@@ -49,6 +51,7 @@ public class ItemResource extends DelegatingSubResource<Item, Import, ImportReso
 
     @Override
     public PageableResult doGetAll(Import parent, RequestContext context) throws ResponseException {
+        requireManageConcepts();
         ImportService importService = getImportService();
         HashSet<ItemState> states = new HashSet<ItemState>();
         Integer updateItemsCount = importService.getImportItemsCount(parent, states);
@@ -72,6 +75,7 @@ public class ItemResource extends DelegatingSubResource<Item, Import, ImportReso
 
     @Override
     public Item getByUniqueId(String uuid) {
+        requireManageConcepts();
         return getImportService().getItem(uuid);
     }
 

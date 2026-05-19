@@ -2,8 +2,10 @@ package org.sihsalus.module.appointments;
 
 import java.util.List;
 import org.hibernate.SessionFactory;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.ServiceContext;
+import org.openmrs.module.appointments.AppointmentsActivator;
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict;
 import org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict;
@@ -19,8 +21,14 @@ import org.openmrs.module.appointments.dao.impl.AppointmentRecurringPatternDaoIm
 import org.openmrs.module.appointments.dao.impl.AppointmentServiceAttributeTypeDaoImpl;
 import org.openmrs.module.appointments.dao.impl.AppointmentServiceDaoImpl;
 import org.openmrs.module.appointments.dao.impl.SpecialityDaoImpl;
+import org.openmrs.module.appointments.events.advice.AppointmentEventsAdvice;
+import org.openmrs.module.appointments.events.advice.RecurringAppointmentEventsAdvice;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
-import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
+import org.openmrs.module.appointments.notification.MailSender;
+import org.openmrs.module.appointments.notification.impl.DefaultMailSender;
+import org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier;
+import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
 import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
 import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
@@ -30,6 +38,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.RecurringAppointmentNumberGenerator;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.service.impl.AppointmentRecurringPatternServiceImpl;
+import org.openmrs.module.appointments.service.impl.AppointmentArgumentsMapperImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentServiceAttributeTypeServiceImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentServiceDefinitionServiceImpl;
@@ -44,10 +53,6 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator;
 import org.openmrs.module.appointments.validator.impl.DefaultEditAppointmentValidator;
-import org.openmrs.module.appointments.web.controller.AppointmentsController;
-import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsService;
-import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
 import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
@@ -55,13 +60,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackageClasses = {
-        Appointment.class,
-        AppointmentsController.class,
-        AppointmentMapper.class,
-        AppointmentSearchValidator.class,
-        AbstractRecurringAppointmentsService.class
-})
+@ComponentScan(basePackageClasses = AppointmentsActivator.class)
 public class SihsalusAppointmentsConfiguration {
 
     @Bean
@@ -157,8 +156,23 @@ public class SihsalusAppointmentsConfiguration {
     }
 
     @Bean
-    PatientAppointmentNotifierService patientAppointmentNotifierService() {
-        return new PatientAppointmentNotifierService(List.of());
+    MailSender defaultTCApptMailSender(AdministrationService administrationService) {
+        return new DefaultMailSender(administrationService);
+    }
+
+    @Bean
+    AppointmentEventNotifier defaultPatientEmailNotifier(MailSender defaultTCApptMailSender) {
+        return new DefaultTCAppointmentPatientEmailNotifier(defaultTCApptMailSender);
+    }
+
+    @Bean
+    PatientAppointmentNotifierService patientAppointmentNotifierService(List<AppointmentEventNotifier> eventNotifiers) {
+        return new PatientAppointmentNotifierService(eventNotifiers);
+    }
+
+    @Bean
+    AppointmentArgumentsMapper appointmentArgumentsMapper() {
+        return new AppointmentArgumentsMapperImpl();
     }
 
     @Bean
@@ -258,13 +272,17 @@ public class SihsalusAppointmentsConfiguration {
             AppointmentServiceDefinitionService appointmentServiceDefinitionService,
             AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService,
             SpecialityService specialityService,
-            AppointmentRecurringPatternService appointmentRecurringPatternService) {
+            AppointmentRecurringPatternService appointmentRecurringPatternService,
+            AppointmentArgumentsMapper appointmentArgumentsMapper) {
         return () -> {
             serviceContext.setService(AppointmentsService.class, appointmentsService);
             serviceContext.setService(AppointmentServiceDefinitionService.class, appointmentServiceDefinitionService);
             serviceContext.setService(AppointmentServiceAttributeTypeService.class, appointmentServiceAttributeTypeService);
             serviceContext.setService(SpecialityService.class, specialityService);
             serviceContext.setService(AppointmentRecurringPatternService.class, appointmentRecurringPatternService);
+            serviceContext.setService(AppointmentArgumentsMapper.class, appointmentArgumentsMapper);
+            serviceContext.addAdvice(AppointmentsService.class, new AppointmentEventsAdvice());
+            serviceContext.addAdvice(AppointmentRecurringPatternService.class, new RecurringAppointmentEventsAdvice());
         };
     }
 }

@@ -128,5 +128,69 @@
             referencedColumnNames="user_id"/>
     </changeSet>
 
-</databaseChangeLog>
+    <changeSet id="sihsalus-interop-static-metadata-20260519" author="sihsalus-team">
+        <comment>Create privileges and global properties normally provided by config.xml in OMOD mode.</comment>
+        <sql>
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'SIH SALUS Interop Privilege', 'Allows user to access SIH SALUS Interoperability module functions', '97e7b6e2-0b7a-4d80-9b83-7d51f7f32801'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'SIH SALUS Interop Privilege');
 
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Manage Interop Queue', 'Allows user to manage interoperability message queue (FHIR/FUA)', 'b21b5c11-a0d1-4e2f-8f3a-7c996f995ac1'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Manage Interop Queue');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Send FHIR Messages', 'Allows user to send FHIR messages to RENHICE', '3101f993-3359-4f37-a943-6a3590e41723'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Send FHIR Messages');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Generate FUA', 'Allows user to generate and send FUA documents to SETI-SIS', '37d9887c-4b70-4de2-b8e7-d2e8b02fb591'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Generate FUA');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'View Interop Logs', 'Allows user to view interoperability logs and queue status', 'e07f13ae-1497-46ff-9e22-db08660f4fa6'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'View Interop Logs');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'View Interop Queue', 'Allows user to view and monitor the interoperability message queue', 'ec3a9b48-8862-44cf-bef4-78d994daebcc'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'View Interop Queue');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'sihsalusinterop.renhice.endpoint', 'http://hapi-fhir-server:8080/fhir', 'Endpoint URL del servidor FHIR de RENHICE (Dyaku).', 'a54d3c80-4b61-4b4f-b63e-71f0f8774d9a'
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sihsalusinterop.renhice.endpoint');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'sihsalusinterop.renhice.enabled', 'true', 'Habilita o deshabilita el envio automatico de datos a RENHICE.', '77533603-fad3-4e70-8af1-ce31879241eb'
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sihsalusinterop.renhice.enabled');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'sihsalusinterop.queue.maxRetries', '5', 'Numero maximo de reintentos para enviar un mensaje fallido.', '801220f4-14ca-4e97-9896-892a4c441922'
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sihsalusinterop.queue.maxRetries');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'sihsalusinterop.queue.retryInterval', '300000', 'Intervalo de tiempo en milisegundos entre reintentos de mensajes fallidos.', 'f00b5f5d-782d-43ab-bcff-bc5fbef890d0'
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sihsalusinterop.queue.retryInterval');
+
+            INSERT INTO scheduler_task_config (task_config_id, name, description, schedulable_class, repeat_interval, date_created, created_by, start_on_startup, started, uuid)
+            SELECT COALESCE((SELECT MAX(task_config_id) FROM scheduler_task_config), 0) + 1,
+                   'SIH SALUS Interop Queue Processor',
+                   'Procesa automaticamente la cola de mensajes FHIR pendientes cada 5 minutos',
+                   'org.openmrs.module.sihsalusinterop.api.tasks.QueueProcessorTask',
+                   300,
+                   CURRENT_TIMESTAMP,
+                   1,
+                   true,
+                   true,
+                   'e15ce1a6-d5d7-4d1f-9bb4-f2065608c0c3'
+            WHERE NOT EXISTS (SELECT 1 FROM scheduler_task_config WHERE name = 'SIH SALUS Interop Queue Processor');
+
+            UPDATE scheduler_task_config
+            SET schedulable_class = 'org.openmrs.module.sihsalusinterop.api.tasks.QueueProcessorTask',
+                repeat_interval = 300,
+                start_on_startup = true,
+                started = true
+            WHERE name = 'SIH SALUS Interop Queue Processor';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -767,4 +767,18 @@
         <comment>Renaming column column_number to bed_column_number in table bed_location_map because column_number is a reserved word in MySQL 8.0.2 and later</comment>
         <renameColumn columnDataType="int" newColumnName="bed_column_number" oldColumnName="column_number" tableName="bed_location_map" />
     </changeSet>
+    <changeSet id="bedmanagement-static-config-metadata-20260519" author="SIHSalus">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property WHERE property = 'bedmanagement.owa.enableManagingLocations';
+            </sqlCheck>
+        </preConditions>
+        <comment>Restore config.xml global property required when bedmanagement runs as a static internal module.</comment>
+        <insert tableName="global_property">
+            <column name="property" value="bedmanagement.owa.enableManagingLocations"/>
+            <column name="property_value" value="true"/>
+            <column name="uuid" valueComputed="uuid()"/>
+            <column name="description" value="Set this property to false to disable OWA location management features."/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

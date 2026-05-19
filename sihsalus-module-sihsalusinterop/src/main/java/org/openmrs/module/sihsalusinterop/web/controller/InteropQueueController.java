@@ -12,10 +12,14 @@ package org.openmrs.module.sihsalusinterop.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Patient;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.sihsalusinterop.api.DyakuSenderService;
 import org.openmrs.module.sihsalusinterop.api.exception.InteropException;
 import org.openmrs.module.sihsalusinterop.api.model.InteropQueueItem;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,11 +57,14 @@ public class InteropQueueController {
 	 */
 	@RequestMapping(value = "/queue/patient/{patientId}", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> queuePatient(@PathVariable("patientId") Integer patientId) {
+	public ResponseEntity<Map<String, Object>> queuePatient(@PathVariable("patientId") Integer patientId) {
 		
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		try {
+			Context.requirePrivilege(DyakuSenderService.PRIVILEGE_MANAGE_INTEROP_QUEUE);
+			Context.requirePrivilege(DyakuSenderService.PRIVILEGE_SEND_FHIR_MESSAGES);
+
 			// Obtener servicios
 			DyakuSenderService service = Context.getService(DyakuSenderService.class);
 			Patient patient = Context.getPatientService().getPatient(patientId);
@@ -66,7 +73,7 @@ public class InteropQueueController {
 			if (patient == null) {
 				response.put("success", false);
 				response.put("error", "Paciente no encontrado con ID: " + patientId);
-				return response;
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
 			}
 			
 			// Encolar paciente (conversión automática OpenMRS → FHIR → JSON)
@@ -81,6 +88,8 @@ public class InteropQueueController {
 			response.put("targetEndpoint", item.getTargetEndpoint());
 			
 			log.info("✓ API: Paciente " + patientId + " encolado con ID " + item.getQueueId());
+
+			return ResponseEntity.ok(response);
 			
 		} catch (InteropException e) {
 			// Error de validación (ej: paciente sin DNI)
@@ -88,15 +97,17 @@ public class InteropQueueController {
 			response.put("success", false);
 			response.put("error", e.getMessage());
 			response.put("errorCode", e.getErrorCode());
+			return ResponseEntity.badRequest().body(response);
 			
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
+			return forbidden(response, e);
 		} catch (Exception e) {
 			// Error inesperado
 			log.error("✗ API: Error inesperado", e);
 			response.put("success", false);
 			response.put("error", "Error interno del servidor: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
-		
-		return response;
 	}
 	
 	/**
@@ -108,11 +119,12 @@ public class InteropQueueController {
 	 */
 	@RequestMapping(value = "/queue/process", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> processQueue() {
+	public ResponseEntity<Map<String, Object>> processQueue() {
 		
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		try {
+			Context.requirePrivilege(DyakuSenderService.PRIVILEGE_MANAGE_INTEROP_QUEUE);
 			DyakuSenderService service = Context.getService(DyakuSenderService.class);
 			
 			// Procesar todos los mensajes pendientes
@@ -126,14 +138,17 @@ public class InteropQueueController {
 			response.put("processedCount", processedCount);
 			
 			log.info("✓ API: Cola procesada - " + sentCount + " mensajes enviados");
+
+			return ResponseEntity.ok(response);
 			
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
+			return forbidden(response, e);
 		} catch (Exception e) {
 			log.error("✗ API: Error al procesar cola", e);
 			response.put("success", false);
 			response.put("error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
-		
-		return response;
 	}
 	
 	/**
@@ -145,25 +160,29 @@ public class InteropQueueController {
 	 */
 	@RequestMapping(value = "/queue/items", method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> getAllItems() {
+	public ResponseEntity<Map<String, Object>> getAllItems() {
 		
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		try {
+			Context.requirePrivilege(DyakuSenderService.PRIVILEGE_VIEW_INTEROP_LOGS);
 			DyakuSenderService service = Context.getService(DyakuSenderService.class);
 			List<InteropQueueItem> items = service.getAllQueueItems();
 			
 			response.put("success", true);
 			response.put("count", items.size());
 			response.put("items", items);
+
+			return ResponseEntity.ok(response);
 			
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
+			return forbidden(response, e);
 		} catch (Exception e) {
 			log.error("✗ API: Error al obtener items", e);
 			response.put("success", false);
 			response.put("error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
-		
-		return response;
 	}
 	
 	/**
@@ -175,11 +194,12 @@ public class InteropQueueController {
 	 */
 	@RequestMapping(value = "/queue/items/status/{status}", method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> getItemsByStatus(@PathVariable("status") String status) {
+	public ResponseEntity<Map<String, Object>> getItemsByStatus(@PathVariable("status") String status) {
 		
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		try {
+			Context.requirePrivilege(DyakuSenderService.PRIVILEGE_VIEW_INTEROP_LOGS);
 			DyakuSenderService service = Context.getService(DyakuSenderService.class);
 			List<InteropQueueItem> items = service.getQueueItemsByStatus(status);
 			
@@ -187,14 +207,17 @@ public class InteropQueueController {
 			response.put("status", status);
 			response.put("count", items.size());
 			response.put("items", items);
+
+			return ResponseEntity.ok(response);
 			
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
+			return forbidden(response, e);
 		} catch (Exception e) {
 			log.error("✗ API: Error al filtrar items", e);
 			response.put("success", false);
 			response.put("error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
-		
-		return response;
 	}
 	
 	/**
@@ -206,11 +229,12 @@ public class InteropQueueController {
 	 */
 	@RequestMapping(value = "/queue/retry/{queueId}", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> retryItem(@PathVariable("queueId") Integer queueId) {
+	public ResponseEntity<Map<String, Object>> retryItem(@PathVariable("queueId") Integer queueId) {
 		
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		try {
+			Context.requirePrivilege(DyakuSenderService.PRIVILEGE_MANAGE_INTEROP_QUEUE);
 			DyakuSenderService service = Context.getService(DyakuSenderService.class);
 			
 			// Reintentar envío
@@ -224,14 +248,17 @@ public class InteropQueueController {
 			} else {
 				response.put("message", "No se pudo enviar el mensaje (ver logs)");
 			}
+
+			return ResponseEntity.ok(response);
 			
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
+			return forbidden(response, e);
 		} catch (Exception e) {
 			log.error("✗ API: Error al reintentar item", e);
 			response.put("success", false);
 			response.put("error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
-		
-		return response;
 	}
 	
 	/**
@@ -243,11 +270,12 @@ public class InteropQueueController {
 	 */
 	@RequestMapping(value = "/queue/stats", method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> getStats() {
+	public ResponseEntity<Map<String, Object>> getStats() {
 		
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		try {
+			Context.requirePrivilege(DyakuSenderService.PRIVILEGE_VIEW_INTEROP_LOGS);
 			DyakuSenderService service = Context.getService(DyakuSenderService.class);
 			
 			int totalItems = service.getAllQueueItems().size();
@@ -262,13 +290,23 @@ public class InteropQueueController {
 			response.put("sent", sentItems);
 			response.put("error", errorItems);
 			response.put("failed", failedItems);
+
+			return ResponseEntity.ok(response);
 			
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
+			return forbidden(response, e);
 		} catch (Exception e) {
 			log.error("✗ API: Error al obtener estadísticas", e);
 			response.put("success", false);
 			response.put("error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
-		
-		return response;
+	}
+
+	private ResponseEntity<Map<String, Object>> forbidden(Map<String, Object> response, Exception e) {
+		response.put("success", false);
+		response.put("error", "Forbidden");
+		response.put("message", e.getMessage());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
 	}
 }

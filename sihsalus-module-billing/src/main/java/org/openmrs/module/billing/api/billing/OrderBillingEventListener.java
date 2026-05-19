@@ -22,9 +22,9 @@ import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.api.context.Context;
-import org.openmrs.api.context.Daemon;
 import org.openmrs.event.Event;
 import org.openmrs.module.DaemonToken;
+import org.sihsalus.core.api.StaticModuleTaskRunner;
 
 /**
  * Listens for Order CREATED events from the OpenMRS Event module and delegates billing to the
@@ -48,19 +48,14 @@ public class OrderBillingEventListener implements BillingEventListener {
 	
 	@Override
 	public void onMessage(Message message) {
-		if (daemonToken == null) {
-			log.error("Cannot process order billing event: daemon token not set");
-			return;
-		}
-		
-		Daemon.runInDaemonThread(() -> {
+		StaticModuleTaskRunner.runInBackground(daemonToken, () -> {
 			try {
 				processMessage(message);
 			}
 			catch (Exception e) {
 				log.error("Error processing order billing event", e);
 			}
-		}, daemonToken);
+		});
 	}
 	
 	private void processMessage(Message message) throws JMSException {

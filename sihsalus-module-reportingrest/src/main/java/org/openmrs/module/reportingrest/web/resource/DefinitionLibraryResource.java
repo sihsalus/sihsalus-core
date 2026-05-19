@@ -23,6 +23,7 @@ import org.openmrs.module.reporting.definition.library.AllDefinitionLibraries;
 import org.openmrs.module.reporting.definition.library.LibraryDefinitionSummary;
 import org.openmrs.module.reporting.evaluation.Definition;
 import org.openmrs.module.reporting.query.encounter.definition.EncounterQuery;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -64,6 +65,7 @@ public class DefinitionLibraryResource implements CrudResource, Searchable {
 
     @Override
     public SimpleObject search(RequestContext context) throws ResponseException {
+        ReportingRestPrivileges.requireViewReportObjects();
         Class<? extends Definition> definitionClass = getDefinitionClass(context, "q");
         List<LibraryDefinitionSummary> summaries = getLibraries().getDefinitionSummaries(definitionClass);
         SimpleObject results = new SimpleObject();
@@ -86,6 +88,7 @@ public class DefinitionLibraryResource implements CrudResource, Searchable {
 
     @Override
     public Object retrieve(String uuid, RequestContext context) throws ResponseException {
+        ReportingRestPrivileges.requireViewReportObjects();
         Definition definition = getLibraries().getDefinition(null, uuid);
         if (definition == null) {
             throw new ObjectNotFoundException();

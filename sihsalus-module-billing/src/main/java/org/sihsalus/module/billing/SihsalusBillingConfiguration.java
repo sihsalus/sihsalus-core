@@ -4,6 +4,7 @@ import java.util.List;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.event.Event;
 import org.openmrs.module.billing.api.BillDiscountService;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.BillLineItemService;
@@ -60,6 +61,7 @@ import org.openmrs.module.billing.api.impl.PaymentModeServiceImpl;
 import org.openmrs.module.billing.api.impl.SequentialReceiptNumberGeneratorServiceImpl;
 import org.openmrs.module.billing.api.impl.TimesheetServiceImpl;
 import org.sihsalus.core.api.HibernateMappingContributor;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -249,6 +251,12 @@ public class SihsalusBillingConfiguration {
     @Bean
     BillingEventListener orderBillingEventListener() {
         return new OrderBillingEventListener();
+    }
+
+    @Bean
+    SmartInitializingSingleton billingEventListenerSubscriber(List<BillingEventListener> billingEventListeners) {
+        return () -> billingEventListeners.forEach(listener -> Event.subscribe(
+                listener.getSubscribedClass(), listener.getSubscribedAction().name(), listener));
     }
 
     @Bean

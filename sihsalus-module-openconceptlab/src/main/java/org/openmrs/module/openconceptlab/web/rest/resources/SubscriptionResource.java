@@ -34,15 +34,18 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Locale;
 
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
+
 @Resource(
         name = RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE + "/subscription",
         supportedClass = Subscription.class,
-        supportedOpenmrsVersions = { "1.8.* - 2.*" }
+        supportedOpenmrsVersions = { "1.8.* - 9.*" }
 )
 public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     @Override
     public Subscription getByUniqueId(String uniqueId) {
+        requireManageConcepts();
         Subscription subscription = getImportService().getSubscription();
         if(subscription.getUuid().equals(uniqueId)){
             return subscription;
@@ -53,6 +56,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     @Override
     protected void delete(Subscription subscription, String reason, RequestContext context) throws ResponseException {
+        requireManageConcepts();
         getImportService().unsubscribe();
     }
 
@@ -63,6 +67,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     @Override
     public Subscription save(Subscription subscription) {
+        requireManageConcepts();
         if (!"url".equals(subscription.getUrl())) {
             validateSubscriptionUrl(subscription.getUrl());
             UpdateScheduler updateScheduler = getUpdateScheduler();
@@ -169,6 +174,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     @Override
     protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+        requireManageConcepts();
         return new NeedsPaging<Subscription>(Collections.singletonList(getImportService().getSubscription()), context);
     }
 

@@ -14,4 +14,22 @@
             INSERT INTO privilege (privilege, description, uuid) VALUES ('Create Teleconsultation', 'Able to create Teleconsultation Link in Teleconsultation module', uuid());
         </sql>
     </changeSet>
+
+    <changeSet id="teleconsultation-static-config-metadata-20260519" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from global_property where property = 'bahmni.appointment.teleConsultation.serverUrlPattern'
+            </sqlCheck>
+        </preConditions>
+        <comment>Add global property declared in the legacy teleconsultation config.xml</comment>
+        <sql>
+            INSERT INTO global_property (property, property_value, description, uuid)
+            VALUES (
+                'bahmni.appointment.teleConsultation.serverUrlPattern',
+                'https://meet.jit.si/{0}',
+                'Pattern of the URL for the meeting server. Notice the placeholder {0} for appointment UUID',
+                uuid()
+            );
+        </sql>
+    </changeSet>
 </databaseChangeLog>

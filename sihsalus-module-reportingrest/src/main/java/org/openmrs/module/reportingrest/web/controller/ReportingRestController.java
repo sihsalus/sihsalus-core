@@ -27,6 +27,7 @@ import org.openmrs.module.reporting.report.definition.service.ReportDefinitionSe
 import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.module.reportingrest.web.ReportFile;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -75,6 +76,7 @@ public class ReportingRestController extends MainResourceController {
     @RequestMapping(value = "/saveReport", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> saveReport(@RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
+        ReportingRestPrivileges.requireAddReports();
         if (StringUtils.isBlank(reportRequestUuid)) {
             return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
         }
@@ -98,6 +100,7 @@ public class ReportingRestController extends MainResourceController {
     @RequestMapping(value = "/downloadReport", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> downloadReport(@RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
+        ReportingRestPrivileges.requireViewReports();
         if (StringUtils.isBlank(reportRequestUuid)) {
             return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
         }
@@ -113,6 +116,7 @@ public class ReportingRestController extends MainResourceController {
     @RequestMapping(value = "/downloadMultipleReports", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> downloadMultipleReports(@RequestParam(value = "reportRequestUuids", required = false) String reportRequestUuids) {
+        ReportingRestPrivileges.requireViewReports();
         if (StringUtils.isBlank(reportRequestUuids)) {
             return new ResponseEntity<String>("reportRequestUuids is required", HttpStatus.BAD_REQUEST);
         }
@@ -147,6 +151,7 @@ public class ReportingRestController extends MainResourceController {
                                               HttpServletResponse response,
                                               @PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
                                               @PathVariable("dataSetKey") String dataSetKey) {
+        ReportingRestPrivileges.requireViewReports();
         ReportDefinition reportDefinition = DefinitionContext.getReportDefinitionService().getDefinitionByUuid(reportDefinitionUuid);
         if (reportDefinition == null) {
             throw new ObjectNotFoundException("Report definition not found: " +  reportDefinitionUuid);
@@ -188,6 +193,7 @@ public class ReportingRestController extends MainResourceController {
     public SimpleObject runReportAsJson(@PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
                                         HttpServletRequest request,
                                         HttpServletResponse response) throws Exception {
+        ReportingRestPrivileges.requireViewReports();
         ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
         EvaluationContext evalContext = buildEvaluationContext(definition, request);
         ReportData reportData = evaluateReport(definition, evalContext);
@@ -200,6 +206,7 @@ public class ReportingRestController extends MainResourceController {
                                     @PathVariable("reportDesignUuid") String reportDesignUuid,
                                     HttpServletRequest request,
                                     HttpServletResponse response) throws Exception {
+        ReportingRestPrivileges.requireViewReports();
         ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
         EvaluationContext evalContext = buildEvaluationContext(definition, request);
 

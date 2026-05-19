@@ -33,6 +33,7 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.legacyui.api.LegacyUIService;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -114,7 +115,7 @@ public class LegacyUIImpl extends BaseOpenmrsService implements LegacyUIService 
 		// exit
 		log.debug("Patient is exiting, so let's make sure there's an Obs for it");
 		
-		String codProp = Context.getAdministrationService().getGlobalProperty("concept.reasonExitedCare");
+		String codProp = getGlobalProperty("concept.reasonExitedCare");
 		Concept reasonForExit = Context.getConceptService().getConcept(codProp);
 		
 		if (reasonForExit != null) {
@@ -254,16 +255,15 @@ public class LegacyUIImpl extends BaseOpenmrsService implements LegacyUIService 
 			        + discontinueDate);
 		
 		OrderService orderService = Context.getOrderService();
-		int durgOrderType = 2; //Default OpenMRS core drug order type ID
+		int drugOrderType = 2; //Default OpenMRS core drug order type ID
 		try {
-			durgOrderType = Integer.valueOf(Context.getAdministrationService().getGlobalProperty(
-			    "orderextension.drugOrderType"));
+			drugOrderType = Integer.valueOf(getGlobalProperty("orderextension.drugOrderType"));
 		}
 		catch (Exception e) {
 			log.error("orderextension.drugOrderType global property value should be an integer");
 		}
 		List<Order> drugOrders = orderService.getOrders(patient, orderService.getCareSetting(2), Context.getOrderService()
-		        .getOrderType(durgOrderType), false);
+		        .getOrderType(drugOrderType), false);
 		// loop over all of this patient's drug orders to discontinue each
 		if (drugOrders != null) {
 			for (Order drugOrder : drugOrders) {
@@ -278,11 +278,27 @@ public class LegacyUIImpl extends BaseOpenmrsService implements LegacyUIService 
 						    drugOrder.getEncounter());
 					}
 					catch (Exception e) {
-						e.printStackTrace();
+						log.warn("Unable to discontinue drug order " + drugOrder, e);
 					}
 				} else {
 					
 				}
+			}
+		}
+	}
+
+	private String getGlobalProperty(String property) {
+		boolean addedProxyPrivilege = Context.isAuthenticated()
+		        && !Context.hasPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		if (addedProxyPrivilege) {
+			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		}
+		try {
+			return Context.getAdministrationService().getGlobalProperty(property);
+		}
+		finally {
+			if (addedProxyPrivilege) {
+				Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
 			}
 		}
 	}

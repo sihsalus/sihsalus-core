@@ -27,7 +27,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingC
  * @param <T> The instance attribute type class
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/attributetype", supportedClass = IInstanceAttributeType.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/attributetype", supportedClass = IInstanceAttributeType.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class InstanceAttributeTypeConverter<T extends IInstanceAttributeType<?>> extends MetadataDelegatingCrudResource<T> {
 	
 	private static final String NEED_SUBCLASS_HANDLER = "This operation should be handled by a subclass handler.";
