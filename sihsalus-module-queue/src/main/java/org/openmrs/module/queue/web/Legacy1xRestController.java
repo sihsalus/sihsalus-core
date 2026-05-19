@@ -228,6 +228,7 @@ public class Legacy1xRestController extends BaseRestController {
 	}
 	
 	@RequestMapping(method = { GET, POST }, value = "/rest/" + RestConstants.VERSION_1 + "/queue-entry-number")
+	@ResponseBody
 	public Object generateQueueEntryNumber(HttpServletRequest request) {
 		String serviceType = "";
 		String visitQueueNumber = "";
@@ -238,8 +239,10 @@ public class Legacy1xRestController extends BaseRestController {
 				Location l = services.getLocation(request.getParameter("location"));
 				Visit v = services.getVisit(request.getParameter("visit"));
 				Queue q = services.getQueue(request.getParameter("queue"));
-				serviceType = q.getName();
-				visitQueueNumber = services.getQueueEntryService().generateVisitQueueNumber(l, q, v, vat);
+				if (q != null) {
+					serviceType = q.getName();
+					visitQueueNumber = services.getQueueEntryService().generateVisitQueueNumber(l, q, v, vat);
+				}
 			}
 		}
 		return new GenericSingleObjectResult(Arrays.asList(new PropValue("serviceType", serviceType),

@@ -43,10 +43,13 @@ public class TimesheetSearchHandler implements SearchHandler {
 	@Override
 	public PageableResult search(RequestContext context) {
 		ITimesheetService service = Context.getService(ITimesheetService.class);
+		if (Context.getAuthenticatedUser() == null) {
+			return new AlreadyPagedWithLength<>(context, Collections.emptyList(), false, 0);
+		}
 		Provider provider = ProviderUtil.getCurrentProvider();
 		Date date;
 		if (provider == null) {
-			return null;
+			return new AlreadyPagedWithLength<>(context, Collections.emptyList(), false, 0);
 		}
 		try {
 			date = new SimpleDateFormat("MM/dd/yyyy").parse(context.getParameter("date"));
