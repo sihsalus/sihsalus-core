@@ -38,6 +38,8 @@ import org.openmrs.Location;
 import org.openmrs.Visit;
 import org.openmrs.VisitAttributeType;
 import org.openmrs.annotation.Authorized;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.queue.api.QueueServicesWrapper;
 import org.openmrs.module.queue.api.digitalSignage.QueueTicketAssignments;
 import org.openmrs.module.queue.api.search.QueueEntrySearchCriteria;
@@ -197,6 +199,7 @@ public class Legacy1xRestController extends BaseRestController {
 	@ResponseBody
 	@Authorized(PrivilegeConstants.MANAGE_QUEUE_ENTRIES)
 	public Object assignTicketToServicePoint(HttpServletRequest request) throws Exception {
+		requireAnyPrivilege(PrivilegeConstants.MANAGE_QUEUE_ENTRIES);
 		String requestBody = IOUtils.toString(request.getReader());
 		if (requestBody != null) {
 			ObjectMapper mapper = new ObjectMapper();
@@ -224,6 +227,7 @@ public class Legacy1xRestController extends BaseRestController {
 	@RequestMapping(method = GET, value = "/rest/" + RestConstants.VERSION_1 + "/queueutil/active-tickets")
 	@Authorized(PrivilegeConstants.GET_QUEUE_ENTRIES)
 	public Object getActiveTickets() {
+		requireAnyPrivilege(PrivilegeConstants.GET_QUEUE_ENTRIES);
 		return new ResponseEntity<>(QueueTicketAssignments.getActiveTicketAssignments(), new HttpHeaders(), HttpStatus.OK);
 	}
 	
@@ -234,6 +238,9 @@ public class Legacy1xRestController extends BaseRestController {
 		String visitQueueNumber = "";
 		String vatUuid = request.getParameter("visitAttributeType");
 		if (StringUtils.isNotEmpty(vatUuid)) {
+			requireAnyPrivilege(PrivilegeConstants.MANAGE_QUEUE_ENTRIES,
+			    org.openmrs.util.PrivilegeConstants.ADD_VISITS,
+			    org.openmrs.util.PrivilegeConstants.EDIT_VISITS);
 			VisitAttributeType vat = services.getVisitService().getVisitAttributeTypeByUuid(vatUuid);
 			if (vat != null) {
 				Location l = services.getLocation(request.getParameter("location"));
@@ -249,6 +256,15 @@ public class Legacy1xRestController extends BaseRestController {
 		result.add("serviceType", serviceType);
 		result.add("visitQueueNumber", visitQueueNumber);
 		return result;
+	}
+
+	private void requireAnyPrivilege(String... privileges) {
+		for (String privilege : privileges) {
+			if (Context.hasPrivilege(privilege)) {
+				return;
+			}
+		}
+		throw new APIAuthenticationException("Privileges required: " + StringUtils.join(privileges, ", "));
 	}
 	
 	@Data

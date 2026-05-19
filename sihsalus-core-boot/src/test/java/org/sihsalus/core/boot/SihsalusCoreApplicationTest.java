@@ -282,6 +282,19 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void queueLegacyStateEndpointsRequirePrivileges() throws Exception {
+        mockMvc.perform(post("/rest/v1/queueutil/assignticket")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"servicePointName\":\"Room 1\",\"ticketNumber\":\"A-001\",\"status\":\"called\"}"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/rest/v1/queueutil/active-tickets"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/rest/v1/queue-entry-number")
+                        .param("visitAttributeType", "not-a-real-vat"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void queueIsWiredAsStaticInternalModule() {
         QueueService queueService = Context.getService(QueueService.class);
         QueueEntryService queueEntryService = Context.getService(QueueEntryService.class);
