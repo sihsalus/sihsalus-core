@@ -77,8 +77,18 @@ import org.openmrs.module.bedmanagement.extension.html.AdminList;
 import org.openmrs.module.bedmanagement.service.BedManagementService;
 import org.openmrs.module.bedmanagement.service.BedTagMapService;
 import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.BillExemptionService;
+import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.CashierItemPriceService;
 import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.billing.BillingEventListener;
+import org.openmrs.module.billing.api.handler.BillReceiptNumberHandler;
+import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.BillRefund;
+import org.openmrs.module.billing.validator.BillDiscountValidator;
+import org.openmrs.module.billing.validator.BillRefundValidator;
+import org.openmrs.module.billing.validator.BillValidator;
 import org.openmrs.module.cohort.api.CohortMemberService;
 import org.openmrs.module.cohort.api.CohortService;
 import org.openmrs.module.cohort.api.CohortTypeService;
@@ -328,11 +338,11 @@ class SihsalusCoreApplicationTest {
                 () -> "Visit SaveHandlers: " + visitSaveHandlers.stream()
                         .map(handler -> handler.getClass().getName())
                         .toList());
-        assertQueueValidatorRegistered(Queue.class, QueueValidator.class);
-        assertQueueValidatorRegistered(QueueEntry.class, QueueEntryValidator.class);
-        assertQueueValidatorRegistered(QueueRoom.class, QueueRoomValidation.class);
-        assertQueueValidatorRegistered(RoomProviderMap.class, RoomProviderMapValidator.class);
-        assertQueueValidatorRegistered(Visit.class, VisitWithQueueEntriesValidator.class);
+        assertOpenmrsValidatorRegistered(Queue.class, QueueValidator.class);
+        assertOpenmrsValidatorRegistered(QueueEntry.class, QueueEntryValidator.class);
+        assertOpenmrsValidatorRegistered(QueueRoom.class, QueueRoomValidation.class);
+        assertOpenmrsValidatorRegistered(RoomProviderMap.class, RoomProviderMapValidator.class);
+        assertOpenmrsValidatorRegistered(Visit.class, VisitWithQueueEntriesValidator.class);
 
         List<String> queuePrivileges = List.of(
                 "Get Queues",
@@ -889,9 +899,12 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
-    void billingIsWiredAsStaticInternalModule() {
+    void billingIsWiredAsStaticInternalModule() throws Exception {
         assertNotNull(Context.getService(BillService.class));
         assertNotNull(Context.getService(PaymentModeService.class));
+        assertNotNull(Context.getService(CashierItemPriceService.class));
+        assertNotNull(Context.getService(BillExemptionService.class));
+        assertNotNull(Context.getService(BillLineItemService.class));
         assertNotNull(Context.getRegisteredComponents(BillingEventListener.class).stream()
                 .findFirst()
                 .orElse(null));
@@ -913,6 +926,15 @@ class SihsalusCoreApplicationTest {
                 "v2/billing/timesheet")) {
             assertNotNull(restService.getResourceByName(resourceName));
         }
+        assertOpenmrsValidatorRegistered(Bill.class, BillValidator.class);
+        assertOpenmrsValidatorRegistered(BillDiscount.class, BillDiscountValidator.class);
+        assertOpenmrsValidatorRegistered(BillRefund.class, BillRefundValidator.class);
+        List<SaveHandler> billSaveHandlers = HandlerUtil.getHandlersForType(SaveHandler.class, Bill.class);
+        assertTrue(
+                billSaveHandlers.stream().anyMatch(BillReceiptNumberHandler.class::isInstance),
+                () -> "Bill SaveHandlers: " + billSaveHandlers.stream()
+                        .map(handler -> handler.getClass().getName())
+                        .toList());
 
         List<String> billingPrivileges = List.of(
                 "Manage Cashier Bills",
@@ -948,6 +970,30 @@ class SihsalusCoreApplicationTest {
                 "select count(*) from privilege where privilege in (" + placeholders + ")",
                 Integer.class,
                 billingPrivileges.toArray()));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class, () -> Context.getService(BillService.class).getBill(1));
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(PaymentModeService.class).getPaymentModes(false));
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(CashierItemPriceService.class).getCashierItemPrices(false));
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(BillExemptionService.class).getBillingExemptionById(1));
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(BillLineItemService.class).getBillLineItemByUuid("not-a-real-line-item"));
+            mockMvc.perform(get("/rest/v1/billing/bill/not-a-real-bill"))
+                    .andExpect(status().isUnauthorized());
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test
@@ -1418,7 +1464,7 @@ class SihsalusCoreApplicationTest {
         return "Basic " + token;
     }
 
-    private void assertQueueValidatorRegistered(Class<?> supportedClass, Class<? extends Validator> validatorClass) {
+    private void assertOpenmrsValidatorRegistered(Class<?> supportedClass, Class<? extends Validator> validatorClass) {
         List<Validator> validators = HandlerUtil.getHandlersForType(Validator.class, supportedClass);
         assertTrue(
                 validators.stream().anyMatch(validatorClass::isInstance),

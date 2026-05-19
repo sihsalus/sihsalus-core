@@ -46,6 +46,7 @@ import org.openmrs.module.billing.api.db.hibernate.HibernatePaymentModeDAOImpl;
 import org.openmrs.module.billing.api.evaluator.ExemptionEvaluator;
 import org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine;
 import org.openmrs.module.billing.api.evaluator.impl.JSExemptionEvaluator;
+import org.openmrs.module.billing.api.handler.BillReceiptNumberHandler;
 import org.openmrs.module.billing.api.impl.BillDiscountServiceImpl;
 import org.openmrs.module.billing.api.impl.BillExemptionServiceImpl;
 import org.openmrs.module.billing.api.impl.BillLineItemServiceImpl;
@@ -60,6 +61,9 @@ import org.openmrs.module.billing.api.impl.PaymentModeAttributeTypeServiceImpl;
 import org.openmrs.module.billing.api.impl.PaymentModeServiceImpl;
 import org.openmrs.module.billing.api.impl.SequentialReceiptNumberGeneratorServiceImpl;
 import org.openmrs.module.billing.api.impl.TimesheetServiceImpl;
+import org.openmrs.module.billing.validator.BillDiscountValidator;
+import org.openmrs.module.billing.validator.BillRefundValidator;
+import org.openmrs.module.billing.validator.BillValidator;
 import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -236,6 +240,26 @@ public class SihsalusBillingConfiguration {
     @Bean
     BillRefundService billRefundService(BillRefundDAO billRefundDAO) {
         return new BillRefundServiceImpl(billRefundDAO);
+    }
+
+    @Bean
+    BillValidator billValidator() {
+        return new BillValidator();
+    }
+
+    @Bean
+    BillDiscountValidator billDiscountValidator() {
+        return new BillDiscountValidator();
+    }
+
+    @Bean
+    BillRefundValidator billRefundValidator() {
+        return new BillRefundValidator();
+    }
+
+    @Bean
+    BillReceiptNumberHandler billReceiptNumberHandler() {
+        return new BillReceiptNumberHandler();
     }
 
     @Bean

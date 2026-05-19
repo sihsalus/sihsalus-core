@@ -10,7 +10,9 @@
 package org.openmrs.module.billing.api;
 
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.api.model.PaymentMode;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 import java.util.List;
 
@@ -25,6 +27,7 @@ public interface PaymentModeService extends OpenmrsService {
 	 * @param id the payment mode id
 	 * @return the payment mode or {@code null} if not found
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	PaymentMode getPaymentMode(Integer id);
 	
 	/**
@@ -33,6 +36,7 @@ public interface PaymentModeService extends OpenmrsService {
 	 * @param uuid the payment mode uuid
 	 * @return the payment mode or {@code null} if not found
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	PaymentMode getPaymentModeByUuid(String uuid);
 	
 	/**
@@ -41,6 +45,7 @@ public interface PaymentModeService extends OpenmrsService {
 	 * @param includeRetired whether to include retired payment modes
 	 * @return a list of payment modes, or an empty list if none found
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	List<PaymentMode> getPaymentModes(boolean includeRetired);
 	
 	/**
@@ -50,6 +55,7 @@ public interface PaymentModeService extends OpenmrsService {
 	 * @return the saved payment mode
 	 * @throws NullPointerException if paymentMode is null
 	 */
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	PaymentMode savePaymentMode(PaymentMode paymentMode);
 	
 	/**
@@ -60,6 +66,7 @@ public interface PaymentModeService extends OpenmrsService {
 	 * @return the retired payment mode
 	 * @throws IllegalArgumentException if reason is empty or null
 	 */
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	PaymentMode retirePaymentMode(PaymentMode paymentMode, String reason);
 	
 	/**
@@ -68,6 +75,7 @@ public interface PaymentModeService extends OpenmrsService {
 	 * @param paymentMode the payment mode to unretire
 	 * @return the unretired payment mode
 	 */
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	PaymentMode unretirePaymentMode(PaymentMode paymentMode);
 	
 	/**
@@ -76,5 +84,6 @@ public interface PaymentModeService extends OpenmrsService {
 	 * @param paymentMode the payment mode to purge
 	 * @throws NullPointerException if paymentMode is null
 	 */
+	@Authorized(PrivilegeConstants.PURGE_METADATA)
 	void purgePaymentMode(PaymentMode paymentMode);
 }
