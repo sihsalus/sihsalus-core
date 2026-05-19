@@ -13,6 +13,7 @@ import static org.openmrs.module.patientdocuments.common.PatientDocumentsConstan
 import static org.openmrs.module.patientdocuments.common.PatientDocumentsConstants.MODULE_ARTIFACT_ID;
 
 import org.openmrs.Patient;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.patientdocuments.reports.PatientIdStickerPdfReport;
@@ -61,7 +62,7 @@ public class PatientIdStickerDataPdfExportController extends BaseRestController 
 			
 			return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
 		}
-		catch (ContextAuthenticationException e) {
+		catch (APIAuthenticationException | ContextAuthenticationException e) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.TEXT_PLAIN)
 			        .body(e.getMessage().getBytes());
 		}
@@ -75,15 +76,21 @@ public class PatientIdStickerDataPdfExportController extends BaseRestController 
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<byte[]> getPatientIdSticker(@RequestParam(value = "patientUuid", required = false) String patientUuid,
 	        @RequestParam(value = "inline", required = false, defaultValue = "true") boolean inline) {
-		if (patientUuid == null || patientUuid.isBlank()) {
-			return ResponseEntity.badRequest().build();
+		try {
+			if (patientUuid == null || patientUuid.isBlank()) {
+				return ResponseEntity.badRequest().build();
+			}
+
+			Patient patient = ps.getPatientByUuid(patientUuid);
+			if (patient == null) {
+				return ResponseEntity.notFound().build();
+			}
+
+			return writeResponse(patient, inline);
 		}
-		
-		Patient patient = ps.getPatientByUuid(patientUuid);
-		if (patient == null) {
-			return ResponseEntity.notFound().build();
+		catch (APIAuthenticationException | ContextAuthenticationException e) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.TEXT_PLAIN)
+			        .body(e.getMessage().getBytes());
 		}
-		
-		return writeResponse(patient, inline);
 	}
 }

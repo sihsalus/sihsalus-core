@@ -1,5 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceSearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
@@ -9,6 +11,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentServiceDescriptio
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -75,6 +78,8 @@ public class AppointmentServiceController extends BaseRestController {
             AppointmentServiceDefinition savedAppointmentServiceDefinition = appointmentServiceDefinitionService.save(appointmentServiceDefinition);
             AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(savedAppointmentServiceDefinition);
             return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
+        } catch (APIAuthenticationException | ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
@@ -84,6 +89,9 @@ public class AppointmentServiceController extends BaseRestController {
     @ResponseBody
     public ResponseEntity<Object> voidAppointmentService(@RequestParam(value = "uuid", required = true) String appointmentServiceUuid, @RequestParam(value = "void_reason", required = false) String voidReason ) {
         AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServiceUuid);
+        if (appointmentServiceDefinition == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         if (appointmentServiceDefinition.getVoided()){
             AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDefinition);
             return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
@@ -92,6 +100,8 @@ public class AppointmentServiceController extends BaseRestController {
             AppointmentServiceDefinition appointmentServiceDefinition1 = appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, voidReason);
             AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDefinition1);
             return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
+        } catch (APIAuthenticationException | ContextAuthenticationException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }

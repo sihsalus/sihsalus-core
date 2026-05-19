@@ -152,6 +152,7 @@ class SihsalusCoreApplicationTest {
     @Test
     void queueTicketAssignmentRejectsIncompletePayload() throws Exception {
         mockMvc.perform(post("/rest/v1/queueutil/assignticket")
+                        .header("Authorization", ADMIN_BASIC_AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"ticketNumber\":\"A-001\"}"))
                 .andExpect(status().isBadRequest());
@@ -306,6 +307,26 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(StockManagementService.class));
         assertNotNull(
                 jdbcTemplate.queryForObject("select count(*) from stockmgmt_stock_item", Integer.class));
+    }
+
+    @Test
+    void stockManagementProxyPreservesOpenmrsAuthorizationInterceptors() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            StockManagementService stockManagementService = Context.getService(StockManagementService.class);
+
+            assertThrows(APIAuthenticationException.class,
+                    () -> stockManagementService.getStockOperationByUuid("not-a-real-stock-operation"));
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test

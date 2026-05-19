@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
@@ -105,7 +106,7 @@ public class RecurringAppointmentsController extends BaseRestController {
             appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
             return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(
                     new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
-        } catch (ContextAuthenticationException e) {
+        } catch (APIAuthenticationException | ContextAuthenticationException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to create recurring appointments", e);
@@ -128,7 +129,7 @@ public class RecurringAppointmentsController extends BaseRestController {
             } else {
                 throw new RuntimeException("Appointment does not exist");
             }
-        } catch (ContextAuthenticationException e) {
+        } catch (APIAuthenticationException | ContextAuthenticationException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to validateAndUpdate appointment status", e);
@@ -157,7 +158,7 @@ public class RecurringAppointmentsController extends BaseRestController {
                         Arrays.asList(appointmentToBeUpdated, appointmentToBeUpdated.getRelatedAppointment()));
                 return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(Arrays.asList(updatedAppointment)), HttpStatus.OK);
             }
-        } catch (ContextAuthenticationException e) {
+        } catch (APIAuthenticationException | ContextAuthenticationException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to validateAndUpdate an appointment", e);
@@ -189,7 +190,7 @@ public class RecurringAppointmentsController extends BaseRestController {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             return new ResponseEntity<>(appointmentMapper.constructConflictResponse(appointmentsConflicts),
                     HttpStatus.OK);
-        } catch (ContextAuthenticationException e) {
+        } catch (APIAuthenticationException | ContextAuthenticationException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.FORBIDDEN);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to get getConflicts for recurring appointments", e);

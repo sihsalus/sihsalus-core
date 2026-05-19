@@ -10,6 +10,7 @@
 package org.openmrs.module.patientdocuments.web.rest.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.patientdocuments.common.PatientDocumentsPrivilegeConstants;
@@ -75,7 +76,7 @@ public class EncounterDataPdfExportController extends BaseRestController {
 			validatePrivileges();
 			SimpleObject response = encounterPdfReport.triggerEncountersPrinting(encounterUuids);
 			return ResponseEntity.ok(response);
-		} catch (ContextAuthenticationException e) {
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(createError(e.getMessage()));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -101,7 +102,7 @@ public class EncounterDataPdfExportController extends BaseRestController {
 			response.put("status", request.getStatus().name());
 
 			return ResponseEntity.ok(response);
-		} catch (ContextAuthenticationException e) {
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(createError(e.getMessage()));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createError(e.getMessage()));
@@ -144,7 +145,7 @@ public class EncounterDataPdfExportController extends BaseRestController {
 				}
 				out.flush();
 			}
-		} catch (ContextAuthenticationException e) {
+		} catch (APIAuthenticationException | ContextAuthenticationException e) {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		} catch (IOException e) {
 			throw e;

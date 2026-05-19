@@ -1,6 +1,7 @@
 package org.bahmni.module.teleconsultation.web.controller;
 
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class TeleconsultationController extends BaseRestController {
     public ResponseEntity<String> generateTeleconsultationLink(@RequestParam(value = "uuid", required = true) String uuid) {
         try {
             return new ResponseEntity<>(teleconsultationService.generateTeleconsultationLink(uuid), HttpStatus.OK);
-        } catch (ContextAuthenticationException e) {
+        } catch (APIAuthenticationException | ContextAuthenticationException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

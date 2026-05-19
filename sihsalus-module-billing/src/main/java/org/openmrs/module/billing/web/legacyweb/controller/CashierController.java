@@ -79,7 +79,7 @@ public class CashierController {
 			        + "(Admin -> Manage providers)");
 		}
 		
-		String returnTo = returnUrl;
+		String returnTo = safeReturnUrl(returnUrl);
 		if (StringUtils.isEmpty(returnTo)) {
 			HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 			returnTo = req.getHeader("Referer");
@@ -93,6 +93,7 @@ public class CashierController {
 						
 						returnTo = returnTo.substring(req.getContextPath().length());
 					}
+					returnTo = safeReturnUrl(returnTo);
 				}
 				catch (MalformedURLException e) {
 					log.warn("Could not parse referrer url '{}'", returnTo);
@@ -114,7 +115,7 @@ public class CashierController {
 	
 	@RequestMapping(method = RequestMethod.POST)
 	public String post(Timesheet timesheet, Errors errors, WebRequest request, ModelMap modelMap) {
-		String returnUrl = request.getParameter("returnUrl");
+		String returnUrl = safeReturnUrl(request.getParameter("returnUrl"));
 		
 		new TimesheetEntryValidator().validate(timesheet, errors);
 		if (errors.hasErrors()) {
@@ -131,6 +132,17 @@ public class CashierController {
 			returnUrl = "redirect:" + returnUrl;
 		}
 		return returnUrl;
+	}
+
+	private String safeReturnUrl(String returnUrl) {
+		if (StringUtils.isBlank(returnUrl)) {
+			return "";
+		}
+		String trimmed = returnUrl.trim();
+		if (!trimmed.startsWith("/") || trimmed.startsWith("//") || trimmed.contains("\r") || trimmed.contains("\n")) {
+			return "";
+		}
+		return trimmed;
 	}
 	
 	@ModelAttribute("cashPoints")

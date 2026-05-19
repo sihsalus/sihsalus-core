@@ -59,7 +59,7 @@ public class AppointmentServiceHelper {
         appointmentJson.put("locationUuid", locationUuid);
         String startDate = appointment.getStartDateTime() == null ? null : appointment.getStartDateTime().toInstant().toString();
         appointmentJson.put("startDateTime", startDate);
-        String endDate = appointment.getStartDateTime() == null ? null : appointment.getEndDateTime().toInstant().toString();
+        String endDate = appointment.getEndDateTime() == null ? null : appointment.getEndDateTime().toInstant().toString();
         appointmentJson.put("endDateTime", endDate);
         appointmentJson.put("appointmentKind", appointment.getAppointmentKind().name());
         appointmentJson.put("appointmentNotes", appointment.getComments());

@@ -37,11 +37,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.Visit;
 import org.openmrs.VisitAttributeType;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.queue.api.QueueServicesWrapper;
 import org.openmrs.module.queue.api.digitalSignage.QueueTicketAssignments;
 import org.openmrs.module.queue.api.search.QueueEntrySearchCriteria;
 import org.openmrs.module.queue.model.Queue;
 import org.openmrs.module.queue.model.QueueEntry;
+import org.openmrs.module.queue.utils.PrivilegeConstants;
 import org.openmrs.module.queue.web.resources.QueueEntryResource;
 import org.openmrs.module.queue.web.resources.QueueRoomResource;
 import org.openmrs.module.queue.web.resources.RoomProviderMapResource;
@@ -74,29 +76,24 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @Slf4j
 public class Legacy1xRestController extends BaseRestController {
-	
-	@Autowired
-	QueueServicesWrapper services;
-	
-	@Autowired
-	QueueEntrySearchCriteriaParser queueEntrySearchCriteriaParser;
-	
-	@Autowired
-	QueueRoomSearchCriteriaParser queueRoomSearchCriteriaParser;
-	
-	@Autowired
-	RoomProviderMapSearchCriteriaParser roomProviderMapSearchCriteriaParser;
-	
+
+	private final QueueServicesWrapper services;
+
 	@Autowired
 	private QueueEntryMetricRestController queueEntryMetricRestController;
-	
+
 	private final QueueEntryResource queueEntryResource;
-	
+
 	private final QueueRoomResource queueRoomResource;
-	
+
 	private final RoomProviderMapResource roomProviderMapResource;
-	
-	public Legacy1xRestController() {
+
+	@Autowired
+	public Legacy1xRestController(QueueServicesWrapper services,
+	        QueueEntrySearchCriteriaParser queueEntrySearchCriteriaParser,
+	        QueueRoomSearchCriteriaParser queueRoomSearchCriteriaParser,
+	        RoomProviderMapSearchCriteriaParser roomProviderMapSearchCriteriaParser) {
+		this.services = services;
 		queueEntryResource = new QueueEntryResource(services, queueEntrySearchCriteriaParser);
 		queueRoomResource = new QueueRoomResource(services, queueRoomSearchCriteriaParser);
 		roomProviderMapResource = new RoomProviderMapResource(services, roomProviderMapSearchCriteriaParser);
@@ -198,6 +195,7 @@ public class Legacy1xRestController extends BaseRestController {
 	
 	@RequestMapping(method = POST, value = "/rest/" + RestConstants.VERSION_1 + "/queueutil/assignticket")
 	@ResponseBody
+	@Authorized(PrivilegeConstants.MANAGE_QUEUE_ENTRIES)
 	public Object assignTicketToServicePoint(HttpServletRequest request) throws Exception {
 		String requestBody = IOUtils.toString(request.getReader());
 		if (requestBody != null) {
@@ -224,6 +222,7 @@ public class Legacy1xRestController extends BaseRestController {
 	}
 	
 	@RequestMapping(method = GET, value = "/rest/" + RestConstants.VERSION_1 + "/queueutil/active-tickets")
+	@Authorized(PrivilegeConstants.GET_QUEUE_ENTRIES)
 	public Object getActiveTickets() {
 		return new ResponseEntity<>(QueueTicketAssignments.getActiveTicketAssignments(), new HttpHeaders(), HttpStatus.OK);
 	}

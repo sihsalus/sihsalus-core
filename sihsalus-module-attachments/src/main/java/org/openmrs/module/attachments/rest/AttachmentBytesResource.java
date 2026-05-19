@@ -67,13 +67,14 @@ public class AttachmentBytesResource extends BaseRestController {
 		AttachmentComplexData attComplexData = context.getComplexDataHelper().build(valueComplex.getInstructions(),
 				complexData);
 
-		String mimeType = attComplexData.getMimeType();
+		String mimeType = StringUtils.defaultIfBlank(attComplexData.getMimeType(), "application/octet-stream");
+		String title = sanitizeHeaderValue(attComplexData.getTitle());
 
 		// The attachment metadata is sent as HTTP headers.
 		response.setContentType(mimeType);
 		response.addHeader("Content-Family", getContentFamily(mimeType).name());
-		response.addHeader("File-Name", attComplexData.getTitle());
-		response.addHeader("File-Ext", getExtension(attComplexData.getTitle(), mimeType));
+		response.addHeader("File-Name", title);
+		response.addHeader("File-Ext", sanitizeHeaderValue(getExtension(attComplexData.getTitle(), mimeType)));
 		response.addHeader("X-Content-Type-Options", "nosniff");
 
 		try {
@@ -103,5 +104,12 @@ public class AttachmentBytesResource extends BaseRestController {
 			ext = extFromMimeType;
 		}
 		return ext;
+	}
+
+	static String sanitizeHeaderValue(String value) {
+		if (value == null) {
+			return "";
+		}
+		return value.replace('\r', '_').replace('\n', '_');
 	}
 }

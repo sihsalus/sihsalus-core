@@ -11,6 +11,7 @@ package org.openmrs.module.sihsalusinterop.web.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.Concept;
@@ -113,7 +114,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -160,7 +161,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -205,7 +206,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -246,7 +247,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -280,7 +281,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -314,7 +315,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -415,7 +416,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -515,7 +516,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -647,7 +648,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -761,7 +762,7 @@ public class DyakuSubmissionController {
 			return ResponseEntity.ok(response);
 
 		}
-		catch (ContextAuthenticationException ex) {
+		catch (APIAuthenticationException | ContextAuthenticationException ex) {
 			return forbidden(response, ex);
 		}
 		catch (Exception ex) {
@@ -896,7 +897,7 @@ public class DyakuSubmissionController {
 		}
 	}
 
-	private ResponseEntity<Map<String, Object>> forbidden(Map<String, Object> response, ContextAuthenticationException ex) {
+	private ResponseEntity<Map<String, Object>> forbidden(Map<String, Object> response, RuntimeException ex) {
 		response.put("success", false);
 		response.put("message", ex.getMessage());
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
