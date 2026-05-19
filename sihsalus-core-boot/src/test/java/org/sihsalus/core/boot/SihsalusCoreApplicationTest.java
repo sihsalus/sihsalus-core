@@ -7,7 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -135,6 +137,8 @@ import org.openmrs.module.oauth2login.authscheme.OAuth2UserInfoAuthenticationSch
 import org.openmrs.module.o3forms.api.O3FormsService;
 import org.openmrs.module.openconceptlab.ImportService;
 import org.openmrs.module.openconceptlab.OclConceptService;
+import org.openmrs.module.openconceptlab.OpenConceptLabConstants;
+import org.openmrs.module.openconceptlab.Subscription;
 import org.openmrs.module.openconceptlab.importer.Importer;
 import org.openmrs.module.openconceptlab.scheduler.UpdateScheduler;
 import org.openmrs.module.ordertemplates.api.OrderTemplatesService;
@@ -1336,11 +1340,27 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(OclConceptService.class));
         assertNotNull(Context.getRegisteredComponent("openconceptlab.importer", Importer.class));
         assertNotNull(Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class));
+        assertTrue(ModuleFactory.getExtensions("org.openmrs.admin.list", Extension.MEDIA_TYPE.html).stream()
+                .anyMatch(org.openmrs.module.openconceptlab.extension.html.AdminList.class::isInstance));
+        assertTrue(ModuleFactory.getExtensions("org.openmrs.dictionary.conceptHeader", Extension.MEDIA_TYPE.html).stream()
+                .anyMatch(org.openmrs.module.openconceptlab.extension.html.HighlightSubscribedConcept.class::isInstance));
 
         RestService restService = Context.getService(RestService.class);
         assertNotNull(restService.getResourceByName("v1/openconceptlab/import"));
         assertNotNull(restService.getResourceByName("v1/openconceptlab/importaction"));
         assertNotNull(restService.getResourceByName("v1/openconceptlab/subscription"));
+        assertEquals(4, jdbcTemplate.queryForObject(
+                "select count(*) from global_property where property in (?, ?, ?, ?)",
+                Integer.class,
+                OpenConceptLabConstants.GP_SUBSCRIPTION_URL,
+                OpenConceptLabConstants.GP_SCHEDULED_DAYS,
+                OpenConceptLabConstants.GP_SCHEDULED_TIME,
+                OpenConceptLabConstants.GP_TOKEN));
+        Subscription subscription = new Subscription();
+        subscription.setUrl(null);
+        subscription.setToken("super-secret-token");
+        assertNull(subscription.getUrl());
+        assertFalse(subscription.toString().contains("super-secret-token"));
 
         boolean openedSession = !Context.isSessionOpen();
         if (openedSession) {

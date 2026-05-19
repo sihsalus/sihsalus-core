@@ -55,6 +55,10 @@ public class Subscription {
 	}
 
 	public void setUrl(String url) {
+		if (url == null) {
+			this.url = null;
+			return;
+		}
 		if (url.endsWith("/")) {
 			this.url = url.substring(0, url.lastIndexOf("/"));
 		}
@@ -131,8 +135,8 @@ public class Subscription {
 	
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("url", url).append("token", token).append("days", days)
-		        .append("hours", hours).append("minutes", minutes).build();
+		return new ToStringBuilder(this).append("url", url).append("token", token == null ? null : "********")
+		        .append("days", days).append("hours", hours).append("minutes", minutes).build();
 	}
 	
 }
