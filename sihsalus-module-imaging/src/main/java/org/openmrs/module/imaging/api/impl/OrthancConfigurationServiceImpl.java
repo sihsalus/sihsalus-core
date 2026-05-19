@@ -89,6 +89,10 @@ public class OrthancConfigurationServiceImpl extends BaseOpenmrsService implemen
 			                "https".equals(scheme.toLowerCase(Locale.ROOT)))) {
 				throw new IllegalArgumentException("Orthanc base URL must be a valid HTTP(S) URL");
 			}
+			if (uri.getUserInfo() != null || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+				throw new IllegalArgumentException("Orthanc base URL must not include credentials, query, or fragment");
+			}
+			orthancConfiguration.setOrthancBaseUrl(uri.toString());
 		}
 		catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Orthanc base URL must be a valid HTTP(S) URL", e);

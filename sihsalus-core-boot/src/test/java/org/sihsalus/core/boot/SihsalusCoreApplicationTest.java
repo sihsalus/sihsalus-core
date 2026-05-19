@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -138,6 +139,7 @@ import org.openmrs.module.imaging.api.DicomStudyService;
 import org.openmrs.module.imaging.api.OrthancConfigurationService;
 import org.openmrs.module.imaging.api.RequestProcedureService;
 import org.openmrs.module.imaging.api.RequestProcedureStepService;
+import org.openmrs.module.imaging.api.client.OrthancHttpClient;
 import org.openmrs.module.sihsalusinterop.api.DyakuSenderService;
 import org.openmrs.module.sihsalusinterop.api.advice.EncounterSavedAdvice;
 import org.openmrs.module.sihsalusinterop.api.model.InteropQueueItem;
@@ -1191,6 +1193,15 @@ class SihsalusCoreApplicationTest {
         assertTrue(requestProcedureService instanceof Advised);
         assertTrue(requestProcedureStepService instanceof Advised);
         assertNotNull(Context.getRegisteredComponent("imagingProperties", ImagingProperties.class));
+        OrthancHttpClient orthancHttpClient = applicationContext.getBean(OrthancHttpClient.class);
+        assertNotNull(orthancHttpClient);
+        assertEquals("study%2Fid%20with%20space", OrthancHttpClient.encodePathSegment("study/id with space"));
+        assertThrows(IOException.class,
+                () -> orthancHttpClient.createConnection("GET", "file:///tmp/orthanc", "/system", "", ""));
+        assertThrows(IOException.class,
+                () -> orthancHttpClient.createConnection("GET", "https://user:pass@example.org", "/system", "", ""));
+        assertThrows(IOException.class,
+                () -> orthancHttpClient.createConnection("GET", "https://example.org", "//evil.example/system", "", ""));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_orthancconfiguration", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_dicomstudy", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_requestprocedure", Integer.class));
@@ -1235,6 +1246,12 @@ class SihsalusCoreApplicationTest {
                     Context.getService(OrthancConfigurationService.class);
 
             assertThrows(APIAuthenticationException.class, orthancConfigurationService::getAllOrthancConfigurations);
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(DicomStudyService.class).getAllStudies());
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(RequestProcedureService.class).getAllRequestProcedures());
+            assertThrows(APIAuthenticationException.class,
+                    () -> Context.getService(RequestProcedureStepService.class).getProcedureStep(1));
         } finally {
             if (originalUserContext != null) {
                 Context.setUserContext(originalUserContext);
