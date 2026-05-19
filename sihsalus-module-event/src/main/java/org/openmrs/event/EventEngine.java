@@ -157,18 +157,24 @@ public class EventEngine {
 	}
 
     private String getExternalUrl() {
-    	try {
-			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-    		return Context.getRegisteredComponent("adminService", AdministrationService.class)
-					.getGlobalProperty("activeMQ.externalUrl");
-    	}
-    	catch (NullPointerException ex) {
-    		log.error("AdministrationService not yet initialized to get the activeMQ.externalUrl setting" , ex);
-    	}
-		finally {
-			Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-		}
-    	return null;
+        boolean addedProxyPrivilege = Context.isAuthenticated()
+                && !Context.hasPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+        try {
+            if (addedProxyPrivilege) {
+                Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+            }
+            return Context.getRegisteredComponent("adminService", AdministrationService.class)
+                    .getGlobalProperty("activeMQ.externalUrl");
+        }
+        catch (NullPointerException ex) {
+            log.error("AdministrationService not yet initialized to get the activeMQ.externalUrl setting" , ex);
+        }
+        finally {
+            if (addedProxyPrivilege) {
+                Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+            }
+        }
+        return null;
     }
 
 	/**

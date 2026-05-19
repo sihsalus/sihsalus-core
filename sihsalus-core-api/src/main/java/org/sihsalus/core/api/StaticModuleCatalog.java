@@ -52,7 +52,7 @@ public final class StaticModuleCatalog {
                     module("openconceptlab", "openconceptlab-omod", "3.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("sihsalusinterop", "sihsalusinterop-omod", "1.0.3", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("ordertemplates", "ordertemplates-omod", "2.2.0", SihsalusModuleStatus.STATIC_INTERNAL),
-                    module("event", "event-omod", "4.0.0", SihsalusModuleStatus.PLACEHOLDER),
+                    module("event", "event-omod", "4.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("stockmanagement", "stockmanagement-api", "3.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("billing", "billing-omod", "2.3.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("fua", "fua-omod", "1.0.75", SihsalusModuleStatus.STATIC_INTERNAL),

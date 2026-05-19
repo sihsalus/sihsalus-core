@@ -6,6 +6,7 @@ import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.Daemon;
+import org.openmrs.api.context.UserContext;
 import org.openmrs.module.DaemonToken;
 import org.openmrs.module.ModuleFactory;
 import org.openmrs.util.OpenmrsThreadPoolHolder;
@@ -44,15 +45,20 @@ public final class StaticModuleTaskRunner {
             Context.openSession();
         }
 
+        UserContext originalUserContext = openedSession ? null : Context.getUserContext();
         boolean authenticatedForTask = !Context.isAuthenticated();
         try {
             if (authenticatedForTask) {
+                Context.setUserContext(new UserContext(Context.getAuthenticationScheme()));
                 authenticateSchedulerUser();
             }
             task.run();
         } finally {
             if (authenticatedForTask && Context.isSessionOpen()) {
                 Context.logout();
+            }
+            if (authenticatedForTask && originalUserContext != null) {
+                Context.setUserContext(originalUserContext);
             }
             if (openedSession && Context.isSessionOpen()) {
                 Context.closeSession();

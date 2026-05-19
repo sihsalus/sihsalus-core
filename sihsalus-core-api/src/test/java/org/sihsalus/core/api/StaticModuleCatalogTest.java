@@ -193,6 +193,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void eventIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("event")
+                        && module.sourceModule().equals("event-omod")
+                        && module.baselineVersion().equals("4.0.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void legacyUiIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("legacyui")

@@ -23,6 +23,7 @@ import org.openmrs.module.sihsalusinterop.api.dao.InteropQueueDao;
 import org.openmrs.module.sihsalusinterop.api.exception.InteropException;
 import org.openmrs.module.sihsalusinterop.api.mapper.DyakuPatientMapper;
 import org.openmrs.module.sihsalusinterop.api.model.InteropQueueItem;
+import org.openmrs.util.PrivilegeConstants;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -323,8 +324,7 @@ public class DyakuSenderServiceImpl extends BaseOpenmrsService implements DyakuS
 	 */
 	private String getDefaultRenhiceEndpoint() {
 		try {
-			String endpoint = Context.getAdministrationService().getGlobalProperty(GP_RENHICE_ENDPOINT,
-			    DEFAULT_RENHICE_ENDPOINT);
+			String endpoint = getGlobalProperty(GP_RENHICE_ENDPOINT, DEFAULT_RENHICE_ENDPOINT);
 			if (endpoint != null && !endpoint.trim().isEmpty()) {
 				return endpoint.trim();
 			}
@@ -333,5 +333,21 @@ public class DyakuSenderServiceImpl extends BaseOpenmrsService implements DyakuS
 			log.warn(">>> No se pudo leer la global property " + GP_RENHICE_ENDPOINT + "; usando endpoint por defecto.", e);
 		}
 		return DEFAULT_RENHICE_ENDPOINT;
+	}
+
+	private String getGlobalProperty(String property, String defaultValue) {
+		boolean addedProxyPrivilege = Context.isAuthenticated()
+		        && !Context.hasPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		if (addedProxyPrivilege) {
+			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		}
+		try {
+			return Context.getAdministrationService().getGlobalProperty(property, defaultValue);
+		}
+		finally {
+			if (addedProxyPrivilege) {
+				Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+			}
+		}
 	}
 }

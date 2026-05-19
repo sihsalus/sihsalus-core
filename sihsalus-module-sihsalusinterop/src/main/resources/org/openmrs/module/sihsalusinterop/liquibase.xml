@@ -193,4 +193,17 @@
         </sql>
     </changeSet>
 
+    <changeSet id="sihsalus-interop-disable-openmrs-scheduler-in-static-mode-20260519" author="sihsalus-team">
+        <comment>
+            Disable the OpenMRS scheduler row in static mode. The static Spring configuration
+            owns queue processing, so leaving both schedulers active can process the same item twice.
+        </comment>
+        <sql>
+            UPDATE scheduler_task_config
+            SET start_on_startup = false,
+                started = false
+            WHERE name = 'SIH SALUS Interop Queue Processor';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

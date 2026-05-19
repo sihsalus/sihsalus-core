@@ -9,11 +9,14 @@
  */
 package org.openmrs.module.sihsalusinterop.api.dao;
 
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import org.hibernate.SessionFactory;
+import org.openmrs.User;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.sihsalusinterop.api.model.InteropQueueItem;
 import org.springframework.stereotype.Repository;
-import org.hibernate.SessionFactory;
-
-import java.util.List;
 
 /**
  * DAO para InteropQueueItem
@@ -28,11 +31,31 @@ public class InteropQueueDao {
 	}
 	
 	public InteropQueueItem save(InteropQueueItem item) {
+		setAuditFields(item);
 		if (item.getQueueId() == null) {
 			sessionFactory.getCurrentSession().persist(item);
 			return item;
 		}
 		return sessionFactory.getCurrentSession().merge(item);
+	}
+
+	private void setAuditFields(InteropQueueItem item) {
+		Date now = new Date();
+		User authenticatedUser = Context.getAuthenticatedUser();
+		if (item.getQueueId() == null) {
+			if (item.getUuid() == null) {
+				item.setUuid(UUID.randomUUID().toString());
+			}
+			if (item.getCreator() == null) {
+				item.setCreator(authenticatedUser);
+			}
+			if (item.getDateCreated() == null) {
+				item.setDateCreated(now);
+			}
+			return;
+		}
+		item.setChangedBy(authenticatedUser);
+		item.setDateChanged(now);
 	}
 	
 	public InteropQueueItem getById(Integer id) {
@@ -59,7 +82,6 @@ public class InteropQueueDao {
 		sessionFactory.getCurrentSession().remove(item);
 	}
 }
-
 
 
 

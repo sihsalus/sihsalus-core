@@ -20,11 +20,7 @@ public class FuaEstadoVersionServiceImpl extends BaseOpenmrsService implements F
 		
 		FuaEstadoVersion version = new FuaEstadoVersion(fuaEstado);
 		version.setDescripcion(descripcion);
-		
-		System.out.println("		SE GENERA UNA VERSIÓN DE FUAESTADO");
-		System.out.println("			UUID FUAESTADO: " + fuaEstado.getUuid());
-		System.out.println("			UUID VERSION: " + version.getUuid());
-		
+
 		return dao.saveFuaEstadoVersion(version);
 	}
 }

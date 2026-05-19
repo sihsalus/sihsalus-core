@@ -360,4 +360,17 @@
         </insert>
     </changeSet>
 
+    <changeSet id="418-add-max-upload-image-data-size-global-property" author="sihsalus">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM global_property WHERE property = 'imaging.maxUploadImageDataSize'</sqlCheck>
+        </preConditions>
+        <comment>Add Imaging upload size global property normally loaded from config.xml by the OMOD runtime</comment>
+        <insert tableName="global_property">
+            <column name="property" value="imaging.maxUploadImageDataSize"/>
+            <column name="property_value" value="200000000"/>
+            <column name="description" value="Set maximum size for upload of image study data"/>
+            <column name="uuid" value="2634d91f-e77c-4a6c-b0eb-59d34c296537"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

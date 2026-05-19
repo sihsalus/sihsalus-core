@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 import org.openmrs.Patient;
@@ -29,9 +30,16 @@ import org.openmrs.Encounter;
 import org.openmrs.Visit;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UserContext;
+import org.openmrs.api.db.hibernate.HibernateSessionFactoryBean;
 import org.openmrs.api.handler.SaveHandler;
 import org.openmrs.calculation.api.CalculationRegistrationService;
 import org.openmrs.calculation.patient.PatientCalculationService;
+import org.openmrs.event.Event;
+import org.openmrs.event.EventActivator;
+import org.openmrs.event.EventListener;
+import org.openmrs.event.JmsEventPublisher;
+import org.openmrs.event.api.db.hibernate.HibernateEventInterceptor;
 import org.openmrs.module.authentication.AuthenticationConfig;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 import org.openmrs.module.attachments.AttachmentsService;
@@ -73,19 +81,26 @@ import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.concept.EmrConceptService;
 import org.openmrs.module.emrapi.patient.EmrPatientService;
 import org.openmrs.module.emrapi.procedure.ProcedureService;
+import org.openmrs.module.fua.FuaConfig;
+import org.openmrs.module.fua.api.FuaEstadoService;
+import org.openmrs.module.fua.api.FuaEstadoVersionService;
 import org.openmrs.module.fua.api.FuaService;
+import org.openmrs.module.fua.api.FuaVersionService;
 import org.openmrs.module.htmlwidgets.service.HtmlWidgetsService;
 import org.openmrs.module.htmlwidgets.web.handler.WidgetHandler;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod25IdentifierValidator;
 import org.openmrs.module.idgen.validator.LuhnMod30IdentifierValidator;
+import org.openmrs.module.imaging.ImagingConstants;
+import org.openmrs.module.imaging.ImagingProperties;
 import org.openmrs.module.imaging.api.DicomStudyService;
 import org.openmrs.module.imaging.api.OrthancConfigurationService;
 import org.openmrs.module.imaging.api.RequestProcedureService;
 import org.openmrs.module.imaging.api.RequestProcedureStepService;
 import org.openmrs.module.sihsalusinterop.api.DyakuSenderService;
 import org.openmrs.module.sihsalusinterop.api.advice.EncounterSavedAdvice;
+import org.openmrs.module.sihsalusinterop.api.model.InteropQueueItem;
 import org.openmrs.module.sihsalusinterop.api.service.BundleBuilderService;
 import org.openmrs.module.legacyui.api.LegacyUIService;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
@@ -144,6 +159,7 @@ import org.openmrs.module.reporting.serializer.ReportingSerializer;
 import org.openmrs.module.reportingrest.adhoc.AdHocExportManager;
 import org.openmrs.module.serialization.xstream.XStreamSerializer;
 import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
+import org.openmrs.module.stockmanagement.api.Privileges;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.webservices.rest.web.resource.api.Converter;
 import org.openmrs.module.webservices.rest.web.api.RestService;
@@ -173,6 +189,11 @@ class SihsalusCoreApplicationTest {
     private static final String TEST_IDENTIFIER_TYPE_UUID = "f7c1c7d2-cf2d-45fd-9660-e81975cf50da";
 
     private static final String ADMIN_BASIC_AUTH = basicAuth("admin", "test");
+
+    private static final List<String> UNPORTED_STOCKMANAGEMENT_SCHEDULER_JOBS = Arrays.asList(
+            "org.openmrs.module.stockmanagement.api.jobs.StockRuleEvaluationJob",
+            "org.openmrs.module.stockmanagement.api.jobs.StockBatchExpiryJob",
+            "org.openmrs.module.stockmanagement.api.jobs.AsyncTasksBatchJob");
 
     @Autowired private MockMvc mockMvc;
 
@@ -458,7 +479,11 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void o3FormsIsWiredAsStaticInternalModule() throws Exception {
-        assertNotNull(Context.getService(O3FormsService.class));
+        O3FormsService service = Context.getService(O3FormsService.class);
+        assertNotNull(service);
+        assertTrue(service instanceof Advised);
+        mockMvc.perform(get("/rest/v1/o3/forms/not-a-real-form"))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/rest/v1/o3/forms/not-a-real-form").header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isNotFound());
     }
@@ -511,6 +536,34 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void eventIsWiredAsStaticInternalModule() {
+        assertNotNull(Context.getRegisteredComponent("eventActivator", EventActivator.class));
+        assertNotNull(Context.getRegisteredComponents(HibernateEventInterceptor.class).stream()
+                .findFirst()
+                .orElse(null));
+        assertNotNull(Context.getRegisteredComponents(JmsEventPublisher.class).stream()
+                .findFirst()
+                .orElse(null));
+
+        HibernateSessionFactoryBean sessionFactoryBean =
+                applicationContext.getBean("&sessionFactory", HibernateSessionFactoryBean.class);
+        assertTrue(sessionFactoryBean.interceptors.values().stream()
+                .anyMatch(HibernateEventInterceptor.class::isInstance));
+
+        AtomicInteger received = new AtomicInteger();
+        EventListener listener = message -> received.incrementAndGet();
+        Event.subscribe(Patient.class, Event.Action.CREATED.name(), listener);
+        try {
+            Patient patient = new Patient();
+            patient.setUuid("event-smoke-patient");
+            Event.fireAction(Event.Action.CREATED.name(), patient);
+            assertEquals(1, received.get());
+        } finally {
+            Event.unsubscribe(Patient.class, Event.Action.CREATED, listener);
+        }
+    }
+
+    @Test
     void calculationIsWiredAsStaticInternalModule() {
         assertNotNull(Context.getService(PatientCalculationService.class));
         assertNotNull(Context.getService(CalculationRegistrationService.class));
@@ -530,6 +583,19 @@ class SihsalusCoreApplicationTest {
         assertNotNull(Context.getService(StockManagementService.class));
         assertNotNull(
                 jdbcTemplate.queryForObject("select count(*) from stockmgmt_stock_item", Integer.class));
+        String privilegePlaceholders = String.join(",", Collections.nCopies(Privileges.ALL.size(), "?"));
+        assertEquals(Privileges.ALL.size(), jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (" + privilegePlaceholders + ")",
+                Integer.class,
+                Privileges.ALL.toArray()));
+
+        String jobPlaceholders = String.join(
+                ",", Collections.nCopies(UNPORTED_STOCKMANAGEMENT_SCHEDULER_JOBS.size(), "?"));
+        assertEquals(0, jdbcTemplate.queryForObject(
+                "select count(*) from scheduler_task_config where schedulable_class in (" + jobPlaceholders
+                        + ") and (started = true or start_on_startup = true)",
+                Integer.class,
+                UNPORTED_STOCKMANAGEMENT_SCHEDULER_JOBS.toArray()));
     }
 
     @Test
@@ -834,26 +900,129 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void fuaIsWiredAsStaticInternalModule() {
-        assertNotNull(Context.getService(FuaService.class));
+        FuaService fuaService = Context.getService(FuaService.class);
+        assertNotNull(fuaService);
+        assertTrue(fuaService instanceof Advised);
+        assertNotNull(Context.getService(FuaEstadoService.class));
+        assertNotNull(Context.getService(FuaVersionService.class));
+        assertNotNull(Context.getService(FuaEstadoVersionService.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from fua", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from fua_estado", Integer.class));
+
+        List<String> fuaPrivileges = Arrays.asList(
+                FuaConfig.MODULE_PRIVILEGE,
+                FuaConfig.READ_FUA_PRIVILEGE,
+                FuaConfig.MANAGE_FUA_PRIVILEGE,
+                FuaConfig.DELETE_FUA_PRIVILEGE,
+                FuaConfig.UPDATE_FUA_PRIVILEGE);
+        String privilegePlaceholders = String.join(",", Collections.nCopies(fuaPrivileges.size(), "?"));
+        assertEquals(fuaPrivileges.size(), jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (" + privilegePlaceholders + ")",
+                Integer.class,
+                fuaPrivileges.toArray()));
+        assertEquals(FuaConfig.FUA_GENERATOR_URL_DEFAULT, jdbcTemplate.queryForObject(
+                "select property_value from global_property where property = ?",
+                String.class,
+                FuaConfig.FUA_GENERATOR_URL_GP));
+        assertEquals("", jdbcTemplate.queryForObject(
+                "select property_value from global_property where property = ?",
+                String.class,
+                FuaConfig.FUA_GENERATOR_IDENTIFIER));
+    }
+
+    @Test
+    void fuaProxyPreservesOpenmrsAuthorizationInterceptors() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            FuaService fuaService = Context.getService(FuaService.class);
+
+            assertThrows(APIAuthenticationException.class, fuaService::getAllFuas);
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test
     void imagingIsWiredAsStaticInternalModule() {
-        assertNotNull(Context.getService(OrthancConfigurationService.class));
-        assertNotNull(Context.getService(DicomStudyService.class));
-        assertNotNull(Context.getService(RequestProcedureService.class));
-        assertNotNull(Context.getService(RequestProcedureStepService.class));
+        OrthancConfigurationService orthancConfigurationService = Context.getService(OrthancConfigurationService.class);
+        DicomStudyService dicomStudyService = Context.getService(DicomStudyService.class);
+        RequestProcedureService requestProcedureService = Context.getService(RequestProcedureService.class);
+        RequestProcedureStepService requestProcedureStepService = Context.getService(RequestProcedureStepService.class);
+        assertNotNull(orthancConfigurationService);
+        assertNotNull(dicomStudyService);
+        assertNotNull(requestProcedureService);
+        assertNotNull(requestProcedureStepService);
+        assertTrue(orthancConfigurationService instanceof Advised);
+        assertTrue(dicomStudyService instanceof Advised);
+        assertTrue(requestProcedureService instanceof Advised);
+        assertTrue(requestProcedureStepService instanceof Advised);
+        assertNotNull(Context.getRegisteredComponent("imagingProperties", ImagingProperties.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_orthancconfiguration", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_dicomstudy", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_requestprocedure", Integer.class));
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from imaging_requestprocedurestep", Integer.class));
+
+        List<String> imagingPrivileges = Arrays.asList(
+                ImagingConstants.TASK_MANAGER_ORTHANC_CONFIGURATION,
+                ImagingConstants.PRIVILEGE_MODIFY_IMAGE_DATA,
+                ImagingConstants.PRIVILEGE_VIEW_IMAGE_DATA,
+                ImagingConstants.PRIVILEGE_UPLOAD_IMAGE_DATA,
+                ImagingConstants.PRIVILEGE_DELETE_IMAGE_DATA,
+                ImagingConstants.PRIVILEGE_LINK_IMAGE_STUDIES,
+                ImagingConstants.PRIVILEGE_EDIT_WORKLIST,
+                ImagingConstants.PRIVILEGE_RECEIVE_ORTHANC_UPDATES);
+        String privilegePlaceholders = String.join(",", Collections.nCopies(imagingPrivileges.size(), "?"));
+        assertEquals(imagingPrivileges.size(), jdbcTemplate.queryForObject(
+                "select count(*) from privilege where privilege in (" + privilegePlaceholders + ")",
+                Integer.class,
+                imagingPrivileges.toArray()));
+        assertEquals("200000000", jdbcTemplate.queryForObject(
+                "select property_value from global_property where property = ?",
+                String.class,
+                ImagingConstants.GP_MAX_UPLOAD_IMAGEDATA_SIZE));
+        assertEquals(imagingPrivileges.size(), jdbcTemplate.queryForObject(
+                "select count(*) from role_privilege where role = 'Imaging Manager' and privilege in ("
+                        + privilegePlaceholders + ")",
+                Integer.class,
+                imagingPrivileges.toArray()));
+    }
+
+    @Test
+    void imagingProxyPreservesOpenmrsAuthorizationInterceptors() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        UserContext originalUserContext = openedSession ? null : Context.getUserContext();
+        try {
+            Context.setUserContext(new UserContext(Context.getAuthenticationScheme()));
+            OrthancConfigurationService orthancConfigurationService =
+                    Context.getService(OrthancConfigurationService.class);
+
+            assertThrows(APIAuthenticationException.class, orthancConfigurationService::getAllOrthancConfigurations);
+        } finally {
+            if (originalUserContext != null) {
+                Context.setUserContext(originalUserContext);
+            }
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test
     void sihsalusInteropIsWiredAsStaticInternalModule() throws Exception {
-        assertNotNull(Context.getService(DyakuSenderService.class));
+        DyakuSenderService dyakuSenderService = Context.getService(DyakuSenderService.class);
+        assertNotNull(dyakuSenderService);
+        assertTrue(dyakuSenderService instanceof Advised);
         assertNotNull(Context.getRegisteredComponent("sihsalusinterop.BundleBuilderService", BundleBuilderService.class));
         assertAdviceRegistered(Context.getEncounterService(), EncounterSavedAdvice.class);
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from sihsalus_interop_queue", Integer.class));
@@ -890,10 +1059,81 @@ class SihsalusCoreApplicationTest {
                 "org.openmrs.module.sihsalusinterop.api.tasks.QueueProcessorTask",
                 300L));
 
-        Context.logout();
-        mockMvc.perform(get("/module/sihsalusinterop/api/queue/items"))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.success").value(false));
+        assertEquals(0, jdbcTemplate.queryForObject(
+                "select count(*) from scheduler_task_config "
+                        + "where name = ? and (started = true or start_on_startup = true)",
+                Integer.class,
+                "SIH SALUS Interop Queue Processor"));
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+        boolean authenticatedBeforeQueueSmoke = Context.isAuthenticated();
+        if (!authenticatedBeforeQueueSmoke) {
+            Context.authenticate("admin", "test");
+        }
+        InteropQueueItem queuedItem = null;
+        try {
+            queuedItem = dyakuSenderService.queueMessage(
+                    "FHIR_BUNDLE",
+                    "{\"resourceType\":\"Bundle\",\"type\":\"transaction\"}",
+                    "http://request-controlled.example/fhir");
+            assertEquals("http://hapi-fhir-server:8080/fhir", queuedItem.getTargetEndpoint());
+        } finally {
+            try {
+                if (queuedItem != null) {
+                    dyakuSenderService.deleteQueueItem(queuedItem.getQueueId());
+                }
+            } finally {
+                if (!authenticatedBeforeQueueSmoke && Context.isSessionOpen()) {
+                    Context.logout();
+                }
+                if (openedSession && Context.isSessionOpen()) {
+                    Context.closeSession();
+                }
+            }
+        }
+
+        boolean openedRequestSession = !Context.isSessionOpen();
+        if (openedRequestSession) {
+            Context.openSession();
+        }
+        UserContext originalUserContext = Context.getUserContext();
+        Context.setUserContext(new UserContext(Context.getAuthenticationScheme()));
+        try {
+            mockMvc.perform(get("/module/sihsalusinterop/api/queue/items"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.success").value(false));
+        } finally {
+            Context.setUserContext(originalUserContext);
+            if (openedRequestSession && Context.isSessionOpen()) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
+    void sihsalusInteropProxyPreservesOpenmrsAuthorizationInterceptors() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        UserContext originalUserContext = openedSession ? null : Context.getUserContext();
+        try {
+            Context.setUserContext(new UserContext(Context.getAuthenticationScheme()));
+            DyakuSenderService dyakuSenderService = Context.getService(DyakuSenderService.class);
+
+            assertThrows(APIAuthenticationException.class, dyakuSenderService::getAllQueueItems);
+        } finally {
+            if (originalUserContext != null) {
+                Context.setUserContext(originalUserContext);
+            }
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test
