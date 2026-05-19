@@ -15,6 +15,7 @@ package org.openmrs.module.patientflags.web.validators;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientflags.Tag;
 import org.openmrs.module.patientflags.api.FlagService;
@@ -25,30 +26,31 @@ import org.springframework.validation.ValidationUtils;
  * Validator for the Tag class
  */
 public class TagValidator {
-	
+
 	@SuppressWarnings("rawtypes")
     public boolean supports(Class clazz) {
 		return Tag.class.isAssignableFrom(clazz);
 	}
-	
+
 	public void validate(Object target, Errors errors) {
 		Tag targetTag = (Tag) target;
 		FlagService flagService = Context.getService(FlagService.class);
-		
+		String name = targetTag.getName();
+
 		// name and criteria cannot be empty
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "patientflags.errors.noTag");
-		
+
 		// make sure that the tag field isn't too large
-		if(targetTag.getName().length() > 255)
+		if(name != null && name.length() > 255)
 			errors.rejectValue("name", "patientflags.errors.tagTooLong");
-		
+
 		// if this is a new tag, make sure that a tag with the same name doesn't already exist
 		// TODO this doesn't stop you from changing the name of tag to the identical name of another tag
-		if(targetTag.getId() == null){
+		if(targetTag.getId() == null && StringUtils.isNotBlank(name)){
 			List<Tag> tags = flagService.getAllTags();
 			if (tags != null){
 				for(Tag tag:tags){
-					if(tag.getName().equalsIgnoreCase(targetTag.getName())){
+					if(tag.getName().equalsIgnoreCase(name)){
 						errors.rejectValue("tag", "patientflags.errors.tagNameExists");
 						break;
 					}

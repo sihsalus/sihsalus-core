@@ -149,8 +149,15 @@ import org.openmrs.module.patientflags.aop.ObsServiceAdvice;
 import org.openmrs.module.patientflags.aop.OrderServiceAdvice;
 import org.openmrs.module.patientflags.aop.PatientServiceAdvice;
 import org.openmrs.module.patientflags.aop.ProgramWorkflowServiceAdvice;
+import org.openmrs.module.patientflags.Flag;
+import org.openmrs.module.patientflags.PatientFlagsConstants;
 import org.openmrs.module.patientflags.api.FlagService;
 import org.openmrs.module.patientflags.task.PatientFlagTask;
+import org.openmrs.module.patientflags.web.RefAppConfiguration;
+import org.openmrs.module.patientflags.web.validators.FlagValidator;
+import org.openmrs.module.patientflags.web.validators.PatientFlagsPropertiesValidator;
+import org.openmrs.module.patientflags.web.validators.PriorityValidator;
+import org.openmrs.module.patientflags.web.validators.TagValidator;
 import org.openmrs.module.patientdocuments.common.PatientDocumentsPrivilegeConstants;
 import org.openmrs.module.patientdocuments.reports.EncounterPdfReport;
 import org.openmrs.module.patientdocuments.reports.PatientIdStickerPdfReport;
@@ -1293,18 +1300,34 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
-    void patientFlagsIsWiredAsStaticInternalModule() {
-        assertNotNull(Context.getService(FlagService.class));
+    void patientFlagsIsWiredAsStaticInternalModule() throws Exception {
+        FlagService flagService = Context.getService(FlagService.class);
+        assertNotNull(flagService);
         assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/flag"));
         assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/tag"));
         assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/priority"));
         assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/displaypoint"));
         assertNotNull(Context.getService(RestService.class).getResourceByName("v1/patientflags/patientflag"));
+        assertNotNull(applicationContext.getBean(FlagValidator.class));
+        assertNotNull(applicationContext.getBean(TagValidator.class));
+        assertNotNull(applicationContext.getBean(PriorityValidator.class));
+        assertNotNull(applicationContext.getBean(PatientFlagsPropertiesValidator.class));
+        assertNotNull(applicationContext.getBean(RefAppConfiguration.class));
 
         assertEquals(5, jdbcTemplate.queryForObject(
-                "select count(*) from privilege where privilege in ('Manage Flags', 'View Flags', "
-                        + "'Manage Patient Flags', 'View Patient Flags', 'Test Flags')",
-                Integer.class));
+                "select count(*) from privilege where privilege in (?, ?, ?, ?, ?)",
+                Integer.class,
+                PatientFlagsConstants.PRIV_MANAGE_FLAGS,
+                PatientFlagsConstants.PRIV_VIEW_FLAGS,
+                PatientFlagsConstants.PRIV_MANAGE_PATIENT_FLAGS,
+                PatientFlagsConstants.PRIV_VIEW_PATIENT_FLAGS,
+                PatientFlagsConstants.PRIV_TEST_FLAGS));
+        assertEquals(3, jdbcTemplate.queryForObject(
+                "select count(*) from global_property where property in (?, ?, ?)",
+                Integer.class,
+                "patientflags.patientHeaderDisplay",
+                "patientflags.patientOverviewDisplay",
+                "patientflags.username"));
 
         assertAdviceRegistered(Context.getEncounterService(), EncounterServiceAdvice.class);
         assertAdviceRegistered(Context.getObsService(), ObsServiceAdvice.class);
@@ -1313,8 +1336,28 @@ class SihsalusCoreApplicationTest {
         assertAdviceRegistered(Context.getConditionService(), ConditionServiceAdvice.class);
         assertAdviceRegistered(Context.getProgramWorkflowService(), ProgramWorkflowServiceAdvice.class);
 
+        Flag invalidEvaluatorFlag = new Flag("Invalid evaluator", "select p.patient_id from patient p", "message");
+        invalidEvaluatorFlag.setEvaluator(String.class.getName());
+        assertThrows(APIException.class, invalidEvaluatorFlag::instantiateEvaluator);
+
         PatientFlagTask.setDaemonToken(null);
         PatientFlagTask.evaluateAllFlags().run();
+
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+
+        try {
+            Context.logout();
+            assertThrows(APIAuthenticationException.class, flagService::getAllFlags);
+            mockMvc.perform(get("/rest/v1/patientflags/flag"))
+                    .andExpect(status().isUnauthorized());
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test

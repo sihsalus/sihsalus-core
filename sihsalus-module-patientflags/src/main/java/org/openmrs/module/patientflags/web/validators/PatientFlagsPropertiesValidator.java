@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.patientflags.web.validators;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientflags.PatientFlagsProperties;
 import org.springframework.validation.Errors;
@@ -21,17 +22,18 @@ import org.springframework.validation.Errors;
  * Validator for the PatientFlagsProperties class
  */
 public class PatientFlagsPropertiesValidator {
-	
+
 	@SuppressWarnings("rawtypes")
     public boolean supports(Class clazz) {
 		return PatientFlagsProperties.class.isAssignableFrom(clazz);
 	}
-	
+
 	public void validate(Object target, Errors errors) {
 		PatientFlagsProperties propertiesToValidate = (PatientFlagsProperties) target;
-		
+
 		// reject username if no user exists for that name
-		if(Context.getUserService().getUserByUsername(propertiesToValidate.getUsername()) == null)
+		if(StringUtils.isBlank(propertiesToValidate.getUsername())
+				|| Context.getUserService().getUserByUsername(propertiesToValidate.getUsername()) == null)
 			errors.rejectValue("username", "patientflags.errors.invalidUsername");
 	}
 }

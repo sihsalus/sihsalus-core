@@ -13,6 +13,8 @@
  */
 package org.openmrs.module.patientflags.web.validators;
 
+import org.apache.commons.lang3.StringUtils;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientflags.Flag;
 import org.openmrs.module.patientflags.FlagValidationResult;
@@ -25,41 +27,52 @@ import org.springframework.validation.Validator;
  * Validator for the Flag class
  */
 public class FlagValidator implements Validator {
-	
+
 	@SuppressWarnings("rawtypes")
     public boolean supports(Class clazz) {
 		return Flag.class.isAssignableFrom(clazz);
 	}
-	
+
 	public void validate(Object target, Errors errors) {
-		
+
 		Flag flagToValidate = (Flag) target;
-		
+		String name = flagToValidate.getName();
+		String criteria = flagToValidate.getCriteria();
+		String flagMessage = flagToValidate.getMessage();
+		String evaluator = flagToValidate.getEvaluator();
+
 		// name cannot be empty
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "patientflags.errors.noName");
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "criteria", "patientflags.errors.noCriteria");
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "message", "patientflags.errors.noMessage");
-		
+
 		// make sure that the string fields aren't too large
-		if (flagToValidate.getName().length() > 255)
+		if (name != null && name.length() > 255)
 			errors.rejectValue("name", "patientflags.errors.nameTooLong");
 
-		if (isFlagNameDuplicated(flagToValidate)) {
+		if (StringUtils.isNotBlank(name) && isFlagNameDuplicated(flagToValidate)) {
 			errors.rejectValue("name", "patientflags.errors.noUniqueName");
 		}
-		
-		if (flagToValidate.getCriteria().length() > 5000)
+
+		if (criteria != null && criteria.length() > 5000)
 			errors.rejectValue("criteria", "patientflags.errors.criteriaTooLong");
-		
-		if (flagToValidate.getMessage().length() > 255)
+
+		if (flagMessage != null && flagMessage.length() > 255)
 			errors.rejectValue("message", "patientflags.errors.messageTooLong");
-		
-		if (flagToValidate.getEvaluator() == null) {
+
+		if (StringUtils.isBlank(evaluator)) {
 			errors.rejectValue("evaluator", "patientflags.errors.noEvaluator");
-		} else {
+		} else if (StringUtils.isNotBlank(criteria)) {
 			// run the target Flag's validate method to see if the criteria is well-formed
-			FlagValidationResult result = flagToValidate.validate();
-			
+			FlagValidationResult result;
+			try {
+				result = flagToValidate.validate();
+			}
+			catch (APIException e) {
+				errors.rejectValue("evaluator", "patientflags.errors.invalidCriteria");
+				return;
+			}
+
 			if (!result.getResult()) {
 				String message = result.getLocalizedMessage();
 				errors.rejectValue("criteria", Context.getMessageSourceService()

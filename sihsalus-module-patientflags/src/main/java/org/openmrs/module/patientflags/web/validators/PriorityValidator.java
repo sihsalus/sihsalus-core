@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.patientflags.web.validators;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientflags.Priority;
 import org.openmrs.module.patientflags.api.FlagService;
@@ -31,23 +32,25 @@ public class PriorityValidator {
 
 	public void validate(Object target, Errors errors) {
 		Priority priorityToValidate = (Priority) target;
+		String name = priorityToValidate.getName();
+		String style = priorityToValidate.getStyle();
 
 		// name and rank cannot be empty
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "patientflags.errors.noPriorityName");
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "rank", "patientflags.errors.noRank");
 
 		// make sure that the name field isn't too large
-		if (priorityToValidate.getName().length() > 255) {
+		if (name != null && name.length() > 255) {
 			errors.rejectValue("name", "patientflags.errors.priorityNameTooLong");
 		}
 
 		//make sure that the name is unique
-		if (isPriorityNameDuplicated(priorityToValidate)) {
+		if (StringUtils.isNotBlank(name) && isPriorityNameDuplicated(priorityToValidate)) {
 			errors.rejectValue("name", "patientflags.errors.noUniqueName");
 		}
 
 		// make sure that the style field isn't too large if provided
-		if (priorityToValidate.getStyle() != null && priorityToValidate.getStyle().length() > 255) {
+		if (style != null && style.length() > 255) {
 			errors.rejectValue("style", "patientflags.errors.styleTooLong");
 		}
 	}
