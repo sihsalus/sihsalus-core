@@ -2220,7 +2220,7 @@ public final class StaticSihsalusContentLoader {
     if (id == null) {
       jdbcTemplate.update(
           "insert into cashier_payment_mode_attribute_type "
-              + "(payment_mode_id, attribute_order, name, description, foreignKey, format, reg_exp, required, "
+              + "(payment_mode_id, attribute_order, name, description, \"foreignKey\", format, reg_exp, required, "
               + "creator, date_created, retired, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           paymentModeId,
           attribute.attributeOrder(),
@@ -2239,7 +2239,7 @@ public final class StaticSihsalusContentLoader {
 
     jdbcTemplate.update(
         "update cashier_payment_mode_attribute_type set payment_mode_id = ?, attribute_order = ?, name = ?, "
-            + "description = ?, foreignKey = ?, format = ?, reg_exp = ?, required = ?, changed_by = ?, "
+            + "description = ?, \"foreignKey\" = ?, format = ?, reg_exp = ?, required = ?, changed_by = ?, "
             + "date_changed = ?, retired = false, retired_by = null, date_retired = null, retire_reason = null, "
             + "uuid = ? where payment_mode_attribute_type_id = ?",
         paymentModeId,

@@ -5,6 +5,218 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
+    <changeSet id="sihsalus-appointments-postgresql-core-tables-20260520" author="sihsalus" dbms="postgresql">
+        <comment>Create the legacy Appointments base tables with PostgreSQL syntax before the upstream MySQL DDL changesets run.</comment>
+        <sql><![CDATA[
+            CREATE SEQUENCE IF NOT EXISTS speciality_id_seq;
+            CREATE TABLE IF NOT EXISTS appointment_speciality (
+                speciality_id INTEGER NOT NULL DEFAULT nextval('speciality_id_seq'),
+                name VARCHAR(50) NOT NULL,
+                date_created TIMESTAMP NOT NULL,
+                creator INTEGER NOT NULL,
+                date_changed TIMESTAMP NULL,
+                changed_by INTEGER NULL,
+                uuid VARCHAR(38) NOT NULL UNIQUE,
+                voided BOOLEAN DEFAULT FALSE,
+                PRIMARY KEY (speciality_id)
+            );
+            ALTER SEQUENCE speciality_id_seq OWNED BY appointment_speciality.speciality_id;
+            CREATE UNIQUE INDEX IF NOT EXISTS appointment_speciality_name_unique ON appointment_speciality (name);
+
+            CREATE SEQUENCE IF NOT EXISTS appointment_service_id_seq;
+            CREATE TABLE IF NOT EXISTS appointment_service (
+                appointment_service_id INTEGER NOT NULL DEFAULT nextval('appointment_service_id_seq'),
+                name VARCHAR(50) NOT NULL,
+                description TEXT NULL,
+                start_time TIME NULL,
+                end_time TIME NULL,
+                location_id INTEGER NULL,
+                speciality_id INTEGER NULL,
+                max_appointments_limit INTEGER NULL,
+                duration_mins INTEGER NULL,
+                color VARCHAR(8) NULL,
+                initial_appointment_status VARCHAR(45) NULL,
+                date_created TIMESTAMP NOT NULL,
+                creator INTEGER NOT NULL,
+                date_changed TIMESTAMP NULL,
+                changed_by INTEGER NULL,
+                voided BOOLEAN DEFAULT FALSE,
+                voided_by INTEGER NULL,
+                date_voided TIMESTAMP NULL,
+                void_reason VARCHAR(255) NULL,
+                uuid VARCHAR(38) NOT NULL UNIQUE,
+                PRIMARY KEY (appointment_service_id),
+                CONSTRAINT fk_appointment_service_speciality
+                    FOREIGN KEY (speciality_id) REFERENCES appointment_speciality (speciality_id),
+                CONSTRAINT fk_appointment_service_location
+                    FOREIGN KEY (location_id) REFERENCES location (location_id)
+            );
+            ALTER SEQUENCE appointment_service_id_seq OWNED BY appointment_service.appointment_service_id;
+            CREATE INDEX IF NOT EXISTS fk_appointment_service_speciality_idx ON appointment_service (speciality_id);
+            CREATE INDEX IF NOT EXISTS fk_appointment_service_location_idx ON appointment_service (location_id);
+            CREATE UNIQUE INDEX IF NOT EXISTS appointment_service_name_unique ON appointment_service (name);
+
+            CREATE SEQUENCE IF NOT EXISTS service_weekly_availability_seq;
+            CREATE TABLE IF NOT EXISTS appointment_service_weekly_availability (
+                service_weekly_availability_id INTEGER NOT NULL DEFAULT nextval('service_weekly_availability_seq'),
+                service_id INTEGER NOT NULL,
+                day_of_week VARCHAR(45) NOT NULL,
+                start_time TIME NULL,
+                end_time TIME NULL,
+                max_appointments_limit INTEGER NULL,
+                uuid VARCHAR(38) NOT NULL UNIQUE,
+                voided BOOLEAN DEFAULT FALSE,
+                voided_by INTEGER NULL,
+                date_voided TIMESTAMP NULL,
+                void_reason VARCHAR(255) NULL,
+                date_created TIMESTAMP NOT NULL,
+                creator INTEGER NOT NULL,
+                date_changed TIMESTAMP NULL,
+                changed_by INTEGER NULL,
+                PRIMARY KEY (service_weekly_availability_id),
+                CONSTRAINT appointment_service
+                    FOREIGN KEY (service_id) REFERENCES appointment_service (appointment_service_id),
+                CONSTRAINT service_enterer
+                    FOREIGN KEY (creator) REFERENCES users (user_id),
+                CONSTRAINT user_who_deleted_service
+                    FOREIGN KEY (voided_by) REFERENCES users (user_id)
+            );
+            ALTER SEQUENCE service_weekly_availability_seq OWNED BY appointment_service_weekly_availability.service_weekly_availability_id;
+            CREATE INDEX IF NOT EXISTS fk_weekly_availability_appointment_service_idx ON appointment_service_weekly_availability (service_id);
+
+            CREATE SEQUENCE IF NOT EXISTS appointment_service_type_id_seq;
+            CREATE TABLE IF NOT EXISTS appointment_service_type (
+                appointment_service_type_id INTEGER NOT NULL DEFAULT nextval('appointment_service_type_id_seq'),
+                appointment_service_id INTEGER NOT NULL,
+                name VARCHAR(50) NOT NULL,
+                duration_mins INTEGER NULL,
+                date_created TIMESTAMP NOT NULL,
+                creator INTEGER NOT NULL,
+                date_changed TIMESTAMP NULL,
+                changed_by INTEGER NULL,
+                voided BOOLEAN DEFAULT FALSE,
+                voided_by INTEGER NULL,
+                date_voided TIMESTAMP NULL,
+                void_reason VARCHAR(255) NULL,
+                uuid VARCHAR(38) NOT NULL UNIQUE,
+                PRIMARY KEY (appointment_service_type_id),
+                CONSTRAINT fk_appointment_service
+                    FOREIGN KEY (appointment_service_id) REFERENCES appointment_service (appointment_service_id)
+            );
+            ALTER SEQUENCE appointment_service_type_id_seq OWNED BY appointment_service_type.appointment_service_type_id;
+            CREATE INDEX IF NOT EXISTS fk_appointment_service_idx ON appointment_service_type (appointment_service_id);
+            CREATE UNIQUE INDEX IF NOT EXISTS service_name_dur_UNIQUE ON appointment_service_type (appointment_service_id, name, duration_mins);
+
+            CREATE SEQUENCE IF NOT EXISTS patient_appointment_id_seq;
+            CREATE TABLE IF NOT EXISTS patient_appointment (
+                patient_appointment_id INTEGER NOT NULL DEFAULT nextval('patient_appointment_id_seq'),
+                provider_id INTEGER NULL,
+                appointment_number VARCHAR(50) NOT NULL,
+                patient_id INTEGER NOT NULL,
+                start_date_time TIMESTAMP NULL,
+                end_date_time TIMESTAMP NULL,
+                appointment_service_id INTEGER NULL,
+                appointment_service_type_id INTEGER NULL,
+                status VARCHAR(45) NOT NULL,
+                priority VARCHAR(45) NULL,
+                location_id INTEGER NULL,
+                appointment_kind VARCHAR(45) NOT NULL,
+                comments VARCHAR(255) NULL,
+                uuid VARCHAR(38) NOT NULL UNIQUE,
+                date_created TIMESTAMP NOT NULL,
+                date_appointment_scheduled TIMESTAMP NULL,
+                creator INTEGER NOT NULL,
+                date_changed TIMESTAMP NULL,
+                changed_by INTEGER NULL,
+                voided BOOLEAN NOT NULL DEFAULT FALSE,
+                voided_by INTEGER NULL,
+                date_voided TIMESTAMP NULL,
+                void_reason VARCHAR(255) NULL,
+                tele_health_video_link VARCHAR(255) NULL,
+                related_appointment_id INTEGER NULL,
+                PRIMARY KEY (patient_appointment_id),
+                CONSTRAINT fk_patient_appointment_patient
+                    FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
+                CONSTRAINT fk_patient_appointment_location
+                    FOREIGN KEY (location_id) REFERENCES location (location_id),
+                CONSTRAINT fk_patient_appointment_provider
+                    FOREIGN KEY (provider_id) REFERENCES provider (provider_id),
+                CONSTRAINT fk_patient_appointment_appointment_service
+                    FOREIGN KEY (appointment_service_id) REFERENCES appointment_service (appointment_service_id),
+                CONSTRAINT fk_patient_appointment_appointment_service_type
+                    FOREIGN KEY (appointment_service_type_id) REFERENCES appointment_service_type (appointment_service_type_id),
+                CONSTRAINT patient_appointment_id_fk
+                    FOREIGN KEY (related_appointment_id) REFERENCES patient_appointment (patient_appointment_id)
+            );
+            ALTER SEQUENCE patient_appointment_id_seq OWNED BY patient_appointment.patient_appointment_id;
+
+            CREATE SEQUENCE IF NOT EXISTS patient_appointment_audit_id_seq;
+            CREATE TABLE IF NOT EXISTS patient_appointment_audit (
+                patient_appointment_audit_id INTEGER NOT NULL DEFAULT nextval('patient_appointment_audit_id_seq'),
+                appointment_id INTEGER NOT NULL,
+                uuid VARCHAR(38) NOT NULL UNIQUE,
+                date_created TIMESTAMP NOT NULL,
+                creator INTEGER NOT NULL,
+                date_changed TIMESTAMP NULL,
+                changed_by INTEGER NULL,
+                voided BOOLEAN NOT NULL DEFAULT FALSE,
+                voided_by INTEGER NULL,
+                date_voided TIMESTAMP NULL,
+                void_reason VARCHAR(255) NULL,
+                status VARCHAR(45) NOT NULL,
+                notes VARCHAR(1000) NULL,
+                PRIMARY KEY (patient_appointment_audit_id),
+                CONSTRAINT fk_patient_appointment_audit_patient_appointment
+                    FOREIGN KEY (appointment_id) REFERENCES patient_appointment (patient_appointment_id)
+            );
+            ALTER SEQUENCE patient_appointment_audit_id_seq OWNED BY patient_appointment_audit.patient_appointment_audit_id;
+            CREATE INDEX IF NOT EXISTS fk_patient_appointment_audit_patient_appointment_idx ON patient_appointment_audit (appointment_id);
+
+            CREATE TABLE IF NOT EXISTS patient_appointment_provider (
+                patient_appointment_provider_id INTEGER NOT NULL DEFAULT nextval('patient_appointment_audit_id_seq'),
+                patient_appointment_id INTEGER NOT NULL,
+                provider_id INTEGER NOT NULL,
+                response VARCHAR(32) DEFAULT NULL,
+                comments VARCHAR(1000) NULL,
+                date_created TIMESTAMP NOT NULL,
+                creator INTEGER NOT NULL,
+                date_changed TIMESTAMP NULL,
+                changed_by INTEGER NULL,
+                voided BOOLEAN DEFAULT FALSE,
+                voided_by INTEGER NULL,
+                date_voided TIMESTAMP NULL,
+                void_reason VARCHAR(255) NULL,
+                uuid VARCHAR(38) NOT NULL UNIQUE,
+                PRIMARY KEY (patient_appointment_provider_id),
+                CONSTRAINT fk_patient_appointment_provider_patient_appointment
+                    FOREIGN KEY (patient_appointment_id) REFERENCES patient_appointment (patient_appointment_id),
+                CONSTRAINT fk_patient_appointment_provider_provider
+                    FOREIGN KEY (provider_id) REFERENCES provider (provider_id)
+            );
+
+            CREATE SEQUENCE IF NOT EXISTS patient_appointment_timings_id;
+            CREATE TABLE IF NOT EXISTS patient_appointment_recurring_time (
+                patient_appointment_timings_id INTEGER NOT NULL DEFAULT nextval('patient_appointment_timings_id'),
+                recurrence_type VARCHAR(20) NOT NULL,
+                period INTEGER NOT NULL,
+                frequency INTEGER NULL,
+                end_date TIMESTAMP NULL,
+                days_of_week VARCHAR(100) NULL,
+                PRIMARY KEY (patient_appointment_timings_id)
+            );
+            ALTER SEQUENCE patient_appointment_timings_id OWNED BY patient_appointment_recurring_time.patient_appointment_timings_id;
+
+            CREATE TABLE IF NOT EXISTS patient_appointment_occurrence (
+                patient_appointment_timings_id INTEGER NULL,
+                patient_appointment_id INTEGER NULL,
+                FOREIGN KEY (patient_appointment_timings_id)
+                    REFERENCES patient_appointment_recurring_time (patient_appointment_timings_id),
+                FOREIGN KEY (patient_appointment_id)
+                    REFERENCES patient_appointment (patient_appointment_id)
+            );
+        ]]></sql>
+    </changeSet>
+
     <changeSet id="create-appointment_speciality_table-201707031130" author="Shruthi,Pushpa">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -357,7 +569,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="global-property-past-appointments-sql-09022021" author="Maharjun, Shireesha" runOnChange="true">
+    <changeSet id="global-property-past-appointments-sql-09022021" author="Maharjun, Shireesha" runOnChange="true" dbms="mysql,mariadb,h2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.pastAppointments'</sqlCheck>
         </preConditions>
@@ -365,7 +577,7 @@
         <sqlFile path="patientPastAppointments.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-past-appointments-sql-update" author="Himabindu" runOnChange="true">
+    <changeSet id="global-property-past-appointments-sql-update" author="Himabindu" runOnChange="true" dbms="mysql,mariadb,h2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.pastAppointments'</sqlCheck>
         </preConditions>
@@ -373,7 +585,7 @@
         <sqlFile path="patientPastAppointments_v2.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-past-appointments-sql-202402211800" author="Bahmni" runOnChange="true">
+    <changeSet id="global-property-past-appointments-sql-202402211800" author="Bahmni" runOnChange="true" dbms="mysql,mariadb,h2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.pastAppointments'</sqlCheck>
         </preConditions>
@@ -381,7 +593,7 @@
         <sqlFile path="patientPastAppointments_v3.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-upcoming-appointments-sql-09022021" author="Maharjun, Shireesha" runOnChange="true">
+    <changeSet id="global-property-upcoming-appointments-sql-09022021" author="Maharjun, Shireesha" runOnChange="true" dbms="mysql,mariadb,h2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
@@ -389,7 +601,7 @@
         <sqlFile path="patientUpcomingAppointments.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-upcoming-appointments-sql-update" author="Shankar, Mahesh" runOnChange="true">
+    <changeSet id="global-property-upcoming-appointments-sql-update" author="Shankar, Mahesh" runOnChange="true" dbms="mysql,mariadb,h2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
@@ -397,12 +609,144 @@
         <sqlFile path="patientUpcomingAppointments_v2.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-upcoming-appointments-sql-202402211805" author="Bahmni" runOnChange="true">
+    <changeSet id="global-property-upcoming-appointments-sql-202402211805" author="Bahmni" runOnChange="true" dbms="mysql,mariadb,h2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
         <comment>Updating query to fetch upcoming appointments for patient</comment>
         <sqlFile path="patientUpcomingAppointments_v3.sql"/>
+    </changeSet>
+
+    <changeSet id="sihsalus-appointments-postgresql-dashboard-global-properties-20260520" author="SIH Salus" runOnChange="true" dbms="postgresql">
+        <comment>Installing PostgreSQL-compatible dashboard appointment queries</comment>
+        <sql splitStatements="false"><![CDATA[
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.sqlGet.pastAppointments') THEN
+    UPDATE global_property
+       SET property_value = $query$
+SELECT
+     app_service.name AS "DASHBOARD_APPOINTMENTS_SERVICE_KEY",
+     app_service_type.name AS "DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY",
+     to_char(pa.start_date_time, 'DD/MM/YYYY') AS "DASHBOARD_APPOINTMENTS_DATE_KEY",
+     concat(to_char(pa.start_date_time, 'FMHH12:MI AM'), ' - ', to_char(pa.end_date_time, 'FMHH12:MI AM')) AS "DASHBOARD_APPOINTMENTS_SLOT_KEY",
+     concat(pn.given_name, ' ', pn.family_name) AS "DASHBOARD_APPOINTMENTS_PROVIDER_KEY",
+     pa.status AS "DASHBOARD_APPOINTMENTS_STATUS_KEY",
+     pa.start_date_time AT TIME ZONE current_setting('TIMEZONE') AT TIME ZONE 'UTC' AS "DASHBOARD_APPOINTMENTS_START_DATE_IN_UTC_KEY",
+     pa.end_date_time AT TIME ZONE current_setting('TIMEZONE') AT TIME ZONE 'UTC' AS "DASHBOARD_APPOINTMENTS_END_DATE_IN_UTC_KEY"
+FROM
+patient_appointment pa
+JOIN person p ON p.person_id = pa.patient_id AND pa.voided IS FALSE
+JOIN appointment_service app_service
+ ON app_service.appointment_service_id = pa.appointment_service_id AND app_service.voided IS FALSE
+LEFT JOIN patient_appointment_provider pap on pa.patient_appointment_id = pap.patient_appointment_id AND (pap.voided IS FALSE OR pap.voided IS NULL)
+LEFT JOIN provider prov ON prov.provider_id = pap.provider_id AND prov.retired IS FALSE
+LEFT JOIN person_name pn ON pn.person_id = prov.person_id AND pn.voided IS FALSE
+LEFT JOIN appointment_service_type app_service_type
+ ON app_service_type.appointment_service_type_id = pa.appointment_service_type_id
+WHERE p.uuid = ${patientUuid} AND pa.start_date_time < CURRENT_DATE AND (app_service_type.voided IS FALSE OR app_service_type.voided IS NULL)
+ORDER BY pa.start_date_time DESC
+LIMIT 5;
+$query$,
+           description = 'Past appointments for patient'
+     WHERE property = 'bahmni.sqlGet.pastAppointments';
+  ELSE
+    INSERT INTO global_property (property, property_value, description, uuid)
+    VALUES ('bahmni.sqlGet.pastAppointments', $query$
+SELECT
+     app_service.name AS "DASHBOARD_APPOINTMENTS_SERVICE_KEY",
+     app_service_type.name AS "DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY",
+     to_char(pa.start_date_time, 'DD/MM/YYYY') AS "DASHBOARD_APPOINTMENTS_DATE_KEY",
+     concat(to_char(pa.start_date_time, 'FMHH12:MI AM'), ' - ', to_char(pa.end_date_time, 'FMHH12:MI AM')) AS "DASHBOARD_APPOINTMENTS_SLOT_KEY",
+     concat(pn.given_name, ' ', pn.family_name) AS "DASHBOARD_APPOINTMENTS_PROVIDER_KEY",
+     pa.status AS "DASHBOARD_APPOINTMENTS_STATUS_KEY",
+     pa.start_date_time AT TIME ZONE current_setting('TIMEZONE') AT TIME ZONE 'UTC' AS "DASHBOARD_APPOINTMENTS_START_DATE_IN_UTC_KEY",
+     pa.end_date_time AT TIME ZONE current_setting('TIMEZONE') AT TIME ZONE 'UTC' AS "DASHBOARD_APPOINTMENTS_END_DATE_IN_UTC_KEY"
+FROM
+patient_appointment pa
+JOIN person p ON p.person_id = pa.patient_id AND pa.voided IS FALSE
+JOIN appointment_service app_service
+ ON app_service.appointment_service_id = pa.appointment_service_id AND app_service.voided IS FALSE
+LEFT JOIN patient_appointment_provider pap on pa.patient_appointment_id = pap.patient_appointment_id AND (pap.voided IS FALSE OR pap.voided IS NULL)
+LEFT JOIN provider prov ON prov.provider_id = pap.provider_id AND prov.retired IS FALSE
+LEFT JOIN person_name pn ON pn.person_id = prov.person_id AND pn.voided IS FALSE
+LEFT JOIN appointment_service_type app_service_type
+ ON app_service_type.appointment_service_type_id = pa.appointment_service_type_id
+WHERE p.uuid = ${patientUuid} AND pa.start_date_time < CURRENT_DATE AND (app_service_type.voided IS FALSE OR app_service_type.voided IS NULL)
+ORDER BY pa.start_date_time DESC
+LIMIT 5;
+$query$, 'Past appointments for patient', uuid());
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM global_property WHERE property = 'bahmni.sqlGet.upComingAppointments') THEN
+    UPDATE global_property
+       SET property_value = $query$
+SELECT
+  pa.uuid,
+  app_service.name AS "DASHBOARD_APPOINTMENTS_SERVICE_KEY",
+  app_service_type.name AS "DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY",
+  to_char(pa.start_date_time, 'DD/MM/YYYY') AS "DASHBOARD_APPOINTMENTS_DATE_KEY",
+  concat(to_char(pa.start_date_time, 'FMHH12:MI AM'), ' - ', to_char(pa.end_date_time, 'FMHH12:MI AM')) AS "DASHBOARD_APPOINTMENTS_SLOT_KEY",
+  concat(pn.given_name, ' ', pn.family_name) AS "DASHBOARD_APPOINTMENTS_PROVIDER_KEY",
+  pa.start_date_time AT TIME ZONE current_setting('TIMEZONE') AT TIME ZONE 'UTC' AS "DASHBOARD_APPOINTMENTS_START_DATE_IN_UTC_KEY",
+  pa.end_date_time AT TIME ZONE current_setting('TIMEZONE') AT TIME ZONE 'UTC' AS "DASHBOARD_APPOINTMENTS_END_DATE_IN_UTC_KEY",
+  pa.status AS "DASHBOARD_APPOINTMENTS_STATUS_KEY",
+  pa.appointment_kind AS "DASHBOARD_APPOINTMENTS_KIND",
+  pa.start_date_time AS "DASHBOARD_APPOINTMENTS_START_DATE_KEY",
+  pa.end_date_time AS "DASHBOARD_APPOINTMENTS_END_DATE_KEY",
+  pa.tele_health_video_link
+FROM
+  patient_appointment pa
+  JOIN person p ON p.person_id = pa.patient_id AND pa.voided IS FALSE
+  JOIN appointment_service app_service
+    ON app_service.appointment_service_id = pa.appointment_service_id AND app_service.voided IS FALSE
+  LEFT JOIN patient_appointment_provider pap on pa.patient_appointment_id = pap.patient_appointment_id AND (pap.voided IS FALSE OR pap.voided IS NULL)
+  LEFT JOIN provider prov ON prov.provider_id = pap.provider_id AND prov.retired IS FALSE
+  LEFT JOIN person_name pn ON pn.person_id = prov.person_id AND pn.voided IS FALSE
+  LEFT JOIN appointment_service_type app_service_type
+    ON app_service_type.appointment_service_type_id = pa.appointment_service_type_id
+WHERE p.uuid = ${patientUuid} AND
+      pa.start_date_time >= CURRENT_DATE AND
+      (app_service_type.voided IS FALSE OR app_service_type.voided IS NULL)
+ORDER BY pa.start_date_time ASC;
+$query$,
+           description = 'Upcoming appointments for patient'
+     WHERE property = 'bahmni.sqlGet.upComingAppointments';
+  ELSE
+    INSERT INTO global_property (property, property_value, description, uuid)
+    VALUES ('bahmni.sqlGet.upComingAppointments', $query$
+SELECT
+  pa.uuid,
+  app_service.name AS "DASHBOARD_APPOINTMENTS_SERVICE_KEY",
+  app_service_type.name AS "DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY",
+  to_char(pa.start_date_time, 'DD/MM/YYYY') AS "DASHBOARD_APPOINTMENTS_DATE_KEY",
+  concat(to_char(pa.start_date_time, 'FMHH12:MI AM'), ' - ', to_char(pa.end_date_time, 'FMHH12:MI AM')) AS "DASHBOARD_APPOINTMENTS_SLOT_KEY",
+  concat(pn.given_name, ' ', pn.family_name) AS "DASHBOARD_APPOINTMENTS_PROVIDER_KEY",
+  pa.start_date_time AT TIME ZONE current_setting('TIMEZONE') AT TIME ZONE 'UTC' AS "DASHBOARD_APPOINTMENTS_START_DATE_IN_UTC_KEY",
+  pa.end_date_time AT TIME ZONE current_setting('TIMEZONE') AT TIME ZONE 'UTC' AS "DASHBOARD_APPOINTMENTS_END_DATE_IN_UTC_KEY",
+  pa.status AS "DASHBOARD_APPOINTMENTS_STATUS_KEY",
+  pa.appointment_kind AS "DASHBOARD_APPOINTMENTS_KIND",
+  pa.start_date_time AS "DASHBOARD_APPOINTMENTS_START_DATE_KEY",
+  pa.end_date_time AS "DASHBOARD_APPOINTMENTS_END_DATE_KEY",
+  pa.tele_health_video_link
+FROM
+  patient_appointment pa
+  JOIN person p ON p.person_id = pa.patient_id AND pa.voided IS FALSE
+  JOIN appointment_service app_service
+    ON app_service.appointment_service_id = pa.appointment_service_id AND app_service.voided IS FALSE
+  LEFT JOIN patient_appointment_provider pap on pa.patient_appointment_id = pap.patient_appointment_id AND (pap.voided IS FALSE OR pap.voided IS NULL)
+  LEFT JOIN provider prov ON prov.provider_id = pap.provider_id AND prov.retired IS FALSE
+  LEFT JOIN person_name pn ON pn.person_id = prov.person_id AND pn.voided IS FALSE
+  LEFT JOIN appointment_service_type app_service_type
+    ON app_service_type.appointment_service_type_id = pa.appointment_service_type_id
+WHERE p.uuid = ${patientUuid} AND
+      pa.start_date_time >= CURRENT_DATE AND
+      (app_service_type.voided IS FALSE OR app_service_type.voided IS NULL)
+ORDER BY pa.start_date_time ASC;
+$query$, 'Upcoming appointments for patient', uuid());
+  END IF;
+END $$;
+        ]]></sql>
     </changeSet>
 
     <changeSet id="Create-Available-for-appointments-201712121212-2" author="Maharjun, Saikumar">
@@ -416,7 +760,7 @@
             INSERT INTO provider_attribute_type (name, description, datatype, min_occurs, creator, date_created,
             retired, uuid)
             VALUES ('Available for appointments','providers will be available for appointments',
-            'org.openmrs.customdatatype.datatype.BooleanDatatype', 0, 1, NOW(), 0, UUID());
+            'org.openmrs.customdatatype.datatype.BooleanDatatype', 0, 1, NOW(), false, UUID());
         </sql>
     </changeSet>
 
@@ -650,7 +994,7 @@
         </preConditions>
         <comment> Add email address in registration page </comment>
         <sql>
-            INSERT INTO person_attribute_type (name, description, format, searchable, creator, date_created, retired, uuid) VALUES ('email', 'Email Address', 'java.lang.String', '1', 1, now(), 0, uuid());
+            INSERT INTO person_attribute_type (name, description, format, searchable, creator, date_created, retired, uuid) VALUES ('email', 'Email Address', 'java.lang.String', true, 1, now(), false, uuid());
         </sql>
     </changeSet>
     <changeSet id="create-column-tele_health_video_link-202106211857" author="Angshu">
@@ -671,7 +1015,7 @@
         </preConditions>
         <dropColumn  tableName="patient_appointment" columnName="teleconsultation"/>
     </changeSet>
-    <changeSet id="appointments_sql_diff" author="Nathan Ruhanga">
+    <changeSet id="appointments_sql_diff" author="Nathan Ruhanga" dbms="mysql,mariadb,h2">
         <preConditions onFail="MARK_RAN">
             <columnExists tableName="appointment_speciality" columnName="voided"/>
             <columnExists tableName="appointment_service" columnName="voided"/>
@@ -705,7 +1049,7 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet id="remove-not-null-constraint-202402271826" author="Kavitha, Umair">
+    <changeSet id="remove-not-null-constraint-202402271826" author="Kavitha, Umair" dbms="mysql,mariadb,h2">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="patient_appointment" />
             <columnExists tableName="patient_appointment" columnName="start_date_time" />
@@ -985,5 +1329,60 @@
             SELECT 'sms.dateformat', 'dd-MM-yyyy'' Time ''HH:mm', 'Date format used for appointment SMS messages', UUID()
             WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'sms.dateformat');
         </sql>
+    </changeSet>
+
+    <changeSet id="sihsalus-appointments-postgresql-hibernate-sequences-20260520" author="SIH Salus" dbms="postgresql">
+        <comment>Align Appointments PostgreSQL sequences with Hibernate pooled native generators.</comment>
+        <sql splitStatements="false"><![CDATA[
+DO $$
+BEGIN
+  CREATE SEQUENCE IF NOT EXISTS speciality_id_seq INCREMENT BY 50;
+  ALTER SEQUENCE speciality_id_seq INCREMENT BY 50;
+  PERFORM setval('speciality_id_seq', GREATEST((SELECT COALESCE(MAX(speciality_id), 0) + 50 FROM appointment_speciality), 50), true);
+
+  CREATE SEQUENCE IF NOT EXISTS appointment_service_id_seq INCREMENT BY 50;
+  ALTER SEQUENCE appointment_service_id_seq INCREMENT BY 50;
+  PERFORM setval('appointment_service_id_seq', GREATEST((SELECT COALESCE(MAX(appointment_service_id), 0) + 50 FROM appointment_service), 50), true);
+
+  CREATE SEQUENCE IF NOT EXISTS service_weekly_availability_seq INCREMENT BY 50;
+  ALTER SEQUENCE service_weekly_availability_seq INCREMENT BY 50;
+  PERFORM setval('service_weekly_availability_seq', GREATEST((SELECT COALESCE(MAX(service_weekly_availability_id), 0) + 50 FROM appointment_service_weekly_availability), 50), true);
+
+  CREATE SEQUENCE IF NOT EXISTS appointment_service_type_id_seq INCREMENT BY 50;
+  ALTER SEQUENCE appointment_service_type_id_seq INCREMENT BY 50;
+  PERFORM setval('appointment_service_type_id_seq', GREATEST((SELECT COALESCE(MAX(appointment_service_type_id), 0) + 50 FROM appointment_service_type), 50), true);
+
+  CREATE SEQUENCE IF NOT EXISTS patient_appointment_id_seq INCREMENT BY 50;
+  ALTER SEQUENCE patient_appointment_id_seq INCREMENT BY 50;
+  PERFORM setval('patient_appointment_id_seq', GREATEST((SELECT COALESCE(MAX(patient_appointment_id), 0) + 50 FROM patient_appointment), 50), true);
+
+  CREATE SEQUENCE IF NOT EXISTS patient_appointment_audit_id_seq INCREMENT BY 50;
+  ALTER SEQUENCE patient_appointment_audit_id_seq INCREMENT BY 50;
+  PERFORM setval(
+    'patient_appointment_audit_id_seq',
+    GREATEST(
+      (SELECT COALESCE(MAX(patient_appointment_audit_id), 0) FROM patient_appointment_audit),
+      (SELECT COALESCE(MAX(patient_appointment_provider_id), 0) FROM patient_appointment_provider)
+    ) + 50,
+    true
+  );
+
+  CREATE SEQUENCE IF NOT EXISTS patient_appointment_timings_id INCREMENT BY 50;
+  ALTER SEQUENCE patient_appointment_timings_id INCREMENT BY 50;
+  PERFORM setval('patient_appointment_timings_id', GREATEST((SELECT COALESCE(MAX(patient_appointment_timings_id), 0) + 50 FROM patient_appointment_recurring_time), 50), true);
+
+  CREATE SEQUENCE IF NOT EXISTS patient_appointment_reason_id_seq INCREMENT BY 50;
+  ALTER SEQUENCE patient_appointment_reason_id_seq INCREMENT BY 50;
+  PERFORM setval('patient_appointment_reason_id_seq', GREATEST((SELECT COALESCE(MAX(patient_appointment_reason_id), 0) + 50 FROM patient_appointment_reason), 50), true);
+
+  CREATE SEQUENCE IF NOT EXISTS appointment_service_attribute_type_id_seq INCREMENT BY 50;
+  ALTER SEQUENCE appointment_service_attribute_type_id_seq INCREMENT BY 50;
+  PERFORM setval('appointment_service_attribute_type_id_seq', GREATEST((SELECT COALESCE(MAX(appointment_service_attribute_type_id), 0) + 50 FROM appointment_service_attribute_type), 50), true);
+
+  CREATE SEQUENCE IF NOT EXISTS appointment_service_attribute_id_seq INCREMENT BY 50;
+  ALTER SEQUENCE appointment_service_attribute_id_seq INCREMENT BY 50;
+  PERFORM setval('appointment_service_attribute_id_seq', GREATEST((SELECT COALESCE(MAX(appointment_service_attribute_id), 0) + 50 FROM appointment_service_attribute), 50), true);
+END $$;
+        ]]></sql>
     </changeSet>
 </databaseChangeLog>

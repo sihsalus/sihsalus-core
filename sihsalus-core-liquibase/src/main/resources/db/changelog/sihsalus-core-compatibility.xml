@@ -69,7 +69,7 @@
 
     <changeSet id="sihsalus-core-compatibility-20260518-06-postgres-person-attribute-value-backfill" author="sihsalus" dbms="postgresql">
         <comment>Backfill PersonAttribute value from value_reference when both columns exist.</comment>
-        <sql><![CDATA[
+        <sql splitStatements="false"><![CDATA[
             DO $$
             BEGIN
                 IF EXISTS (
@@ -165,5 +165,61 @@
     <changeSet id="increase-name-varchar-20250325-static-h2" author="gonzalo g." dbms="h2">
         <comment>Keep H2 aligned with the SIH Salus content concept_name length change.</comment>
         <sql>ALTER TABLE IF EXISTS concept_name ALTER COLUMN name VARCHAR(500) NOT NULL</sql>
+    </changeSet>
+
+    <changeSet id="sihsalus-core-compatibility-20260520-01-postgres-resync-owned-sequences" author="sihsalus" dbms="postgresql">
+        <comment>Advance PostgreSQL owned sequences after legacy seed data with explicit primary keys.</comment>
+        <sql splitStatements="false"><![CDATA[
+            DO $$
+            DECLARE
+                sequence_record RECORD;
+                current_value BIGINT;
+                max_value BIGINT;
+            BEGIN
+                FOR sequence_record IN
+                    SELECT table_namespace.nspname AS table_schema,
+                           table_class.relname AS table_name,
+                           table_column.attname AS column_name,
+                           sequence_namespace.nspname AS sequence_schema,
+                           sequence_class.relname AS sequence_name
+                    FROM pg_class sequence_class
+                    JOIN pg_namespace sequence_namespace
+                      ON sequence_namespace.oid = sequence_class.relnamespace
+                    JOIN pg_depend sequence_depend
+                      ON sequence_depend.objid = sequence_class.oid
+                     AND sequence_depend.deptype IN ('a', 'i')
+                    JOIN pg_class table_class
+                      ON table_class.oid = sequence_depend.refobjid
+                    JOIN pg_namespace table_namespace
+                      ON table_namespace.oid = table_class.relnamespace
+                    JOIN pg_attribute table_column
+                      ON table_column.attrelid = table_class.oid
+                     AND table_column.attnum = sequence_depend.refobjsubid
+                    WHERE sequence_class.relkind = 'S'
+                      AND table_namespace.nspname = CURRENT_SCHEMA()
+                LOOP
+                    EXECUTE format(
+                        'SELECT last_value FROM %I.%I',
+                        sequence_record.sequence_schema,
+                        sequence_record.sequence_name
+                    )
+                    INTO current_value;
+
+                    EXECUTE format(
+                        'SELECT COALESCE(MAX(%I), 0) FROM %I.%I',
+                        sequence_record.column_name,
+                        sequence_record.table_schema,
+                        sequence_record.table_name
+                    )
+                    INTO max_value;
+
+                    EXECUTE format(
+                        'SELECT setval(%L::regclass, %s, true)',
+                        format('%I.%I', sequence_record.sequence_schema, sequence_record.sequence_name),
+                        GREATEST(current_value, max_value, 1)
+                    );
+                END LOOP;
+            END $$;
+        ]]></sql>
     </changeSet>
 </databaseChangeLog>

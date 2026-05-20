@@ -4049,8 +4049,13 @@ CREATE TRIGGER stockmgmt_location_after_delete
   <changeSet author="dev" id="stockmanagement-1758855877841-303">
     <preConditions onFail="MARK_RAN">
       <tableExists tableName="stockmgmt_stock_batch"/>
+      <not>
+        <columnExists tableName="stockmgmt_stock_batch" columnName="expiry_notification_date"/>
+      </not>
     </preConditions>
-    <sql>ALTER TABLE stockmgmt_stock_batch ADD COLUMN IF NOT EXISTS expiry_notification_date DATETIME</sql>
+    <addColumn tableName="stockmgmt_stock_batch">
+      <column name="expiry_notification_date" type="DATETIME"/>
+    </addColumn>
   </changeSet>
   <changeSet id="stockmanagement-1758855877841-304" author="dev">
     <preConditions onFail="MARK_RAN">

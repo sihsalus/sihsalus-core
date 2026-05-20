@@ -17,4 +17,59 @@
             WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'dashboard.formEntry.maximumNumberEncountersToShow');
         </sql>
     </changeSet>
+
+    <changeSet id="sihsalus-postgresql-align-sequence-increments-20260520" author="SIH Salus" dbms="postgresql">
+        <comment>Align PostgreSQL sequences with Hibernate 6 pooled native generator validation.</comment>
+        <sql splitStatements="false"><![CDATA[
+DO $$
+DECLARE
+  seq RECORD;
+  qualified_sequence TEXT;
+  owner_table TEXT;
+  owner_column NAME;
+  current_value BIGINT;
+  max_identifier BIGINT;
+  target_value BIGINT;
+BEGIN
+  FOR seq IN
+    SELECT schemaname, sequencename
+      FROM pg_sequences
+     WHERE schemaname = current_schema()
+  LOOP
+    qualified_sequence := format('%I.%I', seq.schemaname, seq.sequencename);
+    owner_table := NULL;
+    owner_column := NULL;
+    max_identifier := 0;
+
+    SELECT format('%I.%I', table_namespace.nspname, owned_table.relname), owned_column.attname
+      INTO owner_table, owner_column
+      FROM pg_class sequence_class
+      JOIN pg_namespace sequence_namespace ON sequence_namespace.oid = sequence_class.relnamespace
+      JOIN pg_depend dependency ON dependency.objid = sequence_class.oid
+      JOIN pg_class owned_table ON owned_table.oid = dependency.refobjid
+      JOIN pg_namespace table_namespace ON table_namespace.oid = owned_table.relnamespace
+      JOIN pg_attribute owned_column
+        ON owned_column.attrelid = owned_table.oid
+       AND owned_column.attnum = dependency.refobjsubid
+     WHERE sequence_namespace.nspname = seq.schemaname
+       AND sequence_class.relname = seq.sequencename
+       AND sequence_class.relkind = 'S'
+       AND dependency.classid = 'pg_class'::regclass
+       AND dependency.refclassid = 'pg_class'::regclass
+       AND dependency.deptype IN ('a', 'i')
+     LIMIT 1;
+
+    EXECUTE format('SELECT last_value FROM %s', qualified_sequence) INTO current_value;
+
+    IF owner_table IS NOT NULL THEN
+      EXECUTE format('SELECT COALESCE(MAX(%I), 0) FROM %s', owner_column, owner_table) INTO max_identifier;
+    END IF;
+
+    target_value := GREATEST(COALESCE(current_value, 0), COALESCE(max_identifier, 0), 1) + 50;
+    EXECUTE format('ALTER SEQUENCE %s INCREMENT BY 50', qualified_sequence);
+    PERFORM setval(qualified_sequence::regclass, target_value, true);
+  END LOOP;
+END $$;
+        ]]></sql>
+    </changeSet>
 </databaseChangeLog>

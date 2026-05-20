@@ -165,6 +165,33 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet author="SIH Salus" id="sihsalus-openconceptlab-postgresql-hashed-url-bytea-20260520" dbms="postgresql">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="openconceptlab_item"/>
+			<columnExists tableName="openconceptlab_item" columnName="hashed_url"/>
+		</preConditions>
+		<comment>Use bytea for Item.hashedUrl byte arrays on PostgreSQL</comment>
+		<sql splitStatements="false"><![CDATA[
+DO $$
+BEGIN
+	IF EXISTS (
+		SELECT 1
+		  FROM information_schema.columns
+		 WHERE table_schema = current_schema()
+		   AND table_name = 'openconceptlab_item'
+		   AND column_name = 'hashed_url'
+		   AND udt_name <> 'bytea'
+	) THEN
+		DROP INDEX IF EXISTS openconceptlab_item_url;
+		ALTER TABLE openconceptlab_item
+			ALTER COLUMN hashed_url TYPE bytea
+			USING NULL;
+		CREATE INDEX IF NOT EXISTS openconceptlab_item_url ON openconceptlab_item (hashed_url);
+	END IF;
+END $$;
+		]]></sql>
+	</changeSet>
+
 	<changeSet author="ibacher" id="openconceptlab-2026-02-19-1">
 		<comment>Shrink type column from varchar(512) to varchar(50) since only short enum values are stored</comment>
 		<modifyDataType tableName="openconceptlab_item" columnName="type" newDataType="varchar(50)" />
