@@ -25,21 +25,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libxml2-utils
 
-      - name: Validate changed Liquibase XML files
+      - name: Validate Liquibase XML files
         run: |
-          xmllint --noout \
-            sihsalus-core-liquibase/src/main/resources/db/changelog/sihsalus-core-compatibility.xml \
-            sihsalus-module-appointments/src/main/resources/liquibase.xml \
-            sihsalus-module-appointments/src/main/resources/org/openmrs/module/appointments/liquibase.xml \
-            sihsalus-module-stockmanagement/src/main/resources/org/openmrs/module/stockmanagement/liquibase.xml \
-            sihsalus-module-legacyui/src/main/resources/liquibase.xml \
-            sihsalus-module-legacyui/src/main/resources/org/openmrs/module/legacyui/liquibase.xml \
-            sihsalus-module-openconceptlab/src/main/resources/liquibase.xml \
-            sihsalus-module-openconceptlab/src/main/resources/org/openmrs/module/openconceptlab/liquibase.xml
+          find sihsalus-core-liquibase/src/main/resources sihsalus-module-*/src/main/resources \
+            \( -name 'liquibase.xml' -o -name 'db.changelog*.xml' \) \
+            -print0 | xargs -0 xmllint --noout
 
-  docker-build:
-    name: Docker Image
+  compose-smoke:
+    name: Compose Runtime Smoke
     runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      SIHSALUS_BACKEND_PORT: 18080
+      SIHSALUS_OCL_STATIC_IMPORT_ENABLED: "false"
+      DOCKER_BUILDKIT: "1"
+      COMPOSE_DOCKER_CLI_BUILD: "1"
     steps:
       - name: Checkout backend
         uses: actions/checkout@v6
@@ -54,26 +54,8 @@ jobs:
       - name: Build backend image
         run: docker compose build backend
 
-  compose-smoke:
-    name: Compose Runtime Smoke
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    env:
-      SIHSALUS_BACKEND_PORT: 18080
-      SIHSALUS_OCL_STATIC_IMPORT_ENABLED: "false"
-    steps:
-      - name: Checkout backend
-        uses: actions/checkout@v6
-
-      - name: Checkout static content
-        uses: actions/checkout@v6
-        with:
-          repository: sihsalus/sihsalus-content
-          path: reference-sources/sihsalus-content
-          token: ${{ secrets.SIHSALUS_CONTENT_TOKEN || github.token }}
-
       - name: Start backend stack
-        run: docker compose up -d --build backend
+        run: docker compose up -d --no-build backend
 
       - name: Wait for backend health
         run: |
