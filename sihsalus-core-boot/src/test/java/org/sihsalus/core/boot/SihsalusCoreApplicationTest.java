@@ -260,7 +260,11 @@ class SihsalusCoreApplicationTest {
 
     private static final String REQUIRED_IDENTIFIER_TYPE_UUID = "05a29f94-c0ed-11e2-94be-8c13b969e334";
 
-    private static final String ADMIN_BASIC_AUTH = basicAuth("admin", "test");
+    private static final String TEST_ADMIN_USERNAME = "admin";
+
+    private static final String TEST_ADMIN_PASSWORD = "Admin123";
+
+    private static final String ADMIN_BASIC_AUTH = basicAuth(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
 
     private static final List<String> UNPORTED_STOCKMANAGEMENT_SCHEDULER_JOBS = Arrays.asList(
             "org.openmrs.module.stockmanagement.api.jobs.StockRuleEvaluationJob",
@@ -1615,7 +1619,7 @@ class SihsalusCoreApplicationTest {
         }
         boolean authenticatedBeforeQueueSmoke = Context.isAuthenticated();
         if (!authenticatedBeforeQueueSmoke) {
-            Context.authenticate("admin", "test");
+            Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
         }
         InteropQueueItem queuedItem = null;
         try {
