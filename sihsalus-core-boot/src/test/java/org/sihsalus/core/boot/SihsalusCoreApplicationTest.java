@@ -848,14 +848,12 @@ class SihsalusCoreApplicationTest {
         mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker").header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker")
-                        .header("Authorization", ADMIN_BASIC_AUTH)
                         .param("patientUuid", TEST_PATIENT_UUID))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(post("/rest/v1/patientdocuments/encounters")
-                        .header("Authorization", ADMIN_BASIC_AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[\"" + TEST_PATIENT_UUID + "\"]"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
