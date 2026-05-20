@@ -1,9 +1,11 @@
 name: Backend Runtime
 
 on:
+  pull_request:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,12 +29,15 @@ jobs:
 
       - name: Validate Liquibase XML files
         run: |
-          find sihsalus-core-liquibase/src/main/resources sihsalus-module-*/src/main/resources \
+          find . \
+            \( -path './reference-sources' -o -path '*/target' \) -prune -o \
+            -path '*/src/main/resources/*' \
             \( -name 'liquibase.xml' -o -name 'db.changelog*.xml' \) \
             -print0 | xargs -0 xmllint --noout
 
   compose-smoke:
     name: Compose Runtime Smoke
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
@@ -59,9 +64,15 @@ jobs:
 
       - name: Wait for backend health
         run: |
+          container_id="$(docker compose ps -q backend)"
+          if [ -z "$container_id" ]; then
+            docker compose ps
+            exit 1
+          fi
+
           for attempt in {1..60}; do
-            status="$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' sihsalus-core-backend-1)"
-            if [ "$status" = "healthy" ]; then
+            health_status="$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' "$container_id")"
+            if [ "$health_status" = "healthy" ]; then
               exit 0
             fi
             docker compose ps backend
