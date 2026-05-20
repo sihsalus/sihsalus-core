@@ -19,6 +19,7 @@ import org.openmrs.OpenmrsMetadata;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Privilege;
 import org.openmrs.Role;
+import org.openmrs.User;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -64,7 +65,7 @@ public class DataFilterServiceImpl extends BaseOpenmrsService implements DataFil
 				map.setEntityType(Hibernate.getClass(entity).getName());
 				map.setBasisIdentifier(getIdentifier(basis));
 				map.setBasisType(Hibernate.getClass(basis).getName());
-				map.setCreator(Context.getAuthenticatedUser());
+				map.setCreator(getAuthenticatedUser());
 				map.setDateCreated(new Date());
 
 				dao.saveEntityBasisMap(map);
@@ -116,21 +117,38 @@ public class DataFilterServiceImpl extends BaseOpenmrsService implements DataFil
 	}
 
 	private String getIdentifier(OpenmrsObject openmrsObject) {
-		String entityId = null;
+		if (openmrsObject == null) {
+			throw new APIException("Failed to determine id for null Object");
+		}
+
+		Object id = null;
 		try {
-			entityId = openmrsObject.getId().toString();
+			id = openmrsObject.getId();
 		}
 		catch (UnsupportedOperationException e) {
-			if (openmrsObject instanceof Role || openmrsObject instanceof Privilege) {
-				entityId = ((OpenmrsMetadata) openmrsObject).getName();
+			// Role and Privilege are metadata keyed by name in OpenMRS, not integer ids.
+		}
+
+		if (id != null) {
+			return id.toString();
+		}
+
+		if (openmrsObject instanceof Role || openmrsObject instanceof Privilege) {
+			String metadataName = ((OpenmrsMetadata) openmrsObject).getName();
+			if (StringUtils.isNotBlank(metadataName)) {
+				return metadataName;
 			}
 		}
 
-		if (StringUtils.isBlank(entityId)) {
-			throw new APIException("Failed to determine id for Object: " + openmrsObject);
-		}
+		throw new APIException("Failed to determine id for Object: " + openmrsObject);
+	}
 
-		return entityId;
+	private User getAuthenticatedUser() {
+		User authenticatedUser = Context.getAuthenticatedUser();
+		if (authenticatedUser == null) {
+			throw new APIException("Data Filter access grants require an authenticated user");
+		}
+		return authenticatedUser;
 	}
 
 	/**
@@ -138,17 +156,20 @@ public class DataFilterServiceImpl extends BaseOpenmrsService implements DataFil
 	 */
 	@Override
 	public Collection<EntityBasisMap> getEntityBasisMaps(OpenmrsObject entity, String basisClassName) {
-		return dao.getEntityBasisMaps(entity.getId().toString(), Hibernate.getClass(entity).getName(), basisClassName);
+		return dao.getEntityBasisMaps(getIdentifier(entity), Hibernate.getClass(entity).getName(), basisClassName);
 	}
 
 	@Override
 	public Collection<EntityBasisMap> getEntityBasisMapsByBasis(Class<? extends OpenmrsObject> entityClass,
 			OpenmrsObject basis) {
+		if (entityClass == null) {
+			throw new APIException("Failed to determine entity class for null Class");
+		}
 		return getEntityBasisMapsByBasis(entityClass.getName(), basis);
 	}
 
 	@Override
 	public Collection<EntityBasisMap> getEntityBasisMapsByBasis(String entityClassName, OpenmrsObject basis) {
-		return dao.getEntityBasisMapsByBasis(entityClassName, Hibernate.getClass(basis).getName(), basis.getId().toString());
+		return dao.getEntityBasisMapsByBasis(entityClassName, Hibernate.getClass(basis).getName(), getIdentifier(basis));
 	}
 }

@@ -1,6 +1,6 @@
 # Static Module Conversion Status
 
-Date: 2026-05-14
+Date: 2026-05-20
 
 This file tracks distro module source that has been converted from runtime `.omod` loading into SIH Salus static internal modules.
 
@@ -12,9 +12,9 @@ The Maven reactor is the source of truth for build participation. The compatibil
 
 Status: repaired in-tree.
 
-- `sihsalus-module-identitylookup` is a Sihsalus-planned patient registry capability, not a module from the current distro baseline.
-- It is declared in the Maven reactor and `sihsalus-core-boot`, so it must exist even while the feature is still pending.
-- The module currently exists as a placeholder Maven jar to keep IDE import and reactor resolution stable.
+- The reactor contains only modules that are built into the static backend runtime.
+- `sihsalus-module-identitylookup` was removed because it had no current distro source baseline and only existed as a placeholder.
+- Future identity lookup work should be added as a real feature module when the product scope is defined.
 
 ### Operational Status Model
 
@@ -31,7 +31,6 @@ Use these levels when reporting module progress:
 
 High priority:
 
-- `sihsalus-module-identitylookup`: implement Sihsalus patient identity lookup/search capability; no distro source baseline exists.
 - `sihsalus-module-o3forms`: finish acceptance checks for service registration and `/rest/v1/o3/forms/{formNameOrUuid}`.
 - `sihsalus-module-billing`: confirm static service registration, Hibernate mappings, Liquibase order, and REST surface.
 - `sihsalus-module-stockmanagement`: confirm service registration, metadata loading, Liquibase order, and billing integration.
@@ -68,6 +67,7 @@ Already substantially imported, but still requiring workflow/PostgreSQL verifica
 - `sihsalus-module-ordertemplates`
 - `sihsalus-module-patientdocuments`
 - `sihsalus-module-legacyui`
+- `sihsalus-module-datafilter`
 
 ## Completed Blocks
 

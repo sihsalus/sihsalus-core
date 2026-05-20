@@ -11,6 +11,8 @@ package org.openmrs.module.datafilter.impl.api.db.hibernate;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -96,9 +98,9 @@ public class HibernateDataFilterDAO implements DataFilterDAO {
 		Root<EntityBasisMap> root = cq.from(EntityBasisMap.class);
 		cq.select(root).where(
 				cb.and(
-						cb.equal(root.get("entityType"), entityType),
-						cb.equal(root.get("basisType"), basisType),
-						cb.equal(root.get("basisIdentifier"), basisIdentifier)
+						equalIgnoreCase(cb, root, "entityType", entityType),
+						equalIgnoreCase(cb, root, "basisType", basisType),
+						equalIgnoreCase(cb, root, "basisIdentifier", basisIdentifier)
 				)
 		);
 
@@ -117,6 +119,9 @@ public class HibernateDataFilterDAO implements DataFilterDAO {
 	}
 
 	private Predicate equalIgnoreCase(CriteriaBuilder cb, Root<EntityBasisMap> root, String attribute, String value) {
-		return cb.equal(cb.lower(root.get(attribute)), value.toLowerCase());
+		if (value == null) {
+			return cb.isNull(root.get(attribute));
+		}
+		return cb.equal(cb.lower(root.get(attribute)), value.toLowerCase(Locale.ROOT));
 	}
 }

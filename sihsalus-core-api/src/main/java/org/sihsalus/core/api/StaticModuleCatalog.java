@@ -54,16 +54,22 @@ public final class StaticModuleCatalog {
                     module("ordertemplates", "ordertemplates-omod", "2.2.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("event", "event-omod", "4.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("stockmanagement", "stockmanagement-api", "3.0.0", SihsalusModuleStatus.STATIC_INTERNAL),
+                    module("datafilter", "datafilter-omod", "0.1.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("billing", "billing-omod", "2.3.0-SNAPSHOT", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("fua", "fua-omod", "1.0.75", SihsalusModuleStatus.STATIC_INTERNAL),
                     module("imaging", "imaging-omod", "1.2.2", SihsalusModuleStatus.STATIC_INTERNAL),
-                    module("identitylookup", "sihsalus-core-planned", "0.1.0-SNAPSHOT", SihsalusModuleStatus.PLACEHOLDER),
                     module("legacyui", "legacyui-omod", "2.1.0", SihsalusModuleStatus.STATIC_INTERNAL));
 
     private StaticModuleCatalog() {}
 
     public static List<SihsalusModuleDescriptor> modules() {
         return MODULES;
+    }
+
+    public static List<SihsalusModuleDescriptor> staticInternalModules() {
+        return MODULES.stream()
+                .filter(module -> module.status() == SihsalusModuleStatus.STATIC_INTERNAL)
+                .toList();
     }
 
     private static SihsalusModuleDescriptor module(

@@ -10,6 +10,9 @@ class StaticModuleCatalogTest {
     void includesFhirAndNoOmodRuntimeModule() {
         assertTrue(StaticModuleCatalog.modules().stream().anyMatch(module -> module.id().equals("fhir2")));
         assertTrue(StaticModuleCatalog.modules().stream().noneMatch(module -> module.id().equals("omod-runtime")));
+        assertTrue(StaticModuleCatalog.modules().stream().noneMatch(module -> module.id().equals("identitylookup")));
+        assertTrue(StaticModuleCatalog.staticInternalModules().stream()
+                .noneMatch(module -> module.status() == SihsalusModuleStatus.PLACEHOLDER));
     }
 
     @Test
@@ -117,6 +120,15 @@ class StaticModuleCatalogTest {
                 .anyMatch(module -> module.id().equals("stockmanagement")
                         && module.sourceModule().equals("stockmanagement-api")
                         && module.baselineVersion().equals("3.0.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
+    void dataFilterIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("datafilter")
+                        && module.sourceModule().equals("datafilter-omod")
+                        && module.baselineVersion().equals("0.1.0-SNAPSHOT")
                         && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
     }
 
