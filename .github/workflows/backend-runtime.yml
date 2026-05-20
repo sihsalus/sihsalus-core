@@ -114,6 +114,25 @@ jobs:
         if: failure()
         run: docker compose logs --tail=300 backend postgres
 
+      - name: Collect runtime diagnostics on failure
+        if: failure()
+        run: |
+          mkdir -p artifacts/runtime
+          docker compose ps > artifacts/runtime/compose-ps.txt
+          docker compose logs --no-color backend postgres > artifacts/runtime/compose-logs.txt
+          backend_container="$(docker compose ps -q backend || true)"
+          if [ -n "$backend_container" ]; then
+            docker inspect "$backend_container" > artifacts/runtime/backend-inspect.json
+          fi
+
+      - name: Upload runtime diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-runtime-diagnostics
+          path: artifacts/runtime/**
+          if-no-files-found: ignore
+
       - name: Stop stack
         if: always()
         run: docker compose down --volumes --remove-orphans

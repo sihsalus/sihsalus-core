@@ -26,3 +26,13 @@ jobs:
 
       - name: Verify
         run: mvn --batch-mode --no-transfer-progress verify
+
+      - name: Upload test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-test-reports
+          path: |
+            **/target/surefire-reports/**
+            **/target/failsafe-reports/**
+          if-no-files-found: ignore
