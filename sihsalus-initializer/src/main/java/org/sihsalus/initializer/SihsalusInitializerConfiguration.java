@@ -5,6 +5,7 @@ import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_
 
 import java.util.List;
 import org.openmrs.api.context.ServiceContext;
+import org.openmrs.messagesource.impl.MutableResourceBundleMessageSource;
 import org.openmrs.module.initializer.api.InitializerService;
 import org.openmrs.module.initializer.api.InitializerServiceImpl;
 import org.openmrs.module.initializer.api.loaders.Loader;
@@ -28,6 +29,12 @@ public class SihsalusInitializerConfiguration {
   }
 
   @Bean
+  SmartInitializingSingleton sihsalusMessagePropertiesRegistrar(
+      MutableResourceBundleMessageSource messageSource) {
+    return new SihsalusMessagePropertiesRegistrar(messageSource);
+  }
+
+  @Bean
   StaticSihsalusContentLoader staticSihsalusContentLoader(JdbcTemplate jdbcTemplate) {
     return new StaticSihsalusContentLoader(jdbcTemplate);
   }
@@ -40,6 +47,11 @@ public class SihsalusInitializerConfiguration {
   @Bean
   Loader conceptSourcesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
     return new StaticSihsalusContentDomainLoader("conceptsources", 4, contentLoader);
+  }
+
+  @Bean
+  Loader metadataSharingInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("metadatasharing", 5, contentLoader);
   }
 
   @Bean
@@ -88,6 +100,11 @@ public class SihsalusInitializerConfiguration {
   }
 
   @Bean
+  Loader addressHierarchyInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("addresshierarchy", 16, contentLoader);
+  }
+
+  @Bean
   Loader attributeTypesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
     return new StaticSihsalusContentDomainLoader("attributetypes", 15, contentLoader);
   }
@@ -103,13 +120,74 @@ public class SihsalusInitializerConfiguration {
   }
 
   @Bean
+  Loader appointmentSpecialitiesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("appointmentspecialities", 41, contentLoader);
+  }
+
+  @Bean
+  Loader appointmentServiceDefinitionsInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader(
+        "appointmentservicedefinitions", 42, contentLoader);
+  }
+
+  @Bean
   Loader billableServicesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
     return new StaticSihsalusContentDomainLoader("billableservices", 26, contentLoader);
   }
 
   @Bean
+  Loader paymentModesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("paymentmodes", 27, contentLoader);
+  }
+
+  @Bean
+  Loader cashPointsInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("cashpoints", 28, contentLoader);
+  }
+
+  @Bean
   Loader personAttributeTypesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
     return new StaticSihsalusContentDomainLoader("personattributetypes", 35, contentLoader);
+  }
+
+  @Bean
+  Loader identifierSourcesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("idgen", 36, contentLoader);
+  }
+
+  @Bean
+  Loader autoGenerationOptionsInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("autogenerationoptions", 37, contentLoader);
+  }
+
+  @Bean
+  Loader metadataSetsInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("metadatasets", 46, contentLoader);
+  }
+
+  @Bean
+  Loader metadataTermMappingsInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("metadatatermmappings", 48, contentLoader);
+  }
+
+  @Bean
+  Loader cohortTypesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("cohorttypes", 49, contentLoader);
+  }
+
+  @Bean
+  Loader cohortAttributeTypesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("cohortattributetypes", 50, contentLoader);
+  }
+
+  @Bean
+  Loader fhirConceptSourcesInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("fhirconceptsources", 51, contentLoader);
+  }
+
+  @Bean
+  Loader fhirPatientIdentifierSystemsInitializerLoader(StaticSihsalusContentLoader contentLoader) {
+    return new StaticSihsalusContentDomainLoader("fhirpatientidentifiersystems", 52, contentLoader);
   }
 
   @Bean

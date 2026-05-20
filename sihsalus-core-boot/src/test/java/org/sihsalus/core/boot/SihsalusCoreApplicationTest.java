@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
@@ -378,8 +379,178 @@ class SihsalusCoreApplicationTest {
         assertEquals(
                 1,
                 countRows(
+                        "select count(*) from cashier_payment_mode where uuid = ?",
+                        "526bf278-ba81-4436-b867-c2f6641d060a"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from cashier_payment_mode_attribute_type where name = ? and required = true",
+                        "Maximum"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from cashier_cash_point where uuid = ?",
+                        "422bbe3e-2742-4640-8ec9-4ee4fbf23374"));
+        assertEquals(
+                1,
+                countRows(
                         "select count(*) from cashier_billable_service where uuid = ?",
                         "5689a516-f9e4-4a88-b068-2ac0d132953e"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from appointment_speciality where uuid = ? and name = ?",
+                        "9f2a8cd0-32c6-4844-8df7-1ac9c4d79943",
+                        "Medicina General"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from appointment_service where uuid = ? and location_id is not null",
+                        "7ba3aa21-cc56-47ca-bb4d-a60549f666c0"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from cohort_type where uuid = ? and name = ?",
+                        "eee9970e-7ca0-4e8c-a280-c33e9d5f6a04",
+                        "System List"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from cohort_attribute_type where uuid = ? and datatype = ?",
+                        "70d8be3c-3a3c-4c64-b394-cee994f60cbe",
+                        "org.openmrs.customdatatype.datatype.FreeTextDatatype"));
+        assertEquals(
+                "https://cielterminology.org",
+                jdbcTemplate.queryForObject(
+                        "select url from fhir_concept_source where uuid = ?",
+                        String.class,
+                        "2b3c1ff8-768a-102f-83f4-12313b04a615"));
+        assertEquals(
+                "https://santaclotilde.salud.gob.pe/fhir/sid/historia-clinica",
+                jdbcTemplate.queryForObject(
+                        "select url from fhir_patient_identifier_system where uuid = ?",
+                        String.class,
+                        "6000e616-4af9-4631-841a-f96a441875bd"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from idgen_identifier_source src "
+                                + "join idgen_seq_id_gen seq on seq.id = src.id "
+                                + "where src.uuid = ? and src.name = ? and seq.first_identifier_base = ? "
+                                + "and seq.min_length = ?",
+                        "8549f706-7e85-4c1d-9424-217d50a2988b",
+                        "Generator for SIHSALUS",
+                        "100000",
+                        7));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from idgen_auto_generation_option "
+                                + "where uuid = ? and manual_entry_enabled = false "
+                                + "and automatic_generation_enabled = true",
+                        "2be74f07-a4a0-4bfc-a943-8555d0074a74"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from metadatamapping_metadata_source where uuid = ? and name = ?",
+                        "33bed25b-2ff7-49ec-ba52-bd066199d8b8",
+                        "org.openmrs.module.emrapi"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from metadatamapping_metadata_set where uuid = ? and name = ?",
+                        "f0ebcb99-7618-41b7-b0bf-8ff93de67b9e",
+                        "Extra Patient Identifiers Set"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from metadatamapping_metadata_term_mapping mapping "
+                                + "join metadatamapping_metadata_source source "
+                                + "on source.metadata_source_id = mapping.metadata_source_id "
+                                + "where source.name = ? and mapping.code = ? and mapping.metadata_uuid = ?",
+                        "org.openmrs.module.emrapi",
+                        "emr.primaryIdentifierType",
+                        "05a29f94-c0ed-11e2-94be-8c13b969e334"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from concept_set conceptSet "
+                                + "join concept parentConcept on parentConcept.concept_id = conceptSet.concept_set "
+                                + "join concept memberConcept on memberConcept.concept_id = conceptSet.concept_id "
+                                + "where parentConcept.uuid = ? and memberConcept.uuid = ? and conceptSet.sort_weight = ?",
+                        "4bf3f465-ac91-44fa-9b1f-173daf0c89a0",
+                        "7ba3aa21-cc56-47ca-bb4d-a60549f666c0",
+                        1.0));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from order_frequency where uuid = ? and frequency_per_day = ?",
+                        "136ebdb7-e989-47cf-8ec2-4e8b2ffe0ab3",
+                        1.0));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from drug where uuid = ? and concept_id is not null "
+                                + "and dosage_form is not null and strength = ?",
+                        "0ee4c038-56b7-4ffe-808b-5a9ec5a00004",
+                        "300 mg"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from program where uuid = ? and concept_id is not null and retired = false",
+                        "b9db5c39-2855-4c61-9f25-9a7ec2d564bc"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from program_workflow where uuid = ? and program_id is not null "
+                                + "and concept_id is not null",
+                        "41dc3091-cf1c-4a54-bbc6-98b762c87f28"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from program_workflow_state where uuid = ? and initial = true "
+                                + "and terminal = false",
+                        "4470c9d2-8893-4dbf-bdcf-894104a9f9cb"));
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from queue where uuid = ? and service is not null "
+                                + "and status_concept_set is not null and priority_concept_set is not null",
+                        "c3d4e5f6-a7b8-49c0-d1e2-f3a4b5c6d7e8"));
+        assertEquals(7, countRows("select count(*) from address_hierarchy_level"));
+        assertEquals(
+                "País",
+                jdbcTemplate.queryForObject(
+                        "select name from address_hierarchy_level where address_field = ?",
+                        String.class,
+                        "COUNTRY"));
+        assertTrue(
+                countRows("select count(*) from address_hierarchy_entry") > 90000,
+                "Peru address hierarchy entries should be loaded from sihsalus-content");
+        assertEquals(
+                1,
+                countRows(
+                        "select count(*) from address_hierarchy_entry where name = ? and user_generated_id = ?",
+                        "CACLIC",
+                        "0101010002"));
+        assertTrue(
+                jdbcTemplate.queryForObject(
+                                "select property_value from global_property where property = ?",
+                                String.class,
+                                "layout.address.format")
+                        .contains("Centro Poblado"));
+        InitializerService initializerService = applicationContext.getBean(InitializerService.class);
+        assertEquals("50mm", initializerService.getValueFromKey("report.patientIdSticker.size.height"));
+        assertTrue(initializerService.getBooleanFromKey("report.patientIdSticker.barcode"));
+        assertEquals(
+                "Visitas Activas",
+                Context.getMessageSourceService()
+                        .getMessage("coreapps.app.activeVisits.label", null, Locale.forLanguageTag("es")));
+        assertTrue(
+                jdbcTemplate.queryForObject(
+                                "select character_maximum_length from information_schema.columns where lower(table_name) = 'concept_name' and lower(column_name) = 'name'",
+                                Integer.class)
+                        >= 500);
     }
 
     private boolean sihsalusContentConfigurationAvailable() {

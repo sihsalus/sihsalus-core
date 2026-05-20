@@ -25,7 +25,9 @@ import org.openmrs.module.openconceptlab.scheduler.UpdateScheduler;
 import org.openmrs.module.openconceptlab.web.rest.controller.OpenConceptLabRestController;
 import org.openmrs.module.openconceptlab.web.rest.resources.ImportResource;
 import org.openmrs.util.PrivilegeConstants;
+import org.sihsalus.initializer.StaticSihsalusContentLoader;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -134,6 +136,22 @@ public class SihsalusOpenConceptLabConfiguration {
             registerAdminListExtension();
             registerHighlightSubscribedConceptExtension(openConceptLabImportService);
         };
+    }
+
+    @Bean
+    SihsalusOpenConceptLabStaticContentImporter openConceptLabStaticContentImporter(
+            Importer openConceptLabImporter,
+            ImportService openConceptLabImportService,
+            AdministrationService administrationService,
+            StaticSihsalusContentLoader contentLoader,
+            Environment environment) {
+        return new SihsalusOpenConceptLabStaticContentImporter(
+                openConceptLabImporter,
+                openConceptLabImportService,
+                administrationService,
+                contentLoader,
+                environment.getProperty("sihsalus.ocl.static-import.enabled", Boolean.class, true),
+                environment.getProperty("sihsalus.ocl.static-import.fail-on-errors", Boolean.class, false));
     }
 
     private static void ensureGlobalProperties(AdministrationService administrationService) {

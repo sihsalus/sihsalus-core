@@ -67,6 +67,7 @@ public class Importer implements Runnable {
 		PrivilegeConstants.GET_CONCEPT_MAP_TYPES,
 		PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS,
 		PrivilegeConstants.GET_GLOBAL_PROPERTIES,
+		PrivilegeConstants.GET_OBS,
 		PrivilegeConstants.MANAGE_CONCEPTS,
 		PrivilegeConstants.MANAGE_CONCEPT_CLASSES,
 		PrivilegeConstants.MANAGE_CONCEPT_DATATYPES,
@@ -433,6 +434,7 @@ public class Importer implements Runnable {
 			oclMapping.setFromConceptUrl(prependBaseUrl(baseUrl, oclMapping.getFromConceptUrl()));
 			oclMapping.setFromSourceUrl(prependBaseUrl(baseUrl, oclMapping.getFromSourceUrl()));
 			oclMapping.setToConceptUrl(prependBaseUrl(baseUrl, oclMapping.getToConceptUrl()));
+			oclMapping.setToSourceUrl(prependBaseUrl(baseUrl, oclMapping.getToSourceUrl()));
 
 			Item item;
 			try {
@@ -472,8 +474,11 @@ public class Importer implements Runnable {
 		if (baseUrl == null) {
 			return url;
 		}
-		if (url == null) {
+		if (StringUtils.isBlank(url)) {
 			return null;
+		}
+		if (StringUtils.startsWithAny(url, "http://", "https://")) {
+			return url;
 		}
 
 		if (!url.startsWith("/")) {

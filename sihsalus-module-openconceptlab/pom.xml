@@ -21,6 +21,11 @@
         </dependency>
         <dependency>
             <groupId>org.sihsalus</groupId>
+            <artifactId>sihsalus-initializer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sihsalus</groupId>
             <artifactId>sihsalus-webservices-rest</artifactId>
             <version>${project.version}</version>
         </dependency>

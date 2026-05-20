@@ -152,4 +152,18 @@
                                  referencedTableName="users"
                                  referencedColumnNames="user_id"/>
     </changeSet>
+
+    <changeSet id="increase-name-varchar-20250325-static" author="gonzalo g.">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="concept_name"/>
+            <columnExists tableName="concept_name" columnName="name"/>
+        </preConditions>
+        <comment>Port SIH Salus content changelog: allow long OCL concept names.</comment>
+        <modifyDataType tableName="concept_name" columnName="name" newDataType="VARCHAR(500)"/>
+    </changeSet>
+
+    <changeSet id="increase-name-varchar-20250325-static-h2" author="gonzalo g." dbms="h2">
+        <comment>Keep H2 aligned with the SIH Salus content concept_name length change.</comment>
+        <sql>ALTER TABLE IF EXISTS concept_name ALTER COLUMN name VARCHAR(500) NOT NULL</sql>
+    </changeSet>
 </databaseChangeLog>

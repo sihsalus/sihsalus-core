@@ -11,6 +11,7 @@ package org.openmrs.module.openconceptlab.importer;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Auditable;
 import org.openmrs.Concept;
 import org.openmrs.ConceptAnswer;
 import org.openmrs.ConceptClass;
@@ -24,6 +25,7 @@ import org.openmrs.ConceptNumeric;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSet;
 import org.openmrs.ConceptSource;
+import org.openmrs.User;
 import org.openmrs.api.ConceptNameType;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.DuplicateConceptNameException;
@@ -48,6 +50,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -105,6 +108,7 @@ public class Saver {
 						validationType = ValidationType.FULL;
 					}
 
+					ensureAuditInfo(concept);
 					if (ValidationType.FULL.equals(validationType)) {
 						conceptService.saveConcept(concept);
 					} else if (ValidationType.NONE.equals(validationType)) {
@@ -196,6 +200,7 @@ public class Saver {
 			conceptClass.setName(oclConcept.getConceptClass());
 			conceptClass.setDescription("Imported from Open Concept Lab");
 			conceptClass.setUuid(version5Uuid("conceptClass/" + oclConcept.getConceptClass()).toString());
+			ensureAuditInfo(conceptClass);
 			conceptService.saveConceptClass(conceptClass);
 		}
 		concept.setConceptClass(conceptClass);
@@ -336,24 +341,15 @@ public class Saver {
 				}
 
 				final Item item;
-				Item fromItem;
-				Concept fromConcept = null;
-				if (!StringUtils.isBlank(oclMapping.getFromConceptUrl())) {
-					fromItem = cacheService.getLastSuccessfulItemByUrl(oclMapping.getFromConceptUrl(), importService);
-					if (fromItem != null) {
-						fromConcept = cacheService.getConceptByUuid(fromItem.getUuid());
-					}
-
-					if (fromConcept == null) {
-						String source = oclMapping.getFromSourceName();
-						String code = oclMapping.getFromConceptCode();
-						fromConcept = cacheService.getConceptWithSameAsMapping(source, code);
-					}
-
-					if (fromConcept == null) {
-						throw new SavingException("Cannot create mapping from concept with URL " + oclMapping.getFromConceptUrl()
-								+ ", because the concept has not been imported");
-					}
+				Concept fromConcept = getMappingConcept(
+						cacheService,
+						oclMapping.getFromConceptUrl(),
+						oclMapping.getFromSourceUrl(),
+						oclMapping.getFromSourceName(),
+						oclMapping.getFromConceptCode());
+				if (fromConcept == null && !StringUtils.isBlank(oclMapping.getFromConceptUrl())) {
+					throw new SavingException("Cannot create mapping from concept with URL " + oclMapping.getFromConceptUrl()
+							+ ", because the concept has not been imported");
 				}
 
 				if (MapType.Q_AND_A.equals(oclMapping.getMapType()) || MapType.SET.equals(oclMapping.getMapType())) {
@@ -362,26 +358,12 @@ public class Saver {
 								+ " defined");
 					}
 
-					Item toItem;
-					Concept toConcept = null;
-					if (!StringUtils.isBlank(oclMapping.getToConceptUrl())) {
-						toItem = cacheService.getLastSuccessfulItemByUrl(oclMapping.getToConceptUrl(), importService);
-						if (toItem != null) {
-							toConcept = cacheService.getConceptByUuid(toItem.getUuid());
-						}
-						
-						if (toConcept == null) {
-							String source = oclMapping.getToSourceName();
-							String code = oclMapping.getToConceptCode();
-							toConcept = cacheService.getConceptWithSameAsMapping(source, code);
-						}
-
-						if (toConcept == null) {
-							throw new SavingException("Cannot create mapping to concept with URL "
-									+ oclMapping.getToConceptUrl() + ", because the concept has not been imported");
-						}
-					}
-
+					Concept toConcept = getMappingConcept(
+							cacheService,
+							oclMapping.getToConceptUrl(),
+							oclMapping.getToSourceUrl(),
+							oclMapping.getToSourceName(),
+							oclMapping.getToConceptCode());
 					if (toConcept == null) {
 						throw new SavingException("Cannot create mapping " + oclMapping.getUrl() + " as no to concept is defined");
 					}
@@ -392,14 +374,19 @@ public class Saver {
 						item = updateOrAddSetMembersFromOcl(update, oclMapping, fromConcept, toConcept);
 					}
 
+					ensureAuditInfo(fromConcept);
 					importService.updateConceptWithoutValidation(fromConcept);
 				} else {
 					ConceptSource toSource = cacheService.getConceptSourceByName(oclMapping.getToSourceName());
 					if (toSource == null) {
+						if (StringUtils.isBlank(oclMapping.getToSourceName())) {
+							throw new SavingException("Cannot create mapping " + oclMapping.getUrl() + " as no to source is defined");
+						}
 						toSource = new ConceptSource();
 						toSource.setName(oclMapping.getToSourceName());
 						toSource.setDescription("Imported from " + oclMapping.getUrl());
 						toSource.setUuid(version5Uuid("source/" + oclMapping.getToSourceName()).toString());
+						ensureAuditInfo(toSource);
 						conceptService.saveConceptSource(toSource);
 						cacheService.addConceptSource(toSource);
 					}
@@ -411,6 +398,7 @@ public class Saver {
 						mapType.setName(mapTypeName);
 						mapType.setDescription("Imported from " + oclMapping.getUrl());
 						mapType.setUuid(version5Uuid("mapType/" + mapTypeName).toString());
+						ensureAuditInfo(mapType);
 						conceptService.saveConceptMapType(mapType);
 					}
 
@@ -422,6 +410,7 @@ public class Saver {
 							term = new ConceptReferenceTerm();
 							term.setConceptSource(toSource);
 							term.setCode(oclMapping.getToConceptCode());
+							ensureAuditInfo(term);
 							conceptService.saveConceptReferenceTerm(term);
 							cacheService.addConceptReferenceTerm(term);
 						} else {
@@ -448,6 +437,7 @@ public class Saver {
 							if (!conceptMap.getConcept().equals(fromConcept)) {
 								Concept previousConcept = conceptMap.getConcept();
 								previousConcept.removeConceptMapping(conceptMap);
+								ensureAuditInfo(previousConcept);
 								importService.updateConceptWithoutValidation(previousConcept);
 								fromConcept.addConceptMapping(conceptMap);
 							}
@@ -496,6 +486,7 @@ public class Saver {
 
 						item = new Item(update, oclMapping, state);
 						if (state != ItemState.UP_TO_DATE) {
+							ensureAuditInfo(fromConcept);
 							importService.updateConceptWithoutValidation(fromConcept);
 						}
 					} else {
@@ -610,6 +601,76 @@ public class Saver {
 		}
 		
 		return defaultIfUndefined;
+	}
+
+	private Concept getMappingConcept(
+			CacheService cacheService,
+			String conceptUrl,
+			String sourceUrl,
+			String sourceName,
+			String conceptCode) {
+		Concept concept = getConceptByImportedUrl(cacheService, conceptUrl);
+		if (concept == null) {
+			concept = getConceptByImportedUrl(cacheService, deriveConceptUrl(sourceUrl, conceptCode));
+		}
+		if (concept == null) {
+			concept = cacheService.getConceptWithSameAsMapping(sourceName, conceptCode);
+		}
+		return concept;
+	}
+
+	private Concept getConceptByImportedUrl(CacheService cacheService, String conceptUrl) {
+		if (StringUtils.isBlank(conceptUrl)) {
+			return null;
+		}
+		Item item = cacheService.getLastSuccessfulItemByUrl(conceptUrl, importService);
+		return item != null ? cacheService.getConceptByUuid(item.getUuid()) : null;
+	}
+
+	private String deriveConceptUrl(String sourceUrl, String conceptCode) {
+		if (StringUtils.isAnyBlank(sourceUrl, conceptCode)) {
+			return null;
+		}
+		return StringUtils.appendIfMissing(sourceUrl, "/") + "concepts/" + conceptCode + "/";
+	}
+
+	private void ensureAuditInfo(Concept concept) {
+		Date now = new Date();
+		User creator = getAuditCreator();
+		ensureAuditInfo((Auditable) concept, creator, now);
+		for (ConceptName name : concept.getNames(true)) {
+			ensureAuditInfo(name, creator, now);
+		}
+		for (ConceptDescription description : concept.getDescriptions()) {
+			ensureAuditInfo(description, creator, now);
+		}
+		for (ConceptMap mapping : concept.getConceptMappings()) {
+			ensureAuditInfo(mapping, creator, now);
+		}
+		for (ConceptSet conceptSet : concept.getConceptSets()) {
+			ensureAuditInfo(conceptSet, creator, now);
+		}
+		for (ConceptAnswer answer : concept.getAnswers()) {
+			ensureAuditInfo(answer, creator, now);
+		}
+	}
+
+	private void ensureAuditInfo(Auditable auditable) {
+		ensureAuditInfo(auditable, getAuditCreator(), new Date());
+	}
+
+	private void ensureAuditInfo(Auditable auditable, User creator, Date now) {
+		if (auditable.getCreator() == null) {
+			auditable.setCreator(creator);
+		}
+		if (auditable.getDateCreated() == null) {
+			auditable.setDateCreated(now);
+		}
+	}
+
+	private User getAuditCreator() {
+		User authenticatedUser = Context.getAuthenticatedUser();
+		return authenticatedUser != null ? authenticatedUser : new User(1);
 	}
 
 	private void updateOrAddNamesFromOcl(Concept concept, OclConcept oclConcept) {
