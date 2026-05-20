@@ -1,0 +1,101 @@
+name: Backend Runtime
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  liquibase-xml:
+    name: Liquibase XML
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout backend
+        uses: actions/checkout@v4
+
+      - name: Install xmllint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libxml2-utils
+
+      - name: Validate changed Liquibase XML files
+        run: |
+          xmllint --noout \
+            sihsalus-core-liquibase/src/main/resources/db/changelog/sihsalus-core-compatibility.xml \
+            sihsalus-module-appointments/src/main/resources/liquibase.xml \
+            sihsalus-module-appointments/src/main/resources/org/openmrs/module/appointments/liquibase.xml \
+            sihsalus-module-stockmanagement/src/main/resources/org/openmrs/module/stockmanagement/liquibase.xml \
+            sihsalus-module-legacyui/src/main/resources/liquibase.xml \
+            sihsalus-module-legacyui/src/main/resources/org/openmrs/module/legacyui/liquibase.xml \
+            sihsalus-module-openconceptlab/src/main/resources/liquibase.xml \
+            sihsalus-module-openconceptlab/src/main/resources/org/openmrs/module/openconceptlab/liquibase.xml
+
+  docker-build:
+    name: Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout backend
+        uses: actions/checkout@v4
+
+      - name: Checkout static content
+        uses: actions/checkout@v4
+        with:
+          repository: sihsalus/sihsalus-content
+          path: reference-sources/sihsalus-content
+          token: ${{ secrets.SIHSALUS_CONTENT_TOKEN || github.token }}
+
+      - name: Build backend image
+        run: docker compose build backend
+
+  compose-smoke:
+    name: Compose Runtime Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      SIHSALUS_BACKEND_PORT: 18080
+      SIHSALUS_OCL_STATIC_IMPORT_ENABLED: "false"
+    steps:
+      - name: Checkout backend
+        uses: actions/checkout@v4
+
+      - name: Checkout static content
+        uses: actions/checkout@v4
+        with:
+          repository: sihsalus/sihsalus-content
+          path: reference-sources/sihsalus-content
+          token: ${{ secrets.SIHSALUS_CONTENT_TOKEN || github.token }}
+
+      - name: Start backend stack
+        run: docker compose up -d --build backend
+
+      - name: Wait for backend health
+        run: |
+          for attempt in {1..60}; do
+            status="$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' sihsalus-core-backend-1)"
+            if [ "$status" = "healthy" ]; then
+              exit 0
+            fi
+            docker compose ps backend
+            sleep 10
+          done
+
+          docker compose logs --tail=300 backend
+          exit 1
+
+      - name: Verify actuator from inside container
+        run: docker compose exec -T backend curl -fsS -m 5 http://localhost:8080/actuator/health
+
+      - name: Print logs on failure
+        if: failure()
+        run: docker compose logs --tail=300 backend postgres
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down --volumes --remove-orphans
