@@ -8,6 +8,11 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
 
+sihsalus:
+  admin:
+    username: ${SIHSALUS_ADMIN_USERNAME:admin}
+    password: ${SIHSALUS_ADMIN_PASSWORD:}
+
 management:
   endpoints:
     web:

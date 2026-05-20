@@ -74,14 +74,14 @@ public class AuthorizationFilter implements Filter {
 			return;
 		}
 		
-		// skip if the session has timed out, we're already authenticated, or it's not an HTTP request
 		if (request instanceof HttpServletRequest) {
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
 			if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
 				HttpServletResponse httpResponse = (HttpServletResponse) response;
 				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Session timed out");
+				return;
 			}
-			
+
 			if (!Context.isAuthenticated()) {
 				String basicAuth = httpRequest.getHeader("Authorization");
 				if (basicAuth != null) {
@@ -102,22 +102,47 @@ public class AuthorizationFilter implements Filter {
 								httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials provided");
 								return;
 							}
-							
-							String[] userAndPass = decoded.split(":");
+
+							String[] userAndPass = decoded.split(":", 2);
 							Context.authenticate(userAndPass[0], userAndPass[1]);
 							log.debug("authenticated [{}]", userAndPass[0]);
 						}
 						catch (Exception ex) {
-							// This filter never stops execution. If the user failed to
-							// authenticate, that will be caught later.
 							log.debug("authentication exception ", ex);
+							sendUnauthorized(response, "Invalid username or password");
+							return;
 						}
+					} else {
+						sendUnauthorized(response, "Unsupported authorization scheme");
+						return;
 					}
 				}
 			}
+
+			if (!Context.isAuthenticated() && requiresAuthentication(httpRequest)) {
+				sendUnauthorized(response, "Authentication required");
+				return;
+			}
 		}
-		
+
 		// continue with the filter chain (unless IP is not allowed)
 		chain.doFilter(request, response);
+	}
+
+	private boolean requiresAuthentication(HttpServletRequest request) {
+		return !"OPTIONS".equalsIgnoreCase(request.getMethod()) && !isSessionResource(request);
+	}
+
+	private boolean isSessionResource(HttpServletRequest request) {
+		String contextPath = request.getContextPath();
+		String requestUri = request.getRequestURI();
+		return requestUri.equals(contextPath + "/rest/" + RestConstants.VERSION_1 + "/session")
+		        || requestUri.equals(contextPath + "/ws/rest/" + RestConstants.VERSION_1 + "/session");
+	}
+
+	private void sendUnauthorized(ServletResponse response, String message) throws IOException {
+		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		httpResponse.setHeader("WWW-Authenticate", "Basic realm=\"OpenMRS REST\"");
+		httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
 	}
 }
