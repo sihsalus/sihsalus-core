@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.emrapi.encounter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.FlushMode;
 import org.openmrs.Encounter;
@@ -51,6 +53,8 @@ import static org.openmrs.module.emrapi.utils.GeneralUtils.getCurrentDateIfNull;
 
 @Transactional
 public class EmrEncounterServiceImpl extends BaseOpenmrsService implements EmrEncounterService {
+
+	private static final Log log = LogFactory.getLog(EmrEncounterServiceImpl.class);
 	
 	private final EncounterTransactionMapper encounterTransactionMapper;
 	
@@ -109,7 +113,7 @@ public class EmrEncounterServiceImpl extends BaseOpenmrsService implements EmrEn
 			encounterTransactionHandlers = Context.getRegisteredComponents(EncounterTransactionHandler.class);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			log.error("Unable to initialize EMR encounter transaction handlers", e);
 		}
 	}
 	

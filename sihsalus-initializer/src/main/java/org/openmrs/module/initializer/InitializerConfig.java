@@ -4,6 +4,7 @@ import static org.openmrs.module.initializer.InitializerConstants.PROPS_DOMAINS;
 import static org.openmrs.module.initializer.InitializerConstants.PROPS_EXCLUDE;
 import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_LOAD;
 import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_LOAD_CONTINUE_ON_ERROR;
+import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_LOAD_DISABLED;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +35,15 @@ public final class InitializerConfig {
   }
 
   public void init(Set<String> supportedDomains) {
+    startupLoadingMode =
+        StringUtils.defaultIfBlank(
+            propertyResolver.apply(PROPS_STARTUP_LOAD), PROPS_STARTUP_LOAD_CONTINUE_ON_ERROR);
+    if (PROPS_STARTUP_LOAD_DISABLED.equalsIgnoreCase(startupLoadingMode)) {
+      filteredDomains = Set.of();
+      wildcardExclusions = Map.of();
+      return;
+    }
+
     String domainsCsv = StringUtils.defaultString(propertyResolver.apply(PROPS_DOMAINS)).trim();
     if (domainsCsv.startsWith("!")) {
       inclusionList = false;
@@ -52,10 +62,6 @@ public final class InitializerConfig {
       }
     }
     wildcardExclusions = Collections.unmodifiableMap(exclusions);
-
-    startupLoadingMode =
-        StringUtils.defaultIfBlank(
-            propertyResolver.apply(PROPS_STARTUP_LOAD), PROPS_STARTUP_LOAD_CONTINUE_ON_ERROR);
   }
 
   public Set<String> getFilteredDomains() {

@@ -110,26 +110,33 @@ public class InitializerServiceImpl extends BaseOpenmrsService implements Initia
       return null;
     }
 
+    String configuredValue = getConfiguredValue(key);
+    if (StringUtils.isNotBlank(configuredValue)) {
+      return configuredValue;
+    }
+
     loadJsonKeyValuesIfNecessary();
     if (keyValueCache.containsKey(key)) {
       return stringValue(keyValueCache.get(key));
     }
 
-    String value = null;
+    return null;
+  }
+
+  private String getConfiguredValue(String key) {
     try {
       if (Context.isSessionOpen()) {
-        value = Context.getAdministrationService().getGlobalProperty(key);
+        String value = Context.getAdministrationService().getGlobalProperty(key);
+        if (StringUtils.isNotBlank(value)) {
+          return value;
+        }
       }
     } catch (APIException ignored) {
       // Fall back to runtime properties below.
     }
 
-    if (StringUtils.isNotBlank(value)) {
-      return value;
-    }
-
     Properties runtimeProperties = Context.getRuntimeProperties();
-    return runtimeProperties == null ? null : runtimeProperties.getProperty(key);
+    return runtimeProperties.getProperty(key);
   }
 
   @Override

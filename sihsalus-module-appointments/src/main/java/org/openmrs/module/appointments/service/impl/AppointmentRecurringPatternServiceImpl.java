@@ -174,7 +174,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
             String notes = appointmentServiceHelper.getAppointmentAsJsonString(appointment);
             updateAppointmentAudits(appointment, notes);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.warn("Unable to serialize appointment audit notes", e);
         }
     }
 

@@ -42,6 +42,7 @@ jobs:
     timeout-minutes: 35
     env:
       SIHSALUS_BACKEND_PORT: 18080
+      SIHSALUS_POSTGRES_PASSWORD: ci-postgres-password
       SIHSALUS_ADMIN_USERNAME: admin
       SIHSALUS_ADMIN_PASSWORD: Admin123
       SIHSALUS_OCL_STATIC_IMPORT_ENABLED: "false"
