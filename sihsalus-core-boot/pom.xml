@@ -48,8 +48,8 @@
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-reporting</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-billing</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-stockmanagement</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-datafilter</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-fua</artifactId><version>${project.version}</version></dependency>
-        <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-identitylookup</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-imaging</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-attachments</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-patientdocuments</artifactId><version>${project.version}</version></dependency>

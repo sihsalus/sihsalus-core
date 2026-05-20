@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout backend
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install xmllint
         run: |
@@ -42,10 +42,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout backend
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout static content
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: sihsalus/sihsalus-content
           path: reference-sources/sihsalus-content
@@ -63,10 +63,10 @@ jobs:
       SIHSALUS_OCL_STATIC_IMPORT_ENABLED: "false"
     steps:
       - name: Checkout backend
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout static content
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: sihsalus/sihsalus-content
           path: reference-sources/sihsalus-content
