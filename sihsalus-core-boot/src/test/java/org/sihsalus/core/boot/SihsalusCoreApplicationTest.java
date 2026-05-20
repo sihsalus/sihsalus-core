@@ -278,7 +278,7 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void fhirMetadataResponds() throws Exception {
-        mockMvc.perform(get("/api/fhir/metadata"))
+        mockMvc.perform(get("/api/fhir/metadata").header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resourceType").value("CapabilityStatement"))
                 .andExpect(jsonPath("$.rest[0].resource[?(@.type == 'Patient')]").exists());
@@ -589,7 +589,7 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void restV1ControllerIsWiredWithoutOmodRuntime() throws Exception {
-        mockMvc.perform(get("/rest/v1/not-a-resource/not-a-real-uuid"))
+        mockMvc.perform(get("/rest/v1/not-a-resource/not-a-real-uuid").header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error.message").exists())
                 .andExpect(jsonPath("$.error.rawMessage").value("Unknown resource: v1/not-a-resource"));
@@ -599,7 +599,7 @@ class SihsalusCoreApplicationTest {
     void queueEntryNumberLegacyEndpointRespondsSafelyWithoutParameters() throws Exception {
         assertTrue(QueueTimerTask.isEnabled());
 
-        mockMvc.perform(get("/rest/v1/queue-entry-number"))
+        mockMvc.perform(get("/rest/v1/queue-entry-number").header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serviceType").value(""))
                 .andExpect(jsonPath("$.visitQueueNumber").value(""));
@@ -845,11 +845,14 @@ class SihsalusCoreApplicationTest {
                 Integer.class,
                 PatientDocumentsPrivilegeConstants.VIEW_PATIENT_ID_STICKER,
                 PatientDocumentsPrivilegeConstants.PRINT_ENCOUNTER_FORMS_PRIVILEGE));
-        mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker")).andExpect(status().isBadRequest());
+        mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker").header("Authorization", ADMIN_BASIC_AUTH))
+                .andExpect(status().isBadRequest());
         mockMvc.perform(get("/rest/v1/patientdocuments/patientIdSticker")
+                        .header("Authorization", ADMIN_BASIC_AUTH)
                         .param("patientUuid", TEST_PATIENT_UUID))
                 .andExpect(status().isForbidden());
         mockMvc.perform(post("/rest/v1/patientdocuments/encounters")
+                        .header("Authorization", ADMIN_BASIC_AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[\"" + TEST_PATIENT_UUID + "\"]"))
                 .andExpect(status().isForbidden());
@@ -1080,7 +1083,7 @@ class SihsalusCoreApplicationTest {
         }
 
         mockMvc.perform(get("/rest/v1/teleconsultation/generateLink").param("uuid", "not-a-real-appointment"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/rest/v1/teleconsultation/generateLink")
                         .header("Authorization", ADMIN_BASIC_AUTH)
                         .param("uuid", "room 123"))

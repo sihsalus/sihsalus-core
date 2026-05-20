@@ -2201,6 +2201,7 @@ public final class StaticSihsalusContentLoader {
 
   private void upsertPaymentModeAttribute(
       Integer paymentModeId, PaymentModeAttributeRecord attribute) {
+    String foreignKeyColumn = paymentModeAttributeForeignKeyColumn();
     Integer id =
         queryInteger(
             "select payment_mode_attribute_type_id from cashier_payment_mode_attribute_type where uuid = ?",
@@ -2220,7 +2221,9 @@ public final class StaticSihsalusContentLoader {
     if (id == null) {
       jdbcTemplate.update(
           "insert into cashier_payment_mode_attribute_type "
-              + "(payment_mode_id, attribute_order, name, description, \"foreignKey\", format, reg_exp, required, "
+              + "(payment_mode_id, attribute_order, name, description, "
+              + foreignKeyColumn
+              + ", format, reg_exp, required, "
               + "creator, date_created, retired, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           paymentModeId,
           attribute.attributeOrder(),
@@ -2239,7 +2242,9 @@ public final class StaticSihsalusContentLoader {
 
     jdbcTemplate.update(
         "update cashier_payment_mode_attribute_type set payment_mode_id = ?, attribute_order = ?, name = ?, "
-            + "description = ?, \"foreignKey\" = ?, format = ?, reg_exp = ?, required = ?, changed_by = ?, "
+            + "description = ?, "
+            + foreignKeyColumn
+            + " = ?, format = ?, reg_exp = ?, required = ?, changed_by = ?, "
             + "date_changed = ?, retired = false, retired_by = null, date_retired = null, retire_reason = null, "
             + "uuid = ? where payment_mode_attribute_type_id = ?",
         paymentModeId,
@@ -2254,6 +2259,14 @@ public final class StaticSihsalusContentLoader {
         now,
         attribute.uuid(),
         id);
+  }
+
+  private String paymentModeAttributeForeignKeyColumn() {
+    if (!columnExists("cashier_payment_mode_attribute_type", "foreignKey")) {
+      throw new IllegalStateException(
+          "No foreignKey column found on cashier_payment_mode_attribute_type.");
+    }
+    return isPostgres() ? "\"foreignKey\"" : "foreignKey";
   }
 
   private void upsertCashPoint(CsvRecord record) {
@@ -3938,6 +3951,17 @@ public final class StaticSihsalusContentLoader {
 
   private boolean columnExists(String table, String column) {
     return columns(table).contains(column.toLowerCase(Locale.ROOT));
+  }
+
+  private boolean isPostgres() {
+    return jdbcTemplate.execute(
+        (ConnectionCallback<Boolean>)
+            connection ->
+                connection
+                    .getMetaData()
+                    .getDatabaseProductName()
+                    .toLowerCase(Locale.ROOT)
+                    .contains("postgres"));
   }
 
   private Set<String> columns(String table) {
