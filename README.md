@@ -62,6 +62,13 @@ Start the local PostgreSQL dependency:
 docker compose up -d postgres
 ```
 
+Set an explicit admin password before starting the backend. A runtime with the default OpenMRS admin password is rejected at startup.
+
+```bash
+export SIHSALUS_ADMIN_PASSWORD='<set-a-long-local-secret>'
+docker compose up -d backend
+```
+
 ```bash
 mvn --batch-mode --no-transfer-progress verify
 ```

@@ -10,7 +10,8 @@
 package org.openmrs.module.webservices.rest.web.filter;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -21,7 +22,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -83,29 +83,31 @@ public class AuthorizationFilter implements Filter {
 			}
 
 			if (!Context.isAuthenticated()) {
-				String basicAuth = httpRequest.getHeader("Authorization");
-				if (basicAuth != null) {
+				String authorizationHeader = httpRequest.getHeader("Authorization");
+				if (authorizationHeader != null) {
 					// check that header is in format "Basic ${base64encode(username + ":" + password)}"
-					if (basicAuth.startsWith("Basic")) {
+					if (StringUtils.startsWithIgnoreCase(authorizationHeader, "Basic ")) {
 						try {
 							// remove the leading "Basic "
-							basicAuth = basicAuth.substring(6);
+							String basicAuth = authorizationHeader.substring(6).trim();
 							if (StringUtils.isBlank(basicAuth)) {
 								HttpServletResponse httpResponse = (HttpServletResponse) response;
 								httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials provided");
 								return;
 							}
-							
-							String decoded = new String(Base64.decodeBase64(basicAuth), Charset.forName("UTF-8"));
-							if (StringUtils.isBlank(decoded) || !decoded.contains(":")) {
+
+							String decoded = new String(Base64.getDecoder().decode(basicAuth), StandardCharsets.UTF_8);
+							int separator = decoded.indexOf(":");
+							if (StringUtils.isBlank(decoded) || separator < 0) {
 								HttpServletResponse httpResponse = (HttpServletResponse) response;
 								httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials provided");
 								return;
 							}
 
-							String[] userAndPass = decoded.split(":", 2);
-							Context.authenticate(userAndPass[0], userAndPass[1]);
-							log.debug("authenticated [{}]", userAndPass[0]);
+							String username = decoded.substring(0, separator);
+							String password = decoded.substring(separator + 1);
+							Context.authenticate(username, password);
+							log.debug("authenticated [{}]", username);
 						}
 						catch (Exception ex) {
 							log.debug("authentication exception ", ex);

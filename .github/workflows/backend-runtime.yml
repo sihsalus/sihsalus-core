@@ -42,6 +42,8 @@ jobs:
     timeout-minutes: 35
     env:
       SIHSALUS_BACKEND_PORT: 18080
+      SIHSALUS_ADMIN_USERNAME: admin
+      SIHSALUS_ADMIN_PASSWORD: Admin123
       SIHSALUS_OCL_STATIC_IMPORT_ENABLED: "false"
       DOCKER_BUILDKIT: "1"
       COMPOSE_DOCKER_CLI_BUILD: "1"
@@ -84,6 +86,29 @@ jobs:
 
       - name: Verify actuator from inside container
         run: docker compose exec -T backend curl -fsS -m 5 http://localhost:8080/actuator/health
+
+      - name: Verify authentication smoke
+        run: |
+          assert_status() {
+            expected="$1"
+            shift
+            actual="$(docker compose exec -T backend curl -sS -o /tmp/sihsalus-smoke-body -w '%{http_code}' "$@")"
+            if [ "$actual" != "$expected" ]; then
+              echo "Expected HTTP $expected but got HTTP $actual for: $*"
+              docker compose exec -T backend cat /tmp/sihsalus-smoke-body || true
+              exit 1
+            fi
+          }
+
+          assert_status 401 http://localhost:8080/rest/v1/patient?q=test
+          assert_status 401 -u admin:not-the-password http://localhost:8080/rest/v1/patient?q=test
+          assert_status 401 http://localhost:8080/api/fhir/metadata
+          assert_status 401 http://localhost:8080/api/admin/static-modules
+          assert_status 401 'http://localhost:8080/module/htmlwidgets/patientSearch.form?q=a'
+
+          session="$(docker compose exec -T backend curl -fsS -u admin:Admin123 http://localhost:8080/rest/v1/session)"
+          echo "$session" | grep -q '"authenticated":true'
+          echo "$session" | grep -q '"username":"admin"'
 
       - name: Print logs on failure
         if: failure()

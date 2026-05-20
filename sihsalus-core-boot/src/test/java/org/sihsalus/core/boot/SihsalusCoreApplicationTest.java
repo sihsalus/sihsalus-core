@@ -3,9 +3,11 @@ package org.sihsalus.core.boot;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -277,6 +279,13 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    void requestTraceHeaderIsReturned() throws Exception {
+        mockMvc.perform(get("/actuator/health").header("X-Request-Id", "test-request-1"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Request-Id", "test-request-1"));
+    }
+
+    @Test
     void fhirMetadataResponds() throws Exception {
         mockMvc.perform(get("/api/fhir/metadata").header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isOk())
@@ -298,6 +307,18 @@ class SihsalusCoreApplicationTest {
         mockMvc.perform(get("/api/system/info"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
+    }
+
+    @Test
+    void adminAndLegacyModuleEndpointsRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/api/admin/static-modules"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("WWW-Authenticate", containsString("Basic")));
+        mockMvc.perform(get("/api/admin/static-modules").header("Authorization", ADMIN_BASIC_AUTH))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == 'webservices-rest')]").exists());
+        mockMvc.perform(get("/module/htmlwidgets/patientSearch.form").param("q", "a"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -1630,8 +1651,7 @@ class SihsalusCoreApplicationTest {
         Context.setUserContext(new UserContext(Context.getAuthenticationScheme()));
         try {
             mockMvc.perform(get("/module/sihsalusinterop/api/queue/items"))
-                    .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.success").value(false));
+                    .andExpect(status().isUnauthorized());
         } finally {
             Context.setUserContext(originalUserContext);
             if (openedRequestSession && Context.isSessionOpen()) {

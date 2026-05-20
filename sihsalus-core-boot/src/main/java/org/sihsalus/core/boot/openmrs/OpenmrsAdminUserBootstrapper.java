@@ -19,6 +19,12 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(OpenmrsAdminUserBootstrapper.class);
 
+    private static final String DEFAULT_OPENMRS_ADMIN_PASSWORD = "Admin123";
+
+    private static final String DEFAULT_OPENMRS_ADMIN_PASSWORD_HASH = "4a1750c8607dfa237de36c6305715c223415189";
+
+    private static final String DEFAULT_OPENMRS_ADMIN_PASSWORD_SALT = "c788c6ad82a157b712392ca695dfcf2eed193d7f";
+
     private final JdbcTemplate jdbcTemplate;
 
     private final String adminUsername;
@@ -38,7 +44,8 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         List<AdminUserRecord> records =
                 jdbcTemplate.query(
-                        "select user_id, username, salt from users where system_id = 'admin' and retired = false",
+                        "select user_id, username, password, salt from users "
+                                + "where system_id = 'admin' and retired = false",
                         this::mapAdminUser);
         if (records.isEmpty()) {
             log.warn("Cannot normalize OpenMRS admin user because no active system_id=admin user exists");
@@ -46,6 +53,11 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
         }
 
         AdminUserRecord adminUser = records.get(0);
+        if (StringUtils.isBlank(adminPassword) && hasDefaultOpenmrsAdminPassword(adminUser)) {
+            throw new IllegalStateException(
+                    "SIHSALUS_ADMIN_PASSWORD must be set; refusing to keep the default OpenMRS admin password");
+        }
+
         if (!adminUsername.equals(adminUser.username())) {
             jdbcTemplate.update("update users set username = ? where user_id = ?", adminUsername, adminUser.userId());
         }
@@ -62,11 +74,23 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
                     adminUser.userId());
             upsertGlobalProperty("scheduler.username", adminUsername);
             upsertGlobalProperty("scheduler.password", adminPassword);
+        } else {
+            log.warn("SIHSALUS_ADMIN_PASSWORD is not set; leaving existing OpenMRS admin password unchanged");
         }
     }
 
     private AdminUserRecord mapAdminUser(ResultSet rs, int rowNumber) throws SQLException {
-        return new AdminUserRecord(rs.getInt("user_id"), rs.getString("username"), rs.getString("salt"));
+        return new AdminUserRecord(
+                rs.getInt("user_id"), rs.getString("username"), rs.getString("password"), rs.getString("salt"));
+    }
+
+    private boolean hasDefaultOpenmrsAdminPassword(AdminUserRecord adminUser) {
+        if (StringUtils.isBlank(adminUser.password()) || StringUtils.isBlank(adminUser.salt())) {
+            return false;
+        }
+        return (DEFAULT_OPENMRS_ADMIN_PASSWORD_HASH.equals(adminUser.password())
+                        && DEFAULT_OPENMRS_ADMIN_PASSWORD_SALT.equals(adminUser.salt()))
+                || adminUser.password().equals(Security.encodeString(DEFAULT_OPENMRS_ADMIN_PASSWORD + adminUser.salt()));
     }
 
     private void upsertGlobalProperty(String property, String value) {
@@ -85,5 +109,5 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
         }
     }
 
-    private record AdminUserRecord(Integer userId, String username, String salt) {}
+    private record AdminUserRecord(Integer userId, String username, String password, String salt) {}
 }
