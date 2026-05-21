@@ -235,6 +235,9 @@ class PartialStockManagementService implements InvocationHandler {
                 return findStockOperationLinks(null, (String) args[0]);
             case "getStockSourceByUuid":
                 return byUuid(StockSource.class, (String) args[0]);
+            case "voidStockOperationItem":
+                voidByUuid(StockOperationItem.class, (String) args[0], (String) args[1], (Integer) args[2]);
+                return null;
             case "findStockSources":
                 return findStockSources((StockSourceSearchFilter) args[0]);
             case "saveStockSource":
