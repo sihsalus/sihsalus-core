@@ -2,6 +2,8 @@ package org.sihsalus.initializer;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +52,17 @@ public final class StaticSihsalusContentLoader {
   private static final Logger log = LoggerFactory.getLogger(StaticSihsalusContentLoader.class);
 
   private static final int SYSTEM_USER_ID = 1;
+
+  private static final String AMPATH_FORMS_UUID = "794c4598-ab82-47ca-8d18-483a8abe6f4f";
+
+  private static final String JSON_SCHEMA_RESOURCE_NAME = "JSON schema";
+
+  private static final String AMPATH_JSON_SCHEMA_DATATYPE = "AmpathJsonSchema";
+
+  private static final String LONG_FREE_TEXT_DATATYPE =
+      "org.openmrs.customdatatype.datatype.LongFreeTextDatatype";
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final JdbcTemplate jdbcTemplate;
 
@@ -110,7 +123,9 @@ public final class StaticSihsalusContentLoader {
             "programworkflows",
             "programworkflowstates",
             "queues",
-            "conceptreferencerange"));
+            "conceptreferencerange",
+            "ampathforms",
+            "ampathformstranslations"));
   }
 
   private void loadDomains(List<String> domainNames) {
@@ -237,6 +252,12 @@ public final class StaticSihsalusContentLoader {
         break;
       case "conceptreferencerange":
         loadConceptReferenceRanges(configRoot, wildcardExclusions);
+        break;
+      case "ampathforms":
+        loadAmpathForms(configRoot, wildcardExclusions);
+        break;
+      case "ampathformstranslations":
+        loadAmpathFormTranslations(configRoot, wildcardExclusions);
         break;
       case "metadatasets":
         loadMetadataSets(configRoot, wildcardExclusions);
@@ -1151,6 +1172,298 @@ public final class StaticSihsalusContentLoader {
         upsertConceptReferenceRange(record);
       }
     }
+  }
+
+  private void loadAmpathForms(Path configRoot, List<String> wildcardExclusions)
+      throws IOException {
+    if (!tableExists("form")
+        || !tableExists("form_resource")
+        || !tableExists("clob_datatype_storage")) {
+      return;
+    }
+
+    for (Path jsonFile : domainFiles(configRoot, "ampathforms", ".json", wildcardExclusions)) {
+      upsertAmpathForm(jsonFile, Files.readString(jsonFile, StandardCharsets.UTF_8));
+    }
+  }
+
+  private void loadAmpathFormTranslations(Path configRoot, List<String> wildcardExclusions)
+      throws IOException {
+    if (!tableExists("form")
+        || !tableExists("form_resource")
+        || !tableExists("clob_datatype_storage")) {
+      return;
+    }
+
+    for (Path jsonFile :
+        domainFiles(configRoot, "ampathformstranslations", ".json", wildcardExclusions)) {
+      upsertAmpathFormTranslation(jsonFile, Files.readString(jsonFile, StandardCharsets.UTF_8));
+    }
+  }
+
+  private void upsertAmpathForm(Path jsonFile, String jsonString) throws IOException {
+    JsonNode formJson = OBJECT_MAPPER.readTree(jsonString);
+    String formName = requiredJsonText(formJson, "name", jsonFile);
+    String formVersion = requiredJsonText(formJson, "version", jsonFile);
+    String formDescription = jsonText(formJson, "description");
+    boolean formPublished = jsonBoolean(formJson, "published", false);
+    boolean formRetired = jsonBoolean(formJson, "retired", false);
+    String formProcessor = jsonText(formJson, "processor");
+    boolean encounterForm =
+        isBlank(formProcessor) || "EncounterFormProcessor".equalsIgnoreCase(formProcessor);
+    Integer encounterTypeId =
+        findEncounterTypeId(jsonText(formJson, "encounterType"), jsonText(formJson, "encounter"));
+
+    if (encounterForm && encounterTypeId == null) {
+      throw new IllegalStateException(
+          "No encounter type was found for AMPATH form " + formName + " in " + jsonFile + ".");
+    }
+
+    String formUuid = uuidFromObjects(AMPATH_FORMS_UUID, formName, formVersion);
+    Integer formId = queryInteger("select form_id from form where uuid = ?", formUuid);
+    if (formId != null) {
+      updateAmpathForm(
+          formId,
+          formName,
+          formVersion,
+          formDescription,
+          formPublished,
+          formRetired,
+          encounterTypeId);
+      upsertFormResource(
+          formId,
+          formUuid,
+          JSON_SCHEMA_RESOURCE_NAME,
+          AMPATH_JSON_SCHEMA_DATATYPE,
+          jsonString);
+      return;
+    }
+
+    retireActiveFormsWithName(formName, formUuid);
+    formId =
+        createAmpathForm(
+            formUuid,
+            formName,
+            formVersion,
+            formDescription,
+            formPublished,
+            formRetired,
+            encounterTypeId);
+    if (formId == null) {
+      throw new IllegalStateException("Failed to create AMPATH form " + formName + ".");
+    }
+    upsertFormResource(
+        formId, formUuid, JSON_SCHEMA_RESOURCE_NAME, AMPATH_JSON_SCHEMA_DATATYPE, jsonString);
+  }
+
+  private void upsertAmpathFormTranslation(Path jsonFile, String jsonString) throws IOException {
+    JsonNode translationJson = OBJECT_MAPPER.readTree(jsonString);
+    String formName = requiredJsonText(translationJson, "form", jsonFile);
+    String language = requiredJsonText(translationJson, "language", jsonFile);
+    Integer formId = findCurrentFormIdByName(formName);
+    if (formId == null) {
+      throw new IllegalStateException(
+          "Could not find AMPATH form " + formName + " for translation " + jsonFile + ".");
+    }
+
+    String resourceName = formName + "_translations_" + language;
+    String resourceUuid = stableUuid("ampath-form-translation", resourceName);
+    upsertFormResource(formId, resourceUuid, resourceName, LONG_FREE_TEXT_DATATYPE, jsonString);
+  }
+
+  private void updateAmpathForm(
+      Integer formId,
+      String formName,
+      String formVersion,
+      String formDescription,
+      boolean formPublished,
+      boolean formRetired,
+      Integer encounterTypeId) {
+    String retireReason = formRetired ? "Retired by SIH Salus content package" : null;
+    Timestamp retiredAt = formRetired ? now() : null;
+    Integer retiredBy = formRetired ? SYSTEM_USER_ID : null;
+    jdbcTemplate.update(
+        "update form set name = ?, version = ?, description = ?, published = ?, retired = ?, "
+            + "encounter_type = ?, changed_by = ?, date_changed = ?, retired_by = ?, "
+            + "date_retired = ?, retired_reason = ? where form_id = ?",
+        formName,
+        formVersion,
+        formDescription,
+        formPublished,
+        formRetired,
+        encounterTypeId,
+        SYSTEM_USER_ID,
+        now(),
+        retiredBy,
+        retiredAt,
+        retireReason,
+        formId);
+  }
+
+  private Integer createAmpathForm(
+      String formUuid,
+      String formName,
+      String formVersion,
+      String formDescription,
+      boolean formPublished,
+      boolean formRetired,
+      Integer encounterTypeId) {
+    String retireReason = formRetired ? "Retired by SIH Salus content package" : null;
+    Timestamp retiredAt = formRetired ? now() : null;
+    Integer retiredBy = formRetired ? SYSTEM_USER_ID : null;
+    jdbcTemplate.update(
+        "insert into form "
+            + "(name, version, build, published, description, encounter_type, creator, "
+            + "date_created, retired, retired_by, date_retired, retired_reason, uuid) "
+            + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        formName,
+        formVersion,
+        null,
+        formPublished,
+        formDescription,
+        encounterTypeId,
+        SYSTEM_USER_ID,
+        now(),
+        formRetired,
+        retiredBy,
+        retiredAt,
+        retireReason,
+        formUuid);
+    return queryInteger("select form_id from form where uuid = ?", formUuid);
+  }
+
+  private void retireActiveFormsWithName(String formName, String replacementUuid) {
+    Timestamp now = now();
+    jdbcTemplate.update(
+        "update form set retired = ?, retired_by = ?, date_retired = ?, retired_reason = ?, "
+            + "changed_by = ?, date_changed = ? where name = ? and uuid <> ? and retired = ?",
+        true,
+        SYSTEM_USER_ID,
+        now,
+        "Replaced with new version by SIH Salus content package",
+        SYSTEM_USER_ID,
+        now,
+        formName,
+        replacementUuid,
+        false);
+  }
+
+  private void upsertFormResource(
+      Integer formId, String resourceUuidSeed, String resourceName, String datatype, String value) {
+    Integer resourceId =
+        queryInteger(
+            "select form_resource_id from form_resource where form_id = ? and name = ?",
+            formId,
+            resourceName);
+    String valueReference =
+        resourceId == null
+            ? null
+            : queryString(
+                "select value_reference from form_resource where form_resource_id = ?", resourceId);
+    String clobUuid =
+        isBlank(valueReference) ? stableUuid("form-resource-clob", resourceUuidSeed) : valueReference;
+    upsertClob(clobUuid, value);
+
+    if (resourceId == null) {
+      jdbcTemplate.update(
+          "insert into form_resource "
+              + "(form_id, name, value_reference, datatype, datatype_config, preferred_handler, "
+              + "handler_config, uuid, changed_by, date_changed) "
+              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          formId,
+          resourceName,
+          clobUuid,
+          datatype,
+          null,
+          null,
+          null,
+          stableUuid("form-resource", resourceUuidSeed + ":" + resourceName),
+          SYSTEM_USER_ID,
+          now());
+    } else {
+      jdbcTemplate.update(
+          "update form_resource set value_reference = ?, datatype = ?, changed_by = ?, "
+              + "date_changed = ? where form_resource_id = ?",
+          clobUuid,
+          datatype,
+          SYSTEM_USER_ID,
+          now(),
+          resourceId);
+    }
+  }
+
+  private void upsertClob(String uuid, String value) {
+    Integer clobId = queryInteger("select id from clob_datatype_storage where uuid = ?", uuid);
+    if (clobId == null) {
+      jdbcTemplate.update(
+          "insert into clob_datatype_storage (uuid, value) values (?, ?)", uuid, value);
+    } else {
+      jdbcTemplate.update("update clob_datatype_storage set value = ? where id = ?", value, clobId);
+    }
+  }
+
+  private Integer findCurrentFormIdByName(String formName) {
+    List<Integer> formIds =
+        jdbcTemplate.queryForList(
+            "select form_id from form where name = ? and retired = ? order by form_id desc",
+            Integer.class,
+            formName,
+            false);
+    if (formIds.isEmpty()) {
+      formIds =
+          jdbcTemplate.queryForList(
+              "select form_id from form where name = ? order by form_id desc",
+              Integer.class,
+              formName);
+    }
+    return formIds.isEmpty() ? null : formIds.get(0);
+  }
+
+  private Integer findEncounterTypeId(String uuid, String name) {
+    Integer id = null;
+    if (!isBlank(uuid)) {
+      id =
+          queryInteger(
+              "select encounter_type_id from encounter_type where uuid = ? and retired = ?",
+              uuid,
+              false);
+    }
+    if (id == null && !isBlank(name)) {
+      id =
+          queryInteger(
+              "select encounter_type_id from encounter_type where name = ? and retired = ?",
+              name,
+              false);
+    }
+    return id;
+  }
+
+  private String requiredJsonText(JsonNode node, String field, Path source) {
+    String value = jsonText(node, field);
+    if (isBlank(value)) {
+      throw new IllegalStateException(field + " is required in " + source + ".");
+    }
+    return value;
+  }
+
+  private String jsonText(JsonNode node, String field) {
+    JsonNode value = node == null ? null : node.get(field);
+    if (value == null || value.isNull()) {
+      return null;
+    }
+    String text = value.asText();
+    return isBlank(text) ? null : text.trim();
+  }
+
+  private boolean jsonBoolean(JsonNode node, String field, boolean defaultValue) {
+    JsonNode value = node == null ? null : node.get(field);
+    if (value == null || value.isNull()) {
+      return defaultValue;
+    }
+    if (value.isBoolean()) {
+      return value.asBoolean();
+    }
+    return toBoolean(value.asText());
   }
 
   private void upsertConceptClass(CsvRecord record) {
@@ -3993,6 +4306,11 @@ public final class StaticSihsalusContentLoader {
     return values.isEmpty() ? null : values.get(0);
   }
 
+  private String queryString(String sql, Object... args) {
+    List<String> values = jdbcTemplate.queryForList(sql, String.class, args);
+    return values.isEmpty() ? null : values.get(0);
+  }
+
   private Integer queryIntegerIfSupported(String sql) {
     try {
       return jdbcTemplate.queryForObject(sql, Integer.class);
@@ -4067,6 +4385,15 @@ public final class StaticSihsalusContentLoader {
 
   private String stableUuid(String namespace, String value) {
     return UUID.nameUUIDFromBytes((namespace + ":" + value).getBytes(StandardCharsets.UTF_8))
+        .toString();
+  }
+
+  private String uuidFromObjects(Object... values) {
+    List<String> seedParts = new ArrayList<>();
+    for (Object value : values) {
+      seedParts.add(value == null ? "null" : value.toString());
+    }
+    return UUID.nameUUIDFromBytes(String.join("_", seedParts).getBytes(StandardCharsets.UTF_8))
         .toString();
   }
 

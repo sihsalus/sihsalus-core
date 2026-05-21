@@ -25,6 +25,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -187,7 +189,11 @@ public class DispositionServiceImpl extends BaseOpenmrsService implements Dispos
 			if (configFile.indexOf("file:") == -1) {
 				path = "classpath*:/" + configFile;
 			} else {
-				path = "file:" + OpenmrsUtil.getApplicationDataDirectory() + "/" + configFile.replace("file:", "");
+				Path configPath = Paths.get(configFile.replace("file:", ""));
+				if (!configPath.isAbsolute()) {
+					configPath = Paths.get(OpenmrsUtil.getApplicationDataDirectory()).resolve(configPath);
+				}
+				path = configPath.normalize().toUri().toString();
 			}
 			
 			Resource[] dispositionDefinitions = resourceResolver.getResources(path);

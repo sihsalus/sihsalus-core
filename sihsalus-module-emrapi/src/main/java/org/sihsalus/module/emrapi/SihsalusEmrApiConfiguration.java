@@ -1,6 +1,13 @@
 package org.sihsalus.module.emrapi;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
@@ -64,6 +71,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SihsalusEmrApiConfiguration {
 
+    private static final String DEFAULT_CONTENT_SOURCE_ROOT = "reference-sources/sihsalus-content";
+
+    private static final String BACKEND_CONFIGURATION_ROOT = "configuration/backend_configuration";
+
+    private static final String DISPOSITIONS_DOMAIN = "dispositions";
+
     @Bean
     EmrApiProperties emrApiProperties(
             MetadataMappingService metadataMappingService,
@@ -117,6 +130,16 @@ public class SihsalusEmrApiConfiguration {
     SmartInitializingSingleton emrApiPropertiesDispositionBinder(
             EmrApiProperties emrApiProperties, DispositionService dispositionService) {
         return () -> emrApiProperties.setDispositionService(dispositionService);
+    }
+
+    @Bean
+    SmartInitializingSingleton sihsalusDispositionConfigBinder(DispositionService dispositionService) {
+        return () -> {
+            Path dispositionConfig = resolveDispositionConfig();
+            if (dispositionConfig != null) {
+                dispositionService.setDispositionConfig("file:" + dispositionConfig);
+            }
+        };
     }
 
     @Bean
@@ -334,5 +357,52 @@ public class SihsalusEmrApiConfiguration {
             serviceContext.setService(DiagnosisService.class, emrDiagnosisService);
             serviceContext.setService(ProcedureService.class, procedureService);
         };
+    }
+
+    private static Path resolveDispositionConfig() {
+        try {
+            Path dispositionsDirectory =
+                    resolveContentSourceRoot()
+                            .resolve(BACKEND_CONFIGURATION_ROOT)
+                            .resolve(DISPOSITIONS_DOMAIN)
+                            .normalize();
+            if (!Files.isDirectory(dispositionsDirectory)) {
+                return null;
+            }
+
+            List<Path> jsonFiles;
+            try (Stream<Path> stream = Files.list(dispositionsDirectory)) {
+                jsonFiles =
+                        stream
+                                .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                                .filter(path -> path.getFileName()
+                                        .toString()
+                                        .toLowerCase(Locale.ROOT)
+                                        .endsWith(".json"))
+                                .sorted()
+                                .toList();
+            }
+            if (jsonFiles.isEmpty()) {
+                return null;
+            }
+            if (jsonFiles.size() > 1) {
+                throw new IllegalStateException(
+                        "Multiple SIH Salus disposition JSON files found in " + dispositionsDirectory + ".");
+            }
+            return jsonFiles.get(0).toRealPath();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to resolve SIH Salus disposition configuration.", e);
+        }
+    }
+
+    private static Path resolveContentSourceRoot() {
+        String sourceRoot = System.getProperty("sihsalus.initializer.sourceRoot");
+        if (sourceRoot == null || sourceRoot.isBlank()) {
+            sourceRoot = System.getenv("SIHSALUS_INITIALIZER_SOURCE_ROOT");
+        }
+        if (sourceRoot == null || sourceRoot.isBlank()) {
+            sourceRoot = DEFAULT_CONTENT_SOURCE_ROOT;
+        }
+        return Paths.get(sourceRoot).toAbsolutePath().normalize();
     }
 }
