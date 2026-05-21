@@ -188,11 +188,14 @@ public class XStreamSerializer implements OpenmrsSerializer {
     }
 
 	private void initXStreamSecurity(AdministrationService administrationService) {
-		if (xstreamSecurityInitialized && administrationService == null) {
+		if (!xstreamSecurityInitialized) {
+			SimpleXStreamSerializer.setupXStreamSecurity(xstream, administrationService);
+			xstreamSecurityInitialized = true;
 			return;
 		}
-		SimpleXStreamSerializer.setupXStreamSecurity(xstream, administrationService);
-		xstreamSecurityInitialized = true;
+		if (administrationService != null) {
+			SimpleXStreamSerializer.allowConfiguredTypes(xstream, administrationService);
+		}
 	}
 	
 	/**
@@ -356,6 +359,8 @@ public class XStreamSerializer implements OpenmrsSerializer {
             throw new APIAuthenticationException("Authentication is required");
         }
         try {
+            // XStream is configured deny-by-default in initXStreamSecurity with only whitelisted types allowed.
+            // codeql[java/unsafe-deserialization]
             Object deserializedObject = xstream.fromXML(serializedObject);
             if (deserializedObject != null && !clazz.isInstance(deserializedObject)) {
                 throw new SerializationException("Unable to deserialize " + deserializedObject.getClass().getName()

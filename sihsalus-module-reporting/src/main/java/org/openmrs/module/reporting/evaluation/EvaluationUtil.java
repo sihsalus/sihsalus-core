@@ -18,41 +18,22 @@ import org.openmrs.module.reporting.evaluation.caching.CachingStrategy;
 import org.openmrs.module.reporting.evaluation.caching.NoCachingStrategy;
 import org.openmrs.module.reporting.evaluation.parameter.ParameterException;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Provides utility methods useful for Evaluation
  */
 public class EvaluationUtil {
-	
+
 	private static Log log = LogFactory.getLog(EvaluationUtil.class);
-	
+
 	public static final String EXPRESSION_START = "${";
 	public static final String EXPRESSION_END = "}";
 	public static final String FORMAT_SEPARATOR = "\\|";
-
-    /*
-     * ([a-zA-Z_0-9.]+)                      ... (group 1) word made of letters, _, or dot, e.g. "report.start_date"
-     *
-     * ((?:\s*[+-/*]\s*\d*\.?\d+[a-zA-Z]*+)+) ... (group 2)
-     *  (?:                               )+    ... means this occurs at least once, but isn't counted as a group
-     *     \s*[+-/*]\s*                         ... optional whitespace, operator [+-/*], optional whitespace
-     *                 \d*\.?\d+                ... captures either #.# or #
-     *                          [a-zA-Z]*+      ... optional unit (*+ means possessive, zero or more times)
-     */
-    private static Pattern expressionPattern = Pattern.compile("([a-zA-Z_0-9.]+)((?:\\s*[-+/*]\\s*\\d*\\.?\\d+[a-zA-Z]*+)+)");
-
-    /*
-     * ([+-/*])                           ... (group 1) single-character operator
-     *         \s*                        ... optional whitespace
-     *            (\d*\.?\d+)             ... (group 2) captures either #.# or #
-     *                       ([a-zA-Z]*+) ... (group 3) optional unit (*+ means possessive, zero or more times)
-     */
-    private static Pattern operationPattern = Pattern.compile("([-+/*])\\s*(\\d*\\.?\\d+)([a-zA-Z]*+)");
 
     /**
 	 * Returns true if the passed String is an expression that is capable of being evaluated
@@ -62,7 +43,7 @@ public class EvaluationUtil {
 	public static boolean isExpression(String s) {
 		return s != null && s.startsWith(EXPRESSION_START) && s.endsWith(EXPRESSION_END);
 	}
-	
+
 	/**
 	 * Returns the passed String, removing the expression start and end delimiters
 	 * @param s the original string
@@ -74,7 +55,7 @@ public class EvaluationUtil {
 		}
 		return s;
 	}
-	
+
 	/**
 	 * @see EvaluationUtil#evaluateExpression(String, Map<String, Object>, Class)
 	 */
@@ -83,7 +64,7 @@ public class EvaluationUtil {
 		params.putAll(context.getContextValues());
 		return evaluateExpression(expression, params);
 	}
-	
+
 	/**
 	 * This method will parse the passed expression and return a value based on the following
 	 * criteria:<br/>
@@ -106,7 +87,7 @@ public class EvaluationUtil {
 	 * evaluateExpression("${report.startDate+1y}") -> "2008-01-10" as Date
 	 * <pre>
 	 * </ul>
-	 * 
+	 *
 	 * @param expression
 	 * @return value for given expression, as an <code>Object</code>
 	 * @throws ParameterException
@@ -117,30 +98,30 @@ public class EvaluationUtil {
 
 	/**
 	 */
-	public static Object evaluateExpression(String expression, Map<String, Object> parameters, 
-						 					String expressionPrefix, String expressionSuffix) throws ParameterException {
+	public static Object evaluateExpression(String expression, Map<String, Object> parameters,
+	                                        String expressionPrefix, String expressionSuffix) throws ParameterException {
 
 		while (expression != null) {
 			String newExpression = expression;
-			
+
 			int startIndex = expression.indexOf(expressionPrefix);
 			int endIndex = expression.indexOf(expressionSuffix, startIndex+1);
 			StringBuilder sb = new StringBuilder();
 			if (startIndex != -1 && endIndex != -1) {
-				
+
 				String e = expression.substring(startIndex + expressionPrefix.length(), endIndex);
 				Object replacement = evaluateParameterExpression(e, parameters);
-				
+
 				if (startIndex == 0 && endIndex == expression.length()-1) {
 					return replacement;
 				}
-				
+
 				sb.append(expression.substring(0, startIndex));
 				sb.append(ObjectUtil.format(replacement));
 				sb.append(expression.substring(endIndex + expressionSuffix.length()));
 				newExpression = sb.toString();
 			}
-			
+
 			if (newExpression.equals(expression)) {
 				return newExpression;
 			}
@@ -159,13 +140,13 @@ public class EvaluationUtil {
 	 */
 	public static String parseParameterNameFromExpression(String expression) {
 		expression = EvaluationUtil.stripExpression(expression);
-		Matcher matcher = expressionPattern.matcher(expression);
-		if (matcher.matches()) {
-			return matcher.group(1);
+		ParsedExpression parsedExpression = parseExpression(expression);
+		if (parsedExpression != null) {
+			return parsedExpression.parameterName;
 		}
 		return expression;
 	}
-		
+
 	/**
 	 * This method will parse the passed expression and return a value based on the following
 	 * criteria:<br/>
@@ -184,13 +165,13 @@ public class EvaluationUtil {
 	 * evaluateParameterExpression("report.startDate") -> "2007-01-10" as Date
 	 * <pre>
 	 * </ul>
-	 * 
+	 *
 	 * @param expression
 	 * @return value for given expression, as an <code>Object</code>
 	 * @throws org.openmrs.module.reporting.evaluation.parameter.ParameterException
 	 */
 	public static Object evaluateParameterExpression(String expression, Map<String, Object> parameters) throws ParameterException {
-		
+
 		log.debug("evaluateParameterExpression(): " + expression);
 
 		log.debug("Starting expression: " + expression);
@@ -198,21 +179,19 @@ public class EvaluationUtil {
 		Object paramValueToFormat = null;
 
         try {
-            Matcher matcher = expressionPattern.matcher(paramAndFormat[0]);
-            if (matcher.matches()) {
-                String parameterName = matcher.group(1);
+            ParsedExpression parsedExpression = parseExpression(paramAndFormat[0]);
+            if (parsedExpression != null) {
+                String parameterName = parsedExpression.parameterName;
                 paramValueToFormat = parameters.get(parameterName);
                 if (paramValueToFormat == null) {
                     log.debug("Looked like an expression but the parameter value is null");
                 } else {
-                    String operations = matcher.group(2);
-                    Matcher opMatcher = operationPattern.matcher(operations);
-                    while (opMatcher.find()) {
-                        String op = opMatcher.group(1);
-                        String number = opMatcher.group(2);
-                        String unit = opMatcher.group(3).toLowerCase();
+                    for (Operation operation : parsedExpression.operations) {
+                        char op = operation.operator;
+                        String number = operation.number;
+                        String unit = operation.unit.toLowerCase();
                         if (paramValueToFormat instanceof Date) {
-                            if (!op.matches("[+-]")) {
+                            if (op != '+' && op != '-') {
                                 throw new IllegalArgumentException("Dates only support the + and - operators");
                             }
                             Integer numAsInt;
@@ -222,7 +201,7 @@ public class EvaluationUtil {
                                 throw new IllegalArgumentException("Dates do not support arithmetic with floating-point values");
                             }
 
-                            if ("-".equals(op)) {
+                            if (op == '-') {
                                 numAsInt = -numAsInt;
                             }
                             if ("w".equals(unit)) {
@@ -249,15 +228,15 @@ public class EvaluationUtil {
                             if (!"".equals(unit)) {
                                 throw new IllegalArgumentException("Can't specify units in a non-date expression");
                             }
-                            if (paramValueToFormat instanceof Integer && number.matches("\\d+")) {
+                            if (paramValueToFormat instanceof Integer && isWholeNumber(number)) {
                                 Integer parsed = Integer.parseInt(number);
-                                if ("+".equals(op)) {
+                                if (op == '+') {
                                     paramValueToFormat = ((Integer) paramValueToFormat) + parsed;
-                                } else if ("-".equals(op)) {
+                                } else if (op == '-') {
                                     paramValueToFormat = ((Integer) paramValueToFormat) - parsed;
-                                } else if ("*".equals(op)) {
+                                } else if (op == '*') {
                                     paramValueToFormat = ((Integer) paramValueToFormat) * parsed;
-                                } else if ("/".equals(op)) {
+                                } else if (op == '/') {
                                     paramValueToFormat = ((Integer) paramValueToFormat) / parsed;
                                 } else {
                                     throw new IllegalArgumentException("Unknown operator " + op);
@@ -265,13 +244,13 @@ public class EvaluationUtil {
                             } else {
                                 // since one or both are decimal values, do double arithmetic
                                 Double parsed = Double.parseDouble(number);
-                                if ("+".equals(op)) {
+                                if (op == '+') {
                                     paramValueToFormat = ((Number) paramValueToFormat).doubleValue() + parsed;
-                                } else if ("-".equals(op)) {
+                                } else if (op == '-') {
                                     paramValueToFormat = ((Number) paramValueToFormat).doubleValue() - parsed;
-                                } else if ("*".equals(op)) {
+                                } else if (op == '*') {
                                     paramValueToFormat = ((Number) paramValueToFormat).doubleValue() * parsed;
-                                } else if ("/".equals(op)) {
+                                } else if (op == '/') {
                                     paramValueToFormat = ((Number) paramValueToFormat).doubleValue() / parsed;
                                 } else {
                                     throw new IllegalArgumentException("Unknown operator " + op);
@@ -305,7 +284,116 @@ public class EvaluationUtil {
 
 		return paramValueToFormat;
 	}
-	
+
+	private static ParsedExpression parseExpression(String expression) {
+		if (expression == null) {
+			return null;
+		}
+
+		int index = 0;
+		int length = expression.length();
+		while (index < length && isParameterNameChar(expression.charAt(index))) {
+			index++;
+		}
+		if (index == 0 || index == length) {
+			return null;
+		}
+
+		String parameterName = expression.substring(0, index);
+		List<Operation> operations = new ArrayList<Operation>();
+		while (index < length) {
+			while (index < length && Character.isWhitespace(expression.charAt(index))) {
+				index++;
+			}
+			if (index >= length) {
+				return null;
+			}
+
+			char operator = expression.charAt(index);
+			if (operator != '+' && operator != '-' && operator != '*' && operator != '/') {
+				return null;
+			}
+			index++;
+
+			while (index < length && Character.isWhitespace(expression.charAt(index))) {
+				index++;
+			}
+
+			int numberStart = index;
+			while (index < length && isAsciiDigit(expression.charAt(index))) {
+				index++;
+			}
+			if (index < length && expression.charAt(index) == '.') {
+				index++;
+				int digitsAfterDecimalStart = index;
+				while (index < length && isAsciiDigit(expression.charAt(index))) {
+					index++;
+				}
+				if (index == digitsAfterDecimalStart) {
+					return null;
+				}
+			} else if (index == numberStart) {
+				return null;
+			}
+
+			String number = expression.substring(numberStart, index);
+			int unitStart = index;
+			while (index < length && Character.isLetter(expression.charAt(index))) {
+				index++;
+			}
+			operations.add(new Operation(operator, number, expression.substring(unitStart, index)));
+		}
+
+		return operations.isEmpty() ? null : new ParsedExpression(parameterName, operations);
+	}
+
+	private static boolean isParameterNameChar(char ch) {
+		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.';
+	}
+
+	private static boolean isWholeNumber(String number) {
+		if (number == null || number.length() == 0) {
+			return false;
+		}
+		for (int i = 0; i < number.length(); i++) {
+			if (!isAsciiDigit(number.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean isAsciiDigit(char ch) {
+		return ch >= '0' && ch <= '9';
+	}
+
+	private static class ParsedExpression {
+
+		private final String parameterName;
+
+		private final List<Operation> operations;
+
+		private ParsedExpression(String parameterName, List<Operation> operations) {
+			this.parameterName = parameterName;
+			this.operations = operations;
+		}
+	}
+
+	private static class Operation {
+
+		private final char operator;
+
+		private final String number;
+
+		private final String unit;
+
+		private Operation(char operator, String number, String unit) {
+			this.operator = operator;
+			this.number = number;
+			this.unit = unit;
+		}
+	}
+
 	/**
 	 * @return the Cache key for the given definition class
 	 */
