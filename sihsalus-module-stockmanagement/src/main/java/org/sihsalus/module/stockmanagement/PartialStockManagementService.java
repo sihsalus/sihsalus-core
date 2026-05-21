@@ -43,12 +43,15 @@ import org.openmrs.module.stockmanagement.api.dto.BatchJobSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.PartyDTO;
 import org.openmrs.module.stockmanagement.api.dto.PartySearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.PrivilegeScope;
+import org.openmrs.module.stockmanagement.api.dto.RecordPrivilegeFilter;
 import org.openmrs.module.stockmanagement.api.dto.Result;
 import org.openmrs.module.stockmanagement.api.dto.SessionInfo;
 import org.openmrs.module.stockmanagement.api.dto.StockItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockRuleDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockRuleSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockSourceSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeLocationDTO;
@@ -191,6 +194,12 @@ class PartialStockManagementService implements InvocationHandler {
                 return findStockItems((StockItemSearchFilter) args[0]);
             case "saveStockItem":
                 return saveStockItem(args);
+            case "saveStockRule":
+                return saveStockRule((StockRuleDTO) args[0]);
+            case "findStockRules":
+                return args.length > 1
+                        ? findStockRules((StockRuleSearchFilter) args[0], (HashSet<RecordPrivilegeFilter>) args[1])
+                        : findStockRules((StockRuleSearchFilter) args[0], null);
             case "getStockRuleByUuid":
                 return byUuid(StockRule.class, (String) args[0]);
             case "voidStockRules":
@@ -844,6 +853,220 @@ class PartialStockManagementService implements InvocationHandler {
             throw new StockManagementException("Stock item UOM is not related to the stock item");
         }
         return uom;
+    }
+
+    private StockRuleDTO saveStockRule(StockRuleDTO dto) {
+        if (dto == null) {
+            throw new StockManagementException("Stock rule payload is required");
+        }
+        validateStockRule(dto);
+
+        boolean isNew = StringUtils.isBlank(dto.getUuid());
+        StockRule stockRule;
+        if (isNew) {
+            stockRule = new StockRule();
+            stockRule.setCreator(authenticatedUser());
+            stockRule.setDateCreated(new Date());
+        } else {
+            stockRule = requireByUuid(StockRule.class, dto.getUuid(), "Stock rule not found");
+            stockRule.setChangedBy(authenticatedUser());
+            stockRule.setDateChanged(new Date());
+        }
+
+        StockItem stockItem = requireByUuid(StockItem.class, dto.getStockItemUuid(), "Stock item not found");
+        StockItemPackagingUOM uom = requireRelatedUom(dto.getStockItemPackagingUOMUuid(), stockItem);
+        Location location = Context.getLocationService().getLocationByUuid(dto.getLocationUuid());
+        if (location == null) {
+            throw new StockManagementException("Stock rule location not found");
+        }
+        if (!isNew && !sameUuid(dto.getStockItemUuid(), stockRule.getStockItem())) {
+            throw new StockManagementException("Stock rule stock item cannot be changed");
+        }
+        if (!isNew && !sameUuid(dto.getLocationUuid(), stockRule.getLocation())) {
+            throw new StockManagementException("Stock rule location cannot be changed");
+        }
+
+        stockRule.setStockItem(stockItem);
+        stockRule.setLocation(location);
+        stockRule.setName(dto.getName());
+        stockRule.setDescription(dto.getDescription());
+        stockRule.setQuantity(dto.getQuantity());
+        stockRule.setStockItemPackagingUOM(uom);
+        stockRule.setEnabled(Boolean.TRUE.equals(dto.getEnabled()));
+        if (!isNew && stockRule.getLastEvaluation() != null && dto.getEvaluationFrequency() != null
+                && !Objects.equals(dto.getEvaluationFrequency(), stockRule.getEvaluationFrequency())) {
+            stockRule.setNextEvaluation(addMinutes(stockRule.getLastEvaluation(), boundedMinutes(dto.getEvaluationFrequency())));
+        }
+        stockRule.setEvaluationFrequency(dto.getEvaluationFrequency());
+        stockRule.setActionFrequency(dto.getActionFrequency());
+        stockRule.setAlertRole(StringUtils.isBlank(dto.getAlertRole()) ? null : dto.getAlertRole());
+        stockRule.setMailRole(StringUtils.isBlank(dto.getMailRole()) ? null : dto.getMailRole());
+        stockRule.setEnableDescendants(Boolean.TRUE.equals(dto.getEnableDescendants()));
+
+        return stockRuleToDto(saveOrUpdate(stockRule));
+    }
+
+    private void validateStockRule(StockRuleDTO dto) {
+        if (StringUtils.isBlank(dto.getStockItemUuid())) {
+            throw new StockManagementException("Stock rule stock item is required");
+        }
+        if (StringUtils.isBlank(dto.getName())) {
+            throw new StockManagementException("Stock rule name is required");
+        }
+        if (dto.getName().length() > 255) {
+            throw new StockManagementException("Stock rule name cannot exceed 255 characters");
+        }
+        if (StringUtils.isNotBlank(dto.getDescription()) && dto.getDescription().length() > 500) {
+            throw new StockManagementException("Stock rule description cannot exceed 500 characters");
+        }
+        if (StringUtils.isBlank(dto.getLocationUuid())) {
+            throw new StockManagementException("Stock rule location is required");
+        }
+        if (dto.getQuantity() == null || dto.getQuantity().signum() <= 0) {
+            throw new StockManagementException("Stock rule quantity must be greater than zero");
+        }
+        if (dto.getEnabled() == null) {
+            throw new StockManagementException("Stock rule enabled flag is required");
+        }
+        if (dto.getEvaluationFrequency() == null || dto.getEvaluationFrequency() <= 0) {
+            throw new StockManagementException("Stock rule evaluation frequency must be greater than zero");
+        }
+        if (dto.getActionFrequency() == null || dto.getActionFrequency() <= 0) {
+            throw new StockManagementException("Stock rule action frequency must be greater than zero");
+        }
+        if (StringUtils.isBlank(dto.getStockItemPackagingUOMUuid())) {
+            throw new StockManagementException("Stock rule packaging unit is required");
+        }
+        requireRole(dto.getAlertRole(), "Stock rule alert role not found");
+        requireRole(dto.getMailRole(), "Stock rule mail role not found");
+    }
+
+    private void requireRole(String roleName, String message) {
+        if (StringUtils.isBlank(roleName)) {
+            return;
+        }
+        if (Context.getUserService().getRole(roleName) == null) {
+            throw new StockManagementException(message);
+        }
+    }
+
+    private Result<StockRuleDTO> findStockRules(
+            StockRuleSearchFilter filter, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        if (recordPrivilegeFilters != null && recordPrivilegeFilters.isEmpty()) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+        StockRuleSearchFilter safeFilter = filter == null ? new StockRuleSearchFilter() : filter;
+        Set<Integer> allowedLocationIds = recordPrivilegeFilters == null ? null
+                : recordPrivilegeFilters.stream()
+                        .map(RecordPrivilegeFilter::getLocationId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+        if (allowedLocationIds != null && allowedLocationIds.isEmpty()) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+        List<StockRuleDTO> dtos = query(StockRule.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockRule, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            Join<StockRule, Location> location = root.join("location", JoinType.INNER);
+            if (safeFilter.getId() != null) {
+                predicates.add(cb.equal(root.get("id"), safeFilter.getId()));
+            }
+            if (safeFilter.getUuids() != null && !safeFilter.getUuids().isEmpty()) {
+                predicates.add(root.get("uuid").in(safeFilter.getUuids()));
+            }
+            if (safeFilter.getStockItemUuids() != null && !safeFilter.getStockItemUuids().isEmpty()) {
+                predicates.add(stockItem.get("uuid").in(safeFilter.getStockItemUuids()));
+            }
+            if (safeFilter.getLocationUuids() != null && !safeFilter.getLocationUuids().isEmpty()) {
+                predicates.add(location.get("uuid").in(safeFilter.getLocationUuids()));
+            }
+            if (allowedLocationIds != null) {
+                predicates.add(location.get("locationId").in(allowedLocationIds));
+            }
+            addNullableDateRangePredicate(cb, predicates, root, "lastEvaluation",
+                safeFilter.getLastEvaluationMin(), safeFilter.getLastEvaluationMax());
+            addNullableDateRangePredicate(cb, predicates, root, "nextEvaluation",
+                safeFilter.getNextEvaluationMin(), safeFilter.getNextEvaluationMax());
+            addNullableDateRangePredicate(cb, predicates, root, "lastActionDate",
+                safeFilter.getLastActionDateMin(), safeFilter.getLastActionDateMax());
+            if (safeFilter.getHasNotificationRoleSet() != null) {
+                Predicate alertSet = cb.and(cb.isNotNull(root.get("alertRole")),
+                    cb.notEqual(root.get("alertRole"), ""));
+                Predicate mailSet = cb.and(cb.isNotNull(root.get("mailRole")),
+                    cb.notEqual(root.get("mailRole"), ""));
+                predicates.add(safeFilter.getHasNotificationRoleSet()
+                        ? cb.or(alertSet, mailSet)
+                        : cb.and(cb.not(alertSet), cb.not(mailSet)));
+            }
+            if (safeFilter.getEnabled() != null) {
+                predicates.add(cb.equal(root.get("enabled"), safeFilter.getEnabled()));
+            }
+            if (!safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)).reversed())
+                .map(this::stockRuleToDto)
+                .collect(Collectors.toList());
+        return resultFromList(dtos, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private void addNullableDateRangePredicate(CriteriaBuilder cb, List<Predicate> predicates, Root<StockRule> root,
+            String field, Date min, Date max) {
+        if (min != null) {
+            predicates.add(cb.or(cb.greaterThanOrEqualTo(root.<Date>get(field), min), cb.isNull(root.get(field))));
+        }
+        if (max != null) {
+            predicates.add(cb.or(cb.lessThanOrEqualTo(root.<Date>get(field), max), cb.isNull(root.get(field))));
+        }
+    }
+
+    private StockRuleDTO stockRuleToDto(StockRule stockRule) {
+        StockRuleDTO dto = new StockRuleDTO();
+        dto.setId(stockRule.getId());
+        dto.setUuid(stockRule.getUuid());
+        dto.setName(stockRule.getName());
+        dto.setDescription(stockRule.getDescription());
+        dto.setQuantity(stockRule.getQuantity());
+        dto.setEnabled(stockRule.getEnabled());
+        dto.setEvaluationFrequency(stockRule.getEvaluationFrequency());
+        dto.setLastEvaluation(stockRule.getLastEvaluation());
+        dto.setNextEvaluation(stockRule.getNextEvaluation());
+        dto.setActionFrequency(stockRule.getActionFrequency());
+        dto.setLastActionDate(stockRule.getLastActionDate());
+        dto.setNextActionDate(stockRule.getNextActionDate());
+        dto.setAlertRole(stockRule.getAlertRole());
+        dto.setMailRole(stockRule.getMailRole());
+        dto.setEnableDescendants(stockRule.getEnableDescendants());
+        dto.setVoided(Boolean.TRUE.equals(stockRule.getVoided()));
+        dto.setDateCreated(stockRule.getDateCreated());
+        if (stockRule.getCreator() != null) {
+            dto.setCreator(stockRule.getCreator().getId());
+            dto.setCreatorGivenName(stockRule.getCreator().getGivenName());
+            dto.setCreatorFamilyName(stockRule.getCreator().getFamilyName());
+        }
+        StockItem stockItem = stockRule.getStockItem();
+        if (stockItem != null) {
+            dto.setStockItemId(stockItem.getId());
+            dto.setStockItemUuid(stockItem.getUuid());
+        }
+        Location location = stockRule.getLocation();
+        if (location != null) {
+            dto.setLocationId(location.getLocationId());
+            dto.setLocationUuid(location.getUuid());
+            dto.setLocationName(location.getName());
+        }
+        StockItemPackagingUOM uom = stockRule.getStockItemPackagingUOM();
+        if (uom != null) {
+            dto.setStockItemPackagingUOMId(uom.getId());
+            dto.setStockItemPackagingUOMUuid(uom.getUuid());
+            if (uom.getPackagingUom() != null) {
+                dto.setPackagingUoMId(uom.getPackagingUom().getConceptId());
+                dto.setPackagingUomName(conceptName(uom.getPackagingUom()));
+            }
+        }
+        return dto;
     }
 
     private Result<StockSource> findStockSources(StockSourceSearchFilter filter) {
@@ -1720,9 +1943,24 @@ class PartialStockManagementService implements InvocationHandler {
     }
 
     private Date minutesFromNow(int minutes) {
+        return addMinutes(new Date(), minutes);
+    }
+
+    private Date addMinutes(Date date, int minutes) {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
         calendar.add(Calendar.MINUTE, minutes);
         return calendar.getTime();
+    }
+
+    private int boundedMinutes(Long minutes) {
+        if (minutes < Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        if (minutes > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        return Math.toIntExact(minutes);
     }
 
     private String truncate(String value, int maxLength) {
