@@ -49,6 +49,7 @@ import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.stockmanagement.StockLocationTags;
+import org.openmrs.module.stockmanagement.api.Privileges;
 import org.openmrs.module.stockmanagement.api.StockManagementException;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobDTO;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobOwnerDTO;
@@ -72,6 +73,7 @@ import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFil
 import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemTransactionDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemTransactionSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationAction;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationItemCost;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationItemDTO;
@@ -197,6 +199,30 @@ class PartialStockManagementService implements InvocationHandler {
                 return byUuid(StockOperation.class, (String) args[0]);
             case "saveStockOperation":
                 return saveStockOperation((StockOperationDTO) args[0]);
+            case "submitStockOperation":
+                processStockOperationAction((StockOperationDTO) args[0], StockOperationAction.Action.SUBMIT, null);
+                return null;
+            case "completeStockOperation":
+                processStockOperationAction((StockOperationDTO) args[0], StockOperationAction.Action.COMPLETE, null);
+                return null;
+            case "approveStockOperation":
+                processStockOperationAction((StockOperationDTO) args[0], StockOperationAction.Action.APPROVE, null);
+                return null;
+            case "dispatchStockOperation":
+                processStockOperationAction((StockOperationDTO) args[0], StockOperationAction.Action.DISPATCH, null);
+                return null;
+            case "rejectStockOperation":
+                processStockOperationAction((StockOperationDTO) args[0], StockOperationAction.Action.REJECT,
+                    (String) args[1]);
+                return null;
+            case "returnStockOperation":
+                processStockOperationAction((StockOperationDTO) args[0], StockOperationAction.Action.RETURN,
+                    (String) args[1]);
+                return null;
+            case "cancelStockOperation":
+                processStockOperationAction((StockOperationDTO) args[0], StockOperationAction.Action.CANCEL,
+                    (String) args[1]);
+                return null;
             case "getStockOperationItemsByStockOperation":
                 return getStockOperationItemsByStockOperation((Integer) args[0]);
             case "findStockOperationItems":
@@ -1030,6 +1056,206 @@ class PartialStockManagementService implements InvocationHandler {
             item.setQuantityRequested(itemDto.getQuantityRequested());
             item.setQuantityRequestedPackagingUOM(requireByUuid(StockItemPackagingUOM.class,
                 itemDto.getQuantityRequestedPackagingUOMUuid(), "Quantity requested packaging unit not found"));
+        }
+    }
+
+    private void processStockOperationAction(StockOperationDTO dto, StockOperationAction.Action action,
+            String reason) {
+        if (dto == null || StringUtils.isBlank(dto.getUuid())) {
+            throw new StockManagementException("Stock operation uuid is required");
+        }
+        StockOperation operation = requireByUuid(StockOperation.class, dto.getUuid(), "Stock operation not found");
+        ensureStockOperationCollections(operation);
+        StockOperationType operationType = operation.getStockOperationType();
+        if (operationType == null) {
+            throw new StockManagementException("Stock operation type not found");
+        }
+        validateStockOperationAction(operation, operationType, action);
+        boolean lockAndReserve = action == StockOperationAction.Action.SUBMIT
+                || (operation.isUpdateable() && (action == StockOperationAction.Action.COMPLETE
+                        || action == StockOperationAction.Action.DISPATCH));
+        if (lockAndReserve && !operationType.isQuantityOptional()) {
+            createReservedTransactions(operation);
+        }
+        applyStockOperationAction(operation, operationType, action, reason, lockAndReserve);
+        saveOrUpdate(operation);
+    }
+
+    private void ensureStockOperationCollections(StockOperation operation) {
+        if (operation.getStockOperationItems() == null) {
+            operation.setStockOperationItems(new HashSet<>());
+        }
+        if (operation.getReservedTransactions() == null) {
+            operation.setReservedTransactions(new HashSet<>());
+        }
+        if (operation.getStockItemTransactions() == null) {
+            operation.setStockItemTransactions(new HashSet<>());
+        }
+    }
+
+    private void validateStockOperationAction(StockOperation operation, StockOperationType operationType,
+            StockOperationAction.Action action) {
+        boolean allowed;
+        switch (action) {
+            case SUBMIT:
+                allowed = operation.isUpdateable();
+                break;
+            case COMPLETE:
+                allowed = (operation.isUpdateable() && !operationType.requiresDispatchAcknowledgement())
+                        || (!operation.isUpdateable() && operationType.requiresDispatchAcknowledgement()
+                                && operation.getStatus() == StockOperationStatus.DISPATCHED);
+                break;
+            case DISPATCH:
+                allowed = operationType.requiresDispatchAcknowledgement()
+                        && (operation.isUpdateable() || operation.getStatus() == StockOperationStatus.SUBMITTED);
+                break;
+            case APPROVE:
+                allowed = operation.getStatus() == StockOperationStatus.SUBMITTED
+                        && !operationType.requiresDispatchAcknowledgement();
+                break;
+            case RETURN:
+                allowed = operation.getStatus() == StockOperationStatus.SUBMITTED
+                        || operation.getStatus() == StockOperationStatus.DISPATCHED;
+                break;
+            case REJECT:
+                allowed = operation.getStatus() == StockOperationStatus.SUBMITTED;
+                break;
+            case CANCEL:
+                allowed = operation.isUpdateable() || operation.getStatus() == StockOperationStatus.SUBMITTED;
+                break;
+            default:
+                allowed = false;
+        }
+        if (!allowed) {
+            throw new StockManagementException("Stock operation action is not allowed");
+        }
+        validateStockOperationActionPrivilege(operation, operationType, action);
+    }
+
+    private void validateStockOperationActionPrivilege(StockOperation operation, StockOperationType operationType,
+            StockOperationAction.Action action) {
+        String privilege = stockOperationActionPrivilege(operation, action);
+        Location location = stockOperationActionLocation(operation, action);
+        if (location == null || !operationType.userCanProcess(authenticatedUser(), location, privilege)) {
+            throw new StockManagementException("User cannot process stock operation");
+        }
+    }
+
+    private String stockOperationActionPrivilege(StockOperation operation, StockOperationAction.Action action) {
+        switch (action) {
+            case APPROVE:
+            case REJECT:
+                return Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_APPROVE;
+            case RETURN:
+                return operation.getStatus() == StockOperationStatus.DISPATCHED
+                        ? Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_RECEIVEITEMS
+                        : Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_APPROVE;
+            case COMPLETE:
+                return operation.getStatus() == StockOperationStatus.DISPATCHED
+                        ? Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_RECEIVEITEMS
+                        : Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_MUTATE;
+            case DISPATCH:
+                return operation.isUpdateable()
+                        ? Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_MUTATE
+                        : Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_APPROVE;
+            case CANCEL:
+                return operation.getStatus() == StockOperationStatus.SUBMITTED
+                        ? Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_APPROVE
+                        : Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_MUTATE;
+            case SUBMIT:
+            default:
+                return Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_MUTATE;
+        }
+    }
+
+    private Location stockOperationActionLocation(StockOperation operation, StockOperationAction.Action action) {
+        if ((action == StockOperationAction.Action.COMPLETE || action == StockOperationAction.Action.RETURN)
+                && operation.getStatus() == StockOperationStatus.DISPATCHED
+                && operation.getDestination() != null) {
+            return operation.getDestination().getLocation();
+        }
+        return operation.getAtLocation();
+    }
+
+    private void createReservedTransactions(StockOperation operation) {
+        operation.getReservedTransactions().clear();
+        for (StockOperationItem item : operation.getStockOperationItems()) {
+            if (Boolean.TRUE.equals(item.getVoided())) {
+                continue;
+            }
+            ReservedTransaction transaction = new ReservedTransaction(operation, item);
+            transaction.setCreator(authenticatedUser());
+            transaction.setDateCreated(new Date());
+            transaction.setParty(operation.getSource());
+            operation.addReservedTransaction(transaction);
+        }
+    }
+
+    private void applyStockOperationAction(StockOperation operation, StockOperationType operationType,
+            StockOperationAction.Action action, String reason, boolean lockAndReserve) {
+        User user = authenticatedUser();
+        Date now = new Date();
+        if (lockAndReserve) {
+            operation.setLocked(true);
+            if (action == StockOperationAction.Action.SUBMIT) {
+                operation.setSubmittedBy(user);
+                operation.setSubmittedDate(now);
+                operation.setStatus(StockOperationStatus.SUBMITTED);
+            } else if (action == StockOperationAction.Action.COMPLETE) {
+                operation.setCompletedBy(user);
+                operation.setCompletedDate(now);
+                operation.setStatus(StockOperationStatus.COMPLETED);
+            } else if (action == StockOperationAction.Action.DISPATCH) {
+                resetDispatchedQuantities(operation);
+                operation.setDispatchedBy(user);
+                operation.setDispatchedDate(now);
+                operation.setStatus(StockOperationStatus.DISPATCHED);
+            }
+            operationType.onPending(operation);
+            if (action == StockOperationAction.Action.COMPLETE) {
+                operationType.onCompleted(operation);
+            }
+            return;
+        }
+        if (action == StockOperationAction.Action.DISPATCH) {
+            resetDispatchedQuantities(operation);
+            operation.setDispatchedBy(user);
+            operation.setDispatchedDate(now);
+            operation.setStatus(StockOperationStatus.DISPATCHED);
+        } else if (action == StockOperationAction.Action.COMPLETE || action == StockOperationAction.Action.APPROVE) {
+            operation.setCompletedBy(user);
+            operation.setCompletedDate(now);
+            operation.setStatus(StockOperationStatus.COMPLETED);
+            operationType.onCompleted(operation);
+        } else if (action == StockOperationAction.Action.RETURN) {
+            operation.setLocked(false);
+            operation.setReturnedBy(user);
+            operation.setReturnedDate(now);
+            operation.setReturnReason(reason);
+            operation.setStatus(StockOperationStatus.RETURNED);
+            operationType.onCancelled(operation);
+        } else if (action == StockOperationAction.Action.REJECT) {
+            operation.setRejectedBy(user);
+            operation.setRejectedDate(now);
+            operation.setRejectionReason(reason);
+            operation.setStatus(StockOperationStatus.REJECTED);
+            operationType.onCancelled(operation);
+        } else if (action == StockOperationAction.Action.CANCEL) {
+            operation.setCancelledBy(user);
+            operation.setCancelledDate(now);
+            operation.setCancelReason(reason);
+            operation.setStatus(StockOperationStatus.CANCELLED);
+            operationType.onCancelled(operation);
+        }
+    }
+
+    private void resetDispatchedQuantities(StockOperation operation) {
+        for (StockOperationItem item : operation.getStockOperationItems()) {
+            if (Boolean.TRUE.equals(item.getVoided())) {
+                continue;
+            }
+            item.setQuantityReceived(item.getQuantity());
+            item.setQuantityReceivedPackagingUOM(item.getStockItemPackagingUOM());
         }
     }
 
