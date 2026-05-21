@@ -243,6 +243,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.Validator;
@@ -250,6 +251,7 @@ import org.springframework.validation.Validator;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class SihsalusCoreApplicationTest {
 
     private static final String TEST_PATIENT_UUID = "2e29f6cc-14e4-44f5-bf57-c5cf0d7659f3";
