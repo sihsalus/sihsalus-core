@@ -24,6 +24,16 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Check changed-file whitespace
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            git diff --check "origin/${{ github.base_ref }}...HEAD"
+          else
+            git diff --check HEAD^ HEAD
+          fi
+
       - name: Verify
         run: mvn --batch-mode --no-transfer-progress verify
 
