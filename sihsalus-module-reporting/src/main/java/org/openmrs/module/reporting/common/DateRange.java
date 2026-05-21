@@ -115,7 +115,10 @@ public class DateRange {
 	public static DateRange parse(String inputString, String format, String nullString) {
 		DateRange ret = new DateRange();
 		try {
-			String[] split = inputString.substring(1, inputString.length()-1).split(",");
+			String[] split = inputString.substring(1, inputString.length()-1).split(",", -1);
+			if (split.length != 2) {
+				throw new IllegalArgumentException("DateRange interval must have start and end values");
+			}
 			ret.setInclusiveOfStart(inputString.charAt(0) == '[');
 			ret.setInclusiveOfEnd(inputString.charAt(inputString.length()-1) == ']');
 			if (!split[0].equals(nullString)) {

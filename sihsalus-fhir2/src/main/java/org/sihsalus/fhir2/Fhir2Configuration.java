@@ -1,6 +1,7 @@
 package org.sihsalus.fhir2;
 
 import java.io.IOException;
+import java.io.InputStream;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import org.fhir.ucum.UcumEssenceService;
@@ -50,11 +51,15 @@ public class Fhir2Configuration {
 
     @Bean
     UcumEssenceService baseUcumService() throws IOException, UcumException {
-        return new UcumEssenceService(new ClassPathResource("ucum-essence.xml").getInputStream());
+        try (InputStream inputStream = new ClassPathResource("ucum-essence.xml").getInputStream()) {
+            return new UcumEssenceService(inputStream);
+        }
     }
 
     @Bean
     UcumEssenceService fhirUcumService() throws IOException, UcumException {
-        return new UcumEssenceService(new ClassPathResource("ucum-fhir-essence.xml").getInputStream());
+        try (InputStream inputStream = new ClassPathResource("ucum-fhir-essence.xml").getInputStream()) {
+            return new UcumEssenceService(inputStream);
+        }
     }
 }

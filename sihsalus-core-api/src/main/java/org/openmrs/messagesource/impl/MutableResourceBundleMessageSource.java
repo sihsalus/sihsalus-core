@@ -10,6 +10,7 @@
 package org.openmrs.messagesource.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -139,8 +140,8 @@ public class MutableResourceBundleMessageSource extends ReloadableResourceBundle
 		for (Resource propertiesFile : findPropertiesFiles()) {
 			Locale currentLocale = parseLocaleFrom(propertiesFile.getFilename());
 			Properties props = new Properties();
-			try {
-				OpenmrsUtil.loadProperties(props, propertiesFile.getInputStream());
+			try (InputStream inputStream = propertiesFile.getInputStream()) {
+				OpenmrsUtil.loadProperties(props, inputStream);
 				for (Map.Entry<Object, Object> property : props.entrySet()) {
 					presentations.add(new PresentationMessage(property.getKey().toString(), currentLocale,
 					        property.getValue().toString(), ""));
@@ -202,8 +203,8 @@ public class MutableResourceBundleMessageSource extends ReloadableResourceBundle
 		Resource propertyFile = findPropertiesFileFor(message.getCode());
 		if (propertyFile != null) {
 			Properties props = new Properties();
-			try {
-				OpenmrsUtil.loadProperties(props, propertyFile.getInputStream());
+			try (InputStream inputStream = propertyFile.getInputStream()) {
+				OpenmrsUtil.loadProperties(props, inputStream);
 				props.setProperty(message.getCode(), message.getMessage());
 
 				//TODO properties files are now in api jar files which cannot be modified. TRUNK-4097
@@ -223,8 +224,8 @@ public class MutableResourceBundleMessageSource extends ReloadableResourceBundle
 		Resource propertyFile = findPropertiesFileFor(message.getCode());
 		if (propertyFile != null) {
 			Properties props = new Properties();
-			try {
-				OpenmrsUtil.loadProperties(props, propertyFile.getInputStream());
+			try (InputStream inputStream = propertyFile.getInputStream()) {
+				OpenmrsUtil.loadProperties(props, inputStream);
 				props.remove(message.getCode());
 
 				//TODO properties files are now in api jar files which cannot be modified. TRUNK-4097
@@ -249,8 +250,8 @@ public class MutableResourceBundleMessageSource extends ReloadableResourceBundle
 
 		for (Resource propertiesFile : findPropertiesFiles()) {
 			props.clear();
-			try {
-				OpenmrsUtil.loadProperties(props, propertiesFile.getInputStream());
+			try (InputStream inputStream = propertiesFile.getInputStream()) {
+				OpenmrsUtil.loadProperties(props, inputStream);
 			} catch (Exception e) {
 				log.error("Error generated", e);
 			}
@@ -308,8 +309,8 @@ public class MutableResourceBundleMessageSource extends ReloadableResourceBundle
 			List<Resource> propList = localeToFilesMap.computeIfAbsent(propsLocale, k -> new ArrayList<>());
 			propList.add(propertiesFile);
 
-			try {
-				OpenmrsUtil.loadProperties(props, propertiesFile.getInputStream());
+			try (InputStream inputStream = propertiesFile.getInputStream()) {
+				OpenmrsUtil.loadProperties(props, inputStream);
 				fileToPropertiesMap.put(propertiesFile, props);
 			} catch (Exception e) {
 				// skip over errors in loading a single file
