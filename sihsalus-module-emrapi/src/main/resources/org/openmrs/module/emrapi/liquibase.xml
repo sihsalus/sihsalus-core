@@ -362,4 +362,97 @@
             where not exists (select 1 from global_property where property = 'emrapi.conceptCode.consultFreeTextComments');
         </sql>
     </changeSet>
+
+    <changeSet id="sihsalus-emrapi-202605211430-concept-mapping-code-fallbacks" author="sihsalus">
+        <comment>Keep legacy EMR API concept mappings as code fallbacks instead of persistent database defaults.</comment>
+        <sql>
+            delete from global_property
+            where property = 'emrapi.conceptSourceName'
+              and property_value = 'org.openmrs.module.emrapi';
+
+            delete from global_property
+            where property = 'emrapi.sameAsConceptMapTypeUuid'
+              and property_value = '35543629-7d8c-11e1-909d-c80aa9edcf4e';
+
+            delete from global_property
+            where property = 'emrapi.narrowerThanConceptMapTypeUuid'
+              and property_value = '43ac5109-7d8c-11e1-909d-c80aa9edcf4e';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisConceptSet'
+              and property_value = 'Diagnosis Concept Set';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.codedDiagnosis'
+              and property_value = 'Coded Diagnosis';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.nonCodedDiagnosis'
+              and property_value = 'Non-Coded Diagnosis';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisOrder'
+              and property_value = 'Diagnosis Order';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisOrderPrimary'
+              and property_value = 'Primary';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisOrderSecondary'
+              and property_value = 'Secondary';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisCertainty'
+              and property_value = 'Diagnosis Certainty';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisCertaintyConfirmed'
+              and property_value = 'Confirmed';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisCertaintyPresumed'
+              and property_value = 'Presumed';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.dispositionConceptSet'
+              and property_value = 'Disposition Concept Set';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.disposition'
+              and property_value = 'Disposition';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.admissionLocation'
+              and property_value = 'Admission Location';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.internalTransferLocation'
+              and property_value = 'Internal Transfer Location';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.dateOfDeath'
+              and property_value = 'Date of Death';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.unknownCauseOfDeath'
+              and property_value = 'Unknown Cause of Death';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.patientDied'
+              and property_value = 'Patient Died';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.admissionDecision'
+              and property_value = 'Admission Decision';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.denyAdmission'
+              and property_value = 'Deny Admission';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.consultFreeTextComments'
+              and property_value = 'Consult Free Text Comments';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -36,6 +36,7 @@ class StaticSihsalusContentLoaderTest {
             + ";MODE=PostgreSQL;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1;NON_KEYWORDS=ROLE,USER");
     jdbcTemplate = new JdbcTemplate(dataSource);
     createDataFilterSchema();
+    createGlobalPropertySchema();
     loader = new StaticSihsalusContentLoader(jdbcTemplate);
   }
 
@@ -46,6 +47,44 @@ class StaticSihsalusContentLoaderTest {
     } else {
       System.setProperty("sihsalus.initializer.sourceRoot", previousSourceRoot);
     }
+  }
+
+  @Test
+  void globalPropertiesOverrideLiquibaseSeededValues() throws Exception {
+    jdbcTemplate.update(
+        "insert into global_property (property, property_value, description, uuid) values (?, ?, ?, ?)",
+        "emrapi.conceptCode.disposition",
+        "Disposition",
+        "Liquibase default",
+        "11111111-1111-1111-1111-111111111111");
+
+    writeGlobalProperties(
+        """
+        <config>
+          <globalProperties>
+            <globalProperty>
+              <property>emrapi.conceptCode.disposition</property>
+              <value>sihsalus-disposition</value>
+              <description>Initializer value</description>
+            </globalProperty>
+          </globalProperties>
+        </config>
+        """);
+
+    loader.loadDomain("globalproperties", List.of());
+
+    assertEquals(
+        "sihsalus-disposition",
+        jdbcTemplate.queryForObject(
+            "select property_value from global_property where property = ?",
+            String.class,
+            "emrapi.conceptCode.disposition"));
+    assertEquals(
+        "Initializer value",
+        jdbcTemplate.queryForObject(
+            "select description from global_property where property = ?",
+            String.class,
+            "emrapi.conceptCode.disposition"));
   }
 
   @Test
@@ -116,6 +155,17 @@ class StaticSihsalusContentLoaderTest {
             + "(entity_identifier, entity_type, basis_identifier, basis_type)");
   }
 
+  private void createGlobalPropertySchema() {
+    jdbcTemplate.execute(
+        "create table global_property ("
+            + "property varchar(255) primary key, "
+            + "property_value varchar(4000), "
+            + "description varchar(1024), "
+            + "changed_by int, "
+            + "date_changed timestamp, "
+            + "uuid varchar(38) not null unique)");
+  }
+
   private int mapCount() {
     Integer count =
         jdbcTemplate.queryForObject("select count(*) from datafilter_entity_basis_map", Integer.class);
@@ -127,5 +177,12 @@ class StaticSihsalusContentLoaderTest {
         tempDir.resolve("configuration").resolve("backend_configuration").resolve("datafiltermappings");
     Files.createDirectories(directory);
     Files.writeString(directory.resolve("mappings.csv"), content);
+  }
+
+  private void writeGlobalProperties(String content) throws Exception {
+    Path directory =
+        tempDir.resolve("configuration").resolve("backend_configuration").resolve("globalproperties");
+    Files.createDirectories(directory);
+    Files.writeString(directory.resolve("globalproperties.xml"), content);
   }
 }
