@@ -1,7 +1,7 @@
 package org.openmrs.module.stockmanagement.api.jobs;
 
-import org.apache.commons.lang.*;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
@@ -17,7 +17,6 @@ import org.openmrs.module.stockmanagement.api.Roles;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.stockmanagement.api.utils.*;
-import org.openmrs.module.stockmanagement.api.utils.StringUtils;
 import org.openmrs.notification.Alert;
 import org.openmrs.notification.Template;
 import org.openmrs.scheduler.tasks.AbstractTask;
@@ -261,7 +260,7 @@ public class StockBatchExpiryJob extends AbstractTask {
                     }
 
                     String emailAddress = stockManagementService.getUserEmailAddress(user);
-                    if(org.apache.commons.lang.StringUtils.isBlank(emailAddress)){
+                    if(StringUtils.isBlank(emailAddress)){
                         continue;
                     }
                     receipients.add(emailAddress);
@@ -281,7 +280,7 @@ public class StockBatchExpiryJob extends AbstractTask {
                 }
 
                 String emailAddress = stockManagementService.getUserEmailAddress(user);
-                if(org.apache.commons.lang.StringUtils.isBlank(emailAddress)){
+                if(StringUtils.isBlank(emailAddress)){
                     continue;
                 }
                 receipients.add(emailAddress);

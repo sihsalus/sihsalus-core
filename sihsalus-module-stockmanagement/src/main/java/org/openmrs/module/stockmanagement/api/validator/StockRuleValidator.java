@@ -1,6 +1,6 @@
 package org.openmrs.module.stockmanagement.api.validator;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.Role;
 import org.openmrs.annotation.Handler;

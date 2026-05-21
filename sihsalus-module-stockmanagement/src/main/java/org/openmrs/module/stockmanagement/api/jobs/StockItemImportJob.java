@@ -7,7 +7,7 @@ import com.opencsv.CSVReaderHeaderAware;
 import com.opencsv.CSVReaderHeaderAwareBuilder;
 import com.opencsv.RFC4180Parser;
 import com.opencsv.RFC4180ParserBuilder;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.api.context.Context;
