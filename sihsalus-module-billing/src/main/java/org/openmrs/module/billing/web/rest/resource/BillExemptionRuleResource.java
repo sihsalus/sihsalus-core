@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.evaluator.ScriptType;
@@ -157,7 +157,7 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 	@PropertySetter("script")
 	public void setScript(BillExemptionRule instance, String script) {
 		if (script != null) {
-			instance.setScript(StringEscapeUtils.unescapeHtml(script));
+			instance.setScript(StringEscapeUtils.unescapeHtml4(script));
 		}
 	}
 	

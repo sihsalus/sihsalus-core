@@ -190,7 +190,7 @@ public class SihsalusOpenConceptLabConfiguration {
     private static void registerExtension(String pointId, Extension extension) {
         extension.setPointId(pointId);
         List<Extension> extensions = ModuleFactory.getExtensionMap()
-                .computeIfAbsent(extension.getExtensionId(), key -> new ArrayList<>());
+                .computeIfAbsent(pointId + Extension.EXTENSION_ID_SEPARATOR + "html", key -> new ArrayList<>());
         if (extensions.stream().noneMatch(existing -> existing.getClass().equals(extension.getClass()))) {
             extensions.add(extension);
         }
