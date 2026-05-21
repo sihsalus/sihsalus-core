@@ -116,7 +116,7 @@ public class SihsalusBedManagementConfiguration {
         AdminList adminList = new AdminList();
         adminList.setPointId(ADMIN_LIST_EXTENSION_POINT);
         List<Extension> extensions = ModuleFactory.getExtensionMap()
-                .computeIfAbsent(adminList.getExtensionId(), key -> new ArrayList<>());
+                .computeIfAbsent(ADMIN_LIST_EXTENSION_POINT + Extension.EXTENSION_ID_SEPARATOR + "html", key -> new ArrayList<>());
         if (extensions.stream().noneMatch(AdminList.class::isInstance)) {
             extensions.add(adminList);
         }

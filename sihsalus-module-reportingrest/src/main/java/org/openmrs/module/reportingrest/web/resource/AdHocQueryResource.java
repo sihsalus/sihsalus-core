@@ -14,7 +14,7 @@
 
 package org.openmrs.module.reportingrest.web.resource;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.Cohort;
 import org.openmrs.api.context.Context;

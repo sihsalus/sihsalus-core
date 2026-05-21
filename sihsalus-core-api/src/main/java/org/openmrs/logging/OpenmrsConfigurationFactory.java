@@ -36,6 +36,7 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
 import org.apache.logging.log4j.core.config.yaml.YamlConfiguration;
 import org.openmrs.api.AdministrationService;
+import org.openmrs.api.APIException;
 import org.openmrs.api.ServiceNotFoundException;
 import org.openmrs.api.context.Context;
 import org.openmrs.util.OpenmrsConstants;
@@ -158,6 +159,8 @@ public class OpenmrsConfigurationFactory extends ConfigurationFactory {
 			if (!e.getServiceClass().isAssignableFrom(AdministrationService.class)) {
 				throw e;
 			}
+		} catch (APIException e) {
+			log.debug("Skipping OpenMRS log level overrides until an OpenMRS user context is available", e);
 		}
 	}
 
