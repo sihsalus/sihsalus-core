@@ -63,7 +63,7 @@ public class PatientIdentifierDataDefinition extends BaseDataDefinition implemen
 	 * @see DataDefinition#getDataType()
 	 */
 	public Class<?> getDataType() {
-        if (getIncludeFirstNonNullOnly() == Boolean.TRUE) {
+        if (Boolean.TRUE.equals(getIncludeFirstNonNullOnly())) {
             return PatientIdentifier.class;
         }
 		return List.class;

@@ -1199,7 +1199,7 @@ public class ModuleUtil {
 				}
 				String packageName = name.substring(0, indexOfLastSlash);
 
-				packageName = packageName.replaceAll("/", ".");
+				packageName = packageName.replace("/", ".");
 
 				if (packagesProvided.add(packageName) && log.isTraceEnabled()) {
 					log.trace("Adding module's jarentry with package: " + packageName);

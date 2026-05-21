@@ -892,7 +892,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 		// TODO Should not allow user to provide empty SQL query
 		// FIXME This is going to be a really quick validation implementation  
 		// TODO We need to implement a validation framework within the reporting module
-		if (sqlQuery == null || sqlQuery.equals("")) 
+		if (sqlQuery == null || sqlQuery.isEmpty())
 			throw new ReportingException("SQL query string is required");
 		if (!SqlUtils.isSelectQuery(sqlQuery)) {
 			throw new IllegalDatabaseAccessException();

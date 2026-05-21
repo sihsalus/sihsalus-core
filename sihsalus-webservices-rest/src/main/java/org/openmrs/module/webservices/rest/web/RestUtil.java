@@ -471,7 +471,7 @@ public class RestUtil implements GlobalPropertyListener {
 		
 		// get the "v" param for the representations
 		String temp = request.getParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION);
-		if ("".equals(temp)) {
+		if (temp != null && temp.isEmpty()) {
 			throw new IllegalArgumentException("?v=(empty string) is not allowed");
 		} else if (temp == null || temp.equalsIgnoreCase(defaultView.getRepresentation())) {
 			ret.setRepresentation(defaultView);
@@ -481,7 +481,7 @@ public class RestUtil implements GlobalPropertyListener {
 		
 		// get the "t" param for subclass-specific requests
 		temp = request.getParameter(RestConstants.REQUEST_PROPERTY_FOR_TYPE);
-		if ("".equals(temp)) {
+		if (temp != null && temp.isEmpty()) {
 			throw new IllegalArgumentException(
 			        "?" + RestConstants.REQUEST_PROPERTY_FOR_TYPE + "=(empty string) is not allowed");
 		} else {

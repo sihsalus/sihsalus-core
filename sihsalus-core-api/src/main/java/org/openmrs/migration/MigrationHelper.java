@@ -224,7 +224,7 @@ public class MigrationHelper {
 			}
 			String userLastName = ss[0];
 			String userFirstName = ss[1];
-			String username = (userFirstName + userLastName).replaceAll(" ", "");
+			String username = (userFirstName + userLastName).replace(" ", "");
 			String relationshipType = ss[2];
 			String identifierType = ss[3];
 			String identifier = ss[4];

@@ -55,7 +55,7 @@ public class EncounterCohortDefinitionEvaluator implements CohortDefinitionEvalu
     		cd.getAtLeastCount(), cd.getAtMostCount(), 
     		cd.getCreatedBy(), cd.getCreatedOnOrAfter(), cd.getCreatedOnOrBefore());
 		   	
-    	if (cd.isReturnInverse() == Boolean.TRUE) {
+        if (Boolean.TRUE.equals(cd.isReturnInverse())) {
     		Cohort baseCohort = context.getBaseCohort();
     		if (baseCohort == null) {
     			baseCohort = Cohorts.allPatients(context);

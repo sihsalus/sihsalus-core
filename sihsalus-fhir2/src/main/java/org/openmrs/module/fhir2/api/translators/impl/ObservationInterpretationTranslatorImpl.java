@@ -174,11 +174,11 @@ public class ObservationInterpretationTranslatorImpl implements ObservationInter
 		Coding coding = new Coding();
 		coding.setSystem(FhirConstants.INTERPRETATION_SYSTEM_URI);
 		coding.setCode(code);
-		coding.setDisplay(WordUtils.capitalizeFully(display.toString().replaceAll("_", " ")));
+		coding.setDisplay(WordUtils.capitalizeFully(display.toString().replace("_", " ")));
 		return coding;
 	}
 	
 	private void setText(CodeableConcept interpretation, Obs.Interpretation text) {
-		interpretation.setText(WordUtils.capitalizeFully(text.toString().replaceAll("_", " ")));
+		interpretation.setText(WordUtils.capitalizeFully(text.toString().replace("_", " ")));
 	}
 }

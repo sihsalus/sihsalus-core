@@ -50,7 +50,7 @@ public class VitalStatusDataEvaluator implements PersonDataEvaluator {
 		List<Object[]> results = evaluationService.evaluateToList(q, context);
 		for (Object[] row : results) {
 			Integer pId = (Integer)row[0];
-			boolean dead = (row[1] == Boolean.TRUE);
+			boolean dead = Boolean.TRUE.equals(row[1]);
 			Date deathDate = (dead ? (Date)row[2] : null);
 			Concept causeOfDeath = (dead ? (Concept)row[3] : null);
 			c.addData(pId, new VitalStatus(dead, deathDate, causeOfDeath));

@@ -44,10 +44,10 @@ public class BooleanConverter implements DataConverter  {
 	 */
 	public Object convert(Object original) {
 		Boolean b = (Boolean) original;
-		if (b == Boolean.TRUE) {
+		if (Boolean.TRUE.equals(b)) {
 			return trueFormat;
 		}
-		else if (b == Boolean.FALSE) {
+		else if (Boolean.FALSE.equals(b)) {
 			return falseFormat;
 		}
 		return unspecifiedFormat;

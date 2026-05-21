@@ -47,13 +47,13 @@ public class GenderCohortDefinition extends BaseCohortDefinition {
 	 */
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();		
-		if (isMaleIncluded() == Boolean.TRUE) {
+		if (Boolean.TRUE.equals(isMaleIncluded())) {
 			buffer.append("Male");
 		}
-		if (isFemaleIncluded() == Boolean.TRUE) {
+		if (Boolean.TRUE.equals(isFemaleIncluded())) {
 			buffer.append((buffer.length() > 0 ? "," : "") + "Female");
 		}
-		if (isUnknownGenderIncluded() == Boolean.TRUE) {
+		if (Boolean.TRUE.equals(isUnknownGenderIncluded())) {
 			buffer.append((buffer.length() > 0 ? "," : "") + "Unknown Gender");
 		}
 		if (buffer.length() == 0) {

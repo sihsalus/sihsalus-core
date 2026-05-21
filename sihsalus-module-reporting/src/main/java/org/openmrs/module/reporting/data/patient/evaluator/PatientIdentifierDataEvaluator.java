@@ -70,7 +70,7 @@ public class PatientIdentifierDataEvaluator implements PatientDataEvaluator {
 		for (Integer pId : patIds.keySet()) {
 			List<PatientIdentifier> l = patIds.get(pId);
 			Collections.sort(l, comparator);
-            if (def.getIncludeFirstNonNullOnly() == Boolean.TRUE) {
+            if (Boolean.TRUE.equals(def.getIncludeFirstNonNullOnly())) {
                 c.addData(pId, l.get(0));
             }
             else {
@@ -103,8 +103,8 @@ public class PatientIdentifierDataEvaluator implements PatientDataEvaluator {
                 c2 = idTypes.indexOf(pi2.getIdentifierType());
             }
 			if (c1 == c2) {
-				c1 = pi1.getPreferred() == Boolean.TRUE ? 0 : 1;
-				c2 = pi2.getPreferred() == Boolean.TRUE ? 0 : 1;
+				c1 = Boolean.TRUE.equals(pi1.getPreferred()) ? 0 : 1;
+				c2 = Boolean.TRUE.equals(pi2.getPreferred()) ? 0 : 1;
 			}
 			return c1-c2;
 		}
