@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openmrs.util.DatabaseUpdater;
 import org.openmrs.util.DatabaseUtil;
@@ -104,7 +105,7 @@ public class DuplicateLocationAttributeTypeNameChangeSet implements CustomTaskCh
 
 			for (Object o : duplicates.entrySet()) {
 				Map.Entry pairs = (Map.Entry) o;
-				HashSet<Integer> values = (HashSet<Integer>) pairs.getValue();
+				Set<Integer> values = (Set<Integer>) pairs.getValue();
 				List<Integer> duplicateNames = new ArrayList<Integer>(values);
 				int duplicateNameId = 1;
 				for (int i = 1; i < duplicateNames.size(); i++) {
