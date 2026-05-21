@@ -65,6 +65,7 @@ import org.openmrs.module.stockmanagement.api.dto.StockOperationItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationLinkDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockRuleNotificationUser;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockSourceSearchFilter;
@@ -96,6 +97,7 @@ import org.openmrs.module.stockmanagement.api.model.UserRoleScopeOperationType;
 import org.openmrs.module.stockmanagement.api.reporting.Report;
 import org.openmrs.module.stockmanagement.api.utils.DateUtil;
 import org.openmrs.module.stockmanagement.api.utils.GlobalProperties;
+import org.openmrs.util.OpenmrsConstants;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -323,6 +325,10 @@ class PartialStockManagementService implements InvocationHandler {
             case "updateStockRuleJobNextActionDate":
                 updateStockRuleDate((List<Integer>) args[0], (Date) args[1], false);
                 return null;
+            case "getDueStockRules":
+                return getDueStockRules((Integer) args[0], (Integer) args[1]);
+            case "getActiveUsersAssignedForScope":
+                return getActiveUsersAssignedForScope((Integer) args[0], (List<String>) args[1]);
             case "saveBatchJob":
                 if (args[0] instanceof BatchJob) {
                     saveOrUpdate(args[0]);
@@ -369,6 +375,8 @@ class PartialStockManagementService implements InvocationHandler {
                 return byUuid(StockItemReference.class, (String) args[0]);
             case "getStockItemReferenceByStockItem":
                 return getStockItemReferenceByStockItem((String) args[0]);
+            case "getUserEmailAddress":
+                return getUserEmailAddress((User) args[0]);
             default:
                 throw unsupported(method);
         }
@@ -2294,6 +2302,110 @@ class PartialStockManagementService implements InvocationHandler {
         }
     }
 
+    private List<StockRuleNotificationUser> getDueStockRules(Integer lastStockRuleId, int limit) {
+        if (limit <= 0) {
+            return new ArrayList<>();
+        }
+        Date now = new Date();
+        List<StockRuleNotificationUser> rules = query(StockRule.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockRule, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            predicates.add(cb.greaterThan(root.get("id"), lastStockRuleId == null ? 0 : lastStockRuleId));
+            predicates.add(cb.or(cb.isNull(root.get("nextEvaluation")),
+                cb.lessThanOrEqualTo(root.<Date>get("nextEvaluation"), now)));
+            predicates.add(cb.or(cb.isNull(root.get("nextActionDate")),
+                cb.lessThanOrEqualTo(root.<Date>get("nextActionDate"), now)));
+            predicates.add(cb.isTrue(root.get("enabled")));
+            predicates.add(cb.isFalse(root.get("voided")));
+            predicates.add(cb.isFalse(stockItem.get("voided")));
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .limit(limit)
+                .map(this::stockRuleNotificationUser)
+                .collect(Collectors.toList());
+        return rules;
+    }
+
+    private StockRuleNotificationUser stockRuleNotificationUser(StockRule rule) {
+        StockRuleNotificationUser notificationUser = new StockRuleNotificationUser();
+        notificationUser.setId(rule.getId());
+        if (rule.getStockItem() != null) {
+            notificationUser.setStockItemId(rule.getStockItem().getId());
+        }
+        if (rule.getLocation() != null) {
+            notificationUser.setLocationId(rule.getLocation().getLocationId());
+        }
+        notificationUser.setAlertRole(rule.getAlertRole());
+        notificationUser.setMailRole(rule.getMailRole());
+        notificationUser.setEnableDescendants(Boolean.TRUE.equals(rule.getEnableDescendants()));
+        notificationUser.setEvaluationFrequency(rule.getEvaluationFrequency());
+        notificationUser.setActionFrequency(rule.getActionFrequency());
+        BigDecimal factor = BigDecimal.ONE;
+        if (rule.getStockItemPackagingUOM() != null) {
+            if (rule.getStockItemPackagingUOM().getFactor() != null) {
+                factor = rule.getStockItemPackagingUOM().getFactor();
+            }
+            notificationUser.setFactor(rule.getStockItemPackagingUOM().getFactor());
+            if (rule.getStockItemPackagingUOM().getPackagingUom() != null) {
+                notificationUser.setPackagingConceptId(
+                    rule.getStockItemPackagingUOM().getPackagingUom().getConceptId());
+            }
+        }
+        notificationUser.setQuantity(rule.getQuantity() == null ? null : rule.getQuantity().multiply(factor));
+        return notificationUser;
+    }
+
+    private List<Integer> getActiveUsersAssignedForScope(Integer locationId, List<String> roles) {
+        if (locationId == null || roles == null || roles.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Set<Integer> ancestorLocationIds = ancestorLocationIds(locationId);
+        Date today = DateUtil.today();
+        return listAll(UserRoleScope.class).stream()
+                .filter(scope -> scope.getUser() != null && !Boolean.TRUE.equals(scope.getUser().getRetired()))
+                .filter(scope -> scope.getRole() != null && roles.contains(scope.getRole().getRole()))
+                .filter(scope -> !Boolean.TRUE.equals(scope.getVoided()))
+                .filter(scope -> Boolean.TRUE.equals(scope.getEnabled()))
+                .filter(scope -> activeToday(scope, today))
+                .filter(scope -> scopeLocationsMatch(scope, locationId, ancestorLocationIds))
+                .map(scope -> scope.getUser().getId())
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    private Set<Integer> ancestorLocationIds(Integer locationId) {
+        Set<Integer> ids = new HashSet<>();
+        ids.add(locationId);
+        query(LocationTree.class, (cb, root) -> predicates(cb.equal(root.get("childLocationId"), locationId))).stream()
+                .map(LocationTree::getParentLocationId)
+                .filter(Objects::nonNull)
+                .forEach(ids::add);
+        return ids;
+    }
+
+    private boolean activeToday(UserRoleScope scope, Date today) {
+        if (Boolean.TRUE.equals(scope.getPermanent())) {
+            return true;
+        }
+        return scope.getActiveFrom() != null && scope.getActiveTo() != null
+                && !scope.getActiveFrom().after(today) && !scope.getActiveTo().before(today);
+    }
+
+    private boolean scopeLocationsMatch(UserRoleScope scope, Integer locationId, Set<Integer> ancestorLocationIds) {
+        return activeUserRoleScopeLocations(scope).stream().anyMatch(scopeLocation -> {
+            Location location = scopeLocation.getLocation();
+            if (location == null || Boolean.TRUE.equals(location.getRetired())) {
+                return false;
+            }
+            Integer scopeLocationId = location.getLocationId();
+            return Boolean.TRUE.equals(scopeLocation.getEnableDescendants())
+                    ? ancestorLocationIds.contains(scopeLocationId)
+                    : Objects.equals(scopeLocationId, locationId);
+        });
+    }
+
     private Result<BatchJobDTO> findBatchJobs(BatchJobSearchFilter filter) {
         BatchJobSearchFilter safeFilter = filter == null ? new BatchJobSearchFilter() : filter;
         List<BatchJobDTO> dtos = findBatchJobEntities(safeFilter).stream()
@@ -2562,6 +2674,20 @@ class PartialStockManagementService implements InvocationHandler {
         return query(StockItemReference.class, (cb, root) -> predicates(
             cb.equal(root.get("stockItem"), stockItem),
             cb.isFalse(root.get("voided"))));
+    }
+
+    private String getUserEmailAddress(User user) {
+        if (user == null) {
+            return null;
+        }
+        String email = user.getEmail();
+        if (!org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(email)) {
+            email = user.getUserProperty(OpenmrsConstants.USER_PROPERTY_NOTIFICATION_ADDRESS);
+        }
+        if (!org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(email)) {
+            email = user.getUsername();
+        }
+        return org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(email) ? email : null;
     }
 
     private StockItemDTO stockItemToDto(StockItem item) {
