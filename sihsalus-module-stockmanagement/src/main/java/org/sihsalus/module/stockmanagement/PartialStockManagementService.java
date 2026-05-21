@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -27,7 +28,10 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.BaseOpenmrsData;
@@ -48,6 +52,7 @@ import org.openmrs.Role;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.hibernate.HibernateUtil;
+import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.stockmanagement.StockLocationTags;
 import org.openmrs.module.stockmanagement.api.Privileges;
 import org.openmrs.module.stockmanagement.api.StockManagementException;
@@ -55,6 +60,7 @@ import org.openmrs.module.stockmanagement.api.dto.BatchJobDTO;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobOwnerDTO;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.DispenseRequest;
+import org.openmrs.module.stockmanagement.api.dto.ImportResult;
 import org.openmrs.module.stockmanagement.api.dto.OrderItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.OrderItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.PartyDTO;
@@ -101,6 +107,9 @@ import org.openmrs.module.stockmanagement.api.dto.reporting.StockBatchLineItem;
 import org.openmrs.module.stockmanagement.api.dto.reporting.StockExpiryFilter;
 import org.openmrs.module.stockmanagement.api.dto.reporting.StockOperationLineItem;
 import org.openmrs.module.stockmanagement.api.dto.reporting.StockOperationLineItemFilter;
+import org.openmrs.module.stockmanagement.api.jobs.StockBatchExpiryJob;
+import org.openmrs.module.stockmanagement.api.jobs.StockItemImportJob;
+import org.openmrs.module.stockmanagement.api.jobs.StockRuleEvaluationJob;
 import org.openmrs.module.stockmanagement.api.model.BatchJob;
 import org.openmrs.module.stockmanagement.api.model.BatchJobOwner;
 import org.openmrs.module.stockmanagement.api.model.BatchJobStatus;
@@ -127,6 +136,9 @@ import org.openmrs.module.stockmanagement.api.model.UserRoleScopeOperationType;
 import org.openmrs.module.stockmanagement.api.reporting.Report;
 import org.openmrs.module.stockmanagement.api.utils.DateUtil;
 import org.openmrs.module.stockmanagement.api.utils.GlobalProperties;
+import org.openmrs.module.stockmanagement.api.utils.SmtpUtil;
+import org.openmrs.notification.Alert;
+import org.openmrs.notification.Template;
 import org.openmrs.util.OpenmrsConstants;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
@@ -135,6 +147,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 class PartialStockManagementService implements InvocationHandler {
+
+    private static final Log log = LogFactory.getLog(PartialStockManagementService.class);
 
     private final SessionFactory sessionFactory;
 
@@ -285,6 +299,8 @@ class PartialStockManagementService implements InvocationHandler {
                     (Integer) args[3]);
             case "findStockItems":
                 return findStockItems((StockItemSearchFilter) args[0]);
+            case "importStockItems":
+                return importStockItems((Path) args[0], (Boolean) args[1]);
             case "saveStockItem":
                 return saveStockItem(args);
             case "saveStockRule":
@@ -415,7 +431,7 @@ class PartialStockManagementService implements InvocationHandler {
             case "getLocationNames":
                 return getLocationNames((List<Integer>) args[0]);
             case "getHealthCenterName":
-                return Context.getAdministrationService().getGlobalProperty("site.name", "");
+                return healthCenterName();
             case "updateStockBatchExpiryNotificationDate":
                 updateStockBatchExpiryNotificationDate((Collection<Integer>) args[0], (Date) args[1]);
                 return null;
@@ -437,6 +453,12 @@ class PartialStockManagementService implements InvocationHandler {
                 return getActiveUsersAssignedForScope((Integer) args[0], (List<String>) args[1]);
             case "getExpiringStockBatchesDueForNotification":
                 return getExpiringStockBatchesDueForNotification((Integer) args[0]);
+            case "runStockRuleEvaluationJob":
+                runStockRuleEvaluationJob();
+                return null;
+            case "runStockBatchExpiryNoticationJob":
+                runStockBatchExpiryNoticationJob();
+                return null;
             case "saveBatchJob":
                 if (args[0] instanceof BatchJob) {
                     saveOrUpdate(args[0]);
@@ -490,6 +512,10 @@ class PartialStockManagementService implements InvocationHandler {
                 return getStockItemReferenceByStockItem((String) args[0]);
             case "getUserEmailAddress":
                 return getUserEmailAddress((User) args[0]);
+            case "sendStockOperationNotification":
+                sendStockOperationNotification((String) args[0], (StockOperationAction.Action) args[1],
+                    (String) args[2], (Integer) args[3]);
+                return null;
             case "getExpiringStockBatchList":
                 return getExpiringStockBatchList((StockExpiryFilter) args[0]);
             case "findStockOperationLineItems":
@@ -1090,6 +1116,45 @@ class PartialStockManagementService implements InvocationHandler {
         }
         applyStockOperationAction(operation, operationType, action, reason, lockAndReserve);
         saveOrUpdate(operation);
+        notifyStockOperationAction(operation, operationType, action, reason);
+    }
+
+    private void notifyStockOperationAction(StockOperation operation, StockOperationType operationType,
+            StockOperationAction.Action action, String reason) {
+        if (!shouldNotifyStockOperationAction(operationType, action)) {
+            return;
+        }
+        try {
+            User user = authenticatedUser();
+            sendStockOperationNotification(operation.getUuid(), action, reason, user == null ? null : user.getUserId());
+        } catch (Exception exception) {
+            log.error("Unable to send stock operation notification", exception);
+        }
+    }
+
+    private boolean shouldNotifyStockOperationAction(StockOperationType operationType,
+            StockOperationAction.Action action) {
+        if (operationType == null || action == null) {
+            return false;
+        }
+        switch (action) {
+            case SUBMIT:
+                return Boolean.TRUE.equals(operationType.getNotifySubmitted());
+            case APPROVE:
+                return Boolean.TRUE.equals(operationType.getNotifyApproved());
+            case DISPATCH:
+                return Boolean.TRUE.equals(operationType.getNotifyDispatched());
+            case RETURN:
+                return Boolean.TRUE.equals(operationType.getNotifyReturned());
+            case REJECT:
+                return Boolean.TRUE.equals(operationType.getNotifyRejected());
+            case COMPLETE:
+                return Boolean.TRUE.equals(operationType.getNotifyCompleted());
+            case CANCEL:
+                return Boolean.TRUE.equals(operationType.getNotifyCancelled());
+            default:
+                return false;
+        }
     }
 
     private void ensureStockOperationCollections(StockOperation operation) {
@@ -3002,6 +3067,17 @@ class PartialStockManagementService implements InvocationHandler {
                 .collect(Collectors.toList());
     }
 
+    private ImportResult importStockItems(Path file, boolean hasHeader) {
+        if (file == null) {
+            ImportResult result = new ImportResult();
+            result.setErrors(new ArrayList<>(List.of("Import file is required")));
+            return result;
+        }
+        StockItemImportJob importJob = new StockItemImportJob(file, hasHeader);
+        importJob.execute();
+        return (ImportResult) importJob.getResult();
+    }
+
     private Object saveStockItem(Object[] args) {
         if (args.length == 1 && args[0] instanceof StockItemDTO) {
             return saveStockItem((StockItemDTO) args[0]);
@@ -3010,13 +3086,56 @@ class PartialStockManagementService implements InvocationHandler {
             return saveOrUpdate(args[0]);
         }
         if (args.length == 2 && args[0] instanceof StockItem && args[1] instanceof StockItemPackagingUOM) {
-            StockItem stockItem = saveOrUpdate((StockItem) args[0]);
+            StockItem stockItem = (StockItem) args[0];
             StockItemPackagingUOM uom = (StockItemPackagingUOM) args[1];
+            boolean isNewUom = uom.getId() == null;
+            boolean isDispensingUom = stockItem.getDispensingUnitPackagingUoM() == uom;
+            boolean isDefaultOperationUom = stockItem.getDefaultStockOperationsUoM() == uom;
+            boolean isPurchasePriceUom = stockItem.getPurchasePriceUoM() == uom;
+            boolean isReorderLevelUom = stockItem.getReorderLevelUOM() == uom;
+            if (isNewUom) {
+                clearTransientStockItemUomReferences(stockItem, uom);
+            }
+            stockItem = saveOrUpdate(stockItem);
             uom.setStockItem(stockItem);
-            saveOrUpdate(uom);
+            uom = saveOrUpdate(uom);
+            restoreStockItemUomReferences(stockItem, uom, isDispensingUom, isDefaultOperationUom,
+                isPurchasePriceUom, isReorderLevelUom);
+            saveOrUpdate(stockItem);
             return stockItem;
         }
         throw new UnsupportedOperationException("Unsupported saveStockItem signature");
+    }
+
+    private void clearTransientStockItemUomReferences(StockItem stockItem, StockItemPackagingUOM uom) {
+        if (stockItem.getDispensingUnitPackagingUoM() == uom) {
+            stockItem.setDispensingUnitPackagingUoM(null);
+        }
+        if (stockItem.getDefaultStockOperationsUoM() == uom) {
+            stockItem.setDefaultStockOperationsUoM(null);
+        }
+        if (stockItem.getPurchasePriceUoM() == uom) {
+            stockItem.setPurchasePriceUoM(null);
+        }
+        if (stockItem.getReorderLevelUOM() == uom) {
+            stockItem.setReorderLevelUOM(null);
+        }
+    }
+
+    private void restoreStockItemUomReferences(StockItem stockItem, StockItemPackagingUOM uom, boolean dispensing,
+            boolean defaultOperation, boolean purchasePrice, boolean reorderLevel) {
+        if (dispensing) {
+            stockItem.setDispensingUnitPackagingUoM(uom);
+        }
+        if (defaultOperation) {
+            stockItem.setDefaultStockOperationsUoM(uom);
+        }
+        if (purchasePrice) {
+            stockItem.setPurchasePriceUoM(uom);
+        }
+        if (reorderLevel) {
+            stockItem.setReorderLevelUOM(uom);
+        }
     }
 
     private StockItem saveStockItem(StockItemDTO dto) {
@@ -4806,6 +4925,192 @@ class PartialStockManagementService implements InvocationHandler {
                 .collect(Collectors.toMap(Location::getId, Location::getName, (a, b) -> a));
     }
 
+    private void runStockRuleEvaluationJob() {
+        new StockRuleEvaluationJob().execute();
+    }
+
+    private void runStockBatchExpiryNoticationJob() {
+        new StockBatchExpiryJob().execute();
+    }
+
+    private void sendStockOperationNotification(String stockOperationUuid, StockOperationAction.Action action,
+            String actionReason, Integer actionByUserId) {
+        StockOperationSearchFilter filter = new StockOperationSearchFilter();
+        filter.setStockOperationUuid(stockOperationUuid);
+        Result<StockOperationDTO> result = findStockOperations(filter, null);
+        StockOperationDTO operation = result.getData().isEmpty() ? null : result.getData().get(0);
+        if (operation == null) {
+            return;
+        }
+
+        String configuredEmail = GlobalProperties.getStockOperationNotificationEmail();
+        if (!org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(configuredEmail)) {
+            configuredEmail = null;
+        }
+        String roleToNotify = GlobalProperties.getStockOperationNotificationRole();
+        if (StringUtils.isBlank(configuredEmail) && StringUtils.isBlank(roleToNotify)) {
+            log.info("Stock operation notification not sent; email and role settings are empty");
+            return;
+        }
+
+        User actor = actionByUserId == null ? null : Context.getUserService().getUser(actionByUserId);
+        String actorName = actor == null
+                ? (actionByUserId == null ? "System" : "User ID " + actionByUserId)
+                : actor.getDisplayString();
+        List<User> usersToNotify = notificationUsersForRole(roleToNotify, operation, action);
+        createStockOperationAlert(operation, action, actor, actorName, usersToNotify);
+
+        List<String> emailRecipients = new ArrayList<>();
+        if (usersToNotify != null) {
+            usersToNotify.stream()
+                    .map(this::getUserEmailAddress)
+                    .filter(StringUtils::isNotBlank)
+                    .forEach(emailRecipients::add);
+        }
+        if (StringUtils.isNotBlank(configuredEmail)) {
+            emailRecipients.add(configuredEmail);
+        }
+        emailRecipients = emailRecipients.stream().distinct().collect(Collectors.toList());
+        if (emailRecipients.isEmpty()) {
+            log.info("Stock operation notification not sent; no valid email recipients");
+            return;
+        }
+        if (!SmtpUtil.hasSmptHostSetup()) {
+            log.info("Stock operation notification not sent; SMTP is not configured");
+            return;
+        }
+
+        Template template = stockOperationNotificationTemplate();
+        if (template == null) {
+            return;
+        }
+        String healthCenterName = healthCenterName();
+        String details = stockOperationNotificationDetails(operation, action, actionReason);
+        String actionName = StockOperationAction.getActionName(action);
+        String body = replaceStockOperationNotificationTokens(template.getTemplate(), operation, actionName, actorName,
+            details, healthCenterName);
+        String subject = replaceStockOperationNotificationTokens(template.getSubject(), operation, actionName, actorName,
+            details, healthCenterName);
+        try {
+            jakarta.mail.Session mailSession = SmtpUtil.getSession();
+            SmtpUtil.sendEmail(subject, body, mailSession, emailRecipients.toArray(new String[0]));
+        } catch (Exception exception) {
+            log.error("Unable to send stock operation notification email", exception);
+        }
+    }
+
+    private List<User> notificationUsersForRole(String roleToNotify, StockOperationDTO operation,
+            StockOperationAction.Action action) {
+        if (StringUtils.isBlank(roleToNotify)) {
+            return new ArrayList<>();
+        }
+        Role role = Context.getUserService().getRole(roleToNotify);
+        if (role == null) {
+            log.info("Stock operation " + operation.getOperationNumber() + " action " + action
+                    + " notification not sent to role; role not found");
+            return new ArrayList<>();
+        }
+        return Context.getUserService().getUsersByRole(role);
+    }
+
+    private void createStockOperationAlert(StockOperationDTO operation, StockOperationAction.Action action,
+            User actor, String actorName, List<User> usersToNotify) {
+        if (usersToNotify == null || usersToNotify.isEmpty()) {
+            return;
+        }
+        Alert alert = new Alert();
+        alert.setDateCreated(new Date());
+        alert.setCreator(actor);
+        alert.setDateToExpire(addDays(new Date(), 7));
+        alert.setText(String.format(Context.getMessageSourceService().getMessage("stockmanagement.stockoperation.alertmsg"),
+            operation.getAtLocationName(), operation.getOperationTypeName(), operation.getOperationNumber(),
+            StockOperationAction.getActionName(action), actorName));
+        usersToNotify.forEach(alert::addRecipient);
+        Context.getAlertService().saveAlert(alert);
+    }
+
+    private Template stockOperationNotificationTemplate() {
+        try {
+            List<Template> templates = Context.getMessageService().getTemplatesByName("STOCK_MGMT_OPERATION_ACTION");
+            if (templates.isEmpty()) {
+                log.debug("Template STOCK_MGMT_OPERATION_ACTION not found");
+                return null;
+            }
+            return templates.get(0);
+        } catch (Exception exception) {
+            log.error("Unable to load stock operation notification template", exception);
+            return null;
+        }
+    }
+
+    private String stockOperationNotificationDetails(StockOperationDTO operation, StockOperationAction.Action action,
+            String actionReason) {
+        MessageSourceService messages = Context.getMessageSourceService();
+        StringBuilder details = new StringBuilder();
+        if (StringUtils.isNotBlank(operation.getSourceUuid())) {
+            appendNotificationRow(details, messages.getMessage("stockmanagement.stockoperation.notification.source"),
+                operation.getSourceName());
+        }
+        if (StringUtils.isNotBlank(operation.getDestinationUuid())) {
+            appendNotificationRow(details,
+                messages.getMessage("stockmanagement.stockoperation.notification.destination"),
+                operation.getDestinationName());
+        }
+        appendNotificationRow(details, messages.getMessage("stockmanagement.stockoperation.notification.operationdate"),
+            DateUtil.formatDDMMMyyyy(operation.getOperationDate()));
+        String responsible = operation.getResponsiblePersonFamilyName() != null
+                ? operation.getResponsiblePersonFamilyName() + " " + operation.getResponsiblePersonGivenName()
+                : operation.getResponsiblePersonOther();
+        appendNotificationRow(details,
+            messages.getMessage("stockmanagement.stockoperation.notification.responsibleperson"), responsible);
+        appendNotificationRow(details, messages.getMessage("stockmanagement.stockoperation.notification.remarks"),
+            operation.getRemarks());
+        if (action == StockOperationAction.Action.RETURN) {
+            appendNotificationRow(details,
+                messages.getMessage("stockmanagement.stockoperation.notification.returnreason"), actionReason);
+        } else if (action == StockOperationAction.Action.REJECT) {
+            appendNotificationRow(details,
+                messages.getMessage("stockmanagement.stockoperation.notification.rejectionreason"), actionReason);
+        }
+        return details.toString();
+    }
+
+    private void appendNotificationRow(StringBuilder builder, String label, String value) {
+        builder.append("<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%;'><b>")
+                .append(escapeHtml(label))
+                .append(":</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%;'>")
+                .append(StringUtils.isBlank(value) ? "&nbsp;" : escapeHtml(value))
+                .append("</td></tr>");
+    }
+
+    private String replaceStockOperationNotificationTokens(String template, StockOperationDTO operation,
+            String actionName, String actorName, String details, String healthCenterName) {
+        return (template == null ? "" : template)
+                .replace("%LOCATION%", nullToEmpty(operation.getAtLocationName()))
+                .replace("%OPERATION_TYPE%", nullToEmpty(operation.getOperationTypeName()))
+                .replace("%OPERATION_REF%", nullToEmpty(operation.getOperationNumber()))
+                .replace("%OPERATION_ACTION%", nullToEmpty(actionName))
+                .replace("%ACTION_BY%", nullToEmpty(actorName))
+                .replace("%OPERATION_BASIC_INFO%", details == null ? "" : details)
+                .replace("%CENTER_NAME%", nullToEmpty(healthCenterName));
+    }
+
+    private String healthCenterName() {
+        String healthCenterName = GlobalProperties.getHealthCenterName();
+        if (StringUtils.isNotBlank(healthCenterName)) {
+            return healthCenterName;
+        }
+        return Context.getAdministrationService().getGlobalProperty("site.name", "NOT SET");
+    }
+
+    private String nullToEmpty(String value) {
+        return value == null ? "" : value;
+    }
+
+    private String escapeHtml(String value) {
+        return StringEscapeUtils.escapeHtml(value == null ? "" : value);
+    }
+
     private void updateStockBatchExpiryNotificationDate(Collection<Integer> stockBatchIds, Date notificationDate) {
         for (StockBatch batch : listByIds(StockBatch.class, "id", stockBatchIds)) {
             batch.setExpiryNotificationDate(notificationDate);
@@ -5033,7 +5338,7 @@ class PartialStockManagementService implements InvocationHandler {
             if (rule.getStockItemPackagingUOM().getFactor() != null) {
                 factor = rule.getStockItemPackagingUOM().getFactor();
             }
-            notificationUser.setFactor(rule.getStockItemPackagingUOM().getFactor());
+            notificationUser.setFactor(factor);
             if (rule.getStockItemPackagingUOM().getPackagingUom() != null) {
                 notificationUser.setPackagingConceptId(
                     rule.getStockItemPackagingUOM().getPackagingUom().getConceptId());
