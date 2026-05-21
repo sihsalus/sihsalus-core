@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,6 +53,7 @@ import org.openmrs.module.stockmanagement.api.dto.SessionInfo;
 import org.openmrs.module.stockmanagement.api.dto.StockBatchDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockBatchSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockItemInventory;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
@@ -236,6 +238,8 @@ class PartialStockManagementService implements InvocationHandler {
                         : findStockOperations((StockOperationSearchFilter) args[0], null);
             case "findStockItemTransactions":
                 return findStockItemTransactions((StockItemTransactionSearchFilter) args[0], null);
+            case "getStockBatchLocationInventory":
+                return getStockBatchLocationInventory((List<Integer>) args[0]);
             case "getParentStockOperationLinks":
                 return findStockOperationLinks(null, (String) args[0]);
             case "getStockSourceByUuid":
@@ -1023,6 +1027,151 @@ class PartialStockManagementService implements InvocationHandler {
             dto.setPackagingUoMId(uom.getPackagingUom().getConceptId());
             dto.setPackagingUomName(conceptName(uom.getPackagingUom()));
         }
+    }
+
+    private List<StockItemInventory> getStockBatchLocationInventory(List<Integer> stockBatchIds) {
+        if (stockBatchIds == null || stockBatchIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Date today = DateUtil.today();
+        Map<String, StockItemInventory> inventoryByKey = new LinkedHashMap<>();
+        List<StockItemTransaction> transactions = query(StockItemTransaction.class, (cb, root) -> predicates(
+            root.get("stockBatch").get("id").in(stockBatchIds),
+            cb.or(cb.isNull(root.get("stockBatch").get("expiration")),
+                cb.greaterThan(root.<Date>get("stockBatch").get("expiration"), today))));
+        for (StockItemTransaction transaction : transactions) {
+            if (transaction.getStockBatch() == null || transaction.getStockItemPackagingUOM() == null
+                    || transaction.getQuantity() == null) {
+                continue;
+            }
+            StockItemPackagingUOM uom = transaction.getStockItemPackagingUOM();
+            if (uom.getFactor() == null) {
+                continue;
+            }
+            StockBatch batch = transaction.getStockBatch();
+            StockItem stockItem = transaction.getStockItem();
+            Party party = transaction.getParty();
+            Integer partyId = party == null ? null : party.getId();
+            Integer stockItemId = stockItem == null ? null : stockItem.getId();
+            String key = partyId + ":" + stockItemId + ":" + batch.getId();
+            StockItemInventory inventory = inventoryByKey.computeIfAbsent(key,
+                ignored -> stockItemInventory(party, stockItem, batch));
+            BigDecimal existingQuantity = inventory.getQuantity() == null ? BigDecimal.ZERO : inventory.getQuantity();
+            inventory.setQuantity(existingQuantity.add(transaction.getQuantity().multiply(uom.getFactor())));
+        }
+        List<StockItemInventory> result = new ArrayList<>(inventoryByKey.values());
+        applyPreferredInventoryUoms(result);
+        return result;
+    }
+
+    private StockItemInventory stockItemInventory(Party party, StockItem stockItem, StockBatch batch) {
+        StockItemInventory inventory = new StockItemInventory();
+        if (party != null) {
+            inventory.setPartyId(party.getId());
+            inventory.setPartyUuid(party.getUuid());
+            inventory.setPartyName(partyName(party));
+            if (party.getLocation() != null) {
+                inventory.setLocationUuid(party.getLocation().getUuid());
+            }
+        }
+        if (stockItem != null) {
+            inventory.setStockItemId(stockItem.getId());
+            inventory.setStockItemUuid(stockItem.getUuid());
+            inventory.setCommonName(stockItem.getCommonName());
+            inventory.setAcronym(stockItem.getAcronym());
+            if (stockItem.getDrug() != null) {
+                inventory.setDrugId(stockItem.getDrug().getDrugId());
+                inventory.setDrugUuid(stockItem.getDrug().getUuid());
+                inventory.setDrugName(stockItem.getDrug().getName());
+                inventory.setDrugStrength(stockItem.getDrug().getStrength());
+            }
+            if (stockItem.getConcept() != null) {
+                inventory.setConceptId(stockItem.getConcept().getConceptId());
+                inventory.setConceptUuid(stockItem.getConcept().getUuid());
+                inventory.setConceptName(conceptName(stockItem.getConcept()));
+            }
+            if (stockItem.getCategory() != null) {
+                inventory.setStockItemCategoryName(conceptName(stockItem.getCategory()));
+            }
+        }
+        inventory.setStockBatchId(batch.getId());
+        inventory.setStockBatchUuid(batch.getUuid());
+        inventory.setBatchNumber(batch.getBatchNo());
+        inventory.setExpiration(batch.getExpiration());
+        inventory.setQuantity(BigDecimal.ZERO);
+        return inventory;
+    }
+
+    private void applyPreferredInventoryUoms(List<StockItemInventory> inventories) {
+        if (inventories == null || inventories.isEmpty()) {
+            return;
+        }
+        StockItemPackagingUOMSearchFilter uomFilter = new StockItemPackagingUOMSearchFilter();
+        uomFilter.setStockItemIds(inventories.stream()
+                .map(StockItemInventory::getStockItemId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList()));
+        Map<Integer, List<StockItemPackagingUOMDTO>> uomsByStockItem = findStockItemPackagingUOMs(uomFilter).getData()
+                .stream()
+                .collect(Collectors.groupingBy(StockItemPackagingUOMDTO::getStockItemId));
+        boolean uomPriorityIsBigToSmall = GlobalProperties.uomPriorityIsBigToSmall();
+        for (StockItemInventory inventory : inventories) {
+            List<StockItemPackagingUOMDTO> uoms = uomsByStockItem.get(inventory.getStockItemId());
+            StockItemPackagingUOMDTO preferredUom = preferredPackagingUom(
+                inventory.getQuantity(), uoms, false, uomPriorityIsBigToSmall, null);
+            if (preferredUom == null || preferredUom.getFactor() == null || BigDecimal.ZERO.compareTo(preferredUom.getFactor()) == 0) {
+                continue;
+            }
+            inventory.setQuantity(inventory.getQuantity().divide(preferredUom.getFactor(), 5, RoundingMode.HALF_EVEN));
+            inventory.setQuantityUoM(preferredUom.getPackagingUomName());
+            inventory.setQuantityUoMUuid(preferredUom.getUuid());
+            inventory.setQuantityFactor(preferredUom.getFactor());
+        }
+    }
+
+    private StockItemPackagingUOMDTO preferredPackagingUom(BigDecimal value, List<StockItemPackagingUOMDTO> uoms,
+            boolean isDispensing, boolean uomPriorityIsBigToSmall, Integer preferredStockItemPackagingUomId) {
+        if (value == null || uoms == null || uoms.isEmpty()) {
+            return null;
+        }
+        Comparator<StockItemPackagingUOMDTO> comparator = Comparator
+                .comparing(StockItemPackagingUOMDTO::getIsDefaultStockOperationsUoM,
+                    Comparator.nullsLast(Boolean::compareTo))
+                .reversed();
+        if (isDispensing || !uomPriorityIsBigToSmall) {
+            comparator = comparator.thenComparing(StockItemPackagingUOMDTO::getFactor,
+                Comparator.nullsLast(BigDecimal::compareTo));
+        } else {
+            comparator = comparator.thenComparing(Comparator
+                    .comparing(StockItemPackagingUOMDTO::getFactor, Comparator.nullsLast(BigDecimal::compareTo))
+                    .reversed());
+        }
+        uoms.sort(comparator);
+        StockItemPackagingUOMDTO foundUom = null;
+        boolean checkedPreferred = false;
+        boolean checkPreferred = preferredStockItemPackagingUomId != null;
+        for (StockItemPackagingUOMDTO uom : uoms) {
+            if (uom.getFactor() == null || BigDecimal.ZERO.compareTo(uom.getFactor()) == 0) {
+                continue;
+            }
+            boolean isPreferred = checkPreferred && preferredStockItemPackagingUomId.equals(uom.getId());
+            if (value.divide(uom.getFactor(), 5, RoundingMode.HALF_EVEN).abs().compareTo(BigDecimal.ONE) >= 0) {
+                if (!checkPreferred || isPreferred) {
+                    return uom;
+                }
+                if (checkedPreferred) {
+                    return foundUom == null ? uom : foundUom;
+                }
+                if (foundUom == null) {
+                    foundUom = uom;
+                }
+            }
+            if (isPreferred) {
+                checkedPreferred = true;
+            }
+        }
+        return checkedPreferred && foundUom != null ? foundUom : uoms.get(0);
     }
 
     private StockOperationType stockOperationTypeByType(String type) {
