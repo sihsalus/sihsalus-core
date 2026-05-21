@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -27,12 +29,7 @@ jobs:
       - name: Check changed-file whitespace
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-            git diff --check "origin/${{ github.base_ref }}...HEAD"
-          else
-            git diff --check HEAD^ HEAD
-          fi
+          git diff --check HEAD^1 HEAD
 
       - name: Verify
         run: mvn --batch-mode --no-transfer-progress verify
