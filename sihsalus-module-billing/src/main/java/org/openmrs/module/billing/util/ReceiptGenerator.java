@@ -45,7 +45,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -116,18 +115,14 @@ public class ReceiptGenerator {
 		
 		String logoPath = ConfigUtil.getGlobalProperty(GP_BILL_LOGO_PATH);
 		if (StringUtils.isNotBlank(logoPath)) {
-			File file = new File(logoPath.trim());
-			if (!file.isAbsolute()) {
-				file = new File(OpenmrsUtil.getApplicationDataDirectory(), logoPath.trim());
-			}
-			
-			if (file.exists()) {
-				try {
+			try {
+				File file = resolveLogoFile(logoPath.trim());
+				if (file.exists()) {
 					logoUrl = file.getAbsoluteFile().toURI().toURL();
 				}
-				catch (MalformedURLException e) {
-					LOG.error("Error Loading file: {}", file.getAbsoluteFile(), e);
-				}
+			}
+			catch (IOException e) {
+				LOG.error("Error loading logo path: {}", logoPath, e);
 			}
 		}
 		
@@ -307,5 +302,18 @@ public class ReceiptGenerator {
 	private static void addFormattedCell(Table table, String cellValue, PdfFont font, TextAlignment alignment) {
 		table.addCell(new Paragraph(cellValue).setTextAlignment(alignment)).setFontSize(12).setTextAlignment(alignment)
 		        .setBorder(Border.NO_BORDER).setFont(font);
+	}
+
+	private static File resolveLogoFile(String logoPath) throws IOException {
+		File applicationDataDirectory = new File(OpenmrsUtil.getApplicationDataDirectory()).getCanonicalFile();
+		File file = new File(logoPath);
+		if (!file.isAbsolute()) {
+			file = new File(applicationDataDirectory, logoPath);
+		}
+		File canonicalFile = file.getCanonicalFile();
+		if (!canonicalFile.toPath().startsWith(applicationDataDirectory.toPath())) {
+			throw new IOException("Logo path is outside the application data directory");
+		}
+		return canonicalFile;
 	}
 }

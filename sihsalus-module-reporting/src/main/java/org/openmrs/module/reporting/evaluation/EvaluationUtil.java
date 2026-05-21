@@ -44,7 +44,7 @@ public class EvaluationUtil {
      *                 \d*\.?\d+                ... captures either #.# or #
      *                          [a-zA-Z]*+      ... optional unit (*+ means possessive, zero or more times)
      */
-    private static Pattern expressionPattern = Pattern.compile("([a-zA-Z_0-9.]+)((?:\\s*[+-/*]\\s*\\d*\\.?\\d+[a-zA-Z]*+)+)");
+    private static Pattern expressionPattern = Pattern.compile("([a-zA-Z_0-9.]+)((?:\\s*[-+/*]\\s*\\d*\\.?\\d+[a-zA-Z]*+)+)");
 
     /*
      * ([+-/*])                           ... (group 1) single-character operator
@@ -52,7 +52,7 @@ public class EvaluationUtil {
      *            (\d*\.?\d+)             ... (group 2) captures either #.# or #
      *                       ([a-zA-Z]*+) ... (group 3) optional unit (*+ means possessive, zero or more times)
      */
-    private static Pattern operationPattern = Pattern.compile("([+-/*])\\s*(\\d*\\.?\\d+)([a-zA-Z]*+)");
+    private static Pattern operationPattern = Pattern.compile("([-+/*])\\s*(\\d*\\.?\\d+)([a-zA-Z]*+)");
 
     /**
 	 * Returns true if the passed String is an expression that is capable of being evaluated

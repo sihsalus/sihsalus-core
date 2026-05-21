@@ -166,7 +166,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 					groupCount = maxGroupCount;
 				}
 				if (groupCount > 0) {
-					count += rowCount;
+					count = Math.addExact(count, Math.toIntExact(rowCount));
 					groupCount--;
 				}
 				prevConceptId = conceptId;

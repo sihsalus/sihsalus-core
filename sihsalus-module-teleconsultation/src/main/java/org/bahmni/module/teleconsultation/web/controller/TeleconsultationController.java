@@ -27,9 +27,9 @@ public class TeleconsultationController extends BaseRestController {
         try {
             return new ResponseEntity<>(teleconsultationService.generateTeleconsultationLink(uuid), HttpStatus.OK);
         } catch (APIAuthenticationException | ContextAuthenticationException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Invalid teleconsultation request", HttpStatus.BAD_REQUEST);
         }
     }
 }

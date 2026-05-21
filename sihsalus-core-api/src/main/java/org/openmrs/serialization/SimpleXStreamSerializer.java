@@ -27,6 +27,9 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.extended.DynamicProxyConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.security.NoTypePermission;
+import com.thoughtworks.xstream.security.NullPermission;
+import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
 /**
  * This serializer uses the xstream library to serialize and deserialize objects. <br>
@@ -95,6 +98,10 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
 	 * @param adminService
 	 */
 	public static void setupXStreamSecurity(XStream newXStream, AdministrationService adminService) {
+		newXStream.addPermission(NoTypePermission.NONE);
+		newXStream.addPermission(NullPermission.NULL);
+		newXStream.addPermission(PrimitiveTypePermission.PRIMITIVES);
+		newXStream.allowTypes(new Class[] { String.class });
 		if (adminService != null) {
 			List<String> serializerWhitelistTypes = adminService.getSerializerWhitelistTypes();
 			int prefixLength = AdministrationService.GP_SERIALIZER_WHITELIST_HIERARCHY_TYPES_PREFIX.length();
