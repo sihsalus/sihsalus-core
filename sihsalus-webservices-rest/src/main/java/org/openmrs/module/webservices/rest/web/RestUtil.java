@@ -161,7 +161,10 @@ public class RestUtil implements GlobalPropertyListener {
 		
 		for (String candidateIp : candidateIps) {
 			// split IP and mask
-			String[] candidateIpPattern = candidateIp.split("/");
+			String[] candidateIpPattern = candidateIp.split("/", -1);
+			if (candidateIpPattern.length > 2) {
+				throw new IllegalArgumentException("Invalid IP mask pattern in the candidateIps parameter");
+			}
 			
 			InetAddress candidateAddress;
 			try {
@@ -180,8 +183,9 @@ public class RestUtil implements GlobalPropertyListener {
 					continue;
 				}
 				
-				int bits = Integer.parseInt(candidateIpPattern[1]);
-				if (candidateAddress.getAddress().length < Math.ceil((double) bits / 8)) {
+				int bits = parseMaskBits(candidateIpPattern[1], candidateIp);
+				int maxBits = candidateAddress.getAddress().length * 8;
+				if (bits < 0 || bits > maxBits) {
 					throw new IllegalArgumentException(
 					        "Invalid mask " + bits + " for IP " + candidateIp + " in the candidateIps parameter");
 				}
@@ -206,6 +210,19 @@ public class RestUtil implements GlobalPropertyListener {
 			
 		}
 		return false;
+	}
+
+	private static int parseMaskBits(String mask, String candidateIp) {
+		if (StringUtils.isBlank(mask)) {
+			throw new IllegalArgumentException("Invalid mask for IP " + candidateIp + " in the candidateIps parameter");
+		}
+		try {
+			return Integer.parseInt(mask);
+		}
+		catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid mask " + mask + " for IP " + candidateIp
+			        + " in the candidateIps parameter", e);
+		}
 	}
 	
 	/**
@@ -515,7 +532,7 @@ public class RestUtil implements GlobalPropertyListener {
 		
 		if (paramString != null) {
 			try {
-				return new Integer(paramString);// return the valid value
+				return Integer.valueOf(paramString);// return the valid value
 			}
 			catch (NumberFormatException e) {
 				log.debug("unable to parse '" + param + "' parameter into a valid integer: " + paramString);

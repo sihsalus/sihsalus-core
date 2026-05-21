@@ -236,7 +236,7 @@ public class ConversionUtil {
 		
 		// Numbers with a decimal are always assumed to be Double, so convert to Float, if necessary
 		if (toClass.isAssignableFrom(Float.class) && object instanceof Double) {
-			return new Float((Double) object);
+			return ((Double) object).floatValue();
 		}
 		
 		if (object instanceof String) {
