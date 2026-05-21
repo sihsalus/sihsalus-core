@@ -166,9 +166,13 @@ public class LogicDataSetDefinition extends BaseDataSetDefinition implements Pag
     	}
     	public Object format(Result input) {
     		try {
-	    		if (input != null && input.toConcept() != null && format != null) {
-	    			Concept c = input.toConcept();
-	    			String nameTag = format.split(":")[1];
+            if (input != null && input.toConcept() != null && format != null) {
+                Concept c = input.toConcept();
+                String[] formatParts = format.split(":", 2);
+                if (formatParts.length != 2) {
+                    return input;
+                }
+                String nameTag = formatParts[1];
     				for (ConceptName cn : c.getNames()) {
     					if (cn.hasTag(nameTag)) {
     						return cn.getName();
@@ -228,7 +232,7 @@ public class LogicDataSetDefinition extends BaseDataSetDefinition implements Pag
     			String key = null;
     			String val;
     			if (s.contains(":")) {
-    				String[] keyAndVal = s.split(":");
+                String[] keyAndVal = s.split(":", 2);
     				key = keyAndVal[0];
     				val = keyAndVal[1];
     			} else {

@@ -123,9 +123,10 @@ public class CacheConfig {
 			// Apply cache type for caches using the 'entity' template
 			// and add the 'infinispan.cacheContainer.caches' parent.
 			// Skip already defined caches.
-			InputStream fullConfig = buildFullConfig(yaml, configFile,
-			    baseConfigBuilder.getNamedConfigurationBuilders().keySet(), cacheType);
-			parser.parse(fullConfig, baseConfigBuilder, ConfigurationResourceResolver.DEFAULT, MediaType.APPLICATION_YAML);
+			try (InputStream fullConfig = buildFullConfig(yaml, configFile,
+			        baseConfigBuilder.getNamedConfigurationBuilders().keySet(), cacheType)) {
+				parser.parse(fullConfig, baseConfigBuilder, ConfigurationResourceResolver.DEFAULT, MediaType.APPLICATION_YAML);
+			}
 		}
 
 		DefaultCacheManager cacheManager = new DefaultCacheManager(baseConfigBuilder, true);
@@ -134,7 +135,10 @@ public class CacheConfig {
 
 	private static InputStream buildFullConfig(Yaml yaml, URL configFile, Set<String> skipCaches, String cacheType)
 	        throws IOException {
-		Map<String, Object> loadedConfig = yaml.load(configFile.openStream());
+		Map<String, Object> loadedConfig;
+		try (InputStream configStream = configFile.openStream()) {
+			loadedConfig = yaml.load(configStream);
+		}
 
 		Map<String, Object> config = new LinkedHashMap<>();
 		Map<String, Object> cacheContainer = new LinkedHashMap<>();
