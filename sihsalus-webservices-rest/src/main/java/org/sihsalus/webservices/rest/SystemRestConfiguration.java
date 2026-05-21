@@ -48,7 +48,8 @@ public class SystemRestConfiguration {
 
     @Bean
     Filter restAuthorizationFilter() {
-        return new PathScopedFilter(new AuthorizationFilter(), 2, "/rest/", "/ws/rest/", "/api/fhir/", "/api/admin/", "/module/");
+        return new PathScopedFilter(
+                new AuthorizationFilter(), 2, "/rest/", "/ws/rest/", "/api/fhir/", "/api/admin/", "/api/system/", "/module/");
     }
 
     @Bean

@@ -105,6 +105,7 @@ jobs:
           assert_status 401 -u admin:not-the-password http://localhost:8080/rest/v1/patient?q=test
           assert_status 401 http://localhost:8080/api/fhir/metadata
           assert_status 401 http://localhost:8080/api/admin/static-modules
+          assert_status 401 http://localhost:8080/api/system/info
           assert_status 401 'http://localhost:8080/module/htmlwidgets/patientSearch.form?q=a'
 
           session="$(docker compose exec -T backend curl -fsS -u admin:Admin123 http://localhost:8080/rest/v1/session)"

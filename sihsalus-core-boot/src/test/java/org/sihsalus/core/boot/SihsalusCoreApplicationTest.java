@@ -312,6 +312,9 @@ class SihsalusCoreApplicationTest {
     @Test
     void reportsStaticModulesWithoutOmodRuntime() throws Exception {
         mockMvc.perform(get("/api/system/info"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("WWW-Authenticate", containsString("Basic")));
+        mockMvc.perform(get("/api/system/info").header("Authorization", ADMIN_BASIC_AUTH))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
     }
