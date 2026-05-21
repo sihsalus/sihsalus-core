@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -46,6 +47,8 @@ import org.openmrs.module.stockmanagement.api.dto.PrivilegeScope;
 import org.openmrs.module.stockmanagement.api.dto.RecordPrivilegeFilter;
 import org.openmrs.module.stockmanagement.api.dto.Result;
 import org.openmrs.module.stockmanagement.api.dto.SessionInfo;
+import org.openmrs.module.stockmanagement.api.dto.StockBatchDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockBatchSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
@@ -67,6 +70,7 @@ import org.openmrs.module.stockmanagement.api.model.StockBatch;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.openmrs.module.stockmanagement.api.model.StockItemPackagingUOM;
 import org.openmrs.module.stockmanagement.api.model.StockItemReference;
+import org.openmrs.module.stockmanagement.api.model.StockItemTransaction;
 import org.openmrs.module.stockmanagement.api.model.StockOperation;
 import org.openmrs.module.stockmanagement.api.model.StockOperationItem;
 import org.openmrs.module.stockmanagement.api.model.StockOperationType;
@@ -77,6 +81,7 @@ import org.openmrs.module.stockmanagement.api.model.UserRoleScope;
 import org.openmrs.module.stockmanagement.api.model.UserRoleScopeLocation;
 import org.openmrs.module.stockmanagement.api.model.UserRoleScopeOperationType;
 import org.openmrs.module.stockmanagement.api.reporting.Report;
+import org.openmrs.module.stockmanagement.api.utils.DateUtil;
 import org.openmrs.module.stockmanagement.api.utils.GlobalProperties;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
@@ -246,6 +251,8 @@ class PartialStockManagementService implements InvocationHandler {
             case "voidStockItemPackagingUOM":
                 voidByUuid(StockItemPackagingUOM.class, (String) args[0], (String) args[1], (Integer) args[2]);
                 return null;
+            case "findStockBatches":
+                return findStockBatches((StockBatchSearchFilter) args[0]);
             case "getExistingStockItemIds":
                 return getExistingStockItemIds((Collection<StockItemSearchFilter.ItemGroupFilter>) args[0]);
             case "getDrugs":
@@ -1274,6 +1281,96 @@ class PartialStockManagementService implements InvocationHandler {
                 dto.setStockItemDispensingUnitId(stockItem.getDispensingUnit().getConceptId());
                 dto.setStockItemDispensingUnitName(conceptName(stockItem.getDispensingUnit()));
             }
+        }
+        return dto;
+    }
+
+    private Result<StockBatchDTO> findStockBatches(StockBatchSearchFilter filter) {
+        StockBatchSearchFilter safeFilter = filter == null ? new StockBatchSearchFilter() : filter;
+        List<StockBatchDTO> batches = query(StockBatch.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockBatch, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            if (safeFilter.getStockBatchIds() != null && !safeFilter.getStockBatchIds().isEmpty()) {
+                predicates.add(root.get("id").in(safeFilter.getStockBatchIds()));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getStockBatchUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), safeFilter.getStockBatchUuid()));
+            }
+            if (safeFilter.getStockItemId() != null) {
+                predicates.add(cb.equal(stockItem.get("id"), safeFilter.getStockItemId()));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getStockItemUuid())) {
+                predicates.add(cb.equal(stockItem.get("uuid"), safeFilter.getStockItemUuid()));
+            }
+            if (Boolean.TRUE.equals(safeFilter.getExcludeExpired())) {
+                predicates.add(cb.or(cb.isNull(root.get("expiration")),
+                    cb.greaterThan(root.<Date>get("expiration"), DateUtil.today())));
+            }
+            if (!safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::stockBatchToDto)
+                .collect(Collectors.toList());
+
+        if (StringUtils.isNotBlank(safeFilter.getLocationUuid()) && !batches.isEmpty()) {
+            batches = filterStockBatchesByLocation(batches, safeFilter);
+        }
+
+        return resultFromList(batches, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private List<StockBatchDTO> filterStockBatchesByLocation(
+            List<StockBatchDTO> batches, StockBatchSearchFilter filter) {
+        Location location = Context.getLocationService().getLocationByUuid(filter.getLocationUuid());
+        if (location == null) {
+            return new ArrayList<>();
+        }
+        Party party = firstByEntity(Party.class, "location", location);
+        if (party == null) {
+            return new ArrayList<>();
+        }
+        Map<Integer, BigDecimal> balances = stockBatchBalancesForParty(
+            batches.stream().map(StockBatchDTO::getId).collect(Collectors.toList()), party);
+        return batches.stream()
+                .filter(batch -> balances.containsKey(batch.getId()))
+                .filter(batch -> !Boolean.TRUE.equals(filter.getExcludeEmptyStock())
+                        || balances.get(batch.getId()).compareTo(BigDecimal.ZERO) > 0)
+                .collect(Collectors.toList());
+    }
+
+    private Map<Integer, BigDecimal> stockBatchBalancesForParty(Collection<Integer> batchIds, Party party) {
+        if (batchIds == null || batchIds.isEmpty()) {
+            return Map.of();
+        }
+        return query(StockItemTransaction.class, (cb, root) -> predicates(
+            cb.equal(root.get("party"), party),
+            root.get("stockBatch").get("id").in(batchIds))).stream()
+                .filter(transaction -> transaction.getStockBatch() != null)
+                .collect(Collectors.groupingBy(
+                    transaction -> transaction.getStockBatch().getId(),
+                    Collectors.reducing(BigDecimal.ZERO, this::stockItemTransactionQuantity, BigDecimal::add)));
+    }
+
+    private BigDecimal stockItemTransactionQuantity(StockItemTransaction transaction) {
+        BigDecimal quantity = transaction.getQuantity() == null ? BigDecimal.ZERO : transaction.getQuantity();
+        StockItemPackagingUOM uom = transaction.getStockItemPackagingUOM();
+        BigDecimal factor = uom == null || uom.getFactor() == null ? BigDecimal.ONE : uom.getFactor();
+        return quantity.multiply(factor);
+    }
+
+    private StockBatchDTO stockBatchToDto(StockBatch stockBatch) {
+        StockBatchDTO dto = new StockBatchDTO();
+        dto.setId(stockBatch.getId());
+        dto.setUuid(stockBatch.getUuid());
+        dto.setBatchNo(stockBatch.getBatchNo());
+        dto.setExpiration(stockBatch.getExpiration());
+        dto.setExpiryNotificationDate(stockBatch.getExpiryNotificationDate());
+        dto.setVoided(Boolean.TRUE.equals(stockBatch.getVoided()));
+        if (stockBatch.getStockItem() != null) {
+            dto.setStockItemUuid(stockBatch.getStockItem().getUuid());
         }
         return dto;
     }
