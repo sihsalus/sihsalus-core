@@ -33,6 +33,7 @@ import org.openmrs.ConceptName;
 import org.openmrs.Drug;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
+import org.openmrs.Patient;
 import org.openmrs.Role;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
@@ -54,6 +55,8 @@ import org.openmrs.module.stockmanagement.api.dto.StockItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockItemTransactionDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockItemTransactionSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationItemCost;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationItemDTO;
@@ -231,6 +234,8 @@ class PartialStockManagementService implements InvocationHandler {
                         ? findStockOperations((StockOperationSearchFilter) args[0],
                             (HashSet<RecordPrivilegeFilter>) args[1])
                         : findStockOperations((StockOperationSearchFilter) args[0], null);
+            case "findStockItemTransactions":
+                return findStockItemTransactions((StockItemTransactionSearchFilter) args[0], null);
             case "getParentStockOperationLinks":
                 return findStockOperationLinks(null, (String) args[0]);
             case "getStockSourceByUuid":
@@ -878,6 +883,146 @@ class PartialStockManagementService implements InvocationHandler {
         cost.setUnitCostUOMUuid(uom.getUuid());
         cost.setUnitCostUOMId(uom.getPackagingUom().getConceptId());
         cost.setUnitCostUOMName(conceptName(uom.getPackagingUom()));
+    }
+
+    private Result<StockItemTransactionDTO> findStockItemTransactions(
+            StockItemTransactionSearchFilter filter, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        StockItemTransactionSearchFilter safeFilter = filter == null ? new StockItemTransactionSearchFilter() : filter;
+        List<StockItemTransactionDTO> transactions = queryStockItemTransactions(safeFilter, recordPrivilegeFilters)
+                .stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)).reversed())
+                .map(this::stockItemTransactionToDto)
+                .collect(Collectors.toList());
+        return resultFromList(transactions, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private List<StockItemTransaction> queryStockItemTransactions(
+            StockItemTransactionSearchFilter filter, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        Set<Integer> allowedPartyIds = allowedPartyIds(recordPrivilegeFilters);
+        if (allowedPartyIds != null && allowedPartyIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        if (allowedPartyIds != null && filter.getPartyId() != null && !allowedPartyIds.contains(filter.getPartyId())) {
+            return new ArrayList<>();
+        }
+        return query(StockItemTransaction.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.isNotBlank(filter.getUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), filter.getUuid()));
+            }
+            if (filter.getPartyId() != null) {
+                predicates.add(cb.equal(root.get("party").get("id"), filter.getPartyId()));
+            } else if (allowedPartyIds != null) {
+                predicates.add(root.get("party").get("id").in(allowedPartyIds));
+            }
+            if (filter.getStockOperationId() != null) {
+                predicates.add(cb.equal(root.get("stockOperation").get("id"), filter.getStockOperationId()));
+            }
+            if (filter.getStockItemId() != null) {
+                predicates.add(cb.equal(root.get("stockItem").get("id"), filter.getStockItemId()));
+            }
+            if (filter.getTransactionDateMin() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.<Date>get("dateCreated"),
+                    filter.getTransactionDateMin()));
+            }
+            if (filter.getTransactionDateMax() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.<Date>get("dateCreated"),
+                    filter.getTransactionDateMax()));
+            }
+            if (filter.getIsPatientTransaction() != null) {
+                predicates.add(Boolean.TRUE.equals(filter.getIsPatientTransaction())
+                        ? cb.isNotNull(root.get("patient"))
+                        : cb.isNull(root.get("patient")));
+            }
+            return predicates;
+        });
+    }
+
+    private Set<Integer> allowedPartyIds(HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        if (recordPrivilegeFilters == null) {
+            return null;
+        }
+        List<Integer> locationIds = recordPrivilegeFilters.stream()
+                .map(RecordPrivilegeFilter::getLocationId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (locationIds.isEmpty()) {
+            return Set.of();
+        }
+        PartySearchFilter partySearchFilter = new PartySearchFilter();
+        partySearchFilter.setIncludeVoided(true);
+        partySearchFilter.setLocationIds(locationIds);
+        return findParty(partySearchFilter).getData().stream()
+                .map(PartyDTO::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    private StockItemTransactionDTO stockItemTransactionToDto(StockItemTransaction transaction) {
+        StockItemTransactionDTO dto = new StockItemTransactionDTO();
+        dto.setDateCreated(transaction.getDateCreated());
+        dto.setUuid(transaction.getUuid());
+        dto.setQuantity(transaction.getQuantity());
+        Party party = transaction.getParty();
+        if (party != null) {
+            dto.setPartyId(party.getId());
+            dto.setPartyUuid(party.getUuid());
+            dto.setPartyName(partyName(party));
+        }
+        Patient patient = transaction.getPatient();
+        if (patient != null) {
+            dto.setPatientId(patient.getPatientId());
+            dto.setPatientUuid(patient.getUuid());
+        }
+        if (transaction.getOrder() != null) {
+            dto.setOrderId(transaction.getOrder().getOrderId());
+        }
+        if (transaction.getEncounter() != null) {
+            dto.setEncounterId(transaction.getEncounter().getEncounterId());
+        }
+        StockItem stockItem = transaction.getStockItem();
+        if (stockItem != null) {
+            dto.setStockItemId(stockItem.getId());
+            dto.setStockItemUuid(stockItem.getUuid());
+        }
+        StockBatch stockBatch = transaction.getStockBatch();
+        if (stockBatch != null) {
+            dto.setStockBatchUuid(stockBatch.getUuid());
+            dto.setStockBatchNo(stockBatch.getBatchNo());
+            dto.setExpiration(stockBatch.getExpiration());
+        }
+        setTransactionUom(dto, transaction.getStockItemPackagingUOM());
+        StockOperation stockOperation = transaction.getStockOperation();
+        if (stockOperation != null) {
+            dto.setStockOperationUuid(stockOperation.getUuid());
+            dto.setStockOperationStatus(stockOperation.getStatus());
+            dto.setStockOperationNumber(stockOperation.getOperationNumber());
+            if (stockOperation.getStockOperationType() != null) {
+                dto.setStockOperationTypeName(stockOperation.getStockOperationType().getName());
+            }
+            if (stockOperation.getSource() != null) {
+                dto.setOperationSourcePartyId(stockOperation.getSource().getId());
+                dto.setOperationSourcePartyName(partyName(stockOperation.getSource()));
+            }
+            if (stockOperation.getDestination() != null) {
+                dto.setOperationDestinationPartyId(stockOperation.getDestination().getId());
+                dto.setOperationDestinationPartyName(partyName(stockOperation.getDestination()));
+            }
+        }
+        return dto;
+    }
+
+    private void setTransactionUom(StockItemTransactionDTO dto, StockItemPackagingUOM uom) {
+        if (uom == null) {
+            return;
+        }
+        dto.setStockItemPackagingUOMUuid(uom.getUuid());
+        dto.setPackagingUomFactor(uom.getFactor());
+        if (uom.getPackagingUom() != null) {
+            dto.setPackagingUoMId(uom.getPackagingUom().getConceptId());
+            dto.setPackagingUomName(conceptName(uom.getPackagingUom()));
+        }
     }
 
     private StockOperationType stockOperationTypeByType(String type) {
