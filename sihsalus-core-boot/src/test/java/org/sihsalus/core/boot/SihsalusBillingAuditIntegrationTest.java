@@ -23,10 +23,12 @@ import org.openmrs.module.billing.api.model.PaymentMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(properties = "sihsalus.ocl.static-import.enabled=false")
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class SihsalusBillingAuditIntegrationTest {
 
     private static final String TEST_ADMIN_USERNAME = "admin";
