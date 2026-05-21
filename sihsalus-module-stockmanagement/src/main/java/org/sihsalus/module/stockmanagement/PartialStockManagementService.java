@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.Root;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -54,6 +55,9 @@ import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationItemCost;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationItemDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationLinkDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleDTO;
@@ -158,6 +162,10 @@ class PartialStockManagementService implements InvocationHandler {
                 return byUuid(StockOperation.class, (String) args[0]);
             case "getStockOperationItemsByStockOperation":
                 return getStockOperationItemsByStockOperation((Integer) args[0]);
+            case "findStockOperationItems":
+                return findStockOperationItems((StockOperationItemSearchFilter) args[0]);
+            case "getStockOperationItemCosts":
+                return getStockOperationItemCosts((StockOperationItemSearchFilter) args[0]);
             case "findStockOperationLinks":
                 return findStockOperationLinks((String) args[0], null);
             case "getStockOperationTypeByUuid":
@@ -675,6 +683,198 @@ class PartialStockManagementService implements InvocationHandler {
         return query(StockOperationItem.class, (cb, root) -> predicates(
             cb.equal(root.get("stockOperation").get("id"), stockOperationId),
             cb.isFalse(root.get("voided"))));
+    }
+
+    private Result<StockOperationItemDTO> findStockOperationItems(StockOperationItemSearchFilter filter) {
+        StockOperationItemSearchFilter safeFilter = filter == null ? new StockOperationItemSearchFilter() : filter;
+        List<StockOperationItemDTO> items = queryStockOperationItems(safeFilter).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(item -> stockOperationItemToDto(item, safeFilter))
+                .collect(Collectors.toList());
+        return resultFromList(items, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private Result<StockOperationItemCost> getStockOperationItemCosts(StockOperationItemSearchFilter filter) {
+        StockOperationItemSearchFilter safeFilter = filter == null ? new StockOperationItemSearchFilter() : filter;
+        List<StockOperationItemCost> costs = queryStockOperationItems(safeFilter).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::stockOperationItemToCost)
+                .collect(Collectors.toList());
+        return resultFromList(costs, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private List<StockOperationItem> queryStockOperationItems(StockOperationItemSearchFilter filter) {
+        return query(StockOperationItem.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockOperationItem, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            Join<StockOperationItem, StockOperation> stockOperation = root.join("stockOperation", JoinType.LEFT);
+            if (StringUtils.isNotBlank(filter.getUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), filter.getUuid()));
+            }
+            if (filter.getStockItemId() != null) {
+                predicates.add(cb.equal(stockItem.get("id"), filter.getStockItemId()));
+            }
+            if (StringUtils.isNotBlank(filter.getStockItemUuid())) {
+                predicates.add(cb.equal(stockItem.get("uuid"), filter.getStockItemUuid()));
+            }
+            if (filter.getStockOperationIds() != null && !filter.getStockOperationIds().isEmpty()) {
+                predicates.add(stockOperation.get("id").in(filter.getStockOperationIds()));
+            }
+            if (filter.getStockOperationUuids() != null && !filter.getStockOperationUuids().isEmpty()) {
+                predicates.add(stockOperation.get("uuid").in(filter.getStockOperationUuids()));
+            }
+            if (!filter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            return predicates;
+        });
+    }
+
+    private StockOperationItemDTO stockOperationItemToDto(
+            StockOperationItem item, StockOperationItemSearchFilter filter) {
+        StockOperationItemDTO dto = new StockOperationItemDTO();
+        dto.setId(item.getId());
+        dto.setUuid(item.getUuid());
+        dto.setQuantity(item.getQuantity());
+        dto.setPurchasePrice(item.getPurchasePrice());
+        dto.setQuantityReceived(item.getQuantityReceived());
+        dto.setQuantityRequested(item.getQuantityRequested());
+        StockItem stockItem = item.getStockItem();
+        if (stockItem != null) {
+            dto.setStockItemId(stockItem.getId());
+            dto.setStockItemUuid(stockItem.getUuid());
+            dto.setCommonName(stockItem.getCommonName());
+            dto.setAcronym(stockItem.getAcronym());
+            dto.setHasExpiration(Boolean.TRUE.equals(stockItem.getHasExpiration()));
+            if (stockItem.getDrug() != null) {
+                dto.setStockItemDrugId(stockItem.getDrug().getDrugId());
+            }
+            if (stockItem.getConcept() != null) {
+                dto.setStockItemConceptId(stockItem.getConcept().getConceptId());
+            }
+            if (filter.getIncludeStockUnitName()) {
+                dto.setStockItemName(stockItemName(stockItem));
+            }
+        }
+        setOperationItemUom(dto, item.getStockItemPackagingUOM(), "quantity", filter.getIncludePackagingUnitName());
+        setOperationItemUom(dto, item.getQuantityReceivedPackagingUOM(), "received",
+            filter.getIncludePackagingUnitName());
+        setOperationItemUom(dto, item.getQuantityRequestedPackagingUOM(), "requested",
+            filter.getIncludePackagingUnitName());
+        StockBatch stockBatch = item.getStockBatch();
+        if (stockBatch != null) {
+            dto.setStockBatchId(stockBatch.getId());
+            dto.setStockBatchUuid(stockBatch.getUuid());
+            dto.setBatchNo(stockBatch.getBatchNo());
+            dto.setExpiration(stockBatch.getExpiration());
+        }
+        StockOperation stockOperation = item.getStockOperation();
+        if (stockOperation != null) {
+            dto.setStockOperationId(stockOperation.getId());
+            dto.setStockOperationUuid(stockOperation.getUuid());
+        }
+        return dto;
+    }
+
+    private void setOperationItemUom(
+            StockOperationItemDTO dto, StockItemPackagingUOM uom, String target, boolean includeName) {
+        if (uom == null) {
+            return;
+        }
+        Concept packaging = uom.getPackagingUom();
+        if ("quantity".equals(target)) {
+            dto.setStockItemPackagingUOMUuid(uom.getUuid());
+            dto.setStockItemPackagingUOMFactor(uom.getFactor());
+            if (packaging != null) {
+                dto.setPackagingUoMId(packaging.getConceptId());
+                if (includeName) {
+                    dto.setStockItemPackagingUOMName(conceptName(packaging));
+                }
+            }
+        } else if ("received".equals(target)) {
+            dto.setQuantityReceivedPackagingUOMUuid(uom.getUuid());
+            dto.setQuantityReceivedPackagingUOMFactor(uom.getFactor());
+            if (packaging != null) {
+                dto.setQuantityReceivedPackagingUOMUoMId(packaging.getConceptId());
+                if (includeName) {
+                    dto.setQuantityReceivedPackagingUOMName(conceptName(packaging));
+                }
+            }
+        } else if ("requested".equals(target)) {
+            dto.setQuantityRequestedPackagingUOMUuid(uom.getUuid());
+            dto.setQuantityRequestedPackagingUOMFactor(uom.getFactor());
+            if (packaging != null) {
+                dto.setQuantityRequestedPackagingUOMUoMId(packaging.getConceptId());
+                if (includeName) {
+                    dto.setQuantityRequestedPackagingUOMName(conceptName(packaging));
+                }
+            }
+        }
+    }
+
+    private StockOperationItemCost stockOperationItemToCost(StockOperationItem item) {
+        StockOperationItemCost cost = new StockOperationItemCost();
+        cost.setId(item.getId());
+        cost.setUuid(item.getUuid());
+        cost.setQuantity(item.getQuantity());
+        StockItem stockItem = item.getStockItem();
+        if (stockItem != null) {
+            cost.setStockItemId(stockItem.getId());
+            cost.setStockItemUuid(stockItem.getUuid());
+        }
+        StockBatch stockBatch = item.getStockBatch();
+        if (stockBatch != null) {
+            cost.setStockBatchId(stockBatch.getId());
+            cost.setStockBatchUuid(stockBatch.getUuid());
+            cost.setBatchNo(stockBatch.getBatchNo());
+        }
+        StockItemPackagingUOM quantityUom = item.getStockItemPackagingUOM();
+        setCostQuantityUom(cost, quantityUom);
+        if (stockItem == null || stockItem.getPurchasePrice() == null || stockItem.getPurchasePriceUoM() == null) {
+            return cost;
+        }
+        StockItemPackagingUOM purchaseUom = stockItem.getPurchasePriceUoM();
+        setPurchaseCost(cost, stockItem.getPurchasePrice(), purchaseUom, quantityUom);
+        return cost;
+    }
+
+    private void setCostQuantityUom(StockOperationItemCost cost, StockItemPackagingUOM uom) {
+        if (uom == null) {
+            return;
+        }
+        cost.setStockItemPackagingUOMUuid(uom.getUuid());
+        if (uom.getPackagingUom() != null) {
+            cost.setPackagingUoMId(uom.getPackagingUom().getConceptId());
+            cost.setStockItemPackagingUOMName(conceptName(uom.getPackagingUom()));
+        }
+    }
+
+    private void setPurchaseCost(StockOperationItemCost cost, BigDecimal purchasePrice,
+            StockItemPackagingUOM purchaseUom, StockItemPackagingUOM quantityUom) {
+        if (quantityUom == null || cost.getQuantity() == null || purchaseUom.getFactor() == null
+                || quantityUom.getFactor() == null) {
+            setUnitCost(cost, purchasePrice, purchaseUom);
+            return;
+        }
+        if (Objects.equals(purchaseUom.getId(), quantityUom.getId())) {
+            setUnitCost(cost, purchasePrice, purchaseUom);
+            cost.setTotalCost(cost.getQuantity().multiply(purchasePrice));
+            return;
+        }
+        BigDecimal baseUnitPrice = purchasePrice.divide(purchaseUom.getFactor(), 5, RoundingMode.HALF_EVEN);
+        BigDecimal convertedUnitPrice = baseUnitPrice.multiply(quantityUom.getFactor()).setScale(2, RoundingMode.HALF_EVEN);
+        setUnitCost(cost, convertedUnitPrice, quantityUom);
+        cost.setTotalCost(convertedUnitPrice.multiply(cost.getQuantity()));
+    }
+
+    private void setUnitCost(StockOperationItemCost cost, BigDecimal unitCost, StockItemPackagingUOM uom) {
+        cost.setUnitCost(unitCost);
+        if (uom == null || uom.getPackagingUom() == null) {
+            return;
+        }
+        cost.setUnitCostUOMUuid(uom.getUuid());
+        cost.setUnitCostUOMId(uom.getPackagingUom().getConceptId());
+        cost.setUnitCostUOMName(conceptName(uom.getPackagingUom()));
     }
 
     private StockOperationType stockOperationTypeByType(String type) {
