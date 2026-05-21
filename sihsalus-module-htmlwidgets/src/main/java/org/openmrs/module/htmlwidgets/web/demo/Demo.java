@@ -62,8 +62,8 @@ public class Demo {
 	private Boolean booleanObj = Boolean.TRUE;
 	private Class<?> classObj = Date.class;
 	private Date dateObj = new Date();
-	private Double doubleObj = new Double(10.22);
-	private Integer integerObj = new Integer(89);
+	private Double doubleObj = Double.valueOf(10.22);
+	private Integer integerObj = Integer.valueOf(89);
 	private Object objectObj;
 	private PatientLocationMethod enumObj = PatientLocationMethod.PATIENT_HEALTH_CENTER;
 	private String stringObj = "Hello world";

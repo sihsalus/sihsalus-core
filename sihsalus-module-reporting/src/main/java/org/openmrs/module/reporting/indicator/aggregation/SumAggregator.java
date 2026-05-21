@@ -42,6 +42,6 @@ public class SumAggregator implements Aggregator {
 		catch (Exception e) {
 			throw new RuntimeException("Unable to calculate sum of numbers, since all values are not numeric.");
 		}
-		return new Double(runningTotal);
+		return Double.valueOf(runningTotal);
 	}
 }
