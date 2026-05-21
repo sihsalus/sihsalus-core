@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Session;
@@ -56,8 +57,10 @@ import org.openmrs.module.stockmanagement.api.dto.Result;
 import org.openmrs.module.stockmanagement.api.dto.SessionInfo;
 import org.openmrs.module.stockmanagement.api.dto.StockBatchDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockBatchSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockInventoryResult;
 import org.openmrs.module.stockmanagement.api.dto.StockItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemInventory;
+import org.openmrs.module.stockmanagement.api.dto.StockItemInventorySearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
@@ -250,6 +253,23 @@ class PartialStockManagementService implements InvocationHandler {
                 return findStockItemTransactions((StockItemTransactionSearchFilter) args[0], null);
             case "getStockBatchLocationInventory":
                 return getStockBatchLocationInventory((List<Integer>) args[0]);
+            case "getStockInventory":
+                if (args.length > 3) {
+                    getStockInventory((StockItemInventorySearchFilter) args[0],
+                        (HashSet<RecordPrivilegeFilter>) args[1], (Function<StockItemInventory, Boolean>) args[2],
+                        (Class<StockItemInventory>) args[3]);
+                    return null;
+                }
+                return args.length > 1
+                        ? getStockInventory((StockItemInventorySearchFilter) args[0],
+                            (HashSet<RecordPrivilegeFilter>) args[1])
+                        : getStockInventory((StockItemInventorySearchFilter) args[0], null);
+            case "postProcessInventoryResult":
+                return postProcessInventoryResult((StockItemInventorySearchFilter) args[0],
+                    (StockInventoryResult) args[1]);
+            case "setStockItemInformation":
+                setStockItemInformation((List<StockItemInventory>) args[0]);
+                return null;
             case "getParentStockOperationLinks":
                 return findStockOperationLinks(null, (String) args[0]);
             case "getStockSourceByUuid":
@@ -1163,6 +1183,330 @@ class PartialStockManagementService implements InvocationHandler {
             inventory.setQuantityUoMUuid(preferredUom.getUuid());
             inventory.setQuantityFactor(preferredUom.getFactor());
         }
+    }
+
+    private StockInventoryResult getStockInventory(StockItemInventorySearchFilter filter,
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        StockItemInventorySearchFilter safeFilter = filter == null ? new StockItemInventorySearchFilter() : filter;
+        List<StockItemInventory> inventories = computeStockInventory(safeFilter, recordPrivilegeFilters);
+        StockInventoryResult result = new StockInventoryResult();
+        result.setTotalRecordCount((long) inventories.size());
+        Integer limit = safeFilter.getLimit() == null || safeFilter.getLimit() <= 0 ? null : safeFilter.getLimit();
+        Result<StockItemInventory> page = resultFromList(inventories, safeFilter.getStartIndex(), limit);
+        result.setData(page.getData());
+        result.setPageIndex(page.getPageIndex());
+        result.setPageSize(page.getPageSize());
+        result.setTotals(inventoryTotals(safeFilter, inventories));
+        return result;
+    }
+
+    private <T extends StockItemInventory> void getStockInventory(StockItemInventorySearchFilter filter,
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters, Function<T, Boolean> consumer, Class<T> resultClass) {
+        if (consumer == null) {
+            return;
+        }
+        for (StockItemInventory inventory : computeStockInventory(
+                filter == null ? new StockItemInventorySearchFilter() : filter, recordPrivilegeFilters)) {
+            if (!Boolean.TRUE.equals(consumer.apply((T) inventory))) {
+                break;
+            }
+        }
+    }
+
+    private StockInventoryResult postProcessInventoryResult(StockItemInventorySearchFilter filter,
+            StockInventoryResult result) {
+        StockInventoryResult safeResult = result == null ? new StockInventoryResult() : result;
+        StockItemInventorySearchFilter safeFilter = filter == null ? new StockItemInventorySearchFilter() : filter;
+        List<StockItemInventory> data = safeResult.getData() == null ? new ArrayList<>() : safeResult.getData();
+        if (safeFilter.getDoSetQuantityUoM()) {
+            applyPreferredInventoryUoms(data);
+        }
+        safeResult.setTotals(inventoryTotals(safeFilter, data));
+        return safeResult;
+    }
+
+    private void setStockItemInformation(List<StockItemInventory> inventories) {
+        if (inventories == null || inventories.isEmpty()) {
+            return;
+        }
+        Map<Integer, StockItem> stockItems = listByIds(StockItem.class, "id", inventories.stream()
+                .map(StockItemInventory::getStockItemId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList())).stream()
+                .collect(Collectors.toMap(StockItem::getId, Function.identity(), (a, b) -> a));
+        Map<Integer, StockBatch> stockBatches = listByIds(StockBatch.class, "id", inventories.stream()
+                .map(StockItemInventory::getStockBatchId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList())).stream()
+                .collect(Collectors.toMap(StockBatch::getId, Function.identity(), (a, b) -> a));
+        Map<Integer, Party> parties = listByIds(Party.class, "id", inventories.stream()
+                .map(StockItemInventory::getPartyId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList())).stream()
+                .collect(Collectors.toMap(Party::getId, Function.identity(), (a, b) -> a));
+        for (StockItemInventory inventory : inventories) {
+            populateInventoryStockItem(inventory, stockItems.get(inventory.getStockItemId()));
+            populateInventoryBatch(inventory, stockBatches.get(inventory.getStockBatchId()));
+            populateInventoryParty(inventory, parties.get(inventory.getPartyId()));
+        }
+    }
+
+    private List<StockItemInventory> computeStockInventory(StockItemInventorySearchFilter filter,
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        List<StockItemInventorySearchFilter.ItemGroupFilter> itemGroupFilters = filter.getItemGroupFilters();
+        if (filter.isRequireItemGroupFilters() && (itemGroupFilters == null || itemGroupFilters.isEmpty())) {
+            return new ArrayList<>();
+        }
+        Set<Integer> allowedPartyIds = allowedPartyIds(recordPrivilegeFilters);
+        if (allowedPartyIds != null && allowedPartyIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Set<Integer> requestedPartyIds = inventoryPartyIds(itemGroupFilters);
+        Set<Integer> unrestrictedPartyIds = filter.getUnRestrictedPartyIds() == null ? new HashSet<>()
+                : new HashSet<>(filter.getUnRestrictedPartyIds());
+        if (allowedPartyIds != null) {
+            requestedPartyIds = requestedPartyIds.isEmpty() ? new HashSet<>(allowedPartyIds)
+                    : requestedPartyIds.stream()
+                            .filter(partyId -> allowedPartyIds.contains(partyId) || unrestrictedPartyIds.contains(partyId))
+                            .collect(Collectors.toSet());
+            if (requestedPartyIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+        }
+        Set<Integer> stockItemIds = inventoryStockItemIds(itemGroupFilters);
+        Set<Integer> stockBatchIds = inventoryStockBatchIds(itemGroupFilters);
+        Date today = DateUtil.today();
+        Set<Integer> queryPartyIds = requestedPartyIds;
+        StockItemInventorySearchFilter queryFilter = filter;
+        Map<String, StockItemInventory> inventoryByKey = new LinkedHashMap<>();
+        for (StockItemTransaction transaction : query(StockItemTransaction.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (!queryPartyIds.isEmpty()) {
+                predicates.add(root.get("party").get("id").in(queryPartyIds));
+            }
+            if (!stockItemIds.isEmpty()) {
+                predicates.add(root.get("stockItem").get("id").in(stockItemIds));
+            }
+            if (!stockBatchIds.isEmpty()) {
+                predicates.add(root.get("stockBatch").get("id").in(stockBatchIds));
+            }
+            if (queryFilter.getDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.<Date>get("dateCreated"), queryFilter.getDate()));
+            }
+            if (queryFilter.getStartDate() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.<Date>get("dateCreated"), queryFilter.getStartDate()));
+            }
+            if (queryFilter.getEndDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.<Date>get("dateCreated"), queryFilter.getEndDate()));
+            }
+            if (queryFilter.getStockItemCategoryConceptId() != null) {
+                predicates.add(cb.equal(root.get("stockItem").get("category").get("conceptId"),
+                    queryFilter.getStockItemCategoryConceptId()));
+            }
+            if (Boolean.TRUE.equals(queryFilter.getRequireNonExpiredStockBatches())) {
+                predicates.add(cb.or(cb.isNull(root.get("stockBatch").get("expiration")),
+                    cb.greaterThan(root.<Date>get("stockBatch").get("expiration"), today)));
+            }
+            return predicates;
+        })) {
+            addInventoryTransaction(filter, inventoryByKey, transaction);
+        }
+        List<StockItemInventory> inventories = new ArrayList<>(inventoryByKey.values());
+        inventories.removeIf(inventory -> inventory.getQuantity() == null
+                || BigDecimal.ZERO.compareTo(inventory.getQuantity()) == 0);
+        inventories.sort(Comparator
+                .comparing(StockItemInventory::getPartyId, Comparator.nullsLast(Integer::compareTo))
+                .thenComparing(StockItemInventory::getStockItemId, Comparator.nullsLast(Integer::compareTo))
+                .thenComparing(StockItemInventory::getStockBatchId, Comparator.nullsLast(Integer::compareTo)));
+        if (filter.getDoSetQuantityUoM()) {
+            applyPreferredInventoryUoms(inventories);
+        }
+        return inventories;
+    }
+
+    private void addInventoryTransaction(StockItemInventorySearchFilter filter,
+            Map<String, StockItemInventory> inventoryByKey, StockItemTransaction transaction) {
+        BigDecimal quantity = transactionQuantityInBaseUnits(transaction);
+        if (quantity == null || transaction.getStockItem() == null) {
+            return;
+        }
+        Party party = filter.getInventoryGroupBy() == StockItemInventorySearchFilter.InventoryGroupBy.StockItemOnly
+                ? null
+                : transaction.getParty();
+        StockBatch batch = filter.getInventoryGroupBy() == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo
+                ? transaction.getStockBatch()
+                : null;
+        String key = inventoryKey(party == null ? null : party.getId(), transaction.getStockItem().getId(),
+            batch == null ? null : batch.getId());
+        StockItemInventory inventory = inventoryByKey.computeIfAbsent(key,
+            ignored -> inventoryRow(party, transaction.getStockItem(), batch));
+        inventory.setQuantity((inventory.getQuantity() == null ? BigDecimal.ZERO : inventory.getQuantity()).add(quantity));
+    }
+
+    private StockItemInventory inventoryRow(Party party, StockItem stockItem, StockBatch batch) {
+        StockItemInventory inventory = new StockItemInventory();
+        inventory.setQuantity(BigDecimal.ZERO);
+        populateInventoryParty(inventory, party);
+        populateInventoryStockItem(inventory, stockItem);
+        populateInventoryBatch(inventory, batch);
+        return inventory;
+    }
+
+    private void populateInventoryParty(StockItemInventory inventory, Party party) {
+        if (party == null) {
+            return;
+        }
+        inventory.setPartyId(party.getId());
+        inventory.setPartyUuid(party.getUuid());
+        inventory.setPartyName(partyName(party));
+        if (party.getLocation() != null) {
+            inventory.setLocationUuid(party.getLocation().getUuid());
+        }
+    }
+
+    private void populateInventoryStockItem(StockItemInventory inventory, StockItem stockItem) {
+        if (stockItem == null) {
+            return;
+        }
+        inventory.setStockItemId(stockItem.getId());
+        inventory.setStockItemUuid(stockItem.getUuid());
+        inventory.setCommonName(stockItem.getCommonName());
+        inventory.setAcronym(stockItem.getAcronym());
+        inventory.setReorderLevel(stockItem.getReorderLevel());
+        if (stockItem.getDrug() != null) {
+            inventory.setDrugId(stockItem.getDrug().getDrugId());
+            inventory.setDrugUuid(stockItem.getDrug().getUuid());
+            inventory.setDrugName(stockItem.getDrug().getName());
+            inventory.setDrugStrength(stockItem.getDrug().getStrength());
+        }
+        if (stockItem.getConcept() != null) {
+            inventory.setConceptId(stockItem.getConcept().getConceptId());
+            inventory.setConceptUuid(stockItem.getConcept().getUuid());
+            inventory.setConceptName(conceptName(stockItem.getConcept()));
+        }
+        if (stockItem.getCategory() != null) {
+            inventory.setStockItemCategoryName(conceptName(stockItem.getCategory()));
+        }
+        StockItemPackagingUOM reorderUom = stockItem.getReorderLevelUOM();
+        if (reorderUom != null) {
+            inventory.setReorderLevelFactor(reorderUom.getFactor());
+            if (reorderUom.getPackagingUom() != null) {
+                inventory.setReorderLevelUoM(conceptName(reorderUom.getPackagingUom()));
+            }
+        }
+    }
+
+    private void populateInventoryBatch(StockItemInventory inventory, StockBatch batch) {
+        if (batch == null) {
+            return;
+        }
+        inventory.setStockBatchId(batch.getId());
+        inventory.setStockBatchUuid(batch.getUuid());
+        inventory.setBatchNumber(batch.getBatchNo());
+        inventory.setExpiration(batch.getExpiration());
+    }
+
+    private Set<Integer> inventoryPartyIds(List<StockItemInventorySearchFilter.ItemGroupFilter> filters) {
+        if (filters == null) {
+            return new HashSet<>();
+        }
+        Set<Integer> partyIds = filters.stream()
+                .filter(Objects::nonNull)
+                .flatMap(filter -> filter.getPartyIds() == null ? java.util.stream.Stream.empty()
+                        : filter.getPartyIds().stream())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        List<String> partyUuids = filters.stream()
+                .filter(Objects::nonNull)
+                .flatMap(filter -> filter.getPartyUuids() == null ? java.util.stream.Stream.empty()
+                        : filter.getPartyUuids().stream())
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+        if (!partyUuids.isEmpty()) {
+            query(Party.class, (cb, root) -> predicates(root.get("uuid").in(partyUuids))).stream()
+                    .map(Party::getId)
+                    .filter(Objects::nonNull)
+                    .forEach(partyIds::add);
+        }
+        return partyIds;
+    }
+
+    private Set<Integer> inventoryStockItemIds(List<StockItemInventorySearchFilter.ItemGroupFilter> filters) {
+        if (filters == null) {
+            return new HashSet<>();
+        }
+        Set<Integer> stockItemIds = filters.stream()
+                .filter(Objects::nonNull)
+                .map(StockItemInventorySearchFilter.ItemGroupFilter::getStockItemId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        List<String> stockItemUuids = filters.stream()
+                .filter(Objects::nonNull)
+                .map(StockItemInventorySearchFilter.ItemGroupFilter::getStockItemUuid)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+        if (!stockItemUuids.isEmpty()) {
+            query(StockItem.class, (cb, root) -> predicates(root.get("uuid").in(stockItemUuids))).stream()
+                    .map(StockItem::getId)
+                    .filter(Objects::nonNull)
+                    .forEach(stockItemIds::add);
+        }
+        return stockItemIds;
+    }
+
+    private Set<Integer> inventoryStockBatchIds(List<StockItemInventorySearchFilter.ItemGroupFilter> filters) {
+        if (filters == null) {
+            return new HashSet<>();
+        }
+        return filters.stream()
+                .filter(Objects::nonNull)
+                .flatMap(filter -> filter.getStockBatchIds() == null ? java.util.stream.Stream.empty()
+                        : filter.getStockBatchIds().stream())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    private List<StockItemInventory> inventoryTotals(StockItemInventorySearchFilter filter,
+            List<StockItemInventory> inventories) {
+        if (filter.getTotalBy() == null || inventories == null || inventories.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Map<String, StockItemInventory> totalsByKey = new LinkedHashMap<>();
+        for (StockItemInventory inventory : inventories) {
+            String key = inventoryKey(
+                filter.getTotalBy() == StockItemInventorySearchFilter.InventoryGroupBy.StockItemOnly ? null
+                        : inventory.getPartyId(),
+                inventory.getStockItemId(),
+                filter.getTotalBy() == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo
+                        ? inventory.getStockBatchId() : null);
+            StockItemInventory total = totalsByKey.computeIfAbsent(key, ignored -> {
+                StockItemInventory row = new StockItemInventory();
+                row.setPartyId(filter.getTotalBy() == StockItemInventorySearchFilter.InventoryGroupBy.StockItemOnly
+                        ? null : inventory.getPartyId());
+                row.setPartyName(filter.getTotalBy() == StockItemInventorySearchFilter.InventoryGroupBy.StockItemOnly
+                        ? null : inventory.getPartyName());
+                row.setStockItemId(inventory.getStockItemId());
+                row.setStockItemUuid(inventory.getStockItemUuid());
+                row.setCommonName(inventory.getCommonName());
+                row.setDrugName(inventory.getDrugName());
+                row.setConceptName(inventory.getConceptName());
+                row.setStockBatchId(filter.getTotalBy() == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo
+                        ? inventory.getStockBatchId() : null);
+                row.setBatchNumber(filter.getTotalBy() == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo
+                        ? inventory.getBatchNumber() : null);
+                row.setQuantity(BigDecimal.ZERO);
+                return row;
+            });
+            total.setQuantity(total.getQuantity().add(inventory.getQuantity() == null ? BigDecimal.ZERO : inventory.getQuantity()));
+        }
+        return new ArrayList<>(totalsByKey.values());
+    }
+
+    private String inventoryKey(Integer partyId, Integer stockItemId, Integer stockBatchId) {
+        return partyId + ":" + stockItemId + ":" + stockBatchId;
     }
 
     private StockItemPackagingUOMDTO preferredPackagingUom(BigDecimal value, List<StockItemPackagingUOMDTO> uoms,
