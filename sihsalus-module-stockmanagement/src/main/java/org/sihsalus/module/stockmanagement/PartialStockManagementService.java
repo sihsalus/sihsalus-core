@@ -172,6 +172,9 @@ class PartialStockManagementService implements InvocationHandler {
             case "deleteLocationTreeNodes":
                 deleteLocationTreeNodes((List<LocationTree>) args[0]);
                 return null;
+            case "deleteLocation":
+                deleteLocation((String) args[0]);
+                return null;
             case "saveLocationTreeNodes":
                 saveAll((List<LocationTree>) args[0]);
                 return null;
@@ -482,6 +485,51 @@ class PartialStockManagementService implements InvocationHandler {
         for (LocationTree node : nodes) {
             remove(node);
         }
+    }
+
+    private void deleteLocation(String uuid) {
+        try {
+            deleteLocationInternal(uuid);
+        } catch (StockManagementException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new StockManagementException("Location is in use", exception);
+        }
+    }
+
+    private void deleteLocationInternal(String uuid) {
+        Location location = Context.getLocationService().getLocationByUuid(uuid);
+        if (location == null) {
+            throw new StockManagementException("Location does not exist");
+        }
+        if (location.getChildLocations() != null && !location.getChildLocations().isEmpty()) {
+            throw new StockManagementException("Location has child locations");
+        }
+        Party party = firstByEntity(Party.class, "location", location);
+        if (party != null) {
+            remove(party);
+        }
+        deleteLocationTreeNodes(location.getLocationId());
+        if (location.getTags() != null && !location.getTags().isEmpty()) {
+            new ArrayList<>(location.getTags()).forEach(location::removeTag);
+            Context.getLocationService().saveLocation(location);
+        }
+        if (location.getAttributes() != null && !location.getAttributes().isEmpty()) {
+            new ArrayList<>(location.getAttributes()).forEach(this::remove);
+            location.setAttributes(new HashSet<>());
+        }
+        remove(location);
+    }
+
+    private void deleteLocationTreeNodes(Integer locationId) {
+        if (locationId == null) {
+            return;
+        }
+        session().createMutationQuery(
+            "delete from stockmanagement.LocationTree where parentLocationId = :locationId"
+                    + " or childLocationId = :locationId")
+                .setParameter("locationId", locationId)
+                .executeUpdate();
     }
 
     private void saveAll(List<? extends Object> entities) {
