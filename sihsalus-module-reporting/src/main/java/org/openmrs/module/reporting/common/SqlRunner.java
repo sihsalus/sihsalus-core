@@ -41,6 +41,12 @@ public class SqlRunner {
 	// Regular expression to identify a change in the delimiter.  This ignores spaces, allows delimiter in comment, allows an equals-sign
     private static final Pattern DELIMITER_PATTERN = Pattern.compile("^\\s*(--)?\\s*delimiter\\s*=?\\s*(\\S+)\\s*.*$", Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern READ_ONLY_SQL_PATTERN = Pattern.compile(
+            "^\\s*(select|with|show|describe|desc|explain)\\b[\\s\\S]*$", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PARAMETER_SET_PATTERN = Pattern.compile("^\\s*set\\s+@[A-Za-z_][A-Za-z0-9_]*\\s*=.*$",
+            Pattern.CASE_INSENSITIVE);
+
     //*********** INSTANCE PROPERTIES ******************
 
     private Connection connection;
@@ -120,6 +126,7 @@ public class SqlRunner {
             for (String sqlStatement : sqlStatements) {
                 Statement statement = null;
                 try {
+                    validateReadOnlyStatement(sqlStatement);
                     statement = connection.createStatement();
                     log.debug("Executing: " + sqlStatement);
                     statement.execute(sqlStatement);
@@ -187,6 +194,7 @@ public class SqlRunner {
             for (String sqlStatement : sqlStatements) {
                 Statement statement = null;
                 try {
+                    validateReadOnlyStatement(sqlStatement);
                     statement = connection.createStatement();
                     // If is the last statement set setFetchSize
                     if (sqlStatement.equals(sqlStatements.get(sqlStatements.size() - 1))) {
@@ -221,6 +229,16 @@ public class SqlRunner {
         }
         catch (Exception e) {
             log.warn("An error occurred while trying to close a statement", e);
+        }
+    }
+
+    private void validateReadOnlyStatement(String sqlStatement) {
+        String statement = sqlStatement == null ? "" : sqlStatement.trim();
+        if (PARAMETER_SET_PATTERN.matcher(statement).matches()) {
+            return;
+        }
+        if (!READ_ONLY_SQL_PATTERN.matcher(statement).matches() || statement.contains(";")) {
+            throw new IllegalArgumentException("Only read-only SQL statements are allowed in reports");
         }
     }
 
