@@ -53,6 +53,7 @@ import org.openmrs.module.stockmanagement.api.dto.StockItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationLinkDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockSourceSearchFilter;
@@ -73,6 +74,7 @@ import org.openmrs.module.stockmanagement.api.model.StockItemReference;
 import org.openmrs.module.stockmanagement.api.model.StockItemTransaction;
 import org.openmrs.module.stockmanagement.api.model.StockOperation;
 import org.openmrs.module.stockmanagement.api.model.StockOperationItem;
+import org.openmrs.module.stockmanagement.api.model.StockOperationLink;
 import org.openmrs.module.stockmanagement.api.model.StockOperationType;
 import org.openmrs.module.stockmanagement.api.model.StockOperationTypeLocationScope;
 import org.openmrs.module.stockmanagement.api.model.StockRule;
@@ -154,6 +156,8 @@ class PartialStockManagementService implements InvocationHandler {
                 return byUuid(StockOperation.class, (String) args[0]);
             case "getStockOperationItemsByStockOperation":
                 return getStockOperationItemsByStockOperation((Integer) args[0]);
+            case "findStockOperationLinks":
+                return findStockOperationLinks((String) args[0], null);
             case "getStockOperationTypeByUuid":
                 return byUuid(StockOperationType.class, (String) args[0]);
             case "getStockOperationTypeByType":
@@ -212,6 +216,8 @@ class PartialStockManagementService implements InvocationHandler {
                 return null;
             case "getStockItemByUuid":
                 return byUuid(StockItem.class, (String) args[0]);
+            case "getParentStockOperationLinks":
+                return findStockOperationLinks(null, (String) args[0]);
             case "getStockSourceByUuid":
                 return byUuid(StockSource.class, (String) args[0]);
             case "findStockSources":
@@ -667,6 +673,58 @@ class PartialStockManagementService implements InvocationHandler {
     private StockOperationType stockOperationTypeByType(String type) {
         return first(query(StockOperationType.class,
             (cb, root) -> predicates(cb.equal(root.get("operationType"), type))));
+    }
+
+    private Result<StockOperationLinkDTO> findStockOperationLinks(
+            String parentOrChildStockOperationUuid, String childStockOperationUuid) {
+        if (StringUtils.isBlank(parentOrChildStockOperationUuid) && StringUtils.isBlank(childStockOperationUuid)) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+        List<StockOperationLinkDTO> links = query(StockOperationLink.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockOperationLink, StockOperation> parent = root.join("parent", JoinType.INNER);
+            Join<StockOperationLink, StockOperation> child = root.join("child", JoinType.INNER);
+            if (StringUtils.isNotBlank(parentOrChildStockOperationUuid)) {
+                predicates.add(cb.or(
+                    cb.equal(parent.get("uuid"), parentOrChildStockOperationUuid),
+                    cb.equal(child.get("uuid"), parentOrChildStockOperationUuid)));
+            }
+            if (StringUtils.isNotBlank(childStockOperationUuid)) {
+                predicates.add(cb.equal(child.get("uuid"), childStockOperationUuid));
+            }
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::stockOperationLinkToDto)
+                .collect(Collectors.toList());
+        return resultFromList(links, 0, 10);
+    }
+
+    private StockOperationLinkDTO stockOperationLinkToDto(StockOperationLink link) {
+        StockOperationLinkDTO dto = new StockOperationLinkDTO();
+        dto.setId(link.getId() == null ? 0 : link.getId());
+        dto.setUuid(link.getUuid());
+        StockOperation parent = link.getParent();
+        if (parent != null) {
+            dto.setParentUuid(parent.getUuid());
+            dto.setParentOperationNumber(parent.getOperationNumber());
+            dto.setParentStatus(parent.getStatus());
+            dto.setParentVoided(Boolean.TRUE.equals(parent.getVoided()));
+            if (parent.getStockOperationType() != null) {
+                dto.setParentOperationTypeName(parent.getStockOperationType().getName());
+            }
+        }
+        StockOperation child = link.getChild();
+        if (child != null) {
+            dto.setChildUuid(child.getUuid());
+            dto.setChildOperationNumber(child.getOperationNumber());
+            dto.setChildStatus(child.getStatus());
+            dto.setChildVoided(Boolean.TRUE.equals(child.getVoided()));
+            if (child.getStockOperationType() != null) {
+                dto.setChildOperationTypeName(child.getStockOperationType().getName());
+            }
+        }
+        return dto;
     }
 
     private Result<StockItem> findStockItemEntities(StockItemSearchFilter filter) {
