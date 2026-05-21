@@ -180,7 +180,7 @@ public class SQLFlagEvaluator implements FlagEvaluator {
 		return message;
 	}
 
-	private String findPatientIdColumn(String criteria) {
+	String findPatientIdColumn(String criteria) {
 		if (criteria == null) {
 			return null;
 		}
@@ -211,7 +211,7 @@ public class SQLFlagEvaluator implements FlagEvaluator {
 		return null;
 	}
 
-	private String stripTrailingStatementTerminator(String criteria) {
+	String stripTrailingStatementTerminator(String criteria) {
 		int end = criteria.length();
 		while (end > 0 && Character.isWhitespace(criteria.charAt(end - 1))) {
 			end--;
@@ -244,7 +244,7 @@ public class SQLFlagEvaluator implements FlagEvaluator {
 		return -1;
 	}
 
-	private boolean hasMessagePlaceholder(String message) {
+	boolean hasMessagePlaceholder(String message) {
 		if (message == null) {
 			return false;
 		}
@@ -262,7 +262,7 @@ public class SQLFlagEvaluator implements FlagEvaluator {
 		return false;
 	}
 
-	private String replaceMessagePlaceholders(String message, List<Object> row) {
+	String replaceMessagePlaceholders(String message, List<Object> row) {
 		StringBuilder replaced = new StringBuilder();
 		int fromIndex = 0;
 		while (fromIndex < message.length()) {
