@@ -34,10 +34,14 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
+import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Order;
+import org.openmrs.OrderFrequency;
 import org.openmrs.Patient;
+import org.openmrs.Person;
+import org.openmrs.Provider;
 import org.openmrs.Role;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
@@ -81,8 +85,15 @@ import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeLocationDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeOperationTypeDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.reporting.DispensingLineFilter;
+import org.openmrs.module.stockmanagement.api.dto.reporting.DispensingLineItem;
+import org.openmrs.module.stockmanagement.api.dto.reporting.Fullfillment;
+import org.openmrs.module.stockmanagement.api.dto.reporting.PrescriptionLineFilter;
+import org.openmrs.module.stockmanagement.api.dto.reporting.PrescriptionLineItem;
 import org.openmrs.module.stockmanagement.api.dto.reporting.StockBatchLineItem;
 import org.openmrs.module.stockmanagement.api.dto.reporting.StockExpiryFilter;
+import org.openmrs.module.stockmanagement.api.dto.reporting.StockOperationLineItem;
+import org.openmrs.module.stockmanagement.api.dto.reporting.StockOperationLineItemFilter;
 import org.openmrs.module.stockmanagement.api.model.BatchJob;
 import org.openmrs.module.stockmanagement.api.model.BatchJobOwner;
 import org.openmrs.module.stockmanagement.api.model.BatchJobStatus;
@@ -428,6 +439,12 @@ class PartialStockManagementService implements InvocationHandler {
                 return getUserEmailAddress((User) args[0]);
             case "getExpiringStockBatchList":
                 return getExpiringStockBatchList((StockExpiryFilter) args[0]);
+            case "findStockOperationLineItems":
+                return findStockOperationLineItems((StockOperationLineItemFilter) args[0]);
+            case "findDispensingLineItems":
+                return findDispensingLineItems((DispensingLineFilter) args[0]);
+            case "findPrescriptionLineItems":
+                return findPrescriptionLineItems((PrescriptionLineFilter) args[0]);
             default:
                 throw unsupported(method);
         }
@@ -2571,6 +2588,720 @@ class PartialStockManagementService implements InvocationHandler {
             noticePeriod = defaultNoticePeriod;
         }
         return noticePeriod != null && !batch.getExpiration().after(addDays(today, noticePeriod));
+    }
+
+    private Result<StockOperationLineItem> findStockOperationLineItems(StockOperationLineItemFilter filter) {
+        StockOperationLineItemFilter safeFilter = filter == null ? new StockOperationLineItemFilter() : filter;
+        Set<Integer> atLocationIds = reportLocationIds(safeFilter.getAtLocationId(), safeFilter.getChildLocations());
+        Set<Integer> sourcePartyIds = reportPartyIds(safeFilter.getSourcePartyId(),
+            safeFilter.getSourcePartyChildLocations());
+        Set<Integer> destinationPartyIds = reportPartyIds(safeFilter.getDestinationPartyId(),
+            safeFilter.getDestinationPartyChildLocations());
+        if ((safeFilter.getSourcePartyId() != null && sourcePartyIds.isEmpty())
+                || (safeFilter.getDestinationPartyId() != null && destinationPartyIds.isEmpty())) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+        Set<Integer> operationTypeIds = safeFilter.getStockOperationTypes() == null ? Set.of()
+                : safeFilter.getStockOperationTypes().stream()
+                        .map(StockOperationType::getId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+        List<StockOperationLineItem> lineItems = query(StockOperationItem.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockOperationItem, StockOperation> operation = root.join("stockOperation", JoinType.INNER);
+            Join<StockOperationItem, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            Join<StockOperation, Location> atLocation = operation.join("atLocation", JoinType.LEFT);
+            Join<StockOperation, Party> source = operation.join("source", JoinType.LEFT);
+            Join<StockOperation, Party> destination = operation.join("destination", JoinType.LEFT);
+            if (safeFilter.getStockOperationIdMin() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(operation.get("id"), safeFilter.getStockOperationIdMin()));
+            }
+            if (safeFilter.getStockOperationItemIdMin() != null) {
+                predicates.add(cb.greaterThan(root.get("id"), safeFilter.getStockOperationItemIdMin()));
+            }
+            addInPredicate(predicates, atLocation.get("locationId"), atLocationIds);
+            addInPredicate(predicates, source.get("id"), sourcePartyIds);
+            addInPredicate(predicates, destination.get("id"), destinationPartyIds);
+            addInPredicate(predicates, operation.get("stockOperationType").get("id"), operationTypeIds);
+            addInPredicate(predicates, operation.get("status"), safeFilter.getStockOperationStatuses());
+            if (safeFilter.getStartDate() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(operation.<Date>get("dateCreated"),
+                    safeFilter.getStartDate()));
+            }
+            if (safeFilter.getEndDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(operation.<Date>get("dateCreated"), safeFilter.getEndDate()));
+            }
+            if (safeFilter.getStockItemCategoryConceptId() != null) {
+                predicates.add(cb.equal(stockItem.get("category").get("conceptId"),
+                    safeFilter.getStockItemCategoryConceptId()));
+            }
+            predicates.add(cb.isFalse(operation.get("voided")));
+            predicates.add(cb.isFalse(root.get("voided")));
+            return predicates;
+        }).stream()
+                .sorted(Comparator
+                        .comparing((StockOperationItem item) -> item.getStockOperation() == null
+                                ? null
+                                : item.getStockOperation().getId(), Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::stockOperationLineItem)
+                .collect(Collectors.toList());
+        return reportResultFromList(lineItems, safeFilter.getStartIndex(), safeFilter.getLimit(),
+            safeFilter.getStockOperationItemIdMin() != null);
+    }
+
+    private StockOperationLineItem stockOperationLineItem(StockOperationItem item) {
+        StockOperationLineItem lineItem = new StockOperationLineItem();
+        lineItem.setStockOperationItemId(item.getId());
+        lineItem.setQuantity(item.getQuantity());
+        lineItem.setPurchasePrice(item.getPurchasePrice());
+        lineItem.setQuantityRequested(item.getQuantityRequested());
+        setStockOperationLineStockItem(lineItem, item.getStockItem());
+        setStockOperationLineBatch(lineItem, item.getStockBatch());
+        setStockOperationLineUom(lineItem, item.getStockItemPackagingUOM());
+        setStockOperationLineRequestedUom(lineItem, item.getQuantityRequestedPackagingUOM());
+        setStockOperationLineOperation(lineItem, item.getStockOperation());
+        return lineItem;
+    }
+
+    private void setStockOperationLineStockItem(StockOperationLineItem lineItem, StockItem stockItem) {
+        if (stockItem == null) {
+            return;
+        }
+        lineItem.setStockItemId(stockItem.getId());
+        lineItem.setCommonName(stockItem.getCommonName());
+        lineItem.setAcronym(stockItem.getAcronym());
+        if (stockItem.getDrug() != null) {
+            lineItem.setStockItemDrugId(stockItem.getDrug().getDrugId());
+            lineItem.setStockItemDrugName(stockItem.getDrug().getName());
+        }
+        if (stockItem.getConcept() != null) {
+            lineItem.setStockItemConceptId(stockItem.getConcept().getConceptId());
+            lineItem.setStockItemConceptName(conceptName(stockItem.getConcept()));
+        }
+        if (stockItem.getCategory() != null) {
+            lineItem.setStockItemCategoryConceptId(stockItem.getCategory().getConceptId());
+            lineItem.setStockItemCategoryName(conceptName(stockItem.getCategory()));
+        }
+    }
+
+    private void setStockOperationLineBatch(StockOperationLineItem lineItem, StockBatch batch) {
+        if (batch == null) {
+            return;
+        }
+        lineItem.setBatchNo(batch.getBatchNo());
+        lineItem.setExpiration(batch.getExpiration());
+    }
+
+    private void setStockOperationLineUom(StockOperationLineItem lineItem, StockItemPackagingUOM uom) {
+        if (uom == null) {
+            return;
+        }
+        lineItem.setStockItemPackagingUOMFactor(uom.getFactor());
+        if (uom.getPackagingUom() != null) {
+            lineItem.setPackagingUoMId(uom.getPackagingUom().getConceptId());
+            lineItem.setStockItemPackagingUOMName(conceptName(uom.getPackagingUom()));
+        }
+    }
+
+    private void setStockOperationLineRequestedUom(StockOperationLineItem lineItem, StockItemPackagingUOM uom) {
+        if (uom == null) {
+            return;
+        }
+        lineItem.setQuantityRequestedPackagingUOMFactor(uom.getFactor());
+        if (uom.getPackagingUom() != null) {
+            lineItem.setQuantityRequestedPackagingUoMId(uom.getPackagingUom().getConceptId());
+            lineItem.setQuantityRequestedPackagingUOMName(conceptName(uom.getPackagingUom()));
+        }
+    }
+
+    private void setStockOperationLineOperation(StockOperationLineItem lineItem, StockOperation operation) {
+        if (operation == null) {
+            return;
+        }
+        lineItem.setStockOperationId(operation.getId());
+        lineItem.setOperationDate(operation.getOperationDate());
+        lineItem.setOperationNumber(operation.getOperationNumber());
+        lineItem.setCompletedDate(operation.getCompletedDate());
+        lineItem.setStockOperationStatus(operation.getStatus());
+        lineItem.setSourceName(operation.getSource() == null ? null : partyName(operation.getSource()));
+        lineItem.setDestinationName(operation.getDestination() == null ? null : partyName(operation.getDestination()));
+        lineItem.setResponsiblePersonOther(operation.getResponsiblePersonOther());
+        lineItem.setRemarks(operation.getRemarks());
+        lineItem.setDateCreated(operation.getDateCreated());
+        if (operation.getStockOperationType() != null) {
+            lineItem.setOperationTypeName(operation.getStockOperationType().getName());
+        }
+        if (operation.getReason() != null) {
+            lineItem.setReasonId(operation.getReason().getConceptId());
+            lineItem.setReasonName(conceptName(operation.getReason()));
+        }
+        setLineUser(operation.getCompletedBy(), lineItem::setCompletedBy,
+            lineItem::setCompletedByGivenName, lineItem::setCompletedByFamilyName);
+        setLineUser(operation.getResponsiblePerson(), lineItem::setResponsiblePerson,
+            lineItem::setResponsiblePersonGivenName, lineItem::setResponsiblePersonFamilyName);
+        setLineUser(operation.getCreator(), lineItem::setCreator,
+            lineItem::setCreatorGivenName, lineItem::setCreatorFamilyName);
+        if (operation.getParentStockOperationLinks() != null) {
+            operation.getParentStockOperationLinks().stream()
+                    .filter(link -> link.getParent() != null && !Boolean.TRUE.equals(link.getVoided()))
+                    .findFirst()
+                    .ifPresent(link -> lineItem.setRequisitionOperationNumber(
+                        link.getParent().getOperationNumber()));
+        }
+    }
+
+    private Result<DispensingLineItem> findDispensingLineItems(DispensingLineFilter filter) {
+        DispensingLineFilter safeFilter = filter == null ? new DispensingLineFilter() : filter;
+        Set<Integer> partyIds = dispensingPartyIds(safeFilter);
+        if (safeFilter.getAtLocationId() != null && partyIds.isEmpty()) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+        List<DispensingLineItem> lineItems = query(StockItemTransaction.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockItemTransaction, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            Join<StockItemTransaction, Patient> patient = root.join("patient", JoinType.LEFT);
+            Join<StockItemTransaction, Party> party = root.join("party", JoinType.LEFT);
+            if (safeFilter.getStockItemTransactionMin() != null) {
+                predicates.add(cb.greaterThan(root.get("id"), safeFilter.getStockItemTransactionMin()));
+            }
+            addInPredicate(predicates, party.get("id"), partyIds);
+            if (safeFilter.getStockItemId() != null) {
+                predicates.add(cb.equal(stockItem.get("id"), safeFilter.getStockItemId()));
+            }
+            if (safeFilter.getPatientId() != null) {
+                predicates.add(cb.equal(patient.get("patientId"), safeFilter.getPatientId()));
+            } else {
+                predicates.add(cb.isNotNull(patient.get("patientId")));
+            }
+            if (safeFilter.getStartDate() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.<Date>get("dateCreated"), safeFilter.getStartDate()));
+            }
+            if (safeFilter.getEndDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.<Date>get("dateCreated"), safeFilter.getEndDate()));
+            }
+            if (safeFilter.getStockItemCategoryConceptId() != null) {
+                predicates.add(cb.equal(stockItem.get("category").get("conceptId"),
+                    safeFilter.getStockItemCategoryConceptId()));
+            }
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::dispensingLineItem)
+                .collect(Collectors.toList());
+        return reportResultFromList(lineItems, safeFilter.getStartIndex(), safeFilter.getLimit(),
+            safeFilter.getStockItemTransactionMin() != null);
+    }
+
+    private DispensingLineItem dispensingLineItem(StockItemTransaction transaction) {
+        DispensingLineItem lineItem = new DispensingLineItem();
+        lineItem.setStockItemTransactionId(transaction.getId());
+        lineItem.setDateCreated(transaction.getDateCreated());
+        lineItem.setQuantity(transaction.getQuantity());
+        setLineUser(transaction.getCreator(), lineItem::setCreator,
+            lineItem::setCreatorGivenName, lineItem::setCreatorFamilyName);
+        Party party = transaction.getParty();
+        if (party != null) {
+            lineItem.setPartyId(party.getId());
+            lineItem.setPartyName(partyName(party));
+        }
+        setDispensingLinePatient(lineItem, transaction.getPatient());
+        setDispensingLineOrder(lineItem, transaction.getOrder());
+        if (transaction.getEncounter() != null) {
+            lineItem.setEncounterId(transaction.getEncounter().getEncounterId());
+        }
+        setDispensingLineStockItem(lineItem, transaction.getStockItem());
+        setDispensingLineUom(lineItem, transaction.getStockItemPackagingUOM());
+        if (transaction.getStockBatch() != null) {
+            lineItem.setBatchNo(transaction.getStockBatch().getBatchNo());
+            lineItem.setExpiration(transaction.getStockBatch().getExpiration());
+        }
+        return lineItem;
+    }
+
+    private void setDispensingLinePatient(DispensingLineItem lineItem, Patient patient) {
+        if (patient == null) {
+            return;
+        }
+        lineItem.setPatientId(patient.getPatientId());
+        lineItem.setPatientGivenName(patient.getGivenName());
+        lineItem.setPatientMiddleName(patient.getMiddleName());
+        lineItem.setPatientFamilyName(patient.getFamilyName());
+        if (patient.getPatientIdentifier() != null) {
+            lineItem.setPatientIdentifier(patient.getPatientIdentifier().getIdentifier());
+        }
+    }
+
+    private void setDispensingLineOrder(DispensingLineItem lineItem, Order order) {
+        if (order == null) {
+            return;
+        }
+        lineItem.setOrderId(order.getOrderId());
+        lineItem.setOrderNumber(order.getOrderNumber());
+        lineItem.setOrderDateCreated(order.getDateCreated());
+        if (order.getEncounter() != null) {
+            lineItem.setEncounterId(order.getEncounter().getEncounterId());
+        }
+        if (order instanceof DrugOrder drugOrder) {
+            setDispensingLineDrugOrder(lineItem, drugOrder);
+        }
+    }
+
+    private void setDispensingLineDrugOrder(DispensingLineItem lineItem, DrugOrder order) {
+        lineItem.setDose(order.getDose());
+        lineItem.setFrequencyPerDay(order.getFrequency() == null ? null : order.getFrequency().getFrequencyPerDay());
+        lineItem.setAsNeeded(order.getAsNeeded());
+        lineItem.setAsNeededCondition(order.getAsNeededCondition());
+        lineItem.setNumRefills(order.getNumRefills());
+        lineItem.setDuration(order.getDuration());
+        lineItem.setDispenseAsWritten(order.getDispenseAsWritten());
+        setConcept(lineItem::setDoseUnitsConceptId, lineItem::setDoseUnitsConceptName, order.getDoseUnits());
+        setConcept(lineItem::setFrequencyConceptId, lineItem::setFrequencyConceptName,
+            order.getFrequency() == null ? null : order.getFrequency().getConcept());
+        setConcept(lineItem::setQuantityUnitsConceptId, lineItem::setQuantityUnitsConceptName,
+            order.getQuantityUnits());
+        setConcept(lineItem::setDurationUnitsConceptId, lineItem::setDurationUnitsConceptName,
+            order.getDurationUnits());
+        if (order.getRoute() != null) {
+            lineItem.setRouteConceptId(order.getRoute().getConceptId());
+        }
+    }
+
+    private void setDispensingLineStockItem(DispensingLineItem lineItem, StockItem stockItem) {
+        if (stockItem == null) {
+            return;
+        }
+        lineItem.setStockItemId(stockItem.getId());
+        lineItem.setCommonName(stockItem.getCommonName());
+        lineItem.setAcronym(stockItem.getAcronym());
+        if (stockItem.getDrug() != null) {
+            lineItem.setStockItemDrugId(stockItem.getDrug().getDrugId());
+            lineItem.setStockItemDrugName(stockItem.getDrug().getName());
+        }
+        if (stockItem.getConcept() != null) {
+            lineItem.setStockItemConceptId(stockItem.getConcept().getConceptId());
+            lineItem.setStockItemConceptName(conceptName(stockItem.getConcept()));
+        }
+        if (stockItem.getCategory() != null) {
+            lineItem.setStockItemCategoryConceptId(stockItem.getCategory().getConceptId());
+            lineItem.setStockItemCategoryName(conceptName(stockItem.getCategory()));
+        }
+    }
+
+    private void setDispensingLineUom(DispensingLineItem lineItem, StockItemPackagingUOM uom) {
+        if (uom == null) {
+            return;
+        }
+        lineItem.setStockItemPackagingUOMFactor(uom.getFactor());
+        if (uom.getPackagingUom() != null) {
+            lineItem.setPackagingUoMId(uom.getPackagingUom().getConceptId());
+            lineItem.setStockItemPackagingUOMName(conceptName(uom.getPackagingUom()));
+        }
+    }
+
+    private Result<PrescriptionLineItem> findPrescriptionLineItems(PrescriptionLineFilter filter) {
+        PrescriptionLineFilter safeFilter = filter == null ? new PrescriptionLineFilter() : filter;
+        Set<Integer> locationIds = reportLocationIds(safeFilter.getAtLocationId(), safeFilter.getChildLocations());
+        List<DrugOrder> orders = query(DrugOrder.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<DrugOrder, Drug> drug = root.join("drug", JoinType.LEFT);
+            Join<DrugOrder, Patient> patient = root.join("patient", JoinType.LEFT);
+            Join<DrugOrder, Encounter> encounter = root.join("encounter", JoinType.LEFT);
+            Join<Encounter, Location> location = encounter.join("location", JoinType.LEFT);
+            if (safeFilter.getPrescriptionTransactionMin() != null) {
+                predicates.add(cb.greaterThan(root.get("orderId"), safeFilter.getPrescriptionTransactionMin()));
+            }
+            addInPredicate(predicates, location.get("locationId"), locationIds);
+            if (safeFilter.getDrugId() != null) {
+                predicates.add(cb.equal(drug.get("drugId"), safeFilter.getDrugId()));
+            }
+            if (safeFilter.getPatientId() != null) {
+                predicates.add(cb.equal(patient.get("patientId"), safeFilter.getPatientId()));
+            }
+            if (safeFilter.getStartDate() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.<Date>get("dateCreated"), safeFilter.getStartDate()));
+            }
+            if (safeFilter.getEndDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.<Date>get("dateCreated"), safeFilter.getEndDate()));
+            }
+            predicates.add(cb.greaterThan(root.<Double>get("quantity"), 0.0d));
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(Order::getOrderId, Comparator.nullsLast(Integer::compareTo)))
+                .collect(Collectors.toList());
+
+        Map<Integer, StockItem> stockItemsByDrugId = stockItemsByDrugId(orders.stream()
+                .map(DrugOrder::getDrug)
+                .filter(Objects::nonNull)
+                .map(Drug::getDrugId)
+                .collect(Collectors.toSet()));
+        Map<Integer, List<StockItemTransaction>> transactionsByOrderId = stockTransactionsByOrderId(orders.stream()
+                .map(Order::getOrderId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet()));
+        List<PrescriptionLineItem> lineItems = new ArrayList<>();
+        boolean includeFulfillmentInfo = safeFilter.getFullfillments() != null
+                && !safeFilter.getFullfillments().isEmpty();
+        for (DrugOrder order : orders) {
+            StockItem stockItem = order.getDrug() == null ? null : stockItemsByDrugId.get(order.getDrug().getDrugId());
+            if (!prescriptionStockItemMatchesFilter(stockItem, safeFilter)) {
+                continue;
+            }
+            List<StockItemTransaction> transactions = transactionsByOrderId.getOrDefault(order.getOrderId(),
+                new ArrayList<>());
+            if (!includeFulfillmentInfo) {
+                lineItems.add(prescriptionLineItem(order, stockItem, null));
+                continue;
+            }
+            BigDecimal orderedQuantity = orderedQuantityInBaseUnits(order, stockItem);
+            BigDecimal dispensedQuantity = transactions.stream()
+                    .map(this::absoluteTransactionQuantityInBaseUnits)
+                    .filter(Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (!matchesFulfillmentFilter(safeFilter.getFullfillments(), orderedQuantity, dispensedQuantity,
+                transactions.isEmpty())) {
+                continue;
+            }
+            if (transactions.isEmpty()) {
+                lineItems.add(prescriptionLineItem(order, stockItem, null));
+            } else {
+                transactions.forEach(transaction -> lineItems.add(prescriptionLineItem(order, stockItem, transaction)));
+            }
+        }
+        return reportResultFromList(lineItems, safeFilter.getStartIndex(), safeFilter.getLimit(),
+            safeFilter.getPrescriptionTransactionMin() != null);
+    }
+
+    private PrescriptionLineItem prescriptionLineItem(DrugOrder order, StockItem stockItem,
+            StockItemTransaction transaction) {
+        PrescriptionLineItem lineItem = new PrescriptionLineItem();
+        lineItem.setId(order.getOrderId());
+        lineItem.setOrderId(order.getOrderId());
+        lineItem.setPreviousOrderId(order.getPreviousOrder() == null ? null : order.getPreviousOrder().getOrderId());
+        lineItem.setDateActivated(order.getDateActivated());
+        lineItem.setDateStopped(order.getDateStopped());
+        lineItem.setAction(order.getAction() == null ? null : order.getAction().name());
+        lineItem.setUrgency(order.getUrgency() == null ? null : order.getUrgency().name());
+        lineItem.setDateCreated(order.getDateCreated());
+        lineItem.setOrderNumber(order.getOrderNumber());
+        lineItem.setQuantity(order.getQuantity());
+        lineItem.setDose(order.getDose());
+        lineItem.setFrequencyPerDay(order.getFrequency() == null ? null : order.getFrequency().getFrequencyPerDay());
+        lineItem.setAsNeeded(order.getAsNeeded());
+        lineItem.setDosingInstructions(order.getDosingInstructions());
+        lineItem.setAsNeededCondition(order.getAsNeededCondition());
+        lineItem.setNumRefills(order.getNumRefills());
+        lineItem.setDuration(order.getDuration());
+        lineItem.setDispenseAsWritten(order.getDispenseAsWritten());
+        setPrescriptionLinePatient(lineItem, order.getPatient());
+        setPrescriptionLineOrderer(lineItem, order.getOrderer());
+        setPrescriptionLineStockItem(lineItem, stockItem);
+        setPrescriptionLineOrderUom(lineItem, order, stockItem);
+        setPrescriptionLineLocation(lineItem, order.getEncounter());
+        setConcept(lineItem::setDoseUnitsConceptId, lineItem::setDoseUnitsConceptName, order.getDoseUnits());
+        setConcept(lineItem::setFrequencyConceptId, lineItem::setFrequencyConceptName,
+            order.getFrequency() == null ? null : order.getFrequency().getConcept());
+        setConcept(lineItem::setQuantityUnitsConceptId, lineItem::setQuantityUnitsConceptName,
+            order.getQuantityUnits());
+        setConcept(lineItem::setDurationUnitsConceptId, lineItem::setDurationUnitsConceptName,
+            order.getDurationUnits());
+        setConcept(lineItem::setRouteConceptId, lineItem::setRouteConceptName, order.getRoute());
+        setPrescriptionFulfillment(lineItem, transaction);
+        return lineItem;
+    }
+
+    private void setPrescriptionLinePatient(PrescriptionLineItem lineItem, Patient patient) {
+        if (patient == null) {
+            return;
+        }
+        lineItem.setPatientId(patient.getPatientId());
+        lineItem.setPatientGivenName(patient.getGivenName());
+        lineItem.setPatientMiddleName(patient.getMiddleName());
+        lineItem.setPatientFamilyName(patient.getFamilyName());
+        if (patient.getPatientIdentifier() != null) {
+            lineItem.setPatientIdentifier(patient.getPatientIdentifier().getIdentifier());
+        }
+    }
+
+    private void setPrescriptionLineOrderer(PrescriptionLineItem lineItem, Provider provider) {
+        if (provider == null || provider.getPerson() == null) {
+            return;
+        }
+        Person person = provider.getPerson();
+        lineItem.setOrdererPersonId(person.getPersonId());
+        lineItem.setOrdererGivenName(person.getGivenName());
+        lineItem.setOrdererMiddleName(person.getMiddleName());
+        lineItem.setOrdererFamilyName(person.getFamilyName());
+    }
+
+    private void setPrescriptionLineStockItem(PrescriptionLineItem lineItem, StockItem stockItem) {
+        if (stockItem == null) {
+            return;
+        }
+        lineItem.setStockItemId(stockItem.getId());
+        lineItem.setCommonName(stockItem.getCommonName());
+        lineItem.setAcronym(stockItem.getAcronym());
+        if (stockItem.getDrug() != null) {
+            lineItem.setStockItemDrugId(stockItem.getDrug().getDrugId());
+            lineItem.setStockItemDrugName(stockItem.getDrug().getName());
+        }
+        if (stockItem.getConcept() != null) {
+            lineItem.setStockItemConceptId(stockItem.getConcept().getConceptId());
+            lineItem.setStockItemConceptName(conceptName(stockItem.getConcept()));
+        }
+        if (stockItem.getCategory() != null) {
+            lineItem.setStockItemCategoryConceptId(stockItem.getCategory().getConceptId());
+            lineItem.setStockItemCategoryName(conceptName(stockItem.getCategory()));
+        }
+    }
+
+    private void setPrescriptionLineOrderUom(PrescriptionLineItem lineItem, DrugOrder order, StockItem stockItem) {
+        Concept quantityUnits = order.getQuantityUnits();
+        if (quantityUnits != null) {
+            lineItem.setPackagingUoMId(quantityUnits.getConceptId());
+            lineItem.setQuantityUnitsConceptId(quantityUnits.getConceptId());
+            lineItem.setQuantityUnitsConceptName(conceptName(quantityUnits));
+        }
+        StockItemPackagingUOM uom = packagingUomForConcept(stockItem, quantityUnits);
+        if (uom == null && stockItem != null) {
+            uom = stockItem.getDispensingUnitPackagingUoM();
+        }
+        if (uom != null) {
+            lineItem.setStockItemPackagingUOMFactor(uom.getFactor());
+            if (uom.getPackagingUom() != null) {
+                lineItem.setPackagingUoMId(uom.getPackagingUom().getConceptId());
+                lineItem.setStockItemPackagingUOMName(conceptName(uom.getPackagingUom()));
+            }
+        } else {
+            lineItem.setStockItemPackagingUOMFactor(BigDecimal.ONE);
+        }
+    }
+
+    private void setPrescriptionLineLocation(PrescriptionLineItem lineItem, Encounter encounter) {
+        if (encounter != null && encounter.getLocation() != null) {
+            lineItem.setCreatedFrom(encounter.getLocation().getName());
+        }
+    }
+
+    private void setPrescriptionFulfillment(PrescriptionLineItem lineItem, StockItemTransaction transaction) {
+        if (transaction == null) {
+            return;
+        }
+        lineItem.setStockItemTransactionId(transaction.getId());
+        lineItem.setQuantityDispensed(transaction.getQuantity());
+        lineItem.setDateDispensed(transaction.getDateCreated());
+        setLineUser(transaction.getCreator(), lineItem::setDispenserUserId,
+            lineItem::setDispenserGivenName, lineItem::setDispenserFamilyName);
+        Party party = transaction.getParty();
+        if (party != null) {
+            lineItem.setDispensingLocation(partyName(party));
+            if (party.getLocation() != null) {
+                lineItem.setFulfilmentLocationUuid(party.getLocation().getUuid());
+                lineItem.setFulfilmentLocation(party.getLocation().getName());
+            }
+        }
+        StockBatch batch = transaction.getStockBatch();
+        if (batch != null) {
+            lineItem.setBatchNo(batch.getBatchNo());
+            lineItem.setBatchExpiryDate(batch.getExpiration());
+        }
+        StockItemPackagingUOM uom = transaction.getStockItemPackagingUOM();
+        if (uom != null) {
+            lineItem.setQuantityDispensedStockItemPackagingUOMFactor(uom.getFactor());
+            if (uom.getPackagingUom() != null) {
+                lineItem.setQuantityDispensedPackagingUoMId(uom.getPackagingUom().getConceptId());
+                lineItem.setQuantityDispensedStockItemPackagingUOMName(conceptName(uom.getPackagingUom()));
+            }
+        }
+    }
+
+    private Set<Integer> reportLocationIds(Integer locationId, Boolean childLocations) {
+        if (locationId == null) {
+            return null;
+        }
+        Set<Integer> locationIds = new HashSet<>();
+        locationIds.add(locationId);
+        if (Boolean.TRUE.equals(childLocations)) {
+            getCompleteLocationTree(locationId).stream()
+                    .map(LocationTree::getChildLocationId)
+                    .filter(Objects::nonNull)
+                    .forEach(locationIds::add);
+        }
+        return locationIds;
+    }
+
+    private Set<Integer> reportPartyIds(Integer partyId, Boolean childLocations) {
+        if (partyId == null) {
+            return null;
+        }
+        if (!Boolean.TRUE.equals(childLocations)) {
+            return Set.of(partyId);
+        }
+        Party party = first(listByIds(Party.class, "id", List.of(partyId)));
+        if (party == null) {
+            return Set.of();
+        }
+        if (party.getLocation() == null || party.getLocation().getLocationId() == null) {
+            return Set.of(partyId);
+        }
+        Set<Integer> locationIds = reportLocationIds(party.getLocation().getLocationId(), true);
+        Set<Integer> partyIds = new HashSet<>(getLocationPartyIds(locationIds).values());
+        return partyIds.isEmpty() ? Set.of(partyId) : partyIds;
+    }
+
+    private Set<Integer> dispensingPartyIds(DispensingLineFilter filter) {
+        if (filter.getAtLocationId() == null) {
+            return null;
+        }
+        Location location = first(listByIds(Location.class, "locationId", List.of(filter.getAtLocationId())));
+        if (location == null) {
+            return Set.of();
+        }
+        Party party = firstByEntity(Party.class, "location", location);
+        if (party == null) {
+            return Set.of();
+        }
+        if (!Boolean.TRUE.equals(filter.getChildLocations())) {
+            return Set.of(party.getId());
+        }
+        Set<Integer> locationIds = reportLocationIds(filter.getAtLocationId(), true);
+        Set<Integer> partyIds = new HashSet<>(getLocationPartyIds(locationIds).values());
+        return partyIds.isEmpty() ? Set.of(party.getId()) : partyIds;
+    }
+
+    private <T> Result<T> reportResultFromList(List<T> data, int pageIndex, int limit, boolean keysetPaging) {
+        Result<T> result = new Result<>();
+        List<T> safeData = data == null ? new ArrayList<>() : data;
+        if (limit > 0) {
+            int safePageIndex = Math.max(0, pageIndex);
+            int fromIndex = keysetPaging ? 0 : safePageIndex * limit;
+            int toIndex = Math.min(safeData.size(), fromIndex + limit);
+            result.setData(fromIndex >= safeData.size() ? new ArrayList<>()
+                    : new ArrayList<>(safeData.subList(fromIndex, toIndex)));
+            result.setPageIndex(safePageIndex);
+            result.setPageSize(limit);
+        } else {
+            result.setData(new ArrayList<>(safeData));
+        }
+        result.setTotalRecordCount((long) safeData.size());
+        return result;
+    }
+
+    private Map<Integer, StockItem> stockItemsByDrugId(Collection<Integer> drugIds) {
+        if (drugIds == null || drugIds.isEmpty()) {
+            return Map.of();
+        }
+        return query(StockItem.class, (cb, root) -> {
+            Join<StockItem, Drug> drug = root.join("drug", JoinType.INNER);
+            return predicates(drug.get("drugId").in(drugIds));
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .filter(stockItem -> stockItem.getDrug() != null && stockItem.getDrug().getDrugId() != null)
+                .collect(Collectors.toMap(stockItem -> stockItem.getDrug().getDrugId(), Function.identity(),
+                    (existing, ignored) -> existing, LinkedHashMap::new));
+    }
+
+    private Map<Integer, List<StockItemTransaction>> stockTransactionsByOrderId(Collection<Integer> orderIds) {
+        if (orderIds == null || orderIds.isEmpty()) {
+            return Map.of();
+        }
+        return query(StockItemTransaction.class, (cb, root) -> predicates(root.get("order").get("orderId").in(orderIds)))
+                .stream()
+                .filter(transaction -> transaction.getOrder() != null && transaction.getOrder().getOrderId() != null)
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .collect(Collectors.groupingBy(transaction -> transaction.getOrder().getOrderId(),
+                    LinkedHashMap::new, Collectors.toList()));
+    }
+
+    private boolean prescriptionStockItemMatchesFilter(StockItem stockItem, PrescriptionLineFilter filter) {
+        if (filter.getStockItemId() != null
+                && (stockItem == null || !Objects.equals(stockItem.getId(), filter.getStockItemId()))) {
+            return false;
+        }
+        return filter.getStockItemCategoryConceptId() == null || (stockItem != null
+                && stockItem.getCategory() != null
+                && Objects.equals(stockItem.getCategory().getConceptId(), filter.getStockItemCategoryConceptId()));
+    }
+
+    private BigDecimal orderedQuantityInBaseUnits(DrugOrder order, StockItem stockItem) {
+        if (order.getQuantity() == null) {
+            return null;
+        }
+        BigDecimal factor = BigDecimal.ONE;
+        StockItemPackagingUOM uom = packagingUomForConcept(stockItem, order.getQuantityUnits());
+        if (uom == null && stockItem != null) {
+            uom = stockItem.getDispensingUnitPackagingUoM();
+        }
+        if (uom != null && uom.getFactor() != null) {
+            factor = uom.getFactor();
+        }
+        return BigDecimal.valueOf(order.getQuantity()).multiply(factor);
+    }
+
+    private BigDecimal absoluteTransactionQuantityInBaseUnits(StockItemTransaction transaction) {
+        BigDecimal quantity = transaction.getQuantity();
+        if (quantity == null) {
+            return null;
+        }
+        BigDecimal factor = BigDecimal.ONE;
+        if (transaction.getStockItemPackagingUOM() != null
+                && transaction.getStockItemPackagingUOM().getFactor() != null) {
+            factor = transaction.getStockItemPackagingUOM().getFactor();
+        }
+        return quantity.abs().multiply(factor);
+    }
+
+    private boolean matchesFulfillmentFilter(List<Fullfillment> fulfillments, BigDecimal orderedQuantity,
+            BigDecimal dispensedQuantity, boolean noTransactions) {
+        Set<Fullfillment> requested = new HashSet<>(fulfillments);
+        if (requested.contains(Fullfillment.All)
+                || (requested.contains(Fullfillment.Full) && requested.contains(Fullfillment.Partial)
+                        && requested.contains(Fullfillment.None))) {
+            return true;
+        }
+        if (noTransactions || dispensedQuantity == null || dispensedQuantity.compareTo(BigDecimal.ZERO) == 0) {
+            return requested.contains(Fullfillment.None);
+        }
+        if (orderedQuantity == null || orderedQuantity.compareTo(BigDecimal.ZERO) == 0) {
+            return requested.contains(Fullfillment.Partial) || requested.contains(Fullfillment.Full);
+        }
+        int comparison = dispensedQuantity.compareTo(orderedQuantity);
+        if (comparison >= 0) {
+            return requested.contains(Fullfillment.Full);
+        }
+        return requested.contains(Fullfillment.Partial);
+    }
+
+    private StockItemPackagingUOM packagingUomForConcept(StockItem stockItem, Concept concept) {
+        if (stockItem == null || concept == null || stockItem.getStockItemPackagingUOMs() == null) {
+            return null;
+        }
+        return stockItem.getStockItemPackagingUOMs().stream()
+                .filter(uom -> !Boolean.TRUE.equals(uom.getVoided()))
+                .filter(uom -> uom.getPackagingUom() != null)
+                .filter(uom -> Objects.equals(uom.getPackagingUom().getConceptId(), concept.getConceptId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private void setLineUser(User user, java.util.function.Consumer<Integer> idSetter,
+            java.util.function.Consumer<String> givenNameSetter,
+            java.util.function.Consumer<String> familyNameSetter) {
+        if (user == null) {
+            return;
+        }
+        idSetter.accept(user.getId());
+        givenNameSetter.accept(user.getGivenName());
+        familyNameSetter.accept(user.getFamilyName());
+    }
+
+    private void setConcept(java.util.function.Consumer<Integer> idSetter,
+            java.util.function.Consumer<String> nameSetter, Concept concept) {
+        if (concept == null) {
+            return;
+        }
+        idSetter.accept(concept.getConceptId());
+        nameSetter.accept(conceptName(concept));
     }
 
     private Result<StockBatchLineItem> getExpiringStockBatchList(StockExpiryFilter filter) {
