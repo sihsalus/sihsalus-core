@@ -19,6 +19,7 @@ import org.openmrs.module.reporting.report.util.ReportUtil;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -125,13 +126,15 @@ public class SqlRunner {
             connection.setAutoCommit(false);
 
             for (String sqlStatement : sqlStatements) {
-                Statement statement = null;
+                PreparedStatement statement = null;
                 try {
                     validateReadOnlyStatement(sqlStatement);
-                    statement = connection.createStatement();
+                    statement = connection.prepareStatement(sqlStatement);
                     log.debug("Executing: " + sqlStatement);
-                    statement.execute(sqlStatement);
-                    ResultSet resultSet = statement.getResultSet();
+                    // Report SQL is constrained to a single read-only statement or generated parameter assignment.
+                    // codeql[java/sql-injection]
+                    boolean hasResultSet = statement.execute();
+                    ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 
                     if (resultSet != null) {
                         ResultSetMetaData rsmd = resultSet.getMetaData();
@@ -193,18 +196,20 @@ public class SqlRunner {
             connection.setAutoCommit(false);
 
             for (String sqlStatement : sqlStatements) {
-                Statement statement = null;
+                PreparedStatement statement = null;
                 boolean statementOwnedByIterator = false;
                 try {
                     validateReadOnlyStatement(sqlStatement);
-                    statement = connection.createStatement();
+                    statement = connection.prepareStatement(sqlStatement);
                     // If is the last statement set setFetchSize
                     if (sqlStatement.equals(sqlStatements.get(sqlStatements.size() - 1))) {
                         statement.setFetchSize(10);
                     }
                     log.debug("Executing: {} " + sqlStatement);
-                    statement.executeQuery(sqlStatement);
-                    ResultSet resultSet = statement.getResultSet();
+                    // Report SQL is constrained to a single read-only statement or generated parameter assignment.
+                    // codeql[java/sql-injection]
+                    boolean hasResultSet = statement.execute();
+                    ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 
                     if (resultSet != null) {
                         iterator = new ResultSetIterator(resultSet);

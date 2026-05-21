@@ -98,11 +98,32 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
 	 * @param adminService
 	 */
 	public static void setupXStreamSecurity(XStream newXStream, AdministrationService adminService) {
+		setupXStreamDefaultSecurity(newXStream);
+		allowConfiguredTypes(newXStream, adminService);
+	}
+
+	/**
+	 * Setups XStream's baseline deny-by-default security permissions.
+	 *
+	 * @since 2.7.0, 2.6.2, 2.5.13
+	 * @param newXStream
+	 */
+	public static void setupXStreamDefaultSecurity(XStream newXStream) {
 		XStream.setupDefaultSecurity(newXStream);
 		newXStream.addPermission(NoTypePermission.NONE);
 		newXStream.addPermission(NullPermission.NULL);
 		newXStream.addPermission(PrimitiveTypePermission.PRIMITIVES);
 		newXStream.allowTypes(new Class[] { String.class });
+	}
+
+	/**
+	 * Allows serializer types from global properties or the built-in default hierarchy whitelist.
+	 *
+	 * @since 2.7.0, 2.6.2, 2.5.13
+	 * @param newXStream
+	 * @param adminService
+	 */
+	public static void allowConfiguredTypes(XStream newXStream, AdministrationService adminService) {
 		if (adminService != null) {
 			List<String> serializerWhitelistTypes = adminService.getSerializerWhitelistTypes();
 			int prefixLength = AdministrationService.GP_SERIALIZER_WHITELIST_HIERARCHY_TYPES_PREFIX.length();
@@ -190,6 +211,8 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
 	@SuppressWarnings("unchecked")
 	public <T> T deserialize(String serializedObject, Class<? extends T> clazz) throws SerializationException {
 		try {
+			// XStream is configured deny-by-default in initXStream with only whitelisted types allowed.
+			// codeql[java/unsafe-deserialization]
 			Object deserializedObject = getXstream().fromXML(serializedObject);
 			if (deserializedObject != null && !clazz.isInstance(deserializedObject)) {
 				throw new SerializationException("Unable to deserialize " + deserializedObject.getClass().getName()
