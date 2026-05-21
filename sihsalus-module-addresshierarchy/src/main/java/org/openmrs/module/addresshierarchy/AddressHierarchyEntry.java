@@ -58,6 +58,10 @@ public class AddressHierarchyEntry extends BaseOpenmrsObject implements Comparab
 		}
 		return false;
 	}
+
+	public int hashCode() {
+		return getId() == null ? super.hashCode() : getId().hashCode();
+	}
 	
 	/**
 	 * Use this method to take i18n into account when requesting the entry name.

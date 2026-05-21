@@ -101,7 +101,7 @@ public class UserLogin implements Serializable {
     /**
      * @return the last activity date associated with this
      */
-    public Date getLastActivityDate() {
+    public synchronized Date getLastActivityDate() {
         return lastActivityDate;
     }
 
@@ -115,7 +115,7 @@ public class UserLogin implements Serializable {
     /**
      * @return the http session id associated with this
      */
-    public String getHttpSessionId() {
+    public synchronized String getHttpSessionId() {
         return httpSessionId;
     }
 
@@ -129,7 +129,7 @@ public class UserLogin implements Serializable {
     /**
      * @return the ip address associated with this
      */
-    public String getIpAddress() {
+    public synchronized String getIpAddress() {
         return ipAddress;
     }
 
@@ -145,7 +145,7 @@ public class UserLogin implements Serializable {
      * with the request, return the username of this user, or their systemId if they do not have a username,
      * otherwise, return the username that was set on this login, generally during initial primary authentication
      */
-    public String getUsername() {
+    public synchronized String getUsername() {
         return user != null ? StringUtils.defaultIfBlank(user.getUsername(), user.getSystemId()) : username;
     }
 
@@ -161,7 +161,7 @@ public class UserLogin implements Serializable {
      * @return the user associated with this login.  typically this will only be set during the authentication
      * process, by calling the markCredentialAsValid method
      */
-    public User getUser() {
+    public synchronized User getUser() {
         return user;
     }
 

@@ -106,6 +106,10 @@ public class ValueComplex {
 				&& PIPE_WITH_LEADING_SPACE_AND_NO_TRAILING_SPACE_REGEX.matcher(fileNameAndKey).find()) {
 			// new model, contains filename and path
 			String[] fileNameAndKeyParts = fileNameAndKey.split(Pattern.quote(PIPE_WITH_LEADING_SPACE));
+			if (fileNameAndKeyParts.length < 2) {
+				fileName = fileNameAndKey;
+				return;
+			}
 			fileName = fileNameAndKeyParts[0];
 			key = fileNameAndKeyParts[1];
 			// strip off the "file" or "image" suffix, if present
