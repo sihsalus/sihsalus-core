@@ -65,6 +65,7 @@ import org.openmrs.module.stockmanagement.api.dto.StockOperationItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationLinkDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockRuleCurrentQuantity;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleNotificationUser;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleSearchFilter;
@@ -79,6 +80,7 @@ import org.openmrs.module.stockmanagement.api.model.BatchJobStatus;
 import org.openmrs.module.stockmanagement.api.model.LocationTree;
 import org.openmrs.module.stockmanagement.api.model.OrderItem;
 import org.openmrs.module.stockmanagement.api.model.Party;
+import org.openmrs.module.stockmanagement.api.model.ReservedTransaction;
 import org.openmrs.module.stockmanagement.api.model.StockBatch;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.openmrs.module.stockmanagement.api.model.StockItemPackagingUOM;
@@ -325,6 +327,12 @@ class PartialStockManagementService implements InvocationHandler {
             case "updateStockRuleJobNextActionDate":
                 updateStockRuleDate((List<Integer>) args[0], (Date) args[1], false);
                 return null;
+            case "setStockItemCurrentBalanceWithDescendants":
+                setStockItemCurrentBalanceWithDescendants((List<StockRuleCurrentQuantity>) args[0]);
+                return null;
+            case "setStockItemCurrentBalanceWithoutDescendants":
+                setStockItemCurrentBalanceWithoutDescendants((List<StockRuleCurrentQuantity>) args[0]);
+                return null;
             case "getDueStockRules":
                 return getDueStockRules((Integer) args[0], (Integer) args[1]);
             case "getActiveUsersAssignedForScope":
@@ -365,6 +373,11 @@ class PartialStockManagementService implements InvocationHandler {
                 return getExpiredBatchJobs();
             case "deleteBatchJob":
                 remove(args[0]);
+                return null;
+            case "checkStockBatchHasTransactionsAfterOperation":
+                return checkStockBatchHasTransactionsAfterOperation((Integer) args[0], (List<Integer>) args[1]);
+            case "deleteReservedTransations":
+                deleteReservedTransations((Integer) args[0]);
                 return null;
             case "getStockItemByReference":
                 return getStockItemByReference((StockSource) args[0], (String) args[1]);
@@ -2302,6 +2315,171 @@ class PartialStockManagementService implements InvocationHandler {
         }
     }
 
+    private void setStockItemCurrentBalanceWithDescendants(List<StockRuleCurrentQuantity> currentQuantities) {
+        if (currentQuantities == null || currentQuantities.isEmpty()) {
+            return;
+        }
+        Set<String> wantedKeys = currentQuantities.stream()
+                .filter(quantity -> quantity.getLocationId() != null && quantity.getStockItemId() != null)
+                .map(quantity -> inventoryKey(quantity.getLocationId(), quantity.getStockItemId()))
+                .collect(Collectors.toSet());
+        if (wantedKeys.isEmpty()) {
+            return;
+        }
+
+        List<LocationTree> locationTrees = listAll(LocationTree.class);
+        Set<Integer> ruleLocationIds = currentQuantities.stream()
+                .map(StockRuleCurrentQuantity::getLocationId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Set<Integer> descendantLocationIds = locationTrees.stream()
+                .filter(tree -> ruleLocationIds.contains(tree.getParentLocationId()))
+                .map(LocationTree::getChildLocationId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        descendantLocationIds.addAll(ruleLocationIds);
+        Map<Integer, Integer> partyIdsByLocation = getLocationPartyIds(descendantLocationIds);
+        if (partyIdsByLocation.isEmpty()) {
+            return;
+        }
+
+        Map<Integer, Set<Integer>> ancestorIdsByLocation = locationTrees.stream()
+                .filter(tree -> tree.getChildLocationId() != null && tree.getParentLocationId() != null)
+                .collect(Collectors.groupingBy(LocationTree::getChildLocationId,
+                    Collectors.mapping(LocationTree::getParentLocationId, Collectors.toSet())));
+        Map<String, BigDecimal> quantitiesByRule = new LinkedHashMap<>();
+        for (StockItemTransaction transaction : currentBalanceTransactions(
+                stockItemIds(currentQuantities), partyIdsByLocation.values())) {
+            Party party = transaction.getParty();
+            StockItem stockItem = transaction.getStockItem();
+            if (party == null || party.getLocation() == null || stockItem == null || stockItem.getId() == null) {
+                continue;
+            }
+            BigDecimal quantity = transactionQuantityInBaseUnits(transaction);
+            if (quantity == null) {
+                continue;
+            }
+            Integer locationId = party.getLocation().getLocationId();
+            Set<Integer> ancestorIds = ancestorIdsByLocation.get(locationId);
+            if (ancestorIds == null || ancestorIds.isEmpty()) {
+                ancestorIds = Set.of(locationId);
+            }
+            for (Integer ancestorId : ancestorIds) {
+                String key = inventoryKey(ancestorId, stockItem.getId());
+                if (wantedKeys.contains(key)) {
+                    quantitiesByRule.merge(key, quantity, BigDecimal::add);
+                }
+            }
+        }
+        setRuleQuantities(currentQuantities, quantitiesByRule, null);
+    }
+
+    private void setStockItemCurrentBalanceWithoutDescendants(List<StockRuleCurrentQuantity> currentQuantities) {
+        if (currentQuantities == null || currentQuantities.isEmpty()) {
+            return;
+        }
+        Map<Integer, Integer> partyIdsByLocation = getLocationPartyIds(currentQuantities.stream()
+                .map(StockRuleCurrentQuantity::getLocationId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList()));
+        if (partyIdsByLocation.isEmpty()) {
+            return;
+        }
+        Set<String> wantedKeys = currentQuantities.stream()
+                .filter(quantity -> quantity.getLocationId() != null && quantity.getStockItemId() != null)
+                .map(quantity -> {
+                    Integer partyId = partyIdsByLocation.get(quantity.getLocationId());
+                    return partyId == null ? null : inventoryKey(partyId, quantity.getStockItemId());
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (wantedKeys.isEmpty()) {
+            return;
+        }
+
+        Map<String, BigDecimal> quantitiesByParty = new LinkedHashMap<>();
+        for (StockItemTransaction transaction : currentBalanceTransactions(
+                stockItemIds(currentQuantities), partyIdsByLocation.values())) {
+            Party party = transaction.getParty();
+            StockItem stockItem = transaction.getStockItem();
+            if (party == null || party.getId() == null || stockItem == null || stockItem.getId() == null) {
+                continue;
+            }
+            String key = inventoryKey(party.getId(), stockItem.getId());
+            if (!wantedKeys.contains(key)) {
+                continue;
+            }
+            BigDecimal quantity = transactionQuantityInBaseUnits(transaction);
+            if (quantity != null) {
+                quantitiesByParty.merge(key, quantity, BigDecimal::add);
+            }
+        }
+        setRuleQuantities(currentQuantities, quantitiesByParty, partyIdsByLocation);
+    }
+
+    private Set<Integer> stockItemIds(List<StockRuleCurrentQuantity> currentQuantities) {
+        return currentQuantities.stream()
+                .map(StockRuleCurrentQuantity::getStockItemId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    private List<StockItemTransaction> currentBalanceTransactions(Set<Integer> stockItemIds,
+            Collection<Integer> partyIds) {
+        if (stockItemIds == null || stockItemIds.isEmpty() || partyIds == null || partyIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Date today = DateUtil.today();
+        return query(StockItemTransaction.class, (cb, root) -> {
+            Join<StockItemTransaction, StockBatch> batch = root.join("stockBatch", JoinType.INNER);
+            return predicates(
+                root.get("party").get("id").in(partyIds),
+                root.get("stockItem").get("id").in(stockItemIds),
+                cb.or(cb.isNull(batch.get("expiration")), cb.greaterThan(batch.<Date>get("expiration"), today)));
+        });
+    }
+
+    private BigDecimal transactionQuantityInBaseUnits(StockItemTransaction transaction) {
+        if (transaction.getQuantity() == null || transaction.getStockItemPackagingUOM() == null
+                || transaction.getStockItemPackagingUOM().getFactor() == null) {
+            return null;
+        }
+        return transaction.getQuantity().multiply(transaction.getStockItemPackagingUOM().getFactor());
+    }
+
+    private void setRuleQuantities(List<StockRuleCurrentQuantity> currentQuantities,
+            Map<String, BigDecimal> quantitiesByKey, Map<Integer, Integer> partyIdsByLocation) {
+        for (StockRuleCurrentQuantity currentQuantity : currentQuantities) {
+            if (currentQuantity.getLocationId() == null || currentQuantity.getStockItemId() == null) {
+                continue;
+            }
+            Integer ownerId = partyIdsByLocation == null
+                    ? currentQuantity.getLocationId()
+                    : partyIdsByLocation.get(currentQuantity.getLocationId());
+            BigDecimal quantity = quantitiesByKey.get(inventoryKey(ownerId, currentQuantity.getStockItemId()));
+            if (quantity != null) {
+                currentQuantity.setQuantity(quantity);
+            }
+        }
+    }
+
+    private String inventoryKey(Integer ownerId, Integer stockItemId) {
+        return ownerId + ":" + stockItemId;
+    }
+
+    private Map<Integer, Integer> getLocationPartyIds(Collection<Integer> locationIds) {
+        if (locationIds == null || locationIds.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
+        return query(Party.class, (cb, root) -> predicates(root.get("location").get("locationId").in(locationIds)))
+                .stream()
+                .filter(party -> party.getLocation() != null && party.getLocation().getLocationId() != null)
+                .filter(party -> party.getId() != null)
+                .collect(Collectors.toMap(party -> party.getLocation().getLocationId(), Party::getId, (a, b) -> b,
+                    LinkedHashMap::new));
+    }
+
     private List<StockRuleNotificationUser> getDueStockRules(Integer lastStockRuleId, int limit) {
         if (limit <= 0) {
             return new ArrayList<>();
@@ -2653,6 +2831,42 @@ class PartialStockManagementService implements InvocationHandler {
             cb.lessThan(root.get("expiration"), now),
             root.get("status").in(List.of(BatchJobStatus.Pending, BatchJobStatus.Running)),
             cb.isFalse(root.get("voided"))));
+    }
+
+    private Map<Integer, Boolean> checkStockBatchHasTransactionsAfterOperation(Integer stockOperationId,
+            List<Integer> stockBatchIds) {
+        if (stockOperationId == null || stockBatchIds == null || stockBatchIds.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
+        Integer lastOperationTransactionId = query(StockItemTransaction.class, (cb, root) -> predicates(
+            cb.equal(root.get("stockOperation").get("id"), stockOperationId))).stream()
+                .map(StockItemTransaction::getId)
+                .filter(Objects::nonNull)
+                .max(Integer::compareTo)
+                .orElse(null);
+        if (lastOperationTransactionId == null) {
+            return new LinkedHashMap<>();
+        }
+        return query(StockItemTransaction.class, (cb, root) -> {
+            Join<StockItemTransaction, StockBatch> batch = root.join("stockBatch", JoinType.INNER);
+            return predicates(
+                cb.greaterThan(root.get("id"), lastOperationTransactionId),
+                batch.get("id").in(stockBatchIds));
+        }).stream()
+                .map(transaction -> transaction.getStockBatch() == null ? null : transaction.getStockBatch().getId())
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toMap(id -> id, id -> Boolean.TRUE, (a, b) -> a, LinkedHashMap::new));
+    }
+
+    private void deleteReservedTransations(Integer stockOperationId) {
+        if (stockOperationId == null) {
+            return;
+        }
+        for (ReservedTransaction reservedTransaction : query(ReservedTransaction.class, (cb, root) -> predicates(
+            cb.equal(root.get("stockOperation").get("id"), stockOperationId)))) {
+            remove(reservedTransaction);
+        }
     }
 
     private StockItem getStockItemByReference(StockSource stockSource, String code) {
