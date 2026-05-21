@@ -53,7 +53,9 @@ import org.openmrs.module.stockmanagement.api.dto.StockItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemPackagingUOMSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationLinkDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockRuleSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockSourceSearchFilter;
@@ -216,6 +218,11 @@ class PartialStockManagementService implements InvocationHandler {
                 return null;
             case "getStockItemByUuid":
                 return byUuid(StockItem.class, (String) args[0]);
+            case "findStockOperations":
+                return args.length > 1
+                        ? findStockOperations((StockOperationSearchFilter) args[0],
+                            (HashSet<RecordPrivilegeFilter>) args[1])
+                        : findStockOperations((StockOperationSearchFilter) args[0], null);
             case "getParentStockOperationLinks":
                 return findStockOperationLinks(null, (String) args[0]);
             case "getStockSourceByUuid":
@@ -725,6 +732,216 @@ class PartialStockManagementService implements InvocationHandler {
             }
         }
         return dto;
+    }
+
+    private Result<StockOperationDTO> findStockOperations(
+            StockOperationSearchFilter filter, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        if (recordPrivilegeFilters != null && recordPrivilegeFilters.isEmpty()) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+        StockOperationSearchFilter safeFilter = filter == null ? new StockOperationSearchFilter() : filter;
+        List<StockOperationDTO> operations = query(StockOperation.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockOperation, StockOperationType> operationType = root.join("stockOperationType", JoinType.INNER);
+            Join<StockOperation, Party> source = root.join("source", JoinType.LEFT);
+            Join<StockOperation, Party> destination = root.join("destination", JoinType.LEFT);
+            Join<Party, Location> sourceLocation = source.join("location", JoinType.LEFT);
+            Join<Party, Location> destinationLocation = destination.join("location", JoinType.LEFT);
+            Join<Party, StockSource> sourceStockSource = source.join("stockSource", JoinType.LEFT);
+            Join<Party, StockSource> destinationStockSource = destination.join("stockSource", JoinType.LEFT);
+            Join<StockSource, Concept> sourceType = sourceStockSource.join("sourceType", JoinType.LEFT);
+            Join<StockSource, Concept> destinationType = destinationStockSource.join("sourceType", JoinType.LEFT);
+
+            if (StringUtils.isNotBlank(safeFilter.getStockOperationUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), safeFilter.getStockOperationUuid()));
+            }
+            if (safeFilter.getLocationId() != null) {
+                predicates.add(cb.or(
+                    cb.equal(sourceLocation.get("locationId"), safeFilter.getLocationId()),
+                    cb.equal(destinationLocation.get("locationId"), safeFilter.getLocationId())));
+            }
+            if (safeFilter.getPartyId() != null) {
+                predicates.add(cb.or(
+                    cb.equal(source.get("id"), safeFilter.getPartyId()),
+                    cb.equal(destination.get("id"), safeFilter.getPartyId())));
+            }
+            if (safeFilter.getStockSourceId() != null) {
+                predicates.add(cb.or(
+                    cb.equal(sourceStockSource.get("id"), safeFilter.getStockSourceId()),
+                    cb.equal(destinationStockSource.get("id"), safeFilter.getStockSourceId())));
+            }
+            if (safeFilter.getOperationTypeId() != null && !safeFilter.getOperationTypeId().isEmpty()) {
+                predicates.add(operationType.get("id").in(safeFilter.getOperationTypeId()));
+            }
+            if (safeFilter.getStatus() != null && !safeFilter.getStatus().isEmpty()) {
+                predicates.add(root.get("status").in(safeFilter.getStatus()));
+            }
+            if (safeFilter.getOperationDateMin() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.<Date>get("operationDate"),
+                    safeFilter.getOperationDateMin()));
+            }
+            if (safeFilter.getOperationDateMax() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.<Date>get("operationDate"),
+                    safeFilter.getOperationDateMax()));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getOperationNumber())) {
+                String operationNumber = safeFilter.getOperationNumber().replace("%", "");
+                if (operationNumber.isEmpty()) {
+                    return predicates(cb.disjunction());
+                }
+                predicates.add(cb.like(cb.upper(root.get("operationNumber").as(String.class)),
+                    operationNumber.toUpperCase(Locale.ROOT) + "%"));
+            }
+            if (Boolean.TRUE.equals(safeFilter.getIsLocationOther())) {
+                predicates.add(cb.or(
+                    cb.isNotNull(sourceStockSource.get("id")),
+                    cb.isNotNull(destinationStockSource.get("id"))));
+            }
+            if (safeFilter.getSourceTypeIds() != null && !safeFilter.getSourceTypeIds().isEmpty()) {
+                predicates.add(cb.or(
+                    sourceType.get("conceptId").in(safeFilter.getSourceTypeIds()),
+                    destinationType.get("conceptId").in(safeFilter.getSourceTypeIds())));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getSearchText())) {
+                String query = safeFilter.getSearchText().replace("%", "").toLowerCase(Locale.ROOT);
+                if (query.isEmpty()) {
+                    return predicates(cb.disjunction());
+                }
+                String term = query + "%";
+                predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("operationNumber").as(String.class)), term),
+                    cb.like(cb.lower(sourceLocation.get("name").as(String.class)), term),
+                    cb.like(cb.lower(destinationLocation.get("name").as(String.class)), term),
+                    cb.like(cb.lower(sourceStockSource.get("name").as(String.class)), term),
+                    cb.like(cb.lower(destinationStockSource.get("name").as(String.class)), term)));
+            }
+            if (!safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            if (safeFilter.getStockItemId() != null) {
+                Join<StockOperation, StockOperationItem> item = root.join("stockOperationItems", JoinType.INNER);
+                predicates.add(cb.equal(item.get("stockItem").get("id"), safeFilter.getStockItemId()));
+                predicates.add(cb.isFalse(item.get("voided")));
+            }
+            addRecordPrivilegePredicates(cb, predicates, operationType, sourceLocation, destinationLocation,
+                recordPrivilegeFilters);
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)).reversed())
+                .map(this::stockOperationToDto)
+                .collect(Collectors.toList());
+        return resultFromList(operations, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private void addRecordPrivilegePredicates(CriteriaBuilder cb, List<Predicate> predicates,
+            Join<StockOperation, StockOperationType> operationType, Join<Party, Location> sourceLocation,
+            Join<Party, Location> destinationLocation, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        if (recordPrivilegeFilters == null) {
+            return;
+        }
+        List<Predicate> allowedScopes = recordPrivilegeFilters.stream()
+                .filter(scope -> scope.getLocationId() != null && scope.getOperationTypeId() != null)
+                .map(scope -> cb.and(
+                    cb.equal(operationType.get("id"), scope.getOperationTypeId()),
+                    cb.or(
+                        cb.equal(sourceLocation.get("locationId"), scope.getLocationId()),
+                        cb.equal(destinationLocation.get("locationId"), scope.getLocationId()))))
+                .collect(Collectors.toList());
+        predicates.add(allowedScopes.isEmpty() ? cb.disjunction()
+                : cb.or(allowedScopes.toArray(new Predicate[0])));
+    }
+
+    private StockOperationDTO stockOperationToDto(StockOperation operation) {
+        StockOperationDTO dto = new StockOperationDTO();
+        dto.setId(operation.getId());
+        dto.setUuid(operation.getUuid());
+        dto.setCancelReason(operation.getCancelReason());
+        setUser(dto::setCancelledBy, dto::setCancelledByGivenName, dto::setCancelledByFamilyName,
+            operation.getCancelledBy());
+        dto.setCancelledDate(operation.getCancelledDate());
+        setUser(dto::setCompletedBy, dto::setCompletedByGivenName, dto::setCompletedByFamilyName,
+            operation.getCompletedBy());
+        dto.setCompletedDate(operation.getCompletedDate());
+        setUser(dto::setSubmittedBy, dto::setSubmittedByGivenName, dto::setSubmittedByFamilyName,
+            operation.getSubmittedBy());
+        dto.setSubmittedDate(operation.getSubmittedDate());
+        setUser(dto::setDispatchedBy, dto::setDispatchedByGivenName, dto::setDispatchedByFamilyName,
+            operation.getDispatchedBy());
+        dto.setDispatchedDate(operation.getDispatchedDate());
+        setUser(dto::setReturnedBy, dto::setReturnedByGivenName, dto::setReturnedByFamilyName,
+            operation.getReturnedBy());
+        dto.setReturnedDate(operation.getReturnedDate());
+        setUser(dto::setRejectedBy, dto::setRejectedByGivenName, dto::setRejectedByFamilyName,
+            operation.getRejectedBy());
+        dto.setRejectedDate(operation.getRejectedDate());
+        setParty(dto, operation.getDestination(), true);
+        setParty(dto, operation.getSource(), false);
+        dto.setExternalReference(operation.getExternalReference());
+        if (operation.getAtLocation() != null) {
+            dto.setAtLocationUuid(operation.getAtLocation().getUuid());
+            dto.setAtLocationName(operation.getAtLocation().getName());
+        }
+        dto.setOperationDate(operation.getOperationDate());
+        dto.setLocked(operation.getLocked());
+        dto.setOperationNumber(operation.getOperationNumber());
+        dto.setOperationOrder(operation.getOperationOrder());
+        dto.setRemarks(operation.getRemarks());
+        dto.setStatus(operation.getStatus());
+        dto.setReturnReason(operation.getReturnReason());
+        dto.setRejectionReason(operation.getRejectionReason());
+        if (operation.getStockOperationType() != null) {
+            dto.setOperationTypeUuid(operation.getStockOperationType().getUuid());
+            dto.setOperationType(operation.getStockOperationType().getOperationType());
+            dto.setOperationTypeName(operation.getStockOperationType().getName());
+        }
+        if (operation.getResponsiblePerson() != null) {
+            dto.setResponsiblePerson(operation.getResponsiblePerson().getId());
+            dto.setResponsiblePersonUuid(operation.getResponsiblePerson().getUuid());
+            dto.setResponsiblePersonGivenName(operation.getResponsiblePerson().getGivenName());
+            dto.setResponsiblePersonFamilyName(operation.getResponsiblePerson().getFamilyName());
+        }
+        dto.setResponsiblePersonOther(operation.getResponsiblePersonOther());
+        setUser(dto::setCreator, dto::setCreatorGivenName, dto::setCreatorFamilyName, operation.getCreator());
+        dto.setDateCreated(operation.getDateCreated());
+        if (operation.getReason() != null) {
+            dto.setReasonId(operation.getReason().getConceptId());
+            dto.setReasonUuid(operation.getReason().getUuid());
+            dto.setReasonName(conceptName(operation.getReason()));
+        }
+        dto.setApprovalRequired(operation.getApprovalRequired());
+        dto.setVoided(Boolean.TRUE.equals(operation.getVoided()));
+        return dto;
+    }
+
+    private void setParty(StockOperationDTO dto, Party party, boolean destination) {
+        if (party == null) {
+            return;
+        }
+        if (destination) {
+            dto.setDestinationUuid(party.getUuid());
+            dto.setDestinationName(partyName(party));
+        } else {
+            dto.setSourceUuid(party.getUuid());
+            dto.setSourceName(partyName(party));
+        }
+    }
+
+    private String partyName(Party party) {
+        if (party.getLocation() != null) {
+            return party.getLocation().getName();
+        }
+        return party.getStockSource() == null ? null : party.getStockSource().getName();
+    }
+
+    private void setUser(java.util.function.Consumer<Integer> idSetter,
+            java.util.function.Consumer<String> givenNameSetter, java.util.function.Consumer<String> familyNameSetter,
+            User user) {
+        if (user == null) {
+            return;
+        }
+        idSetter.accept(user.getId());
+        givenNameSetter.accept(user.getGivenName());
+        familyNameSetter.accept(user.getFamilyName());
     }
 
     private Result<StockItem> findStockItemEntities(StockItemSearchFilter filter) {
