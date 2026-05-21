@@ -123,6 +123,7 @@ public final class StaticSihsalusContentLoader {
             "programworkflows",
             "programworkflowstates",
             "queues",
+            "datafiltermappings",
             "conceptreferencerange",
             "ampathforms",
             "ampathformstranslations"));
@@ -249,6 +250,9 @@ public final class StaticSihsalusContentLoader {
         break;
       case "queues":
         loadQueues(configRoot, wildcardExclusions);
+        break;
+      case "datafiltermappings":
+        loadDataFilterMappings(configRoot, wildcardExclusions);
         break;
       case "conceptreferencerange":
         loadConceptReferenceRanges(configRoot, wildcardExclusions);
@@ -1172,6 +1176,138 @@ public final class StaticSihsalusContentLoader {
         upsertConceptReferenceRange(record);
       }
     }
+  }
+
+  private void loadDataFilterMappings(Path configRoot, List<String> wildcardExclusions)
+      throws IOException, CsvException {
+    if (!tableExists("datafilter_entity_basis_map")) {
+      return;
+    }
+
+    for (CsvRecord record : readDomain(configRoot, "datafiltermappings", wildcardExclusions)) {
+      DataFilterObject entity =
+          resolveDataFilterObject(
+              requiredValue(record, "Entity UUID"), requiredValue(record, "Entity class"), record);
+      DataFilterObject basis =
+          resolveDataFilterObject(
+              requiredValue(record, "Basis UUID"), requiredValue(record, "Basis class"), record);
+
+      if (toBoolean(record.value("Void/Retire"))) {
+        revokeDataFilterAccess(entity, basis);
+      } else {
+        grantDataFilterAccess(entity, basis);
+      }
+    }
+  }
+
+  private DataFilterObject resolveDataFilterObject(String uuid, String className, CsvRecord record) {
+    DataFilterObjectType type = dataFilterObjectType(className);
+    if (type == null) {
+      throw new IllegalStateException(
+          "Unsupported datafilter mapping class '" + className + "' in " + record.source + ".");
+    }
+    if (!tableExists(type.table())) {
+      throw new IllegalStateException(
+          "Datafilter mapping table '" + type.table() + "' is not available for " + record.source + ".");
+    }
+
+    String identifier;
+    if (type.identifierColumn() != null) {
+      identifier =
+          queryString(
+              "select "
+                  + type.identifierColumn()
+                  + " from "
+                  + type.table()
+                  + " where uuid = ?",
+              uuid);
+    } else {
+      Integer id =
+          queryInteger(
+              "select " + type.idColumn() + " from " + type.table() + " where uuid = ?", uuid);
+      identifier = id == null ? null : id.toString();
+    }
+    if (isBlank(identifier)) {
+      throw new IllegalStateException(
+          "Datafilter mapping object "
+              + className
+              + "/"
+              + uuid
+              + " was not loaded before "
+              + record.source
+              + ".");
+    }
+    return new DataFilterObject(identifier, type.className());
+  }
+
+  private DataFilterObjectType dataFilterObjectType(String className) {
+    if (isBlank(className)) {
+      return null;
+    }
+    return switch (className.trim()) {
+      case "org.openmrs.Role" ->
+          new DataFilterObjectType("org.openmrs.Role", "role", null, "role");
+      case "org.openmrs.Privilege" ->
+          new DataFilterObjectType("org.openmrs.Privilege", "privilege", null, "privilege");
+      case "org.openmrs.Location" ->
+          new DataFilterObjectType("org.openmrs.Location", "location", "location_id", null);
+      case "org.openmrs.Program" ->
+          new DataFilterObjectType("org.openmrs.Program", "program", "program_id", null);
+      case "org.openmrs.User" ->
+          new DataFilterObjectType("org.openmrs.User", "users", "user_id", null);
+      default -> null;
+    };
+  }
+
+  private void grantDataFilterAccess(DataFilterObject entity, DataFilterObject basis) {
+    if (hasDataFilterAccess(entity, basis)) {
+      return;
+    }
+
+    jdbcTemplate.update(
+        "insert into datafilter_entity_basis_map "
+            + "(entity_identifier, entity_type, basis_identifier, basis_type, creator, date_created, uuid) "
+            + "values (?, ?, ?, ?, ?, ?, ?)",
+        entity.identifier(),
+        entity.className(),
+        basis.identifier(),
+        basis.className(),
+        SYSTEM_USER_ID,
+        now(),
+        stableUuid(
+            "datafilter-entity-basis-map",
+            entity.className()
+                + ":"
+                + entity.identifier()
+                + "->"
+                + basis.className()
+                + ":"
+                + basis.identifier()));
+  }
+
+  private void revokeDataFilterAccess(DataFilterObject entity, DataFilterObject basis) {
+    jdbcTemplate.update(
+        "delete from datafilter_entity_basis_map where "
+            + dataFilterAccessPredicate(),
+        entity.identifier(),
+        entity.className(),
+        basis.identifier(),
+        basis.className());
+  }
+
+  private boolean hasDataFilterAccess(DataFilterObject entity, DataFilterObject basis) {
+    return countRows(
+            "select count(*) from datafilter_entity_basis_map where " + dataFilterAccessPredicate(),
+            entity.identifier(),
+            entity.className(),
+            basis.identifier(),
+            basis.className())
+        > 0;
+  }
+
+  private String dataFilterAccessPredicate() {
+    return "lower(entity_identifier) = lower(?) and lower(entity_type) = lower(?) "
+        + "and lower(basis_identifier) = lower(?) and lower(basis_type) = lower(?)";
   }
 
   private void loadAmpathForms(Path configRoot, List<String> wildcardExclusions)
@@ -4555,6 +4691,11 @@ public final class StaticSihsalusContentLoader {
 
   private record MetadataSourceRecord(
       String uuid, String name, String description, boolean retired) {}
+
+  private record DataFilterObject(String identifier, String className) {}
+
+  private record DataFilterObjectType(
+      String className, String table, String idColumn, String identifierColumn) {}
 
   private record AddressHierarchyConfig(
       List<AddressHierarchyComponent> components,
