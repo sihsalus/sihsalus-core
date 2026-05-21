@@ -28,8 +28,8 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
@@ -5108,7 +5108,7 @@ class PartialStockManagementService implements InvocationHandler {
     }
 
     private String escapeHtml(String value) {
-        return StringEscapeUtils.escapeHtml(value == null ? "" : value);
+        return StringEscapeUtils.escapeHtml4(value == null ? "" : value);
     }
 
     private void updateStockBatchExpiryNotificationDate(Collection<Integer> stockBatchIds, Date notificationDate) {

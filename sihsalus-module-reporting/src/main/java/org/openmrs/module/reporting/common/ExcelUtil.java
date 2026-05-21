@@ -10,17 +10,16 @@
 package org.openmrs.module.reporting.common;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFEvaluationWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.poifs.crypt.EncryptionInfo;
 import org.apache.poi.poifs.crypt.EncryptionMode;
 import org.apache.poi.poifs.crypt.Encryptor;
+import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.formula.FormulaParser;
 import org.apache.poi.ss.formula.FormulaParsingWorkbook;
@@ -30,13 +29,19 @@ import org.apache.poi.ss.formula.FormulaType;
 import org.apache.poi.ss.formula.ptg.AreaPtg;
 import org.apache.poi.ss.formula.ptg.Ptg;
 import org.apache.poi.ss.formula.ptg.RefPtgBase;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -52,7 +57,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PushbackInputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -77,7 +81,7 @@ public class ExcelUtil {
 	public static Object getCellContents(Cell cell) {
     	Object contents = "";
     	try {
-			if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+			if (cell.getCellType() == CellType.NUMERIC) {
 				if (ExcelUtil.isCellDateFormatted(cell)) {
 					return cell.getDateCellValue();
 				}
@@ -89,16 +93,16 @@ public class ExcelUtil {
 					return d;
 				}
 			}
-			else if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
+			else if (cell.getCellType() == CellType.BOOLEAN) {
 				return cell.getBooleanCellValue();
 			}
-			else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+			else if (cell.getCellType() == CellType.FORMULA) {
 				return cell.getCellFormula();
 			}
-			else if (cell.getCellType() == Cell.CELL_TYPE_ERROR) {
+			else if (cell.getCellType() == CellType.ERROR) {
 				return Byte.toString(cell.getErrorCellValue());
 			}
-			else if (cell.getCellType() == Cell.CELL_TYPE_BLANK) {
+			else if (cell.getCellType() == CellType.BLANK) {
 				return "";
 			}
 			else {
@@ -139,15 +143,15 @@ public class ExcelUtil {
             }
 			String cellValueString = ObjectUtil.format(cellValue);
 			try {
-				if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
+				if (cell.getCellType() == CellType.BOOLEAN) {
 					cell.setCellValue(Boolean.valueOf(cellValueString));
 					return;
 				}
-				if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+				if (cell.getCellType() == CellType.FORMULA) {
 					cell.setCellFormula(cellValueString);
 					return;
 				}
-				if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+				if (cell.getCellType() == CellType.NUMERIC) {
 					cell.setCellValue(Double.parseDouble(cellValueString));
 					return;
 				}
@@ -214,8 +218,8 @@ public class ExcelUtil {
 	 *    align=center | left | right | fill
      *    valign=top | bottom | center | justify
 	 *    date
-     *    color=HSSFColor.XYZ.index
-     *    background-color=HSSFColor.XYZ.index
+     *    color=IndexedColors.XYZ.index
+     *    background-color=IndexedColors.XYZ.index
      *    rotation=##
 	 */
 	public static CellStyle createCellStyle(Workbook wb, String descriptor) {
@@ -232,31 +236,31 @@ public class ExcelUtil {
 				else if (att.startsWith("align=")) {
 					att = att.substring(6);
 					if (att.equals("left")) {
-						style.setAlignment(CellStyle.ALIGN_LEFT);
+						style.setAlignment(HorizontalAlignment.LEFT);
 					}
 					else if (att.equals("center")) {
-						style.setAlignment(CellStyle.ALIGN_CENTER);
+						style.setAlignment(HorizontalAlignment.CENTER);
 					}
 					else if (att.equals("right")) {
-						style.setAlignment(CellStyle.ALIGN_RIGHT);
+						style.setAlignment(HorizontalAlignment.RIGHT);
 					}
 					else if (att.equals("fill")) {
-						style.setAlignment(CellStyle.ALIGN_FILL);
+						style.setAlignment(HorizontalAlignment.FILL);
 					}
 				}
                 else if (att.startsWith("valign=")) {
                     att = att.substring(7);
                     if (att.equals("top")) {
-                        style.setVerticalAlignment(CellStyle.VERTICAL_TOP);
+                        style.setVerticalAlignment(VerticalAlignment.TOP);
                     }
                     else if (att.equals("bottom")) {
-                        style.setVerticalAlignment(CellStyle.VERTICAL_BOTTOM);
+                        style.setVerticalAlignment(VerticalAlignment.BOTTOM);
                     }
                     else if (att.equals("center")) {
-                        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+                        style.setVerticalAlignment(VerticalAlignment.CENTER);
                     }
                     else if (att.equals("justify")) {
-                        style.setVerticalAlignment(CellStyle.VERTICAL_JUSTIFY);
+                        style.setVerticalAlignment(VerticalAlignment.JUSTIFY);
                     }
                 }
                 else if (att.startsWith("rotation=")) {
@@ -275,7 +279,7 @@ public class ExcelUtil {
                     style.setDataFormat(wb.createDataFormat().getFormat(att));
                 }
 				else if (att.equals("bold")) {
-					font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+					font.setBold(true);
 				}
 				else if (att.equals("italic")) {
 					font.setItalic(true);
@@ -303,7 +307,7 @@ public class ExcelUtil {
                                 String[] rgbStr = att.split("x");
                                 if (rgbStr.length == 3) {
                                     Color color = new Color(Integer.parseInt(rgbStr[0]), Integer.parseInt(rgbStr[1]), Integer.parseInt(rgbStr[2]));
-                                    cs.setFillForegroundColor(new XSSFColor(color));
+                                    cs.setFillForegroundColor(new XSSFColor(color, null));
                                 }
                             }
                             catch (Exception e1) {
@@ -312,7 +316,7 @@ public class ExcelUtil {
                         }
                     }
 
-                    style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+                    style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
                 }
 			}
 		}
@@ -361,7 +365,7 @@ public class ExcelUtil {
 
 	public static Font getFont(Cell cell) {
 		CellStyle style = cell.getCellStyle();
-		return cell.getSheet().getWorkbook().getFontAt(style.getFontIndex());
+		return cell.getSheet().getWorkbook().getFontAt(style.getFontIndexAsInt());
 	}
 	
 	public static String formatRow(Row row) {
@@ -398,41 +402,40 @@ public class ExcelUtil {
     /**
      * @return the cellstyle from the passed list the represents a border style, defaulting to thin if none found
      */
-    public static Short findMatchingBorderStyle(List<String> styles) {
-        Map<String, Short> m = new HashMap<String, Short>();
-        m.put("thin", CellStyle.BORDER_THIN);
-        m.put("medium", CellStyle.BORDER_MEDIUM);
-        m.put("dashed", CellStyle.BORDER_DASHED);
-        m.put("hair", CellStyle.BORDER_HAIR);
-        m.put("thick", CellStyle.BORDER_THICK);
-        m.put("double", CellStyle.BORDER_DOUBLE);
-        m.put("dotted", CellStyle.BORDER_DOTTED);
-        m.put("mediumDashed", CellStyle.BORDER_MEDIUM_DASHED);
-        m.put("dashDot", CellStyle.BORDER_DASH_DOT);
-        m.put("mediumDashDot", CellStyle.BORDER_MEDIUM_DASH_DOT);
-        m.put("dashDotDot", CellStyle.BORDER_DASH_DOT_DOT);
-        m.put("mediumDashDotDot", CellStyle.BORDER_MEDIUM_DASH_DOT_DOT);
-        m.put("slantedDashDot", CellStyle.BORDER_SLANTED_DASH_DOT);
+    public static BorderStyle findMatchingBorderStyle(List<String> styles) {
+        Map<String, BorderStyle> m = new HashMap<String, BorderStyle>();
+        m.put("thin", BorderStyle.THIN);
+        m.put("medium", BorderStyle.MEDIUM);
+        m.put("dashed", BorderStyle.DASHED);
+        m.put("hair", BorderStyle.HAIR);
+        m.put("thick", BorderStyle.THICK);
+        m.put("double", BorderStyle.DOUBLE);
+        m.put("dotted", BorderStyle.DOTTED);
+        m.put("mediumdashed", BorderStyle.MEDIUM_DASHED);
+        m.put("dashdot", BorderStyle.DASH_DOT);
+        m.put("mediumdashdot", BorderStyle.MEDIUM_DASH_DOT);
+        m.put("dashdotdot", BorderStyle.DASH_DOT_DOT);
+        m.put("mediumdashdotdot", BorderStyle.MEDIUM_DASH_DOT_DOT);
+        m.put("slanteddashdot", BorderStyle.SLANTED_DASH_DOT);
         for (String s : styles) {
-            Short ret = m.get(s.toLowerCase());
+            BorderStyle ret = m.get(s.toLowerCase());
             if (ret != null) {
                 return ret;
             }
         }
-        return CellStyle.BORDER_THIN;
+        return BorderStyle.THIN;
     }
 
     /**
      * @return the color from the passed list the represents a color, defaulting to black if none found
      */
     public static short findMatchingColor(List<String> styles) {
-        for (HSSFColor color : HSSFColor.getIndexHash().values()) {
-            String colorName = color.getClass().getSimpleName().toLowerCase();
-            if (styles.contains(colorName)) {
+        for (IndexedColors color : IndexedColors.values()) {
+            if (styles.contains(color.name().toLowerCase())) {
                 return color.getIndex();
             }
         }
-        return HSSFColor.BLACK.index;
+        return IndexedColors.BLACK.getIndex();
     }
 
     /**
@@ -442,11 +445,9 @@ public class ExcelUtil {
      */
 	public static Workbook loadWorkbookFromInputStream(InputStream is) {
 		try {
-            if (!is.markSupported()) {
-                is = new PushbackInputStream(is, 8);
-            }
+            is = FileMagic.prepareToCheckMagic(is);
 
-            if (POIFSFileSystem.hasPOIFSHeader(is)) {
+            if (FileMagic.valueOf(is) == FileMagic.OLE2) {
                 POIFSFileSystem fs = new POIFSFileSystem(is);
                 return WorkbookFactory.create(fs);
             }
@@ -527,7 +528,7 @@ public class ExcelUtil {
     }
 
 	public static void copyFormula(Cell fromCell, Cell toCell) {
-		if (fromCell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+		if (fromCell.getCellType() == CellType.FORMULA) {
 			if (!fromCell.isPartOfArrayFormulaGroup()) {
 				Sheet sheet = fromCell.getSheet();
 				Workbook workbook = sheet.getWorkbook();

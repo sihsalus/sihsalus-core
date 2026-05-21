@@ -11,7 +11,6 @@ package org.openmrs.module.attachments;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,10 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
-import org.openmrs.ConceptComplex;
-import org.openmrs.ConceptDatatype;
-import org.openmrs.ConceptDescription;
-import org.openmrs.ConceptName;
 import org.openmrs.EncounterType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
@@ -136,25 +131,14 @@ public class AttachmentsActivator extends BaseModuleActivator {
 
 	private void ensureConceptComplex(ConceptService conceptService, ConceptComplexDefinition definition) {
 		Concept concept = conceptService.getConceptByUuid(definition.getUuid());
-		if (concept != null) {
-			if (conceptService.getConceptComplex(concept.getConceptId()) == null) {
-				throw new APIException("Configured attachment concept " + definition.getUuid()
-						+ " exists but is not a complex concept.");
-			}
-			return;
+		if (concept == null) {
+			throw new APIException("Configured attachment concept " + definition.getUuid()
+					+ " is missing. Attachment concepts must be imported from Open Concept Lab.");
 		}
-
-		ConceptComplex conceptComplex = new ConceptComplex();
-		conceptComplex.setUuid(definition.getUuid());
-		conceptComplex.setHandler(definition.getHandler());
-		ConceptName conceptName = new ConceptName(definition.getName(), Locale.ENGLISH);
-		conceptComplex.setFullySpecifiedName(conceptName);
-		conceptComplex.setPreferredName(conceptName);
-		conceptComplex.setConceptClass(conceptService.getConceptClassByName("Question"));
-		conceptComplex.setDatatype(conceptService.getConceptDatatypeByUuid(ConceptDatatype.COMPLEX_UUID));
-		conceptComplex.addDescription(new ConceptDescription(definition.getDescription(), Locale.ENGLISH));
-
-		conceptService.saveConcept(conceptComplex);
+		if (conceptService.getConceptComplex(concept.getConceptId()) == null) {
+			throw new APIException("Configured attachment concept " + definition.getUuid()
+					+ " exists but is not a complex concept.");
+		}
 	}
 
 	private Map<String, String> getConceptComplexUuidMap() {

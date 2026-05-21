@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.reporting.report;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;

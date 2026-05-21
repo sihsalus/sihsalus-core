@@ -11,6 +11,7 @@ package org.openmrs.module.reporting.common;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -115,28 +116,28 @@ public class ExcelBuilder {
         }
         Cell cell;
         if (cellValue == null) {
-            cell = currentRow.createCell(currentColNum, Cell.CELL_TYPE_BLANK);
+            cell = currentRow.createCell(currentColNum, CellType.BLANK);
         }
         else if (cellValue instanceof Number) {
-            cell = currentRow.createCell(currentColNum, Cell.CELL_TYPE_NUMERIC);
+            cell = currentRow.createCell(currentColNum, CellType.NUMERIC);
         }
         else if (cellValue instanceof Date) {
-            cell = currentRow.createCell(currentColNum, Cell.CELL_TYPE_NUMERIC);
+            cell = currentRow.createCell(currentColNum, CellType.NUMERIC);
         }
         else if (cellValue instanceof Boolean) {
-            cell = currentRow.createCell(currentColNum, Cell.CELL_TYPE_BOOLEAN);
+            cell = currentRow.createCell(currentColNum, CellType.BOOLEAN);
         }
         else if (cellValue instanceof Cohort) {
-            cell = currentRow.createCell(currentColNum, Cell.CELL_TYPE_NUMERIC);
+            cell = currentRow.createCell(currentColNum, CellType.NUMERIC);
         }
         else if (cellValue instanceof CohortIndicatorResult) {
-            cell = currentRow.createCell(currentColNum, Cell.CELL_TYPE_NUMERIC);
+            cell = currentRow.createCell(currentColNum, CellType.NUMERIC);
         }
         else if (cellValue instanceof CohortIndicatorAndDimensionResult) {
-            cell = currentRow.createCell(currentColNum, Cell.CELL_TYPE_NUMERIC);
+            cell = currentRow.createCell(currentColNum, CellType.NUMERIC);
         }
         else {
-            cell = currentRow.createCell(currentColNum, Cell.CELL_TYPE_STRING);
+            cell = currentRow.createCell(currentColNum, CellType.STRING);
         }
 
         if (ObjectUtil.isNull(style) && cellValue instanceof Date) {

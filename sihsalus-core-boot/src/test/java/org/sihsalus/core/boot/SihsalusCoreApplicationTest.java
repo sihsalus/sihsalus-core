@@ -1939,6 +1939,11 @@ class SihsalusCoreApplicationTest {
         assertEquals(1, jdbcTemplate.queryForObject(
                 "select count(*) from global_property where property = 'attachments.defaultConceptComplexUuid'",
                 Integer.class));
+        assertEquals(0, jdbcTemplate.queryForObject(
+                "select count(*) from concept_name where uuid in (?, ?)",
+                Integer.class,
+                "8f3a26f8-7e8f-4a53-84c7-c3ff48bde417",
+                "8f3a26f8-7e8f-4a53-84c7-c3ff48bde419"));
 
         boolean openedSession = !Context.isSessionOpen();
         if (openedSession) {

@@ -26,7 +26,7 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
 import jakarta.mail.internet.MimeMultipart;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.AdministrationService;

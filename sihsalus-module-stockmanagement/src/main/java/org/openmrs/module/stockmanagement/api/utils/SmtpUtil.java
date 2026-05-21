@@ -1,5 +1,6 @@
 package org.openmrs.module.stockmanagement.api.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 
@@ -19,8 +20,8 @@ public class SmtpUtil {
 		Authenticator authenticator = null;
 		String password = smtpProperties.getProperty("mail.smtp.user.password");
 		String username = smtpProperties.getProperty("mail.smtp.user");
-		if (org.apache.commons.lang.StringUtils.isNotBlank(username)
-		        && org.apache.commons.lang.StringUtils.isNotBlank(password)) {
+		if (StringUtils.isNotBlank(username)
+		        && StringUtils.isNotBlank(password)) {
 			authenticator = new Authenticator() {
 				
 				@Override
@@ -38,9 +39,9 @@ public class SmtpUtil {
 		Properties smtpProperties = System.getProperties();
 		if (smtpProperties.get(smptHostProperty) == null) {
 			String propertyValue = Context.getAdministrationService().getGlobalProperty(smptHostProperty);
-			if (org.apache.commons.lang.StringUtils.isBlank(propertyValue)) {
+			if (StringUtils.isBlank(propertyValue)) {
 				propertyValue = Context.getAdministrationService().getGlobalProperty("mail.smtp_host");
-				return org.apache.commons.lang.StringUtils.isNotBlank(propertyValue);
+				return StringUtils.isNotBlank(propertyValue);
 			}
 		}
 		return true;
@@ -117,13 +118,13 @@ public class SmtpUtil {
 	        String propertyName, String altSourcePropertyName) {
 		if (property.get(propertyName) == null) {
 			String propertyValue = administrationService.getGlobalProperty(propertyName);
-			if (!org.apache.commons.lang.StringUtils.isBlank(propertyValue)) {
+			if (!StringUtils.isBlank(propertyValue)) {
 				property.setProperty(propertyName, propertyValue);
 			} else {
 				if (altSourcePropertyName != null) {
 					propertyValue = administrationService.getGlobalProperty(altSourcePropertyName);
 				}
-				if (!org.apache.commons.lang.StringUtils.isBlank(propertyValue)) {
+				if (!StringUtils.isBlank(propertyValue)) {
 					property.setProperty(propertyName, propertyValue);
 				} else if (defaultValue != null) {
 					property.setProperty(propertyName, defaultValue);
