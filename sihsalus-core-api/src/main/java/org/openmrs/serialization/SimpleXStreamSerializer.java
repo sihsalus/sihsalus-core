@@ -98,6 +98,7 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
 	 * @param adminService
 	 */
 	public static void setupXStreamSecurity(XStream newXStream, AdministrationService adminService) {
+		XStream.setupDefaultSecurity(newXStream);
 		newXStream.addPermission(NoTypePermission.NONE);
 		newXStream.addPermission(NullPermission.NULL);
 		newXStream.addPermission(PrimitiveTypePermission.PRIMITIVES);
@@ -189,7 +190,12 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
 	@SuppressWarnings("unchecked")
 	public <T> T deserialize(String serializedObject, Class<? extends T> clazz) throws SerializationException {
 		try {
-			return (T) getXstream().fromXML(serializedObject);
+			Object deserializedObject = getXstream().fromXML(serializedObject);
+			if (deserializedObject != null && !clazz.isInstance(deserializedObject)) {
+				throw new SerializationException("Unable to deserialize " + deserializedObject.getClass().getName()
+				        + " as " + clazz.getName());
+			}
+			return (T) deserializedObject;
 		} catch (XStreamException e) {
 			throw new SerializationException("Unable to deserialize class: " + clazz.getName(), e);
 		}
