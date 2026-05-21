@@ -74,6 +74,8 @@ import org.openmrs.module.stockmanagement.api.dto.StockItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockItemTransactionDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemTransactionSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationAction;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationActionLineItem;
+import org.openmrs.module.stockmanagement.api.dto.StockOperationBatchNumbersDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationItemCost;
 import org.openmrs.module.stockmanagement.api.dto.StockOperationItemDTO;
@@ -223,6 +225,11 @@ class PartialStockManagementService implements InvocationHandler {
                 processStockOperationAction((StockOperationDTO) args[0], StockOperationAction.Action.CANCEL,
                     (String) args[1]);
                 return null;
+            case "stockOperationItemsReceived":
+                stockOperationItemsReceived((StockOperationDTO) args[0], (List<StockOperationActionLineItem>) args[1]);
+                return null;
+            case "saveStockOperationBatchNumbers":
+                return saveStockOperationBatchNumbers((StockOperationBatchNumbersDTO) args[0]);
             case "getStockOperationItemsByStockOperation":
                 return getStockOperationItemsByStockOperation((Integer) args[0]);
             case "findStockOperationItems":
@@ -1257,6 +1264,162 @@ class PartialStockManagementService implements InvocationHandler {
             item.setQuantityReceived(item.getQuantity());
             item.setQuantityReceivedPackagingUOM(item.getStockItemPackagingUOM());
         }
+    }
+
+    private void stockOperationItemsReceived(StockOperationDTO dto, List<StockOperationActionLineItem> lineItems) {
+        if (dto == null || StringUtils.isBlank(dto.getUuid()) || lineItems == null || lineItems.isEmpty()) {
+            return;
+        }
+        StockOperation operation = requireByUuid(StockOperation.class, dto.getUuid(), "Stock operation not found");
+        ensureStockOperationCollections(operation);
+        StockOperationType operationType = operation.getStockOperationType();
+        if (operationType == null || !operationType.requiresDispatchAcknowledgement()
+                || !operation.canReceiveItems()) {
+            throw new StockManagementException("Stock operation cannot receive items");
+        }
+        Location destination = operation.getDestination() == null ? null : operation.getDestination().getLocation();
+        if (destination == null || !operationType.userCanProcess(authenticatedUser(), destination,
+            Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_RECEIVEITEMS)) {
+            throw new StockManagementException("User cannot receive stock operation items");
+        }
+        BigDecimal threshold = GlobalProperties.getExcessReceivedItemThreshold();
+        for (StockOperationActionLineItem lineItem : lineItems) {
+            if (lineItem.getAmount() == null || lineItem.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+                throw new StockManagementException("Received quantity must be positive");
+            }
+            StockOperationItem item = operation.getStockOperationItems().stream()
+                    .filter(candidate -> lineItem.getUuid() != null && lineItem.getUuid().equals(candidate.getUuid()))
+                    .findFirst()
+                    .orElseThrow(() -> new StockManagementException("Stock operation line item not found"));
+            StockItemPackagingUOM uom = stockOperationItemUom(item, lineItem.getPackagingUoMUuId());
+            if (uom == null) {
+                throw new StockManagementException("Received packaging unit not found");
+            }
+            validateReceivedQuantity(item, lineItem.getAmount(), uom, threshold);
+            item.setQuantityReceived(lineItem.getAmount());
+            item.setQuantityReceivedPackagingUOM(uom);
+        }
+        saveOrUpdate(operation);
+    }
+
+    private void validateReceivedQuantity(StockOperationItem item, BigDecimal amount,
+            StockItemPackagingUOM uom, BigDecimal threshold) {
+        if (item.getQuantity() == null || item.getStockItemPackagingUOM() == null
+                || item.getStockItemPackagingUOM().getFactor() == null || uom.getFactor() == null) {
+            return;
+        }
+        BigDecimal receivedBase = amount.multiply(uom.getFactor());
+        BigDecimal sentBase = item.getQuantity().multiply(item.getStockItemPackagingUOM().getFactor());
+        BigDecimal allowedMultiplier = BigDecimal.valueOf(100).add(threshold == null ? BigDecimal.ZERO : threshold)
+                .divide(BigDecimal.valueOf(100), 5, RoundingMode.HALF_EVEN);
+        if (receivedBase.compareTo(sentBase.multiply(allowedMultiplier)) > 0) {
+            throw new StockManagementException("Received quantity exceeds allowed threshold");
+        }
+    }
+
+    private StockOperationBatchNumbersDTO saveStockOperationBatchNumbers(
+            StockOperationBatchNumbersDTO batchNumbersDto) {
+        if (batchNumbersDto == null || StringUtils.isBlank(batchNumbersDto.getUuid())
+                || batchNumbersDto.getBatchNumbers() == null || batchNumbersDto.getBatchNumbers().isEmpty()) {
+            throw new StockManagementException("Stock operation batch numbers are required");
+        }
+        StockOperation operation = requireByUuid(StockOperation.class, batchNumbersDto.getUuid(),
+            "Stock operation not found");
+        ensureStockOperationCollections(operation);
+        StockOperationType operationType = operation.getStockOperationType();
+        if (operationType == null || !operationType.requiresActualBatchInformation()) {
+            throw new StockManagementException("Stock operation does not support batch number updates");
+        }
+        if (!StockOperationStatus.canUpdateBatchInformation(operation.getStatus())
+                || !Boolean.TRUE.equals(operationType.getAllowBatchInfoUpdate())) {
+            throw new StockManagementException("Stock operation batch number update denied");
+        }
+        if (operation.getAtLocation() == null || !operationType.userCanProcess(authenticatedUser(),
+            operation.getAtLocation(), Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_MUTATE)) {
+            throw new StockManagementException("User cannot update stock operation batch numbers");
+        }
+        Map<Integer, Boolean> batchesInUse = checkStockBatchHasTransactionsAfterOperation(operation.getId(),
+            operation.getStockOperationItems().stream()
+                    .map(StockOperationItem::getStockBatch)
+                    .filter(Objects::nonNull)
+                    .map(StockBatch::getId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList()));
+        for (StockOperationBatchNumbersDTO.StockOperationItemBatchNumber batchNumber : batchNumbersDto.getBatchNumbers()) {
+            updateStockOperationItemBatchNumber(operation, batchNumber, batchesInUse);
+        }
+        saveOrUpdate(operation);
+        return batchNumbersDto;
+    }
+
+    private void updateStockOperationItemBatchNumber(StockOperation operation,
+            StockOperationBatchNumbersDTO.StockOperationItemBatchNumber batchNumber, Map<Integer, Boolean> batchesInUse) {
+        if (batchNumber == null || StringUtils.isBlank(batchNumber.getUuid())
+                || StringUtils.isBlank(batchNumber.getBatchNo())) {
+            throw new StockManagementException("Stock operation item batch number is required");
+        }
+        StockOperationItem item = operation.getStockOperationItems().stream()
+                .filter(candidate -> batchNumber.getUuid().equals(candidate.getUuid()))
+                .findFirst()
+                .orElseThrow(() -> new StockManagementException("Stock operation item not found"));
+        StockBatch currentBatch = item.getStockBatch();
+        if (currentBatch != null && batchesInUse.containsKey(currentBatch.getId())) {
+            throw new StockManagementException("Stock batch already has later transactions");
+        }
+        StockItem stockItem = item.getStockItem();
+        if (stockItem == null) {
+            throw new StockManagementException("Stock item not found");
+        }
+        if (Boolean.TRUE.equals(stockItem.getHasExpiration())) {
+            if (batchNumber.getExpiration() == null) {
+                throw new StockManagementException("Batch expiration is required");
+            }
+            if (!batchNumber.getExpiration().after(DateUtil.today())) {
+                throw new StockManagementException("Batch expiration must be in the future");
+            }
+        }
+        StockBatch newBatch = findStockBatch(stockItem, batchNumber.getBatchNo(), batchNumber.getExpiration());
+        if (newBatch == null) {
+            newBatch = new StockBatch();
+            newBatch.setStockItem(stockItem);
+            newBatch.setBatchNo(batchNumber.getBatchNo());
+            if (Boolean.TRUE.equals(stockItem.getHasExpiration())) {
+                newBatch.setExpiration(batchNumber.getExpiration());
+            }
+            saveOrUpdate(newBatch);
+        }
+        item.setStockBatch(newBatch);
+        if (operation.getReservedTransactions() != null) {
+            for (ReservedTransaction transaction : operation.getReservedTransactions()) {
+                if (transaction.getStockOperationItem() != null
+                        && Objects.equals(transaction.getStockOperationItem().getId(), item.getId())) {
+                    transaction.setStockBatch(newBatch);
+                }
+            }
+        }
+        if (operation.getStockItemTransactions() != null) {
+            for (StockItemTransaction transaction : operation.getStockItemTransactions()) {
+                if (transaction.getStockOperationItem() != null
+                        && Objects.equals(transaction.getStockOperationItem().getId(), item.getId())) {
+                    transaction.setStockBatch(newBatch);
+                }
+            }
+        }
+    }
+
+    private StockItemPackagingUOM stockOperationItemUom(StockOperationItem item, String uomUuid) {
+        if (item == null || item.getStockItem() == null || StringUtils.isBlank(uomUuid)) {
+            return null;
+        }
+        if (item.getStockItem().getStockItemPackagingUOMs() != null) {
+            for (StockItemPackagingUOM uom : item.getStockItem().getStockItemPackagingUOMs()) {
+                if (uomUuid.equals(uom.getUuid())) {
+                    return uom;
+                }
+            }
+        }
+        return byUuid(StockItemPackagingUOM.class, uomUuid);
     }
 
     private List<StockOperationItem> getStockOperationItemsByStockOperation(Integer stockOperationId) {
