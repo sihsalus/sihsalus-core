@@ -78,6 +78,8 @@ import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeLocationDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeOperationTypeDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.reporting.StockBatchLineItem;
+import org.openmrs.module.stockmanagement.api.dto.reporting.StockExpiryFilter;
 import org.openmrs.module.stockmanagement.api.model.BatchJob;
 import org.openmrs.module.stockmanagement.api.model.BatchJobOwner;
 import org.openmrs.module.stockmanagement.api.model.BatchJobStatus;
@@ -345,6 +347,8 @@ class PartialStockManagementService implements InvocationHandler {
                 return getDueStockRules((Integer) args[0], (Integer) args[1]);
             case "getActiveUsersAssignedForScope":
                 return getActiveUsersAssignedForScope((Integer) args[0], (List<String>) args[1]);
+            case "getExpiringStockBatchesDueForNotification":
+                return getExpiringStockBatchesDueForNotification((Integer) args[0]);
             case "saveBatchJob":
                 if (args[0] instanceof BatchJob) {
                     saveOrUpdate(args[0]);
@@ -398,6 +402,8 @@ class PartialStockManagementService implements InvocationHandler {
                 return getStockItemReferenceByStockItem((String) args[0]);
             case "getUserEmailAddress":
                 return getUserEmailAddress((User) args[0]);
+            case "getExpiringStockBatchList":
+                return getExpiringStockBatchList((StockExpiryFilter) args[0]);
             default:
                 throw unsupported(method);
         }
@@ -2176,6 +2182,106 @@ class PartialStockManagementService implements InvocationHandler {
         return dto;
     }
 
+    private List<StockBatchDTO> getExpiringStockBatchesDueForNotification(
+            Integer defaultExpiryNotificationNoticePeriod) {
+        Date today = DateUtil.today();
+        return query(StockBatch.class, (cb, root) -> {
+            Join<StockBatch, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            return predicates(
+                cb.isNotNull(root.get("expiration")),
+                cb.greaterThanOrEqualTo(root.<Date>get("expiration"), today),
+                cb.isNull(root.get("expiryNotificationDate")),
+                cb.isFalse(root.get("voided")),
+                cb.isFalse(stockItem.get("voided")));
+        }).stream()
+                .filter(batch -> expiresWithinNoticePeriod(batch, today, defaultExpiryNotificationNoticePeriod))
+                .sorted(Comparator.comparing(StockBatch::getExpiration, Comparator.nullsLast(Date::compareTo))
+                        .thenComparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::stockBatchToDto)
+                .collect(Collectors.toList());
+    }
+
+    private boolean expiresWithinNoticePeriod(StockBatch batch, Date today, Integer defaultNoticePeriod) {
+        StockItem stockItem = batch.getStockItem();
+        Integer noticePeriod = stockItem == null ? null : stockItem.getExpiryNotice();
+        if (noticePeriod == null) {
+            noticePeriod = defaultNoticePeriod;
+        }
+        return noticePeriod != null && !batch.getExpiration().after(addDays(today, noticePeriod));
+    }
+
+    private Result<StockBatchLineItem> getExpiringStockBatchList(StockExpiryFilter filter) {
+        StockExpiryFilter safeFilter = filter == null ? new StockExpiryFilter() : filter;
+        List<StockBatchLineItem> lineItems = query(StockBatch.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockBatch, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            if (safeFilter.getStartDate() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.<Date>get("expiration"), safeFilter.getStartDate()));
+            }
+            if (safeFilter.getEndDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.<Date>get("expiration"), safeFilter.getEndDate()));
+            }
+            if (safeFilter.getStockBatchIdMin() != null) {
+                predicates.add(cb.greaterThan(root.get("id"), safeFilter.getStockBatchIdMin()));
+            }
+            if (safeFilter.getStockItemIdMin() != null) {
+                predicates.add(cb.greaterThan(stockItem.get("id"), safeFilter.getStockItemIdMin()));
+            }
+            if (safeFilter.getStockItemCategoryConceptId() != null) {
+                predicates.add(cb.equal(stockItem.get("category").get("conceptId"),
+                    safeFilter.getStockItemCategoryConceptId()));
+            }
+            predicates.add(cb.isFalse(root.get("voided")));
+            return predicates;
+        }).stream()
+                .sorted(Comparator
+                        .comparing((StockBatch batch) -> batch.getStockItem() == null ? null : batch.getStockItem().getId(),
+                            Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::stockBatchLineItem)
+                .collect(Collectors.toList());
+        Integer limit = safeFilter.getLimit() > 0 ? safeFilter.getLimit() : null;
+        return resultFromList(lineItems, safeFilter.getStartIndex(), limit);
+    }
+
+    private StockBatchLineItem stockBatchLineItem(StockBatch batch) {
+        StockBatchLineItem lineItem = new StockBatchLineItem();
+        lineItem.setStockBatchId(batch.getId());
+        lineItem.setBatchNo(batch.getBatchNo());
+        lineItem.setExpiration(batch.getExpiration());
+        lineItem.setDateCreated(batch.getDateCreated());
+        StockItem stockItem = batch.getStockItem();
+        if (stockItem == null) {
+            return lineItem;
+        }
+        lineItem.setStockItemId(stockItem.getId());
+        lineItem.setCommonName(stockItem.getCommonName());
+        lineItem.setAcronym(stockItem.getAcronym());
+        lineItem.setExpiryNotice(stockItem.getExpiryNotice());
+        lineItem.setReorderLevel(stockItem.getReorderLevel());
+        if (stockItem.getDrug() != null) {
+            lineItem.setStockItemDrugId(stockItem.getDrug().getDrugId());
+            lineItem.setStockItemDrugName(stockItem.getDrug().getName());
+        }
+        if (stockItem.getConcept() != null) {
+            lineItem.setStockItemConceptId(stockItem.getConcept().getConceptId());
+            lineItem.setStockItemConceptName(conceptName(stockItem.getConcept()));
+        }
+        if (stockItem.getCategory() != null) {
+            lineItem.setStockItemCategoryConceptId(stockItem.getCategory().getConceptId());
+            lineItem.setStockItemCategoryName(conceptName(stockItem.getCategory()));
+        }
+        StockItemPackagingUOM reorderUom = stockItem.getReorderLevelUOM();
+        if (reorderUom != null) {
+            lineItem.setReorderLevelFactor(reorderUom.getFactor());
+            if (reorderUom.getPackagingUom() != null) {
+                lineItem.setReorderLevelUoMId(reorderUom.getPackagingUom().getConceptId());
+                lineItem.setReorderLevelUoM(conceptName(reorderUom.getPackagingUom()));
+            }
+        }
+        return lineItem;
+    }
+
     private List<StockItemDTO> getExistingStockItemIds(
             Collection<StockItemSearchFilter.ItemGroupFilter> stockItemFilters) {
         if (stockItemFilters == null || stockItemFilters.isEmpty()) {
@@ -3413,6 +3519,13 @@ class PartialStockManagementService implements InvocationHandler {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.MINUTE, minutes);
+        return calendar.getTime();
+    }
+
+    private Date addDays(Date date, int days) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE, days);
         return calendar.getTime();
     }
 
