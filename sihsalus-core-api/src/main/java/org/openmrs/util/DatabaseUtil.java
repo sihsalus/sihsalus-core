@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.hibernate.Session;
 import org.openmrs.api.db.DAOException;
@@ -57,6 +58,9 @@ public class DatabaseUtil {
 	    POSTGRESQL_DRIVER, H2_DRIVER, HSQLDB_DRIVER, ORACLE_DRIVER, SQLSERVER_DRIVER, JTDS_DRIVER);
 
 	private static final Logger log = LoggerFactory.getLogger(DatabaseUtil.class);
+
+	private static final Pattern READ_ONLY_SQL_PATTERN = Pattern.compile(
+	    "^\\s*(select|with|show|describe|desc|explain)\\b[\\s\\S]*$", Pattern.CASE_INSENSITIVE);
 
 	public static final String ORDER_ENTRY_UPGRADE_SETTINGS_FILENAME = "order_entry_upgrade_settings.txt";
 
@@ -150,8 +154,8 @@ public class DatabaseUtil {
 			dataManipulation = true;
 		}
 
-		if (selectOnly && dataManipulation) {
-			throw new IllegalArgumentException("Illegal command(s) found in query string");
+		if (selectOnly && (dataManipulation || !READ_ONLY_SQL_PATTERN.matcher(sql).matches() || sql.contains(";"))) {
+			throw new IllegalArgumentException("Only single read-only SQL statements are allowed");
 		}
 		return dataManipulation;
 	}
@@ -181,8 +185,8 @@ public class DatabaseUtil {
 				}
 			}
 		} catch (Exception e) {
-			log.debug("Error while running sql: " + sql, e);
-			throw new DAOException("Error while running sql: " + sql + " . Message: " + e.getMessage(), e);
+			log.debug("Error while running sql", e);
+			throw new DAOException("Error while running sql. Message: " + e.getMessage(), e);
 		} finally {
 			if (ps != null) {
 				try {
