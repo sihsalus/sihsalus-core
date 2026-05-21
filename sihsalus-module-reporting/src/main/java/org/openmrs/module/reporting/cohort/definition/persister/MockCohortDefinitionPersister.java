@@ -24,6 +24,7 @@ public class MockCohortDefinitionPersister implements CohortDefinitionPersister 
 	
 	// Keep track of the primary keys handed out
 	Integer primaryKeySequence = Integer.valueOf(1);
+	
 	List<CohortDefinition> cohortDefinitions = new ArrayList<CohortDefinition>();	
 	Map<Integer,CohortDefinition> indexById = new HashMap<Integer,CohortDefinition>();	
 	Map<String,CohortDefinition> indexByUuid = new HashMap<String,CohortDefinition>();	

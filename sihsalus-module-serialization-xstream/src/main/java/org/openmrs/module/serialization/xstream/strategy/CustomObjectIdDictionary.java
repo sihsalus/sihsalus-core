@@ -30,7 +30,7 @@ public class CustomObjectIdDictionary {
 	@SuppressWarnings("unchecked")
 	private final Map map = new LinkedHashMap();
 	
-	private static final String marker = new String("EnhancerByCGLIB");
+	private static final String marker = "EnhancerByCGLIB";
 	
 	private volatile int counter;
 	
