@@ -131,4 +131,24 @@
               and not exists (select 1 from encounter_type where name = 'Attachment Upload');
         </sql>
     </changeSet>
+
+    <changeSet id="sihsalus-attachments-002-configurable-concept-bootstrap" author="sihsalus">
+        <sql>
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.defaultConceptComplexName', 'ATT DEFAULT ATTACHMENT', 'Name used when bootstrapping the default attachment concept complex.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde421'
+            where not exists (select 1 from global_property where property = 'attachments.defaultConceptComplexName');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.defaultConceptComplexDescription', 'Concept complex for default attachment complex obs.', 'Description used when bootstrapping the default attachment concept complex.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde422'
+            where not exists (select 1 from global_property where property = 'attachments.defaultConceptComplexDescription');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.imageConceptComplexName', 'ATT IMAGE ATTACHMENT', 'Name used when bootstrapping the image attachment concept complex.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde423'
+            where not exists (select 1 from global_property where property = 'attachments.imageConceptComplexName');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'attachments.imageConceptComplexDescription', 'Concept complex for image attachments with thumbnails.', 'Description used when bootstrapping the image attachment concept complex.', '8f3a26f8-7e8f-4a53-84c7-c3ff48bde424'
+            where not exists (select 1 from global_property where property = 'attachments.imageConceptComplexDescription');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
