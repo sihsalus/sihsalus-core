@@ -10,6 +10,7 @@
 package org.openmrs.module.oauth2login.authscheme;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.User;
@@ -63,12 +64,17 @@ public class OAuth2UserInfoAuthenticationScheme extends DaoAuthenticationScheme 
 			        + getClass().getSimpleName() + " authentication scheme.", e);
 		}
 		
-		User user = getContextDAO().getUserByUsername(credentials.getClientName());
+		String clientName = credentials.getClientName();
+		if (StringUtils.isBlank(clientName)) {
+			throw new ContextAuthenticationException("OAuth2 credentials did not resolve an OpenMRS username.");
+		}
+
+		User user = getContextDAO().getUserByUsername(clientName);
 		if (!creds.isServiceAccount()) {
 			if (user == null) {
 				createUser(creds.getUserInfo());
 				// Get the user again after the user has been created
-				user = getContextDAO().getUserByUsername(credentials.getClientName());
+				user = getContextDAO().getUserByUsername(clientName);
 			} else {
 				updateUser(user, creds.getUserInfo());
 			}
@@ -76,7 +82,7 @@ public class OAuth2UserInfoAuthenticationScheme extends DaoAuthenticationScheme 
 			postProcessor.process(creds.getUserInfo());
 		}
 		if (user == null) {
-			throw new ContextAuthenticationException("No OpenMRS user found for OAuth2 client: " + credentials.getClientName());
+			throw new ContextAuthenticationException("No OpenMRS user found for OAuth2 client: " + clientName);
 		}
 		return new BasicAuthenticated(user, credentials.getAuthenticationScheme());
 	}
