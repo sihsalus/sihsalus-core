@@ -42,6 +42,10 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        if (StringUtils.isBlank(adminUsername)) {
+            throw new IllegalStateException("SIHSALUS_ADMIN_USERNAME must not be blank");
+        }
+
         List<AdminUserRecord> records =
                 jdbcTemplate.query(
                         "select user_id, username, password, salt from users "
@@ -61,6 +65,7 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
         if (!adminUsername.equals(adminUser.username())) {
             jdbcTemplate.update("update users set username = ? where user_id = ?", adminUsername, adminUser.userId());
         }
+        upsertGlobalProperty("scheduler.username", adminUsername);
 
         if (StringUtils.isNotBlank(adminPassword)) {
             String salt = StringUtils.defaultIfBlank(adminUser.salt(), Security.getRandomToken());
@@ -72,7 +77,6 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
                     salt,
                     adminUser.userId(),
                     adminUser.userId());
-            upsertGlobalProperty("scheduler.username", adminUsername);
             upsertGlobalProperty("scheduler.password", adminPassword);
         } else {
             log.warn("SIHSALUS_ADMIN_PASSWORD is not set; leaving existing OpenMRS admin password unchanged");

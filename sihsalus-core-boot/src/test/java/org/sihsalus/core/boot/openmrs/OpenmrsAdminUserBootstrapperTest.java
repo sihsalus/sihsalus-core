@@ -59,6 +59,15 @@ final class OpenmrsAdminUserBootstrapperTest {
     }
 
     @Test
+    void refusesBlankAdminUsername() {
+        insertAdminUser("admin", "already-changed", "custom-salt");
+
+        OpenmrsAdminUserBootstrapper bootstrapper = new OpenmrsAdminUserBootstrapper(jdbcTemplate, "", "");
+
+        assertThrows(IllegalStateException.class, () -> bootstrapper.run(null));
+    }
+
+    @Test
     void updatesAdminPasswordAndSchedulerCredentialsWhenPasswordIsConfigured() {
         insertAdminUser("", "4a1750c8607dfa237de36c6305715c223415189", "c788c6ad82a157b712392ca695dfcf2eed193d7f");
 
@@ -85,6 +94,22 @@ final class OpenmrsAdminUserBootstrapperTest {
 
         bootstrapper.run(null);
 
+        assertEquals("already-changed", queryString("select password from users where user_id = 1"));
+    }
+
+    @Test
+    void updatesSchedulerUsernameWhenAdminUsernameChangesWithoutPasswordRotation() {
+        insertAdminUser("admin", "already-changed", "custom-salt");
+
+        OpenmrsAdminUserBootstrapper bootstrapper =
+                new OpenmrsAdminUserBootstrapper(jdbcTemplate, "runtime-admin", "");
+
+        bootstrapper.run(null);
+
+        assertEquals("runtime-admin", queryString("select username from users where user_id = 1"));
+        assertEquals(
+                "runtime-admin",
+                queryString("select property_value from global_property where property = 'scheduler.username'"));
         assertEquals("already-changed", queryString("select password from users where user_id = 1"));
     }
 
