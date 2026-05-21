@@ -50,6 +50,9 @@ public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBefo
 	@Override
 	public void before(Method method, Object[] objects, @Nullable Object o) {
 		if (adviceMethodNames.contains(method.getName())) {
+			if (objects == null || objects.length == 0) {
+				return;
+			}
 			Appointment appointment = null;
 
 			Object firstArg = objects[0];

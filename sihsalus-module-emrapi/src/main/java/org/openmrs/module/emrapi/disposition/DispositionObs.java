@@ -12,6 +12,7 @@ package org.openmrs.module.emrapi.disposition;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class DispositionObs {
 	
@@ -49,6 +50,11 @@ public class DispositionObs {
 		}
 		
 		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(label, conceptCode, params);
 	}
 	
 	public String getLabel() {

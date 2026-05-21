@@ -49,6 +49,9 @@ public class RecurringAppointmentEventsAdvice implements AfterReturningAdvice, M
     @Override
     public void before(Method method, Object[] objects, Object o) {
         if (adviceMethodNames.contains(method.getName())) {
+            if (objects == null || objects.length == 0 || !(objects[0] instanceof AppointmentRecurringPattern)) {
+                return;
+            }
             AppointmentRecurringPattern appointmentRecurringPattern = (AppointmentRecurringPattern) objects[0];
             Map<String, Integer> appointmentInfo = new HashMap<>(1);
             appointmentInfo.put(RECURRING_APPOINTMENT_ID_KEY, appointmentRecurringPattern.getId());

@@ -37,6 +37,10 @@ public class AddressHierarchyLevel extends BaseOpenmrsObject {
 		return false;
 	}
 
+	public int hashCode() {
+		return getId() == null ? super.hashCode() : getId().hashCode();
+	}
+
 	/**
 	 * Getters and Setters
 	 */
