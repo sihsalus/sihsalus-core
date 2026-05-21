@@ -10,7 +10,6 @@
 package org.openmrs.module.billing;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.f.Action1;
@@ -243,13 +242,8 @@ public class ModuleSettings {
 	}
 	
 	private static Integer getIntProperty(String propertyName) {
-		Integer result = null;
 		String property = administrationService.getGlobalProperty(propertyName);
-		if (!StringUtils.isEmpty(property) && NumberUtils.isCreatable(property)) {
-			result = Integer.parseInt(property);
-		}
-		
-		return result;
+		return parseIntegerProperty(property);
 	}
 	
 	private static void getIntProperty(String propertyName, Action1<Integer> action) {
@@ -258,10 +252,23 @@ public class ModuleSettings {
 	
 	private static void getIntProperty(String propertyName, Integer defaultValue, Action1<Integer> action) {
 		String property = administrationService.getGlobalProperty(propertyName);
-		if (!StringUtils.isEmpty(property) && NumberUtils.isCreatable(property)) {
-			action.apply(Integer.parseInt(property));
+		Integer parsedValue = parseIntegerProperty(property);
+		if (parsedValue != null) {
+			action.apply(parsedValue);
 		} else if (defaultValue != null) {
 			action.apply(defaultValue);
+		}
+	}
+
+	private static Integer parseIntegerProperty(String property) {
+		if (StringUtils.isEmpty(property)) {
+			return null;
+		}
+		try {
+			return Integer.parseInt(property);
+		}
+		catch (NumberFormatException e) {
+			return null;
 		}
 	}
 	

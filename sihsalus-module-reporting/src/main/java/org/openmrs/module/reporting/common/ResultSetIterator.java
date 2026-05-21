@@ -92,6 +92,9 @@ public class ResultSetIterator implements Iterator<DataSetRow> {
 
     public void closeConnection() {
         try {
+            if (resultSet != null) {
+                resultSet.close();
+            }
             if (statement != null) {
                 statement.close();
             }

@@ -44,7 +44,12 @@ public class AuthenticationUtil {
         if (StringUtils.isBlank(val)) {
             return defaultValue;
         }
-        return Integer.parseInt(val);
+        try {
+            return Integer.parseInt(val);
+        }
+        catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     /**

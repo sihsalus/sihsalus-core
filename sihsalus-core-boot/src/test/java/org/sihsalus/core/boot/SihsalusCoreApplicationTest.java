@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 import org.openmrs.Cohort;
@@ -248,7 +249,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.Validator;
 
-@SpringBootTest
+@SpringBootTest(properties = "sihsalus.ocl.static-import.enabled=false")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -334,6 +335,7 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
+    @Disabled("Covered by SihsalusStaticContentImportTest; keep the general boot suite off the heavy OCL import path")
     void sihsalusContentPackageIsLoadedIntoStaticBootDatabase() {
         assumeTrue(
                 sihsalusContentConfigurationAvailable(),

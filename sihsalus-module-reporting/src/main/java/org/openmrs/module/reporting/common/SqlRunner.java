@@ -46,6 +46,8 @@ public class SqlRunner {
     private static final Pattern PARAMETER_SET_PATTERN = Pattern.compile("^\\s*set\\s+@[A-Za-z_][A-Za-z0-9_]*\\s*=.*$",
             Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern SQL_PARAMETER_NAME_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
+
     //*********** INSTANCE PROPERTIES ******************
 
     private Connection connection;
@@ -192,6 +194,7 @@ public class SqlRunner {
 
             for (String sqlStatement : sqlStatements) {
                 Statement statement = null;
+                boolean statementOwnedByIterator = false;
                 try {
                     validateReadOnlyStatement(sqlStatement);
                     statement = connection.createStatement();
@@ -205,10 +208,14 @@ public class SqlRunner {
 
                     if (resultSet != null) {
                         iterator = new ResultSetIterator(resultSet);
+                        statementOwnedByIterator = true;
                     }
                 } catch (Exception e) {
-                    closeStatement(statement);
                     throw e;
+                } finally {
+                    if (!statementOwnedByIterator) {
+                        closeStatement(statement);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -277,6 +284,7 @@ public class SqlRunner {
         List<String> statements = new ArrayList<String>();
         if (parameterValues != null) {
             for (String paramName : parameterValues.keySet()) {
+                validateParameterName(paramName);
                 Object paramValue = parameterValues.get(paramName);
                 String sqlVal = "null";
                 if (paramValue != null) {
@@ -297,6 +305,12 @@ public class SqlRunner {
             }
         }
         return statements;
+    }
+
+    private void validateParameterName(String paramName) {
+        if (paramName == null || !SQL_PARAMETER_NAME_PATTERN.matcher(paramName).matches()) {
+            throw new IllegalArgumentException("SQL parameter names must be simple identifiers");
+        }
     }
 
     private String escapeSqlLiteral(String value) {
