@@ -18,7 +18,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
-import org.openmrs.api.context.Daemon;
 import org.openmrs.module.openconceptlab.CacheService;
 import org.openmrs.module.openconceptlab.Import;
 import org.openmrs.module.openconceptlab.ImportProgress;
@@ -35,9 +34,8 @@ import org.openmrs.module.openconceptlab.client.OclClient.OclResponse;
 import org.openmrs.module.openconceptlab.client.OclConcept;
 import org.openmrs.module.openconceptlab.client.OclMapping;
 import org.openmrs.module.openconceptlab.scheduler.UpdateScheduler;
-import org.openmrs.module.DaemonToken;
-import org.openmrs.module.ModuleFactory;
 import org.openmrs.util.PrivilegeConstants;
+import org.sihsalus.core.api.StaticModuleTaskRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,12 +208,8 @@ public class Importer implements Runnable {
 	}
 
 	private void runWithOpenmrsDaemonContext(Runnable task) {
-		DaemonToken daemonToken = OpenConceptLabActivator.getDaemonToken();
-		if (ModuleFactory.isTokenValid(daemonToken)) {
-			Daemon.runInDaemonThreadAndWait(task, daemonToken);
-			return;
-		}
-		runWithStaticModulePrivileges(task);
+		StaticModuleTaskRunner.runAndWait(
+				OpenConceptLabActivator.getDaemonToken(), () -> runWithStaticModulePrivileges(task));
 	}
 
 	private void runWithStaticModulePrivileges(Runnable task) {
