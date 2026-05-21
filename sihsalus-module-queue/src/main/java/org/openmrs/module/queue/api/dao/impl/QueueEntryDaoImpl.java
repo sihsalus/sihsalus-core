@@ -158,14 +158,14 @@ public class QueueEntryDaoImpl extends AbstractBaseQueueDaoImpl<QueueEntry> impl
 		limitToGreaterThanOrEqualToProperty(hql, parameters, "qe.endedAt", searchCriteria.getEndedOnOrAfter());
 		limitToLessThanOrEqualToProperty(hql, parameters, "qe.endedAt", searchCriteria.getEndedOnOrBefore());
 		limitToEqualsProperty(hql, parameters, "qe.endedAt", searchCriteria.getEndedOn());
-		if (searchCriteria.getHasVisit() == Boolean.TRUE) {
+		if (Boolean.TRUE.equals(searchCriteria.getHasVisit())) {
 			hql.append(" and qe.visit is not null");
-		} else if (searchCriteria.getHasVisit() == Boolean.FALSE) {
+		} else if (Boolean.FALSE.equals(searchCriteria.getHasVisit())) {
 			hql.append(" and qe.visit is null");
 		}
-		if (searchCriteria.getIsEnded() == Boolean.TRUE) {
+		if (Boolean.TRUE.equals(searchCriteria.getIsEnded())) {
 			hql.append(" and qe.endedAt is not null");
-		} else if (searchCriteria.getIsEnded() == Boolean.FALSE) {
+		} else if (Boolean.FALSE.equals(searchCriteria.getIsEnded())) {
 			hql.append(" and qe.endedAt is null");
 		}
 		return new QueryParts(hql.toString(), parameters);

@@ -49,7 +49,7 @@ public class BirthdateDataEvaluator implements PersonDataEvaluator {
 		for (Object[] row : results) {
 			Integer pId = (Integer)row[0];
 			Date birthdate = (Date)row[1];
-			boolean estimated = (row[2] == Boolean.TRUE);
+			boolean estimated = Boolean.TRUE.equals(row[2]);
 			if (birthdate != null) {
 				c.addData(pId, new Birthdate(birthdate, estimated));
 			}

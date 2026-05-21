@@ -547,7 +547,7 @@ public class ModuleFileParser {
 	}
 
 	private String removeTabsAndTrim(String string) {
-		return string.replaceAll("	", "").trim();
+		return string.replace("	", "").trim();
 	}
 
 	private GlobalProperty createGlobalProperty(String property, String defaultValue, String description,

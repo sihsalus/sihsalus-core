@@ -177,7 +177,7 @@ public class ValidateUtil {
 	 * @since 2.5.8
 	 */
 	public static boolean isValidationDisabledForThread() {
-		return disableValidationForThread.get() == Boolean.TRUE;
+		return Boolean.TRUE.equals(disableValidationForThread.get());
 	}
 
 	/**

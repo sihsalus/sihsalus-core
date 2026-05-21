@@ -61,7 +61,7 @@ public class ConditionVerificationStatusTranslatorImpl implements ConditionVerif
 		Coding coding = new Coding();
 		coding.setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI);
 		coding.setCode(verificationStatus.toLowerCase());
-		coding.setDisplay(verificationStatus.replaceAll("_", "-").toUpperCase());
+		coding.setDisplay(verificationStatus.replace("_", "-").toUpperCase());
 		return coding;
 	}
 }

@@ -140,9 +140,9 @@ public class AccountServiceImpl extends BaseOpenmrsService implements AccountSer
 			//exclude daemon user
 			if (EmrApiConstants.DAEMON_USER_UUID.equals(user.getUuid())) {
 				persons.remove(user.getPerson());
-			} else if (criteria.getUserEnabled() == Boolean.TRUE && user.isRetired()) {
+			} else if (Boolean.TRUE.equals(criteria.getUserEnabled()) && user.isRetired()) {
 				persons.remove(user.getPerson());
-			} else if (criteria.getUserEnabled() == Boolean.FALSE && !user.isRetired()) {
+			} else if (Boolean.FALSE.equals(criteria.getUserEnabled()) && !user.isRetired()) {
 				persons.remove(user.getPerson());
 			}
 		}
@@ -155,10 +155,10 @@ public class AccountServiceImpl extends BaseOpenmrsService implements AccountSer
 			if (provider.equals(unknownProvider)) {
 				persons.remove(provider.getPerson());
 			}
-			if (criteria.getHasProviderRole() == Boolean.TRUE && provider.getProviderRole() == null) {
+			if (Boolean.TRUE.equals(criteria.getHasProviderRole()) && provider.getProviderRole() == null) {
 				persons.remove(provider.getPerson());
 			}
-			if (criteria.getHasProviderRole() == Boolean.FALSE && provider.getProviderRole() != null) {
+			if (Boolean.FALSE.equals(criteria.getHasProviderRole()) && provider.getProviderRole() != null) {
 				persons.remove(provider.getPerson());
 			}
 			if (criteria.getProviderRoles() != null && !criteria.getProviderRoles().isEmpty()) {

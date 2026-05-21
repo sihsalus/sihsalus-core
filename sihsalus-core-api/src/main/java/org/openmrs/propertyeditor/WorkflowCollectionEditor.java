@@ -71,7 +71,7 @@ public class WorkflowCollectionEditor extends PropertyEditorSupport {
 			Set<Integer> newConceptIds = new HashSet<>();
 
 			for (String id : conceptIds) {
-				if (id.trim().length() == 0) {
+				if (id.trim().isEmpty()) {
 					continue;
 				}
 				log.debug("trying " + id);

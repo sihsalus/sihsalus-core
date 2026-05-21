@@ -168,7 +168,7 @@ public class ResultUtil {
 		} else if (o instanceof Boolean) {
 			return Boolean.FALSE.equals(o);
 		} else if (o instanceof String) {
-			return "".equals(o);
+			return ((String) o).isEmpty();
 		} else if (o instanceof Collection<?>) {
 			return ((Collection<?>) o).isEmpty();
 		} else if (o instanceof Map<?, ?>) {

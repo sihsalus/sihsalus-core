@@ -125,7 +125,7 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
                                 .collect(Collectors.joining(","))
                         : "";
         Object[] arguments = {patientName, practitioners, appointmentDate, link};
-        if (emailTemplate == null || "".equals(emailTemplate)) {
+        if (emailTemplate == null || emailTemplate.isEmpty()) {
             return Context.getMessageSourceService().getMessage(PROP_PATIENT_EMAIL_TEMPLATE, arguments, LocaleUtility.getDefaultLocale());
         } else {
             return new MessageFormat(emailTemplate).format(arguments);
@@ -134,7 +134,7 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
 
     private String getEmailSubject() {
         String emailSubject = Context.getAdministrationService().getGlobalProperty(PROP_PATIENT_EMAIL_SUBJECT);
-        if (emailSubject == null || "".equals(emailSubject)) {
+        if (emailSubject == null || emailSubject.isEmpty()) {
             emailSubject = Context.getMessageSourceService().getMessage(PROP_PATIENT_EMAIL_SUBJECT, null, LocaleUtility.getDefaultLocale());
         }
         return emailSubject;
@@ -161,7 +161,7 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
 
     private String getAdhocTeleconsultationBCCEmails() {
         String bccEmails = Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_BCC_EMAILS);
-        if (bccEmails == null || "".equals(bccEmails)) {
+        if (bccEmails == null || bccEmails.isEmpty()) {
             bccEmails = Context.getMessageSourceService().getMessage(PROP_ADHOC_TELECONSULTATION_BCC_EMAILS, null, LocaleUtility.getDefaultLocale());
         }
         return bccEmails;

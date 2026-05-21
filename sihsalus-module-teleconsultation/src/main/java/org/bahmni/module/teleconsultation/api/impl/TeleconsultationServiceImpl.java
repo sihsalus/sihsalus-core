@@ -22,7 +22,7 @@ public class TeleconsultationServiceImpl extends BaseOpenmrsService implements T
 			throw new IllegalArgumentException("Teleconsultation uuid is required");
 		}
 		String tcServerUrl = getTeleconsultationServerUrl();
-		if ((tcServerUrl == null) || "".equals(tcServerUrl)) {
+		if (tcServerUrl == null || tcServerUrl.isEmpty()) {
 			tcServerUrl = DEFAULT_TC_SERVER_URL_PATTERN;
 		}
 		return new MessageFormat(tcServerUrl).format(new Object[] { encodeRoomId(uuid.trim()) });

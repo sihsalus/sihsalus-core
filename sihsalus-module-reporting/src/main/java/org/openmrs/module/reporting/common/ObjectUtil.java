@@ -136,7 +136,7 @@ public class ObjectUtil {
      * Returns true if object is null or empty String
      */
     public static boolean isNull(Object o) {
-    	return o == null || o.equals("");
+        return o == null || (o instanceof String && ((String) o).isEmpty());
     }
     
     /**
