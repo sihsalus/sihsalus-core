@@ -10,11 +10,13 @@
 package org.openmrs.module.billing.api.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Location;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.base.PagingInfo;
@@ -167,9 +169,16 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	@Override
 	@Transactional
 	public CashPoint retireCashPoint(CashPoint cashPoint, String retireReason) {
+		if (cashPoint == null) {
+			throw new IllegalArgumentException("Cash point cannot be null");
+		}
 		if (StringUtils.isEmpty(retireReason)) {
 			throw new IllegalArgumentException("Retire reason cannot be null or empty");
 		}
+		cashPoint.setRetired(true);
+		cashPoint.setRetiredBy(Context.getAuthenticatedUser());
+		cashPoint.setDateRetired(new Date());
+		cashPoint.setRetireReason(retireReason);
 		return cashPointDAO.saveCashPoint(cashPoint);
 	}
 	
@@ -179,6 +188,13 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	@Override
 	@Transactional
 	public CashPoint unretireCashPoint(CashPoint cashPoint) {
+		if (cashPoint == null) {
+			throw new IllegalArgumentException("Cash point cannot be null");
+		}
+		cashPoint.setRetired(false);
+		cashPoint.setRetiredBy(null);
+		cashPoint.setDateRetired(null);
+		cashPoint.setRetireReason(null);
 		return cashPointDAO.saveCashPoint(cashPoint);
 	}
 }

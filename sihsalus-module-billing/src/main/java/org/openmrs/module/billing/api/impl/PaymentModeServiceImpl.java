@@ -11,6 +11,7 @@ package org.openmrs.module.billing.api.impl;
 
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.db.PaymentModeDAO;
@@ -18,6 +19,7 @@ import org.openmrs.module.billing.api.model.PaymentMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -80,9 +82,16 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	@Override
 	@Transactional
 	public PaymentMode retirePaymentMode(PaymentMode paymentMode, String reason) {
+		if (paymentMode == null) {
+			throw new NullPointerException("Payment mode cannot be null");
+		}
 		if (StringUtils.isEmpty(reason)) {
 			throw new IllegalArgumentException("Retire reason cannot be null");
 		}
+		paymentMode.setRetired(true);
+		paymentMode.setRetiredBy(Context.getAuthenticatedUser());
+		paymentMode.setDateRetired(new Date());
+		paymentMode.setRetireReason(reason);
 		return paymentModeDAO.savePaymentMode(paymentMode);
 	}
 	
@@ -92,6 +101,13 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	@Override
 	@Transactional
 	public PaymentMode unretirePaymentMode(PaymentMode paymentMode) {
+		if (paymentMode == null) {
+			throw new NullPointerException("Payment mode cannot be null");
+		}
+		paymentMode.setRetired(false);
+		paymentMode.setRetiredBy(null);
+		paymentMode.setDateRetired(null);
+		paymentMode.setRetireReason(null);
 		return paymentModeDAO.savePaymentMode(paymentMode);
 	}
 	
