@@ -85,6 +85,8 @@ public class XStreamSerializer implements OpenmrsSerializer {
 	
 	public XStream xstream = null;
 
+	private boolean xstreamSecurityInitialized = false;
+
     @Autowired
     private HibernateCollectionConverter collectionConverter;
 
@@ -170,11 +172,12 @@ public class XStreamSerializer implements OpenmrsSerializer {
 		xstream.registerConverter(new CustomDynamicProxyConverter(), XStream.PRIORITY_VERY_HIGH);
 		// set our own defined marshalling strategy so that we can build references for cglib
 		xstream.setMarshallingStrategy(new CustomReferenceByIdMarshallingStrategy());
+		initXStreamSecurity(null);
 	}
 
     @PostConstruct
     private void init(){
-        SimpleXStreamSerializer.setupXStreamSecurity(xstream, adminService);
+        initXStreamSecurity(adminService);
 		/*
 		 * Converters so that we can better deal with the serialization/deserializtion
 		 * of cglib, sql-timestamp, hibernate collections, etc
@@ -183,6 +186,14 @@ public class XStreamSerializer implements OpenmrsSerializer {
         xstream.registerConverter(collectionConverter);
 
     }
+
+	private void initXStreamSecurity(AdministrationService administrationService) {
+		if (xstreamSecurityInitialized && administrationService == null) {
+			return;
+		}
+		SimpleXStreamSerializer.setupXStreamSecurity(xstream, administrationService);
+		xstreamSecurityInitialized = true;
+	}
 	
 	/**
 	 * Get a list of package in which we will serialize all classes in it. Here we will serialize
@@ -344,7 +355,17 @@ public class XStreamSerializer implements OpenmrsSerializer {
         if (!Context.isAuthenticated()) {
             throw new APIAuthenticationException("Authentication is required");
         }
-        return (T) xstream.fromXML(serializedObject);
+        try {
+            Object deserializedObject = xstream.fromXML(serializedObject);
+            if (deserializedObject != null && !clazz.isInstance(deserializedObject)) {
+                throw new SerializationException("Unable to deserialize " + deserializedObject.getClass().getName()
+                        + " as " + clazz.getName());
+            }
+            return (T) deserializedObject;
+        }
+        catch (XStreamException e) {
+            throw new SerializationException("Unable to deserialize class: " + clazz.getName(), e);
+        }
 	}
 	
 	/**
