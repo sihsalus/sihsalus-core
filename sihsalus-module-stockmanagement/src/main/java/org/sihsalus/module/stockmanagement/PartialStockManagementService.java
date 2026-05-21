@@ -111,6 +111,7 @@ import org.openmrs.module.stockmanagement.api.model.StockItemTransaction;
 import org.openmrs.module.stockmanagement.api.model.StockOperation;
 import org.openmrs.module.stockmanagement.api.model.StockOperationItem;
 import org.openmrs.module.stockmanagement.api.model.StockOperationLink;
+import org.openmrs.module.stockmanagement.api.model.StockOperationStatus;
 import org.openmrs.module.stockmanagement.api.model.StockOperationType;
 import org.openmrs.module.stockmanagement.api.model.StockOperationTypeLocationScope;
 import org.openmrs.module.stockmanagement.api.model.StockRule;
@@ -194,6 +195,8 @@ class PartialStockManagementService implements InvocationHandler {
                 return findUserRoleScopes((UserRoleScopeSearchFilter) args[0]);
             case "getStockOperationByUuid":
                 return byUuid(StockOperation.class, (String) args[0]);
+            case "saveStockOperation":
+                return saveStockOperation((StockOperationDTO) args[0]);
             case "getStockOperationItemsByStockOperation":
                 return getStockOperationItemsByStockOperation((Integer) args[0]);
             case "findStockOperationItems":
@@ -820,6 +823,214 @@ class PartialStockManagementService implements InvocationHandler {
 
     private boolean sameUuid(String uuid, BaseOpenmrsObject object) {
         return StringUtils.isNotBlank(uuid) && object != null && uuid.equalsIgnoreCase(object.getUuid());
+    }
+
+    private StockOperation saveStockOperation(StockOperationDTO dto) {
+        if (dto == null) {
+            throw new StockManagementException("Stock operation is required");
+        }
+        boolean isNew = StringUtils.isBlank(dto.getUuid());
+        StockOperation operation;
+        StockOperationType operationType;
+        if (isNew) {
+            operation = new StockOperation();
+            operation.setOperationOrder(1);
+            operation.setStatus(StockOperationStatus.NEW);
+            operation.setLocked(false);
+            operation.setStockOperationItems(new HashSet<>());
+            operation.setStockItemTransactions(new HashSet<>());
+            operation.setReservedTransactions(new HashSet<>());
+            operation.setParentStockOperationLinks(new HashSet<>());
+            operation.setChildStockOperationLinks(new HashSet<>());
+            operationType = requireByUuid(StockOperationType.class, dto.getOperationTypeUuid(),
+                "Stock operation type not found");
+            operation.setStockOperationType(operationType);
+        } else {
+            operation = requireByUuid(StockOperation.class, dto.getUuid(), "Stock operation not found");
+            operationType = operation.getStockOperationType();
+            if (operationType == null) {
+                throw new StockManagementException("Stock operation type not found");
+            }
+            if (operation.getStockOperationItems() == null) {
+                operation.setStockOperationItems(new HashSet<>());
+            }
+        }
+
+        applyStockOperationFields(operation, dto);
+        StockOperationLink requisitionLink = isNew ? stockOperationRequisitionLink(operationType, dto) : null;
+        List<StockOperationItem> operationItems = saveStockOperationItems(operation, operationType, dto);
+        saveOrUpdate(operation);
+        if (isNew && StringUtils.isBlank(operation.getOperationNumber())) {
+            operation.setOperationNumber(operationType.getAcronym() + "-"
+                    + StringUtils.leftPad(Integer.toString(operation.getId()), 4, '0'));
+            saveOrUpdate(operation);
+        }
+        for (StockOperationItem item : operationItems) {
+            item.setStockOperation(operation);
+            saveOrUpdate(item);
+        }
+        if (requisitionLink != null) {
+            requisitionLink.setChild(operation);
+            saveOrUpdate(requisitionLink);
+        }
+        return operation;
+    }
+
+    private void applyStockOperationFields(StockOperation operation, StockOperationDTO dto) {
+        operation.setApprovalRequired(dto.getApprovalRequired());
+        operation.setOperationDate(dto.getOperationDate());
+        operation.setExternalReference(dto.getExternalReference());
+        operation.setRemarks(StringUtils.isBlank(dto.getRemarks()) ? null : dto.getRemarks());
+        operation.setAtLocation(byUuid(Location.class, dto.getAtLocationUuid()));
+        operation.setSource(StringUtils.isBlank(dto.getSourceUuid()) ? null : byUuid(Party.class, dto.getSourceUuid()));
+        operation.setDestination(StringUtils.isBlank(dto.getDestinationUuid())
+                ? null
+                : byUuid(Party.class, dto.getDestinationUuid()));
+        operation.setReason(StringUtils.isBlank(dto.getReasonUuid())
+                ? null
+                : Context.getConceptService().getConceptByUuid(dto.getReasonUuid()));
+        if (StringUtils.isNotBlank(dto.getResponsiblePersonUuid())) {
+            User user = Context.getUserService().getUserByUuid(dto.getResponsiblePersonUuid());
+            if (user == null) {
+                throw new StockManagementException("Responsible person not found");
+            }
+            operation.setResponsiblePerson(user);
+            operation.setResponsiblePersonOther(null);
+        } else {
+            operation.setResponsiblePerson(null);
+            operation.setResponsiblePersonOther(StringUtils.isBlank(dto.getResponsiblePersonOther())
+                    ? null
+                    : dto.getResponsiblePersonOther());
+        }
+    }
+
+    private StockOperationLink stockOperationRequisitionLink(StockOperationType operationType, StockOperationDTO dto) {
+        if (operationType.canBeRelatedToRequisition() && StringUtils.isNotBlank(dto.getRequisitionStockOperationUuid())) {
+            StockOperation parent = byUuid(StockOperation.class, dto.getRequisitionStockOperationUuid());
+            if (parent == null) {
+                throw new StockManagementException("Requisition stock operation not found");
+            }
+            StockOperationLink link = new StockOperationLink();
+            link.setParent(parent);
+            return link;
+        }
+        if (StockOperationType.STOCK_ISSUE.equals(operationType.getOperationType())
+                && !GlobalProperties.allowStockIssueWithoutRequisition()) {
+            throw new StockManagementException("Requisition stock operation is required");
+        }
+        return null;
+    }
+
+    private List<StockOperationItem> saveStockOperationItems(StockOperation operation,
+            StockOperationType operationType, StockOperationDTO dto) {
+        List<StockOperationItemDTO> itemDtos = dto.getStockOperationItems() == null
+                ? new ArrayList<>()
+                : dto.getStockOperationItems();
+        List<StockOperationItem> existingItems = operation.getStockOperationItems() == null
+                ? new ArrayList<>()
+                : new ArrayList<>(operation.getStockOperationItems());
+        List<StockOperationItem> savedItems = new ArrayList<>();
+        for (StockOperationItemDTO itemDto : itemDtos) {
+            StockOperationItem item = resolveStockOperationItem(existingItems, itemDto);
+            StockItem stockItem = resolveStockOperationStockItem(itemDto);
+            item.setStockItem(stockItem);
+            if (itemDto.getQuantity() != null) {
+                item.setQuantity(itemDto.getQuantity());
+                item.setStockItemPackagingUOM(requireByUuid(StockItemPackagingUOM.class,
+                    itemDto.getStockItemPackagingUOMUuid(), "Stock item packaging unit not found"));
+            }
+            if (itemDto.getPurchasePrice() != null) {
+                item.setPurchasePrice(itemDto.getPurchasePrice());
+            }
+            item.setStockBatch(resolveStockOperationBatch(operationType, stockItem, itemDto));
+            applyStockOperationItemQuantities(item, itemDto);
+            if (operation.getStockOperationItems() != null) {
+                operation.getStockOperationItems().add(item);
+            }
+            savedItems.add(item);
+        }
+        return savedItems;
+    }
+
+    private StockOperationItem resolveStockOperationItem(List<StockOperationItem> existingItems,
+            StockOperationItemDTO itemDto) {
+        if (StringUtils.isBlank(itemDto.getUuid())) {
+            return new StockOperationItem();
+        }
+        return existingItems.stream()
+                .filter(item -> itemDto.getUuid().equals(item.getUuid()))
+                .findFirst()
+                .orElseThrow(() -> new StockManagementException("Stock operation item not found: "
+                        + itemDto.getUuid()));
+    }
+
+    private StockItem resolveStockOperationStockItem(StockOperationItemDTO itemDto) {
+        StockItem stockItem = StringUtils.isNotBlank(itemDto.getStockItemUuid())
+                ? byUuid(StockItem.class, itemDto.getStockItemUuid())
+                : first(listByIds(StockItem.class, "id", List.of(itemDto.getStockItemId())));
+        if (stockItem == null) {
+            throw new StockManagementException("Stock item not found");
+        }
+        return stockItem;
+    }
+
+    private StockBatch resolveStockOperationBatch(StockOperationType operationType, StockItem stockItem,
+            StockOperationItemDTO itemDto) {
+        if (operationType.requiresBatchUuid()) {
+            return requireByUuid(StockBatch.class, itemDto.getStockBatchUuid(), "Stock batch not found");
+        }
+        if (!operationType.requiresActualBatchInformation()) {
+            return null;
+        }
+        StockBatch stockBatch = findStockBatch(stockItem, itemDto.getBatchNo(), itemDto.getExpiration());
+        if (stockBatch != null) {
+            return stockBatch;
+        }
+        stockBatch = new StockBatch();
+        stockBatch.setStockItem(stockItem);
+        stockBatch.setBatchNo(itemDto.getBatchNo());
+        if (Boolean.TRUE.equals(stockItem.getHasExpiration())) {
+            stockBatch.setExpiration(itemDto.getExpiration());
+        }
+        saveOrUpdate(stockBatch);
+        return stockBatch;
+    }
+
+    private StockBatch findStockBatch(StockItem stockItem, String batchNo, Date expiration) {
+        if (stockItem == null || StringUtils.isBlank(batchNo)) {
+            return null;
+        }
+        List<StockBatch> batches = query(StockBatch.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("stockItem"), stockItem));
+            predicates.add(cb.equal(cb.lower(root.get("batchNo").as(String.class)),
+                batchNo.toLowerCase(Locale.ROOT)));
+            if (Boolean.TRUE.equals(stockItem.getHasExpiration())) {
+                if (expiration == null) {
+                    predicates.add(cb.isNull(root.get("expiration")));
+                } else {
+                    predicates.add(cb.equal(root.get("expiration"), expiration));
+                }
+            } else {
+                predicates.add(cb.isNull(root.get("expiration")));
+            }
+            return predicates;
+        });
+        batches.sort(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)));
+        return first(batches);
+    }
+
+    private void applyStockOperationItemQuantities(StockOperationItem item, StockOperationItemDTO itemDto) {
+        if (itemDto.getQuantityReceived() != null) {
+            item.setQuantityReceived(itemDto.getQuantityReceived());
+            item.setQuantityReceivedPackagingUOM(requireByUuid(StockItemPackagingUOM.class,
+                itemDto.getQuantityReceivedPackagingUOMUuid(), "Quantity received packaging unit not found"));
+        }
+        if (itemDto.getQuantityRequested() != null) {
+            item.setQuantityRequested(itemDto.getQuantityRequested());
+            item.setQuantityRequestedPackagingUOM(requireByUuid(StockItemPackagingUOM.class,
+                itemDto.getQuantityRequestedPackagingUOMUuid(), "Quantity requested packaging unit not found"));
+        }
     }
 
     private List<StockOperationItem> getStockOperationItemsByStockOperation(Integer stockOperationId) {
