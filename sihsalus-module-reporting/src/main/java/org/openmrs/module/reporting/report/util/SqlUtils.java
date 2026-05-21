@@ -99,7 +99,7 @@ public class SqlUtils {
 							indexList = new LinkedList<Integer>();
 							params.put(name, indexList);
 						}
-						indexList.add(new Integer(index));
+						indexList.add(Integer.valueOf(index));
 						index++;
 					}
 					s = StringUtils.join(sqlParams, ",");

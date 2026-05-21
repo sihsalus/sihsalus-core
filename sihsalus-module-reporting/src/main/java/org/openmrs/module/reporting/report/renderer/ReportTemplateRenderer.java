@@ -226,7 +226,7 @@ public abstract class ReportTemplateRenderer extends ReportDesignRenderer {
 		Object replacementValue = "";
 		if (initialValue != null) {
 				if (initialValue instanceof Cohort) {
-					replacementValue = new Integer(((Cohort) initialValue).size());
+					replacementValue = Integer.valueOf(((Cohort) initialValue).size());
 				}
 				else if (initialValue instanceof IndicatorResult) {
 					IndicatorResult ir = (IndicatorResult) initialValue;

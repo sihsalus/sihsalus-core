@@ -124,7 +124,7 @@ public class Duration implements Operand {
 	 * @return <code>Duration</code> object for given number of seconds
 	 */
 	public static Duration seconds(int duration) {
-		return seconds(new Double(duration));
+		return seconds(Double.valueOf(duration));
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class Duration implements Operand {
 	 * @return <code>Duration</code> object for given number of minutes
 	 */
 	public static Duration minutes(int duration) {
-		return minutes(new Double(duration));
+		return minutes(Double.valueOf(duration));
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class Duration implements Operand {
 	 * @return <code>Duration</code> object for given number of hours
 	 */
 	public static Duration hours(int duration) {
-		return hours(new Double(duration));
+		return hours(Double.valueOf(duration));
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class Duration implements Operand {
 	 * @return <code>Duration</code> object with specified number of days
 	 */
 	public static Duration days(int duration) {
-		return days(new Double(duration));
+		return days(Double.valueOf(duration));
 	}
 
 	/**
@@ -204,7 +204,7 @@ public class Duration implements Operand {
 	 * @return <code>Duration</code> object with specified number of weeks
 	 */
 	public static Duration weeks(int duration) {
-		return weeks(new Double(duration));
+		return weeks(Double.valueOf(duration));
 	}
 
 	/**
@@ -224,7 +224,7 @@ public class Duration implements Operand {
 	 * @return <code>Duration</code> object with specified number of months
 	 */
 	public static Duration months(int duration) {
-		return months(new Double(duration));
+		return months(Double.valueOf(duration));
 	}
 
 	/**
@@ -244,7 +244,7 @@ public class Duration implements Operand {
 	 * @return <code>Duration</code> object with specified number of years
 	 */
 	public static Duration years(int duration) {
-		return years(new Double(duration));
+		return years(Double.valueOf(duration));
 	}
 
 	/**

@@ -292,7 +292,7 @@ public class AppointmentServiceMapper {
     }
 
     private String convertTimeToString(Time time) {
-       return time != null ? time.toString() : new String();
+       return time != null ? time.toString() : "";
     }
 
     private AppointmentServiceAttributeResponse constructAttributeResponse(AppointmentServiceAttribute attribute) {
