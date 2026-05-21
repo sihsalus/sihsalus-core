@@ -55,63 +55,67 @@ import static org.openmrs.module.emrapi.EmrApiConstants.GP_VISIT_ASSIGNMENT_HAND
  * Properties (some constant, some configured via GPs) for this module.
  */
 public class EmrApiProperties {
-	
+
 	@Setter
 	private MetadataMappingService metadataMappingService;
-	
+
 	@Setter
 	private ConceptService conceptService;
-	
+
 	@Setter
 	private AdministrationService administrationService;
-	
+
 	@Setter
 	private LocationService locationService;
-	
+
 	@Setter
 	private UserService userService;
-	
+
 	@Setter
 	private PersonService personService;
-	
+
 	@Setter
 	private ProviderService providerService;
-	
+
 	@Setter
 	private DispositionService dispositionService;
-	
+
 	public String getMetadataSourceName() {
 		return EmrApiConstants.EMR_METADATA_SOURCE_NAME;
 	}
-	
+
+	public EmrApiConceptMappings getConceptMappings() {
+		return EmrApiConceptMappings.from(this::getGlobalPropertyOrDefault);
+	}
+
 	public Location getUnknownLocation() {
 		return getEmrApiMetadataByCode(Location.class, EmrApiConstants.GP_UNKNOWN_LOCATION);
 	}
-	
+
 	public Provider getUnknownProvider() {
 		return providerService.getProviderByUuid(getEmrApiMetadataUuidByCode(EmrApiConstants.GP_UNKNOWN_PROVIDER));
 	}
-	
+
 	public EncounterRole getOrderingProviderEncounterRole() {
 		return getEmrApiMetadataByCode(EncounterRole.class, EmrApiConstants.GP_ORDERING_PROVIDER_ENCOUNTER_ROLE);
 	}
-	
+
 	public Role getFullPrivilegeLevel() {
 		return userService.getRole(EmrApiConstants.PRIVILEGE_LEVEL_FULL_ROLE);
 	}
-	
+
 	public Role getHighPrivilegeLevel() {
 		return userService.getRole(EmrApiConstants.PRIVILEGE_LEVEL_HIGH_ROLE);
 	}
-	
+
 	public EncounterType getCheckInEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_CHECK_IN_ENCOUNTER_TYPE);
 	}
-	
+
 	public EncounterRole getCheckInClerkEncounterRole() {
 		return getEmrApiMetadataByCode(EncounterRole.class, EmrApiConstants.GP_CHECK_IN_CLERK_ENCOUNTER_ROLE);
 	}
-	
+
 	public EncounterType getVisitNoteEncounterType() {
 		try {
 			return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_VISIT_NOTE_ENCOUNTER_TYPE);
@@ -121,87 +125,87 @@ public class EmrApiProperties {
 			return getConsultEncounterType();
 		}
 	}
-	
+
 	@Deprecated // use visit note encounter type, as "Visit Note" is the proper naming convention
 	public EncounterType getConsultEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_CONSULT_ENCOUNTER_TYPE);
 	}
-	
+
 	public EncounterRole getClinicianEncounterRole() {
 		return getEmrApiMetadataByCode(EncounterRole.class, EmrApiConstants.GP_CLINICIAN_ENCOUNTER_ROLE);
 	}
-	
+
 	public EncounterType getAdmissionEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_ADMISSION_ENCOUNTER_TYPE, false);
 	}
-	
+
 	public EncounterType getExitFromInpatientEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_EXIT_FROM_INPATIENT_ENCOUNTER_TYPE, false);
 	}
-	
+
 	public EncounterType getTransferWithinHospitalEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_TRANSFER_WITHIN_HOSPITAL_ENCOUNTER_TYPE,
 		    false);
 	}
-	
+
 	public EncounterType getInpatientNoteEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_INPATIENT_NOTE_ENCOUNTER_TYPE, false);
 	}
-	
+
 	public EncounterType getTransferRequestEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_TRANSFER_REQUEST_ENCOUNTER_TYPE, false);
 	}
-	
+
 	public EncounterType getBedAssignmentEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_BED_ASSIGNMENT_ENCOUNTER_TYPE, false);
 	}
-	
+
 	public EncounterType getCancelADTRequestEncounterType() {
 		return getEmrApiMetadataByCode(EncounterType.class, EmrApiConstants.GP_CANCEL_ADT_REQUEST_ENCOUNTER_TYPE, false);
 	}
-	
+
 	public Form getAdmissionForm() {
 		return getEmrApiMetadataByCode(Form.class, EmrApiConstants.GP_ADMISSION_FORM, false);
 	}
-	
+
 	public Form getDischargeForm() {
 		return getEmrApiMetadataByCode(Form.class, EmrApiConstants.GP_EXIT_FROM_INPATIENT_FORM, false);
 	}
-	
+
 	public Form getTransferForm() {
 		return getEmrApiMetadataByCode(Form.class, EmrApiConstants.GP_TRANSFER_WITHIN_HOSPITAL_FORM, false);
 	}
-	
+
 	public int getVisitExpireHours() {
 		return NumberUtils.toInt(getGlobalProperty(EmrApiConstants.GP_VISIT_EXPIRE_HOURS, false),
 		    EmrApiConstants.DEFAULT_VISIT_EXPIRE_HOURS);
 	}
-	
+
 	public Integer getInpatientVisitExpireHours() {
 		String gpVal = getGlobalProperty(EmrApiConstants.GP_INPATIENT_VISIT_EXPIRE_HOURS, false);
 		return StringUtils.hasText(gpVal) ? NumberUtils.toInt(gpVal) : null;
 	}
-	
+
 	public VisitType getAtFacilityVisitType() {
 		return getEmrApiMetadataByCode(VisitType.class, EmrApiConstants.GP_AT_FACILITY_VISIT_TYPE);
 	}
-	
+
 	public LocationTag getSupportsVisitsLocationTag() {
 		return locationService.getLocationTagByName(EmrApiConstants.LOCATION_TAG_SUPPORTS_VISITS);
 	}
-	
+
 	public LocationTag getSupportsLoginLocationTag() {
 		return locationService.getLocationTagByName(EmrApiConstants.LOCATION_TAG_SUPPORTS_LOGIN);
 	}
-	
+
 	public LocationTag getSupportsAdmissionLocationTag() {
 		return locationService.getLocationTagByName(EmrApiConstants.LOCATION_TAG_SUPPORTS_ADMISSION);
 	}
-	
+
 	public LocationTag getSupportsTransferLocationTag() {
 		return locationService.getLocationTagByName(EmrApiConstants.LOCATION_TAG_SUPPORTS_TRANSFER);
 	}
-	
+
 	public PersonAttributeType getTestPatientPersonAttributeType() {
 		PersonAttributeType type = null;
 		type = personService.getPersonAttributeTypeByUuid(EmrApiConstants.TEST_PATIENT_ATTRIBUTE_UUID);
@@ -210,7 +214,7 @@ public class EmrApiProperties {
 		}
 		return type;
 	}
-	
+
 	public PersonAttributeType getTelephoneAttributeType() {
 		String lookup = getGlobalProperty(EmrApiConstants.GP_TELEPHONE_ATTRIBUTE_TYPE_NAME, false);
 		if (!StringUtils.hasText(lookup)) {
@@ -222,7 +226,7 @@ public class EmrApiProperties {
 		}
 		return type;
 	}
-	
+
 	public PersonAttributeType getUnknownPatientPersonAttributeType() {
 		PersonAttributeType type = null;
 		type = personService.getPersonAttributeTypeByName(EmrApiConstants.UNKNOWN_PATIENT_PERSON_ATTRIBUTE_TYPE_NAME);
@@ -232,19 +236,19 @@ public class EmrApiProperties {
 		}
 		return type;
 	}
-	
+
 	public PatientIdentifierType getPrimaryIdentifierType() {
 		return getEmrApiMetadataByCode(PatientIdentifierType.class, EmrApiConstants.PRIMARY_IDENTIFIER_TYPE, true);
 	}
-	
+
 	public List<PatientIdentifierType> getExtraPatientIdentifierTypes() {
 		return getPatientIdentifierTypesByCode(EmrApiConstants.GP_EXTRA_PATIENT_IDENTIFIER_TYPES);
 	}
-	
+
 	public DiagnosisMetadata getDiagnosisMetadata() {
-		return new DiagnosisMetadata(conceptService, getEmrApiConceptSource());
+		return new DiagnosisMetadata(conceptService, getEmrApiConceptSource(), getConceptMappings());
 	}
-	
+
 	public List<ConceptSource> getConceptSourcesForDiagnosisSearch() {
 		//The results can very well be cached to reduce calls to database.
 		//however the compatibility requirement to core 1.9.9 do not allow this currently
@@ -262,15 +266,21 @@ public class EmrApiProperties {
 		}
 		return conceptSourceList;
 	}
-	
+
 	public ConceptSource getEmrApiConceptSource() {
-		return conceptService.getConceptSourceByName(EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+		String conceptSourceName = getConceptMappings().getConceptSourceName();
+		ConceptSource conceptSource = conceptService.getConceptSourceByName(conceptSourceName);
+		if (conceptSource == null) {
+			throw new IllegalStateException("Configuration required: " + EmrApiConstants.GP_EMR_CONCEPT_SOURCE_NAME
+			        + " points to missing concept source " + conceptSourceName);
+		}
+		return conceptSource;
 	}
-	
+
 	protected Concept getEmrApiConceptByMapping(String code) {
 		return getSingleConceptByMapping(getEmrApiConceptSource(), code);
 	}
-	
+
 	// won't throw an exception if no concept with that mapping found
 	// Metadata Deploy should probably provide a method like this
 	protected Concept getEmrApiConceptByMappingAllowUndefined(String code) {
@@ -284,27 +294,27 @@ public class EmrApiProperties {
 			        + getEmrApiConceptSource().getName() + ":" + code);
 		}
 	}
-	
+
 	public Concept getUnknownCauseOfDeathConcept() {
-		return getEmrApiConceptByMapping(EmrApiConstants.CONCEPT_CODE_UNKNOWN_CAUSE_OF_DEATH);
+		return getEmrApiConceptByMapping(getConceptMappings().getUnknownCauseOfDeathCode());
 	}
-	
+
 	public Concept getAdmissionDecisionConcept() {
-		return getEmrApiConceptByMapping(EmrApiConstants.CONCEPT_CODE_ADMISSION_DECISION);
+		return getEmrApiConceptByMapping(getConceptMappings().getAdmissionDecisionCode());
 	}
-	
+
 	public Concept getDenyAdmissionConcept() {
-		return getEmrApiConceptByMapping(EmrApiConstants.CONCEPT_CODE_DENY_ADMISSION);
+		return getEmrApiConceptByMapping(getConceptMappings().getDenyAdmissionCode());
 	}
-	
+
 	public Concept getPatientDiedConcept() {
-		return getEmrApiConceptByMappingAllowUndefined(EmrApiConstants.CONCEPT_CODE_PATIENT_DIED);
+		return getEmrApiConceptByMappingAllowUndefined(getConceptMappings().getPatientDiedCode());
 	}
-	
+
 	public Concept getConsultFreeTextCommentsConcept() {
-		return getEmrApiConceptByMapping(EmrApiConstants.CONCEPT_CODE_CONSULT_FREE_TEXT_COMMENTS);
+		return getEmrApiConceptByMapping(getConceptMappings().getConsultFreeTextCommentsCode());
 	}
-	
+
 	public List<PatientIdentifierType> getIdentifierTypesToSearch() {
 		ArrayList<PatientIdentifierType> types = new ArrayList<PatientIdentifierType>();
 		types.add(getPrimaryIdentifierType());
@@ -318,7 +328,7 @@ public class EmrApiProperties {
 		}
 		return types;
 	}
-	
+
 	/**
 	 * Expects there to be a GP configured to point to a concept set, which is a set of other concept
 	 * sets. E.g. "HUM Diagnosis Sets" contains "HUM Outpatient Diagnosis Set", "HUM ER Diagnosis Set",
@@ -338,10 +348,10 @@ public class EmrApiProperties {
 			return null;
 		}
 	}
-	
+
 	public Collection<Concept> getNonDiagnosisConceptSets() {
 		Collection<Concept> concepts = getConceptsByGlobalProperty(EmrApiConstants.GP_NON_DIAGNOSIS_CONCEPT_SETS);
-		
+
 		for (Concept concept : concepts) {
 			if (!concept.isSet()) {
 				throw new IllegalStateException("Invalid configuration: concept '" + concept.getUuid() + "' defined in "
@@ -350,19 +360,19 @@ public class EmrApiProperties {
 		}
 		return concepts;
 	}
-	
+
 	public Collection<Concept> getSuppressedDiagnosisConcepts() {
 		return getConceptsByGlobalProperty(EmrApiConstants.GP_SUPPRESSED_DIAGNOSIS_CONCEPTS);
 	}
-	
+
 	public ConceptMapType getSameAsConceptMapType() {
-		return conceptService.getConceptMapTypeByUuid(EmrApiConstants.SAME_AS_CONCEPT_MAP_TYPE_UUID);
+		return conceptService.getConceptMapTypeByUuid(getConceptMappings().getSameAsConceptMapTypeUuid());
 	}
-	
+
 	public ConceptMapType getNarrowerThanConceptMapType() {
-		return conceptService.getConceptMapTypeByUuid(EmrApiConstants.NARROWER_THAN_CONCEPT_MAP_TYPE_UUID);
+		return conceptService.getConceptMapTypeByUuid(getConceptMappings().getNarrowerThanConceptMapTypeUuid());
 	}
-	
+
 	public Integer getLastViewedPatientSizeLimit() {
 		String limit = administrationService.getGlobalProperty(EmrApiConstants.GP_LAST_VIEWED_PATIENT_SIZE_LIMIT);
 		if (StringUtils.hasText(limit)) {
@@ -370,42 +380,42 @@ public class EmrApiProperties {
 				return Integer.valueOf(limit);
 			}
 			catch (NumberFormatException e) {
-				
+
 			}
 		}
 		return EmrApiConstants.DEFAULT_LAST_VIEWED_PATIENT_SIZE_LIMIT;
 	}
-	
+
 	public File getPersonImageDirectory() {
 		String personImagesDir = getGlobalProperty(EmrApiConstants.GP_PERSON_IMAGES_DIRECTORY, false);
 		if (personImagesDir == null || personImagesDir.isEmpty()) {
 			File appDataDirectory = new File(OpenmrsUtil.getApplicationDataDirectory());
 			personImagesDir = appDataDirectory.getAbsolutePath() + "/person_images";
 		}
-		
+
 		return new File(personImagesDir);
 	}
-	
+
 	public Boolean getVisitAssignmentHandlerAdjustEncounterTimeOfDayIfNecessary() {
 		return "TRUE".equalsIgnoreCase(
 		    getGlobalProperty(GP_VISIT_ASSIGNMENT_HANDLER_ADJUST_ENCOUNTER_TIME_OF_DAY_IF_NECESSARY, false));
 	}
-	
+
 	public List<Disposition> getDispositions() {
 		return dispositionService.getDispositions();
 	}
-	
+
 	public DispositionDescriptor getDispositionDescriptor() {
 		return dispositionService.getDispositionDescriptor();
 	}
-	
+
 	public RelationshipType getMotherChildRelationshipType() {
 		return getEmrApiMetadataByCode(RelationshipType.class,
 		    EmrApiConstants.METADATA_MAPPING_MOTHER_CHILD_RELATIONSHIP_TYPE, false);
 	}
-	
+
 	// Copied over from metadatamapping moduleproperties
-	
+
 	protected ConceptSource getConceptSourceByCode(String mappingCode) {
 		ConceptSource conceptSource = getEmrApiMetadataByCode(ConceptSource.class, mappingCode);
 		if (conceptSource == null) {
@@ -413,16 +423,16 @@ public class EmrApiProperties {
 		}
 		return conceptSource;
 	}
-	
+
 	protected List<PatientIdentifierType> getPatientIdentifierTypesByCode(String code) {
 		MetadataSet metadataSet = getEmrApiMetadataByCode(MetadataSet.class, code);
 		return metadataMappingService.getMetadataSetItems(PatientIdentifierType.class, metadataSet);
 	}
-	
+
 	protected String getEmrApiMetadataUuidByCode(String mappingCode) {
 		return getEmrApiMetadataUuidByCode(mappingCode, true);
 	}
-	
+
 	protected String getEmrApiMetadataUuidByCode(String mappingCode, boolean required) {
 		MetadataTermMapping mapping = metadataMappingService.getMetadataTermMapping(getEmrApiMetadataSource(), mappingCode);
 		if (mapping != null && mapping.getMetadataUuid() != null) {
@@ -433,11 +443,11 @@ public class EmrApiProperties {
 			return null;
 		}
 	}
-	
+
 	protected MetadataSource getEmrApiMetadataSource() {
 		return metadataMappingService.getMetadataSourceByName(getMetadataSourceName());
 	}
-	
+
 	protected <T extends OpenmrsMetadata> T getEmrApiMetadataByCode(Class<T> type, String code, boolean required) {
 		T metadataItem = metadataMappingService.getMetadataItem(type, getMetadataSourceName(), code);
 		if (required && metadataItem == null) {
@@ -446,11 +456,11 @@ public class EmrApiProperties {
 			return metadataItem;
 		}
 	}
-	
+
 	protected <T extends OpenmrsMetadata> T getEmrApiMetadataByCode(Class<T> type, String code) {
 		return getEmrApiMetadataByCode(type, code, true);
 	}
-	
+
 	protected Concept getSingleConceptByMapping(ConceptSource conceptSource, String code) {
 		List<Concept> candidates = conceptService.getConceptsByMapping(code, conceptSource.getName(), false);
 		if (candidates.size() == 0) {
@@ -463,7 +473,7 @@ public class EmrApiProperties {
 			        "Configuration required: found more than one concept mapped as " + conceptSource.getName() + ":" + code);
 		}
 	}
-	
+
 	protected Integer getIntegerByGlobalProperty(String globalPropertyName) {
 		String globalProperty = getGlobalProperty(globalPropertyName, true);
 		try {
@@ -474,7 +484,7 @@ public class EmrApiProperties {
 			        + " is not parsable as an Integer");
 		}
 	}
-	
+
 	protected String getGlobalProperty(String globalPropertyName, boolean required) {
 		String globalProperty = administrationService.getGlobalProperty(globalPropertyName);
 		if (required && org.apache.commons.lang3.StringUtils.isEmpty(globalProperty)) {
@@ -482,16 +492,21 @@ public class EmrApiProperties {
 		}
 		return globalProperty;
 	}
-	
+
+	protected String getGlobalPropertyOrDefault(String globalPropertyName, String defaultValue) {
+		String globalProperty = administrationService.getGlobalProperty(globalPropertyName);
+		return org.apache.commons.lang3.StringUtils.isNotBlank(globalProperty) ? globalProperty.trim() : defaultValue;
+	}
+
 	protected Collection<Concept> getConceptsByGlobalProperty(String gpName) {
 		String gpValue = getGlobalProperty(gpName, false);
-		
+
 		if (!org.springframework.util.StringUtils.hasText(gpValue)) {
 			return Collections.emptyList();
 		}
-		
+
 		List<Concept> result = new ArrayList<Concept>();
-		
+
 		String[] concepts = gpValue.split("\\,");
 		for (String concept : concepts) {
 			Concept foundConcept = conceptService.getConceptByUuid(concept);
@@ -501,7 +516,7 @@ public class EmrApiProperties {
 					foundConcept = conceptService.getConceptByMapping(mapping[0], mapping[1]);
 				}
 			}
-			
+
 			if (foundConcept != null) {
 				result.add(foundConcept);
 			} else {
@@ -509,7 +524,7 @@ public class EmrApiProperties {
 				        "Invalid configuration: concept '" + concept + "' defined in " + gpName + " does not exist");
 			}
 		}
-		
+
 		return result;
 	}
 }

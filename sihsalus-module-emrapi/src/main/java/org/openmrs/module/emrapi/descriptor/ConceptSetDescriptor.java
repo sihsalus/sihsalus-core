@@ -173,8 +173,8 @@ public abstract class ConceptSetDescriptor {
 				}
 			}
 		}
-		throw new IllegalStateException("Cannot find answer mapped with " + EmrApiConstants.EMR_CONCEPT_SOURCE_NAME + ":"
-		        + codeForAnswer + " in the concept " + concept.getName());
+		throw new IllegalStateException("Cannot find answer mapped with " + conceptSource + ":" + codeForAnswer
+		        + " in the concept " + concept.getName());
 	}
 	
 	private boolean hasConceptMapping(Concept concept, String sourceName, String codeToLookFor) {

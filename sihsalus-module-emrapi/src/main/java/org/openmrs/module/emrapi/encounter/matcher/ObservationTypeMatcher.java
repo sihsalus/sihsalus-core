@@ -12,7 +12,7 @@ package org.openmrs.module.emrapi.encounter.matcher;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.emrapi.EmrApiConstants;
+import org.openmrs.module.emrapi.EmrApiConceptMappings;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.diagnosis.DiagnosisMetadata;
 import org.openmrs.module.emrapi.encounter.exception.ConceptNotFoundException;
@@ -63,21 +63,22 @@ public class ObservationTypeMatcher {
 	}
 	
 	private Concept getDispositionGroupConcept() {
-		Concept concept = conceptService.getConceptByMapping(EmrApiConstants.CONCEPT_CODE_DISPOSITION_CONCEPT_SET,
-		    EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+		EmrApiConceptMappings mappings = emrApiProperties.getConceptMappings();
+		Concept concept = conceptService.getConceptByMapping(mappings.getDispositionConceptSetCode(),
+		    mappings.getConceptSourceName());
 		if (concept == null) {
 			throw new ConceptNotFoundException("Disposition group concept does not exist. Code : "
-			        + EmrApiConstants.CONCEPT_CODE_DISPOSITION_CONCEPT_SET);
+			        + mappings.getDispositionConceptSetCode());
 		}
 		return concept;
 	}
 	
 	private Concept getDispositionConcept() {
-		Concept concept = conceptService.getConceptByMapping(EmrApiConstants.CONCEPT_CODE_DISPOSITION,
-		    EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+		EmrApiConceptMappings mappings = emrApiProperties.getConceptMappings();
+		Concept concept = conceptService.getConceptByMapping(mappings.getDispositionCode(), mappings.getConceptSourceName());
 		if (concept == null) {
 			throw new ConceptNotFoundException(
-			        "Disposition concept does not exist. Code : " + EmrApiConstants.CONCEPT_CODE_DISPOSITION);
+			        "Disposition concept does not exist. Code : " + mappings.getDispositionCode());
 		}
 		return concept;
 	}

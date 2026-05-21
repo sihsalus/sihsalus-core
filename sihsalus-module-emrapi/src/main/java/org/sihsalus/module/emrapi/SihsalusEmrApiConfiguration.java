@@ -121,10 +121,13 @@ public class SihsalusEmrApiConfiguration {
         return service;
     }
 
-    @Bean
-    DispositionService dispositionService(ConceptService conceptService, EmrConceptService emrConceptService) {
-        return new DispositionServiceImpl(conceptService, emrConceptService);
-    }
+	@Bean
+	DispositionService dispositionService(ConceptService conceptService, EmrConceptService emrConceptService,
+	        EmrApiProperties emrApiProperties) {
+		DispositionServiceImpl service = new DispositionServiceImpl(conceptService, emrConceptService);
+		service.setEmrApiProperties(emrApiProperties);
+		return service;
+	}
 
     @Bean
     SmartInitializingSingleton emrApiPropertiesDispositionBinder(

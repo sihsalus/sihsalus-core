@@ -261,8 +261,9 @@
         </property>
         <property name="target">
             <bean class="org.openmrs.module.emrapi.disposition.DispositionServiceImpl">
-                <constructor-arg ref="emrConceptService"/>
-                <constructor-arg ref="conceptService"/>
+                <constructor-arg name="conceptService" ref="conceptService"/>
+                <constructor-arg name="emrConceptService" ref="emrConceptService"/>
+                <property name="emrApiProperties" ref="emrApiProperties"/>
             </bean>
         </property>
         <property name="preInterceptors">
@@ -330,7 +331,8 @@
     </bean>
 
     <bean id="encounterDispositionServiceHelper" class="org.openmrs.module.emrapi.encounter.EncounterDispositionServiceHelper">
-        <constructor-arg ref="conceptService"/>
+        <constructor-arg name="conceptService" ref="conceptService"/>
+        <constructor-arg name="emrApiProperties" ref="emrApiProperties"/>
     </bean>
 
     <bean id="encounterProviderServiceHelper" class="org.openmrs.module.emrapi.encounter.EncounterProviderServiceHelper">
@@ -381,6 +383,7 @@
     <bean id="dispositionMapper" class="org.openmrs.module.emrapi.encounter.DispositionMapper">
         <constructor-arg name="conceptService" ref="conceptService"/>
         <constructor-arg name="userMapper" ref="userMapper"/>
+        <constructor-arg name="emrApiProperties" ref="emrApiProperties"/>
     </bean>
 
     <bean id="observationTypeMatcher" class="org.openmrs.module.emrapi.encounter.matcher.ObservationTypeMatcher">

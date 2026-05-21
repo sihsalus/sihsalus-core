@@ -15,7 +15,8 @@ import org.openmrs.ConceptAnswer;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.emrapi.EmrApiConstants;
+import org.openmrs.module.emrapi.EmrApiConceptMappings;
+import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 import org.openmrs.module.emrapi.encounter.exception.ConceptNotFoundException;
 
@@ -27,21 +28,28 @@ import java.util.Set;
 import static org.openmrs.module.emrapi.utils.GeneralUtils.getCurrentDateIfNull;
 
 public class EncounterDispositionServiceHelper {
-	
+
 	private ConceptService conceptService;
-	
+
 	private Concept dispositionConcept;
-	
+
 	private Concept dispositionGroupConcept;
-	
+
+	private EmrApiProperties emrApiProperties;
+
 	public EncounterDispositionServiceHelper(ConceptService conceptService) {
+		this(conceptService, null);
+	}
+
+	public EncounterDispositionServiceHelper(ConceptService conceptService, EmrApiProperties emrApiProperties) {
 		this.conceptService = conceptService;
+		this.emrApiProperties = emrApiProperties;
 	}
-	
+
 	public EncounterDispositionServiceHelper() {
-		
+
 	}
-	
+
 	public void update(Encounter encounter, EncounterTransaction.Disposition disposition) {
 		try {
 			if (isValid(disposition)) {
@@ -62,7 +70,7 @@ public class EncounterDispositionServiceHelper {
 			throw new IllegalArgumentException(e);
 		}
 	}
-	
+
 	private Obs voidDisposition(Obs existingDispositionObsGroup, EncounterTransaction.Disposition disposition) {
 		existingDispositionObsGroup.setVoided(disposition.isVoided());
 		existingDispositionObsGroup.setVoidReason(disposition.getVoidReason());
@@ -72,17 +80,17 @@ public class EncounterDispositionServiceHelper {
 		}
 		return existingDispositionObsGroup;
 	}
-	
+
 	private Obs createObsGroupForDisposition(EncounterTransaction.Disposition disposition) throws ParseException {
 		Date dispositionDateTime = new Date();
 		Obs obs = new Obs();
 		obs.setConcept(dispositionGroupConcept);
 		obs.setObsDatetime(dispositionDateTime);
-		
+
 		Obs dispositionAsObservation = mapDispositionProperties(new Obs(), disposition.getCode());
 		dispositionAsObservation.setObsDatetime(dispositionDateTime);
 		obs.addGroupMember(dispositionAsObservation);
-		
+
 		if (disposition.getAdditionalObs() != null) {
 			for (EncounterTransaction.Observation etObservation : disposition.getAdditionalObs()) {
 				if (etObservation.getValue() != null && !((String) etObservation.getValue()).isEmpty()) {
@@ -92,7 +100,7 @@ public class EncounterDispositionServiceHelper {
 		}
 		return obs;
 	}
-	
+
 	private Obs editExistingDisposition(Obs existingDispositionObsGroup, EncounterTransaction.Disposition disposition)
 	        throws ParseException {
 		Obs existingDisposition = getMatchingObservation(existingDispositionObsGroup.getGroupMembers(),
@@ -111,7 +119,7 @@ public class EncounterDispositionServiceHelper {
 		}
 		return existingDispositionObsGroup;
 	}
-	
+
 	private Obs getExistingDisposition(Encounter encounter) {
 		Set<Obs> obsAtTopLevel = encounter.getObsAtTopLevel(false);
 		for (Obs obs : obsAtTopLevel) {
@@ -121,14 +129,14 @@ public class EncounterDispositionServiceHelper {
 		}
 		return null;
 	}
-	
+
 	private Obs createObsFromETObservation(EncounterTransaction.Observation observation) throws ParseException {
 		Obs obs = new Obs();
 		updateObsFromObservation(observation, obs);
 		obs.setObsDatetime(new Date());
 		return obs;
 	}
-	
+
 	private Obs updateObsFromObservation(EncounterTransaction.Observation observation, Obs obs) throws ParseException {
 		if (observation != null && obs != null) {
 			obs.setConcept(getConceptByUuid(observation.getConceptUuid()));
@@ -142,7 +150,7 @@ public class EncounterDispositionServiceHelper {
 		}
 		return obs;
 	}
-	
+
 	private Obs mapDispositionProperties(Obs dispositionObs, String dispositionCode) {
 		if (dispositionObs != null) {
 			dispositionObs.setConcept(dispositionConcept);
@@ -150,27 +158,28 @@ public class EncounterDispositionServiceHelper {
 		}
 		return dispositionObs;
 	}
-	
+
 	private Concept getDispositionConcept() {
-		Concept concept = conceptService.getConceptByMapping(EmrApiConstants.CONCEPT_CODE_DISPOSITION,
-		    EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+		EmrApiConceptMappings mappings = getConceptMappings();
+		Concept concept = conceptService.getConceptByMapping(mappings.getDispositionCode(), mappings.getConceptSourceName());
 		if (concept == null) {
 			throw new ConceptNotFoundException(
-			        "Disposition concept does not exist. Code : " + EmrApiConstants.CONCEPT_CODE_DISPOSITION);
+			        "Disposition concept does not exist. Code : " + mappings.getDispositionCode());
 		}
 		return concept;
 	}
-	
+
 	private Concept getDispositionGroupConcept() {
-		Concept concept = conceptService.getConceptByMapping(EmrApiConstants.CONCEPT_CODE_DISPOSITION_CONCEPT_SET,
-		    EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+		EmrApiConceptMappings mappings = getConceptMappings();
+		Concept concept = conceptService.getConceptByMapping(mappings.getDispositionConceptSetCode(),
+		    mappings.getConceptSourceName());
 		if (concept == null) {
 			throw new ConceptNotFoundException("Disposition group concept does not exist. Code : "
-			        + EmrApiConstants.CONCEPT_CODE_DISPOSITION_CONCEPT_SET);
+			        + mappings.getDispositionConceptSetCode());
 		}
 		return concept;
 	}
-	
+
 	private Concept getConceptByUuid(String conceptUuid) {
 		Concept concept = conceptService.getConceptByUuid(conceptUuid);
 		if (concept == null) {
@@ -178,7 +187,7 @@ public class EncounterDispositionServiceHelper {
 		}
 		return concept;
 	}
-	
+
 	private Obs getMatchingObservation(Set<Obs> existingObservations, String conceptUUID) {
 		for (Obs obs : existingObservations) {
 			if (StringUtils.equals(obs.getConcept().getUuid(), conceptUUID))
@@ -186,9 +195,9 @@ public class EncounterDispositionServiceHelper {
 		}
 		return null;
 	}
-	
+
 	private Concept getMatchingAnswer(Collection<ConceptAnswer> answers, String dispositionCode) {
-		Concept answerConcept = conceptService.getConceptByMapping(dispositionCode, EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+		Concept answerConcept = conceptService.getConceptByMapping(dispositionCode, getConceptMappings().getConceptSourceName());
 		for (ConceptAnswer answer : answers) {
 			if (answerConcept.getUuid().equals(answer.getAnswerConcept().getUuid())) {
 				return answerConcept;
@@ -197,12 +206,16 @@ public class EncounterDispositionServiceHelper {
 		throw new IllegalArgumentException(
 		        "Concept with code " + dispositionCode + " does not belong to this observation group");
 	}
-	
+
 	private boolean isValid(EncounterTransaction.Disposition disposition) {
 		if (disposition == null || StringUtils.isEmpty(disposition.getCode())) {
 			return false;
 		}
 		return true;
 	}
-	
+
+	private EmrApiConceptMappings getConceptMappings() {
+		return emrApiProperties == null ? EmrApiConceptMappings.defaults() : emrApiProperties.getConceptMappings();
+	}
+
 }
