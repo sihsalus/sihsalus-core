@@ -10,6 +10,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -278,6 +280,14 @@ class PartialStockManagementService implements InvocationHandler {
                         ? getStockInventory((StockItemInventorySearchFilter) args[0],
                             (HashSet<RecordPrivilegeFilter>) args[1])
                         : getStockInventory((StockItemInventorySearchFilter) args[0], null);
+            case "getStockInventoryForecastData":
+                getStockInventoryForecastData((StockItemInventorySearchFilter) args[0],
+                    (Function<Object[], Boolean>) args[1]);
+                return null;
+            case "getStockInventoryExpiryForecastData":
+                getStockInventoryExpiryForecastData((StockItemInventorySearchFilter) args[0],
+                    (Function<Object[], Boolean>) args[1]);
+                return null;
             case "postProcessInventoryResult":
                 return postProcessInventoryResult((StockItemInventorySearchFilter) args[0],
                     (StockInventoryResult) args[1]);
@@ -1307,6 +1317,284 @@ class PartialStockManagementService implements InvocationHandler {
         inventories.sort(comparator.thenComparing(StockItemInventory::getStockItemId,
             Comparator.nullsLast(Integer::compareTo)));
         return resultFromList(inventories, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private void getStockInventoryForecastData(StockItemInventorySearchFilter filter,
+            Function<Object[], Boolean> consumer) {
+        if (consumer == null) {
+            return;
+        }
+        StockItemInventorySearchFilter safeFilter = filter == null ? new StockItemInventorySearchFilter() : filter;
+        if (!hasUsableForecastFilter(safeFilter)) {
+            return;
+        }
+        boolean groupByParty = true;
+        boolean groupByStockItem = true;
+        boolean groupByBatch = true;
+        StockItemInventorySearchFilter.InventoryGroupBy groupBy = safeFilter.getInventoryGroupBy();
+        if (groupBy != null) {
+            groupByParty = groupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItem
+                    || groupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo;
+            groupByStockItem = groupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItem
+                    || groupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo
+                    || groupBy == StockItemInventorySearchFilter.InventoryGroupBy.StockItemOnly;
+            groupByBatch = groupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo;
+        }
+        List<LocalDate> months = forecastMonths(safeFilter);
+        Map<String, ForecastAccumulator> accumulators = new LinkedHashMap<>();
+        for (StockItemTransaction transaction : forecastTransactions(safeFilter, false)) {
+            if (!matchesForecastFilters(transaction, safeFilter)) {
+                continue;
+            }
+            Integer partyId = groupByParty && transaction.getParty() != null ? transaction.getParty().getId() : null;
+            Integer stockItemId = groupByStockItem && transaction.getStockItem() != null
+                    ? transaction.getStockItem().getId()
+                    : null;
+            Integer stockBatchId = groupByBatch && transaction.getStockBatch() != null
+                    ? transaction.getStockBatch().getId()
+                    : null;
+            ForecastAccumulator accumulator = accumulators.computeIfAbsent(
+                forecastKey(partyId, stockItemId, stockBatchId, null),
+                ignored -> new ForecastAccumulator(partyId, stockItemId, stockBatchId, null, months.size()));
+            addForecastTransaction(accumulator, transaction, months, safeFilter, false);
+        }
+        for (ForecastAccumulator accumulator : accumulators.values()) {
+            if (!Boolean.TRUE.equals(consumer.apply(accumulator.toForecastRow()))) {
+                break;
+            }
+        }
+    }
+
+    private void getStockInventoryExpiryForecastData(StockItemInventorySearchFilter filter,
+            Function<Object[], Boolean> consumer) {
+        if (consumer == null) {
+            return;
+        }
+        StockItemInventorySearchFilter safeFilter = filter == null ? new StockItemInventorySearchFilter() : filter;
+        if (!hasUsableForecastFilter(safeFilter)) {
+            return;
+        }
+        List<LocalDate> months = forecastMonths(safeFilter);
+        Map<String, ForecastAccumulator> accumulators = new LinkedHashMap<>();
+        for (StockItemTransaction transaction : forecastTransactions(safeFilter, true)) {
+            if (!matchesForecastFilters(transaction, safeFilter)) {
+                continue;
+            }
+            StockItem stockItem = transaction.getStockItem();
+            StockBatch stockBatch = transaction.getStockBatch();
+            Integer stockItemId = stockItem == null ? null : stockItem.getId();
+            Integer stockBatchId = stockBatch == null ? null : stockBatch.getId();
+            Date expiration = stockBatch == null ? null : stockBatch.getExpiration();
+            ForecastAccumulator accumulator = accumulators.computeIfAbsent(
+                forecastKey(null, stockItemId, stockBatchId, expiration),
+                ignored -> new ForecastAccumulator(null, stockItemId, stockBatchId, expiration, months.size()));
+            addForecastTransaction(accumulator, transaction, months, safeFilter, true);
+        }
+        for (ForecastAccumulator accumulator : accumulators.values()) {
+            if (!Boolean.TRUE.equals(consumer.apply(accumulator.toExpiryForecastRow()))) {
+                break;
+            }
+        }
+    }
+
+    private boolean hasUsableForecastFilter(StockItemInventorySearchFilter filter) {
+        if (filter.getStartDate() == null || filter.getEndDate() == null) {
+            return false;
+        }
+        if (!filter.isRequireItemGroupFilters()) {
+            return true;
+        }
+        return filter.getItemGroupFilters() != null
+                && filter.getItemGroupFilters().stream().anyMatch(this::hasForecastItemGroupConstraint);
+    }
+
+    private List<StockItemTransaction> forecastTransactions(StockItemInventorySearchFilter filter,
+            boolean requireExpiringBatch) {
+        Date today = DateUtil.today();
+        return query(StockItemTransaction.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<StockItemTransaction, StockBatch> batch = root.join("stockBatch", JoinType.INNER);
+            Join<StockItemTransaction, StockItem> stockItem = root.join("stockItem", JoinType.INNER);
+            Join<StockItemTransaction, StockItemPackagingUOM> uom = root.join("stockItemPackagingUOM", JoinType.INNER);
+            predicates.add(cb.isNotNull(uom.get("id")));
+            if (requireExpiringBatch) {
+                predicates.add(cb.greaterThan(batch.<Date>get("expiration"), filter.getStartDate()));
+            } else {
+                predicates.add(cb.or(cb.isNull(batch.get("expiration")),
+                    cb.greaterThan(batch.<Date>get("expiration"), filter.getStartDate())));
+            }
+            if (filter.getStockItemCategoryConceptId() != null) {
+                predicates.add(cb.equal(stockItem.get("category").get("conceptId"),
+                    filter.getStockItemCategoryConceptId()));
+            }
+            return predicates;
+        }).stream()
+                .filter(transaction -> transaction.getStockBatch() != null)
+                .filter(transaction -> transaction.getStockItemPackagingUOM() != null)
+                .filter(transaction -> !requireExpiringBatch || transaction.getStockBatch().getExpiration() != null)
+                .filter(transaction -> transaction.getStockBatch().getExpiration() == null
+                        || transaction.getStockBatch().getExpiration().after(today)
+                        || transaction.getDateCreated() != null)
+                .sorted(Comparator
+                        .comparing((StockItemTransaction transaction) -> transaction.getStockItem() == null
+                                ? null
+                                : transaction.getStockItem().getId(), Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(transaction -> transaction.getStockBatch() == null
+                                ? null
+                                : transaction.getStockBatch().getExpiration(), Comparator.nullsLast(Date::compareTo))
+                        .thenComparing(this::objectId, Comparator.nullsLast(Integer::compareTo)))
+                .collect(Collectors.toList());
+    }
+
+    private boolean matchesForecastFilters(StockItemTransaction transaction, StockItemInventorySearchFilter filter) {
+        if (filter.getUnRestrictedPartyIds() != null && !filter.getUnRestrictedPartyIds().isEmpty()) {
+            Integer partyId = transaction.getParty() == null ? null : transaction.getParty().getId();
+            if (!filter.getUnRestrictedPartyIds().contains(partyId)) {
+                return false;
+            }
+        }
+        if (filter.getItemGroupFilters() == null || filter.getItemGroupFilters().isEmpty()) {
+            return true;
+        }
+        return filter.getItemGroupFilters().stream()
+                .filter(this::hasForecastItemGroupConstraint)
+                .anyMatch(group -> forecastItemGroupMatches(transaction, group));
+    }
+
+    private boolean hasForecastItemGroupConstraint(StockItemInventorySearchFilter.ItemGroupFilter group) {
+        return group != null
+                && ((group.getPartyIds() != null && !group.getPartyIds().isEmpty())
+                        || (group.getPartyUuids() != null && !group.getPartyUuids().isEmpty())
+                        || group.getStockItemId() != null
+                        || StringUtils.isNotBlank(group.getStockItemUuid())
+                        || (group.getStockBatchIds() != null && !group.getStockBatchIds().isEmpty()));
+    }
+
+    private boolean forecastItemGroupMatches(StockItemTransaction transaction,
+            StockItemInventorySearchFilter.ItemGroupFilter group) {
+        Party party = transaction.getParty();
+        StockItem stockItem = transaction.getStockItem();
+        StockBatch batch = transaction.getStockBatch();
+        if (group.getPartyIds() != null && !group.getPartyIds().isEmpty()
+                && (party == null || !group.getPartyIds().contains(party.getId()))) {
+            return false;
+        }
+        if (group.getPartyUuids() != null && !group.getPartyUuids().isEmpty()
+                && (party == null || !group.getPartyUuids().contains(party.getUuid()))) {
+            return false;
+        }
+        if (group.getStockItemId() != null
+                && (stockItem == null || !Objects.equals(stockItem.getId(), group.getStockItemId()))) {
+            return false;
+        }
+        if (StringUtils.isNotBlank(group.getStockItemUuid())
+                && (stockItem == null || !group.getStockItemUuid().equals(stockItem.getUuid()))) {
+            return false;
+        }
+        return group.getStockBatchIds() == null || group.getStockBatchIds().isEmpty()
+                || (batch != null && group.getStockBatchIds().contains(batch.getId()));
+    }
+
+    private void addForecastTransaction(ForecastAccumulator accumulator, StockItemTransaction transaction,
+            List<LocalDate> months, StockItemInventorySearchFilter filter, boolean expiryOnly) {
+        BigDecimal quantity = stockItemTransactionQuantity(transaction);
+        if (quantity == null) {
+            quantity = BigDecimal.ZERO;
+        }
+        StockBatch batch = transaction.getStockBatch();
+        Date today = DateUtil.today();
+        if (batch != null && (batch.getExpiration() == null || batch.getExpiration().after(today))) {
+            accumulator.quantity = accumulator.quantity.add(quantity);
+        }
+        if (transaction.getQuantity() == null || transaction.getQuantity().compareTo(BigDecimal.ZERO) >= 0
+                || transaction.getDateCreated() == null || transaction.getDateCreated().before(filter.getStartDate())
+                || transaction.getDateCreated().after(filter.getEndDate())) {
+            return;
+        }
+        int monthIndex = forecastMonthIndex(transaction.getDateCreated(), months);
+        if (monthIndex >= 0) {
+            accumulator.consumedByMonth[monthIndex] = accumulator.consumedByMonth[monthIndex]
+                    .add(quantity.abs());
+        }
+    }
+
+    private List<LocalDate> forecastMonths(StockItemInventorySearchFilter filter) {
+        List<LocalDate> months = new ArrayList<>();
+        LocalDate start = filter.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                .withDayOfMonth(1);
+        LocalDate end = filter.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                .withDayOfMonth(1);
+        while (!start.isAfter(end)) {
+            months.add(start);
+            start = start.plusMonths(1);
+        }
+        return months;
+    }
+
+    private int forecastMonthIndex(Date date, List<LocalDate> months) {
+        LocalDate month = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().withDayOfMonth(1);
+        for (int i = 0; i < months.size(); i++) {
+            if (months.get(i).equals(month)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private String forecastKey(Integer partyId, Integer stockItemId, Integer stockBatchId, Date expiration) {
+        return partyId + ":" + stockItemId + ":" + stockBatchId + ":"
+                + (expiration == null ? "" : expiration.getTime());
+    }
+
+    private static class ForecastAccumulator {
+
+        private final Integer partyId;
+
+        private final Integer stockItemId;
+
+        private final Integer stockBatchId;
+
+        private final Date expiration;
+
+        private final BigDecimal[] consumedByMonth;
+
+        private BigDecimal quantity = BigDecimal.ZERO;
+
+        ForecastAccumulator(Integer partyId, Integer stockItemId, Integer stockBatchId, Date expiration,
+                int monthCount) {
+            this.partyId = partyId;
+            this.stockItemId = stockItemId;
+            this.stockBatchId = stockBatchId;
+            this.expiration = expiration;
+            this.consumedByMonth = new BigDecimal[monthCount];
+            for (int i = 0; i < consumedByMonth.length; i++) {
+                consumedByMonth[i] = BigDecimal.ZERO;
+            }
+        }
+
+        Object[] toForecastRow() {
+            Object[] row = new Object[3 + consumedByMonth.length + 1];
+            row[0] = partyId;
+            row[1] = stockItemId;
+            row[2] = stockBatchId;
+            for (int i = 0; i < consumedByMonth.length; i++) {
+                row[3 + i] = consumedByMonth[i];
+            }
+            row[row.length - 1] = quantity;
+            return row;
+        }
+
+        Object[] toExpiryForecastRow() {
+            Object[] row = new Object[3 + consumedByMonth.length + 1];
+            row[0] = stockItemId;
+            row[1] = stockBatchId;
+            row[2] = expiration;
+            for (int i = 0; i < consumedByMonth.length; i++) {
+                row[3 + i] = consumedByMonth[i];
+            }
+            row[row.length - 1] = quantity;
+            return row;
+        }
     }
 
     private void setStockItemInformation(List<StockItemInventory> inventories) {
