@@ -66,6 +66,7 @@
       <column defaultValueBoolean="false" name="has_expiration" type="BOOLEAN">
         <constraints nullable="false" />
       </column>
+      <column name="expiry_notice" type="INT" />
       <column name="preferred_vendor_id" type="INT" />
       <column name="purchase_price" type="DECIMAL(10,2)" />
       <column name="purchase_price_uom_id" type="INT" />
@@ -74,6 +75,7 @@
       <column name="default_stock_operations_uom_id" type="INT" />
       <column name="common_name" type="VARCHAR(255)" />
       <column name="acronym" type="VARCHAR(255)" />
+      <column name="category_id" type="INT" />
       <column name="is_drug" type="BOOLEAN">
         <constraints nullable="false" />
       </column>
@@ -4689,6 +4691,31 @@ CREATE TRIGGER stockmgmt_location_after_delete
         <constraints nullable="false" />
       </column>
     </addColumn>
+  </changeSet>
+
+  <changeSet id="sihsalus-stockmanagement-stock-item-runtime-schema-20260520" author="sihsalus">
+    <comment>Ensure the stock management schema matches the static Hibernate entity mappings.</comment>
+    <sql splitStatements="true">
+      ALTER TABLE stockmgmt_stock_item ADD COLUMN IF NOT EXISTS category_id INT;
+      ALTER TABLE stockmgmt_stock_item ADD COLUMN IF NOT EXISTS expiry_notice INT;
+      CREATE INDEX IF NOT EXISTS stockmgmt_stock_item_category_id_fk ON stockmgmt_stock_item(category_id);
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS alert_role VARCHAR(50);
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS mail_role VARCHAR(50);
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS last_action_date TIMESTAMP;
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS enable_descendants BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS next_action_date TIMESTAMP;
+      ALTER TABLE stockmgmt_stock_batch ADD COLUMN IF NOT EXISTS expiry_notification_date TIMESTAMP;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_submitted BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_approved BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_completed BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_cancelled BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_rejected BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_returned BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_dispatched BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS allow_expired_batch_numbers BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS allow_batch_info_update BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_item_reference ADD COLUMN IF NOT EXISTS uuid VARCHAR(38);
+    </sql>
   </changeSet>
 
   <changeSet id="sihsalus-stockmanagement-create-static-privileges-20260519" author="sihsalus">

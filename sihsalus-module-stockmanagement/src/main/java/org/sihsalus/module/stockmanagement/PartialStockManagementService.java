@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.Root;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -36,6 +37,8 @@ import org.openmrs.api.context.Context;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.stockmanagement.StockLocationTags;
 import org.openmrs.module.stockmanagement.api.StockManagementException;
+import org.openmrs.module.stockmanagement.api.dto.BatchJobDTO;
+import org.openmrs.module.stockmanagement.api.dto.BatchJobOwnerDTO;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.PartyDTO;
 import org.openmrs.module.stockmanagement.api.dto.PartySearchFilter;
@@ -52,6 +55,7 @@ import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeLocationDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeOperationTypeDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeSearchFilter;
 import org.openmrs.module.stockmanagement.api.model.BatchJob;
+import org.openmrs.module.stockmanagement.api.model.BatchJobOwner;
 import org.openmrs.module.stockmanagement.api.model.BatchJobStatus;
 import org.openmrs.module.stockmanagement.api.model.LocationTree;
 import org.openmrs.module.stockmanagement.api.model.OrderItem;
@@ -70,6 +74,7 @@ import org.openmrs.module.stockmanagement.api.model.UserRoleScope;
 import org.openmrs.module.stockmanagement.api.model.UserRoleScopeLocation;
 import org.openmrs.module.stockmanagement.api.model.UserRoleScopeOperationType;
 import org.openmrs.module.stockmanagement.api.reporting.Report;
+import org.openmrs.module.stockmanagement.api.utils.GlobalProperties;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -159,6 +164,9 @@ class PartialStockManagementService implements InvocationHandler {
                 if (args[0] instanceof UserRoleScope) {
                     return saveOrUpdate(args[0]);
                 }
+                if (args[0] instanceof UserRoleScopeDTO) {
+                    return saveUserRoleScope((UserRoleScopeDTO) args[0]);
+                }
                 throw unsupported(method);
             case "saveUserRoleScopeLocation":
             case "saveUserRoleScopeOperationType":
@@ -166,7 +174,7 @@ class PartialStockManagementService implements InvocationHandler {
             case "saveStockItemReference":
                 return saveOrUpdate(args[0]);
             case "voidUserRoleScopes":
-                voidByUuids(UserRoleScope.class, (List<String>) args[0], (String) args[1], (Integer) args[2]);
+                voidByUuids(UserRoleScope.class, (List<String>) args[0], (String) args[1], null);
                 return null;
             case "voidUserRoleScopeLocations":
                 voidByUuids(UserRoleScopeLocation.class, (List<String>) args[0], (String) args[1], (Integer) args[2]);
@@ -271,11 +279,23 @@ class PartialStockManagementService implements InvocationHandler {
                     saveOrUpdate(args[0]);
                     return null;
                 }
+                if (args[0] instanceof BatchJobDTO) {
+                    return saveBatchJob((BatchJobDTO) args[0]);
+                }
                 throw unsupported(method);
             case "findBatchJobs":
                 return findBatchJobs((BatchJobSearchFilter) args[0]);
+            case "cancelBatchJob":
+                cancelBatchJob((String) args[0], (String) args[1]);
+                return null;
+            case "failBatchJob":
+                failBatchJob((String) args[0], (String) args[1]);
+                return null;
+            case "expireBatchJob":
+                expireBatchJob((String) args[0], (String) args[1]);
+                return null;
             case "getReports":
-                return new ArrayList<Report>();
+                return Report.getAllReports();
             case "getNextActiveBatchJob":
                 return getNextActiveBatchJob();
             case "getBatchJobByUuid":
@@ -487,6 +507,136 @@ class PartialStockManagementService implements InvocationHandler {
             dto.setOperationTypeName(operationType.getStockOperationType().getName());
         }
         return dto;
+    }
+
+    private UserRoleScope saveUserRoleScope(UserRoleScopeDTO dto) {
+        if (dto == null) {
+            throw new StockManagementException("User role scope payload is required");
+        }
+
+        UserRoleScope userRoleScope;
+        if (StringUtils.isNotBlank(dto.getUuid())) {
+            userRoleScope = byUuid(UserRoleScope.class, dto.getUuid());
+            if (userRoleScope == null) {
+                throw new StockManagementException("User role scope " + dto.getUuid() + " not found");
+            }
+            rejectSelfUserRoleScopeUpdate(userRoleScope.getUser());
+        } else {
+            userRoleScope = new UserRoleScope();
+            User user = Context.getUserService().getUserByUuid(dto.getUserUuid());
+            if (user == null) {
+                throw new StockManagementException("User role scope user not found");
+            }
+            rejectSelfUserRoleScopeUpdate(user);
+            userRoleScope.setUser(user);
+        }
+
+        Role role = Context.getUserService().getRole(dto.getRole());
+        if (role == null) {
+            throw new StockManagementException("User role scope role not found");
+        }
+
+        userRoleScope.setRole(role);
+        if (dto.getPermanent() != null) {
+            userRoleScope.setPermanent(dto.getPermanent());
+        }
+        userRoleScope.setActiveFrom(dto.getActiveFrom());
+        userRoleScope.setActiveTo(dto.getActiveTo());
+        userRoleScope.setEnabled(Boolean.TRUE.equals(dto.getEnabled()));
+
+        List<UserRoleScopeLocation> locationsToRemove = dto.getLocations() == null ? new ArrayList<>()
+                : activeUserRoleScopeLocations(userRoleScope).stream()
+                        .filter(location -> dto.getLocations().stream()
+                                .noneMatch(incoming -> sameUuid(incoming.getLocationUuid(), location.getLocation())))
+                        .collect(Collectors.toList());
+        List<UserRoleScopeOperationType> operationTypesToRemove = dto.getOperationTypes() == null ? new ArrayList<>()
+                : activeUserRoleScopeOperationTypes(userRoleScope).stream()
+                        .filter(operationType -> dto.getOperationTypes().stream()
+                                .noneMatch(incoming -> sameUuid(
+                                    incoming.getOperationTypeUuid(), operationType.getStockOperationType())))
+                        .collect(Collectors.toList());
+
+        userRoleScope = saveOrUpdate(userRoleScope);
+
+        for (UserRoleScopeLocation location : locationsToRemove) {
+            voidByUuid(UserRoleScopeLocation.class, location.getUuid(), null, null);
+        }
+        for (UserRoleScopeOperationType operationType : operationTypesToRemove) {
+            voidByUuid(UserRoleScopeOperationType.class, operationType.getUuid(), null, null);
+        }
+        saveUserRoleScopeLocations(userRoleScope, dto.getLocations());
+        saveUserRoleScopeOperationTypes(userRoleScope, dto.getOperationTypes());
+
+        return userRoleScope;
+    }
+
+    private void rejectSelfUserRoleScopeUpdate(User user) {
+        User authenticatedUser = authenticatedUser();
+        if (user != null && authenticatedUser != null && user.getUuid().equalsIgnoreCase(authenticatedUser.getUuid())) {
+            throw new StockManagementException("Users cannot update their own stock management role scopes");
+        }
+    }
+
+    private void saveUserRoleScopeLocations(UserRoleScope userRoleScope, List<UserRoleScopeLocationDTO> locationDtos) {
+        if (locationDtos == null) {
+            return;
+        }
+        for (UserRoleScopeLocationDTO locationDto : locationDtos) {
+            Location location = Context.getLocationService().getLocationByUuid(locationDto.getLocationUuid());
+            if (location == null) {
+                throw new StockManagementException("User role scope location not found");
+            }
+            UserRoleScopeLocation scopeLocation = activeUserRoleScopeLocations(userRoleScope).stream()
+                    .filter(existing -> sameUuid(locationDto.getLocationUuid(), existing.getLocation()))
+                    .findFirst()
+                    .orElseGet(UserRoleScopeLocation::new);
+            scopeLocation.setUserRoleScope(userRoleScope);
+            scopeLocation.setLocation(location);
+            scopeLocation.setEnableDescendants(Boolean.TRUE.equals(locationDto.getEnableDescendants()));
+            saveOrUpdate(scopeLocation);
+        }
+    }
+
+    private void saveUserRoleScopeOperationTypes(
+            UserRoleScope userRoleScope, List<UserRoleScopeOperationTypeDTO> operationTypeDtos) {
+        if (operationTypeDtos == null) {
+            return;
+        }
+        for (UserRoleScopeOperationTypeDTO operationTypeDto : operationTypeDtos) {
+            StockOperationType operationType = byUuid(StockOperationType.class, operationTypeDto.getOperationTypeUuid());
+            if (operationType == null) {
+                throw new StockManagementException("User role scope operation type not found");
+            }
+            UserRoleScopeOperationType scopeOperationType = activeUserRoleScopeOperationTypes(userRoleScope).stream()
+                    .filter(existing -> sameUuid(operationTypeDto.getOperationTypeUuid(), existing.getStockOperationType()))
+                    .findFirst()
+                    .orElseGet(UserRoleScopeOperationType::new);
+            scopeOperationType.setUserRoleScope(userRoleScope);
+            scopeOperationType.setStockOperationType(operationType);
+            saveOrUpdate(scopeOperationType);
+        }
+    }
+
+    private List<UserRoleScopeLocation> activeUserRoleScopeLocations(UserRoleScope userRoleScope) {
+        if (userRoleScope.getUserRoleScopeLocations() == null) {
+            return new ArrayList<>();
+        }
+        return userRoleScope.getUserRoleScopeLocations().stream()
+                .filter(location -> !Boolean.TRUE.equals(location.getVoided()))
+                .collect(Collectors.toList());
+    }
+
+    private List<UserRoleScopeOperationType> activeUserRoleScopeOperationTypes(UserRoleScope userRoleScope) {
+        if (userRoleScope.getUserRoleScopeOperationTypes() == null) {
+            return new ArrayList<>();
+        }
+        return userRoleScope.getUserRoleScopeOperationTypes().stream()
+                .filter(operationType -> !Boolean.TRUE.equals(operationType.getVoided()))
+                .collect(Collectors.toList());
+    }
+
+    private boolean sameUuid(String uuid, BaseOpenmrsObject object) {
+        return StringUtils.isNotBlank(uuid) && object != null && uuid.equalsIgnoreCase(object.getUuid());
     }
 
     private List<StockOperationItem> getStockOperationItemsByStockOperation(Integer stockOperationId) {
@@ -996,8 +1146,9 @@ class PartialStockManagementService implements InvocationHandler {
             return predicates(cb.equal(stockItem.get("id"), finalStockItemId),
                 cb.equal(packaging.get("conceptId"), finalConceptId));
         });
-        matches.sort(Comparator.comparing(StockItemPackagingUOM::getVoided, Comparator.nullsFirst(Boolean::compareTo))
-                .reversed());
+        matches.sort(Comparator
+                .comparing((StockItemPackagingUOM uom) -> Boolean.TRUE.equals(uom.getVoided()))
+                .thenComparing(this::objectId, Comparator.nullsLast(Integer::compareTo)));
         return first(matches);
     }
 
@@ -1051,7 +1202,15 @@ class PartialStockManagementService implements InvocationHandler {
         }
     }
 
-    private Result findBatchJobs(BatchJobSearchFilter filter) {
+    private Result<BatchJobDTO> findBatchJobs(BatchJobSearchFilter filter) {
+        BatchJobSearchFilter safeFilter = filter == null ? new BatchJobSearchFilter() : filter;
+        List<BatchJobDTO> dtos = findBatchJobEntities(safeFilter).stream()
+                .map(this::batchJobToDto)
+                .collect(Collectors.toList());
+        return resultFromList(dtos, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private List<BatchJob> findBatchJobEntities(BatchJobSearchFilter filter) {
         BatchJobSearchFilter safeFilter = filter == null ? new BatchJobSearchFilter() : filter;
         List<BatchJob> jobs = query(BatchJob.class, (cb, root) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -1094,7 +1253,163 @@ class PartialStockManagementService implements InvocationHandler {
             return predicates;
         });
         jobs.sort(Comparator.comparing(BatchJob::getDateCreated, Comparator.nullsLast(Date::compareTo)).reversed());
-        return resultFromList(jobs, safeFilter.getStartIndex(), safeFilter.getLimit());
+        return jobs;
+    }
+
+    private BatchJobDTO saveBatchJob(BatchJobDTO dto) {
+        Location locationScope = StringUtils.isBlank(dto.getLocationScopeUuid())
+                ? null
+                : Context.getLocationService().getLocationByUuid(dto.getLocationScopeUuid());
+        if (StringUtils.isNotBlank(dto.getLocationScopeUuid()) && locationScope == null) {
+            throw new StockManagementException("Batch job location scope not found");
+        }
+
+        BatchJobSearchFilter filter = new BatchJobSearchFilter();
+        filter.setBatchJobType(dto.getBatchJobType());
+        filter.setParameters(dto.getParameters());
+        filter.setPrivilegeScope(dto.getPrivilegeScope());
+        filter.setBatchJobStatus(List.of(BatchJobStatus.Pending, BatchJobStatus.Running));
+        if (locationScope != null) {
+            filter.setLocationScopeIds(List.of(locationScope.getId()));
+        }
+
+        BatchJob batchJob = first(findBatchJobEntities(filter));
+        User currentUser = authenticatedUser();
+        Date now = new Date();
+        if (batchJob == null) {
+            batchJob = new BatchJob();
+            batchJob.setCreator(currentUser);
+            batchJob.setDateCreated(now);
+            batchJob.setBatchJobType(dto.getBatchJobType());
+            batchJob.setStatus(BatchJobStatus.Pending);
+            batchJob.setDescription(dto.getDescription());
+            batchJob.setExpiration(minutesFromNow(GlobalProperties.getBatchJobExpiryInMinutes()));
+            batchJob.setParameters(dto.getParameters());
+            batchJob.setPrivilegeScope(dto.getPrivilegeScope());
+            batchJob.setLocationScope(locationScope);
+        }
+
+        if (currentUser != null && (batchJob.getBatchJobOwners() == null
+                || batchJob.getBatchJobOwners().stream()
+                        .noneMatch(owner -> owner.getOwner() != null
+                                && Objects.equals(owner.getOwner().getId(), currentUser.getId())))) {
+            BatchJobOwner owner = new BatchJobOwner();
+            owner.setOwner(currentUser);
+            owner.setDateCreated(now);
+            batchJob.addBatchJobOwner(owner);
+        }
+        return batchJobToDto(saveOrUpdate(batchJob));
+    }
+
+    private void failBatchJob(String uuid, String reason) {
+        BatchJob job = requireTransitionableBatchJob(uuid);
+        if (job == null) {
+            return;
+        }
+        job.setExitMessage(truncate(reason, 2500));
+        job.setStatus(BatchJobStatus.Failed);
+        saveOrUpdate(job);
+    }
+
+    private void cancelBatchJob(String uuid, String reason) {
+        BatchJob job = requireTransitionableBatchJob(uuid);
+        if (job == null) {
+            return;
+        }
+        job.setStatus(BatchJobStatus.Cancelled);
+        job.setCancelReason(truncate(reason, 500));
+        job.setCancelledBy(authenticatedUser());
+        job.setCancelledDate(new Date());
+        saveOrUpdate(job);
+    }
+
+    private void expireBatchJob(String uuid, String reason) {
+        BatchJob job = byUuid(BatchJob.class, uuid);
+        if (job == null) {
+            return;
+        }
+        job.setStatus(BatchJobStatus.Expired);
+        if (job.getStartTime() != null) {
+            job.setEndTime(new Date());
+        }
+        job.setExitMessage(truncate(reason, 2500));
+        saveOrUpdate(job);
+    }
+
+    private BatchJob requireTransitionableBatchJob(String uuid) {
+        BatchJob job = byUuid(BatchJob.class, uuid);
+        if (job == null) {
+            return null;
+        }
+        if (job.getStatus() != BatchJobStatus.Pending && job.getStatus() != BatchJobStatus.Running) {
+            throw new StockManagementException("Batch job is not cancellable");
+        }
+        return job;
+    }
+
+    private BatchJobDTO batchJobToDto(BatchJob job) {
+        BatchJobDTO dto = new BatchJobDTO();
+        dto.setId(job.getId());
+        dto.setUuid(job.getUuid());
+        dto.setBatchJobType(job.getBatchJobType());
+        dto.setStatus(job.getStatus());
+        dto.setDescription(job.getDescription());
+        dto.setStartTime(job.getStartTime());
+        dto.setEndTime(job.getEndTime());
+        dto.setExpiration(job.getExpiration());
+        dto.setParameters(job.getParameters());
+        dto.setPrivilegeScope(job.getPrivilegeScope());
+        dto.setExecutionState(job.getExecutionState());
+        dto.setCancelReason(job.getCancelReason());
+        dto.setCancelledDate(job.getCancelledDate());
+        dto.setExitMessage(job.getExitMessage());
+        dto.setCompletedDate(job.getCompletedDate());
+        dto.setDateCreated(job.getDateCreated());
+        dto.setVoided(Boolean.TRUE.equals(job.getVoided()));
+        dto.setOutputArtifactSize(job.getOutputArtifactSize());
+        dto.setOutputArtifactFileExt(job.getOutputArtifactFileExt());
+        dto.setOutputArtifactViewable(job.getOutputArtifactViewable());
+        if (job.getCreator() != null) {
+            dto.setCreator(job.getCreator().getId());
+            dto.setCreatorUuid(job.getCreator().getUuid());
+            dto.setCreatorGivenName(job.getCreator().getGivenName());
+            dto.setCreatorFamilyName(job.getCreator().getFamilyName());
+        }
+        if (job.getCancelledBy() != null) {
+            dto.setCancelledBy(job.getCancelledBy().getId());
+            dto.setCancelledByUuid(job.getCancelledBy().getUuid());
+            dto.setCancelledByGivenName(job.getCancelledBy().getGivenName());
+            dto.setCancelledByFamilyName(job.getCancelledBy().getFamilyName());
+        }
+        if (job.getLocationScope() != null) {
+            dto.setLocationScope(job.getLocationScope().getName());
+            dto.setLocationScopeId(job.getLocationScope().getId());
+            dto.setLocationScopeUuid(job.getLocationScope().getUuid());
+        }
+        if (job.getBatchJobOwners() != null) {
+            dto.setOwners(job.getBatchJobOwners().stream()
+                    .map(this::batchJobOwnerToDto)
+                    .collect(Collectors.toList()));
+        }
+        return dto;
+    }
+
+    private BatchJobOwnerDTO batchJobOwnerToDto(BatchJobOwner owner) {
+        BatchJobOwnerDTO dto = new BatchJobOwnerDTO();
+        dto.setId(owner.getId());
+        dto.setUuid(owner.getUuid());
+        dto.setDateCreated(owner.getDateCreated());
+        if (owner.getBatchJob() != null) {
+            dto.setBatchJobId(owner.getBatchJob().getId());
+            dto.setBatchJobUuid(owner.getBatchJob().getUuid());
+        }
+        if (owner.getOwner() != null) {
+            dto.setOwnerUserId(owner.getOwner().getId());
+            dto.setOwnerUserUuid(owner.getOwner().getUuid());
+            dto.setOwnerGivenName(owner.getOwner().getGivenName());
+            dto.setOwnerFamilyName(owner.getOwner().getFamilyName());
+        }
+        return dto;
     }
 
     private BatchJob getNextActiveBatchJob() {
@@ -1111,8 +1426,11 @@ class PartialStockManagementService implements InvocationHandler {
             return;
         }
         job.setStatus(status);
+        if (status == BatchJobStatus.Running && job.getStartTime() == null) {
+            job.setStartTime(new Date());
+        }
         if (reason != null) {
-            job.setExitMessage(reason);
+            job.setExitMessage(truncate(reason, 2500));
         }
         saveOrUpdate(job);
     }
@@ -1147,7 +1465,7 @@ class PartialStockManagementService implements InvocationHandler {
     private List<StockItemReference> getStockItemReferenceByStockItem(String uuid) {
         StockItem stockItem = byUuid(StockItem.class, uuid);
         if (stockItem == null) {
-            return null;
+            return new ArrayList<>();
         }
         return query(StockItemReference.class, (cb, root) -> predicates(
             cb.equal(root.get("stockItem"), stockItem),
@@ -1399,6 +1717,19 @@ class PartialStockManagementService implements InvocationHandler {
 
     private <T> T first(List<T> values) {
         return values == null || values.isEmpty() ? null : values.get(0);
+    }
+
+    private Date minutesFromNow(int minutes) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, minutes);
+        return calendar.getTime();
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null || value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength);
     }
 
     private <T> List<T> sortedById(List<T> values) {

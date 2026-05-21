@@ -30,6 +30,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
@@ -224,6 +225,8 @@ import org.openmrs.module.serialization.xstream.XStreamSerializer;
 import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
 import org.openmrs.module.stockmanagement.api.Privileges;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
+import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeDTO;
+import org.openmrs.module.stockmanagement.api.reporting.Report;
 import org.openmrs.module.webservices.rest.web.resource.api.Converter;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.api.RestService;
@@ -1071,6 +1074,232 @@ class SihsalusCoreApplicationTest {
             assertThrows(APIAuthenticationException.class,
                     () -> stockManagementService.getStockOperationByUuid("not-a-real-stock-operation"));
         } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
+    void stockManagementVoidUserRoleScopesUsesAuthenticatedUser() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+        boolean authenticatedBeforeTest = Context.isAuthenticated();
+        if (!authenticatedBeforeTest) {
+            Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
+        }
+
+        try {
+            Integer adminUserId = jdbcTemplate.queryForObject(
+                    "select user_id from users where username = ?",
+                    Integer.class,
+                    TEST_ADMIN_USERNAME);
+            String role = jdbcTemplate.queryForObject("select role from role order by role limit 1", String.class);
+            String scopeUuid = UUID.randomUUID().toString();
+
+            jdbcTemplate.update(
+                    "insert into stockmgmt_user_role_scope "
+                            + "(user_id, role, is_permanent, enabled, creator, date_created, voided, uuid) "
+                            + "values (?, ?, true, true, ?, current_timestamp, false, ?)",
+                    adminUserId,
+                    role,
+                    adminUserId,
+                    scopeUuid);
+
+            StockManagementService stockManagementService = Context.getService(StockManagementService.class);
+            assertDoesNotThrow(() -> stockManagementService.voidUserRoleScopes(List.of(scopeUuid), "test void"));
+
+            assertEquals(Boolean.TRUE, jdbcTemplate.queryForObject(
+                    "select voided from stockmgmt_user_role_scope where uuid = ?",
+                    Boolean.class,
+                    scopeUuid));
+            assertEquals(adminUserId, jdbcTemplate.queryForObject(
+                    "select voided_by from stockmgmt_user_role_scope where uuid = ?",
+                    Integer.class,
+                    scopeUuid));
+        } finally {
+            if (!authenticatedBeforeTest && Context.isSessionOpen()) {
+                Context.logout();
+            }
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
+    void stockManagementSaveUserRoleScopeAcceptsDtoPayloads() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+        boolean authenticatedBeforeTest = Context.isAuthenticated();
+        if (!authenticatedBeforeTest) {
+            Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
+        }
+
+        try {
+            List<String> userUuids = jdbcTemplate.queryForList(
+                    "select uuid from users where username <> ? order by user_id limit 1",
+                    String.class,
+                    TEST_ADMIN_USERNAME);
+            assumeTrue(!userUuids.isEmpty());
+
+            String role = jdbcTemplate.queryForObject("select role from role order by role limit 1", String.class);
+            Integer existingScopes = jdbcTemplate.queryForObject(
+                    "select count(*) from stockmgmt_user_role_scope urs "
+                            + "join users u on u.user_id = urs.user_id "
+                            + "where u.uuid = ? and urs.role = ? and urs.voided = false",
+                    Integer.class,
+                    userUuids.get(0),
+                    role);
+            UserRoleScopeDTO dto = new UserRoleScopeDTO();
+            dto.setUserUuid(userUuids.get(0));
+            dto.setRole(role);
+            dto.setPermanent(true);
+            dto.setEnabled(true);
+            dto.setLocations(Collections.emptyList());
+            dto.setOperationTypes(Collections.emptyList());
+
+            StockManagementService stockManagementService = Context.getService(StockManagementService.class);
+            assertDoesNotThrow(() -> stockManagementService.saveUserRoleScope(dto));
+
+            assertEquals(existingScopes + 1, jdbcTemplate.queryForObject(
+                    "select count(*) from stockmgmt_user_role_scope urs "
+                            + "join users u on u.user_id = urs.user_id "
+                            + "where u.uuid = ? and urs.role = ? and urs.voided = false",
+                    Integer.class,
+                    userUuids.get(0),
+                    role));
+        } finally {
+            if (!authenticatedBeforeTest && Context.isSessionOpen()) {
+                Context.logout();
+            }
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
+    void stockManagementPackagingUomLookupPrefersNonVoidedRows() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+        boolean authenticatedBeforeTest = Context.isAuthenticated();
+        if (!authenticatedBeforeTest) {
+            Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
+        }
+
+        try {
+            Integer adminUserId = jdbcTemplate.queryForObject(
+                    "select user_id from users where username = ?",
+                    Integer.class,
+                    TEST_ADMIN_USERNAME);
+            Integer conceptId = jdbcTemplate.queryForObject(
+                    "select concept_id from concept where retired = false order by concept_id limit 1",
+                    Integer.class);
+            String stockItemUuid = UUID.randomUUID().toString();
+
+            jdbcTemplate.update(
+                    "insert into stockmgmt_stock_item "
+                            + "(concept_id, has_expiration, common_name, is_drug, creator, date_created, voided, uuid) "
+                            + "values (?, false, ?, false, ?, current_timestamp, false, ?)",
+                    conceptId,
+                    "Test stock item " + stockItemUuid,
+                    adminUserId,
+                    stockItemUuid);
+            Integer stockItemId = jdbcTemplate.queryForObject(
+                    "select stock_item_id from stockmgmt_stock_item where uuid = ?",
+                    Integer.class,
+                    stockItemUuid);
+
+            String voidedUomUuid = UUID.randomUUID().toString();
+            jdbcTemplate.update(
+                    "insert into stockmgmt_stock_item_packaging_uom "
+                            + "(stock_item_id, packaging_uom_id, factor, creator, date_created, voided, uuid) "
+                            + "values (?, ?, 1, ?, current_timestamp, true, ?)",
+                    stockItemId,
+                    conceptId,
+                    adminUserId,
+                    voidedUomUuid);
+
+            String activeUomUuid = UUID.randomUUID().toString();
+            jdbcTemplate.update(
+                    "insert into stockmgmt_stock_item_packaging_uom "
+                            + "(stock_item_id, packaging_uom_id, factor, creator, date_created, voided, uuid) "
+                            + "values (?, ?, 1, ?, current_timestamp, false, ?)",
+                    stockItemId,
+                    conceptId,
+                    adminUserId,
+                    activeUomUuid);
+            Integer activeUomId = jdbcTemplate.queryForObject(
+                    "select stock_item_packaging_uom_id from stockmgmt_stock_item_packaging_uom where uuid = ?",
+                    Integer.class,
+                    activeUomUuid);
+
+            StockManagementService stockManagementService = Context.getService(StockManagementService.class);
+            assertEquals(activeUomId,
+                    stockManagementService.getStockItemPackagingUOMByConcept(stockItemId, conceptId).getId());
+        } finally {
+            if (!authenticatedBeforeTest && Context.isSessionOpen()) {
+                Context.logout();
+            }
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
+    void stockManagementReportsExposeStaticCatalog() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+        boolean authenticatedBeforeTest = Context.isAuthenticated();
+        if (!authenticatedBeforeTest) {
+            Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
+        }
+
+        try {
+            StockManagementService stockManagementService = Context.getService(StockManagementService.class);
+            List<Report> reports = stockManagementService.getReports();
+
+            assertEquals(Report.getAllReports().size(), reports.size());
+            assertTrue(reports.stream().anyMatch(report -> "STOCK_STATUS_REPORT".equals(report.getSystemName())));
+            assertTrue(reports.stream().anyMatch(report -> "STOCK_EXPIRY_REPORT".equals(report.getSystemName())));
+        } finally {
+            if (!authenticatedBeforeTest && Context.isSessionOpen()) {
+                Context.logout();
+            }
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
+    }
+
+    @Test
+    void stockManagementStockItemReferencesReturnsEmptyListForMissingItem() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+        boolean authenticatedBeforeTest = Context.isAuthenticated();
+        if (!authenticatedBeforeTest) {
+            Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
+        }
+
+        try {
+            StockManagementService stockManagementService = Context.getService(StockManagementService.class);
+            assertTrue(stockManagementService.getStockItemReferenceByStockItem(UUID.randomUUID().toString()).isEmpty());
+        } finally {
+            if (!authenticatedBeforeTest && Context.isSessionOpen()) {
+                Context.logout();
+            }
             if (openedSession) {
                 Context.closeSession();
             }
