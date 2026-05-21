@@ -54,6 +54,7 @@ import org.openmrs.module.stockmanagement.api.StockManagementException;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobDTO;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobOwnerDTO;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.DispenseRequest;
 import org.openmrs.module.stockmanagement.api.dto.OrderItemDTO;
 import org.openmrs.module.stockmanagement.api.dto.OrderItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.PartyDTO;
@@ -230,6 +231,9 @@ class PartialStockManagementService implements InvocationHandler {
                 return null;
             case "saveStockOperationBatchNumbers":
                 return saveStockOperationBatchNumbers((StockOperationBatchNumbersDTO) args[0]);
+            case "dispenseStockItems":
+                dispenseStockItems((List<DispenseRequest>) args[0]);
+                return null;
             case "getStockOperationItemsByStockOperation":
                 return getStockOperationItemsByStockOperation((Integer) args[0]);
             case "findStockOperationItems":
@@ -1420,6 +1424,121 @@ class PartialStockManagementService implements InvocationHandler {
             }
         }
         return byUuid(StockItemPackagingUOM.class, uomUuid);
+    }
+
+    private void dispenseStockItems(List<DispenseRequest> dispenseRequests) {
+        if (dispenseRequests == null || dispenseRequests.isEmpty()) {
+            return;
+        }
+        List<DispenseLine> lines = dispenseRequests.stream()
+                .map(this::dispenseLine)
+                .collect(Collectors.toList());
+        validateDispenseBalances(lines);
+        for (DispenseLine line : lines) {
+            StockItemTransaction transaction = new StockItemTransaction();
+            transaction.setParty(line.party);
+            transaction.setPatient(line.patient);
+            transaction.setCreator(authenticatedUser());
+            transaction.setDateCreated(new Date());
+            transaction.setStockItem(line.stockItem);
+            transaction.setStockBatch(line.stockBatch);
+            transaction.setQuantity(line.quantity.multiply(BigDecimal.valueOf(-1)));
+            transaction.setStockItemPackagingUOM(line.uom);
+            transaction.setOrder(line.order);
+            transaction.setEncounter(line.encounter);
+            saveOrUpdate(transaction);
+        }
+    }
+
+    private DispenseLine dispenseLine(DispenseRequest request) {
+        Location location = byUuid(Location.class, request.getLocationUuid());
+        if (location == null) {
+            throw new StockManagementException("Dispense location is required");
+        }
+        Party party = firstByEntity(Party.class, "location", location);
+        if (party == null) {
+            throw new StockManagementException("Dispense location party is required");
+        }
+        StockItem stockItem = requireByUuid(StockItem.class, request.getStockItemUuid(), "Stock item is required");
+        StockBatch stockBatch = requireByUuid(StockBatch.class, request.getStockBatchUuid(), "Stock batch is required");
+        Patient patient = request.getPatientId() == null ? null : Context.getPatientService().getPatient(request.getPatientId());
+        if (patient == null) {
+            throw new StockManagementException("Patient is required");
+        }
+        StockItemPackagingUOM uom = requireByUuid(StockItemPackagingUOM.class,
+            request.getStockItemPackagingUOMUuid(), "Stock item packaging unit is required");
+        if (request.getQuantity() == null || request.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new StockManagementException("Dispense quantity must be greater than zero");
+        }
+        Order order = request.getOrderId() == null ? null : Context.getOrderService().getOrder(request.getOrderId());
+        if (request.getOrderId() != null && order == null) {
+            throw new StockManagementException("Order not found");
+        }
+        Encounter encounter = request.getEncounterId() == null ? null
+                : Context.getEncounterService().getEncounter(request.getEncounterId());
+        if (request.getEncounterId() != null && encounter == null) {
+            throw new StockManagementException("Encounter not found");
+        }
+        return new DispenseLine(party, patient, order, encounter, stockItem, stockBatch, request.getQuantity(), uom);
+    }
+
+    private void validateDispenseBalances(List<DispenseLine> lines) {
+        Map<String, BigDecimal> requestedByKey = new LinkedHashMap<>();
+        Map<String, DispenseLine> lineByKey = new LinkedHashMap<>();
+        for (DispenseLine line : lines) {
+            BigDecimal factor = line.uom.getFactor() == null ? BigDecimal.ONE : line.uom.getFactor();
+            String key = inventoryKey(line.party.getId(), line.stockItem.getId(), line.stockBatch.getId());
+            requestedByKey.merge(key, line.quantity.multiply(factor), BigDecimal::add);
+            lineByKey.putIfAbsent(key, line);
+        }
+        for (Map.Entry<String, BigDecimal> entry : requestedByKey.entrySet()) {
+            DispenseLine line = lineByKey.get(entry.getKey());
+            BigDecimal balance = currentStockBalance(line.party, line.stockItem, line.stockBatch);
+            if (balance.subtract(entry.getValue()).compareTo(BigDecimal.ZERO) < 0) {
+                throw new StockManagementException("Dispense quantity would make stock negative for "
+                        + stockItemName(line.stockItem) + " batch " + line.stockBatch.getBatchNo());
+            }
+        }
+    }
+
+    private BigDecimal currentStockBalance(Party party, StockItem stockItem, StockBatch stockBatch) {
+        return query(StockItemTransaction.class, (cb, root) -> predicates(
+            cb.equal(root.get("party"), party),
+            cb.equal(root.get("stockItem"), stockItem),
+            cb.equal(root.get("stockBatch"), stockBatch))).stream()
+                .map(this::stockItemTransactionQuantity)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static class DispenseLine {
+
+        private final Party party;
+
+        private final Patient patient;
+
+        private final Order order;
+
+        private final Encounter encounter;
+
+        private final StockItem stockItem;
+
+        private final StockBatch stockBatch;
+
+        private final BigDecimal quantity;
+
+        private final StockItemPackagingUOM uom;
+
+        DispenseLine(Party party, Patient patient, Order order, Encounter encounter, StockItem stockItem,
+                StockBatch stockBatch, BigDecimal quantity, StockItemPackagingUOM uom) {
+            this.party = party;
+            this.patient = patient;
+            this.order = order;
+            this.encounter = encounter;
+            this.stockItem = stockItem;
+            this.stockBatch = stockBatch;
+            this.quantity = quantity;
+            this.uom = uom;
+        }
     }
 
     private List<StockOperationItem> getStockOperationItemsByStockOperation(Integer stockOperationId) {
