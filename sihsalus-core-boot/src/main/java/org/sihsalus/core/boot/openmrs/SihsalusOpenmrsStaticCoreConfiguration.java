@@ -96,6 +96,8 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog("classpath:/db/changelog/db.changelog-master.xml");
+        liquibase.setDatabaseChangeLogTable("liquibasechangelog");
+        liquibase.setDatabaseChangeLogLockTable("liquibasechangeloglock");
         return liquibase;
     }
 
