@@ -47,7 +47,17 @@ public class CoreDiagnosisService {
 	}
 	
 	public boolean hasDiagnosis(Encounter encounter, Diagnosis diagnosis) {
-		return true;
+		if (encounter == null || diagnosis == null || diagnosis.getDiagnosis() == null) {
+			return false;
+		}
+		for (org.openmrs.Diagnosis existingDiagnosis : Context.getDiagnosisService()
+		        .getDiagnosesByEncounter(encounter, false, false)) {
+			CodedOrFreeTextAnswer existingAnswer = DiagnosisUtils.convert(existingDiagnosis).getDiagnosis();
+			if (diagnosis.getDiagnosis().equals(existingAnswer)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public List<Obs> codeNonCodedDiagnosis(Obs nonCodedObs, List<Diagnosis> diagnoses) {
