@@ -270,6 +270,10 @@ class PartialStockManagementService implements InvocationHandler {
             case "setStockItemInformation":
                 setStockItemInformation((List<StockItemInventory>) args[0]);
                 return null;
+            case "getLeastMovingStockInventory":
+                return getMovingStockInventory((StockItemInventorySearchFilter) args[0], false);
+            case "getMostMovingStockInventory":
+                return getMovingStockInventory((StockItemInventorySearchFilter) args[0], true);
             case "getParentStockOperationLinks":
                 return findStockOperationLinks(null, (String) args[0]);
             case "getStockSourceByUuid":
@@ -1223,6 +1227,21 @@ class PartialStockManagementService implements InvocationHandler {
         }
         safeResult.setTotals(inventoryTotals(safeFilter, data));
         return safeResult;
+    }
+
+    private Result<StockItemInventory> getMovingStockInventory(StockItemInventorySearchFilter filter,
+            boolean mostMoving) {
+        StockItemInventorySearchFilter safeFilter = filter == null ? new StockItemInventorySearchFilter() : filter;
+        List<StockItemInventory> inventories = computeStockInventory(safeFilter, null);
+        Comparator<StockItemInventory> comparator = Comparator.comparing(
+            inventory -> inventory.getQuantity() == null ? BigDecimal.ZERO : inventory.getQuantity().abs(),
+            Comparator.nullsLast(BigDecimal::compareTo));
+        if (mostMoving) {
+            comparator = comparator.reversed();
+        }
+        inventories.sort(comparator.thenComparing(StockItemInventory::getStockItemId,
+            Comparator.nullsLast(Integer::compareTo)));
+        return resultFromList(inventories, safeFilter.getStartIndex(), safeFilter.getLimit());
     }
 
     private void setStockItemInformation(List<StockItemInventory> inventories) {
