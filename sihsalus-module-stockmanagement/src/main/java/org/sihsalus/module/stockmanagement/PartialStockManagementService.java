@@ -32,8 +32,10 @@ import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.Concept;
 import org.openmrs.ConceptName;
 import org.openmrs.Drug;
+import org.openmrs.DrugOrder;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Role;
 import org.openmrs.User;
@@ -44,6 +46,8 @@ import org.openmrs.module.stockmanagement.api.StockManagementException;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobDTO;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobOwnerDTO;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobSearchFilter;
+import org.openmrs.module.stockmanagement.api.dto.OrderItemDTO;
+import org.openmrs.module.stockmanagement.api.dto.OrderItemSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.PartyDTO;
 import org.openmrs.module.stockmanagement.api.dto.PartySearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.PrivilegeScope;
@@ -310,6 +314,10 @@ class PartialStockManagementService implements InvocationHandler {
                 return getOrderItemsByOrder((Integer[]) args[0]);
             case "getOrderItemsByEncounter":
                 return getOrderItemsByEncounter((Integer[]) args[0]);
+            case "findOrderItems":
+                return args.length > 1
+                        ? findOrderItems((OrderItemSearchFilter) args[0], (HashSet<RecordPrivilegeFilter>) args[1])
+                        : findOrderItems((OrderItemSearchFilter) args[0], null);
             case "getStockItemNames":
                 return getStockItemNames((List<Integer>) args[0]);
             case "getConceptNames":
@@ -2280,6 +2288,252 @@ class PartialStockManagementService implements InvocationHandler {
         List<Integer> ids = List.of(encounterIds);
         return query(OrderItem.class, (cb, root) -> predicates(root.get("order").get("encounter").get("encounterId")
                 .in(ids)));
+    }
+
+    private Result<OrderItemDTO> findOrderItems(
+            OrderItemSearchFilter filter, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+        OrderItemSearchFilter safeFilter = filter == null ? new OrderItemSearchFilter() : filter;
+        Set<Integer> createdFromLocationIds = resolveOrderLocationIds(
+            safeFilter.getCreatedFromLocationIds(),
+            safeFilter.getCreatedFromLocationUuids(),
+            safeFilter.getCreatedFromPartyUuids());
+        if (hasOrderLocationFilter(safeFilter.getCreatedFromLocationIds(), safeFilter.getCreatedFromLocationUuids(),
+            safeFilter.getCreatedFromPartyUuids()) && createdFromLocationIds.isEmpty()) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+        Set<Integer> fulfilmentLocationIds = resolveOrderLocationIds(
+            safeFilter.getFulfilmentLocationIds(),
+            safeFilter.getFulfilmentLocationUuids(),
+            safeFilter.getFulfilmentPartyUuids());
+        if (hasOrderLocationFilter(safeFilter.getFulfilmentLocationIds(), safeFilter.getFulfilmentLocationUuids(),
+            safeFilter.getFulfilmentPartyUuids()) && fulfilmentLocationIds.isEmpty()) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+        Set<Integer> allowedLocationIds = recordPrivilegeFilters == null ? null
+                : recordPrivilegeFilters.stream()
+                        .map(RecordPrivilegeFilter::getLocationId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+        if (recordPrivilegeFilters != null && allowedLocationIds.isEmpty()) {
+            return new Result<>(new ArrayList<>(), 0);
+        }
+
+        List<OrderItemDTO> orderItems = query(OrderItem.class, (cb, root) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Join<OrderItem, Order> orderJoin = root.join("order", JoinType.LEFT);
+            Join<OrderItem, StockItem> stockItemJoin = root.join("stockItem", JoinType.LEFT);
+            Join<StockItem, Drug> drugJoin = stockItemJoin.join("drug", JoinType.LEFT);
+            Join<StockItem, Concept> conceptJoin = stockItemJoin.join("concept", JoinType.LEFT);
+            Join<OrderItem, Location> createdFromJoin = root.join("createdFrom", JoinType.LEFT);
+            Join<OrderItem, Location> fulfilmentLocationJoin = root.join("fulfilmentLocation", JoinType.LEFT);
+            if (safeFilter.getId() != null) {
+                predicates.add(cb.equal(root.get("id"), safeFilter.getId()));
+            }
+            if (StringUtils.isNotBlank(safeFilter.getUuid())) {
+                predicates.add(cb.equal(root.get("uuid"), safeFilter.getUuid()));
+            }
+            addInPredicate(predicates, root.get("order").get("orderId"), safeFilter.getOrderIds());
+            addInPredicate(predicates, orderJoin.get("uuid"), safeFilter.getOrderUuids());
+            addDateRangePredicate(cb, predicates, orderJoin, "dateActivated",
+                safeFilter.getOrderDateMin(), safeFilter.getOrderDateMax());
+            addInPredicate(predicates, orderJoin.get("encounter").get("encounterId"), safeFilter.getEncounterIds());
+            addInPredicate(predicates, orderJoin.get("encounter").get("uuid"), safeFilter.getEncounterUuids());
+            addInPredicate(predicates, orderJoin.get("patient").get("patientId"), safeFilter.getPatientIds());
+            if (StringUtils.isNotBlank(safeFilter.getOrderNumber())) {
+                String orderNumber = safeFilter.getOrderNumber().replace("%", "");
+                if (StringUtils.isBlank(orderNumber)) {
+                    predicates.add(cb.disjunction());
+                } else {
+                    predicates.add(cb.like(orderJoin.get("orderNumber"), orderNumber.toUpperCase(Locale.ROOT) + "%"));
+                }
+            }
+            if (safeFilter.getIsDrug() != null) {
+                predicates.add(safeFilter.getIsDrug()
+                        ? cb.isNotNull(drugJoin.get("drugId"))
+                        : cb.isNull(drugJoin.get("drugId")));
+            }
+            addInPredicate(predicates, stockItemJoin.get("id"), safeFilter.getStockItemIds());
+            addInPredicate(predicates, stockItemJoin.get("uuid"), safeFilter.getStockItemUuids());
+            addDrugConceptPredicates(cb, predicates, drugJoin, conceptJoin, safeFilter);
+            addInPredicate(predicates, createdFromJoin.get("locationId"), createdFromLocationIds);
+            addInPredicate(predicates, fulfilmentLocationJoin.get("locationId"), fulfilmentLocationIds);
+            if (allowedLocationIds != null) {
+                predicates.add(cb.or(
+                    createdFromJoin.get("locationId").in(allowedLocationIds),
+                    fulfilmentLocationJoin.get("locationId").in(allowedLocationIds)));
+            }
+            if (!safeFilter.getIncludeVoided()) {
+                predicates.add(cb.isFalse(root.get("voided")));
+            }
+            return predicates;
+        }).stream()
+                .sorted(Comparator.comparing(this::objectId, Comparator.nullsLast(Integer::compareTo)).reversed())
+                .map(this::orderItemToDto)
+                .collect(Collectors.toList());
+        return resultFromList(orderItems, safeFilter.getStartIndex(), safeFilter.getLimit());
+    }
+
+    private void addDrugConceptPredicates(CriteriaBuilder cb, List<Predicate> predicates,
+            Join<StockItem, Drug> drugJoin, Join<StockItem, Concept> conceptJoin, OrderItemSearchFilter filter) {
+        List<Predicate> drugConceptPredicates = new ArrayList<>();
+        addInPredicate(drugConceptPredicates, drugJoin.get("drugId"), filter.getDrugIds());
+        addInPredicate(drugConceptPredicates, drugJoin.get("uuid"), filter.getDrugUuids());
+        addInPredicate(drugConceptPredicates, conceptJoin.get("conceptId"), filter.getConceptIds());
+        addInPredicate(drugConceptPredicates, conceptJoin.get("uuid"), filter.getConceptUuids());
+        if (drugConceptPredicates.isEmpty()) {
+            return;
+        }
+        predicates.add(filter.getSearchEitherDrugOrConceptStockItems()
+                ? cb.or(drugConceptPredicates.toArray(new Predicate[0]))
+                : cb.and(drugConceptPredicates.toArray(new Predicate[0])));
+    }
+
+    private boolean hasOrderLocationFilter(List<Integer> locationIds, List<String> locationUuids,
+            List<String> partyUuids) {
+        return (locationIds != null && !locationIds.isEmpty())
+                || (locationUuids != null && !locationUuids.isEmpty())
+                || (partyUuids != null && !partyUuids.isEmpty());
+    }
+
+    private Set<Integer> resolveOrderLocationIds(List<Integer> locationIds, List<String> locationUuids,
+            List<String> partyUuids) {
+        Set<Integer> resolved = new HashSet<>();
+        if (locationIds != null) {
+            resolved.addAll(locationIds.stream().filter(Objects::nonNull).collect(Collectors.toSet()));
+        }
+        if (locationUuids != null && !locationUuids.isEmpty()) {
+            query(Location.class, (cb, root) -> predicates(root.get("uuid").in(locationUuids))).stream()
+                    .map(Location::getLocationId)
+                    .filter(Objects::nonNull)
+                    .forEach(resolved::add);
+        }
+        if (partyUuids != null && !partyUuids.isEmpty()) {
+            query(Party.class, (cb, root) -> predicates(root.get("uuid").in(partyUuids))).stream()
+                    .map(Party::getLocation)
+                    .filter(Objects::nonNull)
+                    .map(Location::getLocationId)
+                    .filter(Objects::nonNull)
+                    .forEach(resolved::add);
+        }
+        return resolved;
+    }
+
+    private void addDateRangePredicate(CriteriaBuilder cb, List<Predicate> predicates, Join<?, ?> join,
+            String field, Date min, Date max) {
+        if (min != null) {
+            predicates.add(cb.greaterThanOrEqualTo(join.<Date>get(field), min));
+        }
+        if (max != null) {
+            predicates.add(cb.lessThanOrEqualTo(join.<Date>get(field), max));
+        }
+    }
+
+    private <T> void addInPredicate(List<Predicate> predicates, jakarta.persistence.criteria.Path<T> path,
+            Collection<T> values) {
+        if (values != null && !values.isEmpty()) {
+            predicates.add(path.in(values));
+        }
+    }
+
+    private OrderItemDTO orderItemToDto(OrderItem orderItem) {
+        OrderItemDTO dto = new OrderItemDTO();
+        dto.setId(orderItem.getId());
+        dto.setUuid(orderItem.getUuid());
+        dto.setVoided(Boolean.TRUE.equals(orderItem.getVoided()));
+        dto.setCreator(orderItem.getCreator() == null ? null : orderItem.getCreator().getId());
+        dto.setDateCreated(orderItem.getDateCreated());
+        if (orderItem.getCreator() != null) {
+            dto.setCreatorGivenName(orderItem.getCreator().getGivenName());
+            dto.setCreatorFamilyName(orderItem.getCreator().getFamilyName());
+        }
+        setOrderItemOrder(dto, orderItem.getOrder());
+        setOrderItemStockItem(dto, orderItem.getStockItem());
+        setOrderItemPackagingUom(dto, orderItem.getStockItemPackagingUOM());
+        setOrderItemLocation(dto, orderItem.getCreatedFrom(), true);
+        setOrderItemLocation(dto, orderItem.getFulfilmentLocation(), false);
+        return dto;
+    }
+
+    private void setOrderItemOrder(OrderItemDTO dto, Order order) {
+        if (order == null) {
+            return;
+        }
+        dto.setOrderId(order.getOrderId());
+        dto.setOrderUuid(order.getUuid());
+        dto.setAction(order.getAction());
+        dto.setOrderNumber(order.getOrderNumber());
+        dto.setScheduledDate(order.getScheduledDate());
+        if (order.getEncounter() != null) {
+            dto.setEncounterUuid(order.getEncounter().getUuid());
+        }
+        Patient patient = order.getPatient();
+        if (patient != null) {
+            dto.setPatientId(patient.getPatientId());
+            dto.setPatientGivenName(patient.getGivenName());
+            dto.setPatientFamilyName(patient.getFamilyName());
+        }
+        if (order instanceof DrugOrder drugOrder) {
+            if (drugOrder.getQuantity() != null) {
+                dto.setQuantity(BigDecimal.valueOf(drugOrder.getQuantity()));
+            }
+            dto.setDuration(drugOrder.getDuration());
+        }
+    }
+
+    private void setOrderItemStockItem(OrderItemDTO dto, StockItem stockItem) {
+        if (stockItem == null) {
+            return;
+        }
+        dto.setStockItemId(stockItem.getId());
+        dto.setStockItemUuid(stockItem.getUuid());
+        dto.setCommonName(stockItem.getCommonName());
+        dto.setAcronym(stockItem.getAcronym());
+        if (stockItem.getDrug() != null) {
+            dto.setDrugId(stockItem.getDrug().getDrugId());
+            dto.setDrugUuid(stockItem.getDrug().getUuid());
+            dto.setDrugName(stockItem.getDrug().getName());
+        }
+        if (stockItem.getConcept() != null) {
+            dto.setConceptId(stockItem.getConcept().getConceptId());
+            dto.setConceptUuid(stockItem.getConcept().getUuid());
+            dto.setConceptName(conceptName(stockItem.getConcept()));
+        }
+    }
+
+    private void setOrderItemPackagingUom(OrderItemDTO dto, StockItemPackagingUOM uom) {
+        if (uom == null) {
+            return;
+        }
+        dto.setStockItemPackagingUOMId(uom.getId());
+        dto.setStockItemPackagingUOMUuid(uom.getUuid());
+        if (uom.getPackagingUom() != null) {
+            dto.setStockItemPackagingUOMConceptId(uom.getPackagingUom().getConceptId());
+            dto.setStockItemPackagingUOMName(conceptName(uom.getPackagingUom()));
+        }
+    }
+
+    private void setOrderItemLocation(OrderItemDTO dto, Location location, boolean createdFrom) {
+        if (location == null) {
+            return;
+        }
+        Party party = firstByEntity(Party.class, "location", location);
+        if (createdFrom) {
+            dto.setCreatedFrom(location.getLocationId());
+            dto.setCreatedFromUuid(location.getUuid());
+            dto.setCreatedFromName(location.getName());
+            if (party != null) {
+                dto.setCreatedFromPartyUuid(party.getUuid());
+                dto.setCreatedFromName(partyName(party));
+            }
+        } else {
+            dto.setFulfilmentLocationId(location.getLocationId());
+            dto.setFulfilmentLocationUuid(location.getUuid());
+            dto.setFulfilmentLocationName(location.getName());
+            if (party != null) {
+                dto.setFulfilmentPartyUuid(party.getUuid());
+                dto.setFulfilmentLocationName(partyName(party));
+            }
+        }
     }
 
     private Map<Integer, String> getStockItemNames(List<Integer> stockItemIds) {
