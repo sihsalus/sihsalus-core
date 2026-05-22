@@ -79,6 +79,7 @@ public class UserConverter implements Converter {
 			UnmarshallingContext context) {
 		User user = null;
 		if(reader.getAttributeCount() == 1 && "uuid".equals(reader.getAttributeName(0))){
+			user = new User();
 			user.setUuid(reader.getAttribute("uuid"));
 		}else{
 			user = (User)defaultConverter.unmarshal(reader, context);

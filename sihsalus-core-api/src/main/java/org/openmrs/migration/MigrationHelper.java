@@ -305,13 +305,12 @@ public class MigrationHelper {
 	 * @deprecated since 2.2.0 migrate the method to your code base if needed
 	 */
 	@Deprecated
-	public static int importProgramsAndStatuses(List<String> programWorkflow) throws ParseException {
-		ProgramWorkflowService pws = Context.getProgramWorkflowService();
-		PatientService ps = Context.getPatientService();
-		List<PatientProgram> patientPrograms = new ArrayList<>();
-		Map<String, PatientProgram> knownPatientPrograms = new HashMap<>();
-		Map<String, Program> programsByName = new HashMap<>();
-		for (Program program : pws.getAllPrograms()) {
+		public static int importProgramsAndStatuses(List<String> programWorkflow) throws ParseException {
+			ProgramWorkflowService pws = Context.getProgramWorkflowService();
+			PatientService ps = Context.getPatientService();
+			Map<String, PatientProgram> knownPatientPrograms = new HashMap<>();
+			Map<String, Program> programsByName = new HashMap<>();
+			for (Program program : pws.getAllPrograms()) {
 			programsByName.put(program.getConcept().getName(Context.getLocale(), false).getName(), program);
 		}
 		for (String s : programWorkflow) {
@@ -336,12 +335,11 @@ public class MigrationHelper {
 				Date enrollmentDate = temp.length < 4 ? null : parseDate(temp[3]);
 				Date completionDate = temp.length < 5 ? null : parseDate(temp[4]);
 				PatientProgram pp = new PatientProgram();
-				pp.setPatient(p);
-				pp.setProgram(program);
-				pp.setDateEnrolled(enrollmentDate);
-				pp.setDateCompleted(completionDate);
-				patientPrograms.add(pp);
-				knownPatientPrograms.put(temp[0] + "," + temp[1] + "," + temp[2], pp); // "HIVEMR-V1,9266,IMB HIV PROGRAM"
+					pp.setPatient(p);
+					pp.setProgram(program);
+					pp.setDateEnrolled(enrollmentDate);
+					pp.setDateCompleted(completionDate);
+					knownPatientPrograms.put(temp[0] + "," + temp[1] + "," + temp[2], pp); // "HIVEMR-V1,9266,IMB HIV PROGRAM"
 			} else if (s.startsWith("STATUS:")) {
 				// STATUS:HIVEMR-V1,9266,IMB HIV PROGRAM,TREATMENT STATUS,ACTIVE,2005-08-25,,
 				s = s.substring(s.indexOf(":") + 1);

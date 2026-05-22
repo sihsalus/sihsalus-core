@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import com.google.common.reflect.TypeToken;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,7 +29,6 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 public class SearchParameterMap implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -114,5 +113,23 @@ public class SearchParameterMap implements Serializable {
 	public SearchParameterMap setSortSpec(SortSpec sortSpec) {
 		this.sortSpec = sortSpec;
 		return this;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		SearchParameterMap that = (SearchParameterMap) o;
+		return fromIndex == that.fromIndex && toIndex == that.toIndex && Objects.equals(sortSpec, that.sortSpec)
+		        && Objects.equals(params, that.params);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(sortSpec, params, fromIndex, toIndex);
 	}
 }

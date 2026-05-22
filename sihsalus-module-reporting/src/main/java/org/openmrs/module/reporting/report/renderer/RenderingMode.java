@@ -108,7 +108,13 @@ public class RenderingMode implements Comparable<RenderingMode> {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		RenderingMode that = (RenderingMode)obj;
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		RenderingMode that = (RenderingMode) obj;
 		return this.getDescriptor().equals(that.getDescriptor());
 	}
 	
