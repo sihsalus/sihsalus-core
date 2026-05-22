@@ -10,6 +10,6 @@ import java.util.Date;
 public class DefaultAppointmentNumberGeneratorImpl implements AppointmentNumberGenerator {
     @Override
     public String generateAppointmentNumber(@NotNull Appointment appointment) {
-        return new SimpleDateFormat("yyMMddHHmmssSSS").format(new Date());
+        return new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
     }
 }

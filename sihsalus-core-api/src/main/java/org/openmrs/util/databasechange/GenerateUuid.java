@@ -135,8 +135,8 @@ public class GenerateUuid implements CustomTaskChange {
 						Statement idStatement = null;
 						PreparedStatement updateStatement = null;
 						try {
-							String idSql = genericIdSql.replaceAll("tablename", tableName);
-							String updateSql = genericUpdateSql.replaceAll("tablename", tableName);
+								String idSql = genericIdSql.replace("tablename", tableName);
+								String updateSql = genericUpdateSql.replace("tablename", tableName);
 
 							// hacky way to deal with tables that don't follow the tableNam_id convention
 							for (Map.Entry<String, String> idException : idExceptionsMap.entrySet()) {

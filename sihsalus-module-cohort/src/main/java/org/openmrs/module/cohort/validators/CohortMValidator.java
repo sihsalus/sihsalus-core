@@ -45,7 +45,7 @@ public class CohortMValidator implements Validator {
 		
 		// Cohort should have a unique name
 		CohortM cohortByName = Context.getService(CohortService.class).getCohortM(cohort.getName());
-		if (cohortByName != null && cohortByName.getId() != cohort.getId()) {
+		if (cohortByName != null && !java.util.Objects.equals(cohortByName.getId(), cohort.getId())) {
 			errors.rejectValue("name", "A cohort with this name already exists");
 		}
 		

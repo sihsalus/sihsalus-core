@@ -505,11 +505,11 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
 
 	private Map<String, ?> getTranslationsInternal(List<FormResource> formResources) {
 		return Optional.ofNullable(formResources).map(frs -> {
-			SimpleObject formSchema = getFormSchemaFromResources(formResources);
-			List<?> referencedForms = getReferencedFormList(formSchema).orElse(Collections.emptyList());
+				SimpleObject formSchema = getFormSchemaFromResources(formResources);
+				List<?> referencedForms = getReferencedFormList(formSchema).orElse(Collections.emptyList());
 
-			// potentially breaking in the future because of down-cast
-			LinkedHashSet<Locale> locales = (LinkedHashSet<Locale>) LocaleUtility.getLocalesInOrder();
+				// potentially breaking in the future because of down-cast
+				LinkedHashSet<Locale> locales = new LinkedHashSet<>(LocaleUtility.getLocalesInOrder());
 
 			Map<String, Object> result = referencedForms.stream()
 			        .map(referencedForm -> getTranslationsByPreferredLocales(locales, referencedForm))

@@ -20,6 +20,9 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.StringLayout;
 import org.apache.logging.log4j.core.config.Property;
 
+class MemoryAppenderBridge extends org.openmrs.logging.MemoryAppender {
+}
+
 /**
  * This class stores a configurable number lines of the output from the log file. Note that this
  * class is implemented as a single-buffer-per-appender-name meaning that each appender name can
@@ -28,7 +31,7 @@ import org.apache.logging.log4j.core.config.Property;
  * @deprecated As of 2.4.4, 2.5.1, and 2.6.0 this class is moved to the org.openmrs.logging package
  */
 @Deprecated
-public class MemoryAppender extends org.openmrs.logging.MemoryAppender {
+public class MemoryAppender extends MemoryAppenderBridge {
 
 	private final org.openmrs.logging.MemoryAppender implementation;
 

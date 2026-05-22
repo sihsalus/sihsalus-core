@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,9 +54,6 @@ public class OpenmrsClassLoader extends URLClassLoader {
 	private static volatile File libCacheFolder;
 
 	private static final Object libCacheFolderLock = new Object();
-
-	// placeholder to hold mementos to restore
-	private static Map<String, OpenmrsMemento> mementos = new WeakHashMap<>();
 
 	/**
 	 * Holds all classes that has been requested from this class loader. We use weak references so that

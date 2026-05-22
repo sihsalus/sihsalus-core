@@ -30,9 +30,9 @@ public class AddressHierarchyLevelValidator implements Validator {
 	    	
 	    	// we only want to test all OTHER address hierarchy types
 	    	
-	    	if (level.getId() == null || level.getId() != compareLevel.getId()) {
+	    	if (level.getId() == null || !level.getId().equals(compareLevel.getId())) {
 	    		
-	    		if (level.getAddressField() != null && compareLevel.getAddressField() == level.getAddressField()) {
+	    		if (level.getAddressField() != null && level.getAddressField().equals(compareLevel.getAddressField())) {
 	    			errors.rejectValue("addressField", "addresshierarchy.admin.validation.addressField.alreadyUsed");
 	    		}
 	    		
