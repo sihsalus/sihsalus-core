@@ -10,9 +10,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
+import org.openmrs.module.fhir2.spring.FhirAopConfiguration;
 
 @Configuration
+@Import(FhirAopConfiguration.class)
 @ComponentScan(
         basePackages = {
             "org.openmrs.module.fhir2.api",

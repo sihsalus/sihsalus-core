@@ -60,6 +60,7 @@ import org.springframework.core.io.ClassPathResource;
 @Import({OpenmrsApplicationContextConfig.class, CacheConfig.class})
 @ComponentScan(
         basePackages = {
+            "org.openmrs.aop",
             "org.openmrs.api.impl",
             "org.openmrs.api.db.hibernate",
             "org.openmrs.api.db.hibernate.search.session",

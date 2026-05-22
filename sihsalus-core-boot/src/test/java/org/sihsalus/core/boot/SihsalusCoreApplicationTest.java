@@ -7,8 +7,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -16,6 +20,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.UserSessionListener;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.calculation.api.CalculationRegistrationService;
 import org.openmrs.calculation.patient.PatientCalculationService;
@@ -77,6 +82,7 @@ import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -96,6 +102,11 @@ class SihsalusCoreApplicationTest {
 
     @Autowired private JdbcTemplate jdbcTemplate;
 
+    @BeforeEach
+    void ensureH2PersonAttributeCompatibilityColumn() {
+        jdbcTemplate.execute("alter table person_attribute add column if not exists value varchar(50)");
+    }
+
     @Test
     void healthcheckResponds() throws Exception {
         mockMvc.perform(get("/actuator/health")).andExpect(status().isOk());
@@ -111,7 +122,8 @@ class SihsalusCoreApplicationTest {
 
     @Test
     void fhirR4ReadEndpointInvokesImportedProvider() throws Exception {
-        mockMvc.perform(get("/api/fhir/r4/Patient/not-a-real-patient"))
+        mockMvc.perform(get("/api/fhir/r4/Patient/not-a-real-patient")
+                        .header(HttpHeaders.AUTHORIZATION, basicAuth("admin", "test")))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
                 .andExpect(jsonPath("$.resourceType").value("OperationOutcome"))
@@ -134,10 +146,20 @@ class SihsalusCoreApplicationTest {
     }
 
     @Test
-    void patientRegistryPatientIsReadableThroughRestAndFhir() throws Exception {
+    void patientRegistryPatientRequiresAuthenticationThroughRestAndFhir() throws Exception {
         String patientUuid = ensureTestPatient();
 
         mockMvc.perform(get("/rest/v1/patient/{uuid}", patientUuid))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.message").exists());
+
+        mockMvc.perform(get("/api/fhir/r4/Patient/{uuid}", patientUuid))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+                .andExpect(jsonPath("$.resourceType").value("OperationOutcome"));
+
+        mockMvc.perform(get("/rest/v1/patient/{uuid}", patientUuid)
+                        .header(HttpHeaders.AUTHORIZATION, basicAuth("admin", "test")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.uuid").value(patientUuid))
                 .andExpect(jsonPath("$.identifier").value(TEST_IDENTIFIER))
@@ -146,12 +168,30 @@ class SihsalusCoreApplicationTest {
 
         assertNotNull(jdbcTemplate.queryForObject("select count(*) from fhir_patient_identifier_system", Integer.class));
 
-        mockMvc.perform(get("/api/fhir/r4/Patient/{uuid}", patientUuid))
+        mockMvc.perform(get("/api/fhir/r4/Patient/{uuid}", patientUuid)
+                        .header(HttpHeaders.AUTHORIZATION, basicAuth("admin", "test")))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
                 .andExpect(jsonPath("$.resourceType").value("Patient"))
                 .andExpect(jsonPath("$.id").value(patientUuid))
                 .andExpect(jsonPath("$.identifier[0].value").value(TEST_IDENTIFIER));
+    }
+
+    @Test
+    void openmrsServiceAuthorizationIsEnforcedForInterfaceAnnotations() {
+        boolean openedSession = !Context.isSessionOpen();
+        if (openedSession) {
+            Context.openSession();
+        }
+        try {
+            assertThrows(
+                    APIAuthenticationException.class,
+                    () -> Context.getPatientService().getPatientByUuid(TEST_PATIENT_UUID));
+        } finally {
+            if (openedSession) {
+                Context.closeSession();
+            }
+        }
     }
 
     @Test
@@ -214,7 +254,9 @@ class SihsalusCoreApplicationTest {
     @Test
     void o3FormsIsWiredAsStaticInternalModule() throws Exception {
         assertNotNull(Context.getService(O3FormsService.class));
-        mockMvc.perform(get("/rest/v1/o3/forms/not-a-real-form")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/rest/v1/o3/forms/not-a-real-form")
+                        .header(HttpHeaders.AUTHORIZATION, basicAuth("admin", "test")))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -359,16 +401,20 @@ class SihsalusCoreApplicationTest {
         if (openedSession) {
             Context.openSession();
         }
+        restartOpenmrsIdentityColumnsForH2();
+        boolean authenticatedForSetup = !Context.isAuthenticated();
+        if (authenticatedForSetup) {
+            Context.authenticate("admin", "test");
+        }
 
         Context.addProxyPrivilege(
+                PrivilegeConstants.GET_PATIENTS,
                 PrivilegeConstants.ADD_PATIENTS,
                 PrivilegeConstants.EDIT_PATIENTS,
                 PrivilegeConstants.ADD_PATIENT_IDENTIFIERS,
                 PrivilegeConstants.GET_IDENTIFIER_TYPES,
                 PrivilegeConstants.MANAGE_IDENTIFIER_TYPES);
         try {
-            restartOpenmrsIdentityColumnsForH2();
-
             Patient existing = Context.getPatientService().getPatientByUuid(TEST_PATIENT_UUID);
             if (existing != null) {
                 return existing.getUuid();
@@ -405,11 +451,15 @@ class SihsalusCoreApplicationTest {
             return Context.getPatientService().savePatient(patient).getUuid();
         } finally {
             Context.removeProxyPrivilege(
+                    PrivilegeConstants.GET_PATIENTS,
                     PrivilegeConstants.ADD_PATIENTS,
                     PrivilegeConstants.EDIT_PATIENTS,
                     PrivilegeConstants.ADD_PATIENT_IDENTIFIERS,
                     PrivilegeConstants.GET_IDENTIFIER_TYPES,
                     PrivilegeConstants.MANAGE_IDENTIFIER_TYPES);
+            if (authenticatedForSetup) {
+                Context.logout();
+            }
             if (openedSession) {
                 Context.closeSession();
             }
@@ -417,7 +467,7 @@ class SihsalusCoreApplicationTest {
     }
 
     private void restartOpenmrsIdentityColumnsForH2() {
-        jdbcTemplate.execute("alter table person_attribute add column if not exists value varchar(50)");
+        ensureH2PersonAttributeCompatibilityColumn();
         restartIdentityAfterSeedData("patient_identifier_type", "patient_identifier_type_id");
         restartIdentityAfterSeedData("person", "person_id");
         restartIdentityAfterSeedData("person_name", "person_name_id");
@@ -455,5 +505,10 @@ class SihsalusCoreApplicationTest {
         Integer nextValue = jdbcTemplate.queryForObject(
                 "select coalesce(max(" + columnName + "), 0) + 1000 from " + tableName, Integer.class);
         jdbcTemplate.execute("alter table " + tableName + " alter column " + columnName + " restart with " + nextValue);
+    }
+
+    private String basicAuth(String username, String password) {
+        String credentials = username + ":" + password;
+        return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -2,6 +2,8 @@ package org.sihsalus.core.boot.openmrs;
 
 import java.io.IOException;
 import org.openmrs.api.context.Context;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import jakarta.servlet.FilterChain;
@@ -10,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE + 10)
 final class OpenmrsContextSessionFilter extends OncePerRequestFilter {
 
     @Override

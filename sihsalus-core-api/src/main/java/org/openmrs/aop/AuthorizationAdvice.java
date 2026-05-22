@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.User;
 import org.openmrs.annotation.AuthorizedAnnotationAttributes;
@@ -65,9 +66,10 @@ public class AuthorizationAdvice implements MethodBeforeAdvice {
 			return;
 		}
 
+		Method authorizedMethod = resolveAuthorizedMethod(method, target);
 		AuthorizedAnnotationAttributes attributes = new AuthorizedAnnotationAttributes();
-		Collection<String> privileges = attributes.getAttributes(method);
-		boolean requireAll = attributes.getRequireAll(method);
+		Collection<String> privileges = attributes.getAttributes(authorizedMethod);
+		boolean requireAll = attributes.getRequireAll(authorizedMethod);
 
 		// Only execute if the "secure" method has authorization attributes
 		// Iterate through required privileges and return only if the user has
@@ -93,7 +95,7 @@ public class AuthorizationAdvice implements MethodBeforeAdvice {
 						if (requireAll) {
 							// if all are required, the first miss causes them
 							// to "fail"
-							throwUnauthorized(Context.getAuthenticatedUser(), method, privilege);
+							throwUnauthorized(Context.getAuthenticatedUser(), authorizedMethod, privilege);
 						}
 					}
 				}
@@ -105,12 +107,30 @@ public class AuthorizationAdvice implements MethodBeforeAdvice {
 				// If there's no match, then we know there are privileges and
 				// that the user didn't have any of them. The user is not
 				// authorized to access the method
-				throwUnauthorized(Context.getAuthenticatedUser(), method, privileges);
+				throwUnauthorized(Context.getAuthenticatedUser(), authorizedMethod, privileges);
 			}
 
-		} else if (attributes.hasAuthorizedAnnotation(method) && !Context.isAuthenticated()) {
-			throwUnauthorized(Context.getAuthenticatedUser(), method);
+		} else if (attributes.hasAuthorizedAnnotation(authorizedMethod) && !Context.isAuthenticated()) {
+			throwUnauthorized(Context.getAuthenticatedUser(), authorizedMethod);
 		}
+	}
+
+	private Method resolveAuthorizedMethod(Method method, Object target) {
+		AuthorizedAnnotationAttributes attributes = new AuthorizedAnnotationAttributes();
+		if (attributes.hasAuthorizedAnnotation(method) || target == null) {
+			return method;
+		}
+		for (Class<?> iface : ClassUtils.getAllInterfaces(target.getClass())) {
+			try {
+				Method interfaceMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+				if (attributes.hasAuthorizedAnnotation(interfaceMethod)) {
+					return interfaceMethod;
+				}
+			}
+			catch (NoSuchMethodException ignored) {
+			}
+		}
+		return method;
 	}
 
 	/**

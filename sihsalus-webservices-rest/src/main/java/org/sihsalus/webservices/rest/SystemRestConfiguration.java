@@ -17,12 +17,14 @@ import org.openmrs.module.webservices.rest.web.api.RestHelperService;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.module.webservices.rest.web.api.impl.RestHelperServiceImpl;
 import org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl;
+import org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.core.Ordered;
 
 @Configuration
 @ComponentScan(basePackageClasses = MainResourceController.class)
@@ -36,6 +38,11 @@ public class SystemRestConfiguration {
     @Bean
     Filter openmrsRestContextSessionFilter() {
         return new OpenmrsRestContextSessionFilter();
+    }
+
+    @Bean
+    Filter openmrsApiAuthorizationFilter() {
+        return new OpenmrsApiAuthorizationFilter();
     }
 
     @Bean
@@ -130,6 +137,37 @@ public class SystemRestConfiguration {
         private boolean isRestRequest(ServletRequest request) {
             return request instanceof HttpServletRequest httpRequest
                     && httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/rest/");
+        }
+    }
+
+    static final class OpenmrsApiAuthorizationFilter implements Filter, Ordered {
+
+        private final AuthorizationFilter authorizationFilter = new AuthorizationFilter();
+
+        @Override
+        public int getOrder() {
+            return Ordered.HIGHEST_PRECEDENCE + 20;
+        }
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+            if (isProtectedApiRequest(request)) {
+                authorizationFilter.doFilter(request, response, chain);
+                return;
+            }
+            chain.doFilter(request, response);
+        }
+
+        private boolean isProtectedApiRequest(ServletRequest request) {
+            if (!(request instanceof HttpServletRequest httpRequest)) {
+                return false;
+            }
+            String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
+            return path.startsWith("/rest/")
+                    || path.startsWith("/ws/rest/")
+                    || path.startsWith("/api/fhir/")
+                    || path.startsWith("/ws/fhir2/");
         }
     }
 }

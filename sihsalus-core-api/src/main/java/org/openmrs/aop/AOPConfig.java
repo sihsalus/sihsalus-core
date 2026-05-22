@@ -89,7 +89,7 @@ public class AOPConfig {
 	 * @return transactionAttributeSource
 	 * @deprecated since 3.0.0 use {@link Service} annotation instead
 	 */
-	@Bean
+	@Bean(name = "openmrsTransactionAttributeSource")
 	public TransactionAttributeSource transactionAttributeSource() {
 		return new AnnotationTransactionAttributeSource();
 	}
