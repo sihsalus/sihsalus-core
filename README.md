@@ -43,9 +43,9 @@ This matches the current OpenMRS core development branch, which uses `maven.comp
 
 ```text
 baseline/   Version pins from the current Sihsalus distro
-docs/       Architecture, migration, and security decisions
+docs/       Active architecture, security, CI, and modernization notes
 ops/        Deployment and operations notes
-scripts/    Local automation scripts
+e2e/        Cross-module end-to-end test workspace
 sihsalus-core-api/        Shared SIH Salus core contracts
 sihsalus-core-liquibase/  Centralized database changelogs
 sihsalus-core-boot/       Spring Boot executable runtime

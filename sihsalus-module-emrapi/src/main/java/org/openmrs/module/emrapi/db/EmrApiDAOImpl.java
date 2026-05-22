@@ -33,8 +33,8 @@ public class EmrApiDAOImpl implements EmrApiDAO {
 	@SuppressWarnings("unchecked")
 	public <T> List<T> executeHql(String queryString, Map<String, Object> parameters, Class<T> clazz) {
 		Query query = sessionFactory.getCurrentSession().createQuery(queryString);
-		for (String parameter : parameters.keySet()) {
-			query.setParameter(parameter, parameters.get(parameter));
+		for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
+			query.setParameter(parameter.getKey(), parameter.getValue());
 		}
 		return query.getResultList();
 	}

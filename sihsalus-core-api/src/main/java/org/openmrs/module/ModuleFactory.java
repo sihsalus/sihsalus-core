@@ -461,12 +461,8 @@ public class ModuleFactory {
 
 	public static List<Module> getStartedModulesInOrder() {
 		List<Module> modules = new ArrayList<>();
-		if (actualStartupOrder != null) {
-			for (String moduleId : actualStartupOrder) {
-				modules.add(getStartedModulesMap().get(moduleId));
-			}
-		} else {
-			modules.addAll(getStartedModules());
+		for (String moduleId : actualStartupOrder) {
+			modules.add(getStartedModulesMap().get(moduleId));
 		}
 		return modules;
 	}
@@ -1049,11 +1045,9 @@ public class ModuleFactory {
 			}
 
 			getStartedModulesMap().remove(moduleId);
-			if (actualStartupOrder != null) {
-				actualStartupOrder.remove(moduleId);
-				for (Module depModule : dependentModulesStopped) {
-					actualStartupOrder.remove(depModule.getModuleId());
-				}
+			actualStartupOrder.remove(moduleId);
+			for (Module depModule : dependentModulesStopped) {
+				actualStartupOrder.remove(depModule.getModuleId());
 			}
 
 			if (!skipOverStartedProperty && !Context.isRefreshingContext()) {

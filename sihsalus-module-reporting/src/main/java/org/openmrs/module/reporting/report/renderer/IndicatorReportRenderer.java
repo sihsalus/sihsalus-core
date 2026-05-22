@@ -93,7 +93,7 @@ public class IndicatorReportRenderer extends ReportDesignRenderer {
 					Object cellValue = row.getColumnValue(column.getName());	
 					if (cellValue instanceof CohortIndicatorAndDimensionResult) { 
 						CohortIndicatorAndDimensionResult result = (CohortIndicatorAndDimensionResult) cellValue;
-						w.write("<td>" + ((cellValue != null) ? result.getValue() : "n/a") + "</td>");					
+						w.write("<td>" + result.getValue() + "</td>");
 					}
 					else { 
 						w.write("<td>" + ((cellValue != null) ? cellValue : "n/a") + "</td>");					

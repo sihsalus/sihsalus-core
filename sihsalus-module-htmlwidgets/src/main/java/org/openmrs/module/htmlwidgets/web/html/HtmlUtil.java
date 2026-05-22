@@ -110,7 +110,7 @@ public class HtmlUtil  {
 				initialRequestId = String.valueOf(System.identityHashCode(request));
 			}
 			String lastRequestId = (String) session.getAttribute(OPENMRS_HTML_INCLUDE_REQUEST_ID_KEY);
-			Map<String, String> m = (HashMap<String, String>) session.getAttribute(OPENMRS_HTML_INCLUDE_MAP_KEY);
+			Map<String, String> m = (Map<String, String>) session.getAttribute(OPENMRS_HTML_INCLUDE_MAP_KEY);
 			if (m == null || !initialRequestId.equals(lastRequestId)) {
 				m = new HashMap<String, String>();
 			}

@@ -136,8 +136,8 @@ public class Legacy1xRestController extends BaseRestController {
 		RequestContext requestContext = RestUtil.getRequestContext(request, response);
 		SimpleObject queueEntry = new SimpleObject();
 		Map<String, Object> postedQueueEntry = post.get("queueEntry");
-		for (String key : postedQueueEntry.keySet()) {
-			queueEntry.add(key, postedQueueEntry.get(key));
+		for (Map.Entry<String, Object> entry : postedQueueEntry.entrySet()) {
+			queueEntry.add(entry.getKey(), entry.getValue());
 		}
 		queueEntry.add("visit", post.get("visit"));
 		Object created = queueEntryResource.create(queueEntry, requestContext);

@@ -170,7 +170,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 		sql.append("from drug, drug_order, orders ");
 		sql.append("where orders.order_id = drug_order.order_id ");
 		sql.append("and drug.drug_id = drug_order.drug_inventory_id ");
-		if (drugIds != null && !drugIds.isEmpty()) {
+		if (!drugIds.isEmpty()) {
 			sql.append("and drug_order.drug_inventory_id in (:drugIds) ");
 		}
 		sql.append("and orders." + whichColumn + " is not null ");
@@ -193,7 +193,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 				.debug("Patients having started or stopped drug orders between dates:\n "
 						+ query.getQueryString());
 
-		if (drugIds != null && !drugIds.isEmpty())
+		if (!drugIds.isEmpty())
 			query.setParameterList("drugIds", drugIds);
 		if (changedOnOrAfter != null)
 			query.setParameter("changedOnOrAfter", changedOnOrAfter);
@@ -223,7 +223,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 		sql.append("from drug, drug_order, orders ");
 		sql.append("where orders.order_id = drug_order.order_id ");
 		sql.append("and drug.drug_id = drug_order.drug_inventory_id ");
-		if (drugIds != null && !drugIds.isEmpty()) {
+		if (!drugIds.isEmpty()) {
 			sql.append("and drug_order.drug_inventory_id in (:drugIds) ");
 		}
 		sql.append("and orders.start_date is not null ");
@@ -246,7 +246,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 		log.debug("Patients having active drug orders between dates:\n "
 				+ query.getQueryString());
 
-		if (drugIds != null && !drugIds.isEmpty())
+		if (!drugIds.isEmpty())
 			query.setParameterList("drugIds", drugIds);
 		if (asOfDate != null)
 			query.setParameter("asOfDate", asOfDate);
@@ -445,7 +445,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 		sql.append("where pp.voided = false and p.voided = false ");
 
 		// optional clauses
-		if (programIds != null && !programIds.isEmpty())
+		if (!programIds.isEmpty())
 			sql.append(" and pp.program_id in (:programIds) ");
 		if (onOrAfter != null)
 			sql.append(" and (pp.date_completed is null or pp.date_completed >= :onOrAfter) ");
@@ -457,7 +457,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 
 		// Execute query
 		Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
-		if (programIds != null && !programIds.isEmpty())
+		if (!programIds.isEmpty())
 			query.setParameterList("programIds", programIds);
 		if (onOrAfter != null)
 			query.setParameter("onOrAfter", onOrAfter);
@@ -485,7 +485,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 		sql.append("where ps.voided = false and pp.voided = false and p.voided = false ");
 		
 		// Create a list of clauses
-		if (stateIds != null && !stateIds.isEmpty())
+		if (!stateIds.isEmpty())
 			sql.append(" and ps.state in (:stateIds) ");
 		if (startedOnOrAfter != null)
 			sql.append(" and ps.start_date >= :startedOnOrAfter ");
@@ -502,7 +502,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 		// Execute query
 		Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
 
-		if (stateIds != null && !stateIds.isEmpty())
+		if (!stateIds.isEmpty())
 			query.setParameterList("stateIds", stateIds);
 		if (startedOnOrAfter != null)
 			query.setParameter("startedOnOrAfter", startedOnOrAfter);
@@ -533,7 +533,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 		sql.append("where ps.voided = false and pp.voided = false and p.voided = false ");
 
 		// optional clauses
-		if (stateIds != null && !stateIds.isEmpty())
+		if (!stateIds.isEmpty())
 			sql.append(" and ps.state in (:stateIds) ");
 		if (onOrAfter != null)
 			sql.append(" and (ps.end_date is null or ps.end_date >= :onOrAfter) ");
@@ -545,7 +545,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 
 		// Execute query
 		Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
-		if (stateIds != null && !stateIds.isEmpty())
+		if (!stateIds.isEmpty())
 			query.setParameterList("stateIds", stateIds);
 		if (onOrAfter != null)
 			query.setParameter("onOrAfter", onOrAfter);

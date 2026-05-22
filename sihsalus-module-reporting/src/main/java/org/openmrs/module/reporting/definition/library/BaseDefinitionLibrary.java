@@ -103,7 +103,7 @@ public abstract class BaseDefinitionLibrary<T extends Definition> implements Def
 		String definitionKey = null;
 		DocumentedDefinition annotation = method.getAnnotation(DocumentedDefinition.class);
 		if (annotation != null) {
-			definitionKey = (annotation == null ? "" : annotation.value());
+			definitionKey = annotation.value();
 			if (ObjectUtil.isNull(definitionKey)) {
 				definitionKey = method.getName();
 				if (definitionKey.startsWith("get")) {

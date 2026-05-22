@@ -157,10 +157,8 @@ public class ServiceContext implements ApplicationContextAware {
 				ServiceContextHolder.instance.removeAddedAOP(serviceClass);
 			}
 
-			if (ServiceContextHolder.instance.services != null) {
-				ServiceContextHolder.instance.services.clear();
-				ServiceContextHolder.instance.services = null;
-			}
+			ServiceContextHolder.instance.services.clear();
+			ServiceContextHolder.instance.services = null;
 
 			if (ServiceContextHolder.instance.addedAdvisors != null) {
 				ServiceContextHolder.instance.addedAdvisors.clear();

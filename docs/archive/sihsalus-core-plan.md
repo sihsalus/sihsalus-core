@@ -33,10 +33,10 @@ Local reference code:
 
 Reference docs:
 
-- `docs/openmrs-distro-pom-reference.md`
-- `docs/sihsalus-distro-baseline.md`
+- `docs/archive/openmrs-distro-pom-reference.md`
+- `docs/archive/sihsalus-distro-baseline.md`
 - `docs/architecture.md`
-- `docs/migration-plan.md`
+- `docs/archive/migration-plan.md`
 
 ## Current Cut
 
