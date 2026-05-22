@@ -90,6 +90,10 @@ public class AllDefinitionLibraries {
     public DefinitionLibraryCohortDefinition cohortDefinition(String key, Object... paramsAndValues) {
         DefinitionLibraryCohortDefinition cd = new DefinitionLibraryCohortDefinition(key);
         cd.loadParameters(this);
+        if (paramsAndValues.length % 2 != 0) {
+            throw new IllegalArgumentException("Expected an even number of arguments.");
+        }
+
         for (int i = 0; i < paramsAndValues.length; i += 2) {
             cd.addParameterValue((String) paramsAndValues[i], paramsAndValues[i + 1]);
         }

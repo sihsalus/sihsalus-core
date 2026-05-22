@@ -39,6 +39,10 @@ public class MappedParametersCohortDefinition extends MappedParametersQuery<Coho
 	}
 
 	private static Map<String, String> toMap(String... keysAndValues) {
+		if (keysAndValues.length % 2 != 0) {
+			throw new IllegalArgumentException("Expected an even number of arguments.");
+		}
+
 		Map<String, String> map = new HashMap<String, String>();
 		for (int i = 0; i < keysAndValues.length; i += 2) {
 			map.put(keysAndValues[i], keysAndValues[i + 1]);

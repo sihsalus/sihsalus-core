@@ -114,7 +114,7 @@ public class SearchParameterMap implements Serializable {
 		this.sortSpec = sortSpec;
 		return this;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -125,9 +125,9 @@ public class SearchParameterMap implements Serializable {
 		}
 		SearchParameterMap that = (SearchParameterMap) o;
 		return fromIndex == that.fromIndex && toIndex == that.toIndex && Objects.equals(sortSpec, that.sortSpec)
-		        && Objects.equals(params, that.params);
+				&& Objects.equals(params, that.params);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(sortSpec, params, fromIndex, toIndex);

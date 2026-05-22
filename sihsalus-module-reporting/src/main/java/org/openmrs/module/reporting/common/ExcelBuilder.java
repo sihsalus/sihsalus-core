@@ -179,6 +179,10 @@ public class ExcelBuilder {
     }
 
     public XSSFRichTextString createRichTextString(String... textAndStyle) {
+        if (textAndStyle.length % 2 != 0) {
+            throw new IllegalArgumentException("Expected an even number of arguments.");
+        }
+
         Map<String, String> m = new LinkedHashMap<String, String>();
         for (int i=0; i<textAndStyle.length; i+=2) {
             m.put(textAndStyle[i], textAndStyle[i + 1]);
