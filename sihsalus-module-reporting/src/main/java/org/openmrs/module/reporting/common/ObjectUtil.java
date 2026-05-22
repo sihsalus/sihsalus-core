@@ -102,9 +102,13 @@ public class ObjectUtil {
 	 * @return Map<String, Object> given passed keys and values.  Will convert keys to String if needed
 	 */
 	public static Map<String, Object> toMap(Object...keysAndValues) {
+		if (keysAndValues.length % 2 != 0) {
+			throw new IllegalArgumentException("Expected an even number of arguments.");
+		}
+
 		Map<String, Object> m = new HashMap<String, Object>();
-		for (int i=0; i<keysAndValues.length; i+=2) {
-			m.put(keysAndValues[i].toString(), keysAndValues[i+1]);
+		for (int i = 0; i < keysAndValues.length; i += 2) {
+			m.put(keysAndValues[i].toString(), keysAndValues[i + 1]);
 		}
 		return m;
 	}
