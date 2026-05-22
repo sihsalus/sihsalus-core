@@ -69,9 +69,7 @@ public class SqlPersonQueryEvaluator implements PersonQueryEvaluator {
 		}
 
 		List<Integer> l = evaluationService.evaluateToList(qb, Integer.class, context);
-		if (personIds != null) {
-			l.retainAll(personIds.getMemberIds());
-		}
+		l.retainAll(personIds.getMemberIds());
 		queryResult.addAll(l);
 
 		return queryResult;

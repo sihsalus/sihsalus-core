@@ -271,7 +271,7 @@ public class ModuleClassLoader extends URLClassLoader {
 			ModuleUtil.expandJar(module.getFile(), tmpModuleDir, "lib", true);
 			File libdir = new File(tmpModuleDir, "lib");
 
-			if (libdir != null && libdir.exists()) {
+			if (libdir.exists()) {
 				Map<String, String> startedRelatedModules = new HashMap<>();
 				for (Module requiredModule : collectRequiredModuleImports(module)) {
 					startedRelatedModules.put(requiredModule.getModuleId(), requiredModule.getVersion());

@@ -76,11 +76,7 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 						catch (Exception e) {
 							log.error("Did not find rounding item by ID with ID <{}>", roundingItemId, e);
 						}
-						if (roundingItem != null) {
-							options.setRoundingItemUuid(roundingItem.getUuid());
-						} else {
-							log.error("Rounding item is NULL. Check your ID");
-						}
+						options.setRoundingItemUuid(roundingItem.getUuid());
 					}
 				}
 			}
