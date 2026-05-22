@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.openmrs.api.APIAuthenticationException;
 import org.springframework.http.ResponseEntity;
 
 class FhirR4ReadControllerTest {
@@ -44,6 +45,19 @@ class FhirR4ReadControllerTest {
         assertTrue(response.getBody().contains("Could not find patient with Id missing"));
     }
 
+    @Test
+    void convertsAnonymousAuthorizationExceptionToOperationOutcome() {
+        FhirR4ReadController controller =
+                new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new UnauthorizedPatientProvider()));
+
+        ResponseEntity<String> response = controller.read("Patient", "secured");
+
+        assertEquals(401, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+        assertTrue(response.getBody().contains("FHIR read requires privileges"));
+    }
+
     private static class PatientProvider implements IResourceProvider {
 
         @Override
@@ -66,6 +80,15 @@ class FhirR4ReadControllerTest {
         @Read
         public Patient read(@IdParam IdType id) {
             throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
+        }
+    }
+
+    private static final class UnauthorizedPatientProvider extends PatientProvider {
+
+        @Override
+        @Read
+        public Patient read(@IdParam IdType id) {
+            throw new APIAuthenticationException("FHIR read requires privileges");
         }
     }
 }

@@ -34,6 +34,8 @@
             <column name="service" type="int">
                 <constraints nullable="false"/>
             </column>
+            <column name="priority_concept_set" type="int"/>
+            <column name="status_concept_set" type="int"/>
             <column name="creator" type="int">
                 <constraints nullable="false"/>
             </column>
@@ -67,6 +69,12 @@
         <addForeignKeyConstraint baseTableName="queue" baseColumnNames="service"
                                  constraintName="queue_service_fk"
                                  referencedTableName="concept" referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="priority_concept_set"
+                                 constraintName="queue_priority_concept_set_fk"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint baseTableName="queue" baseColumnNames="status_concept_set"
+                                 constraintName="queue_status_concept_set_fk"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
     </changeSet>
 
     <changeSet id="add_queue_entry_20220125" author="corneliouzbett">
@@ -82,9 +90,11 @@
             <column name="queue_id" type="int">
                 <constraints nullable="false"/>
             </column>
+            <column name="queue_coming_from" type="int"/>
             <column name="patient_id" type="int">
                 <constraints nullable="false"/>
             </column>
+            <column name="visit_id" type="int"/>
             <column name="priority" type="int">
                 <constraints nullable="false"/>
             </column>
@@ -132,6 +142,9 @@
         <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="patient_id"
                                  constraintName="queue_entry_patient_id_fk"
                                  referencedTableName="patient" referencedColumnNames="patient_id"/>
+        <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="visit_id"
+                                 constraintName="queue_entry_visit_id_fk"
+                                 referencedTableName="visit" referencedColumnNames="visit_id"/>
         <addForeignKeyConstraint baseTableName="queue_entry" baseColumnNames="priority"
                                  constraintName="queue_entry_priority_fk"
                                  referencedTableName="concept" referencedColumnNames="concept_id"/>
@@ -339,6 +352,7 @@
     <changeSet id="add_location_coming_from_column_to_queue_entry_20230809" author="cynthiakamau">
         <preConditions onError="WARN" onFail="MARK_RAN">
             <tableExists tableName="queue_entry"/>
+            <not><columnExists tableName="queue_entry" columnName="queue_coming_from"/></not>
             <not><columnExists tableName="queue_entry" columnName="location_coming_from"/></not>
         </preConditions>
         <comment>
@@ -353,6 +367,7 @@
     <changeSet id="add_queue_entry_location_coming_from_fk_20230809" author="cynthiakamau">
         <preConditions onFail="MARK_RAN">
             <columnExists tableName="queue_entry" columnName="location_coming_from"/>
+            <not><columnExists tableName="queue_entry" columnName="queue_coming_from"/></not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="location_coming_from" baseTableName="queue_entry" constraintName="queue_entry_location_coming_from_id_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="queue_id" referencedTableName="queue"/>
     </changeSet>
@@ -376,6 +391,36 @@
     <changeSet id="add_queue_entry_queue_coming_from_fk_20230914" author="cynthiakamau">
         <preConditions onFail="MARK_RAN">
             <columnExists tableName="queue_entry" columnName="queue_coming_from"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="queue_entry" foreignKeyName="queue_entry_queue_coming_from_id_fk"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="queue_coming_from" baseTableName="queue_entry" constraintName="queue_entry_queue_coming_from_id_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="queue_id" referencedTableName="queue"/>
+    </changeSet>
+
+    <changeSet id="ensure_queue_entry_queue_coming_from_column_static_20260518" author="sihsalus">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="queue_entry"/>
+            <not>
+                <columnExists tableName="queue_entry" columnName="queue_coming_from"/>
+            </not>
+        </preConditions>
+        <comment>
+            Static monolith compatibility: ensure queue_coming_from exists even when the legacy
+            location_coming_from rename changesets were marked as ran without producing the final column.
+        </comment>
+        <addColumn tableName="queue_entry">
+            <column name="queue_coming_from" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ensure_queue_entry_queue_coming_from_fk_static_20260518" author="sihsalus">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="queue_entry"/>
+            <columnExists tableName="queue_entry" columnName="queue_coming_from"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="queue_entry" foreignKeyName="queue_entry_queue_coming_from_id_fk"/>
+            </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="queue_coming_from" baseTableName="queue_entry" constraintName="queue_entry_queue_coming_from_id_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="queue_id" referencedTableName="queue"/>
     </changeSet>
@@ -404,6 +449,17 @@
         <addColumn tableName="queue_entry">
             <column name="visit_id" type="int"/>
         </addColumn>
+        <addForeignKeyConstraint baseColumnNames="visit_id" baseTableName="queue_entry" constraintName="queue_entry_visit_id_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="visit_id" referencedTableName="visit"/>
+    </changeSet>
+
+    <changeSet id="ensure_queue_entry_visit_id_fk_static_20260518" author="sihsalus">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="queue_entry"/>
+            <columnExists tableName="queue_entry" columnName="visit_id"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="queue_entry" foreignKeyName="queue_entry_visit_id_fk"/>
+            </not>
+        </preConditions>
         <addForeignKeyConstraint baseColumnNames="visit_id" baseTableName="queue_entry" constraintName="queue_entry_visit_id_fk" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="visit_id" referencedTableName="visit"/>
     </changeSet>
 
@@ -746,6 +802,27 @@
             INSERT INTO role_privilege (role, privilege)
             SELECT role, 'Purge Queues' from role_privilege rp
             WHERE rp.privilege = 'Manage Visit Types';
+        </sql>
+    </changeSet>
+
+    <changeSet id="queue-static-config-metadata-20260519" author="sihsalus">
+        <comment>Add queue global properties previously contributed by config.xml</comment>
+        <sql>
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'queue.statusConceptSetName', 'Status', 'Set status conceptSet name', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'queue.statusConceptSetName');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'queue.priorityConceptSetName', 'Priority', 'Set priority conceptSet name', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'queue.priorityConceptSetName');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'queue.serviceConceptSetName', 'Service', 'Set service conceptSet name', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'queue.serviceConceptSetName');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'queue.sortWeightGenerator', '', 'The bean name of a registered component that provides an algorithm to set a queue entry sort weight when saved', UUID()
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'queue.sortWeightGenerator');
         </sql>
     </changeSet>
 

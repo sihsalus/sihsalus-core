@@ -20,6 +20,7 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,9 +45,11 @@ public class DefaultMailSender implements MailSender {
             MimeMessage mail = new MimeMessage(getSession());
             if(!Objects.equals(mail.getSession().getProperty("mail.send"), "true")) return;
             mail.setFrom(new InternetAddress(this.administrationService.getGlobalProperty("mail.from", "")));
-            Address[] toAddresses = new Address[1];
-            toAddresses[0] = new InternetAddress(to[0]);
-            mail.setRecipients(Message.RecipientType.TO, getAddresses(to));
+            Address[] toAddresses = getAddresses(to);
+            if (toAddresses.length == 0) {
+                throw new IllegalArgumentException("At least one recipient address is required");
+            }
+            mail.setRecipients(Message.RecipientType.TO, toAddresses);
             if (cc != null && cc.length > 0) {
                 mail.setRecipients(Message.RecipientType.CC, getAddresses(cc));
             }
@@ -139,9 +142,9 @@ public class DefaultMailSender implements MailSender {
         Path propertyFilePath = Paths.get(OpenmrsUtil.getApplicationDataDirectory(), EMAIL_PROPERTIES_FILENAME);
         if (Files.exists(propertyFilePath)) {
             Properties properties = new Properties();
-            try {
+            try (InputStream inputStream = Files.newInputStream(propertyFilePath)) {
                 log.info("Reading properties from: " + propertyFilePath);
-                properties.load(Files.newInputStream(propertyFilePath));
+                properties.load(inputStream);
                 return properties;
             } catch (IOException e) {
                 log.error("Could not load email properties from: " + propertyFilePath, e);

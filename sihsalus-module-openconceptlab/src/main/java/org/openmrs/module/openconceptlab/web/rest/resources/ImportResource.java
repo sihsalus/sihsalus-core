@@ -5,6 +5,13 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.DateProperty;
 import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.StringProperty;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openconceptlab.Import;
@@ -32,29 +39,27 @@ import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-import org.openmrs.util.PrivilegeConstants;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
 
 @Resource(
         name = RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE + "/import",
         supportedClass = Import.class,
-        supportedOpenmrsVersions = { "1.8.* - 2.*" }
+        supportedOpenmrsVersions = { "1.8.* - 9.*" }
 )
 public class ImportResource extends DelegatingCrudResource<Import> implements Uploadable {
+    private static final String GP_MAX_IMPORT_UPLOAD_BYTES = "openconceptlab.import.maxUploadBytes";
+
+    private static final long DEFAULT_MAX_IMPORT_UPLOAD_BYTES = 100L * 1024L * 1024L;
+
     private static final Set<String> ALLOWED_MIME_TYPES = new HashSet<>(Arrays.asList(
         "application/zip", "application/x-zip-compressed", "application/x-zip", "application/octet-stream"
     ));
 
     @Override
     public Import getByUniqueId(String uniqueId) {
+        requireManageConcepts();
         return getImportService().getImport(uniqueId);
     }
 
@@ -70,6 +75,7 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
 
     @Override
     public Import save(Import delegate) {
+        requireManageConcepts();
         if (delegate != null) {
             UpdateScheduler updateScheduler = getUpdateScheduler();
             updateScheduler.scheduleNow();
@@ -173,6 +179,7 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
 
     @Override
     protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+        requireManageConcepts();
         return new NeedsPaging<Import>(getImportService().getImportsInOrder(0, 20), context);
     }
 
@@ -269,32 +276,44 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
 
     @Override
     public Object upload(MultipartFile multipartFile, RequestContext requestContext) throws ResponseException, IOException {
-        Context.requirePrivilege(PrivilegeConstants.MANAGE_CONCEPTS);
+        requireManageConcepts();
 
         if (multipartFile.isEmpty()) {
             throw new IllegalRequestException("File uploaded cannot be empty");
         } else if (!isZipFileType(multipartFile)) {
             throw new IllegalRequestException("Supplied file must be a zip file");
+        } else if (multipartFile.getSize() > getMaxImportUploadBytes()) {
+            throw new IllegalRequestException("Supplied file exceeds the maximum allowed upload size");
         }
 
         ImportService importService = getImportService();
         Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
 
         File tempFile = File.createTempFile("ocl", "zip");
-        multipartFile.transferTo(tempFile);
-
-        ZipFile zipFile;
+        ZipFile zipFile = null;
+        boolean scheduled = false;
         try {
+            multipartFile.transferTo(tempFile);
             zipFile = new ZipFile(tempFile);
+            importer.setZipFile(zipFile);
+
+            UpdateScheduler updateScheduler = Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
+            updateScheduler.scheduleNow();
+            scheduled = true;
         } catch (ZipException e) {
-            tempFile.delete();
             throw new IllegalRequestException("Supplied file is not a valid zip file");
+        } finally {
+            if (!scheduled) {
+                importer.setZipFile(null);
+                if (zipFile != null) {
+                    try {
+                        zipFile.close();
+                    } catch (IOException ignored) {
+                    }
+                }
+                tempFile.delete();
+            }
         }
-
-        importer.setZipFile(zipFile);
-
-        UpdateScheduler updateScheduler = Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
-        updateScheduler.scheduleNow();
 
         return importService.getLastImport();
     }
@@ -302,5 +321,16 @@ public class ImportResource extends DelegatingCrudResource<Import> implements Up
     private static boolean isZipFileType(MultipartFile multipartFile) {
         String contentType = multipartFile.getContentType();
         return contentType != null && ALLOWED_MIME_TYPES.contains(contentType.toLowerCase());
+    }
+
+    private static long getMaxImportUploadBytes() {
+        String configuredValue = Context.getAdministrationService().getGlobalProperty(
+                GP_MAX_IMPORT_UPLOAD_BYTES, String.valueOf(DEFAULT_MAX_IMPORT_UPLOAD_BYTES));
+        try {
+            long parsedValue = Long.parseLong(configuredValue);
+            return parsedValue > 0 ? parsedValue : DEFAULT_MAX_IMPORT_UPLOAD_BYTES;
+        } catch (NumberFormatException e) {
+            return DEFAULT_MAX_IMPORT_UPLOAD_BYTES;
+        }
     }
 }

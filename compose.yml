@@ -4,9 +4,9 @@ services:
     environment:
       POSTGRES_DB: ${SIHSALUS_POSTGRES_DB:-sihsalus}
       POSTGRES_USER: ${SIHSALUS_POSTGRES_USER:-sihsalus}
-      POSTGRES_PASSWORD: ${SIHSALUS_POSTGRES_PASSWORD:-sihsalus}
+      POSTGRES_PASSWORD: ${SIHSALUS_POSTGRES_PASSWORD:?SIHSALUS_POSTGRES_PASSWORD must be set}
     ports:
-      - "${SIHSALUS_POSTGRES_PORT:-5432}:5432"
+      - "${SIHSALUS_POSTGRES_BIND_ADDRESS:-127.0.0.1}:${SIHSALUS_POSTGRES_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
@@ -15,5 +15,37 @@ services:
     volumes:
       - sihsalus-postgres-data:/var/lib/postgresql/data
 
+  backend:
+    image: ${SIHSALUS_BACKEND_IMAGE:-sihsalus-core:local}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      OPENMRS_APPLICATION_DATA_DIRECTORY: /openmrs/data
+      SIHSALUS_INITIALIZER_SOURCE_ROOT: /opt/sihsalus/reference-sources/sihsalus-content
+      SIHSALUS_OCL_STATIC_IMPORT_ENABLED: ${SIHSALUS_OCL_STATIC_IMPORT_ENABLED:-true}
+      SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS: ${SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS:-false}
+      SIHSALUS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${SIHSALUS_POSTGRES_DB:-sihsalus}
+      SIHSALUS_DATASOURCE_USERNAME: ${SIHSALUS_POSTGRES_USER:-sihsalus}
+      SIHSALUS_DATASOURCE_PASSWORD: ${SIHSALUS_POSTGRES_PASSWORD:?SIHSALUS_POSTGRES_PASSWORD must be set}
+      SIHSALUS_ADMIN_USERNAME: ${SIHSALUS_ADMIN_USERNAME:-admin}
+      SIHSALUS_ADMIN_PASSWORD: ${SIHSALUS_ADMIN_PASSWORD:?SIHSALUS_ADMIN_PASSWORD must be set}
+      JAVA_OPTS: ${SIHSALUS_JAVA_OPTS:--XX:MaxRAMPercentage=75}
+      SERVER_PORT: 8080
+    ports:
+      - "${SIHSALUS_BACKEND_BIND_ADDRESS:-127.0.0.1}:${SIHSALUS_BACKEND_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 2m
+    volumes:
+      - sihsalus-openmrs-data:/openmrs/data
+
 volumes:
   sihsalus-postgres-data:
+  sihsalus-openmrs-data:

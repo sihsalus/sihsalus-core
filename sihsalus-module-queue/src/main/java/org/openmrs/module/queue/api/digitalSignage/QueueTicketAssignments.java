@@ -34,7 +34,7 @@ public class QueueTicketAssignments {
 	 * @param ticketNumber
 	 * @param status
 	 */
-	synchronized public static void updateTicketAssignment(String servicePointName, String ticketNumber, String status) {
+	public static synchronized void updateTicketAssignment(String servicePointName, String ticketNumber, String status) {
 		if (StringUtils.isNotBlank(servicePointName) && StringUtils.isNotBlank(ticketNumber)
 		        && StringUtils.isNotBlank(status)) {
 			
@@ -67,7 +67,7 @@ public class QueueTicketAssignments {
 		}
 	}
 	
-	public static Map<String, TicketAssignment> getActiveTicketAssignments() {
+	public static synchronized Map<String, TicketAssignment> getActiveTicketAssignments() {
 		return new HashMap<>(ACTIVE_QUEUE_TICKETS);
 	}
 	

@@ -44,9 +44,14 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
  * REST resource representing a {@link PaymentAttribute}.
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/paymentAttribute", supportedClass = PaymentAttribute.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/paymentAttribute", supportedClass = PaymentAttribute.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 @Slf4j
 public class PaymentAttributeResource extends BaseRestAttributeDataResource<PaymentAttribute, PaymentModeAttributeType> {
+
+	
+	protected org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<PaymentAttribute> doGetAll(org.openmrs.module.webservices.rest.web.RequestContext context) {
+		return new org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<>(java.util.Collections.emptyList(), context);
+	}
 	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {

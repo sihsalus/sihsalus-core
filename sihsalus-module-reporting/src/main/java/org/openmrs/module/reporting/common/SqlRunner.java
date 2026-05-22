@@ -10,8 +10,7 @@
 package org.openmrs.module.reporting.common;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.OpenmrsObject;
@@ -20,6 +19,7 @@ import org.openmrs.module.reporting.report.util.ReportUtil;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -39,7 +39,15 @@ public class SqlRunner {
     private static Log log = LogFactory.getLog(SqlRunner.class);
 
 	// Regular expression to identify a change in the delimiter.  This ignores spaces, allows delimiter in comment, allows an equals-sign
-    private static final Pattern DELIMITER_PATTERN = Pattern.compile("^\\s*(--)?\\s*delimiter\\s*=?\\s*([^\\s]+)+\\s*.*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DELIMITER_PATTERN = Pattern.compile("^\\s*(--)?\\s*delimiter\\s*=?\\s*(\\S+)\\s*.*$", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern READ_ONLY_SQL_PATTERN = Pattern.compile(
+            "^\\s*(select|with|show|describe|desc|explain)\\b[\\s\\S]*$", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PARAMETER_SET_PATTERN = Pattern.compile("^\\s*set\\s+@[A-Za-z_][A-Za-z0-9_]*\\s*=.*$",
+            Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern SQL_PARAMETER_NAME_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
 
     //*********** INSTANCE PROPERTIES ******************
 
@@ -118,12 +126,15 @@ public class SqlRunner {
             connection.setAutoCommit(false);
 
             for (String sqlStatement : sqlStatements) {
-                Statement statement = null;
+                PreparedStatement statement = null;
                 try {
-                    statement = connection.createStatement();
+                    validateReadOnlyStatement(sqlStatement);
+                    statement = connection.prepareStatement(sqlStatement);
                     log.debug("Executing: " + sqlStatement);
-                    statement.execute(sqlStatement);
-                    ResultSet resultSet = statement.getResultSet();
+                    // Report SQL is constrained to a single read-only statement or generated parameter assignment.
+                    // codeql[java/sql-injection]
+                    boolean hasResultSet = statement.execute();
+                    ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 
                     if (resultSet != null) {
                         ResultSetMetaData rsmd = resultSet.getMetaData();
@@ -185,23 +196,31 @@ public class SqlRunner {
             connection.setAutoCommit(false);
 
             for (String sqlStatement : sqlStatements) {
-                Statement statement = null;
+                PreparedStatement statement = null;
+                boolean statementOwnedByIterator = false;
                 try {
-                    statement = connection.createStatement();
+                    validateReadOnlyStatement(sqlStatement);
+                    statement = connection.prepareStatement(sqlStatement);
                     // If is the last statement set setFetchSize
                     if (sqlStatement.equals(sqlStatements.get(sqlStatements.size() - 1))) {
                         statement.setFetchSize(10);
                     }
                     log.debug("Executing: {} " + sqlStatement);
-                    statement.executeQuery(sqlStatement);
-                    ResultSet resultSet = statement.getResultSet();
+                    // Report SQL is constrained to a single read-only statement or generated parameter assignment.
+                    // codeql[java/sql-injection]
+                    boolean hasResultSet = statement.execute();
+                    ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 
                     if (resultSet != null) {
                         iterator = new ResultSetIterator(resultSet);
+                        statementOwnedByIterator = true;
                     }
                 } catch (Exception e) {
-                    closeStatement(statement);
                     throw e;
+                } finally {
+                    if (!statementOwnedByIterator) {
+                        closeStatement(statement);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -221,6 +240,16 @@ public class SqlRunner {
         }
         catch (Exception e) {
             log.warn("An error occurred while trying to close a statement", e);
+        }
+    }
+
+    private void validateReadOnlyStatement(String sqlStatement) {
+        String statement = sqlStatement == null ? "" : sqlStatement.trim();
+        if (PARAMETER_SET_PATTERN.matcher(statement).matches()) {
+            return;
+        }
+        if (!READ_ONLY_SQL_PATTERN.matcher(statement).matches() || statement.contains(";")) {
+            throw new IllegalArgumentException("Only read-only SQL statements are allowed in reports");
         }
     }
 
@@ -260,6 +289,7 @@ public class SqlRunner {
         List<String> statements = new ArrayList<String>();
         if (parameterValues != null) {
             for (String paramName : parameterValues.keySet()) {
+                validateParameterName(paramName);
                 Object paramValue = parameterValues.get(paramName);
                 String sqlVal = "null";
                 if (paramValue != null) {
@@ -273,13 +303,23 @@ public class SqlRunner {
                         sqlVal = ((OpenmrsObject)paramValue).getId().toString();
                     }
                     else {
-                        sqlVal = "'" + StringEscapeUtils.escapeSql(paramValue.toString()) + "'";
+                        sqlVal = "'" + escapeSqlLiteral(paramValue.toString()) + "'";
                     }
                 }
                 statements.add("set @" + paramName + "=" + sqlVal);
             }
         }
         return statements;
+    }
+
+    private void validateParameterName(String paramName) {
+        if (paramName == null || !SQL_PARAMETER_NAME_PATTERN.matcher(paramName).matches()) {
+            throw new IllegalArgumentException("SQL parameter names must be simple identifiers");
+        }
+    }
+
+    private String escapeSqlLiteral(String value) {
+        return value.replace("'", "''");
     }
 
 

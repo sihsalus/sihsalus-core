@@ -15,6 +15,7 @@ import org.openmrs.module.reporting.report.ReportRequest;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 import org.openmrs.module.reporting.report.service.ReportService;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.reportingrest.web.controller.ReportingRestController;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -72,6 +73,7 @@ public class ReportDefinitionsWithScheduledRequestsResource extends DelegatingCr
 
   @Override
   protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireViewReports();
     final List<ReportDefinition> reportDefinitions = getSortedReportDefinitions(context);
     List<SimpleObject> scheduledReports = mergeScheduledReports(reportDefinitions);
 

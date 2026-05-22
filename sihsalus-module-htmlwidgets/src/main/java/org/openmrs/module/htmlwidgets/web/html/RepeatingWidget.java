@@ -28,6 +28,8 @@ public class RepeatingWidget implements Widget {
 		HtmlUtil.renderResource(w, config.getRequest(), "/moduleResources/htmlwidgets/htmlwidgets.js");
 		String id = config.getId();
 		String name = config.getName();
+		String escapedId = HtmlUtil.escapeJavaScriptString(id);
+		String escapedName = HtmlUtil.escapeJavaScriptString(name);
 		
 		Class<?> type = null;
 		Type[] genericTypes = null;
@@ -76,14 +78,14 @@ public class RepeatingWidget implements Widget {
 		
 		w.write("<script type=\"text/javascript\" charset=\"utf-8\">");
 		w.write("	jQuery(document).ready(function() {");
-		w.write("		jQuery(\"#AddButton"+id+"\").click(function(event){");
-		w.write("			var count = parseInt(jQuery('#"+id+"Count').html()) + 1;");
-		w.write("			jQuery('#"+id+"Count').html(count);");
-		w.write("			var $newRow = cloneAndInsertBefore('template_"+id+"', this);");
-		w.write("			$newRow.attr('id', '"+id+"' + count);");
+		w.write("		jQuery(\"#AddButton"+ escapedId +"\").click(function(event){");
+		w.write("			var count = parseInt(jQuery('#"+ escapedId +"Count').html()) + 1;");
+		w.write("			jQuery('#"+ escapedId +"Count').html(count);");
+		w.write("			var $newRow = cloneAndInsertBefore('template_"+ escapedId +"', this);");
+		w.write("			$newRow.attr('id', '"+ escapedId +"' + count);");
 		w.write("			$newRow.prepend('<br/>');");
 		w.write("			$newRow.children('#removeRowButton').show();");
-		w.write("			$newRow.find(\"[name|='template_"+name+"']\").attr('name', \""+name+"\");");
+		w.write("			$newRow.find(\"[name|='template_"+ escapedName +"']\").attr('name', \""+ escapedName +"\");");
 		w.write("			var newRowChildren = $newRow.children();");
 		w.write("			for (var i=0; i<newRowChildren.length; i++) {");
 		w.write("				newRowChildren[i].id = newRowChildren[i].id + count;");

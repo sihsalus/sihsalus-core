@@ -42,6 +42,7 @@ import org.openmrs.module.queue.api.sort.SortWeightGenerator;
 import org.openmrs.module.queue.model.Queue;
 import org.openmrs.module.queue.model.QueueEntry;
 import org.openmrs.module.queue.model.QueueEntryTransition;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -261,13 +262,29 @@ public class QueueEntryServiceImpl extends BaseOpenmrsService implements QueueEn
 	@Override
 	public SortWeightGenerator getSortWeightGenerator() {
 		if (sortWeightGenerator == null) {
-			String beanName = administrationService.getGlobalProperty(QUEUE_SORT_WEIGHT_GENERATOR);
+			String beanName = getGlobalProperty(QUEUE_SORT_WEIGHT_GENERATOR);
 			if (StringUtils.isBlank(beanName)) {
 				beanName = EXISTING_VALUE_SORT_WEIGHT_GENERATOR;
 			}
 			sortWeightGenerator = Context.getRegisteredComponent(beanName, SortWeightGenerator.class);
 		}
 		return sortWeightGenerator;
+	}
+
+	private String getGlobalProperty(String property) {
+		boolean addedProxyPrivilege = Context.isAuthenticated()
+		        && !Context.hasPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		if (addedProxyPrivilege) {
+			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		}
+		try {
+			return administrationService.getGlobalProperty(property);
+		}
+		finally {
+			if (addedProxyPrivilege) {
+				Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+			}
+		}
 	}
 	
 	/**

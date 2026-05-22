@@ -16,6 +16,7 @@ import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BillableServiceMapper {
@@ -99,7 +100,8 @@ public class BillableServiceMapper {
 		service.setServiceType(Context.getConceptService().getConceptByUuid(mapper.getServiceType()));
 		service.setServiceCategory(Context.getConceptService().getConceptByUuid(mapper.getServiceCategory()));
 		service.setServiceStatus(mapper.getServiceStatus());
-		for (CashierItemPriceMapper itemPrice : mapper.getServicePrices()) {
+		for (CashierItemPriceMapper itemPrice : mapper.getServicePrices() == null ? Collections.<CashierItemPriceMapper>emptyList()
+		        : mapper.getServicePrices()) {
 			CashierItemPrice price = new CashierItemPrice();
 			price.setName(itemPrice.getName());
 			price.setPrice(itemPrice.getPrice());

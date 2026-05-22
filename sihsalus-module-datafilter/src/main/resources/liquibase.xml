@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <!--
+        See http://www.liquibase.org/manual/home#available_database_refactorings
+        for a list of supported elements and attributes
+    -->
+
+    <changeSet id="datafilter-20190522-2305" author="wluyima">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="datafilter_entity_basis_map" />
+            </not>
+        </preConditions>
+
+        <comment>Adding datafilter_entity_basis_map table</comment>
+
+        <createTable tableName="datafilter_entity_basis_map">
+            <column name="entity_basis_map_id" type="int" autoIncrement="true" >
+                <constraints primaryKey="true" nullable="false" unique="true" />
+            </column>
+            <column name="entity_identifier" type="varchar(127)">
+                <constraints nullable="false" />
+            </column>
+            <column name="entity_type" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="basis_identifier" type="varchar(127)">
+                <constraints nullable="false" />
+            </column>
+            <column name="basis_type" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true" />
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="datafilter_entity_basis_map"
+                                 baseColumnNames="creator"
+                                 constraintName="entity_basis_map_creator"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id" />
+
+        <addUniqueConstraint tableName="datafilter_entity_basis_map"
+                             columnNames="entity_identifier, entity_type, basis_identifier, basis_type"
+                             constraintName="entity_basis_UK" />
+
+    </changeSet>
+
+    <changeSet id="datafilter-20230323-1212" author="fdeniger">
+        <createIndex tableName="datafilter_entity_basis_map" indexName="datafilter_entity_basis_index">
+            <column name="entity_type"/>
+            <column name="basis_type"/>
+            <column name="basis_identifier"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

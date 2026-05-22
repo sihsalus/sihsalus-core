@@ -19,7 +19,7 @@ import java.util.Random;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.openmrs.api.APIException;
@@ -39,6 +39,12 @@ public class Security {
 	private static final Logger log = LoggerFactory.getLogger(Security.class);
 
 	private static final Random RANDOM = new SecureRandom();
+
+	private static final int GCM_TAG_LENGTH_BITS = 128;
+
+	private static final int GCM_IV_LENGTH_BYTES = 12;
+
+	private static final String GCM_CIPHER_TEXT_PREFIX = "v2:gcm:";
 
 	private Security() {
 	}
@@ -184,7 +190,7 @@ public class Security {
 	 * @since 1.9
 	 */
 	public static String encrypt(String text, byte[] initVector, byte[] secretKey) {
-		IvParameterSpec initVectorSpec = new IvParameterSpec(initVector);
+		GCMParameterSpec initVectorSpec = new GCMParameterSpec(GCM_TAG_LENGTH_BITS, initVector);
 		SecretKeySpec secret = new SecretKeySpec(secretKey, OpenmrsConstants.ENCRYPTION_KEY_SPEC);
 		byte[] encrypted;
 		String result;
@@ -214,7 +220,9 @@ public class Security {
 	 */
 	@Deprecated
 	public static String encrypt(String text) {
-		return Security.encrypt(text, Security.getSavedInitVector(), Security.getSavedSecretKey());
+		byte[] initVector = Security.generateNewInitVector();
+		return GCM_CIPHER_TEXT_PREFIX + Base64.getEncoder().encodeToString(initVector) + ":"
+		        + Security.encrypt(text, initVector, Security.getSavedSecretKey());
 	}
 
 	/**
@@ -229,7 +237,7 @@ public class Security {
 	 * @since 1.9
 	 */
 	public static String decrypt(String text, byte[] initVector, byte[] secretKey) {
-		IvParameterSpec initVectorSpec = new IvParameterSpec(initVector);
+		GCMParameterSpec initVectorSpec = new GCMParameterSpec(GCM_TAG_LENGTH_BITS, initVector);
 		SecretKeySpec secret = new SecretKeySpec(secretKey, OpenmrsConstants.ENCRYPTION_KEY_SPEC);
 		String decrypted;
 
@@ -258,6 +266,14 @@ public class Security {
 	 */
 	@Deprecated
 	public static String decrypt(String text) {
+		if (text != null && text.startsWith(GCM_CIPHER_TEXT_PREFIX)) {
+			String payload = text.substring(GCM_CIPHER_TEXT_PREFIX.length());
+			String[] parts = payload.split(":", 2);
+			if (parts.length != 2 || !StringUtils.hasText(parts[0]) || !StringUtils.hasText(parts[1])) {
+				throw new APIException("could.not.decrypt.text", (Object[]) null);
+			}
+			return Security.decrypt(parts[1], Base64.getDecoder().decode(parts[0]), Security.getSavedSecretKey());
+		}
 		return Security.decrypt(text, Security.getSavedInitVector(), Security.getSavedSecretKey());
 	}
 
@@ -286,8 +302,7 @@ public class Security {
 	 * @since 1.9
 	 */
 	public static byte[] generateNewInitVector() {
-		// initialize the init vector with 16 random bytes
-		byte[] initVector = new byte[16];
+		byte[] initVector = new byte[GCM_IV_LENGTH_BYTES];
 		RANDOM.nextBytes(initVector);
 
 		return initVector;

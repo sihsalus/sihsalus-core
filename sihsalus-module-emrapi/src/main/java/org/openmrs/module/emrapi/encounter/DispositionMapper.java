@@ -14,7 +14,8 @@ import org.openmrs.ConceptMap;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.emrapi.EmrApiConstants;
+import org.openmrs.module.emrapi.EmrApiConceptMappings;
+import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 import org.openmrs.module.emrapi.encounter.exception.ConceptNotFoundException;
 import org.openmrs.module.emrapi.encounter.mapper.UserMapper;
@@ -25,16 +26,23 @@ import java.util.List;
 import java.util.Set;
 
 public class DispositionMapper {
-	
+
 	private final ConceptService conceptService;
-	
+
 	private final UserMapper userMapper;
-	
+
+	private final EmrApiProperties emrApiProperties;
+
 	public DispositionMapper(ConceptService conceptService, UserMapper userMapper) {
+		this(conceptService, userMapper, null);
+	}
+
+	public DispositionMapper(ConceptService conceptService, UserMapper userMapper, EmrApiProperties emrApiProperties) {
 		this.conceptService = conceptService;
 		this.userMapper = userMapper;
+		this.emrApiProperties = emrApiProperties;
 	}
-	
+
 	public EncounterTransaction.Disposition getDisposition(Obs obs) {
 		if (obs.isVoided())
 			return null;
@@ -42,9 +50,9 @@ public class DispositionMapper {
 		Set<Obs> groupMembers = obs.getGroupMembers();
 		List<EncounterTransaction.Observation> additionalObservations = new ArrayList<EncounterTransaction.Observation>();
 		for (Obs groupMember : groupMembers) {
-			if (isDisposition(groupMember)) {
-				disposition.setCode(getConceptMappingCodeBySource(EmrApiConstants.EMR_CONCEPT_SOURCE_NAME,
-				    groupMember.getValueCoded().getConceptMappings()));
+				if (isDisposition(groupMember)) {
+					disposition.setCode(getConceptMappingCodeBySource(getConceptMappings().getConceptSourceName(),
+					    groupMember.getValueCoded().getConceptMappings()));
 				disposition.setVoided(groupMember.getVoided());
 				disposition.setVoidReason(groupMember.getVoidReason());
 				disposition.setExistingObs(groupMember.getUuid());
@@ -66,7 +74,7 @@ public class DispositionMapper {
 		disposition.setDispositionDateTime(obs.getObsDatetime());
 		return disposition;
 	}
-	
+
 	private String getConceptMappingCodeBySource(String source, Collection<ConceptMap> conceptMappings) {
 		for (ConceptMap conceptMapping : conceptMappings) {
 			if (conceptMapping.getConceptReferenceTerm().getConceptSource().getName().equals(source)) {
@@ -75,19 +83,23 @@ public class DispositionMapper {
 		}
 		return null;
 	}
-	
+
 	private boolean isDisposition(Obs obs) {
 		Concept dispositionConcept = getDispositionConcept();
 		return obs.getConcept().getUuid().equals(dispositionConcept.getUuid());
 	}
-	
+
 	private Concept getDispositionConcept() {
-		Concept concept = conceptService.getConceptByMapping(EmrApiConstants.CONCEPT_CODE_DISPOSITION,
-		    EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+		EmrApiConceptMappings mappings = getConceptMappings();
+		Concept concept = conceptService.getConceptByMapping(mappings.getDispositionCode(), mappings.getConceptSourceName());
 		if (concept == null) {
 			throw new ConceptNotFoundException(
-			        "Disposition concept does not exist. Code : " + EmrApiConstants.CONCEPT_CODE_DISPOSITION);
+			        "Disposition concept does not exist. Code : " + mappings.getDispositionCode());
 		}
 		return concept;
+	}
+
+	private EmrApiConceptMappings getConceptMappings() {
+		return emrApiProperties == null ? EmrApiConceptMappings.defaults() : emrApiProperties.getConceptMappings();
 	}
 }

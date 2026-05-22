@@ -96,8 +96,7 @@ public class HibernateReportDAO implements ReportDAO {
 	 * @throws DAOException
 	 */
 	public ReportDesign saveReportDesign(ReportDesign reportDesign) throws DAOException {
-		sessionFactory.getCurrentSession().saveOrUpdate(reportDesign);
-		return reportDesign;
+		return (ReportDesign) sessionFactory.getCurrentSession().merge(reportDesign);
 	}
 	
 	/**
@@ -115,8 +114,7 @@ public class HibernateReportDAO implements ReportDAO {
 	 * Saves a {@link ReportProcessorConfiguration} to the database and returns it
 	 */
 	public ReportProcessorConfiguration saveReportProcessorConfiguration(ReportProcessorConfiguration processorConfiguration) {
-		sessionFactory.getCurrentSession().saveOrUpdate(processorConfiguration);
-		return processorConfiguration;
+		return (ReportProcessorConfiguration) sessionFactory.getCurrentSession().merge(processorConfiguration);
 	}
 
 	/**
@@ -165,8 +163,7 @@ public class HibernateReportDAO implements ReportDAO {
 	 * @see ReportDAO#saveReportRequest(ReportRequest)
 	 */
 	public ReportRequest saveReportRequest(ReportRequest request) {
-		sessionFactory.getCurrentSession().saveOrUpdate(request);
-		return request;
+		return (ReportRequest) sessionFactory.getCurrentSession().merge(request);
 	}
 
 	/**

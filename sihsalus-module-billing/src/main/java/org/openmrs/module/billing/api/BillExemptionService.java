@@ -10,20 +10,27 @@
 package org.openmrs.module.billing.api;
 
 import org.openmrs.Concept;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.api.model.BillExemption;
 import org.openmrs.module.billing.api.model.ExemptionType;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 import java.util.List;
 
 public interface BillExemptionService {
 	
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	BillExemption save(BillExemption billExemption);
 	
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	BillExemption getBillingExemptionById(Integer id);
 	
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	BillExemption getBillingExemptionByUuid(String uuid);
 	
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	List<BillExemption> getExemptionsByConcept(Concept concept, ExemptionType itemType, boolean includeRetired);
 	
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	List<BillExemption> getExemptionsByItemType(ExemptionType itemType, boolean includeRetired);
 }

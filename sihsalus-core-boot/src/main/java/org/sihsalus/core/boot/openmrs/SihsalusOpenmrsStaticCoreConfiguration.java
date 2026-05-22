@@ -86,6 +86,10 @@ import org.springframework.core.io.ClassPathResource;
                         pattern = "org\\.openmrs\\.api\\.db\\.hibernate\\.search\\.elasticsearch\\..*"))
 public class SihsalusOpenmrsStaticCoreConfiguration {
 
+    private static final String OPENMRS_CHANGELOG_TABLE = "liquibasechangelog";
+
+    private static final String OPENMRS_CHANGELOG_LOCK_TABLE = "liquibasechangeloglock";
+
     @Bean
     static BeanFactoryPostProcessor openmrsRuntimePropertiesConfigurer() {
         return new OpenmrsRuntimePropertiesConfigurer();
@@ -96,6 +100,9 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog("classpath:/db/changelog/db.changelog-master.xml");
+        // Keep the Spring Boot path aligned with OpenMRS' DatabaseUpdater table names.
+        liquibase.setDatabaseChangeLogTable(OPENMRS_CHANGELOG_TABLE);
+        liquibase.setDatabaseChangeLogLockTable(OPENMRS_CHANGELOG_LOCK_TABLE);
         return liquibase;
     }
 

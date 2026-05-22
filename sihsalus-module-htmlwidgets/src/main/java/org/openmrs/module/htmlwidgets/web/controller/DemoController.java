@@ -6,9 +6,11 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.htmlwidgets.util.ReflectionUtil;
 import org.openmrs.module.htmlwidgets.web.WidgetUtil;
 import org.openmrs.module.htmlwidgets.web.demo.Demo;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
@@ -21,6 +23,7 @@ public class DemoController {
     /**
      * Provides demo functionality controller for the widget framework
      */
+    @Authorized(PrivilegeConstants.VIEW_ADMIN_FUNCTIONS)
     @RequestMapping("/module/htmlwidgets/demonstration.form")
     public void demonstration(ModelMap model, HttpServletRequest request, 
     						  @RequestParam(required=false, value="property") String property,

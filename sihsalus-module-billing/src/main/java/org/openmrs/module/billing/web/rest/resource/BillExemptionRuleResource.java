@@ -9,12 +9,13 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.evaluator.ScriptType;
 import org.openmrs.module.billing.api.model.BillExemption;
 import org.openmrs.module.billing.api.model.BillExemptionRule;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.SubResource;
@@ -26,6 +27,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
@@ -46,6 +48,7 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 	
 	@Override
 	public BillExemptionRule save(BillExemptionRule delegate) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
 		BillExemption exemption = delegate.getBillingExemption();
 		if (exemption != null) {
 			getService().save(exemption);
@@ -79,7 +82,8 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 	
 	@Override
 	protected void delete(BillExemptionRule delegate, String reason, RequestContext context) throws ResponseException {
-		if (delegate.getVoided()) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
+		if (Boolean.TRUE.equals(delegate.getVoided())) {
 			return;
 		}
 		delegate.setVoided(true);
@@ -92,8 +96,9 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 	
 	@Override
 	public void purge(BillExemptionRule delegate, RequestContext context) throws ResponseException {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
 		BillExemption exemption = delegate.getBillingExemption();
-		if (exemption != null) {
+		if (exemption != null && exemption.getRules() != null) {
 			exemption.getRules().remove(delegate);
 			getService().save(exemption);
 		}
@@ -140,14 +145,19 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 	@PropertySetter("scriptType")
 	public void setScriptType(BillExemptionRule instance, String scriptType) {
 		if (scriptType != null) {
-			instance.setScriptType(ScriptType.valueOf(scriptType));
+			try {
+				instance.setScriptType(ScriptType.valueOf(scriptType));
+			}
+			catch (IllegalArgumentException e) {
+				throw new ConversionException("Unknown script type: '" + scriptType + "'", e);
+			}
 		}
 	}
 	
 	@PropertySetter("script")
 	public void setScript(BillExemptionRule instance, String script) {
 		if (script != null) {
-			instance.setScript(StringEscapeUtils.unescapeHtml(script));
+			instance.setScript(StringEscapeUtils.unescapeHtml4(script));
 		}
 	}
 	

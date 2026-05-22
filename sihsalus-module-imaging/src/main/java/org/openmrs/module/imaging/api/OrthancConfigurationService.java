@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.imaging.api;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.imaging.OrthancConfiguration;
 import org.openmrs.module.imaging.api.client.OrthancHttpClient;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static org.openmrs.module.imaging.ImagingConstants.TASK_MANAGER_ORTHANC_CONFIGURATION;
 
 /**
  * This service exposes module's core functionality. It is a Spring managed bean which is configured
@@ -32,16 +35,21 @@ import java.util.List;
 public interface OrthancConfigurationService extends OpenmrsService {
 	
 	@Transactional(readOnly = true)
+	@Authorized(TASK_MANAGER_ORTHANC_CONFIGURATION)
 	List<OrthancConfiguration> getAllOrthancConfigurations();
 	
 	@Transactional(readOnly = true)
+	@Authorized(TASK_MANAGER_ORTHANC_CONFIGURATION)
 	OrthancConfiguration getOrthancConfiguration(int id);
 	
 	void setHttpClient(OrthancHttpClient client);
 	
+	@Authorized(TASK_MANAGER_ORTHANC_CONFIGURATION)
 	void saveOrthancConfiguration(OrthancConfiguration orthancConfiguration);
 	
+	@Authorized(TASK_MANAGER_ORTHANC_CONFIGURATION)
 	void removeOrthancConfiguration(OrthancConfiguration orthancConfiguration);
 	
+	@Authorized(TASK_MANAGER_ORTHANC_CONFIGURATION)
 	void updateOrthancConfiguration(OrthancConfiguration orthancConfiguration);
 }

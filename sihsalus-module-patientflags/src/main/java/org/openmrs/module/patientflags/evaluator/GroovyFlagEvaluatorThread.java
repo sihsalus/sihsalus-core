@@ -17,6 +17,7 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.openmrs.Cohort;
 import org.openmrs.Privilege;
@@ -30,39 +31,41 @@ import org.openmrs.module.patientflags.api.FlagService;
  * Underlying thread to handle groovy flag evaluations  (for security reasons)
  */
 public class GroovyFlagEvaluatorThread implements Runnable{
-	
+
 	/* the cohort to test */
 	private Cohort testCohort;
-	
+
 	/* the result cohort */
 	private Cohort resultCohort;
-	
+
 	/* the flag to test */
 	private Flag flag;
-	
+
 	/* only allow groovy script privileges associated with this user */
 	private User user;
-	
+
 	/* stores any exception throw during execution */
-	private Exception exception; 
-	
+	private Exception exception;
+
+	private boolean complete;
+
 	/**
 	 * Constructors
 	 */
-	
+
 	public GroovyFlagEvaluatorThread(){
 	}
-	
+
 	public GroovyFlagEvaluatorThread(Flag flag, Cohort cohort, User user){
 		this.flag = flag;
 		this.testCohort = cohort;
 		this.user = user;
 	}
-	
+
 	/**
 	 * Getters and Setters
 	 */
-	
+
 	public void setTestCohort(Cohort testCohort) {
 	    this.testCohort = testCohort;
     }
@@ -86,7 +89,7 @@ public class GroovyFlagEvaluatorThread implements Runnable{
 	public Flag getFlag() {
 	    return flag;
     }
-	
+
 	public void setUser(User user) {
 	    this.user = user;
     }
@@ -102,44 +105,49 @@ public class GroovyFlagEvaluatorThread implements Runnable{
 	public Exception getException() {
 	    return exception;
     }
-	
+
 	/**
 	 * Public Methods
 	 */
-	
+
 	public synchronized Cohort fetchResultCohort() throws Exception{
 		// wait for the evaluator thread to alert notify that it's done evaluating
-	    wait();
-        
+		while (!complete) {
+			wait();
+		}
+
         // if the evaluator thread created an exception, throw it; otherwise, return resultCohort
         Exception e = getException();
         if(e != null){
-        	throw e;
+            throw e;
         }
         else{
-        	return getResultCohort();
+            return getResultCohort();
         }
 	}
 
 	public synchronized void run() {
+		boolean openedSession = !Context.isSessionOpen();
 		try{
 			// open a new session and set the privileges that should be allowed
-			Context.openSession();
+			if (openedSession) {
+				Context.openSession();
+			}
 			setPrivileges();
-		
+
 			// get the script to execute
 			String criteria = flag.getCriteria();
-		
+
 			// get the set of bindings to use
 			Binding bindings = getBindings();
-		
+
 			// bind the test Cohort
 			bindings.setVariable("testCohort", getTestCohort());
-		
+
 			// create a Groovy shell and execute the criteria, storing the result in the resultCohort
 			GroovyShell shell = new GroovyShell(bindings);
 			setResultCohort((Cohort) shell.parse("import org.openmrs.*;" + criteria).run());
-	
+
 		}
 		catch (Exception e) {
 			// save the exception and set the result to null
@@ -148,10 +156,14 @@ public class GroovyFlagEvaluatorThread implements Runnable{
 		}
 		finally {
 			// notify the main thread that execution is complete
-			notify();
+			complete = true;
+			notifyAll();
+			if (openedSession && Context.isSessionOpen()) {
+				Context.closeSession();
+			}
 		}
     }
-	
+
 	//TODO: add a better version of this which is driven by a config file.
     private static Binding getBindings() {
 		try {
@@ -189,21 +201,22 @@ public class GroovyFlagEvaluatorThread implements Runnable{
 			Context.removeProxyPrivilege("Get Patients");
 		}
 	}
-	
+
 	private void setPrivileges(){
 		// fetch the privileges allowed from the privilege cache
 		Collection<Privilege> privileges = Context.getService(FlagService.class).getPrivileges();
-		
+
 		if(privileges != null){
+			privileges = new HashSet<Privilege>(privileges);
 			// if a user is specified, further restrict the privileges allowed to the intersection of the cache privileges
 			// and the user privileges
 			if(user != null && !user.isSuperUser()){
 				privileges.retainAll(user.getPrivileges());
 			}
-	
+
 			// add the privileges by proxy
 			for(Privilege privilege : privileges){
-				Context.addProxyPrivilege(privilege.getPrivilege());	
+				Context.addProxyPrivilege(privilege.getPrivilege());
 			}
 		}
 	}

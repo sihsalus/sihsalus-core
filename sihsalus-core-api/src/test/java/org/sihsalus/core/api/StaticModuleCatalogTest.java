@@ -10,6 +10,9 @@ class StaticModuleCatalogTest {
     void includesFhirAndNoOmodRuntimeModule() {
         assertTrue(StaticModuleCatalog.modules().stream().anyMatch(module -> module.id().equals("fhir2")));
         assertTrue(StaticModuleCatalog.modules().stream().noneMatch(module -> module.id().equals("omod-runtime")));
+        assertTrue(StaticModuleCatalog.modules().stream().noneMatch(module -> module.id().equals("identitylookup")));
+        assertTrue(StaticModuleCatalog.staticInternalModules().stream()
+                .noneMatch(module -> module.status() == SihsalusModuleStatus.PLACEHOLDER));
     }
 
     @Test
@@ -121,6 +124,15 @@ class StaticModuleCatalogTest {
     }
 
     @Test
+    void dataFilterIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("datafilter")
+                        && module.sourceModule().equals("datafilter-omod")
+                        && module.baselineVersion().equals("0.1.0-SNAPSHOT")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
     void fuaIsStaticInternalSourceImport() {
         assertTrue(StaticModuleCatalog.modules().stream()
                 .anyMatch(module -> module.id().equals("fua")
@@ -189,6 +201,15 @@ class StaticModuleCatalogTest {
                 .anyMatch(module -> module.id().equals("reportingrest")
                         && module.sourceModule().equals("reportingrest-omod")
                         && module.baselineVersion().equals("2.0.0")
+                        && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
+    }
+
+    @Test
+    void eventIsStaticInternalSourceImport() {
+        assertTrue(StaticModuleCatalog.modules().stream()
+                .anyMatch(module -> module.id().equals("event")
+                        && module.sourceModule().equals("event-omod")
+                        && module.baselineVersion().equals("4.0.0")
                         && module.status() == SihsalusModuleStatus.STATIC_INTERNAL));
     }
 

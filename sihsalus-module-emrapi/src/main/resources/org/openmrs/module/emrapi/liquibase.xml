@@ -270,4 +270,189 @@
             <column name="start_date_time"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="sihsalus-emrapi-202605211300-configurable-concept-mappings" author="sihsalus">
+        <sql>
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptSourceName', 'org.openmrs.module.emrapi', 'Concept source used for EMR API concept mappings.', '510afc29-0994-4b97-8c9f-72d8f622e101'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptSourceName');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.sameAsConceptMapTypeUuid', '35543629-7d8c-11e1-909d-c80aa9edcf4e', 'Concept map type UUID treated as SAME-AS by EMR API.', 'b89d1058-956e-4048-b6dc-1e69044f719d'
+            where not exists (select 1 from global_property where property = 'emrapi.sameAsConceptMapTypeUuid');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.narrowerThanConceptMapTypeUuid', '43ac5109-7d8c-11e1-909d-c80aa9edcf4e', 'Concept map type UUID treated as NARROWER-THAN by EMR API.', '37b77ac9-81f2-46ff-9959-f05830e7ea09'
+            where not exists (select 1 from global_property where property = 'emrapi.narrowerThanConceptMapTypeUuid');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.diagnosisConceptSet', 'Diagnosis Concept Set', 'EMR API mapping code for the diagnosis concept set.', '66c1ae4c-bc88-4d03-bf5c-c7fa78369278'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.diagnosisConceptSet');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.codedDiagnosis', 'Coded Diagnosis', 'EMR API mapping code for coded diagnosis.', 'd56db232-8941-4c1b-ace2-8682f8fb87f8'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.codedDiagnosis');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.nonCodedDiagnosis', 'Non-Coded Diagnosis', 'EMR API mapping code for non-coded diagnosis.', '2d8c7cbf-eef4-4485-8eb1-a6f2342e8d2e'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.nonCodedDiagnosis');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.diagnosisOrder', 'Diagnosis Order', 'EMR API mapping code for diagnosis order.', '0c73285f-3924-4ecb-8cb2-06792a0fe612'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.diagnosisOrder');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.diagnosisOrderPrimary', 'Primary', 'EMR API mapping code for primary diagnosis order.', 'e7286f62-0196-499f-bd39-025ab52275c1'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.diagnosisOrderPrimary');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.diagnosisOrderSecondary', 'Secondary', 'EMR API mapping code for secondary diagnosis order.', '970fe78a-ad77-4cda-a197-648fe1891523'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.diagnosisOrderSecondary');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.diagnosisCertainty', 'Diagnosis Certainty', 'EMR API mapping code for diagnosis certainty.', 'a2014a36-807c-4657-b06b-01ebedb3d04b'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.diagnosisCertainty');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.diagnosisCertaintyConfirmed', 'Confirmed', 'EMR API mapping code for confirmed diagnosis certainty.', '185ce2f1-9520-4d22-a768-0259b9c1558b'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.diagnosisCertaintyConfirmed');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.diagnosisCertaintyPresumed', 'Presumed', 'EMR API mapping code for presumed diagnosis certainty.', '78ddfa4a-0941-4880-ac85-a2451e8df4d3'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.diagnosisCertaintyPresumed');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.dispositionConceptSet', 'Disposition Concept Set', 'EMR API mapping code for disposition concept set.', 'da837b37-8414-453d-8bf1-c24e1726b653'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.dispositionConceptSet');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.disposition', 'Disposition', 'EMR API mapping code for disposition question.', 'caca2616-59de-43ed-aa8c-e7bd54b05932'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.disposition');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.admissionLocation', 'Admission Location', 'EMR API mapping code for admission location.', '8df17382-47d6-4cc4-a951-a02494687d65'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.admissionLocation');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.internalTransferLocation', 'Internal Transfer Location', 'EMR API mapping code for internal transfer location.', 'a2fefcea-80a8-469d-bd44-f13d8d7b3f66'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.internalTransferLocation');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.dateOfDeath', 'Date of Death', 'EMR API mapping code for date of death.', '291aee6f-6aab-45ca-8ade-ccdc885ab19c'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.dateOfDeath');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.unknownCauseOfDeath', 'Unknown Cause of Death', 'EMR API mapping code for unknown cause of death.', '5681d0a4-2f93-43af-8a82-973054c3dac6'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.unknownCauseOfDeath');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.patientDied', 'Patient Died', 'EMR API mapping code for patient died disposition.', '16b00c62-b96f-46a1-b6fc-3cf462da71a1'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.patientDied');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.admissionDecision', 'Admission Decision', 'EMR API mapping code for admission decision.', 'a1cfb207-45ab-4ba3-b461-a9417661bc15'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.admissionDecision');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.denyAdmission', 'Deny Admission', 'EMR API mapping code for deny admission.', 'c5ab64d6-d005-4528-b919-22630c523ad7'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.denyAdmission');
+
+            insert into global_property (property, property_value, description, uuid)
+            select 'emrapi.conceptCode.consultFreeTextComments', 'Consult Free Text Comments', 'EMR API mapping code for consult free text comments.', '05d7c134-8b24-4487-ab31-cec770636af8'
+            where not exists (select 1 from global_property where property = 'emrapi.conceptCode.consultFreeTextComments');
+        </sql>
+    </changeSet>
+
+    <changeSet id="sihsalus-emrapi-202605211430-concept-mapping-code-fallbacks" author="sihsalus">
+        <comment>Keep legacy EMR API concept mappings as code fallbacks instead of persistent database defaults.</comment>
+        <sql>
+            delete from global_property
+            where property = 'emrapi.conceptSourceName'
+              and property_value = 'org.openmrs.module.emrapi';
+
+            delete from global_property
+            where property = 'emrapi.sameAsConceptMapTypeUuid'
+              and property_value = '35543629-7d8c-11e1-909d-c80aa9edcf4e';
+
+            delete from global_property
+            where property = 'emrapi.narrowerThanConceptMapTypeUuid'
+              and property_value = '43ac5109-7d8c-11e1-909d-c80aa9edcf4e';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisConceptSet'
+              and property_value = 'Diagnosis Concept Set';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.codedDiagnosis'
+              and property_value = 'Coded Diagnosis';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.nonCodedDiagnosis'
+              and property_value = 'Non-Coded Diagnosis';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisOrder'
+              and property_value = 'Diagnosis Order';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisOrderPrimary'
+              and property_value = 'Primary';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisOrderSecondary'
+              and property_value = 'Secondary';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisCertainty'
+              and property_value = 'Diagnosis Certainty';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisCertaintyConfirmed'
+              and property_value = 'Confirmed';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.diagnosisCertaintyPresumed'
+              and property_value = 'Presumed';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.dispositionConceptSet'
+              and property_value = 'Disposition Concept Set';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.disposition'
+              and property_value = 'Disposition';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.admissionLocation'
+              and property_value = 'Admission Location';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.internalTransferLocation'
+              and property_value = 'Internal Transfer Location';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.dateOfDeath'
+              and property_value = 'Date of Death';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.unknownCauseOfDeath'
+              and property_value = 'Unknown Cause of Death';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.patientDied'
+              and property_value = 'Patient Died';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.admissionDecision'
+              and property_value = 'Admission Decision';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.denyAdmission'
+              and property_value = 'Deny Admission';
+
+            delete from global_property
+            where property = 'emrapi.conceptCode.consultFreeTextComments'
+              and property_value = 'Consult Free Text Comments';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

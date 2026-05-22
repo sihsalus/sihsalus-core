@@ -386,7 +386,10 @@ public class ReportLoader {
 
             try {
                 File templateFile = new File(reportDescriptor.getPath(), designDescriptor.getTemplate());
-                byte[] excelTemplate = IOUtils.toByteArray(new FileInputStream(templateFile));
+                byte[] excelTemplate;
+                try (InputStream inputStream = new FileInputStream(templateFile)) {
+                    excelTemplate = IOUtils.toByteArray(inputStream);
+                }
                 resource.setContents(excelTemplate);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to load XLS template " + designDescriptor.getTemplate(), e);

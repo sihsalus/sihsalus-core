@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -97,10 +98,12 @@ public class DiskReportProcessor implements ReportProcessor {
 				try {
 					ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(report.getRenderedOutput()));
 					for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-						zip.getNextEntry();
+						if (entry.isDirectory()) {
+							continue;
+						}
 						FileOutputStream fos = null;
 						try {
-							fos = new FileOutputStream(new File(folderName, entry.getName() + "." + extension));
+							fos = new FileOutputStream(resolveZipEntry(folderName, entry, extension));
 							IOUtils.copy(zip, fos);
 						}
 						finally {
@@ -147,5 +150,14 @@ public class DiskReportProcessor implements ReportProcessor {
 		}
 		
 		return file;
+	}
+
+	private File resolveZipEntry(String folderName, ZipEntry entry, String extension) throws IOException {
+		File destinationDirectory = new File(folderName).getCanonicalFile();
+		File destinationFile = new File(destinationDirectory, entry.getName() + "." + extension).getCanonicalFile();
+		if (!destinationFile.toPath().startsWith(destinationDirectory.toPath())) {
+			throw new IOException("Zip entry is outside of the target directory: " + entry.getName());
+		}
+		return destinationFile;
 	}
 }

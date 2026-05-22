@@ -105,7 +105,7 @@ public class HibernateOrderTemplatesDao implements OrderTemplatesDao {
 	
 	@Override
 	public OrderTemplate saveOrderTemplate(OrderTemplate orderTemplate) {
-		sessionFactory.getCurrentSession().saveOrUpdate(orderTemplate);
+		sessionFactory.getCurrentSession().merge(orderTemplate);
 		return orderTemplate;
 	}
 	

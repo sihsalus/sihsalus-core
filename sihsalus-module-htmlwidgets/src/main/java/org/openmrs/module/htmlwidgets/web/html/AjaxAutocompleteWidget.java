@@ -13,7 +13,7 @@ public class AjaxAutocompleteWidget extends AutocompleteWidget {
 	@Override
 	protected void renderAutocomplete(Writer w, WidgetConfig config) throws IOException {
 		String baseUrl = config.getRequest().getContextPath();
-		w.write("$textField.autocomplete( '" + baseUrl + config.getAttributeValue("ajaxUrl") + "',{");
+		w.write("$textField.autocomplete( '" + HtmlUtil.escapeJavaScriptString(baseUrl + config.getAttributeValue("ajaxUrl")) + "',{");
 		w.write("minChars: " + config.getAttributeValue("minChars", "0") + ",");
 		w.write("width: " + config.getAttributeValue("width", "600") + ",");
 		w.write("scroll: " + config.getAttributeValue("scroll", "true") + ",");

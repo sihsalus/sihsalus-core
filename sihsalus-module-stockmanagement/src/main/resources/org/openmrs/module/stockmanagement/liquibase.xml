@@ -66,6 +66,7 @@
       <column defaultValueBoolean="false" name="has_expiration" type="BOOLEAN">
         <constraints nullable="false" />
       </column>
+      <column name="expiry_notice" type="INT" />
       <column name="preferred_vendor_id" type="INT" />
       <column name="purchase_price" type="DECIMAL(10,2)" />
       <column name="purchase_price_uom_id" type="INT" />
@@ -74,6 +75,7 @@
       <column name="default_stock_operations_uom_id" type="INT" />
       <column name="common_name" type="VARCHAR(255)" />
       <column name="acronym" type="VARCHAR(255)" />
+      <column name="category_id" type="INT" />
       <column name="is_drug" type="BOOLEAN">
         <constraints nullable="false" />
       </column>
@@ -4049,8 +4051,13 @@ CREATE TRIGGER stockmgmt_location_after_delete
   <changeSet author="dev" id="stockmanagement-1758855877841-303">
     <preConditions onFail="MARK_RAN">
       <tableExists tableName="stockmgmt_stock_batch"/>
+      <not>
+        <columnExists tableName="stockmgmt_stock_batch" columnName="expiry_notification_date"/>
+      </not>
     </preConditions>
-    <sql>ALTER TABLE stockmgmt_stock_batch ADD COLUMN IF NOT EXISTS expiry_notification_date DATETIME</sql>
+    <addColumn tableName="stockmgmt_stock_batch">
+      <column name="expiry_notification_date" type="DATETIME"/>
+    </addColumn>
   </changeSet>
   <changeSet id="stockmanagement-1758855877841-304" author="dev">
     <preConditions onFail="MARK_RAN">
@@ -4684,5 +4691,100 @@ CREATE TRIGGER stockmgmt_location_after_delete
         <constraints nullable="false" />
       </column>
     </addColumn>
+  </changeSet>
+
+  <changeSet id="sihsalus-stockmanagement-stock-item-runtime-schema-20260520" author="sihsalus">
+    <comment>Ensure the stock management schema matches the static Hibernate entity mappings.</comment>
+    <sql splitStatements="true">
+      ALTER TABLE stockmgmt_stock_item ADD COLUMN IF NOT EXISTS category_id INT;
+      ALTER TABLE stockmgmt_stock_item ADD COLUMN IF NOT EXISTS expiry_notice INT;
+      CREATE INDEX IF NOT EXISTS stockmgmt_stock_item_category_id_fk ON stockmgmt_stock_item(category_id);
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS alert_role VARCHAR(50);
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS mail_role VARCHAR(50);
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS last_action_date TIMESTAMP;
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS enable_descendants BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_rule ADD COLUMN IF NOT EXISTS next_action_date TIMESTAMP;
+      ALTER TABLE stockmgmt_stock_batch ADD COLUMN IF NOT EXISTS expiry_notification_date TIMESTAMP;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_submitted BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_approved BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_completed BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_cancelled BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_rejected BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_returned BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS notify_dispatched BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS allow_expired_batch_numbers BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_operation_type ADD COLUMN IF NOT EXISTS allow_batch_info_update BOOLEAN DEFAULT FALSE NOT NULL;
+      ALTER TABLE stockmgmt_stock_item_reference ADD COLUMN IF NOT EXISTS uuid VARCHAR(38);
+    </sql>
+  </changeSet>
+
+  <changeSet id="sihsalus-stockmanagement-create-static-privileges-20260519" author="sihsalus">
+    <comment>Create stock management privileges normally loaded from config.xml by the OMOD runtime.</comment>
+    <sql splitStatements="true">
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'App: stockmanagement.dashboard', 'Able to view stock management application dashboard', 'cc9b0e0c-ecaf-479d-9d7c-3071c0c1bff2'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: stockmanagement.dashboard');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'App: stockmanagement.stockItems', 'Able to view stock items', 'ffeb0885-293e-433b-a279-8de6f98026b2'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: stockmanagement.stockItems');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.stockItems.mutate', 'Able to create and update stock items', '4a61b6db-03dd-43f2-969c-17dfa66ad41e'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.stockItems.mutate');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.stockItems.dispense.qty', 'Able to view stock item quantities at dispensing locations', '83871f7a-467e-11ed-8109-00155dcc3fc0'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.stockItems.dispense.qty');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.stockItems.dispense', 'Able to dispense stock items', '6292e17d-4694-11ed-8109-00155dcc3fc0'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.stockItems.dispense');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'App: stockmanagement.userRoleScopes', 'Able to view stock management user role scope', 'a627c62a-efa1-4ac9-88e8-b816facfce0a'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: stockmanagement.userRoleScopes');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.userRoleScopes.mutate', 'Able to create and update user role scopes', 'cc5a7ba4-ee34-4c2f-98c7-ae65cacf0094'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.userRoleScopes.mutate');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'App: stockmanagement.stockoperations', 'Able to view stock operations', '5d0d6f61-2188-11ed-9dff-507b9dea1806'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: stockmanagement.stockoperations');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.stockoperations.mutate', 'Able to create and update stock operations', '63b8815f-2188-11ed-9dff-507b9dea1806'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.stockoperations.mutate');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.stockoperations.approve', 'Able to approve stock operations', '7aef02ad-2189-11ed-9dff-507b9dea1806'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.stockoperations.approve');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.stockoperations.receiveitems', 'Able to receive dispatched stock items', 'fd391f90-3335-11ed-a667-507b9dea1806'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.stockoperations.receiveitems');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'App: stockmanagement.stockSources', 'Able to view stock sources', '4fec772e-262a-11ed-a544-507b9dea1806'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: stockmanagement.stockSources');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.stockSources.mutate', 'Able to create and update stock sources', '557acdab-262a-11ed-a544-507b9dea1806'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.stockSources.mutate');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'App: stockmanagement.stockOperationType', 'Able to view stock operation types', '5a421e1a-28ad-11ed-bdcb-507b9dea1806'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: stockmanagement.stockOperationType');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.party.read', 'Able to read party information', '55670834-28ad-11ed-bdcb-507b9dea1806'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.party.read');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'App: stockmanagement.reports', 'Able to view stock reports', '27334ff0-698d-11ed-a1c5-806d973f13a9'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: stockmanagement.reports');
+      INSERT INTO privilege (privilege, description, uuid)
+      SELECT 'Task: stockmanagement.reports.mutate', 'Able to create stock reports', '8f0cecbb-6b11-11ed-93a2-806d973f13a9'
+      WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Task: stockmanagement.reports.mutate');
+    </sql>
+  </changeSet>
+
+  <changeSet id="sihsalus-stockmanagement-disable-unported-static-jobs-20260519" author="sihsalus">
+    <comment>Disable stock management scheduler tasks whose job classes are not part of the static module yet.</comment>
+    <sql>
+      UPDATE scheduler_task_config
+      SET started = false, start_on_startup = false
+      WHERE schedulable_class IN (
+        'org.openmrs.module.stockmanagement.api.jobs.StockRuleEvaluationJob',
+        'org.openmrs.module.stockmanagement.api.jobs.StockBatchExpiryJob',
+        'org.openmrs.module.stockmanagement.api.jobs.AsyncTasksBatchJob'
+      )
+    </sql>
   </changeSet>
 </databaseChangeLog>

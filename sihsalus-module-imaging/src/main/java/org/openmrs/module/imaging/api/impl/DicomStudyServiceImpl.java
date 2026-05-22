@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -39,6 +40,8 @@ import java.util.List;
 public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomStudyService {
 	
 	protected final Log log = LogFactory.getLog(this.getClass());
+
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	
 	private OrthancHttpClient httpClient = new OrthancHttpClient();
 	
@@ -91,15 +94,22 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 		if (con == null) {
 			throw new IOException("Failed to create HTTP connection");
 		}
-		httpClient.sendOrthancQuery(con, "{" + "\"Level\": \"Studies\"," + " \"Expand\": true," + " \"Query\": {}" + " }");
-		int status = con.getResponseCode();
-		if (status == HttpURLConnection.HTTP_OK) {
-			JsonNode studiesData = new ObjectMapper().readTree(con.getInputStream());
-			for (JsonNode studyData : studiesData) {
-				createOrUpdateStudy(config, studyData);
+		try {
+			httpClient.sendOrthancQuery(con, orthancFindQuery("Studies", null, null));
+			int status = con.getResponseCode();
+			if (status == HttpURLConnection.HTTP_OK) {
+				try (InputStream response = con.getInputStream()) {
+					JsonNode studiesData = OBJECT_MAPPER.readTree(response);
+					for (JsonNode studyData : studiesData) {
+						createOrUpdateStudy(config, studyData);
+					}
+				}
+			} else {
+				OrthancHttpClient.throwConnectionException(config, con);
 			}
-		} else {
-			OrthancHttpClient.throwConnectionException(config, con);
+		}
+		finally {
+			con.disconnect();
 		}
 	}
 	
@@ -146,8 +156,15 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 		}
 		con.setRequestProperty("Content-Type", "application/dicom");
 		con.setDoOutput(true);
-		IOUtils.copy(is, con.getOutputStream());
-		return con.getResponseCode();
+		try {
+			try (OutputStream outputStream = con.getOutputStream()) {
+				IOUtils.copy(is, outputStream);
+			}
+			return con.getResponseCode();
+		}
+		finally {
+			con.disconnect();
+		}
 	}
 	
 	/**
@@ -189,41 +206,51 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 	 */
 	public void fetchNewChangedStudiesByConfiguration(OrthancConfiguration config) throws IOException {
 		// repeat until all updates have been received
-		while(true) {
+		while (true) {
 			// get changes from server
 			String params = "?limit=1000";
-			if (config.getLastChangedIndex() != -1) {
-				params += "&since=" + config.getLastChangedIndex();
+			int lastChangedIndex = config.getLastChangedIndex() == null ? -1 : config.getLastChangedIndex();
+			if (lastChangedIndex != -1) {
+				params += "&since=" + lastChangedIndex;
 			}
 			HttpURLConnection con = httpClient.createConnection("GET", config.getOrthancBaseUrl(), "/changes" + params,
 					config.getOrthancUsername(), config.getOrthancPassword());
 			if (con == null) {
 				throw new IOException("Failed to create HTTP connection");
 			}
-			int status = con.getResponseCode();
-			if (status == HttpURLConnection.HTTP_OK) {
-				// collect changes
-				JsonNode changesData = new ObjectMapper().readTree(con.getInputStream());
-				JsonNode changes = changesData.get("Changes");
-				List<String> orthancStudyIds = new ArrayList<>();
-				for (JsonNode change : changes) {
-					String changeType = change.get("ChangeType").asText();
-					if (changeType.equals("NewStudy") || changeType.equals("StableStudy")) {
-						orthancStudyIds.add(change.get("ID").asText());
+			try {
+				int status = con.getResponseCode();
+				if (status == HttpURLConnection.HTTP_OK) {
+					// collect changes
+					JsonNode changesData;
+					try (InputStream response = con.getInputStream()) {
+						changesData = OBJECT_MAPPER.readTree(response);
 					}
+					JsonNode changes = changesData.path("Changes");
+					List<String> orthancStudyIds = new ArrayList<>();
+					for (JsonNode change : changes) {
+						String changeType = change.path("ChangeType").asText();
+						if (changeType.equals("NewStudy") || changeType.equals("StableStudy")) {
+							orthancStudyIds.add(change.path("ID").asText());
+						}
+					}
+					// update the studies
+					fetchNewChangedStudiesByConfigurationAndStudyUIDs(config, orthancStudyIds);
+					// remember last processed change
+					OrthancConfigurationService orthancConfigurationService = Context.getService(
+					    OrthancConfigurationService.class);
+					config.setLastChangedIndex(changesData.path("Last").asInt(lastChangedIndex));
+					orthancConfigurationService.updateOrthancConfiguration(config);
+					// stop when all changes read
+					if (changesData.path("Done").asBoolean(true)) {
+						break;
+					}
+				} else {
+					OrthancHttpClient.throwConnectionException(config, con);
 				}
-				// update the studies
-				fetchNewChangedStudiesByConfigurationAndStudyUIDs(config, orthancStudyIds);
-				// remember last processed change
-				OrthancConfigurationService orthancConfigurationService = Context.getService(OrthancConfigurationService.class);
-				config.setLastChangedIndex(changesData.get("Last").asInt());
-				orthancConfigurationService.updateOrthancConfiguration(config);
-				// stop when all changes read
-				if(changesData.get("Done").asText().equals("true")) {
-					break;
-				}
-			} else {
-				OrthancHttpClient.throwConnectionException(config, con);
+			}
+			finally {
+				con.disconnect();
 			}
 		}
 	}
@@ -237,23 +264,27 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 	        throws IOException {
 		for (String orthancStudyId : orthancStudyIds) {
 			HttpURLConnection con = httpClient.createConnection("GET", config.getOrthancBaseUrl(), "/studies/"
-			        + orthancStudyId, config.getOrthancUsername(), config.getOrthancPassword());
+			        + OrthancHttpClient.encodePathSegment(orthancStudyId), config.getOrthancUsername(),
+			    config.getOrthancPassword());
 			if (con == null) {
 				throw new IOException("Failed to create HTTP connection");
 			}
-			// Enable connection reuse (Keep-Alive)
-			con.setRequestProperty("Connection", "keep-alive");
-			int status = con.getResponseCode();
-			if (status == HttpURLConnection.HTTP_OK) {
-				JsonNode studyData = new ObjectMapper().readTree(con.getInputStream());
-				createOrUpdateStudy(config, studyData);
-			} else {
-				OrthancHttpClient.throwConnectionException(config, con);
+			try {
+				// Enable connection reuse (Keep-Alive)
+				con.setRequestProperty("Connection", "keep-alive");
+				int status = con.getResponseCode();
+				if (status == HttpURLConnection.HTTP_OK) {
+					try (InputStream response = con.getInputStream()) {
+						JsonNode studyData = OBJECT_MAPPER.readTree(response);
+						createOrUpdateStudy(config, studyData);
+					}
+				} else {
+					OrthancHttpClient.throwConnectionException(config, con);
+				}
 			}
-			
-			// Close input stream to free connection for reuse
-			con.getInputStream().close();
-			con.disconnect();
+			finally {
+				con.disconnect();
+			}
 		}
 	}
 	
@@ -290,16 +321,21 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 		OrthancConfiguration config = orthancConfigurationService.getOrthancConfiguration(dicomStudy
 		        .getOrthancConfiguration().getId());
 		HttpURLConnection con = httpClient.createConnection("DELETE", config.getOrthancBaseUrl(),
-		    "/studies/" + dicomStudy.getOrthancStudyUID(), config.getOrthancUsername(), config.getOrthancPassword());
+		    "/studies/" + OrthancHttpClient.encodePathSegment(dicomStudy.getOrthancStudyUID()),
+		    config.getOrthancUsername(), config.getOrthancPassword());
 		if (con == null) {
 			throw new IOException("Failed to create HTTP connection");
 		}
-		int responseCode = con.getResponseCode();
-		if (responseCode == HttpURLConnection.HTTP_OK || responseCode == 404) {
-			dao.remove(dicomStudy);
-		} else {
-			throw new IOException("Failed to delete DICOM study. Response Code: " + responseCode + ", Study UID: "
-			        + dicomStudy.getOrthancStudyUID());
+		try {
+			int responseCode = con.getResponseCode();
+			if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+				dao.remove(dicomStudy);
+			} else {
+				OrthancHttpClient.throwConnectionException(config, con);
+			}
+		}
+		finally {
+			con.disconnect();
 		}
 	}
 	
@@ -318,14 +354,19 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 		OrthancConfiguration config = orthancConfigurationService.getOrthancConfiguration(seriesStudy
 		        .getOrthancConfiguration().getId());
 		HttpURLConnection con = httpClient.createConnection("DELETE", config.getOrthancBaseUrl(), "/series/"
-		        + seriesOrthancUID, config.getOrthancUsername(), config.getOrthancPassword());
+		        + OrthancHttpClient.encodePathSegment(seriesOrthancUID), config.getOrthancUsername(),
+		    config.getOrthancPassword());
 		if (con == null) {
 			throw new IOException("Failed to create HTTP connection");
 		}
-		int responseCode = con.getResponseCode();
-		if (responseCode != HttpURLConnection.HTTP_OK) {
-			throw new IOException("Failed to delete DICOM series. Response Code: " + responseCode + ", Series UID: "
-			        + seriesOrthancUID);
+		try {
+			int responseCode = con.getResponseCode();
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				OrthancHttpClient.throwConnectionException(config, con);
+			}
+		}
+		finally {
+			con.disconnect();
 		}
 	}
 	
@@ -344,24 +385,34 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 		if (con == null) {
 			throw new IOException("Failed to create HTTP connection");
 		}
-		httpClient.sendOrthancQuery(con, "{" + "\"Level\": \"Series\"," + " \"Expand\": true," + " \"Query\": {\"StudyInstanceUID\":\"" + study.getStudyInstanceUID() + "\"}" + " }");
-		int status = con.getResponseCode();
-		if (status == HttpURLConnection.HTTP_OK) {
-			JsonNode seriesesData = new ObjectMapper().readTree(con.getInputStream());
-			for (JsonNode seriesData : seriesesData) {
-				String seriesInstanceUID = seriesData.path("MainDicomTags").path("SeriesInstanceUID").asText();
-				String orthancSeriesUID = seriesData.path("ID").asText();
-				String seriesDescription = Optional.ofNullable(seriesData.path("MainDicomTags").path("SeriesDescription").asText()).orElse("");
-				String seriesNumber = seriesData.path("MainDicomTags").path("SeriesNumber").asText();
-				String modality = seriesData.path("MainDicomTags").path("Modality").asText();
-				String seriesDate = Optional.ofNullable(seriesData.path("MainDicomTags").path("SeriesDate").asText()).orElse("");
-				String seriesTime = Optional.ofNullable(seriesData.path("MainDicomTags").path("SeriesTime").asText()).orElse("");
-				DicomSeries series = new DicomSeries(seriesInstanceUID, orthancSeriesUID, config, seriesDescription, seriesNumber, modality, seriesDate, seriesTime);
-				seriesList.add(series);
+		try {
+			httpClient.sendOrthancQuery(con, orthancFindQuery("Series", "StudyInstanceUID", study.getStudyInstanceUID()));
+			int status = con.getResponseCode();
+			if (status == HttpURLConnection.HTTP_OK) {
+				try (InputStream response = con.getInputStream()) {
+					JsonNode seriesesData = OBJECT_MAPPER.readTree(response);
+					for (JsonNode seriesData : seriesesData) {
+						String seriesInstanceUID = seriesData.path("MainDicomTags").path("SeriesInstanceUID").asText();
+						String orthancSeriesUID = seriesData.path("ID").asText();
+						String seriesDescription = Optional.ofNullable(
+						    seriesData.path("MainDicomTags").path("SeriesDescription").asText()).orElse("");
+						String seriesNumber = seriesData.path("MainDicomTags").path("SeriesNumber").asText();
+						String modality = seriesData.path("MainDicomTags").path("Modality").asText();
+						String seriesDate = Optional.ofNullable(seriesData.path("MainDicomTags").path("SeriesDate").asText())
+						        .orElse("");
+						String seriesTime = Optional.ofNullable(seriesData.path("MainDicomTags").path("SeriesTime").asText())
+						        .orElse("");
+						DicomSeries series = new DicomSeries(seriesInstanceUID, orthancSeriesUID, config, seriesDescription,
+						        seriesNumber, modality, seriesDate, seriesTime);
+						seriesList.add(series);
+					}
+				}
+			} else {
+				OrthancHttpClient.throwConnectionException(config, con);
 			}
-		} else {
-			throw new IOException("Request to Orthanc server " + config.getOrthancBaseUrl() + " failed with error "
-					+ con.getResponseCode() + " " + con.getResponseMessage());
+		}
+		finally {
+			con.disconnect();
 		}
 		return seriesList;
 	}
@@ -381,22 +432,31 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 		if (con == null) {
 			throw new IOException("Failed to create HTTP connection");
 		}
-		httpClient.sendOrthancQuery(con, "{" + "\"Level\": \"Instance\"," + " \"Expand\": true," + " \"Query\": {\"SeriesInstanceUID\":\"" + seriesInstanceUID + "\"}" + " }");
-		int status = con.getResponseCode();
-		if (status == HttpURLConnection.HTTP_OK) {
-			JsonNode instancesData = new ObjectMapper().readTree(con.getInputStream());
-			for (JsonNode instanceData : instancesData) {
-				String sopInstanceUID = instanceData.path("MainDicomTags").path("SOPInstanceUID").asText();
-				String orthancInstanceUID = instanceData.path("ID").asText();
-				String instanceNumber = instanceData.path("MainDicomTags").path("InstanceNumber").asText();
-				String imagePositionPatient = Optional.ofNullable(instanceData.path("MainDicomTags").path("ImagePositionPatient").asText()).orElse("");
-				String numberOfFrames = Optional.ofNullable(instanceData.path("MainDicomTags").path("NumberOfFrames").asText()).orElse("");
-				DicomInstance instance = new DicomInstance(sopInstanceUID, orthancInstanceUID, instanceNumber, imagePositionPatient, numberOfFrames, config);
-				instanceList.add(instance);
+		try {
+			httpClient.sendOrthancQuery(con, orthancFindQuery("Instance", "SeriesInstanceUID", seriesInstanceUID));
+			int status = con.getResponseCode();
+			if (status == HttpURLConnection.HTTP_OK) {
+				try (InputStream response = con.getInputStream()) {
+					JsonNode instancesData = OBJECT_MAPPER.readTree(response);
+					for (JsonNode instanceData : instancesData) {
+						String sopInstanceUID = instanceData.path("MainDicomTags").path("SOPInstanceUID").asText();
+						String orthancInstanceUID = instanceData.path("ID").asText();
+						String instanceNumber = instanceData.path("MainDicomTags").path("InstanceNumber").asText();
+						String imagePositionPatient = Optional.ofNullable(
+						    instanceData.path("MainDicomTags").path("ImagePositionPatient").asText()).orElse("");
+						String numberOfFrames = Optional.ofNullable(
+						    instanceData.path("MainDicomTags").path("NumberOfFrames").asText()).orElse("");
+						DicomInstance instance = new DicomInstance(sopInstanceUID, orthancInstanceUID, instanceNumber,
+						        imagePositionPatient, numberOfFrames, config);
+						instanceList.add(instance);
+					}
+				}
+			} else {
+				OrthancHttpClient.throwConnectionException(config, con);
 			}
-		} else {
-			throw new IOException("Request to Orthanc server " + config.getOrthancBaseUrl() + " failed with error "
-					+ con.getResponseCode() + " " + con.getResponseMessage());
+		}
+		finally {
+			con.disconnect();
 		}
 		return instanceList;
 	}
@@ -411,28 +471,46 @@ public class DicomStudyServiceImpl extends BaseOpenmrsService implements DicomSt
 	public PreviewResult fetchInstancePreview(String orthancInstanceUID, DicomStudy study) throws IOException {
 		OrthancConfiguration config = study.getOrthancConfiguration();
 		HttpURLConnection con = httpClient.createConnection("GET", config.getOrthancBaseUrl(), "/instances/"
-		        + orthancInstanceUID + "/preview", config.getOrthancUsername(), config.getOrthancPassword());
+		        + OrthancHttpClient.encodePathSegment(orthancInstanceUID) + "/preview", config.getOrthancUsername(),
+		    config.getOrthancPassword());
 		if (con == null) {
 			throw new IOException("Failed to create HTTP connection");
 		}
-		int responseCode = con.getResponseCode();
-		if (responseCode == HttpURLConnection.HTTP_OK) {
-			// read image
-			InputStream inputStream = con.getInputStream();
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			while ((bytesRead = inputStream.read(buffer)) != -1) {
-				outputStream.write(buffer, 0, bytesRead);
+		try {
+			int responseCode = con.getResponseCode();
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				// read image
+				try (InputStream inputStream = con.getInputStream();
+				        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+					byte[] buffer = new byte[1024];
+					int bytesRead;
+					while ((bytesRead = inputStream.read(buffer)) != -1) {
+						outputStream.write(buffer, 0, bytesRead);
+					}
+
+					PreviewResult result = new PreviewResult();
+					result.data = outputStream.toByteArray();
+					result.contentType = con.getContentType();
+					return result;
+				}
+			} else {
+				OrthancHttpClient.throwConnectionException(config, con);
+				return null;
 			}
-			
-			PreviewResult result = new PreviewResult();
-			result.data = outputStream.toByteArray();
-			result.contentType = con.getContentType();
-			return result;
-		} else {
-			throw new IOException("Request to Orthanc server " + config.getOrthancBaseUrl() + " failed with error "
-			        + con.getResponseCode() + " " + con.getResponseMessage());
 		}
+		finally {
+			con.disconnect();
+		}
+	}
+
+	private String orthancFindQuery(String level, String queryTag, String queryValue) throws IOException {
+		ObjectNode root = OBJECT_MAPPER.createObjectNode();
+		root.put("Level", level);
+		root.put("Expand", true);
+		ObjectNode query = root.putObject("Query");
+		if (queryTag != null) {
+			query.put(queryTag, queryValue == null ? "" : queryValue);
+		}
+		return OBJECT_MAPPER.writeValueAsString(root);
 	}
 }

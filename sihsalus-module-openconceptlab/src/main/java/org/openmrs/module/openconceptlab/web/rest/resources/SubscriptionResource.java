@@ -24,21 +24,28 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Locale;
+
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
 
 @Resource(
         name = RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE + "/subscription",
         supportedClass = Subscription.class,
-        supportedOpenmrsVersions = { "1.8.* - 2.*" }
+        supportedOpenmrsVersions = { "1.8.* - 9.*" }
 )
 public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     @Override
     public Subscription getByUniqueId(String uniqueId) {
+        requireManageConcepts();
         Subscription subscription = getImportService().getSubscription();
         if(subscription.getUuid().equals(uniqueId)){
             return subscription;
@@ -49,6 +56,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     @Override
     protected void delete(Subscription subscription, String reason, RequestContext context) throws ResponseException {
+        requireManageConcepts();
         getImportService().unsubscribe();
     }
 
@@ -59,7 +67,9 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     @Override
     public Subscription save(Subscription subscription) {
+        requireManageConcepts();
         if (!"url".equals(subscription.getUrl())) {
+            validateSubscriptionUrl(subscription.getUrl());
             UpdateScheduler updateScheduler = getUpdateScheduler();
             updateScheduler.schedule(subscription);
         }
@@ -117,7 +127,6 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
             DelegatingResourceDescription description = new DelegatingResourceDescription();
             description.addProperty("uuid");
             description.addProperty("url");
-            description.addProperty("token");
             description.addProperty("subscribedToSnapshot");
             description.addProperty("validationType");
             description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
@@ -127,7 +136,6 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
             DelegatingResourceDescription description = new DelegatingResourceDescription();
             description.addProperty("uuid");
             description.addProperty("url");
-            description.addProperty("token");
             description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
             description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
             description.addSelfLink();
@@ -148,14 +156,12 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
         if (rep instanceof FullRepresentation) {
             model.property("uuid", new StringProperty().example("uuid"));
             model.property("url", new StringProperty(StringProperty.Format.URL));
-            model.property("token", new StringProperty());
             model.property("subscribedToSnapshot", new BooleanProperty());
             model.property("validationType", new EnumProperty(ValidationType.class));
             return model;
         } else if (rep instanceof DefaultRepresentation) {
             model.property("uuid", new StringProperty().example("uuid"));
             model.property("url", new StringProperty(StringProperty.Format.URL));
-            model.property("token", new StringProperty());
             return model;
         } else if (rep instanceof RefRepresentation) {
             DelegatingResourceDescription description = new DelegatingResourceDescription();
@@ -168,6 +174,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     @Override
     protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+        requireManageConcepts();
         return new NeedsPaging<Subscription>(Collections.singletonList(getImportService().getSubscription()), context);
     }
 
@@ -187,5 +194,22 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
     private static ImportService getImportService() {
         return Context.getService(ImportService.class);
+    }
+
+    private void validateSubscriptionUrl(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            throw new IllegalRequestException("Subscription URL is required");
+        }
+        try {
+            URI uri = new URI(url.trim());
+            String scheme = uri.getScheme();
+            if (scheme == null || uri.getHost() == null ||
+                    !("http".equals(scheme.toLowerCase(Locale.ROOT)) ||
+                            "https".equals(scheme.toLowerCase(Locale.ROOT)))) {
+                throw new IllegalRequestException("Subscription URL must be a valid HTTP(S) URL");
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalRequestException("Subscription URL must be a valid HTTP(S) URL");
+        }
     }
 }

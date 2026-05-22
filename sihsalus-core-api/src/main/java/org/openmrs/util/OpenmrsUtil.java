@@ -890,7 +890,7 @@ public class OpenmrsUtil {
 		if (url == null || !"file".equalsIgnoreCase(url.getProtocol())) {
 			return null;
 		}
-		return new File(url.getFile().replaceAll("%20", " "));
+		return new File(url.getFile().replace("%20", " "));
 	}
 
 	/**

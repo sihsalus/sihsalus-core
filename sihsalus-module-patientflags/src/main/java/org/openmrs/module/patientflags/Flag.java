@@ -263,7 +263,11 @@ public class Flag extends BaseOpenmrsMetadata {
 	public FlagEvaluator instantiateEvaluator() {
 		if (evaluator != null) {
 			try {
-				return (FlagEvaluator) Context.loadClass(evaluator).newInstance();
+				Class<? extends FlagEvaluator> evaluatorClass = Context.loadClass(evaluator).asSubclass(FlagEvaluator.class);
+				return evaluatorClass.getDeclaredConstructor().newInstance();
+			}
+			catch (ClassCastException e) {
+				throw new APIException("Class " + evaluator + " is not a FlagEvaluator", e);
 			}
 			catch (Exception e) {
 				throw new APIException("Unable to instantiate FlagEvaluator " + evaluator, e);

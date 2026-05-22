@@ -4,6 +4,7 @@ import java.util.List;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.event.Event;
 import org.openmrs.module.billing.api.BillDiscountService;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.BillLineItemService;
@@ -45,6 +46,7 @@ import org.openmrs.module.billing.api.db.hibernate.HibernatePaymentModeDAOImpl;
 import org.openmrs.module.billing.api.evaluator.ExemptionEvaluator;
 import org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine;
 import org.openmrs.module.billing.api.evaluator.impl.JSExemptionEvaluator;
+import org.openmrs.module.billing.api.handler.BillReceiptNumberHandler;
 import org.openmrs.module.billing.api.impl.BillDiscountServiceImpl;
 import org.openmrs.module.billing.api.impl.BillExemptionServiceImpl;
 import org.openmrs.module.billing.api.impl.BillLineItemServiceImpl;
@@ -59,7 +61,11 @@ import org.openmrs.module.billing.api.impl.PaymentModeAttributeTypeServiceImpl;
 import org.openmrs.module.billing.api.impl.PaymentModeServiceImpl;
 import org.openmrs.module.billing.api.impl.SequentialReceiptNumberGeneratorServiceImpl;
 import org.openmrs.module.billing.api.impl.TimesheetServiceImpl;
+import org.openmrs.module.billing.validator.BillDiscountValidator;
+import org.openmrs.module.billing.validator.BillRefundValidator;
+import org.openmrs.module.billing.validator.BillValidator;
 import org.sihsalus.core.api.HibernateMappingContributor;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -237,6 +243,26 @@ public class SihsalusBillingConfiguration {
     }
 
     @Bean
+    BillValidator billValidator() {
+        return new BillValidator();
+    }
+
+    @Bean
+    BillDiscountValidator billDiscountValidator() {
+        return new BillDiscountValidator();
+    }
+
+    @Bean
+    BillRefundValidator billRefundValidator() {
+        return new BillRefundValidator();
+    }
+
+    @Bean
+    BillReceiptNumberHandler billReceiptNumberHandler() {
+        return new BillReceiptNumberHandler();
+    }
+
+    @Bean
     ExemptionEvaluator javascriptRuleEvaluator() {
         return new JSExemptionEvaluator();
     }
@@ -249,6 +275,12 @@ public class SihsalusBillingConfiguration {
     @Bean
     BillingEventListener orderBillingEventListener() {
         return new OrderBillingEventListener();
+    }
+
+    @Bean
+    SmartInitializingSingleton billingEventListenerSubscriber(List<BillingEventListener> billingEventListeners) {
+        return () -> billingEventListeners.forEach(listener -> Event.subscribe(
+                listener.getSubscribedClass(), listener.getSubscribedAction().name(), listener));
     }
 
     @Bean

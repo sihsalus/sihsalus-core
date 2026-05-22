@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.PatientService;
@@ -11,13 +12,13 @@ import org.openmrs.module.appointments.notification.NotificationResult;
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 
 import java.util.List;
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class TeleconsultationAppointmentService {
 
-    private final static String PROP_TC_SERVER = "bahmni.appointment.teleConsultation.serverUrlPattern";
     private final static String ADHOC_TC_ID = "bahmni.adhoc.teleConsultation.id";
-    private final static String DEFAULT_TC_SERVER_URL_PATTERN = "https://meet.jit.si/{0}";
+    private final static String CREATE_TELECONSULTATION_PRIVILEGE = "Create Teleconsultation";
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private Log log = LogFactory.getLog(this.getClass());
 
     private PatientService patientService;
@@ -36,12 +37,25 @@ public class TeleconsultationAppointmentService {
     }
 
     public AdhocTeleconsultationResponse generateAdhocTeleconsultationLink(String patientUuid, String provider) {
+        Context.requirePrivilege(CREATE_TELECONSULTATION_PRIVILEGE);
+        if (StringUtils.isBlank(patientUuid)) {
+            throw new IllegalArgumentException("patientUuid is required");
+        }
+        if (StringUtils.isBlank(provider)) {
+            throw new IllegalArgumentException("provider is required");
+        }
         String identifierType = Context.getAdministrationService().getGlobalProperty(ADHOC_TC_ID);
         Patient patient = patientService.getPatientByUuid(patientUuid);
-        PatientIdentifier identifier = patient.getIdentifiers().stream().filter(pi ->
-                        identifierType.equals(pi.getIdentifierType().getName()))
-                .findAny()
-                .orElse(null);
+        if (patient == null) {
+            throw new IllegalArgumentException("Patient does not exist");
+        }
+        PatientIdentifier identifier = null;
+        if (StringUtils.isNotBlank(identifierType)) {
+            identifier = patient.getIdentifiers().stream().filter(pi ->
+                            identifierType.equals(pi.getIdentifierType().getName()))
+                    .findAny()
+                    .orElse(null);
+        }
         String teleConsultationId = (identifier != null) ? identifier.getIdentifier() : generateRandomID();
         String link = generateTeleconsultationLink(teleConsultationId);
         AdhocTeleconsultationResponse response = new AdhocTeleconsultationResponse();
@@ -52,10 +66,7 @@ public class TeleconsultationAppointmentService {
     }
 
     private String generateRandomID() {
-        Random rnd = new Random();
-        int number = rnd.nextInt(999999);
-        String id = String.format("%06d", number) + System.currentTimeMillis();
-        return id;
+        return Long.toHexString(SECURE_RANDOM.nextLong()) + Long.toHexString(System.currentTimeMillis());
     }
 
     private void notifyUpdates(AdhocTeleconsultationResponse response, Patient patient, String provider, String link) {

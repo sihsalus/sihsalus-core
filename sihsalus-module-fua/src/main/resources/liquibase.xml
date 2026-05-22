@@ -23,7 +23,7 @@
             <column name="fecha_creacion" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="fecha_actualizacion" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP">
+            <column name="fecha_actualizacion" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="version" type="int" defaultValueNumeric="1">
@@ -60,7 +60,7 @@
             <column name="fecha_creacion" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="fecha_actualizacion" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP">
+            <column name="fecha_actualizacion" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="version" type="int" defaultValueNumeric="1">
@@ -228,6 +228,49 @@
             </column>
         </addColumn>
 
+    </changeSet>
+
+
+    <changeSet id="sihsalus-fua-create-static-privileges-20260519" author="sihsalus">
+        <comment>Create FUA privileges normally loaded from config.xml by the OMOD runtime.</comment>
+        <sql splitStatements="true">
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Fua Privilege', 'Allows user to access general FUA module functions', '128f8894-4428-42e9-943a-77a13aa2e6c0'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Fua Privilege');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Read Fua', 'Allows user to view FUA records', 'a419d593-1e7e-4460-b75b-a4b85780c721'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Read Fua');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Manage Fua', 'Allows user to create and manage FUA records', '6d826cb0-00ca-4f1e-9270-78f9b0c20a8d'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Manage Fua');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Delete Fua', 'Allows user to delete FUA records', 'ad6e1f62-35a3-4a7d-a936-0965a5b00c9c'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Delete Fua');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'Update Fua', 'Allows user to update FUA records', '12048d96-e027-4f6d-938e-23ab2bd3dcaf'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'Update Fua');
+        </sql>
+    </changeSet>
+
+    <changeSet id="sihsalus-fua-create-static-global-properties-20260519" author="sihsalus">
+        <comment>Create FUA global properties normally loaded from config.xml by the OMOD runtime.</comment>
+        <sql splitStatements="true">
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'fua.generator.url', 'http://fua-generator:3000',
+                   'Base URL of the FUA Generator microservice. This service is responsible for rendering FUA documents as HTML.',
+                   '4980db7f-30fb-4a27-adba-670bf9e9fe2e'
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'fua.generator.url');
+
+            INSERT INTO global_property (property, property_value, description, uuid)
+            SELECT 'fua.identifier', '',
+                   'Identifier used by the FUA module. This is a configurable string value that can be set by the administrator and used when communicating with external FUA-related services.',
+                   '1de77e9e-c42e-447a-866f-465ffcb06e17'
+            WHERE NOT EXISTS (SELECT 1 FROM global_property WHERE property = 'fua.identifier');
+        </sql>
     </changeSet>
 
 

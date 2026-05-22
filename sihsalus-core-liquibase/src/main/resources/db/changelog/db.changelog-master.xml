@@ -19,11 +19,19 @@
     <include file="org/openmrs/module/attachments/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/cohort/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/queue/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/appointments/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/bedmanagement/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/openconceptlab/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/bahmni/module/teleconsultation/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/sihsalusinterop/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/reporting/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/stockmanagement/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/datafilter/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/billing/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/fua/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/imaging/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/patientdocuments/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/ordertemplates/liquibase.xml" relativeToChangelogFile="false"/>
     <include file="org/openmrs/module/patientflags/liquibase.xml" relativeToChangelogFile="false"/>
+    <include file="org/openmrs/module/legacyui/liquibase.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

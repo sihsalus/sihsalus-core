@@ -13,8 +13,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.openmrs.Provider;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.Timesheet;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 /**
  * Interface that represents classes which perform data operations for {@link Timesheet}s.
@@ -31,6 +33,7 @@ public interface ITimesheetService extends IEntityDataService<Timesheet> {
 	 * @should return the most recent timesheet if the cashier is clocked into multiple timesheets
 	 * @should return null if the timesheet is clocked out
 	 */
+	@Authorized(PrivilegeConstants.VIEW_TIMESHEETS)
 	Timesheet getCurrentTimesheet(Provider cashier);
 	
 	/**
@@ -46,6 +49,7 @@ public interface ITimesheetService extends IEntityDataService<Timesheet> {
 	 * @should return timesheets that start before date but end after date
 	 * @should return timesheets that start before date and have not ended
 	 */
+	@Authorized(PrivilegeConstants.VIEW_TIMESHEETS)
 	List<Timesheet> getTimesheetsByDate(Provider cashier, Date date);
 	
 	/**
@@ -53,5 +57,6 @@ public interface ITimesheetService extends IEntityDataService<Timesheet> {
 	 *
 	 * @should return close all open timesheets
 	 */
+	@Authorized(PrivilegeConstants.MANAGE_TIMESHEETS)
 	void closeOpenTimesheets();
 }

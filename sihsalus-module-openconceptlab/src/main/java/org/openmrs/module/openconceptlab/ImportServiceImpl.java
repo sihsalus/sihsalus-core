@@ -22,6 +22,7 @@ import org.openmrs.api.ConceptNameType;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.api.impl.BaseOpenmrsService;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,7 +36,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-public class ImportServiceImpl implements ImportService {
+public class ImportServiceImpl extends BaseOpenmrsService implements ImportService {
 
 	DbSessionFactory sessionFactory;
 
@@ -224,7 +225,7 @@ public class ImportServiceImpl implements ImportService {
 		query.executeUpdate();
 
 		anImport.setErrorMessage(null);
-		getSession().saveOrUpdate(anImport);
+		getSession().merge(anImport);
 	}
 
 	@Override
@@ -241,7 +242,7 @@ public class ImportServiceImpl implements ImportService {
 		} else {
 			update.setErrorMessage("Errors found");
 		}
-		getSession().saveOrUpdate(update);
+		getSession().merge(update);
 	}
 
 	/**
@@ -286,7 +287,7 @@ public class ImportServiceImpl implements ImportService {
 
 		anImport.stop();
 
-		getSession().saveOrUpdate(anImport);
+		getSession().merge(anImport);
 	}
 
 	@Override
@@ -326,7 +327,7 @@ public class ImportServiceImpl implements ImportService {
 
 	@Override
 	public void saveItem(Item item) {
-		getSession().saveOrUpdate(item);
+		getSession().merge(item);
 	}
 
 	@Override
@@ -555,20 +556,20 @@ public class ImportServiceImpl implements ImportService {
 
 	@Override
 	public Concept updateConceptWithoutValidation(Concept concept) {
-		getSession().saveOrUpdate(concept);
+		getSession().merge(concept);
 		return concept;
 	}
 
 	@Override
 	public ConceptReferenceTerm updateConceptReferenceTermWithoutValidation(ConceptReferenceTerm term) {
-		getSession().saveOrUpdate(term);
+		getSession().merge(term);
 		return term;
     }
 
 	@Override
 	public void updateSubscriptionUrl(Import anImport, String url) {
 		anImport.setSubscriptionUrl(url);
-		getSession().saveOrUpdate(anImport);
+		getSession().merge(anImport);
 	}
 
 	@Override

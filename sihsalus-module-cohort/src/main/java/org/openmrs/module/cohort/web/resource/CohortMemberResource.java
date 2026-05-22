@@ -40,6 +40,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.IllegalPropertyException;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
@@ -147,18 +148,27 @@ public class CohortMemberResource extends DataDelegatingCrudResource<CohortMembe
 	public CohortMember save(CohortMember cohortMember) throws ResponseException {
 		CohortM cohort = cohortMember.getCohort();
 		Patient newPatient = cohortMember.getPatient();
-		if (cohort.getVoided()) {
-			throw new RuntimeException("Cannot add patient to ended group.");
+		if (cohort == null) {
+			throw new IllegalPropertyException("Cohort is required");
 		}
-		for (CohortMember currentMember : cohort.getCohortMembers()) {
-			if (currentMember.getPatient().getUuid().equals(newPatient.getUuid()) && !cohortMember.getVoided()) {
-				if (currentMember.getEndDate() == null && cohortMember.getEndDate() == null) {
-					throw new RuntimeException("Patient already exists in group.");
+		if (newPatient == null) {
+			throw new IllegalPropertyException("Patient is required");
+		}
+		if (cohort.getVoided()) {
+			throw new IllegalPropertyException("Cannot add patient to ended group.");
+		}
+		if (cohort.getCohortMembers() != null) {
+			for (CohortMember currentMember : cohort.getCohortMembers()) {
+				if (currentMember.getPatient() != null && currentMember.getPatient().getUuid().equals(newPatient.getUuid())
+				        && !cohortMember.getVoided()) {
+					if (currentMember.getEndDate() == null && cohortMember.getEndDate() == null) {
+						throw new IllegalPropertyException("Patient already exists in group.");
+					}
+					currentMember.setEndDate(cohortMember.getEndDate());
+					currentMember.setVoided(false);
+					cohortMember = currentMember;
+					break;
 				}
-				currentMember.setEndDate(cohortMember.getEndDate());
-				currentMember.setVoided(false);
-				cohortMember = currentMember;
-				break;
 			}
 		}
 		return Context.getService(CohortMemberService.class).saveCohortMember(cohortMember);
@@ -181,6 +191,10 @@ public class CohortMemberResource extends DataDelegatingCrudResource<CohortMembe
 	
 	@PropertySetter("attributes")
 	public static void setAttributes(CohortMember cohortMember, Set<CohortMemberAttribute> attributes) {
+		if (attributes == null) {
+			cohortMember.setAttributes(null);
+			return;
+		}
 		for (CohortMemberAttribute attribute : attributes) {
 			attribute.setOwner(cohortMember);
 		}

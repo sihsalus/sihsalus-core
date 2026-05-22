@@ -83,7 +83,7 @@ public class AuthorizedAnnotationAttributes {
 	public Collection<String> getAttributes(Method method) {
 		Set<String> attributes = new HashSet<>();
 
-		Authorized authorized = AnnotationUtils.findAnnotation(method, Authorized.class);
+		Authorized authorized = findAuthorizedAnnotation(method);
 		if (authorized != null) {
 			Collections.addAll(attributes, authorized.value());
 		}
@@ -116,7 +116,7 @@ public class AuthorizedAnnotationAttributes {
 	 * @see org.openmrs.annotation.Authorized#requireAll()
 	 */
 	public boolean getRequireAll(Method method) {
-		Authorized authorized = AnnotationUtils.findAnnotation(method, Authorized.class);
+		Authorized authorized = findAuthorizedAnnotation(method);
 		if (authorized != null) {
 			return authorized.requireAll();
 		}
@@ -130,9 +130,53 @@ public class AuthorizedAnnotationAttributes {
 	 * @return boolean true/false whether this method is annotated for OpenMRS
 	 */
 	public boolean hasAuthorizedAnnotation(Method method) {
-		Authorized authorized = AnnotationUtils.findAnnotation(method, Authorized.class);
+		return findAuthorizedAnnotation(method) != null;
+	}
 
-		return (authorized != null);
+	private Authorized findAuthorizedAnnotation(Method method) {
+		Authorized authorized = AnnotationUtils.findAnnotation(method, Authorized.class);
+		if (authorized != null) {
+			return authorized;
+		}
+
+		return findAuthorizedAnnotationOnInterfaces(method, method.getDeclaringClass());
+	}
+
+	private Authorized findAuthorizedAnnotationOnInterfaces(Method method, Class<?> targetClass) {
+		if (targetClass == null) {
+			return null;
+		}
+
+		for (Class<?> interfaceClass : targetClass.getInterfaces()) {
+			Authorized authorized = findAuthorizedAnnotationOnInterface(method, interfaceClass);
+			if (authorized != null) {
+				return authorized;
+			}
+		}
+
+		return findAuthorizedAnnotationOnInterfaces(method, targetClass.getSuperclass());
+	}
+
+	private Authorized findAuthorizedAnnotationOnInterface(Method method, Class<?> interfaceClass) {
+		try {
+			Method interfaceMethod = interfaceClass.getMethod(method.getName(), method.getParameterTypes());
+			Authorized authorized = AnnotationUtils.findAnnotation(interfaceMethod, Authorized.class);
+			if (authorized != null) {
+				return authorized;
+			}
+		}
+		catch (NoSuchMethodException e) {
+			// The method may be declared on a parent interface.
+		}
+
+		for (Class<?> parentInterface : interfaceClass.getInterfaces()) {
+			Authorized authorized = findAuthorizedAnnotationOnInterface(method, parentInterface);
+			if (authorized != null) {
+				return authorized;
+			}
+		}
+
+		return null;
 	}
 
 	public Collection<?> getAttributes(Class<?> clazz, Class<?> filter) {

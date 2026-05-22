@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.webservices.rest.web.resource.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -39,6 +40,9 @@ public class NeedsPaging<T> extends BasePageableResult<T> {
 		if (context.getStartIndex() == 0 && context.getLimit() >= unpagedResults.size()) {
 			return unpagedResults;
 		} else {
+			if (context.getStartIndex() >= unpagedResults.size()) {
+				return Collections.emptyList();
+			}
 			int endIndex = context.getStartIndex() + context.getLimit();
 			if (endIndex > unpagedResults.size())
 				endIndex = unpagedResults.size();

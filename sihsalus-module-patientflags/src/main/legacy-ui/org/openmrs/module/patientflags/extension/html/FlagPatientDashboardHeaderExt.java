@@ -1,0 +1,65 @@
+/**
+ * The contents of this file are subject to the OpenMRS Public License
+ * Version 1.0 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://license.openmrs.org
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ */
+package org.openmrs.module.patientflags.extension.html;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openmrs.Patient;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.Extension;
+import org.openmrs.module.patientflags.Flag;
+import org.openmrs.module.patientflags.PatientFlag;
+import org.openmrs.module.patientflags.api.FlagService;
+
+public class FlagPatientDashboardHeaderExt extends Extension {
+	
+	@Override
+	public MEDIA_TYPE getMediaType() {
+		return Extension.MEDIA_TYPE.html;
+	}
+
+	@Override
+	public String getRequiredPrivilege() {
+		return "View Patients,View Patient Flags";
+	}
+
+	public String getOverrideContent(String test) {
+		
+		FlagService flagService = Context.getService(FlagService.class);
+		
+		Integer patientID = Integer.valueOf(getParameterMap().get("patientId"));
+		
+		Patient patient = Context.getPatientService().getPatient(patientID);
+		
+		List<PatientFlag> results = new ArrayList<PatientFlag>();
+		
+		results = flagService.getPatientFlags(patient, Context.getAuthenticatedUser().getAllRoles(), "Patient Dashboard Header");
+		
+		if (!results.isEmpty()) {
+			String content = "<TABLE><TR><TD>";
+			for (PatientFlag patientFlag : results) {
+				Flag flag = patientFlag.getFlag();
+				flag.setMessage(patientFlag.getMessage());
+				content = content + "<SPAN " + (flag.getPriority() != null ? flag.getPriority().getStyle() : "") + ">" + flag.getName() + "</SPAN>, ";
+			}
+			// cut off the trailing delimiter
+			content = content.substring(0, content.length() - 2);
+			content = content + "</TD></TR></TABLE>";
+			return content;
+		} else {
+			return "";
+		}
+	}
+}

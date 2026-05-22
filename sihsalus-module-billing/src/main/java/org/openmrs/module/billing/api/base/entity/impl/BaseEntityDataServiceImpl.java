@@ -13,12 +13,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.OpenmrsData;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.PagingInfo;
+import org.openmrs.module.billing.api.base.criteria.BillingCriteria;
+import org.openmrs.module.billing.api.base.criteria.BillingRestrictions;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.base.f.Action1;
@@ -137,14 +137,11 @@ public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData> extends B
 			PrivilegeUtil.requirePrivileges(Context.getAuthenticatedUser(), privileges.getGetPrivilege());
 		}
 		
-		return executeCriteria(getEntityClass(), pagingInfo, new Action1<Criteria>() {
-			
-			@Override
-			public void apply(Criteria criteria) {
-				if (!includeVoided) {
-					criteria.add(Restrictions.eq("voided", false));
-				}
-			}
-		}, getDefaultSort());
+		return executeCriteria(getEntityClass(), pagingInfo,
+		    criteria -> {
+			    if (!includeVoided) {
+				    criteria.add(BillingRestrictions.eq("voided", false));
+			    }
+		    }, getDefaultSort());
 	}
 }

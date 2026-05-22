@@ -332,7 +332,7 @@ public class ReportUtil {
 			}
 		}
 		sb.append(" from ").append(tableName);
-		System.out.println(tableName + ": " + Context.getAdministrationService().executeSQL(sb.toString(), true));
+		log.info(tableName + ": " + Context.getAdministrationService().executeSQL(sb.toString(), true));
 	}
 
 	public static void updateGlobalProperty(String propertyName, String propertyValue) {

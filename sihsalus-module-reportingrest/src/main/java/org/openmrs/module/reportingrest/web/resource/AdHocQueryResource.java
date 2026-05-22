@@ -14,7 +14,7 @@
 
 package org.openmrs.module.reportingrest.web.resource;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.Cohort;
 import org.openmrs.api.context.Context;
@@ -42,6 +42,7 @@ import org.openmrs.module.reportingrest.adhoc.AdHocParameter;
 import org.openmrs.module.reportingrest.adhoc.AdHocRowFilter;
 import org.openmrs.module.reportingrest.util.ParameterUtil;
 import org.openmrs.module.reportingrest.web.AdHocRowFilterResults;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.reportingrest.web.controller.ReportingRestController;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
@@ -86,6 +87,7 @@ public class AdHocQueryResource implements Creatable {
 
     @Override
     public Object create(SimpleObject post, RequestContext context) throws ResponseException {
+        ReportingRestPrivileges.requireViewReports();
         ObjectMapper jackson = new ObjectMapper();
         AdHocDataSet adHocDataSet = jackson.convertValue(post, AdHocDataSet.class);
 

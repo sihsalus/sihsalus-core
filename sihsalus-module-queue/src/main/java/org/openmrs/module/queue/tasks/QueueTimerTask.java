@@ -11,8 +11,8 @@ package org.openmrs.module.queue.tasks;
 
 import java.util.TimerTask;
 
-import org.openmrs.api.context.Daemon;
 import org.openmrs.module.DaemonToken;
+import org.sihsalus.core.api.StaticModuleTaskRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +38,11 @@ public class QueueTimerTask extends TimerTask {
 	 */
 	@Override
 	public final void run() {
-		if (daemonToken != null && enabled) {
+		if (enabled) {
 			try {
 				log.debug("Running task: {}", taskClass.getSimpleName());
 				Runnable taskInstance = taskClass.getDeclaredConstructor().newInstance();
-				Daemon.runInDaemonThreadWithoutResult(taskInstance, daemonToken);
+				StaticModuleTaskRunner.runInBackground(daemonToken, taskInstance);
 			}
 			catch (Exception e) {
 				log.error("An error occurred while running scheduled task {}", taskClass.getSimpleName(), e);
@@ -54,6 +54,10 @@ public class QueueTimerTask extends TimerTask {
 	
 	public static void setEnabled(boolean enabled) {
 		QueueTimerTask.enabled = enabled;
+	}
+
+	public static boolean isEnabled() {
+		return enabled;
 	}
 	
 	public static void setDaemonToken(DaemonToken daemonToken) {

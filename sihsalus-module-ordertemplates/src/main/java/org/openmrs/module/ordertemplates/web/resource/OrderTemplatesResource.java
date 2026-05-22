@@ -26,6 +26,8 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
+import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
@@ -175,7 +177,9 @@ public class OrderTemplatesResource extends DelegatingCrudResource<OrderTemplate
 	@PropertySetter("template")
 	public void setTemplate(OrderTemplate instance, Object prop) throws JsonGenerationException, JsonMappingException,
 	        IOException {
-		if (prop instanceof String) {
+		if (prop == null) {
+			instance.setTemplate(null);
+		} else if (prop instanceof String) {
 			instance.setTemplate((String) prop);
 		} else if (prop instanceof Map) {
 			instance.setTemplate(new ObjectMapper().writeValueAsString(prop));
@@ -189,6 +193,9 @@ public class OrderTemplatesResource extends DelegatingCrudResource<OrderTemplate
 	public void setDrug(OrderTemplate instance, Object prop) {
 		if (prop instanceof String) {
 			Drug drug = Context.getConceptService().getDrugByUuid((String) prop);
+			if (StringUtils.isNotBlank((String) prop) && drug == null) {
+				throw new ConversionException("Drug not exist");
+			}
 			instance.setDrug(drug);
 		} else {
 			instance.setDrug((Drug) prop);
@@ -199,6 +206,9 @@ public class OrderTemplatesResource extends DelegatingCrudResource<OrderTemplate
 	public void setConcept(OrderTemplate instance, Object prop) {
 		if (prop instanceof String) {
 			Concept concept = Context.getConceptService().getConceptByUuid((String) prop);
+			if (StringUtils.isNotBlank((String) prop) && concept == null) {
+				throw new ConversionException("Concept not exist");
+			}
 			instance.setConcept(concept);
 		} else {
 			instance.setConcept((Concept) prop);
@@ -214,9 +224,15 @@ public class OrderTemplatesResource extends DelegatingCrudResource<OrderTemplate
 		String conceptUuid = requestContext.getParameter("concept");
 		if (StringUtils.isNotBlank(drugUuid)) {
 			drug = Context.getConceptService().getDrugByUuid(drugUuid);
+			if (drug == null) {
+				throw new InvalidSearchException("Drug not exist");
+			}
 		}
 		if (StringUtils.isNotBlank(conceptUuid)) {
 			concept = Context.getConceptService().getConceptByUuid(conceptUuid);
+			if (concept == null) {
+				throw new InvalidSearchException("Concept not exist");
+			}
 		}
 		OrderTemplateCriteriaBuilder builder = new OrderTemplateCriteriaBuilder();
 		builder.setDrug(drug).setConcept(concept);

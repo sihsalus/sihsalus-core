@@ -13,14 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillableServiceService;
+import org.openmrs.module.billing.api.CashierItemPriceService;
 import org.openmrs.module.billing.api.BillLineItemService;
-import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
-import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -33,16 +32,25 @@ import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentat
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
+import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 
 /**
  * REST resource representing a {@link BillLineItem}.
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/billLineItem", supportedClass = BillLineItem.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/billLineItem", supportedClass = BillLineItem.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 @Slf4j
 public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
+
+	
+	@Override
+	protected org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<BillLineItem> doGetAll(RequestContext context) {
+		return new org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<>(Collections.emptyList(), context);
+	}
 	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
@@ -63,16 +71,38 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	
 	@PropertySetter(value = "item")
 	public void setItem(BillLineItem instance, Object item) {
+		if (item == null) {
+			instance.setItem(null);
+			return;
+		}
+		if (!(item instanceof String)) {
+			throw new ConversionException("Stock item must be referenced by uuid");
+		}
 		StockManagementService service = Context.getService(StockManagementService.class);
 		String itemUuid = (String) item;
-		instance.setItem(service.getStockItemByUuid(itemUuid));
+		StockItem stockItem = service.getStockItemByUuid(itemUuid);
+		if (stockItem == null) {
+			throw new ObjectNotFoundException("No stock item found with uuid: " + itemUuid);
+		}
+		instance.setItem(stockItem);
 	}
 	
 	@PropertySetter(value = "billableService")
 	public void setBillableService(BillLineItem instance, Object item) {
+		if (item == null) {
+			instance.setBillableService(null);
+			return;
+		}
+		if (!(item instanceof String)) {
+			throw new ConversionException("Billable service must be referenced by uuid");
+		}
 		BillableServiceService service = Context.getService(BillableServiceService.class);
 		String serviceUuid = (String) item;
-		instance.setBillableService(service.getBillableServiceByUuid(serviceUuid));
+		BillableService billableService = service.getBillableServiceByUuid(serviceUuid);
+		if (billableService == null) {
+			throw new ObjectNotFoundException("No billable service found with uuid: " + serviceUuid);
+		}
+		instance.setBillableService(billableService);
 	}
 	
 	@PropertyGetter(value = "item")
@@ -99,12 +129,7 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	
 	@PropertySetter(value = "price")
 	public void setPriceValue(BillLineItem instance, Object price) {
-		if (price instanceof Double || price instanceof Integer) {
-			double priceValue = ((Number) price).doubleValue();
-			instance.setPrice(BigDecimal.valueOf(priceValue));
-		} else {
-			throw new IllegalArgumentException("Unsupported price type: " + price.getClass().getName());
-		}
+		instance.setPrice(toBigDecimal(price));
 	}
 	
 	@PropertySetter(value = "priceName")
@@ -120,11 +145,17 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	
 	@PropertySetter(value = "priceUuid")
 	public void setItemPrice(BillLineItem instance, String uuid) {
-		StockManagementService itemDataService = Context.getService(StockManagementService.class);
-		CashierItemPrice itemPrice = null;
+		if (StringUtils.isBlank(uuid)) {
+			instance.setItemPrice(null);
+			instance.setPriceName("");
+			return;
+		}
+		CashierItemPrice itemPrice = Context.getService(CashierItemPriceService.class).getCashierItemPriceByUuid(uuid);
 		if (itemPrice != null) {
 			instance.setItemPrice(itemPrice);
 			instance.setPriceName("");
+		} else {
+			throw new ObjectNotFoundException("No cashier item price found with uuid: " + uuid);
 		}
 	}
 	
@@ -132,7 +163,7 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	public String getItemPriceUuid(BillLineItem instance) {
 		try {
 			CashierItemPrice itemPrice = instance.getItemPrice();
-			return "";
+			return itemPrice == null ? "" : itemPrice.getUuid();
 		}
 		catch (Exception e) {
 			log.warn("Price probably was deleted", e);
@@ -164,13 +195,24 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	@Override
 	public void delete(BillLineItem lineItem, String reason, RequestContext context) {
 		if (StringUtils.isBlank(reason)) {
-			throw new IllegalArgumentException("Reason is required");
+			throw new ConversionException("Reason is required");
 		}
 		
-		lineItem.setVoided(true);
-		lineItem.setVoidReason(reason);
-		lineItem.setVoidedBy(Context.getAuthenticatedUser());
-		
-		Context.getService(BillService.class).saveBill(lineItem.getBill());
+		Context.getService(BillLineItemService.class).voidBillLineItem(lineItem, reason);
+	}
+
+	private BigDecimal toBigDecimal(Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof BigDecimal) {
+			return (BigDecimal) value;
+		}
+		try {
+			return new BigDecimal(value.toString());
+		}
+		catch (NumberFormatException e) {
+			throw new ConversionException("Cannot convert '" + value + "' to BigDecimal", e);
+		}
 	}
 }

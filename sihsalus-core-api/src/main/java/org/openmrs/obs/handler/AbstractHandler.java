@@ -159,7 +159,7 @@ public class AbstractHandler {
 		String filename = names[0];
 		// to handle problem with downloading/saving files with blank spaces or commas in their names
 		// also need to remove the suffix text appended to the end of the file name
-		return filename.replaceAll(",", "").replaceAll(" ", "").replaceAll(suffix + "$", "");
+		return filename.replace(",", "").replace(" ", "").replaceAll(suffix + "$", "");
 
 	}
 

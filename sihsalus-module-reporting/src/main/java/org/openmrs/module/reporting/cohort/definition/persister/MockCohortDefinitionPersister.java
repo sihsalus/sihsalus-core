@@ -23,7 +23,7 @@ import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 public class MockCohortDefinitionPersister implements CohortDefinitionPersister {
 	
 	// Keep track of the primary keys handed out
-	Integer primaryKeySequence = new Integer(1);	
+	Integer primaryKeySequence = Integer.valueOf(1);
 	
 	List<CohortDefinition> cohortDefinitions = new ArrayList<CohortDefinition>();	
 	Map<Integer,CohortDefinition> indexById = new HashMap<Integer,CohortDefinition>();	

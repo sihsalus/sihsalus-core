@@ -59,13 +59,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * For example, to create a query for people with the first name "Liam" and last name either
  * "Hemsworth" or "Neeson", the following code can be used: <pre>{@code
  *  StringAndListParam firstNames = new StringAndListParam().addAnd(new StringParam("Liam"));
- *  StringOrListParam lastNames = new StringOrListParam.addOr(new StringParam("Hemsworth), new StringParam("Neeson"));
- *  Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Person.class);
- *  criteria.createAlias("names", "pn");
- *  Stream.of(
- *      handleAndParam(firstNames, name -> Optional.of(eq("pn.givenName", name))),
- *      handleOrParam(lastNames, name -> Optional.of(eq("pn.familyName", name))
- *  ).filter(Optional::isPresent).map(Optional::get).forEach(criteria::add);
+ *  StringOrListParam lastNames = new StringOrListParam().addOr(new StringParam("Hemsworth"), new StringParam("Neeson"));
+ *  OpenmrsFhirCriteriaContext<Person, Person> ctx = createCriteriaContext(Person.class);
+ *  Join<Person, PersonName> pn = ctx.getRoot().join("names");
+ *  List<Predicate> predicates = Stream.of(
+ *      handleAndParam(firstNames, name -> Optional.of(ctx.getCriteriaBuilder().equal(pn.get("givenName"), name))),
+ *      handleOrParam(lastNames, name -> Optional.of(ctx.getCriteriaBuilder().equal(pn.get("familyName"), name)))
+ *  ).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+ *  ctx.getCriteriaQuery().where(predicates.toArray(new Predicate[0]));
  * }</pre>
  * </p>
  * <p>
@@ -81,26 +82,28 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * example, the following code allows grouping {@link TokenParam} representing
  * {@link org.hl7.fhir.r4.model.CodeableConcept}s into groups based on systems with correct AND / OR
  * logic: <pre>{@code
- *  Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Obs.class);
+ *  OpenmrsFhirCriteriaContext<Obs, Obs> ctx = createCriteriaContext(Obs.class);
+ *  Join<Obs, Concept> c = ctx.getRoot().join("concept");
  *  TokenAndListParam code = ...;
  *  handleAndListParamBySystem(code, (system, tokens) -> {
+ *     CriteriaBuilder cb = ctx.getCriteriaBuilder();
  *     if (system.isEmpty()) {
- *         return Optional.of(or(
- *             in("c.conceptId", tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
- * 	               in("c.uuid", tokensToList(tokens))));
+ *         return Optional.of(cb.or(
+ *             c.get("conceptId").in(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
+ *             c.get("uuid").in(tokensToList(tokens))));
  *     } else {
- *         if (!containsAlias(criteria, "cm")) {
- *             criteria.createAlias("c.conceptMappings", "cm").createAlias("cm.conceptReferenceTerm", "crt");
- *         }
- *         DetachedCriteria conceptSourceCriteria = DetachedCriteria.forClass(FhirConceptSource.class).add(eq("url", system))
- *             .setProjection(property("conceptSource"));
- * 	       if (codes.size() > 1) {
- *            return Optional.of(and(propertyEq("crt.conceptSource", conceptSourceCriteria), in("crt.code", codes)));
+ *         Join<Concept, ConceptMap> cm = c.join("conceptMappings");
+ *         Join<ConceptMap, ConceptReferenceTerm> crt = cm.join("conceptReferenceTerm");
+ *         Subquery<ConceptSource> sourceSubquery = ctx.getCriteriaQuery().subquery(ConceptSource.class);
+ *         Root<FhirConceptSource> fcs = sourceSubquery.from(FhirConceptSource.class);
+ *         sourceSubquery.select(fcs.get("conceptSource")).where(cb.equal(fcs.get("url"), system));
+ *         if (codes.size() > 1) {
+ *             return Optional.of(cb.and(cb.equal(crt.get("conceptSource"), sourceSubquery), crt.get("code").in(codes)));
  *         } else {
- *             return Optional.of(and(propertyEq("crt.conceptSource", conceptSourceCriteria), eq("crt.code", codes.get(0))));
- *         };
+ *             return Optional.of(cb.and(cb.equal(crt.get("conceptSource"), sourceSubquery), cb.equal(crt.get("code"), codes.get(0))));
+ *         }
  *     }
- *  }).ifPresent(criteria::add);
+ *  }).ifPresent(p -> ctx.getCriteriaQuery().where(p));
  * }</pre>
  * </p>
  * <p>

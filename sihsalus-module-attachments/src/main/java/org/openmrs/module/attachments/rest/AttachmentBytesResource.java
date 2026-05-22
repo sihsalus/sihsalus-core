@@ -21,6 +21,7 @@ import org.openmrs.module.attachments.obs.ValueComplex;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
+import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.openmrs.obs.ComplexData;
@@ -41,11 +42,16 @@ public class AttachmentBytesResource extends BaseRestController {
 	@GetMapping(value = AttachmentsConstants.ATTACHMENT_BYTES_URI)
 	public void getFile(@PathVariable("uuid") String uuid, @RequestParam(required = false, value = "view") String view,
 			HttpServletResponse response) throws ResponseException {
+		Context.requirePrivilege(AttachmentsConstants.VIEW_ATTACHMENTS);
+
 		AttachmentsContext context = Context.getRegisteredComponent(AttachmentsConstants.COMPONENT_ATT_CONTEXT,
 				AttachmentsContext.class);
 
 		// Getting the Core/Platform complex data object
 		Obs obs = context.getObsService().getObsByUuid(uuid);
+		if (obs == null) {
+			throw new ObjectNotFoundException("Attachment obs not found: " + uuid);
+		}
 
 		if (!obs.isComplex()) {
 			throw new IllegalRequestException(
@@ -63,13 +69,15 @@ public class AttachmentBytesResource extends BaseRestController {
 		AttachmentComplexData attComplexData = context.getComplexDataHelper().build(valueComplex.getInstructions(),
 				complexData);
 
-		String mimeType = attComplexData.getMimeType();
+		String mimeType = StringUtils.defaultIfBlank(attComplexData.getMimeType(), "application/octet-stream");
+		String title = sanitizeHeaderValue(attComplexData.getTitle());
 
 		// The attachment metadata is sent as HTTP headers.
 		response.setContentType(mimeType);
 		response.addHeader("Content-Family", getContentFamily(mimeType).name());
-		response.addHeader("File-Name", attComplexData.getTitle());
-		response.addHeader("File-Ext", getExtension(attComplexData.getTitle(), mimeType));
+		response.addHeader("File-Name", title);
+		response.addHeader("File-Ext", sanitizeHeaderValue(getExtension(attComplexData.getTitle(), mimeType)));
+		response.addHeader("X-Content-Type-Options", "nosniff");
 
 		try {
 			byte[] bytes = attComplexData.asByteArray();
@@ -98,5 +106,12 @@ public class AttachmentBytesResource extends BaseRestController {
 			ext = extFromMimeType;
 		}
 		return ext;
+	}
+
+	static String sanitizeHeaderValue(String value) {
+		if (value == null) {
+			return "";
+		}
+		return value.replace('\r', '_').replace('\n', '_');
 	}
 }

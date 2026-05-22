@@ -9,16 +9,20 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import java.util.Collections;
+
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.Timesheet;
+import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.util.LocaleUtility;
 
 import java.text.DateFormat;
@@ -27,7 +31,7 @@ import java.text.DateFormat;
  * REST resource representing a {@link Timesheet}.
  */
 @Resource(name = RestConstants.VERSION_2 + CashierResourceController.BILLING_NAMESPACE
-        + "/timesheet", supportedClass = Timesheet.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/timesheet", supportedClass = Timesheet.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class TimesheetResource extends BaseRestDataResource<Timesheet> {
 	
 	@Override
@@ -38,6 +42,11 @@ public class TimesheetResource extends BaseRestDataResource<Timesheet> {
 	@Override
 	public Class<? extends IEntityDataService<Timesheet>> getServiceClass() {
 		return ITimesheetService.class;
+	}
+	
+	@Override
+	protected NeedsPaging<Timesheet> doGetAll(RequestContext context) {
+		return new NeedsPaging<>(Collections.emptyList(), context);
 	}
 	
 	@Override

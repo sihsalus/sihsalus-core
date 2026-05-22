@@ -17,7 +17,7 @@ public class TextAreaWidget implements Widget {
 		config.setDefaultAttribute("cols", "20");
 		config.setDefaultAttribute("rows", "2");
 		HtmlUtil.renderOpenTag(w, "textarea", config.getAttributes());
-		w.write(config.getDefaultValue() == null ? "" : config.getDefaultValue().toString());
+		w.write(HtmlUtil.escapeHtml(config.getDefaultValue()));
 		HtmlUtil.renderCloseTag(w, "textarea");
 	}
 }

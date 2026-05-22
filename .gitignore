@@ -16,7 +16,14 @@ tmp/
 *.log
 *.pid
 *.class
+__pycache__/
+*.py[cod]
 
 # Local reference repository clones. Keep the checked-in summaries/manifests.
 reference-sources/openmrs-distro-modules/*/
+reference-sources/openmrs-module-datafilter/
 reference-sources/sihsalus-content/
+
+# Generated local analysis artifacts.
+docs/generated/
+reports/

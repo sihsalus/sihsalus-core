@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+
+<module configVersion="1.2">
+
+	<!-- Module Properties -->
+	<id>datafilter</id>
+	<name>Data Filter Module</name>
+	<version>0.1.0-SNAPSHOT</version>
+	<package>org.openmrs.module.datafilter</package>
+	<author>Wyclif</author>
+	<description>Provides access-basis mapping support for static Sihsalus runtime.</description>
+	<require_version>3.0.0</require_version>
+	<!-- / Module Properties -->
+
+	<!-- Module Activator -->
+	<activator>org.openmrs.module.datafilter.DataFilterActivator</activator>
+
+    <!-- Privileges
+    <privilege>
+        <name>ByPass Data Filters</name>
+        <description>Any user with this privilege bypasses all configured data filters</description>
+    </privilege>
+     -->
+    <!-- Global properties -->
+    <globalProperty>
+        <property>datafilter.runInStrictMode</property>
+        <description>
+            When the value is set to false, the user can view a record that they don't have access,
+            this can arise if they have a filtered record's unique identifier or a link to it since
+            filters are not applied when looking up records by id, it's highly recommended to always
+            run in strict mode and only turn this off when running in a non-production environment.
+        </description>
+    </globalProperty>
+    <globalProperty>
+        <property>datafilter.patientLocationLinkingInterceptor.enabled</property>
+        <description>
+            When the value is set to true, whenever a new patient is created, they get linked to the location
+            set on the authenticated user's context i.e. the location the user selects when logging into the
+            reference application.
+        </description>
+    </globalProperty>
+
+    <extension>
+        <point>org.openmrs.userForm.custom.extension</point>
+        <class>org.openmrs.module.datafilter.extension.html.LocationExt</class>
+    </extension>
+</module>

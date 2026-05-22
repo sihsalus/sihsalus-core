@@ -92,6 +92,14 @@ public class SihsalusReportingConfiguration {
     }
 
     @Bean
+    SmartInitializingSingleton reportingTimerTaskStaticInitializer() {
+        return () -> {
+            ReportingTimerTask.setDaemonToken(null);
+            ReportingTimerTask.setEnabled(true);
+        };
+    }
+
+    @Bean
     ReportingSerializer reportingSerializer() throws Exception {
         return new ReportingSerializer();
     }

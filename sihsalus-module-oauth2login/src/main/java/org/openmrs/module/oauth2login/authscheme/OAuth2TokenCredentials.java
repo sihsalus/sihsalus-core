@@ -55,7 +55,7 @@ public class OAuth2TokenCredentials implements Credentials {
 	
 	@Override
 	public String getClientName() {
-		return userInfo.getUsername();
+		return serviceAccount ? userInfo.getServiceAccountUsername() : userInfo.getUsername();
 	}
 	
 	public boolean isServiceAccount() {

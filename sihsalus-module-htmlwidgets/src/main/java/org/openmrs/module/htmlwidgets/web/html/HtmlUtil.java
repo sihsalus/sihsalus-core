@@ -35,6 +35,10 @@ public class HtmlUtil  {
 		"disabled","label"
 	);
 
+	public static final List<String> A_ATTRIBUTES = Arrays.asList(
+		"href","target","rel"
+	);
+
 	public static final List<String> SELECT_ATTRIBUTES = Arrays.asList(
 		"disabled","multiple","name","size"
 	);
@@ -65,15 +69,21 @@ public class HtmlUtil  {
 	 * @return true if the passed attribute is valid for the passed tagName
 	 */
 	public static boolean isValidTagAttribute(String tagName, String attribute) {
+		if (StringUtils.isBlank(tagName) || StringUtils.isBlank(attribute)) {
+			return false;
+		}
+
+		String tag = tagName.toLowerCase().trim();
 		String att = attribute.toLowerCase().trim();
 		if (STANDARD_ATTRIBUTES.contains(att) || STANDARD_EVENTS.contains(att)) {
 			return true;
 		}
-		if ("input".equals(tagName)) { return INPUT_ATTRIBUTES.contains(att); }
-		if ("option".equals(tagName)) { return OPTION_ATTRIBUTES.contains(att); }
-		if ("optgroup".equals(tagName)) { return OPTGROUP_ATTRIBUTES.contains(att); }
-		if ("select".equals(tagName)) { return SELECT_ATTRIBUTES.contains(att); }
-		if ("textarea".equals(tagName)) { return TEXTAREA_ATTRIBUTES.contains(att); }
+		if ("input".equals(tag)) { return INPUT_ATTRIBUTES.contains(att); }
+		if ("a".equals(tag)) { return A_ATTRIBUTES.contains(att); }
+		if ("option".equals(tag)) { return OPTION_ATTRIBUTES.contains(att); }
+		if ("optgroup".equals(tag)) { return OPTGROUP_ATTRIBUTES.contains(att); }
+		if ("select".equals(tag)) { return SELECT_ATTRIBUTES.contains(att); }
+		if ("textarea".equals(tag)) { return TEXTAREA_ATTRIBUTES.contains(att); }
 		return false;
 	}
 	
@@ -119,10 +129,10 @@ public class HtmlUtil  {
 				
 
 				if (isJs) {
-					w.write("<script src=\"" + resource + "\" type=\"text/javascript\" ></script>");
+					w.write("<script src=\"" + escapeAttribute(resource) + "\" type=\"text/javascript\" ></script>");
 				}
 				else if (isCss) {
-					w.write("<link href=\"" + resource + "\" type=\"text/css\" rel=\"stylesheet\" />");
+					w.write("<link href=\"" + escapeAttribute(resource) + "\" type=\"text/css\" rel=\"stylesheet\" />");
 				}
 			}
 		}
@@ -220,9 +230,10 @@ public class HtmlUtil  {
 	public static void renderTagAttributes(Writer w, String tagName, Collection<Attribute> attributes) throws IOException {
 		if (attributes != null) {
 			for (Attribute a : attributes) {
-				if (isValidTagAttribute(tagName, a.getName())) {
-					if (StringUtils.isNotEmpty(a.getValue()) || ("value".equals(a.getName()) && "".equals(a.getValue()))) {
-						w.write(" " + a.getName() + "=\"" + a.getValue() + "\"");
+				String attributeName = a.getName() == null ? null : a.getName().toLowerCase().trim();
+				if (isValidTagAttribute(tagName, attributeName)) {
+					if (StringUtils.isNotEmpty(a.getValue()) || ("value".equals(attributeName) && "".equals(a.getValue()))) {
+						w.write(" " + attributeName + "=\"" + escapeAttribute(a.getValue()) + "\"");
 					}
 				}
 			}
@@ -238,16 +249,123 @@ public class HtmlUtil  {
 	public static void renderTagAttributes(Writer w, String tagName, String attributeString) throws IOException {
 		if (StringUtils.isNotEmpty(attributeString)) {
 			for (String attribute : attributeString.split("\\|")) {
-				String[] nameVal = attribute.split("=");
+				String[] nameVal = attribute.split("=", 2);
 				if (nameVal.length != 2) {
 					throw new IllegalArgumentException("Misformed argument in attributeString: <" + attributeString + ">");
 				}
-				if (isValidTagAttribute(tagName, nameVal[0])) {
-					if (StringUtils.isNotEmpty(nameVal[1])) {
-						w.write(" " + nameVal[0] + "=\"" + nameVal[1] + "\"");
+				String attributeName = nameVal[0].toLowerCase().trim();
+				if (isValidTagAttribute(tagName, attributeName)) {
+					if (StringUtils.isNotEmpty(nameVal[1]) || ("value".equals(attributeName) && "".equals(nameVal[1]))) {
+						w.write(" " + attributeName + "=\"" + escapeAttribute(nameVal[1]) + "\"");
 					}
 				}
 			}
 		}
+	}
+
+	public static String escapeHtml(Object value) {
+		if (value == null) {
+			return "";
+		}
+
+		String input = value.toString();
+		StringBuilder escaped = new StringBuilder(input.length());
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			switch (c) {
+				case '&':
+					escaped.append("&amp;");
+					break;
+				case '<':
+					escaped.append("&lt;");
+					break;
+				case '>':
+					escaped.append("&gt;");
+					break;
+				case '"':
+					escaped.append("&quot;");
+					break;
+				case '\'':
+					escaped.append("&#39;");
+					break;
+				default:
+					escaped.append(c);
+			}
+		}
+		return escaped.toString();
+	}
+
+	public static String escapeAttribute(Object value) {
+		return escapeHtml(value);
+	}
+
+	public static String escapeJavaScriptString(Object value) {
+		if (value == null) {
+			return "";
+		}
+
+		String input = value.toString();
+		StringBuilder escaped = new StringBuilder(input.length());
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			switch (c) {
+				case '\\':
+					escaped.append("\\\\");
+					break;
+				case '"':
+					escaped.append("\\\"");
+					break;
+				case '\'':
+					escaped.append("\\'");
+					break;
+				case '\n':
+					escaped.append("\\n");
+					break;
+				case '\r':
+					escaped.append("\\r");
+					break;
+				case '\t':
+					escaped.append("\\t");
+					break;
+				case '\b':
+					escaped.append("\\b");
+					break;
+				case '\f':
+					escaped.append("\\f");
+					break;
+				case '<':
+					escaped.append("\\u003C");
+					break;
+				case '>':
+					escaped.append("\\u003E");
+					break;
+				case '&':
+					escaped.append("\\u0026");
+					break;
+				case '\u2028':
+					escaped.append("\\u2028");
+					break;
+				case '\u2029':
+					escaped.append("\\u2029");
+					break;
+				default:
+					if (c < 0x20) {
+						appendUnicodeEscape(escaped, c);
+					}
+					else {
+						escaped.append(c);
+					}
+			}
+		}
+		return escaped.toString();
+	}
+
+	private static void appendUnicodeEscape(StringBuilder escaped, char c) {
+		escaped.append("\\u");
+		String hex = Integer.toHexString(c);
+		for (int i = hex.length(); i < 4; i++) {
+			escaped.append('0');
+		}
+		escaped.append(hex);
 	}
 }

@@ -26,6 +26,7 @@ import org.openmrs.module.DaemonToken;
 import org.openmrs.module.patientflags.Flag;
 import org.openmrs.module.patientflags.PatientFlag;
 import org.openmrs.module.patientflags.api.FlagService;
+import org.sihsalus.core.api.StaticModuleTaskRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class PatientFlagTask implements Runnable {
 	}
 	
 	public static Runnable evaluateAllFlags() {
-		return Daemon.runInDaemonThread(new AllFlagsEvaluator(), daemonToken);
+		return () -> StaticModuleTaskRunner.runAndWait(daemonToken, new AllFlagsEvaluator());
 	}
 
 	public static void setDaemonToken(DaemonToken token) {
@@ -68,17 +69,13 @@ public class PatientFlagTask implements Runnable {
 	public void generatePatientFlags(Patient patient) {
 		this.patient = patient;
 		
-		if (daemonToken != null) {
-			Daemon.runInDaemonThread(this, daemonToken);
-		}
+		StaticModuleTaskRunner.runInBackground(daemonToken, this);
 	}
 	
 	public void generatePatientFlags(Flag flag) {
 		this.flag = flag;
 		
-		if (daemonToken != null) {
-			Daemon.runInDaemonThread(this, daemonToken);
-		}
+		StaticModuleTaskRunner.runInBackground(daemonToken, this);
 	}
 
 	private static void generatePatientFlags(Flag flag, FlagService service) {
@@ -146,7 +143,12 @@ public class PatientFlagTask implements Runnable {
 		public void run() {
 			FlagService flagService = Context.getService(FlagService.class);
 
-			flagService.getAllFlags().forEach(flag -> Daemon.runInNewDaemonThread(new PatientFlagGenerator(flag)));
+			if (StaticModuleTaskRunner.hasValidDaemonToken(daemonToken)) {
+				flagService.getAllFlags().forEach(flag -> Daemon.runNewDaemonTask(new PatientFlagGenerator(flag)));
+			}
+			else {
+				flagService.getAllFlags().forEach(flag -> new PatientFlagGenerator(flag).run());
+			}
 		}
 	}
 

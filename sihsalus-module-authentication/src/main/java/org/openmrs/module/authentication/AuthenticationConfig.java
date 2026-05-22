@@ -219,7 +219,8 @@ public class AuthenticationConfig implements Serializable {
                 return clazz.getDeclaredConstructor().newInstance();
             }
             catch (Exception e) {
-                throw new RuntimeException("Unable to instantiate class " + type);
+                throw new IllegalStateException("Unable to instantiate class configured by " + key + ": "
+                        + clazz.getName(), e);
             }
         }
         return null;
@@ -227,13 +228,14 @@ public class AuthenticationConfig implements Serializable {
 
     /**
      * @param key the configuration property to retrieve
-     * @param ignoredType the type of class expected
+     * @param type the type of class expected
      * @return a class of the given type, with a type identified by the value of the given property
      */
     @SuppressWarnings("unchecked")
-    public static <T> Class<? extends T> getClass(String key, Class<T> ignoredType) {
+    public static <T> Class<? extends T> getClass(String key, Class<T> type) {
         String className = getConfig().getProperty(key);
         if (StringUtils.isNotBlank(className)) {
+            String trimmedClassName = className.trim();
             List<ClassLoader> loaders = new ArrayList<>();
             loaders.add(Thread.currentThread().getContextClassLoader());
             loaders.add(AuthenticationConfig.class.getClassLoader());
@@ -241,11 +243,16 @@ public class AuthenticationConfig implements Serializable {
             loaders.addAll(classLoaders);
             for (ClassLoader loader : loaders) {
                 try {
-                    return (Class<? extends T>) loader.loadClass(className.trim());
-                } catch (Throwable ignored) {
+                    Class<?> loadedClass = loader.loadClass(trimmedClassName);
+                    if (!type.isAssignableFrom(loadedClass)) {
+                        throw new IllegalStateException("Configured class " + trimmedClassName
+                                + " is not assignable to " + type.getName());
+                    }
+                    return (Class<? extends T>) loadedClass;
+                } catch (ClassNotFoundException | LinkageError ignored) {
                 }
             }
-            throw new RuntimeException("Unable to load class: " + className);
+            throw new IllegalStateException("Unable to load class: " + trimmedClassName);
         }
         return null;
     }
@@ -256,7 +263,7 @@ public class AuthenticationConfig implements Serializable {
      * @return the configuration properties that start with the given prefix, without the prefix if stripPrefix is true
      */
     public static Properties getSubsetWithPrefix(String prefix, boolean stripPrefix) {
-        return AuthenticationUtil.getPropertiesWithPrefix(config, prefix, stripPrefix);
+        return AuthenticationUtil.getPropertiesWithPrefix(getConfig(), prefix, stripPrefix);
     }
 
     // Configuration
@@ -339,6 +346,9 @@ public class AuthenticationConfig implements Serializable {
      * @return a configured AuthenticationScheme given configuration properties
      */
     public static AuthenticationScheme getAuthenticationScheme(String schemeId) {
+        if (StringUtils.isBlank(schemeId)) {
+            throw new IllegalStateException("Authentication scheme id is required");
+        }
         AuthenticationScheme registeredScheme = authenticationSchemes.get(schemeId);
         if (registeredScheme != null) {
             configureAuthenticationScheme(schemeId, registeredScheme);
@@ -346,6 +356,10 @@ public class AuthenticationConfig implements Serializable {
         }
         String schemeTypeProperty = SCHEME_TYPE_TEMPLATE.replace(SCHEME_ID, schemeId);
         AuthenticationScheme scheme = getClassInstance(schemeTypeProperty, AuthenticationScheme.class);
+        if (scheme == null) {
+            throw new IllegalStateException(
+                    "No authentication scheme registered or configured for id '" + schemeId + "'");
+        }
         configureAuthenticationScheme(schemeId, scheme);
         return scheme;
     }

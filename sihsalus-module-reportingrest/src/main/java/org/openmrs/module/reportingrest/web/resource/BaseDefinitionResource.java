@@ -13,10 +13,11 @@
  */
 package org.openmrs.module.reportingrest.web.resource;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.definition.DefinitionContext;
 import org.openmrs.module.reporting.evaluation.Definition;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
@@ -62,6 +63,7 @@ public abstract class BaseDefinitionResource<T extends Definition> extends Metad
 	 */
 	@Override
 	public T getByUniqueId(String uuid) {
+		ReportingRestPrivileges.requireViewReportObjects();
 		return DefinitionContext.getDefinitionByUuid(getDefinitionType(), uuid);
 	}
 	
@@ -70,6 +72,11 @@ public abstract class BaseDefinitionResource<T extends Definition> extends Metad
 	 */
 	@Override
 	public T save(T definition) {
+		if (definition.getId() == null) {
+			ReportingRestPrivileges.requireAddReportObjects();
+		} else {
+			ReportingRestPrivileges.requireEditReportObjects();
+		}
 		return DefinitionContext.saveDefinition(definition);
 	}
 
@@ -78,6 +85,7 @@ public abstract class BaseDefinitionResource<T extends Definition> extends Metad
 	 */
 	@Override
 	public void delete(T definition, String reason, RequestContext context) throws ResponseException {
+		ReportingRestPrivileges.requireDeleteReportObjects();
 		definition.setRetireReason(reason);
 		DefinitionContext.retireDefinition(definition);
 	}
@@ -87,6 +95,7 @@ public abstract class BaseDefinitionResource<T extends Definition> extends Metad
 	 */
 	@Override
 	public void purge(T definition, RequestContext context) throws ResponseException {
+		ReportingRestPrivileges.requireDeleteReportObjects();
 		DefinitionContext.purgeDefinition(getDefinitionType(), definition.getUuid());
 	}
 	
@@ -141,6 +150,7 @@ public abstract class BaseDefinitionResource<T extends Definition> extends Metad
 	 */
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
+		ReportingRestPrivileges.requireViewReportObjects();
         String query = context.getParameter("q");
 		List<T> results = DefinitionContext.getDefinitionService(getDefinitionType()).getDefinitions(query, false);
 		return new NeedsPaging<T>(results, context);
@@ -150,6 +160,7 @@ public abstract class BaseDefinitionResource<T extends Definition> extends Metad
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource#doGetAll(org.openmrs.module.webservices.rest.web.RequestContext)
 	 */
 	public PageableResult doGetAll(RequestContext context) throws ResponseException {
+		ReportingRestPrivileges.requireViewReportObjects();
 		return new NeedsPaging<T>(DefinitionContext.getDefinitionService(getDefinitionType()).getAllDefinitions(false), context);
 	}
 	

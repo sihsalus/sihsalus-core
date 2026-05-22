@@ -59,7 +59,16 @@ sihsalus-module-*/        Static internal module placeholders for distro capabil
 Start the local PostgreSQL dependency:
 
 ```bash
+export SIHSALUS_POSTGRES_PASSWORD='<set-a-long-local-db-secret>'
 docker compose up -d postgres
+```
+
+Set explicit database and admin passwords before starting the backend. A runtime with the default OpenMRS admin password is rejected at startup.
+
+```bash
+export SIHSALUS_POSTGRES_PASSWORD='<set-a-long-local-db-secret>'
+export SIHSALUS_ADMIN_PASSWORD='<set-a-long-local-secret>'
+docker compose up -d backend
 ```
 
 ```bash
@@ -71,7 +80,7 @@ The default boot configuration targets PostgreSQL:
 ```text
 SIHSALUS_DATASOURCE_URL=jdbc:postgresql://localhost:5432/sihsalus
 SIHSALUS_DATASOURCE_USERNAME=sihsalus
-SIHSALUS_DATASOURCE_PASSWORD=sihsalus
+SIHSALUS_DATASOURCE_PASSWORD=<set-a-long-local-db-secret>
 ```
 
 Tests use H2 in PostgreSQL compatibility mode.

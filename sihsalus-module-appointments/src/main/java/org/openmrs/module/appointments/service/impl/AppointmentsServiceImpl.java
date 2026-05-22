@@ -161,7 +161,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public List<Appointment> searchAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery) {
         String limitString = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
-        Integer limit = StringUtils.isNotEmpty(limitString) ? Integer.parseInt(limitString) : null;
+        Integer limit = parseIntegerGlobalProperty("webservices.rest.maxResultsDefault", limitString);
         return appointmentDao.getAppointmentsWithoutDates(searchQuery, limit);
     }
 
@@ -327,11 +327,25 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
         if (!isNull(appointmentSearchRequest.getLimit())) {
             String limit = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
-            if (StringUtils.isNotEmpty(limit)) {
-                appointmentSearchRequest.setLimit(Integer.parseInt(limit));
+            Integer configuredLimit = parseIntegerGlobalProperty("webservices.rest.maxResultsDefault", limit);
+            if (configuredLimit != null) {
+                appointmentSearchRequest.setLimit(configuredLimit);
             }
         }
         return appointmentDao.search(appointmentSearchRequest);
+    }
+
+    private Integer parseIntegerGlobalProperty(String propertyName, String value) {
+        if (StringUtils.isEmpty(value)) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(value);
+        }
+        catch (NumberFormatException e) {
+            log.warn("Ignoring invalid numeric global property " + propertyName + ": " + value, e);
+            return null;
+        }
     }
 
     @Override

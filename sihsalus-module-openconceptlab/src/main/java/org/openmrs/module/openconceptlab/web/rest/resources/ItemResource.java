@@ -19,20 +19,23 @@ import org.openmrs.module.webservices.rest.web.representation.FullRepresentation
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
+import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubResource;
-import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
 
 @SubResource(
         parent = ImportResource.class,
         path = "item",
         supportedClass = Item.class,
-        supportedOpenmrsVersions = { "1.8.* - 2.*" }
+        supportedOpenmrsVersions = { "1.8.* - 9.*" }
 )
 public class ItemResource extends DelegatingSubResource<Item, Import, ImportResource>{
 
@@ -48,10 +51,16 @@ public class ItemResource extends DelegatingSubResource<Item, Import, ImportReso
 
     @Override
     public PageableResult doGetAll(Import parent, RequestContext context) throws ResponseException {
+        requireManageConcepts();
         ImportService importService = getImportService();
-        Integer updateItemsCount = importService.getImportItemsCount(parent, new HashSet<ItemState>());
-        List<Item> updateItems = importService.getImportItems(parent, 0, updateItemsCount, new HashSet<ItemState>());
-        return new NeedsPaging<Item>(updateItems, context);
+        HashSet<ItemState> states = new HashSet<ItemState>();
+        Integer updateItemsCount = importService.getImportItemsCount(parent, states);
+        if (context.getStartIndex() >= updateItemsCount) {
+            return new AlreadyPaged<Item>(context, Collections.emptyList(), false, updateItemsCount.longValue());
+        }
+        List<Item> updateItems = importService.getImportItems(parent, context.getStartIndex(), context.getLimit(), states);
+        boolean hasMoreResults = context.getStartIndex() + context.getLimit() < updateItemsCount;
+        return new AlreadyPaged<Item>(context, updateItems, hasMoreResults, updateItemsCount.longValue());
     }
 
     @Override
@@ -66,6 +75,7 @@ public class ItemResource extends DelegatingSubResource<Item, Import, ImportReso
 
     @Override
     public Item getByUniqueId(String uuid) {
+        requireManageConcepts();
         return getImportService().getItem(uuid);
     }
 

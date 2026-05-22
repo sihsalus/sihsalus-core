@@ -11,6 +11,7 @@ package org.openmrs.module.openconceptlab.client;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -46,6 +47,9 @@ public class OclMapping {
 	
 	@JsonProperty("to_concept_url")
 	private String toConceptUrl;
+
+	@JsonProperty("to_source_url")
+	private String toSourceUrl;
 	
 	@JsonProperty("to_source_name_resolved")
 	private String toSourceNameResolved;
@@ -150,7 +154,7 @@ public class OclMapping {
 	}
 	
 	public String getToSourceName() {
-		return toSourceName != null ? toSourceName : toSourceNameResolved;
+		return StringUtils.defaultIfBlank(toSourceName, toSourceNameResolved);
 	}
 	
 	public void setToSourceName(String toSourceName) {
@@ -176,9 +180,17 @@ public class OclMapping {
 	public String getToConceptUrl() {
 		return toConceptUrl;
 	}
-	
+
 	public void setToConceptUrl(String toConceptUrl) {
 		this.toConceptUrl = toConceptUrl;
+	}
+
+	public String getToSourceUrl() {
+		return toSourceUrl;
+	}
+
+	public void setToSourceUrl(String toSourceUrl) {
+		this.toSourceUrl = toSourceUrl;
 	}
 
 	public Date getUpdatedOn() {

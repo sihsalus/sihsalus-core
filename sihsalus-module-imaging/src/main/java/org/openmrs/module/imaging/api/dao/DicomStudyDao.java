@@ -74,16 +74,16 @@ public class DicomStudyDao {
 	}
 	
 	public void save(DicomStudy study) {
-		getSession().saveOrUpdate(study);
+		getSession().merge(study);
 	}
-	
+
 	public void remove(DicomStudy study) {
 		getSession().delete(study);
 	}
-	
+
 	public void updateLinkStatus(DicomStudy study, int newLinkStatus) {
 		study.setLinkStatus(newLinkStatus);
-		getSession().update(study);
+		getSession().merge(study);
 	}
 	
 }

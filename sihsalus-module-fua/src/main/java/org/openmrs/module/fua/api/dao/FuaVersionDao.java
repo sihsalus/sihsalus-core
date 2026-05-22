@@ -21,7 +21,6 @@ public class FuaVersionDao {
 	}
 	
 	public FuaVersion saveFuaVersion(FuaVersion fuaVersion) {
-		getSession().saveOrUpdate(fuaVersion);
-		return fuaVersion;
+		return (FuaVersion) getSession().merge(fuaVersion);
 	}
 }

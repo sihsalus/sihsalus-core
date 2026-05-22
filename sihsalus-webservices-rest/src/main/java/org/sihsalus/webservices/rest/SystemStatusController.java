@@ -14,6 +14,6 @@ public class SystemStatusController {
                 "name", "SIH Salus Core",
                 "moduleModel", "static-maven-reactor",
                 "dynamicOmodLoading", false,
-                "internalModules", StaticModuleCatalog.modules().size());
+                "internalModules", StaticModuleCatalog.staticInternalModules().size());
     }
 }

@@ -44,7 +44,12 @@ public class AuthenticationUtil {
         if (StringUtils.isBlank(val)) {
             return defaultValue;
         }
-        return Integer.parseInt(val);
+        try {
+            return Integer.parseInt(val);
+        }
+        catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -55,7 +60,10 @@ public class AuthenticationUtil {
     public static List<String> getStringList(String val, String delimiter) {
         List<String> ret = new ArrayList<>();
         if (StringUtils.isNotBlank(val)) {
-            ret.addAll(Arrays.asList(val.split(delimiter)));
+            Arrays.stream(val.split(delimiter))
+                    .map(String::trim)
+                    .filter(StringUtils::isNotBlank)
+                    .forEach(ret::add);
         }
         return ret;
     }

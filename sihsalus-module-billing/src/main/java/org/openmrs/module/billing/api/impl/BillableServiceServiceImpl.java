@@ -11,6 +11,7 @@ package org.openmrs.module.billing.api.impl;
 
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.base.PagingInfo;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class BillableServiceServiceImpl extends BaseOpenmrsService implements BillableServiceService {
@@ -91,15 +93,29 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 	@Override
 	@Transactional
 	public BillableService retireBillableService(BillableService billableService, String reason) {
+		if (billableService == null) {
+			throw new NullPointerException("The billableService must be defined.");
+		}
 		if (StringUtils.isEmpty(reason)) {
 			throw new IllegalArgumentException("Retire reason cannot be empty or null");
 		}
+		billableService.setRetired(true);
+		billableService.setRetiredBy(Context.getAuthenticatedUser());
+		billableService.setDateRetired(new Date());
+		billableService.setRetireReason(reason);
 		return billableServiceDAO.saveBillableService(billableService);
 	}
 	
 	@Override
 	@Transactional
 	public BillableService unretireBillableService(BillableService billableService) {
+		if (billableService == null) {
+			throw new NullPointerException("The billableService must be defined.");
+		}
+		billableService.setRetired(false);
+		billableService.setRetiredBy(null);
+		billableService.setDateRetired(null);
+		billableService.setRetireReason(null);
 		return billableServiceDAO.saveBillableService(billableService);
 	}
 }

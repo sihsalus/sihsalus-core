@@ -189,7 +189,7 @@ public class HibernatePersonDAO implements PersonDAO {
 			birthyear = 0;
 		}
 
-		name = name.replaceAll("  ", " ");
+		name = name.replace("  ", " ");
 		name = name.replace(", ", " ");
 		String[] names = name.split(" ");
 

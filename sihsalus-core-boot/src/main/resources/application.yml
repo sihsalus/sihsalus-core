@@ -4,9 +4,20 @@ spring:
   datasource:
     url: ${SIHSALUS_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sihsalus}
     username: ${SIHSALUS_DATASOURCE_USERNAME:sihsalus}
-    password: ${SIHSALUS_DATASOURCE_PASSWORD:sihsalus}
+    password: ${SIHSALUS_DATASOURCE_PASSWORD:}
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
+
+server:
+  error:
+    include-binding-errors: never
+    include-message: never
+    include-stacktrace: never
+
+sihsalus:
+  admin:
+    username: ${SIHSALUS_ADMIN_USERNAME:admin}
+    password: ${SIHSALUS_ADMIN_PASSWORD:}
 
 management:
   endpoints:
@@ -17,3 +28,4 @@ management:
     health:
       probes:
         enabled: true
+      show-details: never

@@ -29,14 +29,16 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
-import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
+import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/cashierItemPrice", supportedClass = CashierItemPrice.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/cashierItemPrice", supportedClass = CashierItemPrice.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class CashierItemPriceResource extends MetadataDelegatingCrudResource<CashierItemPrice> {
 	
 	private final CashierItemPriceService cashierItemPriceService = Context.getService(CashierItemPriceService.class);
@@ -96,20 +98,25 @@ public class CashierItemPriceResource extends MetadataDelegatingCrudResource<Cas
 	
 	@PropertySetter("price")
 	public void setPrice(CashierItemPrice instance, Object price) {
-		double amount;
-		if (price instanceof Integer) {
-			amount = (int) (Integer) price;
-			instance.setPrice(BigDecimal.valueOf(amount));
-		} else {
-			instance.setPrice(BigDecimal.valueOf((Double) price));
-		}
+		instance.setPrice(toBigDecimal(price));
 	}
 	
 	@PropertySetter(value = "item")
 	public void setItem(CashierItemPrice instance, Object item) {
+		if (item == null) {
+			instance.setItem(null);
+			return;
+		}
+		if (!(item instanceof String)) {
+			throw new ConversionException("Stock item must be referenced by uuid");
+		}
 		StockManagementService service = Context.getService(StockManagementService.class);
 		String itemUuid = (String) item;
-		instance.setItem(service.getStockItemByUuid(itemUuid));
+		StockItem stockItem = service.getStockItemByUuid(itemUuid);
+		if (stockItem == null) {
+			throw new ObjectNotFoundException("No stock item found with uuid: " + itemUuid);
+		}
+		instance.setItem(stockItem);
 	}
 	
 	@PropertyGetter(value = "item")
@@ -139,5 +146,20 @@ public class CashierItemPriceResource extends MetadataDelegatingCrudResource<Cas
 		boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
 		List<CashierItemPrice> results = cashierItemPriceService.getCashierItemPrices(includeRetired);
 		return new NeedsPaging<>(results, context);
+	}
+
+	private BigDecimal toBigDecimal(Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof BigDecimal) {
+			return (BigDecimal) value;
+		}
+		try {
+			return new BigDecimal(value.toString());
+		}
+		catch (NumberFormatException e) {
+			throw new ConversionException("Cannot convert '" + value + "' to BigDecimal", e);
+		}
 	}
 }

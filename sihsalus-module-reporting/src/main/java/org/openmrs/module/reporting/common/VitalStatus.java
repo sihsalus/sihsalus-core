@@ -53,7 +53,7 @@ public class VitalStatus {
 	 */
 	public String toString() {
 		String ret = "alive";
-		if (dead == Boolean.TRUE) {
+		if (Boolean.TRUE.equals(dead)) {
 			ret = "died";
 			ret += (deathDate == null ? "" : " on " + DateUtil.formatDate(deathDate, "dd/MMM/yyyy", ""));
 			ret += (causeOfDeath == null ? "" : " due to " + causeOfDeath.getDisplayString());

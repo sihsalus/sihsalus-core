@@ -21,9 +21,13 @@ import org.openmrs.module.webservices.rest.web.annotation.Resource;
  * REST resource representing a {@link PaymentModeAttributeType}.
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/paymentModeAttributeType", supportedClass = PaymentModeAttributeType.class, supportedOpenmrsVersions = {
-                "2.0 - 2.*" })
+        + "/paymentModeAttributeType", supportedClass = PaymentModeAttributeType.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class PaymentModeAttributeTypeResource extends BaseRestAttributeTypeResource<PaymentModeAttributeType> {
+
+	
+	protected org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<PaymentModeAttributeType> doGetAll(org.openmrs.module.webservices.rest.web.RequestContext context) {
+		return new org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<>(java.util.Collections.emptyList(), context);
+	}
 	
 	@Override
 	public PaymentModeAttributeType newDelegate() {

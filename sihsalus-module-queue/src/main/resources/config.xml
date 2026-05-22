@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+
+<module configVersion="1.6">
+
+    <!-- Base Module Properties -->
+    <id>${project.parent.artifactId}</id>
+    <name>${project.parent.name}</name>
+    <version>${project.parent.version}</version>
+    <package>org.openmrs.module.queue</package>
+    <author>corneliouzbett</author>
+    <description>
+        ${project.parent.description}
+    </description>
+
+    <activator>${project.parent.groupId}.${project.parent.artifactId}.QueueModuleActivator</activator>
+
+    <require_version>${openmrsPlatformVersion}</require_version>
+
+    <require_modules>
+        <require_module>org.openmrs.module.webservices.rest</require_module>
+    </require_modules>
+
+    <aware_of_modules>
+        <aware_of_module>org.openmrs.module.legacyui</aware_of_module>
+    </aware_of_modules>
+
+    <globalProperty>
+        <property>${project.parent.artifactId}.statusConceptSetName</property>
+        <defaultValue>Status</defaultValue>
+        <description>Set status conceptSet name</description>
+    </globalProperty>
+    <globalProperty>
+        <property>${project.parent.artifactId}.priorityConceptSetName</property>
+        <defaultValue>Priority</defaultValue>
+        <description>Set priority conceptSet name</description>
+    </globalProperty>
+    <globalProperty>
+        <property>${project.parent.artifactId}.serviceConceptSetName</property>
+        <defaultValue>Service</defaultValue>
+        <description>Set service conceptSet name</description>
+    </globalProperty>
+    <globalProperty>
+        <property>${project.parent.artifactId}.sortWeightGenerator</property>
+        <defaultValue></defaultValue>
+        <description>The bean name of a registered component that provides an algorithm to set a queue entry sort weight when saved</description>
+    </globalProperty>
+</module>
+

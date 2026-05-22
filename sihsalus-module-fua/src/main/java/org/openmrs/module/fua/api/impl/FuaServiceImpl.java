@@ -2,19 +2,14 @@ package org.openmrs.module.fua.api.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.APIException;
-//import org.openmrs.api.UserService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.fua.Fua;
 import org.openmrs.module.fua.FuaEstado;
-
 import org.openmrs.module.fua.api.FuaService;
 import org.openmrs.module.fua.api.dao.FuaDao;
 
-import org.apache.commons.lang3.StringUtils; 
-
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 public class FuaServiceImpl extends BaseOpenmrsService implements FuaService {
 	
@@ -73,8 +68,14 @@ public class FuaServiceImpl extends BaseOpenmrsService implements FuaService {
 	
 	@Override
 	public List<Fua> getFuasFiltrados(String estado, LocalDate inicio, LocalDate fin, int page, int size) {
+		if (page < 1) {
+			throw new APIException("FUA page must be greater than zero");
+		}
+		if (size < 1) {
+			throw new APIException("FUA page size must be greater than zero");
+		}
 		int offset = (page - 1) * size;
-		return dao.getFuasFiltrados(estado, inicio, fin, offset, size);
+		return dao.getFuasFiltrados(StringUtils.trimToNull(estado), inicio, fin, offset, size);
 	}
 
 	@Override

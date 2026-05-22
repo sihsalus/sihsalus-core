@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="sihsalus-patientdocuments-create-static-privileges-20260519" author="sihsalus">
+        <comment>Create OMOD config.xml privileges for the static patientdocuments module.</comment>
+        <sql>
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'App: Can generate a Patient Identity Sticker', 'Allows user to access the patient identifier sticker report.', '35b511fd-6d7d-4b7e-b669-8a986d8fe938'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: Can generate a Patient Identity Sticker');
+
+            INSERT INTO privilege (privilege, description, uuid)
+            SELECT 'App: Print encounter forms', 'Allows user to print encounter forms', 'c4fcf0fe-af38-4d73-bff0-6f3a3e40c9ab'
+            WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE privilege = 'App: Print encounter forms');
+        </sql>
+    </changeSet>
+</databaseChangeLog>

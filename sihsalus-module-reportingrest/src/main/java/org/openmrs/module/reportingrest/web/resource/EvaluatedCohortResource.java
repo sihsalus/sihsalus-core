@@ -31,6 +31,7 @@ import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.querybuilder.HqlQueryBuilder;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.openmrs.module.reporting.serializer.ReportingSerializer;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.reportingrest.web.controller.ReportingRestController;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -63,6 +64,7 @@ public class EvaluatedCohortResource extends EvaluatedResource<EvaluatedCohort> 
 	@Override
 	public Object retrieve(String uuid, RequestContext requestContext)
 			throws ResponseException {
+		ReportingRestPrivileges.requireViewReports();
 
 		try {
 			EvaluatedCohort evaluatedCohort = getEvaluatedCohort(uuid, requestContext, null);
@@ -84,6 +86,7 @@ public class EvaluatedCohortResource extends EvaluatedResource<EvaluatedCohort> 
 	 */
 	@Override
 	public Object update(String uniqueId, SimpleObject postBody, RequestContext context) throws ResponseException {
+		ReportingRestPrivileges.requireViewReports();
 		CohortDefinitionService definitionService = DefinitionContext.getCohortDefinitionService();
 		CohortDefinition definition = getDefinitionByUniqueId(definitionService, CohortDefinition.class, uniqueId);
 		if (definition == null) {
@@ -111,6 +114,7 @@ public class EvaluatedCohortResource extends EvaluatedResource<EvaluatedCohort> 
      */
 	@Override
 	public Object create(SimpleObject postBody, RequestContext context) throws ResponseException {
+		ReportingRestPrivileges.requireViewReports();
 		Object serializedXml = postBody.get("serializedXml");
 		CohortDefinition definition;
 		try {

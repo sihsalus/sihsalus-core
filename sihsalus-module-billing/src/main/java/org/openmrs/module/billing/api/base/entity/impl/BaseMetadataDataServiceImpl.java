@@ -13,14 +13,14 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.PagingInfo;
+import org.openmrs.module.billing.api.base.criteria.BillingCriteria;
+import org.openmrs.module.billing.api.base.criteria.BillingMatchMode;
+import org.openmrs.module.billing.api.base.criteria.BillingOrder;
+import org.openmrs.module.billing.api.base.criteria.BillingRestrictions;
 import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.billing.api.base.f.Action1;
@@ -37,11 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class BaseMetadataDataServiceImpl<E extends OpenmrsMetadata> extends BaseObjectDataServiceImpl<E, IMetadataAuthorizationPrivileges> implements IMetadataDataService<E> {
 	
 	protected static final int NAME_LENGTH = 255;
-	
+
 	@Override
-	protected Order[] getDefaultSort() {
-		// By default, use the name as the sorting column for metadata
-		return new Order[] { Order.asc("name") };
+	protected BillingOrder[] getDefaultSort() {
+		return new BillingOrder[] { BillingOrder.asc("name") };
 	}
 	
 	@Override
@@ -155,15 +154,12 @@ public abstract class BaseMetadataDataServiceImpl<E extends OpenmrsMetadata> ext
 			PrivilegeUtil.requirePrivileges(Context.getAuthenticatedUser(), privileges.getGetPrivilege());
 		}
 		
-		return executeCriteria(getEntityClass(), pagingInfo, new Action1<Criteria>() {
-			
-			@Override
-			public void apply(Criteria criteria) {
-				if (!includeRetired) {
-					criteria.add(Restrictions.eq("retired", false));
-				}
-			}
-		}, getDefaultSort());
+		return executeCriteria(getEntityClass(), pagingInfo,
+		    criteria -> {
+			    if (!includeRetired) {
+				    criteria.add(BillingRestrictions.eq("retired", false));
+			    }
+		    }, getDefaultSort());
 	}
 	
 	@Override
@@ -187,16 +183,12 @@ public abstract class BaseMetadataDataServiceImpl<E extends OpenmrsMetadata> ext
 			throw new IllegalArgumentException("the name fragment must be less than 256 characters long.");
 		}
 		
-		return executeCriteria(getEntityClass(), pagingInfo, new Action1<Criteria>() {
-			
-			@Override
-			public void apply(Criteria criteria) {
-				criteria.add(Restrictions.ilike("name", nameFragment, MatchMode.START));
-				
-				if (!includeRetired) {
-					criteria.add(Restrictions.eq("retired", false));
-				}
-			}
-		}, getDefaultSort());
+		return executeCriteria(getEntityClass(), pagingInfo,
+		    criteria -> {
+			    criteria.add(BillingRestrictions.ilike("name", nameFragment, BillingMatchMode.START));
+			    if (!includeRetired) {
+				    criteria.add(BillingRestrictions.eq("retired", false));
+			    }
+		    }, getDefaultSort());
 	}
 }

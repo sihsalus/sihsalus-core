@@ -5,6 +5,7 @@ import org.openmrs.ConceptMap;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.annotation.Authorized;
+import org.openmrs.api.OpenmrsService;
 import org.openmrs.util.PrivilegeConstants;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +15,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-public interface ImportService {
+public interface ImportService extends OpenmrsService {
 
 	/**
 	 * @should return all updates ordered descending by ids

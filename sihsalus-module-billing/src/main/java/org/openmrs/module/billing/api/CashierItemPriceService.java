@@ -10,7 +10,9 @@
 package org.openmrs.module.billing.api;
 
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 import java.util.List;
 
@@ -25,6 +27,7 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param id the cashier item price id
 	 * @return the cashier item price or {@code null} if not found
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	CashierItemPrice getCashierItemPrice(Integer id);
 	
 	/**
@@ -33,6 +36,7 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param uuid the cashier item price uuid
 	 * @return the cashier item price or {@code null} if not found
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	CashierItemPrice getCashierItemPriceByUuid(String uuid);
 	
 	/**
@@ -41,6 +45,7 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param includeRetired whether to include retired cashier item prices
 	 * @return a list of all cashier item prices, or an empty list if none found
 	 */
+	@Authorized(PrivilegeConstants.VIEW_METADATA)
 	List<CashierItemPrice> getCashierItemPrices(boolean includeRetired);
 	
 	/**
@@ -50,6 +55,7 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @return the saved cashier item price
 	 * @throws IllegalArgumentException if cashierItemPrice is null
 	 */
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	CashierItemPrice saveCashierItemPrice(CashierItemPrice cashierItemPrice);
 	
 	/**
@@ -59,6 +65,7 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param reason the reason for retiring
 	 * @throws IllegalArgumentException if cashierItemPrice is null or reason is empty
 	 */
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	void retireCashierItemPrice(CashierItemPrice cashierItemPrice, String reason);
 	
 	/**
@@ -68,6 +75,7 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @return the unretired cashier item price
 	 * @throws IllegalArgumentException if cashierItemPrice is null
 	 */
+	@Authorized(PrivilegeConstants.MANAGE_METADATA)
 	CashierItemPrice unretireCashierItemPrice(CashierItemPrice cashierItemPrice);
 	
 	/**
@@ -76,5 +84,6 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param cashierItemPrice the cashier item price to purge
 	 * @throws IllegalArgumentException if cashierItemPrice is null
 	 */
+	@Authorized(PrivilegeConstants.PURGE_METADATA)
 	void purgeCashierItemPrice(CashierItemPrice cashierItemPrice);
 }

@@ -13,9 +13,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ITimesheetService;
@@ -73,62 +70,66 @@ public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet> i
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public Timesheet getCurrentTimesheet(Provider cashier) {
-		Criteria criteria = getRepository().createCriteria(Timesheet.class);
-		criteria.add(Restrictions.and(Restrictions.eq("cashier", cashier), Restrictions.isNull(CLOCK_OUT)));
-		criteria.addOrder(Order.desc(CLOCK_IN));
-		
-		return getRepository().selectSingle(Timesheet.class, criteria);
+		Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
+		return (Timesheet) getRepository()
+		        .createQuery("FROM Timesheet WHERE cashier = :cashier AND clockOut IS NULL ORDER BY clockIn DESC")
+		        .setParameter("cashier", cashier)
+		        .setMaxResults(1)
+		        .uniqueResult();
 	}
-	
+
 	@Override
+	@SuppressWarnings("unchecked")
 	public void closeOpenTimesheets() {
-		Criteria criteria = getRepository().createCriteria(Timesheet.class);
-		criteria.add(Restrictions.isNull("clockOut"));
-		criteria.addOrder(Order.desc("clockIn"));
-		
-		List<Timesheet> timesheets = getRepository().select(Timesheet.class, criteria);
-		
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_TIMESHEETS);
+		List<Timesheet> timesheets = (List<Timesheet>) getRepository()
+		        .createQuery("FROM Timesheet WHERE clockOut IS NULL ORDER BY clockIn DESC")
+		        .list();
+
 		Date clockOutDate = new Date();
 		int counter = 0;
 		for (Timesheet timesheet : timesheets) {
 			timesheet.setClockOut(clockOutDate);
-			
+
 			if (counter++ > BATCH_SIZE) {
-				//ensure changes are persisted to DB before reclaiming memory
 				Context.flushSession();
 				Context.clearSession();
 				counter = 0;
 			}
 		}
 	}
-	
+
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<Timesheet> getTimesheetsByDate(Provider cashier, Date date) {
+		Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
+		if (date == null) {
+			throw new IllegalArgumentException("The date must be defined.");
+		}
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		Date startDate = calendar.getTime();
-		
+
 		calendar.set(Calendar.HOUR_OF_DAY, END_DATE_HOUR_OF_DAY);
 		calendar.set(Calendar.MINUTE, END_DATE_MINUTE);
 		calendar.set(Calendar.SECOND, END_DATE_SECOND);
 		Date endDate = calendar.getTime();
-		
-		Criteria criteria = getRepository().createCriteria(Timesheet.class);
-		criteria.add(Restrictions.and(Restrictions.eq("cashier", cashier), Restrictions.or(
-		    // Start or end on date
-		    Restrictions.or(Restrictions.between(CLOCK_IN, startDate, endDate),
-		        Restrictions.between(CLOCK_OUT, startDate, endDate)),
-		    Restrictions.or(
-		        // Start on or before date and have not ended
-		        Restrictions.and(Restrictions.le(CLOCK_IN, endDate), Restrictions.isNull(CLOCK_OUT)),
-		        // Start before and end after date
-		        Restrictions.and(Restrictions.le(CLOCK_IN, startDate), Restrictions.ge(CLOCK_OUT, endDate))))));
-		criteria.addOrder(Order.desc(CLOCK_IN));
-		
-		return getRepository().select(Timesheet.class, criteria);
+
+		return (List<Timesheet>) getRepository()
+		        .createQuery("FROM Timesheet t WHERE t.cashier = :cashier AND ("
+		                + "(t.clockIn BETWEEN :startDate AND :endDate) "
+		                + "OR (t.clockOut BETWEEN :startDate AND :endDate) "
+		                + "OR (t.clockIn <= :endDate AND t.clockOut IS NULL) "
+		                + "OR (t.clockIn <= :startDate AND t.clockOut >= :endDate)"
+		                + ") ORDER BY t.clockIn DESC")
+		        .setParameter("cashier", cashier)
+		        .setParameter("startDate", startDate)
+		        .setParameter("endDate", endDate)
+		        .list();
 	}
 }

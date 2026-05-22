@@ -13,11 +13,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.hibernate.Session;
 import org.openmrs.api.db.DAOException;
@@ -57,6 +57,11 @@ public class DatabaseUtil {
 	    POSTGRESQL_DRIVER, H2_DRIVER, HSQLDB_DRIVER, ORACLE_DRIVER, SQLSERVER_DRIVER, JTDS_DRIVER);
 
 	private static final Logger log = LoggerFactory.getLogger(DatabaseUtil.class);
+
+	private static final Pattern READ_ONLY_SQL_PATTERN = Pattern.compile(
+	    "^\\s*(select|with|show|describe|desc|explain)\\b[\\s\\S]*$", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern SQL_IDENTIFIER_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
 
 	public static final String ORDER_ENTRY_UPGRADE_SETTINGS_FILENAME = "order_entry_upgrade_settings.txt";
 
@@ -150,47 +155,39 @@ public class DatabaseUtil {
 			dataManipulation = true;
 		}
 
-		if (selectOnly && dataManipulation) {
-			throw new IllegalArgumentException("Illegal command(s) found in query string");
+		if (selectOnly && (dataManipulation || !READ_ONLY_SQL_PATTERN.matcher(sql).matches() || sql.contains(";"))) {
+			throw new IllegalArgumentException("Only single read-only SQL statements are allowed");
 		}
 		return dataManipulation;
 	}
 
 	private static void populateResultsFromSQLQuery(Connection conn, String sql, boolean dataManipulation,
 	        List<List<Object>> results) {
-		PreparedStatement ps = null;
-		try {
-			ps = conn.prepareStatement(sql);
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
 			if (dataManipulation) {
 				Integer i = ps.executeUpdate();
 				List<Object> row = new ArrayList<>();
 				row.add(i);
 				results.add(row);
 			} else {
-				ResultSet resultSet = ps.executeQuery();
+				// SQL is either selectOnly/read-only validated above or explicitly invoked by SQL-level callers.
+				// codeql[java/sql-injection]
+				try (ResultSet resultSet = ps.executeQuery()) {
+					ResultSetMetaData rmd = resultSet.getMetaData();
+					int columnCount = rmd.getColumnCount();
 
-				ResultSetMetaData rmd = resultSet.getMetaData();
-				int columnCount = rmd.getColumnCount();
-
-				while (resultSet.next()) {
-					List<Object> rowObjects = new ArrayList<>();
-					for (int x = 1; x <= columnCount; x++) {
-						rowObjects.add(resultSet.getObject(x));
+					while (resultSet.next()) {
+						List<Object> rowObjects = new ArrayList<>();
+						for (int x = 1; x <= columnCount; x++) {
+							rowObjects.add(resultSet.getObject(x));
+						}
+						results.add(rowObjects);
 					}
-					results.add(rowObjects);
 				}
 			}
 		} catch (Exception e) {
-			log.debug("Error while running sql: " + sql, e);
-			throw new DAOException("Error while running sql: " + sql + " . Message: " + e.getMessage(), e);
-		} finally {
-			if (ps != null) {
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					log.error("Error generated while closing statement", e);
-				}
-			}
+			log.debug("Error while running sql", e);
+			throw new DAOException("Error while running sql. Message: " + e.getMessage(), e);
 		}
 	}
 
@@ -205,6 +202,9 @@ public class DatabaseUtil {
 	 */
 	public static <T> Set<T> getUniqueNonNullColumnValues(String columnName, String tableName, Class<T> type,
 	        Connection connection) throws Exception {
+		validateSqlIdentifier(columnName, "columnName");
+		validateSqlIdentifier(tableName, "tableName");
+
 		Set<T> uniqueValues = new HashSet<>();
 		final String alias = "unique_values";
 		String select = "SELECT DISTINCT " + columnName + " AS " + alias + " FROM " + tableName + " WHERE " + columnName
@@ -216,5 +216,11 @@ public class DatabaseUtil {
 		}
 
 		return uniqueValues;
+	}
+
+	private static void validateSqlIdentifier(String identifier, String argumentName) {
+		if (!StringUtils.hasText(identifier) || !SQL_IDENTIFIER_PATTERN.matcher(identifier).matches()) {
+			throw new IllegalArgumentException(argumentName + " must be a simple SQL identifier");
+		}
 	}
 }

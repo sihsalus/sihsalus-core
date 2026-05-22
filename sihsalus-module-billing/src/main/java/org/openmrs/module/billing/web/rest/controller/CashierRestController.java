@@ -12,9 +12,11 @@ package org.openmrs.module.billing.web.rest.controller;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.model.BillableService;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.web.rest.restmapper.BillableServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +31,10 @@ public class CashierRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/billable-service")
 	@ResponseBody
 	public Object get(@RequestBody BillableServiceMapper request) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
+		if (request == null) {
+			throw new ConversionException("Request body is required");
+		}
 		BillableService billableService = request.billableServiceMapper(request);
 		BillableServiceService service = Context.getService(BillableServiceService.class);
 		

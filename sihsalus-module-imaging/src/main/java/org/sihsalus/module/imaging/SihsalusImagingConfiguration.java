@@ -3,6 +3,7 @@ package org.sihsalus.module.imaging;
 import java.util.List;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.module.imaging.ImagingProperties;
 import org.openmrs.module.imaging.api.DicomStudyService;
 import org.openmrs.module.imaging.api.OrthancConfigurationService;
 import org.openmrs.module.imaging.api.RequestProcedureService;
@@ -36,6 +37,11 @@ public class SihsalusImagingConfiguration {
     @Bean
     OrthancHttpClient orthancHttpClient() {
         return new OrthancHttpClient();
+    }
+
+    @Bean("imagingProperties")
+    ImagingProperties imagingProperties() {
+        return new ImagingProperties();
     }
 
     @Bean(name = "imaging.OrthancConfigurationDao")

@@ -25,9 +25,11 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.VisitService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.queue.QueueModuleConstants;
 import org.openmrs.module.queue.model.Queue;
 import org.openmrs.module.queue.model.QueueRoom;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -310,6 +312,18 @@ public class QueueServicesWrapper {
 	 * @return the value of the global property with the given name
 	 */
 	public String getGlobalProperty(String property) {
-		return administrationService.getGlobalProperty(property);
+		boolean addedProxyPrivilege = Context.isAuthenticated()
+		        && !Context.hasPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		if (addedProxyPrivilege) {
+			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		}
+		try {
+			return administrationService.getGlobalProperty(property);
+		}
+		finally {
+			if (addedProxyPrivilege) {
+				Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+			}
+		}
 	}
 }

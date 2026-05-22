@@ -9,6 +9,8 @@
  */
 package org.openmrs;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -1026,9 +1028,7 @@ public class Obs extends BaseFormRecordableOpenmrsData {
 					if (deproxiedConcept instanceof ConceptNumeric) {
 						ConceptNumeric cn = (ConceptNumeric) deproxiedConcept;
 						if (!cn.getAllowDecimal()) {
-							double d = getValueNumeric();
-							int i = (int) d;
-							return Integer.toString(i);
+							return BigDecimal.valueOf(getValueNumeric()).setScale(0, RoundingMode.DOWN).toPlainString();
 						} else {
 							df.format(getValueNumeric());
 						}

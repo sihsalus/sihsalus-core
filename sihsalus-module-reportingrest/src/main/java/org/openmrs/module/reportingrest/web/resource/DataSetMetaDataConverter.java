@@ -1,6 +1,8 @@
 package org.openmrs.module.reportingrest.web.resource;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.dataset.DataSetColumn;
@@ -10,7 +12,6 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.Converter;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.Map;
 
 @Handler(supports = DataSetMetaData.class, order = 0)
 public class DataSetMetaDataConverter implements Converter<DataSetMetaData> {
+
+	private static final Log log = LogFactory.getLog(DataSetMetaDataConverter.class);
 
 	@Override
 	public DataSetMetaData getByUniqueId(String string) {
@@ -51,12 +54,8 @@ public class DataSetMetaDataConverter implements Converter<DataSetMetaData> {
 	public Object getProperty(DataSetMetaData metadata, String propertyName) throws ConversionException {
 		try {
 			return PropertyUtils.getProperty(metadata, propertyName);
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+		} catch (ReflectiveOperationException e) {
+			log.warn("Unable to read DataSetMetaData property " + propertyName, e);
 		}
 
 		// fail

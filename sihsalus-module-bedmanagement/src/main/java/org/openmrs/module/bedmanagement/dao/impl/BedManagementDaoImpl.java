@@ -14,7 +14,7 @@
 package org.openmrs.module.bedmanagement.dao.impl;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.FlushMode;
 import org.hibernate.query.Query;
 import org.hibernate.Session;
@@ -162,7 +162,7 @@ public class BedManagementDaoImpl implements BedManagementDao {
 	@Override
 	public List<AdmissionLocation> getAdmissionLocations(List<Location> locations) {
 		String sql = "select l from Location l " + "where l in :locations and "
-		        + "(l.parentLocation not in :locations or l.parentLocation is null) and " + "l.retired=0";
+		        + "(l.parentLocation not in :locations or l.parentLocation is null) and " + "l.retired = false";
 		Query query = sessionFactory.getCurrentSession().createQuery(sql);
 		query.setParameterList("locations", locations);
 		List<Location> locationList = query.list();

@@ -27,6 +27,7 @@ import org.openmrs.module.reporting.report.definition.service.ReportDefinitionSe
 import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.module.reportingrest.web.ReportFile;
+import org.openmrs.module.reportingrest.web.ReportingRestPrivileges;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -62,6 +63,8 @@ public class ReportingRestController extends MainResourceController {
 
     public static final String REPORTING_REST_NAMESPACE = "/reportingrest";
 
+    private static final int MAX_REPORT_DOWNLOADS = 50;
+
     /**
      * @see org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController#getNamespace()
      */
@@ -72,9 +75,16 @@ public class ReportingRestController extends MainResourceController {
 
     @RequestMapping(value = "/saveReport", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> saveReport(@RequestParam String reportRequestUuid) {
+    public ResponseEntity<String> saveReport(@RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
+        ReportingRestPrivileges.requireAddReports();
+        if (StringUtils.isBlank(reportRequestUuid)) {
+            return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
+        }
         ReportService reportService = getReportService();
         ReportRequest reportRequest = reportService.getReportRequestByUuid(reportRequestUuid);
+        if (reportRequest == null) {
+            return new ResponseEntity<String>("Report request not found", HttpStatus.NOT_FOUND);
+        }
 
         if (!ReportRequest.Status.COMPLETED.equals(reportRequest.getStatus())) {
             return new ResponseEntity<String>("Cannot save report because status is different than completed",
@@ -89,20 +99,49 @@ public class ReportingRestController extends MainResourceController {
 
     @RequestMapping(value = "/downloadReport", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public ReportFile downloadReport(@RequestParam String reportRequestUuid) {
-        return processAndDownloadReport(reportRequestUuid, getReportService());
+    public ResponseEntity<?> downloadReport(@RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
+        ReportingRestPrivileges.requireViewReports();
+        if (StringUtils.isBlank(reportRequestUuid)) {
+            return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
+        }
+        try {
+            return new ResponseEntity<ReportFile>(processAndDownloadReport(reportRequestUuid, getReportService()), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @RequestMapping(value = "/downloadMultipleReports", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public List<ReportFile> downloadMultipleReports(@RequestParam String reportRequestUuids) {
+    public ResponseEntity<?> downloadMultipleReports(@RequestParam(value = "reportRequestUuids", required = false) String reportRequestUuids) {
+        ReportingRestPrivileges.requireViewReports();
+        if (StringUtils.isBlank(reportRequestUuids)) {
+            return new ResponseEntity<String>("reportRequestUuids is required", HttpStatus.BAD_REQUEST);
+        }
+        String[] uuids = reportRequestUuids.split(",");
+        if (uuids.length > MAX_REPORT_DOWNLOADS) {
+            return new ResponseEntity<String>("Too many report requests. Maximum allowed: " + MAX_REPORT_DOWNLOADS,
+                HttpStatus.BAD_REQUEST);
+        }
         List<ReportFile> fileDownloadList = new ArrayList<ReportFile>();
         ReportService reportService = getReportService();
-        for (String reportRequestUuid : reportRequestUuids.split(",")) {
-            fileDownloadList.add(processAndDownloadReport(reportRequestUuid, reportService));
+        try {
+            for (String reportRequestUuid : uuids) {
+                String trimmedUuid = StringUtils.trimToNull(reportRequestUuid);
+                if (trimmedUuid == null) {
+                    return new ResponseEntity<String>("reportRequestUuids contains an empty UUID", HttpStatus.BAD_REQUEST);
+                }
+                fileDownloadList.add(processAndDownloadReport(trimmedUuid, reportService));
+            }
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        return fileDownloadList;
+        return new ResponseEntity<List<ReportFile>>(fileDownloadList, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/reportDataSet/{reportDefinitionUuid}/{dataSetKey}", method = RequestMethod.GET)
@@ -110,8 +149,9 @@ public class ReportingRestController extends MainResourceController {
     @ResponseBody
     public SimpleObject evaluateReportDataSet(HttpServletRequest request,
                                               HttpServletResponse response,
-                                              @PathVariable String reportDefinitionUuid,
-                                              @PathVariable String dataSetKey) {
+                                              @PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
+                                              @PathVariable("dataSetKey") String dataSetKey) {
+        ReportingRestPrivileges.requireViewReports();
         ReportDefinition reportDefinition = DefinitionContext.getReportDefinitionService().getDefinitionByUuid(reportDefinitionUuid);
         if (reportDefinition == null) {
             throw new ObjectNotFoundException("Report definition not found: " +  reportDefinitionUuid);
@@ -150,9 +190,10 @@ public class ReportingRestController extends MainResourceController {
 
     @RequestMapping(value = "/runReport/{reportDefinitionUuid}", method = RequestMethod.POST)
     @ResponseBody
-    public SimpleObject runReportAsJson(@PathVariable String reportDefinitionUuid,
+    public SimpleObject runReportAsJson(@PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
                                         HttpServletRequest request,
                                         HttpServletResponse response) throws Exception {
+        ReportingRestPrivileges.requireViewReports();
         ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
         EvaluationContext evalContext = buildEvaluationContext(definition, request);
         ReportData reportData = evaluateReport(definition, evalContext);
@@ -161,10 +202,11 @@ public class ReportingRestController extends MainResourceController {
     }
 
     @RequestMapping(value = "/runReport/{reportDefinitionUuid}/{reportDesignUuid}", method = RequestMethod.POST)
-    public void runReportWithDesign(@PathVariable String reportDefinitionUuid,
-                                    @PathVariable String reportDesignUuid,
+    public void runReportWithDesign(@PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
+                                    @PathVariable("reportDesignUuid") String reportDesignUuid,
                                     HttpServletRequest request,
                                     HttpServletResponse response) throws Exception {
+        ReportingRestPrivileges.requireViewReports();
         ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
         EvaluationContext evalContext = buildEvaluationContext(definition, request);
 
@@ -188,7 +230,7 @@ public class ReportingRestController extends MainResourceController {
 
         response.setContentType(renderingMode.getRenderer().getRenderedContentType(reportRequest));
         response.setHeader("Content-Disposition",
-                "attachment; filename=\"" + renderingMode.getRenderer().getFilename(reportRequest) + "\"");
+                "attachment; filename=\"" + sanitizeHeaderFilename(renderingMode.getRenderer().getFilename(reportRequest)) + "\"");
 
         renderingMode.getRenderer().render(reportData, reportDesignUuid, response.getOutputStream());
     }
@@ -227,9 +269,12 @@ public class ReportingRestController extends MainResourceController {
         if (reportRequest == null) {
             throw new IllegalArgumentException("Report request not found for UUID: " + reportRequestUuid);
         }
+        if (!ReportRequest.Status.COMPLETED.equals(reportRequest.getStatus())) {
+            throw new IllegalStateException("Report request is not completed: " + reportRequestUuid);
+        }
 
         RenderingMode renderingMode = reportRequest.getRenderingMode();
-        String fileName = renderingMode.getRenderer().getFilename(reportRequest).replace(" ", "_");
+        String fileName = sanitizeHeaderFilename(renderingMode.getRenderer().getFilename(reportRequest).replace(" ", "_"));
         String contentType = renderingMode.getRenderer().getRenderedContentType(reportRequest);
         byte[] fileContent = reportService.loadRenderedOutput(reportRequest);
 
@@ -238,6 +283,13 @@ public class ReportingRestController extends MainResourceController {
         } else {
             return new ReportFile(fileName, contentType, fileContent);
         }
+    }
+
+    private String sanitizeHeaderFilename(String fileName) {
+        if (StringUtils.isBlank(fileName)) {
+            return "report";
+        }
+        return fileName.replaceAll("[\\r\\n\"\\\\/]", "_");
     }
 
     private ReportService getReportService() {

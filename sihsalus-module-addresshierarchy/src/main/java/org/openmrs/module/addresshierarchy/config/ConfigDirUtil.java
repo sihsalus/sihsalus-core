@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -191,9 +192,17 @@ public class ConfigDirUtil {
 	 * @return The {@link File} instance.
 	 */
 	protected static File getFile(String dirPath, String fileName) {
-		StringBuilder path = new StringBuilder(dirPath);
-		path.append(File.separator).append(fileName);
-		return new File(path.toString());
+		if (StringUtils.isBlank(fileName)) {
+			throw new IllegalArgumentException("Configuration file name must not be blank");
+		}
+
+		Path directory = Paths.get(dirPath).toAbsolutePath().normalize();
+		Path file = directory.resolve(fileName).normalize();
+		if (!file.startsWith(directory)) {
+			throw new IllegalArgumentException("Configuration file path is outside the expected directory: " + fileName);
+		}
+
+		return file.toFile();
 	}
 
 	/**

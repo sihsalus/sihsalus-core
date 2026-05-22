@@ -10,12 +10,14 @@
 package org.openmrs.module.billing.api.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Order;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.db.BillLineItemDAO;
@@ -58,9 +60,16 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 	@Override
 	@Transactional
 	public void voidBillLineItem(BillLineItem lineItem, String voidReason) {
+		if (lineItem == null) {
+			throw new NullPointerException("The bill line item must be defined.");
+		}
 		if (StringUtils.isBlank(voidReason)) {
 			throw new IllegalArgumentException("voidReason cannot be null or empty");
 		}
+		lineItem.setVoided(true);
+		lineItem.setVoidedBy(Context.getAuthenticatedUser());
+		lineItem.setDateVoided(new Date());
+		lineItem.setVoidReason(voidReason);
 		billLineItemDAO.saveBillLineItem(lineItem);
 	}
 }

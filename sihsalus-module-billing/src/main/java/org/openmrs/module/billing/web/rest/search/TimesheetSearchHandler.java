@@ -15,12 +15,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
-import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.ProviderUtil;
 import org.openmrs.module.billing.api.model.Timesheet;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.billing.web.base.resource.AlreadyPagedWithLength;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -28,6 +29,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchConfig;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
+import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,17 +44,24 @@ public class TimesheetSearchHandler implements SearchHandler {
 	
 	@Override
 	public PageableResult search(RequestContext context) {
+		Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
 		ITimesheetService service = Context.getService(ITimesheetService.class);
 		Provider provider = ProviderUtil.getCurrentProvider();
 		Date date;
 		if (provider == null) {
-			return null;
+			return new AlreadyPagedWithLength<>(context, Collections.emptyList(), false, 0);
+		}
+		String dateParameter = context.getParameter("date");
+		if (StringUtils.isBlank(dateParameter)) {
+			throw new InvalidSearchException("'date' query parameter is required");
 		}
 		try {
-			date = new SimpleDateFormat("MM/dd/yyyy").parse(context.getParameter("date"));
+			SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+			dateFormat.setLenient(false);
+			date = dateFormat.parse(dateParameter);
 		}
 		catch (ParseException e) {
-			throw new APIException("Invalid date parameter: " + context.getParameter("date"));
+			throw new InvalidSearchException("Invalid date parameter: " + dateParameter, e);
 		}
 		List<Timesheet> timesheets = service.getTimesheetsByDate(provider, date);
 		return new AlreadyPagedWithLength<>(context, timesheets, false, timesheets.size());

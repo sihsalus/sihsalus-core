@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.CodedOrFreeText;
 import org.openmrs.Diagnosis;
 import org.openmrs.DiagnosisAttribute;
@@ -59,7 +60,17 @@ public class DiagnosisServiceImpl extends BaseOpenmrsService implements Diagnosi
 	 */
 	@Override
 	public Diagnosis voidDiagnosis(Diagnosis diagnosis, String voidReason) {
-		return Context.getDiagnosisService().save(diagnosis);
+		if (diagnosis == null) {
+			throw new APIException("Diagnosis cannot be null");
+		}
+		if (StringUtils.isBlank(voidReason)) {
+			throw new APIException("voidReason cannot be null or empty");
+		}
+		diagnosis.setVoided(true);
+		diagnosis.setVoidedBy(Context.getAuthenticatedUser());
+		diagnosis.setDateVoided(new Date());
+		diagnosis.setVoidReason(voidReason);
+		return save(diagnosis);
 	}
 
 	/**
@@ -157,7 +168,14 @@ public class DiagnosisServiceImpl extends BaseOpenmrsService implements Diagnosi
 	 */
 	@Override
 	public Diagnosis unvoidDiagnosis(Diagnosis diagnosis) {
-		return Context.getDiagnosisService().save(diagnosis);
+		if (diagnosis == null) {
+			throw new APIException("Diagnosis cannot be null");
+		}
+		diagnosis.setVoided(false);
+		diagnosis.setVoidedBy(null);
+		diagnosis.setDateVoided(null);
+		diagnosis.setVoidReason(null);
+		return save(diagnosis);
 	}
 
 	/**
@@ -238,7 +256,17 @@ public class DiagnosisServiceImpl extends BaseOpenmrsService implements Diagnosi
 	@Override
 	public DiagnosisAttributeType retireDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType, String reason)
 	        throws APIException {
-		return Context.getDiagnosisService().saveDiagnosisAttributeType(diagnosisAttributeType);
+		if (diagnosisAttributeType == null) {
+			throw new APIException("Diagnosis attribute type cannot be null");
+		}
+		if (StringUtils.isBlank(reason)) {
+			throw new APIException("Retire reason cannot be null or empty");
+		}
+		diagnosisAttributeType.setRetired(true);
+		diagnosisAttributeType.setRetiredBy(Context.getAuthenticatedUser());
+		diagnosisAttributeType.setDateRetired(new Date());
+		diagnosisAttributeType.setRetireReason(reason);
+		return saveDiagnosisAttributeType(diagnosisAttributeType);
 	}
 
 	/**
@@ -247,7 +275,14 @@ public class DiagnosisServiceImpl extends BaseOpenmrsService implements Diagnosi
 	@Override
 	public DiagnosisAttributeType unretireDiagnosisAttributeType(DiagnosisAttributeType diagnosisAttributeType)
 	        throws APIException {
-		return Context.getDiagnosisService().saveDiagnosisAttributeType(diagnosisAttributeType);
+		if (diagnosisAttributeType == null) {
+			throw new APIException("Diagnosis attribute type cannot be null");
+		}
+		diagnosisAttributeType.setRetired(false);
+		diagnosisAttributeType.setRetiredBy(null);
+		diagnosisAttributeType.setDateRetired(null);
+		diagnosisAttributeType.setRetireReason(null);
+		return saveDiagnosisAttributeType(diagnosisAttributeType);
 	}
 
 	/**
@@ -279,7 +314,7 @@ public class DiagnosisServiceImpl extends BaseOpenmrsService implements Diagnosi
 		if (DiagnosisAttribute.class.equals(type)) {
 			return (T) getDiagnosisAttributeByUuid(uuid);
 		}
-		throw new APIException("Unsupported type for getRefByUuid: " + type != null ? type.getName() : "null");
+		throw new APIException("Unsupported type for getRefByUuid: " + (type != null ? type.getName() : "null"));
 	}
 
 	@Override

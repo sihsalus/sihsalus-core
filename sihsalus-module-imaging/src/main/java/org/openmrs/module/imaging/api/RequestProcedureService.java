@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.imaging.api;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.Patient;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.imaging.OrthancConfiguration;
@@ -24,27 +25,40 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
+import static org.openmrs.module.imaging.ImagingConstants.PRIVILEGE_EDIT_WORKLIST;
+import static org.openmrs.module.imaging.ImagingConstants.PRIVILEGE_VIEW_IMAGE_DATA;
+
 @Service
 @Transactional
 public interface RequestProcedureService extends OpenmrsService {
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	List<RequestProcedure> getAllRequestProcedures();
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	List<RequestProcedure> getRequestProceduresByStatus(String status);
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	List<RequestProcedure> getAllByStudyInstanceUID(String studyInstanceUID);
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	List<RequestProcedure> getRequestProcedureByPatient(Patient pt);
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	RequestProcedure getRequestProcedure(int requestProcedureId);
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	RequestProcedure getRequestProcedureByAccessionNUmber(String accessionNumber);
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	List<RequestProcedure> getRequestProcedureByConfig(OrthancConfiguration orthancConfiguration);
 	
+	@Authorized(PRIVILEGE_EDIT_WORKLIST)
 	void deleteRequestProcedure(RequestProcedure requestProcedure) throws IOException;
 	
+	@Authorized(PRIVILEGE_EDIT_WORKLIST)
 	void newRequest(RequestProcedure requestProcedure) throws IOException;
 	
+	@Authorized(PRIVILEGE_EDIT_WORKLIST)
 	void updateRequestStatus(RequestProcedure requestProcedure);
 }

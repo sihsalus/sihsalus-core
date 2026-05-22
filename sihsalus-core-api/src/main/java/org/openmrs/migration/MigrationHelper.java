@@ -11,6 +11,7 @@ package org.openmrs.migration;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,7 +22,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -66,6 +66,8 @@ import static org.openmrs.util.XmlUtils.createDocumentBuilder;
  */
 @Deprecated
 public class MigrationHelper {
+
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
 	private MigrationHelper() {
 	}
@@ -126,7 +128,6 @@ public class MigrationHelper {
 	@Deprecated
 	public static int importUsers(Document document) throws ParseException {
 		int ret = 0;
-		Random rand = new Random();
 		UserService us = Context.getUserService();
 
 		List<Node> toAdd = new ArrayList<>();
@@ -151,10 +152,10 @@ public class MigrationHelper {
 			// Generate a temporary password: 8-12 random characters
 			String pass;
 			{
-				int length = rand.nextInt(4) + 8;
+				int length = SECURE_RANDOM.nextInt(4) + 8;
 				char[] password = new char[length];
 				for (int x = 0; x < length; x++) {
-					int randDecimalAsciiVal = rand.nextInt(93) + 33;
+					int randDecimalAsciiVal = SECURE_RANDOM.nextInt(93) + 33;
 					password[x] = (char) randDecimalAsciiVal;
 				}
 				pass = new String(password);
@@ -213,7 +214,6 @@ public class MigrationHelper {
 		UserService us = Context.getUserService();
 		PersonService personService = Context.getPersonService();
 		List<Relationship> relsToAdd = new ArrayList<>();
-		Random rand = new Random();
 		for (String s : relationships) {
 			if (s.contains(":")) {
 				s = s.substring(s.indexOf(":") + 1);
@@ -224,7 +224,7 @@ public class MigrationHelper {
 			}
 			String userLastName = ss[0];
 			String userFirstName = ss[1];
-			String username = (userFirstName + userLastName).replaceAll(" ", "");
+			String username = (userFirstName + userLastName).replace(" ", "");
 			String relationshipType = ss[2];
 			String identifierType = ss[3];
 			String identifier = ss[4];
@@ -257,10 +257,10 @@ public class MigrationHelper {
 				// Generate a temporary password: 8-12 random characters
 				String pass;
 				{
-					int length = rand.nextInt(4) + 8;
+					int length = SECURE_RANDOM.nextInt(4) + 8;
 					char[] password = new char[length];
 					for (int x = 0; x < length; x++) {
-						int randDecimalAsciiVal = rand.nextInt(93) + 33;
+						int randDecimalAsciiVal = SECURE_RANDOM.nextInt(93) + 33;
 						password[x] = (char) randDecimalAsciiVal;
 					}
 					pass = new String(password);

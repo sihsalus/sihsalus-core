@@ -21,7 +21,9 @@ import org.openmrs.Privilege;
 import org.openmrs.Role;
 import org.openmrs.api.APIException;
 import org.openmrs.api.UserService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.web.WebConstants;
+import org.openmrs.util.PrivilegeConstants;
 import org.openmrs.util.RoleConstants;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Errors;
@@ -40,6 +42,7 @@ public abstract class RoleCreationControllerBase {
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public void render(ModelMap model, HttpServletRequest request) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_ROLES);
 		List<Role> roles = getUserService().getAllRoles();
 		model.addAttribute("roles", roles);
 		HeaderController.render(model, request);
@@ -47,6 +50,7 @@ public abstract class RoleCreationControllerBase {
 	
 	@RequestMapping(method = RequestMethod.POST)
 	public void submit(HttpServletRequest request, RoleCreationViewModel viewModel, Errors errors, ModelMap model) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_ROLES);
 		HttpSession session = request.getSession();
 		String action = request.getParameter("action");
 		

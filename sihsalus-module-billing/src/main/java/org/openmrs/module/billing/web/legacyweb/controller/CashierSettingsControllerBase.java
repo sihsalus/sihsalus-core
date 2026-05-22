@@ -9,10 +9,12 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.web.base.controller.HeaderController;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.base.web.WebConstants;
 import org.openmrs.module.billing.api.model.CashierSettings;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,12 +29,14 @@ public abstract class CashierSettingsControllerBase {
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public void render(ModelMap modelMap, HttpServletRequest request) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
 		modelMap.addAttribute("cashierSettings", ModuleSettings.loadSettings());
 		HeaderController.render(modelMap, request);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
 	public void submit(HttpServletRequest request, CashierSettings cashierSettings, ModelMap modelMap) {
+		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
 		ModuleSettings.saveSettings(cashierSettings);
 		
 		HttpSession session = request.getSession();

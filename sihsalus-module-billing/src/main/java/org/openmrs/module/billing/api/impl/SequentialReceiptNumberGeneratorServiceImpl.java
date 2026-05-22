@@ -11,8 +11,6 @@ package org.openmrs.module.billing.api.impl;
 
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseObjectDataServiceImpl;
 import org.openmrs.module.billing.api.model.GroupSequence;
@@ -82,11 +80,10 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 		if (group == null) {
 			throw new IllegalArgumentException("The group must be defined.");
 		}
-		
-		Criteria criteria = getRepository().createCriteria(GroupSequence.class);
-		criteria.add(Restrictions.eq("group", group));
-		
-		return getRepository().selectSingle(GroupSequence.class, criteria);
+		return (GroupSequence) getRepository()
+		        .createQuery("FROM GroupSequence gs WHERE gs.group = :group")
+		        .setParameter("group", group)
+		        .uniqueResult();
 	}
 	
 	@Override

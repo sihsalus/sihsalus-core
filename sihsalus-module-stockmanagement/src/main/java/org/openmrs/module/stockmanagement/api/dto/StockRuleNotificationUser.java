@@ -152,7 +152,7 @@ public class StockRuleNotificationUser {
 	public Integer getMailRoleLocationHashCode() {
 		if (mailRoleLocationHashCode == null) {
 			int result = locationId != null ? locationId.hashCode() : 0;
-			result = 31 * result + (alertRole != null ? alertRole.hashCode() : 0);
+			result = 31 * result + (mailRole != null ? mailRole.hashCode() : 0);
 			mailRoleLocationHashCode = result;
 		}
 		return mailRoleLocationHashCode;

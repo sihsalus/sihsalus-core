@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -75,13 +76,15 @@ public class FhirR4ReadController {
                         OperationOutcome.IssueType.NOTFOUND);
             }
             return fhirResponse(200, fhirContext.newJsonParser().encodeResourceToString(resource));
+        } catch (BaseServerResponseException exception) {
+            return operationOutcome(exception);
         } catch (APIAuthenticationException exception) {
             return operationOutcome(
                     Context.isAuthenticated() ? 403 : 401,
                     exception.getMessage(),
                     OperationOutcome.IssueType.FORBIDDEN);
-        } catch (BaseServerResponseException exception) {
-            return operationOutcome(exception);
+        } catch (ContextAuthenticationException exception) {
+            return operationOutcome(401, exception.getMessage(), OperationOutcome.IssueType.FORBIDDEN);
         }
     }
 

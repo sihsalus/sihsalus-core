@@ -467,6 +467,7 @@ public interface FlagService extends OpenmrsService {
 	 * @return the list of Flags for the Patient
 	 */
 	@Transactional(readOnly = true)
+	@Authorized( { PatientFlagsConstants.PRIV_VIEW_PATIENT_FLAGS })
 	public List<Flag> getFlagsForPatient(Patient patient);
 	
 	/**
@@ -478,6 +479,7 @@ public interface FlagService extends OpenmrsService {
 	 * @return the list of Flags the Patient triggers
 	 */
 	@Transactional(readOnly = true)
+	@Authorized( { PatientFlagsConstants.PRIV_VIEW_PATIENT_FLAGS })
 	public List<Flag> getFlagsForPatient(Patient patient, Filter filter);
 	
 	/**
@@ -490,6 +492,7 @@ public interface FlagService extends OpenmrsService {
 	 * @return the list of Flags the Patient triggers
 	 */
 	@Transactional(readOnly = true)
+	@Authorized( { PatientFlagsConstants.PRIV_VIEW_PATIENT_FLAGS })
 	public List<Flag> getFlagsForPatient(Patient patient, Set<Role> roles, DisplayPoint displayPoint);
 	
 	/**
@@ -505,6 +508,7 @@ public interface FlagService extends OpenmrsService {
 	 * @return the list of Flags the Patient triggers
 	 */
 	@Transactional(readOnly = true)
+	@Authorized( { PatientFlagsConstants.PRIV_VIEW_PATIENT_FLAGS })
 	public List<Flag> getFlagsForPatient(Patient patient, Set<Role> roles, String displayPointName);
 	
 	/**
@@ -513,6 +517,7 @@ public interface FlagService extends OpenmrsService {
 	 * @param patientFlag the patient flag to save
 	 * @throws DAOException
 	 */
+	@Authorized(PatientFlagsConstants.PRIV_MANAGE_PATIENT_FLAGS)
 	public void savePatientFlag(PatientFlag patientFlag) throws DAOException;
 	
 	/**
@@ -521,6 +526,7 @@ public interface FlagService extends OpenmrsService {
 	 * @param patient the patient whose non voided flags to delete
 	 * @throws DAOException
 	 */
+	@Authorized(PatientFlagsConstants.PRIV_MANAGE_PATIENT_FLAGS)
 	public void deletePatientFlagsForPatient(Patient patient) throws DAOException;
 	
 	/**
@@ -529,6 +535,7 @@ public interface FlagService extends OpenmrsService {
 	 * @param flag the flag whose patient flags to delete
 	 * @throws DAOException
 	 */
+	@Authorized(PatientFlagsConstants.PRIV_MANAGE_PATIENT_FLAGS)
 	public void deletePatientFlagsForFlag(Flag flag) throws DAOException;
 	
 	/**
@@ -538,6 +545,7 @@ public interface FlagService extends OpenmrsService {
 	 * @param flag the flag to delete for the given patient
 	 * @throws DAOException
 	 */
+	@Authorized(PatientFlagsConstants.PRIV_MANAGE_PATIENT_FLAGS)
 	public void deletePatientFlagForPatient(Patient patient, Flag flag) throws DAOException;
 	
 	/**
@@ -549,6 +557,7 @@ public interface FlagService extends OpenmrsService {
 	 *
 	 * @return object representing the result of the started asynchronous operation
 	 */
+	@Authorized(value = { PatientFlagsConstants.PRIV_MANAGE_FLAGS, PatientFlagsConstants.PRIV_MANAGE_PATIENT_FLAGS }, requireAll = false)
 	public Future<?> evaluateAllFlags();
 	
 	/**
@@ -577,8 +586,10 @@ public interface FlagService extends OpenmrsService {
 	 * @return the list of PatientFlags for the Patient
 	 */
 	@Transactional(readOnly = true)
+	@Authorized( { PatientFlagsConstants.PRIV_VIEW_PATIENT_FLAGS })
 	public List<PatientFlag> getPatientFlags(Patient patient);
-	
+
 	@Transactional(readOnly = true)
+	@Authorized( { PatientFlagsConstants.PRIV_VIEW_PATIENT_FLAGS })
 	public List<PatientFlag> getPatientFlags(Patient patient, Set<Role> roles, String displayPointName);
 }

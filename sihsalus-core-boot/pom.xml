@@ -48,6 +48,7 @@
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-reporting</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-billing</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-stockmanagement</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-datafilter</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-fua</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-imaging</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-attachments</artifactId><version>${project.version}</version></dependency>
@@ -59,6 +60,7 @@
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-bedmanagement</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-metadatamapping</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-openconceptlab</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-sihsalusinterop</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-event</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-calculation</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.sihsalus</groupId><artifactId>sihsalus-module-htmlwidgets</artifactId><version>${project.version}</version></dependency>

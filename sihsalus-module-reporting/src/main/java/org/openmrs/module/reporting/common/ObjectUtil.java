@@ -10,7 +10,7 @@
 package org.openmrs.module.reporting.common;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
@@ -136,7 +136,7 @@ public class ObjectUtil {
      * Returns true if object is null or empty String
      */
     public static boolean isNull(Object o) {
-    	return o == null || o.equals("");
+        return o == null || (o instanceof String && ((String) o).isEmpty());
     }
     
     /**

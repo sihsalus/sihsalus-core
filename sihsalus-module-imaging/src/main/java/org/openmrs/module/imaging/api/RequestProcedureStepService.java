@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.imaging.api;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.imaging.api.worklist.RequestProcedure;
 import org.openmrs.module.imaging.api.worklist.RequestProcedureStep;
@@ -22,19 +23,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
+import static org.openmrs.module.imaging.ImagingConstants.PRIVILEGE_EDIT_WORKLIST;
+import static org.openmrs.module.imaging.ImagingConstants.PRIVILEGE_VIEW_IMAGE_DATA;
+
 @Service
 @Transactional
 public interface RequestProcedureStepService extends OpenmrsService {
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	List<RequestProcedureStep> getAllStepByRequestProcedure(RequestProcedure requestProcedure);
 	
+	@Authorized(PRIVILEGE_VIEW_IMAGE_DATA)
 	RequestProcedureStep getProcedureStep(int Id);
 	
+	@Authorized(PRIVILEGE_EDIT_WORKLIST)
 	void newProcedureStep(RequestProcedureStep requestProcedureStep) throws IOException;
 	
+	@Authorized(PRIVILEGE_EDIT_WORKLIST)
 	void deleteProcedureStep(RequestProcedureStep requestProcedureStep) throws IOException;
 	
+	@Authorized(PRIVILEGE_EDIT_WORKLIST)
 	void updateProcedureStep(RequestProcedureStep requestProcedureStep);
 	
+	@Authorized(PRIVILEGE_EDIT_WORKLIST)
 	void updatePerformedProcedureStepStatus(RequestProcedureStep step, String newStatus);
 }

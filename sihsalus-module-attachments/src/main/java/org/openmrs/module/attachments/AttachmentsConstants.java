@@ -86,9 +86,19 @@ public class AttachmentsConstants {
 	 */
 	public static final String GP_DEFAULT_CONCEPT_COMPLEX_UUID = MODULE_ARTIFACT_ID + ".defaultConceptComplexUuid";
 
+	public static final String GP_DEFAULT_CONCEPT_COMPLEX_NAME = MODULE_ARTIFACT_ID + ".defaultConceptComplexName";
+
+	public static final String GP_DEFAULT_CONCEPT_COMPLEX_DESCRIPTION = MODULE_ARTIFACT_ID
+			+ ".defaultConceptComplexDescription";
+
+	public static final String GP_IMAGE_CONCEPT_COMPLEX_NAME = MODULE_ARTIFACT_ID + ".imageConceptComplexName";
+
+	public static final String GP_IMAGE_CONCEPT_COMPLEX_DESCRIPTION = MODULE_ARTIFACT_ID
+			+ ".imageConceptComplexDescription";
+
 	public static final String GP_CONCEPT_COMPLEX_UUID_MAP = MODULE_ARTIFACT_ID + ".conceptComplexUuidMap"; // Map
-																											// between
-																											// content
+																												// between
+																												// content
 																											// families
 																											// and
 																											// concept

@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.oauth2login.authscheme;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -162,6 +161,15 @@ public class UserInfo {
 	public String getUsername() {
 		return getString(PROP_USERNAME);
 	}
+
+	/**
+	 * Convenience method that retrieves the OpenMRS user name used for OAuth2 service accounts.
+	 *
+	 * @return The OpenMRS service account username, falling back to the regular username mapping.
+	 */
+	public String getServiceAccountUsername() {
+		return getString(PROP_USERNAME_SERVICE_ACCOUNT, getUsername());
+	}
 	
 	/**
 	 * Convenience method to get an OpenMRS {@link User} from the OAuth2 user info JSON based on the
@@ -217,13 +225,20 @@ public class UserInfo {
 			}
 		}
 		catch (RuntimeException e) {
-			log.error(e.getMessage(), e);
-			return Collections.emptyList();
+			throw new IllegalArgumentException("Unable to resolve OAuth2 role mapping.", e);
 		}
 		
-		JSONArray jsonArray = (JSONArray) val;
+		if (!(val instanceof JSONArray jsonArray)) {
+			throw new IllegalArgumentException("The OAuth2 role mapping must resolve to a JSON array.");
+		}
 		return IntStream.range(0, jsonArray.size())
-				.mapToObj(i -> (String) jsonArray.get(i))
+				.mapToObj(i -> {
+					Object roleName = jsonArray.get(i);
+					if (!(roleName instanceof String)) {
+						throw new IllegalArgumentException("OAuth2 role names must be string values.");
+					}
+					return (String) roleName;
+				})
 				.collect(Collectors.toList());
 
 	}

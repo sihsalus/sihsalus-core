@@ -46,6 +46,6 @@ public class MeanAggregator implements Aggregator {
 		catch (Exception e) {
 			throw new RuntimeException("Unable to calculate mean value, since all values are not numeric.");
 		}
-		return new Double(runningTotal/numTotaled);
+		return Double.valueOf(runningTotal/numTotaled);
 	}
 }

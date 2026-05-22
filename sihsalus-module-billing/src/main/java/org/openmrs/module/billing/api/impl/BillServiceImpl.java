@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -143,9 +144,16 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	@Override
 	@Transactional
 	public Bill voidBill(Bill bill, String voidReason) {
+		if (bill == null) {
+			throw new NullPointerException("The bill must be defined.");
+		}
 		if (StringUtils.isBlank(voidReason)) {
 			throw new IllegalArgumentException("voidReason cannot be null or empty");
 		}
+		bill.setVoided(true);
+		bill.setVoidedBy(Context.getAuthenticatedUser());
+		bill.setDateVoided(new Date());
+		bill.setVoidReason(voidReason);
 		return billDAO.saveBill(bill);
 	}
 	
@@ -155,6 +163,13 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	@Override
 	@Transactional
 	public Bill unvoidBill(Bill bill) {
+		if (bill == null) {
+			throw new NullPointerException("The bill must be defined.");
+		}
+		bill.setVoided(false);
+		bill.setVoidedBy(null);
+		bill.setDateVoided(null);
+		bill.setVoidReason(null);
 		return billDAO.saveBill(bill);
 	}
 	

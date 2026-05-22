@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -51,7 +52,7 @@ public class BaseRestController {
 	 * <strong>Should</strong> return unauthorized if not logged in
 	 * <strong>Should</strong> return forbidden if logged in
 	 */
-	@ExceptionHandler(APIAuthenticationException.class)
+	@ExceptionHandler({ APIAuthenticationException.class, ContextAuthenticationException.class })
 	@ResponseBody
 	public SimpleObject apiAuthenticationExceptionHandler(Exception ex, HttpServletRequest request,
 	        HttpServletResponse response) throws Exception {
@@ -114,7 +115,8 @@ public class BaseRestController {
 				errorDetail = ann.reason();
 			}
 			
-		} else if (RestUtil.hasCause(ex, APIAuthenticationException.class)) {
+		} else if (RestUtil.hasCause(ex, APIAuthenticationException.class)
+		        || RestUtil.hasCause(ex, ContextAuthenticationException.class)) {
 			return apiAuthenticationExceptionHandler(ex, request, response);
 		} else if (ex.getClass() == HttpRequestMethodNotSupportedException.class) {
 			errorCode = HttpServletResponse.SC_METHOD_NOT_ALLOWED;

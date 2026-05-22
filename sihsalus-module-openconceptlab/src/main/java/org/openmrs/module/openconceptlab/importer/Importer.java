@@ -18,7 +18,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
-import org.openmrs.api.context.Daemon;
 import org.openmrs.module.openconceptlab.CacheService;
 import org.openmrs.module.openconceptlab.Import;
 import org.openmrs.module.openconceptlab.ImportProgress;
@@ -35,6 +34,8 @@ import org.openmrs.module.openconceptlab.client.OclClient.OclResponse;
 import org.openmrs.module.openconceptlab.client.OclConcept;
 import org.openmrs.module.openconceptlab.client.OclMapping;
 import org.openmrs.module.openconceptlab.scheduler.UpdateScheduler;
+import org.openmrs.util.PrivilegeConstants;
+import org.sihsalus.core.api.StaticModuleTaskRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,24 @@ public class Importer implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(Importer.class);
 
 	public final static int BATCH_SIZE = 256;
+
+	private static final String[] STATIC_IMPORT_PRIVILEGES = {
+		PrivilegeConstants.GET_CONCEPTS,
+		PrivilegeConstants.GET_CONCEPT_CLASSES,
+		PrivilegeConstants.GET_CONCEPT_DATATYPES,
+		PrivilegeConstants.GET_CONCEPT_SOURCES,
+		PrivilegeConstants.GET_CONCEPT_MAP_TYPES,
+		PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS,
+		PrivilegeConstants.GET_GLOBAL_PROPERTIES,
+		PrivilegeConstants.GET_OBS,
+		PrivilegeConstants.MANAGE_CONCEPTS,
+		PrivilegeConstants.MANAGE_CONCEPT_CLASSES,
+		PrivilegeConstants.MANAGE_CONCEPT_DATATYPES,
+		PrivilegeConstants.MANAGE_CONCEPT_SOURCES,
+		PrivilegeConstants.MANAGE_CONCEPT_MAP_TYPES,
+		PrivilegeConstants.MANAGE_CONCEPT_REFERENCE_TERMS,
+		PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES
+	};
 
 	private ImportService importService;
 
@@ -117,12 +136,12 @@ public class Importer implements Runnable {
 		if (zipFile != null) {
 			run(zipFile);
 		} else {
-			Daemon.runInDaemonThreadAndWait(new Runnable() {
+			runWithOpenmrsDaemonContext(new Runnable() {
 				@Override
 				public void run() {
 					runTask();
 				}
-			}, OpenConceptLabActivator.getDaemonToken());
+			});
 		}
 	}
 
@@ -174,7 +193,7 @@ public class Importer implements Runnable {
 	 * This run is used to update sources from zip file
 	 */
 	public void run(final ZipFile zipPackage) {
-		Daemon.runInDaemonThreadAndWait(() -> runAndHandleErrors(() -> {
+		runWithOpenmrsDaemonContext(() -> runAndHandleErrors(() -> {
             InputStream zipInputStream = Utils.extractExportInputStreamFromZip(zipPackage);
             try {
                 in = new CountingInputStream(zipInputStream);
@@ -185,7 +204,29 @@ public class Importer implements Runnable {
             } finally {
                 in.close();
             }
-        }), OpenConceptLabActivator.getDaemonToken());
+        }));
+	}
+
+	private void runWithOpenmrsDaemonContext(Runnable task) {
+		StaticModuleTaskRunner.runAndWait(
+				OpenConceptLabActivator.getDaemonToken(), () -> runWithStaticModulePrivileges(task));
+	}
+
+	private void runWithStaticModulePrivileges(Runnable task) {
+		boolean openedSession = !Context.isSessionOpen();
+		if (openedSession) {
+			Context.openSession();
+		}
+
+		Context.addProxyPrivilege(STATIC_IMPORT_PRIVILEGES);
+		try {
+			task.run();
+		} finally {
+			Context.removeProxyPrivilege(STATIC_IMPORT_PRIVILEGES);
+			if (openedSession) {
+				Context.closeSession();
+			}
+		}
 	}
 
 	private void runAndHandleErrors(Task task) {
@@ -201,13 +242,6 @@ public class Importer implements Runnable {
 					Collections.singletonList(ItemState.ERROR)));
 			if (errors > 0) {
 				importService.failImport(anImport);
-			} else {
-				if (zipFile != null) {
-					File file = new File(zipFile.getName());
-					if (file.exists()) {
-						file.delete();
-					}
-				}
 			}
 		}
 		catch (Throwable e) {
@@ -215,9 +249,14 @@ public class Importer implements Runnable {
 			throw new ImportException(e);
 		}
 		finally {
+			File zipFileOnDisk = zipFile != null ? new File(zipFile.getName()) : null;
 			IOUtils.closeQuietly(in);
+			IOUtils.closeQuietly(zipFile);
 
 			zipFile = null;
+			if (zipFileOnDisk != null && zipFileOnDisk.exists() && !zipFileOnDisk.delete()) {
+				log.warn("Failed to delete temporary Open Concept Lab import file {}", zipFileOnDisk.getAbsolutePath());
+			}
 
 			try {
 				if (anImport != null && anImport.getImportId() != null) {
@@ -389,6 +428,7 @@ public class Importer implements Runnable {
 			oclMapping.setFromConceptUrl(prependBaseUrl(baseUrl, oclMapping.getFromConceptUrl()));
 			oclMapping.setFromSourceUrl(prependBaseUrl(baseUrl, oclMapping.getFromSourceUrl()));
 			oclMapping.setToConceptUrl(prependBaseUrl(baseUrl, oclMapping.getToConceptUrl()));
+			oclMapping.setToSourceUrl(prependBaseUrl(baseUrl, oclMapping.getToSourceUrl()));
 
 			Item item;
 			try {
@@ -428,8 +468,11 @@ public class Importer implements Runnable {
 		if (baseUrl == null) {
 			return url;
 		}
-		if (url == null) {
+		if (StringUtils.isBlank(url)) {
 			return null;
+		}
+		if (StringUtils.startsWithAny(url, "http://", "https://")) {
+			return url;
 		}
 
 		if (!url.startsWith("/")) {

@@ -21,7 +21,17 @@
         </dependency>
         <dependency>
             <groupId>org.sihsalus</groupId>
+            <artifactId>sihsalus-initializer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sihsalus</groupId>
             <artifactId>sihsalus-webservices-rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sihsalus</groupId>
+            <artifactId>sihsalus-module-legacyui</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -31,6 +41,12 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

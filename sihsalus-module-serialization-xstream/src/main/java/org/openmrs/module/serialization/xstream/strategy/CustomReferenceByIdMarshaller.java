@@ -55,7 +55,7 @@ public class CustomReferenceByIdMarshaller extends TreeMarshaller {
 	private final IDGenerator idGenerator;
 	
 	//use marker to remove the cglib's signature
-	private static final String marker = new String("EnhancerByCGLIB");
+	private static final String marker = "EnhancerByCGLIB";
 	
 	public static interface IDGenerator {
 		
