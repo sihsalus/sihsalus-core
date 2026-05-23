@@ -184,7 +184,7 @@ public class ExcelBuilder {
         }
 
         Map<String, String> m = new LinkedHashMap<String, String>();
-        for (int i=0; i<textAndStyle.length; i+=2) {
+        for (int i = 0; i + 1 < textAndStyle.length; i += 2) {
             m.put(textAndStyle[i], textAndStyle[i + 1]);
         }
         return createRichTextString(m);

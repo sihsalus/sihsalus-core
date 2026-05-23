@@ -107,7 +107,7 @@ public class ObjectUtil {
 		}
 
 		Map<String, Object> m = new HashMap<String, Object>();
-		for (int i = 0; i < keysAndValues.length; i += 2) {
+		for (int i = 0; i + 1 < keysAndValues.length; i += 2) {
 			m.put(keysAndValues[i].toString(), keysAndValues[i + 1]);
 		}
 		return m;

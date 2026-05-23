@@ -44,7 +44,7 @@ public class MappedParametersCohortDefinition extends MappedParametersQuery<Coho
 		}
 
 		Map<String, String> map = new HashMap<String, String>();
-		for (int i = 0; i < keysAndValues.length; i += 2) {
+		for (int i = 0; i + 1 < keysAndValues.length; i += 2) {
 			map.put(keysAndValues[i], keysAndValues[i + 1]);
 		}
 		return map;
