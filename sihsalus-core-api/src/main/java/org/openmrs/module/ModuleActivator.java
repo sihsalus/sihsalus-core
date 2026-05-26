@@ -76,6 +76,10 @@ public interface ModuleActivator {
   }
 
   private static void ignore(Object... values) {
-    values.getClass();
+    for (Object value : values) {
+      if (value != null) {
+        value.hashCode();
+      }
+    }
   }
 }
