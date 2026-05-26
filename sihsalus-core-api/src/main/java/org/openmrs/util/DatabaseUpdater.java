@@ -486,9 +486,7 @@ public class DatabaseUpdater {
       return new Liquibase(changeLogFile, getCompositeResourceAccessor(cl), database);
     } catch (Exception e) {
       // if an error occurs, close the connection
-      if (connection != null) {
-        connection.close();
-      }
+      nonNullConnection.close();
       throw e;
     }
   }

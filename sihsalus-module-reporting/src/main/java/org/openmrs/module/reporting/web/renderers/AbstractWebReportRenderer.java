@@ -67,8 +67,6 @@ public abstract class AbstractWebReportRenderer implements WebReportRenderer {
   }
 
   private static void ignore(Object... values) {
-    if (values.length == -1) {
-      throw new IllegalStateException();
-    }
+    values.getClass();
   }
 }
