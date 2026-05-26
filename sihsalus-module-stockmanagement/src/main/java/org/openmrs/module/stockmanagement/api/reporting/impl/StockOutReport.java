@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 public class StockOutReport extends StockStatusReport {
 	
-	private BigDecimal oneHundered = BigDecimal.valueOf(100);
+	private BigDecimal oneHundred = BigDecimal.valueOf(100);
 	
 	@Override
 	protected void preWriteBuffer(StockItemInventorySearchFilter inventorySearchFilter, StockInventoryResult stockInventoryResult){
@@ -18,7 +18,7 @@ public class StockOutReport extends StockStatusReport {
             }
             stockInventoryResult.removeDataIf(p -> {
                 return p.getQuantity()
-                        .compareTo(maxReorderLevelRatio.divide(oneHundered, 5, BigDecimal.ROUND_HALF_EVEN).multiply(p.getReorderLevel() == null ? BigDecimal.ZERO : p.getReorderLevel().multiply(p.getReorderLevelFactor()))) > 0;
+                        .compareTo(maxReorderLevelRatio.divide(oneHundred, 5, BigDecimal.ROUND_HALF_EVEN).multiply(p.getReorderLevel() == null ? BigDecimal.ZERO : p.getReorderLevel().multiply(p.getReorderLevelFactor()))) > 0;
             });
             if(!stockInventoryResult.getData().isEmpty()) {
                 stockManagementService.postProcessInventoryResult(inventorySearchFilter, stockInventoryResult);
