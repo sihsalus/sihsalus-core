@@ -169,7 +169,7 @@ public abstract class BaseDefinitionLibrary<T extends Definition> implements Def
     return converters.toArray(new DataConverter[converters.size()]);
   }
 
-  public class Replacements extends HashMap<String, String> {
+  public static class Replacements extends HashMap<String, String> {
     public Replacements add(String key, Object replacement) {
       String asString =
           replacement instanceof OpenmrsObject

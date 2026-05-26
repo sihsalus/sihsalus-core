@@ -14,5 +14,4 @@ package org.openmrs.logic.op;
  *
  * @see Operator
  */
-public interface ComparisonOperator extends Operator {
-}
+public interface ComparisonOperator extends Operator {}

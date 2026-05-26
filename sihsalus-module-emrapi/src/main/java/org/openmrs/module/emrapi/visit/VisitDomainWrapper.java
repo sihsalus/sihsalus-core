@@ -695,7 +695,7 @@ public class VisitDomainWrapper implements DomainWrapper {
     return null;
   }
 
-  private class EncounterTypePredicate implements Predicate {
+  private static class EncounterTypePredicate implements Predicate {
 
     private EncounterType type;
 
@@ -709,7 +709,7 @@ public class VisitDomainWrapper implements DomainWrapper {
     }
   }
 
-  private class EncounterTypeAndLocationPredicate implements Predicate {
+  private static class EncounterTypeAndLocationPredicate implements Predicate {
 
     private EncounterType type;
 

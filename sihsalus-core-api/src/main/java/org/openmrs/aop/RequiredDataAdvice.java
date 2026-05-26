@@ -115,7 +115,7 @@ public class RequiredDataAdvice implements MethodBeforeAdvice {
       // if the first argument is an OpenmrsObject, handle it now
       Reflect reflect = new Reflect(OpenmrsObject.class);
 
-      if (reflect.isSuperClass(mainArgument)) {
+      if (reflect.isSuperClassOfObject(mainArgument)) {
         // fail early if the method name is not like saveXyz(Xyz)
         if (!methodNameEndsWithClassName(method, mainArgument.getClass())) {
           return;

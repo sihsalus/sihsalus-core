@@ -10,5 +10,4 @@
 package org.openmrs.logic.op;
 
 /** Marker for all transform operator. */
-public interface TransformOperator extends Operator {
-}
+public interface TransformOperator extends Operator {}

@@ -323,7 +323,7 @@ public class ModuleFactory {
         }
 
         if (fromNode != null) {
-          graph.addEdge(graph.new Edge(fromNode, mod));
+          graph.addEdge(new Graph.Edge<>(fromNode, mod));
         }
       }
 
@@ -336,7 +336,7 @@ public class ModuleFactory {
         }
 
         if (fromNode != null) {
-          graph.addEdge(graph.new Edge(fromNode, mod));
+          graph.addEdge(new Graph.Edge<>(fromNode, mod));
         }
       }
     }

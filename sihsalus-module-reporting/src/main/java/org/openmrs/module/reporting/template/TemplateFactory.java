@@ -57,8 +57,8 @@ public class TemplateFactory {
     }
   }
 
-  public String evaluateHandlebarsTemplate(String template, Map<String, Object> parameterValues)
-      throws EvaluationException {
+  public String evaluateHandlebarsTemplateWithParameters(
+      String template, Map<String, Object> parameterValues) throws EvaluationException {
     String ret = null;
     if (ObjectUtil.notNull(template)) {
       try {

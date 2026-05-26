@@ -118,7 +118,7 @@ public class DomainServiceImpl extends BaseOpenmrsService implements DomainServi
    * Internal helper that holds metadata and invocation logic for a specific {@code
    * getXByUuid(String)} method.
    */
-  private class DomainFetcher {
+  private static class DomainFetcher {
 
     private final Class<?> returnType;
 

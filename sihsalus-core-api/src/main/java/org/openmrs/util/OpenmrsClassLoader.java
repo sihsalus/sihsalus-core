@@ -681,7 +681,7 @@ public class OpenmrsClassLoader extends URLClassLoader {
    * URLConnection.setDefaultUseCaches(Boolean)</code>. This causes jars opened to not be locked
    * (and allows for the webapp to be reloadable).
    */
-  private class OpenmrsURLConnection extends URLConnection {
+  private static class OpenmrsURLConnection extends URLConnection {
 
     public OpenmrsURLConnection() {
       super(null);

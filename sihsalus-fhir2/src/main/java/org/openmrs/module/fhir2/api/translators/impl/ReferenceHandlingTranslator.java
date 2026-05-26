@@ -40,14 +40,14 @@ import org.openmrs.module.fhir2.api.util.FhirUtils;
 public final class ReferenceHandlingTranslator {
 
   public static Reference createEncounterReference(@Nonnull Encounter encounter) {
-    return createEncounterReference((OpenmrsObject) encounter);
+    return createOpenmrsObjectEncounterReference(encounter);
   }
 
   public static Reference createEncounterReference(@Nonnull Visit visit) {
-    return createEncounterReference((OpenmrsObject) visit);
+    return createOpenmrsObjectEncounterReference(visit);
   }
 
-  private static Reference createEncounterReference(@Nonnull OpenmrsObject encounter) {
+  private static Reference createOpenmrsObjectEncounterReference(@Nonnull OpenmrsObject encounter) {
     return createReferenceOfType(encounter, FhirConstants.ENCOUNTER);
   }
 

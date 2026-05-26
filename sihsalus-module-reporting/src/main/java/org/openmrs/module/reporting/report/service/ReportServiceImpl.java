@@ -896,7 +896,7 @@ public class ReportServiceImpl extends BaseOpenmrsService implements ReportServi
 
   // ***** INNER CLASS FOR CACHING *****
 
-  private class CachedReportData {
+  private static class CachedReportData {
     private boolean persisted = false;
     private ReportData reportData;
 

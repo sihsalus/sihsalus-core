@@ -95,7 +95,7 @@ public class ProgramStatesForPatientDataEvaluator implements PatientDataEvaluato
    * This is necessary because the PatientState comparison function does not account for program
    * enrollment dates
    */
-  private class PatientStateComparator implements Comparator<PatientState> {
+  private static class PatientStateComparator implements Comparator<PatientState> {
     @Override
     public int compare(PatientState s1, PatientState s2) {
       int result = OpenmrsUtil.compareWithNullAsEarliest(s1.getStartDate(), s2.getStartDate());

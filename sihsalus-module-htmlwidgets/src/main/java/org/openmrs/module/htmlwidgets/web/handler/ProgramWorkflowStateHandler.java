@@ -139,7 +139,7 @@ public class ProgramWorkflowStateHandler extends OpenmrsMetadataHandler<ProgramW
   }
 
   /** Comparator that sorts ProgramWorkflows by name, alphabetically */
-  private class ProgramWorkflowComparator implements Comparator<ProgramWorkflow> {
+  private static class ProgramWorkflowComparator implements Comparator<ProgramWorkflow> {
     public int compare(ProgramWorkflow p1, ProgramWorkflow p2) {
       if (p1 != null && p2 != null) {
         String sn1 =
@@ -159,7 +159,7 @@ public class ProgramWorkflowStateHandler extends OpenmrsMetadataHandler<ProgramW
   }
 
   /** Comparator that sorts ProgramWorkflowStates by name, alphabetically */
-  private class ProgramWorkflowStateComparator implements Comparator<ProgramWorkflowState> {
+  private static class ProgramWorkflowStateComparator implements Comparator<ProgramWorkflowState> {
     public int compare(ProgramWorkflowState p1, ProgramWorkflowState p2) {
       if (p1 != null && p2 != null) {
         String sn1 =

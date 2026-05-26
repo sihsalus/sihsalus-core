@@ -170,7 +170,7 @@ public class CohortIndicatorDataSetDefinition extends BaseDataSetDefinition {
    * Column Definition which encapsulates information about the indicator and dimensions chosen for
    * each column
    */
-  public class CohortIndicatorAndDimensionColumn extends DataSetColumn implements Cloneable {
+  public static class CohortIndicatorAndDimensionColumn extends DataSetColumn implements Cloneable {
 
     public static final long serialVersionUID = 1L;
 

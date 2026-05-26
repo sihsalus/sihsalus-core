@@ -51,31 +51,31 @@ public class AuditInfo {
    */
   public AuditInfo(Object dataOrMetadata) {
     if (dataOrMetadata instanceof Auditable) {
-      copyFieldsFrom((Auditable) dataOrMetadata);
+      copyAuditableFieldsFrom((Auditable) dataOrMetadata);
     }
     if (dataOrMetadata instanceof Voidable) {
-      copyFieldsFrom((Voidable) dataOrMetadata);
+      copyVoidableFieldsFrom((Voidable) dataOrMetadata);
     }
     if (dataOrMetadata instanceof Retireable) {
-      copyFieldsFrom((Retireable) dataOrMetadata);
+      copyRetireableFieldsFrom((Retireable) dataOrMetadata);
     }
   }
 
-  private void copyFieldsFrom(Auditable auditable) {
+  private void copyAuditableFieldsFrom(Auditable auditable) {
     this.creator = auditable.getCreator();
     this.dateCreated = auditable.getDateCreated();
     this.changedBy = auditable.getChangedBy();
     this.dateChanged = auditable.getDateChanged();
   }
 
-  private void copyFieldsFrom(Voidable voidable) {
+  private void copyVoidableFieldsFrom(Voidable voidable) {
     this.voided = voidable.isVoided();
     this.voidedBy = voidable.getVoidedBy();
     this.dateVoided = voidable.getDateVoided();
     this.voidReason = voidable.getVoidReason();
   }
 
-  private void copyFieldsFrom(Retireable retireable) {
+  private void copyRetireableFieldsFrom(Retireable retireable) {
     this.retired = retireable.isRetired();
     this.retiredBy = retireable.getRetiredBy();
     this.dateRetired = retireable.getDateRetired();

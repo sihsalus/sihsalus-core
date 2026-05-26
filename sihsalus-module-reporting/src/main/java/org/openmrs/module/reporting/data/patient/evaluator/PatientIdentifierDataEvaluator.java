@@ -78,7 +78,7 @@ public class PatientIdentifierDataEvaluator implements PatientDataEvaluator {
   }
 
   /** Helper comparator class for sorting patient identifiers in each List */
-  protected class PatientIdentifierComparator implements Comparator<PatientIdentifier> {
+  protected static class PatientIdentifierComparator implements Comparator<PatientIdentifier> {
 
     private List<PatientIdentifierType> idTypes;
 

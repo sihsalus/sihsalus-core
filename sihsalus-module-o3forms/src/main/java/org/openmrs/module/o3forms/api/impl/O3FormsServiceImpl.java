@@ -561,7 +561,7 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                   referencedForms.stream()
                       .map(
                           referencedForm ->
-                              getTranslationsByPreferredLocales(locales, referencedForm))
+                              getTranslationsFromReferencedForm(locales, referencedForm))
                       .filter(Optional::isPresent)
                       .map(Optional::get)
                       .reduce(
@@ -571,14 +571,14 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                             return acc;
                           });
 
-              getTranslationsByPreferredLocales(locales, formResources).ifPresent(result::putAll);
+              getTranslationsFromFormResources(locales, formResources).ifPresent(result::putAll);
 
               return result;
             })
         .orElse(Collections.emptyMap());
   }
 
-  private Optional<Map<String, Object>> getTranslationsByPreferredLocales(
+  private Optional<Map<String, Object>> getTranslationsFromReferencedForm(
       LinkedHashSet<Locale> locales, Object referencedForm) {
     if (!(referencedForm instanceof Map)) {
       return Optional.empty();
@@ -597,7 +597,7 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
     }
 
     try {
-      return getTranslationsByPreferredLocales(
+      return getTranslationsFromFormResources(
           locales, getFormResources((String) referencedFormName));
     } catch (APIException e) {
       log.warn(
@@ -606,7 +606,7 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
     }
   }
 
-  private Optional<Map<String, Object>> getTranslationsByPreferredLocales(
+  private Optional<Map<String, Object>> getTranslationsFromFormResources(
       LinkedHashSet<Locale> locales, List<FormResource> formResources) {
     for (Locale locale : locales) {
       String needle = "_translations_" + locale.toLanguageTag();
