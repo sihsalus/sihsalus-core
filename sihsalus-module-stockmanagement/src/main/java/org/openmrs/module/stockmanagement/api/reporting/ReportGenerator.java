@@ -68,14 +68,7 @@ public abstract class ReportGenerator {
   }
 
   public Integer getRecordsProcessed(Properties properties) {
-    try {
-      String key = "param.RecordsProcessed.value";
-      if (properties.containsKey(key)) {
-        return Integer.parseInt(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
-    }
-    return null;
+    return getIntegerParameter(properties, "param.RecordsProcessed.value");
   }
 
   public void setCurrentPageIndex(Properties properties, Integer currentPageIndex) {
@@ -88,14 +81,7 @@ public abstract class ReportGenerator {
   }
 
   public Integer getCurrentPageIndex(Properties properties) {
-    try {
-      String key = "param.CurrentPageIndex.value";
-      if (properties.containsKey(key)) {
-        return Integer.parseInt(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
-    }
-    return null;
+    return getIntegerParameter(properties, "param.CurrentPageIndex.value");
   }
 
   public void setLastRecordProcessed(Properties properties, Integer lastRecordProcessed) {
@@ -117,25 +103,11 @@ public abstract class ReportGenerator {
   }
 
   public Integer getExecutionStep(Properties properties) {
-    try {
-      String key = "param.ExecutionStep.value";
-      if (properties.containsKey(key)) {
-        return Integer.parseInt(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
-    }
-    return null;
+    return getIntegerParameter(properties, "param.ExecutionStep.value");
   }
 
   public Integer getLastRecordProcessed(Properties properties) {
-    try {
-      String key = "param.LastRecordProcessed.value";
-      if (properties.containsKey(key)) {
-        return Integer.parseInt(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
-    }
-    return null;
+    return getIntegerParameter(properties, "param.LastRecordProcessed.value");
   }
 
   public void setLastStockOperationProcessed(
@@ -149,59 +121,44 @@ public abstract class ReportGenerator {
   }
 
   public Integer getLastStockOperationProcessed(Properties properties) {
-    try {
-      String key = "param.LastStockOperationProcessed.value";
-      if (properties.containsKey(key)) {
-        return Integer.parseInt(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
-    }
-    return null;
+    return getIntegerParameter(properties, "param.LastStockOperationProcessed.value");
   }
 
   public Date getReportParameterDate(Properties properties, ReportParameter reportParameter) {
-    try {
-      String key = "param." + reportParameter.name() + ".value";
-      if (properties.containsKey(key)) {
-        return DateUtil.parseDate(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
+    String value = getReportParameterValue(properties, reportParameter);
+    if (StringUtils.isBlank(value)) {
+      return null;
     }
-    return null;
+    try {
+      return DateUtil.parseDate(value);
+    } catch (IllegalArgumentException exception) {
+      return null;
+    }
   }
 
   public String getReportParameterString(Properties properties, ReportParameter reportParameter) {
-    try {
-      String key = "param." + reportParameter.name() + ".value";
-      if (properties.containsKey(key)) {
-        return properties.getProperty(key);
-      }
-    } catch (Exception exception) {
-    }
-    return null;
+    return getReportParameterValue(properties, reportParameter);
   }
 
   public Boolean getReportParameterBoolean(Properties properties, ReportParameter reportParameter) {
-    try {
-      String key = "param." + reportParameter.name() + ".value";
-      if (properties.containsKey(key)) {
-        return Boolean.valueOf(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
+    String value = getReportParameterValue(properties, reportParameter);
+    if (value == null) {
+      return null;
     }
-    return null;
+    return Boolean.valueOf(value);
   }
 
   public BigDecimal getReportParameterBigDecimal(
       Properties properties, ReportParameter reportParameter) {
-    try {
-      String key = "param." + reportParameter.name() + ".value";
-      if (properties.containsKey(key)) {
-        return new BigDecimal(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
+    String value = getReportParameterValue(properties, reportParameter);
+    if (StringUtils.isBlank(value)) {
+      return null;
     }
-    return null;
+    try {
+      return new BigDecimal(value);
+    } catch (NumberFormatException exception) {
+      return null;
+    }
   }
 
   public Date getDate(Properties properties) {
@@ -250,57 +207,68 @@ public abstract class ReportGenerator {
 
   public StockItemInventorySearchFilter.InventoryGroupBy getInventoryGroupBy(
       Properties properties) {
-    try {
-      String key = "param." + ReportParameter.InventoryGroupBy.name() + ".value";
-      if (properties.containsKey(key)) {
-        return StockItemInventorySearchFilter.InventoryGroupBy.valueOf(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
+    String value = getReportParameterValue(properties, ReportParameter.InventoryGroupBy);
+    if (StringUtils.isBlank(value)) {
+      return null;
     }
-    return null;
+    try {
+      return StockItemInventorySearchFilter.InventoryGroupBy.valueOf(value);
+    } catch (IllegalArgumentException exception) {
+      return null;
+    }
   }
 
   public MostLeastMoving getMostLeastMoving(Properties properties) {
-    try {
-      String key = "param." + ReportParameter.MostLeastMoving.name() + ".value";
-      if (properties.containsKey(key)) {
-        return MostLeastMoving.valueOf(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
+    String value = getReportParameterValue(properties, ReportParameter.MostLeastMoving);
+    if (StringUtils.isBlank(value)) {
+      return null;
     }
-    return null;
+    try {
+      return MostLeastMoving.valueOf(value);
+    } catch (IllegalArgumentException exception) {
+      return null;
+    }
   }
 
   public List<Fulfillment> getFullfillment(Properties properties) {
-    try {
-      String key = "param." + ReportParameter.Fullfillment.name() + ".value";
-      if (properties.containsKey(key)) {
-
-        String value = properties.getProperty(key);
-        if (StringUtils.isBlank(value)) {
-          return null;
-        }
-        String[] values = value.split(",");
-        List<Fulfillment> fullfillments = new ArrayList<>();
-        for (String token : values) {
-          fullfillments.add(Fulfillment.valueOf(token));
-        }
-        return fullfillments;
-      }
-    } catch (Exception exception) {
+    String value = getReportParameterValue(properties, ReportParameter.Fullfillment);
+    if (StringUtils.isBlank(value)) {
+      return null;
     }
-    return null;
+    try {
+      String[] values = value.split(",");
+      List<Fulfillment> fullfillments = new ArrayList<>();
+      for (String token : values) {
+        fullfillments.add(Fulfillment.valueOf(token));
+      }
+      return fullfillments;
+    } catch (IllegalArgumentException exception) {
+      return null;
+    }
   }
 
   public Integer getLimit(Properties properties) {
-    try {
-      String key = "param." + ReportParameter.Limit.name() + ".value";
-      if (properties.containsKey(key)) {
-        return Integer.parseInt(properties.getProperty(key));
-      }
-    } catch (Exception exception) {
+    return getIntegerParameter(properties, "param." + ReportParameter.Limit.name() + ".value");
+  }
+
+  private Integer getIntegerParameter(Properties properties, String key) {
+    String value = getParameterValue(properties, key);
+    if (StringUtils.isBlank(value)) {
+      return null;
     }
-    return null;
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException exception) {
+      return null;
+    }
+  }
+
+  private String getReportParameterValue(Properties properties, ReportParameter reportParameter) {
+    return getParameterValue(properties, "param." + reportParameter.name() + ".value");
+  }
+
+  private String getParameterValue(Properties properties, String key) {
+    return properties == null ? null : properties.getProperty(key);
   }
 
   public void setParameter(

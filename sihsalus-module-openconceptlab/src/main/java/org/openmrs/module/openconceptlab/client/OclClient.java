@@ -219,13 +219,22 @@ public class OclClient {
     download(get.body(), get.contentLength(), file);
 
     InputStream response = new FileInputStream(file);
-    String contentTypeHeader = get.header("Content-Type");
-    if (contentTypeHeader != null && contentTypeHeader.startsWith("application/zip")) {
-      return unzipResponse(response, date);
-    } else {
-      date = parseDateFromPath(get.path());
-
-      return ungzipAndUntarResponse(response, date);
+    boolean responseTransferred = false;
+    try {
+      String contentTypeHeader = get.header("Content-Type");
+      OclResponse oclResponse;
+      if (contentTypeHeader != null && contentTypeHeader.startsWith("application/zip")) {
+        oclResponse = unzipResponse(response, date);
+      } else {
+        date = parseDateFromPath(get.path());
+        oclResponse = ungzipAndUntarResponse(response, date);
+      }
+      responseTransferred = true;
+      return oclResponse;
+    } finally {
+      if (!responseTransferred) {
+        IOUtils.closeQuietly(response);
+      }
     }
   }
 
