@@ -93,6 +93,9 @@ mvn -pl sihsalus-core-api -am -DskipITs test
 
 This branch does not include `./mvnw`, so use `mvn` directly.
 
+Modernization and technical-debt cleanup priorities are documented in
+`docs/technical-debt-modernization.md`.
+
 The default boot configuration targets PostgreSQL:
 
 ```text
