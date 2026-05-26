@@ -422,7 +422,7 @@ public class ObjectUtil {
 
   public static String formatNumber(Number n, String format, Locale locale) {
     if (notNull(format)) {
-      NumberFormat nf = NumberFormat.getInstance();
+      NumberFormat nf = NumberFormat.getInstance(locale == null ? Locale.getDefault() : locale);
       nf.setGroupingUsed(false);
       try {
         nf.setMinimumFractionDigits(Integer.parseInt(format));

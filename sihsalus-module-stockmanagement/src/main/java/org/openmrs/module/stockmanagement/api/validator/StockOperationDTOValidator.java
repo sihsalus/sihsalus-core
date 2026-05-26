@@ -204,7 +204,8 @@ public class StockOperationDTOValidator implements Validator {
 
     if (stockOperationType.requiresReason() && StringUtils.isBlank(object.getReasonUuid())) {
       errors.rejectValue(
-          "reasonUuid", messageSourceService.getMessage("stockmanagement.stockoperation.noreason"));
+          "reasonUuid",
+          messageSourceService.getMessage("stockmanagement.stockoperation.noreason"));
       return;
     }
 
@@ -383,7 +384,7 @@ public class StockOperationDTOValidator implements Validator {
 
       if (stockOperationType.getOperationType().equals(StockOperationType.STOCK_ISSUE)) {
         if (stockOperationItemDTO.getQuantityRequested() != null
-            || stockOperationItemDTO.getStockItemPackagingUOMUuid() != null) {
+            || stockOperationItemDTO.getQuantityRequestedPackagingUOMUuid() != null) {
           if (stockOperationItemDTO.getQuantityRequested() != null
               && stockOperationItemDTO.getQuantityRequested().compareTo(zero) <= 0) {
             errors.rejectValue(
@@ -395,7 +396,7 @@ public class StockOperationDTOValidator implements Validator {
             return;
           }
 
-          if (stockOperationItemDTO.getStockItemPackagingUOMUuid() == null) {
+          if (stockOperationItemDTO.getQuantityRequestedPackagingUOMUuid() == null) {
             errors.rejectValue(
                 "stockOperationItems",
                 String.format(

@@ -75,7 +75,7 @@ public class EvaluationServiceImpl extends BaseOpenmrsService implements Evaluat
         throw new IllegalArgumentException(
             "Unable to evaluate to a map. Exactly two columns must be defined.");
       }
-      ret.put((K) resultRow[0], (V) resultRow[1]);
+      ret.put(keyType.cast(resultRow[0]), valueType.cast(resultRow[1]));
     }
     return ret;
   }
@@ -93,7 +93,7 @@ public class EvaluationServiceImpl extends BaseOpenmrsService implements Evaluat
       throw new IllegalArgumentException(
           "Unable to evaluate to a single value. Exactly one column must be defined.");
     }
-    return (T) row[0];
+    return type.cast(row[0]);
   }
 
   /**

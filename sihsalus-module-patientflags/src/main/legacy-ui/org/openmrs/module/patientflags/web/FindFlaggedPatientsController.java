@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.openmrs.Cohort;
 import org.openmrs.CohortMembership;
 import org.openmrs.Patient;
@@ -68,7 +66,7 @@ public class FindFlaggedPatientsController {
 	}
 	
 	@InitBinder
-	public void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
+	public void initBinder(ServletRequestDataBinder binder) throws Exception {
 		binder.registerCustomEditor(Set.class, "tags", new CustomCollectionEditor(
 		                                                                          Set.class) {
 			
@@ -80,8 +78,7 @@ public class FindFlaggedPatientsController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET)
-	@SuppressWarnings("unused")
-	public ModelAndView showForm(HttpServletRequest request, ModelMap model) throws ServletRequestBindingException {
+		public ModelAndView showForm(ModelMap model) throws ServletRequestBindingException {
 		
 		// add the command object for the flag form
 		model.addAttribute("flag", new Flag());

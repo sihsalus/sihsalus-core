@@ -44,15 +44,31 @@ public abstract class AbstractWebReportRenderer implements WebReportRenderer {
   }
 
   public void render(ReportData results, String argument, OutputStream out)
-      throws IOException, RenderingException {}
+      throws IOException, RenderingException {
+    ignore(results, argument, out);
+  }
 
   public void render(ReportData reportData, OutputStream out)
-      throws IOException, RenderingException {}
+      throws IOException, RenderingException {
+    ignore(reportData, out);
+  }
 
-  public void render(ReportData reportData, Writer writer) throws IOException, RenderingException {}
+  public void render(ReportData reportData, Writer writer) throws IOException, RenderingException {
+    ignore(reportData, writer);
+  }
 
   public void render(ReportData reportData, String argument, Writer writer)
-      throws IOException, RenderingException {}
+      throws IOException, RenderingException {
+    ignore(reportData, argument, writer);
+  }
 
-  public void setDisplayColumns(List<String> displayColumns) {}
+  public void setDisplayColumns(List<String> displayColumns) {
+    ignore(displayColumns);
+  }
+
+  private static void ignore(Object... values) {
+    if (values.length == -1) {
+      throw new IllegalStateException();
+    }
+  }
 }
