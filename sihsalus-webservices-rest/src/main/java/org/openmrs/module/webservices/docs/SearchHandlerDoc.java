@@ -51,7 +51,7 @@ public class SearchHandlerDoc implements Comparable<SearchHandlerDoc> {
 	}
 	
 	/**
-	 * @return the resourceURL
+	 * @return the resourceName
 	 */
 	public String getResourceName() {
 		return this.resourceName;
@@ -107,7 +107,7 @@ public class SearchHandlerDoc implements Comparable<SearchHandlerDoc> {
 	@Override
 	public int compareTo(SearchHandlerDoc o) {
 		// TODO Auto-generated method stub
-		return getResourceURL().compareTo(o.getResourceName());
+		return getResourceURL().compareTo(o.getResourceURL());
 	}
 	
 	/**
@@ -122,16 +122,6 @@ public class SearchHandlerDoc implements Comparable<SearchHandlerDoc> {
 	 */
 	public void setResourceURL(String resourceURL) {
 		this.resourceURL = resourceURL;
-	}
-	
-	private List<String> getVersions(Set<String> versions) {
-		
-		List<String> versionAsList = new ArrayList<String>();
-		for (String version : versions) {
-			versionAsList.add(version);
-		}
-		
-		return versionAsList;
 	}
 	
 }

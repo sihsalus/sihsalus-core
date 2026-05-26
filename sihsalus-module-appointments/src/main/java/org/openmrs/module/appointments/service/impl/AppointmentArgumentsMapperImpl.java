@@ -83,16 +83,18 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
                     Collections.singletonList(visitLocationTag));
             return (visitLocationTag != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
         }
-        Location facilityLocation = getParentVisitLocationUuid(location);
+        Location facilityLocation = getParentVisitLocation(location);
         return facilityLocation.getName();
     }
 
-    private Location getParentVisitLocationUuid(Location location) {
-            if(isVisitLocation(location)) {
-            return location.getParentLocation() != null ? getParentVisitLocationUuid(location.getParentLocation()) : location;
-        } else {
-            return location.getParentLocation() != null ? getParentVisitLocationUuid(location.getParentLocation()) : null;
+    private Location getParentVisitLocation(Location location) {
+        if (location == null) {
+            return null;
         }
+        if (isVisitLocation(location)) {
+            return location;
+        }
+        return location.getParentLocation() != null ? getParentVisitLocation(location.getParentLocation()) : null;
     }
 
     private Boolean isVisitLocation(Location location) {

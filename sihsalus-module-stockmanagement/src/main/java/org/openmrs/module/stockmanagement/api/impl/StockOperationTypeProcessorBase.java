@@ -28,7 +28,7 @@ public abstract class StockOperationTypeProcessorBase implements StockOperationT
 	@Override
 	public boolean userCanProcess(User user, Location location, String privilege) {
 		return Context.getService(StockManagementService.class).userHasStockManagementPrivilege(
-		    Context.getAuthenticatedUser(), location, this.stockOperationType, privilege);
+		    user, location, this.stockOperationType, privilege);
 	}
 	
 	@Override
