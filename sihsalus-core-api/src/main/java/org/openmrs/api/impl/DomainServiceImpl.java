@@ -53,10 +53,11 @@ public class DomainServiceImpl extends BaseOpenmrsService implements DomainServi
   @Autowired
   public DomainServiceImpl(List<OpenmrsService> services) {
     for (OpenmrsService service : services) {
-      if (this.getClass().isAssignableFrom(service.getClass())) {
+      Class<?> serviceClass = AopUtils.getTargetClass(service);
+      if (this.getClass().isAssignableFrom(serviceClass)) {
         continue;
       }
-      for (Method method : service.getClass().getMethods()) {
+      for (Method method : serviceClass.getMethods()) {
         if (method.getName().startsWith("get")
             && method.getName().endsWith("ByUuid")
             && method.getParameterCount() == 1
