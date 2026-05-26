@@ -9,10 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.annotation.Nonnull;
-
 import java.util.Date;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Period;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
@@ -20,40 +18,40 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EncounterPeriodTranslatorImpl implements EncounterPeriodTranslator<Encounter> {
-	
-	@Override
-	public Period toFhirResource(@Nonnull Encounter encounter) {
-		if (encounter == null) {
-			return null;
-		}
-		
-		Period result = new Period();
-		result.setStart(encounter.getEncounterDatetime());
-		return result;
-	}
-	
-	@Override
-	public Encounter toOpenmrsType(@Nonnull Encounter encounter, @Nonnull Period period) {
-		if (encounter == null || period == null) {
-			return null;
-		}
-		
-		Date encounterDateTime;
-		if (period.hasStart()) {
-			encounterDateTime = period.getStart();
-		} else if (period.hasEnd()) {
-			encounterDateTime = period.getEnd();
-		} else if (encounter.getEncounterDatetime() == null) {
-			encounterDateTime = encounter.getDateCreated();
-		} else {
-			encounterDateTime = encounter.getEncounterDatetime();
-		}
-		
-		if (encounterDateTime == null) {
-			encounterDateTime = new Date();
-		}
-		
-		encounter.setEncounterDatetime(encounterDateTime);
-		return encounter;
-	}
+
+  @Override
+  public Period toFhirResource(@Nonnull Encounter encounter) {
+    if (encounter == null) {
+      return null;
+    }
+
+    Period result = new Period();
+    result.setStart(encounter.getEncounterDatetime());
+    return result;
+  }
+
+  @Override
+  public Encounter toOpenmrsType(@Nonnull Encounter encounter, @Nonnull Period period) {
+    if (encounter == null || period == null) {
+      return null;
+    }
+
+    Date encounterDateTime;
+    if (period.hasStart()) {
+      encounterDateTime = period.getStart();
+    } else if (period.hasEnd()) {
+      encounterDateTime = period.getEnd();
+    } else if (encounter.getEncounterDatetime() == null) {
+      encounterDateTime = encounter.getDateCreated();
+    } else {
+      encounterDateTime = encounter.getEncounterDatetime();
+    }
+
+    if (encounterDateTime == null) {
+      encounterDateTime = new Date();
+    }
+
+    encounter.setEncounterDatetime(encounterDateTime);
+    return encounter;
+  }
 }

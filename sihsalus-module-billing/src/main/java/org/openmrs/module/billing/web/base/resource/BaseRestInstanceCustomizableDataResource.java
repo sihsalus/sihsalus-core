@@ -16,15 +16,16 @@ import org.openmrs.module.billing.api.base.entity.model.IInstanceType;
 
 // @formatter:off
 /**
- * REST resource for {@link org.openmrs.OpenmrsData}
- * {@link org.openmrs.module.openhmis.commons.api.entity.model.IInstanceCustomizable}s.
+ * REST resource for {@link org.openmrs.OpenmrsData} {@link
+ * org.openmrs.module.openhmis.commons.api.entity.model.IInstanceCustomizable}s.
+ *
  * @param <E> The customizable instance model class
  * @param <TAttribute> The model attribute class
  */
 public abstract class BaseRestInstanceCustomizableDataResource<
-			E extends IInstanceCustomizable<TInstanceType, TAttribute> & OpenmrsData,
-			TInstanceType extends IInstanceType<?>,
-			TAttribute extends IInstanceAttribute<E, ?, ?>>
-        extends BaseRestCustomizableDataResource<E, TAttribute> {
-// @formatter:on
+        E extends IInstanceCustomizable<TInstanceType, TAttribute> & OpenmrsData,
+        TInstanceType extends IInstanceType<?>,
+        TAttribute extends IInstanceAttribute<E, ?, ?>>
+    extends BaseRestCustomizableDataResource<E, TAttribute> {
+  // @formatter:on
 }

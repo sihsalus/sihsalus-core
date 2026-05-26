@@ -14,20 +14,18 @@ import lombok.Setter;
 import org.openmrs.attribute.BaseAttributeType;
 
 public class CohortMemberAttributeType extends BaseAttributeType<CohortMember> {
-	
-	private static final long serialVersionUID = 3L;
-	
-	@Getter
-	@Setter
-	private Integer cohortMemberAttributeTypeId;
-	
-	@Override
-	public Integer getId() {
-		return cohortMemberAttributeTypeId;
-	}
-	
-	@Override
-	public void setId(Integer id) {
-		this.cohortMemberAttributeTypeId = id;
-	}
+
+  private static final long serialVersionUID = 3L;
+
+  @Getter @Setter private Integer cohortMemberAttributeTypeId;
+
+  @Override
+  public Integer getId() {
+    return cohortMemberAttributeTypeId;
+  }
+
+  @Override
+  public void setId(Integer id) {
+    this.cohortMemberAttributeTypeId = id;
+  }
 }

@@ -10,43 +10,45 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.AllergenType;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceCategoryTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AllergyIntoleranceCategoryTranslatorImpl implements AllergyIntoleranceCategoryTranslator {
-	
-	@Override
-	public AllergyIntolerance.AllergyIntoleranceCategory toFhirResource(@Nonnull AllergenType allergenType) {
-		switch (allergenType) {
-			case DRUG:
-				return AllergyIntolerance.AllergyIntoleranceCategory.MEDICATION;
-			case FOOD:
-				return AllergyIntolerance.AllergyIntoleranceCategory.FOOD;
-			case ENVIRONMENT:
-				return AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT;
-			case OTHER:
-			default:
-				return null;
-		}
-	}
-	
-	@Override
-	public AllergenType toOpenmrsType(@Nonnull AllergyIntolerance.AllergyIntoleranceCategory allergyIntoleranceCategory) {
-		switch (allergyIntoleranceCategory) {
-			case MEDICATION:
-				return AllergenType.DRUG;
-			case FOOD:
-				return AllergenType.FOOD;
-			case ENVIRONMENT:
-				return AllergenType.ENVIRONMENT;
-			case BIOLOGIC:
-			case NULL:
-			default:
-				return null;
-		}
-	}
+public class AllergyIntoleranceCategoryTranslatorImpl
+    implements AllergyIntoleranceCategoryTranslator {
+
+  @Override
+  public AllergyIntolerance.AllergyIntoleranceCategory toFhirResource(
+      @Nonnull AllergenType allergenType) {
+    switch (allergenType) {
+      case DRUG:
+        return AllergyIntolerance.AllergyIntoleranceCategory.MEDICATION;
+      case FOOD:
+        return AllergyIntolerance.AllergyIntoleranceCategory.FOOD;
+      case ENVIRONMENT:
+        return AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT;
+      case OTHER:
+      default:
+        return null;
+    }
+  }
+
+  @Override
+  public AllergenType toOpenmrsType(
+      @Nonnull AllergyIntolerance.AllergyIntoleranceCategory allergyIntoleranceCategory) {
+    switch (allergyIntoleranceCategory) {
+      case MEDICATION:
+        return AllergenType.DRUG;
+      case FOOD:
+        return AllergenType.FOOD;
+      case ENVIRONMENT:
+        return AllergenType.ENVIRONMENT;
+      case BIOLOGIC:
+      case NULL:
+      default:
+        return null;
+    }
+  }
 }

@@ -12,10 +12,6 @@ package org.openmrs.module.fhir2.providers.r3;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -36,6 +32,8 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.HashSet;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -57,82 +55,121 @@ import org.springframework.stereotype.Component;
 @Component("allergyIntoleranceFhirR3ResourceProvider")
 @R3Provider
 public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirAllergyIntoleranceService allergyIntoleranceService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return AllergyIntolerance.class;
-	}
-	
-	@Read
-	@SuppressWarnings("unused")
-	public AllergyIntolerance getAllergyIntoleranceById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.AllergyIntolerance allergyIntolerance = allergyIntoleranceService.get(id.getIdPart());
-		if (allergyIntolerance == null) {
-			throw new ResourceNotFoundException("Could not find allergyIntolerance with Id " + id.getIdPart());
-		}
-		
-		return (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance);
-	}
-	
-	@Create
-	@SuppressWarnings("unused")
-	public MethodOutcome creatAllergyIntolerance(@ResourceParam AllergyIntolerance allergyIntolerance) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(allergyIntoleranceService.create(
-		    (org.hl7.fhir.r4.model.AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
-	}
-	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateAllergyIntolerance(@IdParam IdType id, @ResourceParam AllergyIntolerance allergyIntolerance) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update");
-		}
-		
-		allergyIntolerance.setId(id.getIdPart());
-		
-		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(allergyIntoleranceService.update(
-		    id.getIdPart(),
-		    (org.hl7.fhir.r4.model.AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
-	}
-	
-	@Delete
-	@SuppressWarnings("unused")
-	public OperationOutcome deleteAllergyIntolerance(@IdParam @Nonnull IdType id) {
-		allergyIntoleranceService.delete(id.getIdPart());
-		return FhirProviderUtils.buildDeleteR3();
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public IBundleProvider searchForAllergies(
-	        @OptionalParam(name = AllergyIntolerance.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
-	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
-	                Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
-	        @OptionalParam(name = AllergyIntolerance.SP_CATEGORY) TokenAndListParam category,
-	        @OptionalParam(name = AllergyIntolerance.SP_CODE) TokenAndListParam allergen,
-	        @OptionalParam(name = AllergyIntolerance.SP_SEVERITY) TokenAndListParam severity,
-	        @OptionalParam(name = AllergyIntolerance.SP_MANIFESTATION) TokenAndListParam manifestationCode,
-	        @OptionalParam(name = AllergyIntolerance.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus,
-	        @OptionalParam(name = AllergyIntolerance.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
-	        @IncludeParam(allow = { "AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT }) HashSet<Include> includes) {
-		if (patientReference == null) {
-			patientReference = subjectReference;
-		}
-		
-		if (CollectionUtils.isEmpty(includes)) {
-			includes = null;
-		}
-		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        allergyIntoleranceService.searchForAllergies(new FhirAllergyIntoleranceSearchParams(patientReference,
-		                category, allergen, severity, manifestationCode, clinicalStatus, id, lastUpdated, sort, includes)));
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirAllergyIntoleranceService allergyIntoleranceService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return AllergyIntolerance.class;
+  }
+
+  @Read
+  @SuppressWarnings("unused")
+  public AllergyIntolerance getAllergyIntoleranceById(@IdParam @Nonnull IdType id) {
+    org.hl7.fhir.r4.model.AllergyIntolerance allergyIntolerance =
+        allergyIntoleranceService.get(id.getIdPart());
+    if (allergyIntolerance == null) {
+      throw new ResourceNotFoundException(
+          "Could not find allergyIntolerance with Id " + id.getIdPart());
+    }
+
+    return (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance);
+  }
+
+  @Create
+  @SuppressWarnings("unused")
+  public MethodOutcome creatAllergyIntolerance(
+      @ResourceParam AllergyIntolerance allergyIntolerance) {
+    return FhirProviderUtils.buildCreate(
+        VersionConvertorFactory_30_40.convertResource(
+            allergyIntoleranceService.create(
+                (org.hl7.fhir.r4.model.AllergyIntolerance)
+                    VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
+  }
+
+  @Update
+  @SuppressWarnings("unused")
+  public MethodOutcome updateAllergyIntolerance(
+      @IdParam IdType id, @ResourceParam AllergyIntolerance allergyIntolerance) {
+    if (id == null || id.getIdPart() == null) {
+      throw new InvalidRequestException("id must be specified to update");
+    }
+
+    allergyIntolerance.setId(id.getIdPart());
+
+    return FhirProviderUtils.buildUpdate(
+        VersionConvertorFactory_30_40.convertResource(
+            allergyIntoleranceService.update(
+                id.getIdPart(),
+                (org.hl7.fhir.r4.model.AllergyIntolerance)
+                    VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
+  }
+
+  @Delete
+  @SuppressWarnings("unused")
+  public OperationOutcome deleteAllergyIntolerance(@IdParam @Nonnull IdType id) {
+    allergyIntoleranceService.delete(id.getIdPart());
+    return FhirProviderUtils.buildDeleteR3();
+  }
+
+  @Search
+  @SuppressWarnings("unused")
+  public IBundleProvider searchForAllergies(
+      @OptionalParam(
+              name = AllergyIntolerance.SP_PATIENT,
+              chainWhitelist = {
+                "",
+                Patient.SP_IDENTIFIER,
+                Patient.SP_GIVEN,
+                Patient.SP_FAMILY,
+                Patient.SP_NAME
+              },
+              targetTypes = Patient.class)
+          ReferenceAndListParam patientReference,
+      @OptionalParam(
+              name = Observation.SP_SUBJECT,
+              chainWhitelist = {
+                "",
+                Patient.SP_IDENTIFIER,
+                Patient.SP_GIVEN,
+                Patient.SP_FAMILY,
+                Patient.SP_NAME
+              },
+              targetTypes = Patient.class)
+          ReferenceAndListParam subjectReference,
+      @OptionalParam(name = AllergyIntolerance.SP_CATEGORY) TokenAndListParam category,
+      @OptionalParam(name = AllergyIntolerance.SP_CODE) TokenAndListParam allergen,
+      @OptionalParam(name = AllergyIntolerance.SP_SEVERITY) TokenAndListParam severity,
+      @OptionalParam(name = AllergyIntolerance.SP_MANIFESTATION)
+          TokenAndListParam manifestationCode,
+      @OptionalParam(name = AllergyIntolerance.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus,
+      @OptionalParam(name = AllergyIntolerance.SP_RES_ID) TokenAndListParam id,
+      @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+      @Sort SortSpec sort,
+      @IncludeParam(allow = {"AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT})
+          HashSet<Include> includes) {
+    if (patientReference == null) {
+      patientReference = subjectReference;
+    }
+
+    if (CollectionUtils.isEmpty(includes)) {
+      includes = null;
+    }
+
+    return new SearchQueryBundleProviderR3Wrapper(
+        allergyIntoleranceService.searchForAllergies(
+            new FhirAllergyIntoleranceSearchParams(
+                patientReference,
+                category,
+                allergen,
+                severity,
+                manifestationCode,
+                clinicalStatus,
+                id,
+                lastUpdated,
+                sort,
+                includes)));
+  }
 }

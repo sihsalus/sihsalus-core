@@ -10,28 +10,28 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Address;
 import org.openmrs.Location;
 
-public interface LocationAddressTranslator extends ToFhirTranslator<Location, Address>, UpdatableOpenmrsTranslator<Location, Address> {
-	
-	/**
-	 * Maps an {@link org.openmrs.Location} to a {@link org.hl7.fhir.r4.model.Address}
-	 * 
-	 * @param omrsLocation the location to translate
-	 * @return the corresponding FHIR address resource
-	 */
-	@Override
-	Address toFhirResource(@Nonnull Location omrsLocation);
-	
-	/**
-	 * Maps an {@link org.openmrs.Location} to a {@link org.hl7.fhir.r4.model.Address}
-	 * 
-	 * @param location the location resource to update
-	 * @param address the location to translate
-	 * @return the updated OpenMRS location address
-	 */
-	@Override
-	Location toOpenmrsType(@Nonnull Location location, @Nonnull Address address);
+public interface LocationAddressTranslator
+    extends ToFhirTranslator<Location, Address>, UpdatableOpenmrsTranslator<Location, Address> {
+
+  /**
+   * Maps an {@link org.openmrs.Location} to a {@link org.hl7.fhir.r4.model.Address}
+   *
+   * @param omrsLocation the location to translate
+   * @return the corresponding FHIR address resource
+   */
+  @Override
+  Address toFhirResource(@Nonnull Location omrsLocation);
+
+  /**
+   * Maps an {@link org.openmrs.Location} to a {@link org.hl7.fhir.r4.model.Address}
+   *
+   * @param location the location resource to update
+   * @param address the location to translate
+   * @return the updated OpenMRS location address
+   */
+  @Override
+  Location toOpenmrsType(@Nonnull Location location, @Nonnull Address address);
 }

@@ -14,6 +14,6 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 public interface FhirVisitService extends FhirService<Encounter> {
-	
-	IBundleProvider searchForVisits(SearchParameterMap theParams);
+
+  IBundleProvider searchForVisits(SearchParameterMap theParams);
 }

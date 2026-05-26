@@ -15,7 +15,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTra
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -27,30 +26,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PractitionerReferenceTranslatorProviderImpl implements PractitionerReferenceTranslator<Provider> {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirPractitionerDao practitionerDao;
-	
-	@Override
-	public Reference toFhirResource(@Nonnull Provider provider) {
-		if (provider == null) {
-			return null;
-		}
-		return createPractitionerReference(provider);
-	}
-	
-	@Override
-	public Provider toOpenmrsType(@Nonnull Reference reference) {
-		if (reference == null || !reference.hasReference()) {
-			return null;
-		}
-		
-		if (getReferenceType(reference).map(ref -> !ref.equals(FhirConstants.PRACTITIONER)).orElse(false)) {
-			throw new IllegalArgumentException("Reference must be to an Provider not a " + getReferenceType(reference));
-		}
-		
-		return getReferenceId(reference).map(uuid -> practitionerDao.get(uuid)).orElse(null);
-	}
+public class PractitionerReferenceTranslatorProviderImpl
+    implements PractitionerReferenceTranslator<Provider> {
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirPractitionerDao practitionerDao;
+
+  @Override
+  public Reference toFhirResource(@Nonnull Provider provider) {
+    if (provider == null) {
+      return null;
+    }
+    return createPractitionerReference(provider);
+  }
+
+  @Override
+  public Provider toOpenmrsType(@Nonnull Reference reference) {
+    if (reference == null || !reference.hasReference()) {
+      return null;
+    }
+
+    if (getReferenceType(reference)
+        .map(ref -> !ref.equals(FhirConstants.PRACTITIONER))
+        .orElse(false)) {
+      throw new IllegalArgumentException(
+          "Reference must be to an Provider not a " + getReferenceType(reference));
+    }
+
+    return getReferenceId(reference).map(uuid -> practitionerDao.get(uuid)).orElse(null);
+  }
 }

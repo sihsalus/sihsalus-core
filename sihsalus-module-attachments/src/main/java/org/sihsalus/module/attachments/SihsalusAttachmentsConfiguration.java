@@ -19,35 +19,35 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackageClasses = {AttachmentsContext.class, AttachmentBytesResource.class})
 public class SihsalusAttachmentsConfiguration {
 
-    @Bean
-    AttachmentsService attachmentsService() {
-        return new AttachmentsServiceImpl();
-    }
+  @Bean
+  AttachmentsService attachmentsService() {
+    return new AttachmentsServiceImpl();
+  }
 
-    @Bean
-    SmartInitializingSingleton attachmentsServiceRegistrar(
-            ServiceContext serviceContext, AttachmentsService attachmentsService) {
-        return () -> serviceContext.setService(AttachmentsService.class, attachmentsService);
-    }
+  @Bean
+  SmartInitializingSingleton attachmentsServiceRegistrar(
+      ServiceContext serviceContext, AttachmentsService attachmentsService) {
+    return () -> serviceContext.setService(AttachmentsService.class, attachmentsService);
+  }
 
-    @Bean
-    DefaultAttachmentHandler defaultAttachmentHandler() {
-        return new DefaultAttachmentHandler();
-    }
+  @Bean
+  DefaultAttachmentHandler defaultAttachmentHandler() {
+    return new DefaultAttachmentHandler();
+  }
 
-    @Bean
-    ImageAttachmentHandler imageAttachmentHandler() {
-        return new ImageAttachmentHandler();
-    }
+  @Bean
+  ImageAttachmentHandler imageAttachmentHandler() {
+    return new ImageAttachmentHandler();
+  }
 
-    @Bean
-    SmartInitializingSingleton attachmentsComplexObsHandlerRegistrar(
-            @Qualifier("handlers") Map<String, ComplexObsHandler> handlers,
-            DefaultAttachmentHandler defaultAttachmentHandler,
-            ImageAttachmentHandler imageAttachmentHandler) {
-        return () -> {
-            handlers.put(DefaultAttachmentHandler.class.getSimpleName(), defaultAttachmentHandler);
-            handlers.put(ImageAttachmentHandler.class.getSimpleName(), imageAttachmentHandler);
-        };
-    }
+  @Bean
+  SmartInitializingSingleton attachmentsComplexObsHandlerRegistrar(
+      @Qualifier("handlers") Map<String, ComplexObsHandler> handlers,
+      DefaultAttachmentHandler defaultAttachmentHandler,
+      ImageAttachmentHandler imageAttachmentHandler) {
+    return () -> {
+      handlers.put(DefaultAttachmentHandler.class.getSimpleName(), defaultAttachmentHandler);
+      handlers.put(ImageAttachmentHandler.class.getSimpleName(), imageAttachmentHandler);
+    };
+  }
 }

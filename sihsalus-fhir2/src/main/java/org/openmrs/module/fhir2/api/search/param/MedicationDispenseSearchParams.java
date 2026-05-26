@@ -9,14 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.search.param;
 
-import java.io.Serializable;
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import java.io.Serializable;
+import java.util.HashSet;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,18 +24,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicationDispenseSearchParams implements Serializable {
-	
-	private TokenAndListParam id;
-	
-	private ReferenceAndListParam patient;
-	
-	private ReferenceAndListParam encounter;
-	
-	private ReferenceAndListParam medicationRequest;
-	
-	private DateRangeParam lastUpdated;
-	
-	private HashSet<Include> includes;
-	
-	private SortSpec sort;
+
+  private TokenAndListParam id;
+
+  private ReferenceAndListParam patient;
+
+  private ReferenceAndListParam encounter;
+
+  private ReferenceAndListParam medicationRequest;
+
+  private DateRangeParam lastUpdated;
+
+  private HashSet<Include> includes;
+
+  private SortSpec sort;
 }

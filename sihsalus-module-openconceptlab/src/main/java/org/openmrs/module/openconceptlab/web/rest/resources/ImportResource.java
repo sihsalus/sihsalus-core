@@ -1,5 +1,7 @@
 package org.openmrs.module.openconceptlab.web.rest.resources;
 
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
+
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.DateProperty;
@@ -21,7 +23,6 @@ import org.openmrs.module.openconceptlab.ItemState;
 import org.openmrs.module.openconceptlab.importer.Importer;
 import org.openmrs.module.openconceptlab.scheduler.UpdateScheduler;
 import org.openmrs.module.openconceptlab.web.rest.controller.OpenConceptLabRestController;
-import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
@@ -41,296 +42,309 @@ import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOp
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
-
 @Resource(
-        name = RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE + "/import",
-        supportedClass = Import.class,
-        supportedOpenmrsVersions = { "1.8.* - 9.*" }
-)
+    name =
+        RestConstants.VERSION_1
+            + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE
+            + "/import",
+    supportedClass = Import.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.*"})
 public class ImportResource extends DelegatingCrudResource<Import> implements Uploadable {
-    private static final String GP_MAX_IMPORT_UPLOAD_BYTES = "openconceptlab.import.maxUploadBytes";
+  private static final String GP_MAX_IMPORT_UPLOAD_BYTES = "openconceptlab.import.maxUploadBytes";
 
-    private static final long DEFAULT_MAX_IMPORT_UPLOAD_BYTES = 100L * 1024L * 1024L;
+  private static final long DEFAULT_MAX_IMPORT_UPLOAD_BYTES = 100L * 1024L * 1024L;
 
-    private static final Set<String> ALLOWED_MIME_TYPES = new HashSet<>(Arrays.asList(
-        "application/zip", "application/x-zip-compressed", "application/x-zip", "application/octet-stream"
-    ));
+  private static final Set<String> ALLOWED_MIME_TYPES =
+      new HashSet<>(
+          Arrays.asList(
+              "application/zip",
+              "application/x-zip-compressed",
+              "application/x-zip",
+              "application/octet-stream"));
 
-    @Override
-    public Import getByUniqueId(String uniqueId) {
-        requireManageConcepts();
-        return getImportService().getImport(uniqueId);
+  @Override
+  public Import getByUniqueId(String uniqueId) {
+    requireManageConcepts();
+    return getImportService().getImport(uniqueId);
+  }
+
+  @Override
+  protected void delete(Import delegate, String reason, RequestContext context)
+      throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
+
+  @Override
+  public Import newDelegate() {
+    return new Import();
+  }
+
+  @Override
+  public Import save(Import delegate) {
+    requireManageConcepts();
+    if (delegate != null) {
+      UpdateScheduler updateScheduler = getUpdateScheduler();
+      updateScheduler.scheduleNow();
+      return getImportService().getLastImport();
+    }
+    throw new GenericRestException("Import cannot be null");
+  }
+
+  @Override
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
+    return new DelegatingResourceDescription();
+  }
+
+  @Override
+  public Model getCREATEModel(Representation rep) {
+    return new ModelImpl()
+        .property("localDateStarted", new DateProperty())
+        .property("subscriptionUrl", new StringProperty(StringProperty.Format.URL));
+  }
+
+  @Override
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
+
+  @Override
+  public void purge(Import delegate, RequestContext context) throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
+
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    if (rep instanceof FullRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("localDateStarted");
+      description.addProperty("localDateStopped");
+      description.addProperty("oclDateStarted");
+      description.addProperty("releaseVersion");
+      description.addProperty("errorMessage");
+      description.addProperty("importProgress");
+      description.addProperty("importTime");
+      description.addProperty("allItemsCount");
+      description.addProperty("errorItemsCount");
+      description.addProperty("ignoredErrorsCount");
+      description.addProperty("updatedItemsCount");
+      description.addProperty("upToDateItemsCount");
+      description.addProperty("retiredItemsCount");
+      description.addProperty("unretiredItemsCount");
+      description.addProperty("addedItemsCount");
+      description.addProperty("status");
+      description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
+      description.addSelfLink();
+      return description;
+    } else if (rep instanceof DefaultRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("localDateStarted");
+      description.addProperty("localDateStopped");
+      description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
+      description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
+      description.addSelfLink();
+      return description;
+    } else if (rep instanceof RefRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addSelfLink();
+      return description;
+    }
+    return null;
+  }
+
+  @Override
+  public Model getGETModel(Representation rep) {
+    ModelImpl model = (ModelImpl) super.getGETModel(rep);
+    if (rep instanceof FullRepresentation) {
+      model.property("uuid", new StringProperty().example("uuid"));
+      model.property("localDateStarted", new DateProperty());
+      model.property("localDateStopped", new DateProperty());
+      model.property("oclDateStarted", new DateProperty());
+      model.property("releaseVersion", new StringProperty());
+      model.property("errorMessage", new StringProperty());
+      model.property("importProgress", new StringProperty());
+      model.property("importTime", new StringProperty());
+      model.property("allItemsCount", new IntegerProperty());
+      model.property("errorItemsCount", new IntegerProperty());
+      model.property("ignoredErrorsCount", new IntegerProperty());
+      model.property("updatedItemsCount", new IntegerProperty());
+      model.property("upToDateItemsCount", new IntegerProperty());
+      model.property("retiredItemsCount", new IntegerProperty());
+      model.property("unretiredItemsCount", new IntegerProperty());
+      model.property("addedItemsCount", new IntegerProperty());
+      model.property("status", new StringProperty());
+    } else if (rep instanceof DefaultRepresentation) {
+      model.property("uuid", new StringProperty().example("uuid"));
+      model.property("localDateStarted", new DateProperty());
+      model.property("localDateStopped", new DateProperty());
+    } else if (rep instanceof RefRepresentation) {
+      model.property("uuid", new StringProperty().example("uuid"));
+    }
+    return model;
+  }
+
+  @Override
+  protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+    requireManageConcepts();
+    return new NeedsPaging<Import>(getImportService().getImportsInOrder(0, 20), context);
+  }
+
+  @PropertyGetter("importProgress")
+  public static String getImportProgress(Import instance) {
+    Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
+    ImportProgress importProgress = importer.getImportProgress(instance.getUuid());
+    return String.valueOf(importProgress.getProgress());
+  }
+
+  @PropertyGetter("importTime")
+  public static String getImportTime(Import instance) {
+    Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
+    ImportProgress importProgress = importer.getImportProgress(instance.getUuid());
+    return importProgress.getTimeText();
+  }
+
+  @PropertyGetter("allItemsCount")
+  public static Integer getAllItemsCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, new HashSet<ItemState>());
+  }
+
+  @PropertyGetter("errorItemsCount")
+  public static Integer getErrorItemsCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, states(ItemState.ERROR));
+  }
+
+  @PropertyGetter("ignoredErrorsCount")
+  public static Integer getIgnoredErrorsCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, states(ItemState.IGNORED_ERROR));
+  }
+
+  @PropertyGetter("updatedItemsCount")
+  public static Integer getUpdatedItemsCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, states(ItemState.UPDATED));
+  }
+
+  @PropertyGetter("upToDateItemsCount")
+  public static Integer getUpToDateItemsCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, states(ItemState.UP_TO_DATE));
+  }
+
+  @PropertyGetter("duplicateItems")
+  public static Integer getDuplicateItemCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, states(ItemState.DUPLICATE));
+  }
+
+  @PropertyGetter("addedItemsCount")
+  public static Integer getAddedItemsCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, states(ItemState.ADDED));
+  }
+
+  @PropertyGetter("retiredItemsCount")
+  public static Integer getRetiredItemsCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, states(ItemState.RETIRED));
+  }
+
+  @PropertyGetter("unretiredItemsCount")
+  public static Integer getUnretiredItemsCount(Import instance) {
+    return getImportService().getImportItemsCount(instance, states(ItemState.UNRETIRED));
+  }
+
+  private static Set<ItemState> states(ItemState... states) {
+    Set<ItemState> set = new HashSet<ItemState>();
+    set.addAll(Arrays.asList(states));
+    return set;
+  }
+
+  @PropertyGetter("status")
+  public static String getStatus(Import instance) {
+    String errorMessage = instance.getErrorMessage();
+    if (StringUtils.isNotBlank(errorMessage)) {
+      return errorMessage;
     }
 
-    @Override
-    protected void delete(Import delegate, String reason, RequestContext context) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
+    Integer allItemsCount = getAllItemsCount(instance);
+    Integer errors = getErrorItemsCount(instance);
+
+    StringBuilder status = new StringBuilder();
+    status.append(allItemsCount).append(" items fetched");
+    if (errors > 0) {
+      status.append(", \n").append(String.valueOf(errors) + " errors");
+    }
+    return status.toString();
+  }
+
+  private UpdateScheduler getUpdateScheduler() {
+    return Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
+  }
+
+  private static ImportService getImportService() {
+    return Context.getService(ImportService.class);
+  }
+
+  @Override
+  public Object upload(MultipartFile multipartFile, RequestContext requestContext)
+      throws ResponseException, IOException {
+    requireManageConcepts();
+
+    if (multipartFile.isEmpty()) {
+      throw new IllegalRequestException("File uploaded cannot be empty");
+    } else if (!isZipFileType(multipartFile)) {
+      throw new IllegalRequestException("Supplied file must be a zip file");
+    } else if (multipartFile.getSize() > getMaxImportUploadBytes()) {
+      throw new IllegalRequestException("Supplied file exceeds the maximum allowed upload size");
     }
 
-    @Override
-    public Import newDelegate() {
-        return new Import();
-    }
+    ImportService importService = getImportService();
+    Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
 
-    @Override
-    public Import save(Import delegate) {
-        requireManageConcepts();
-        if (delegate != null) {
-            UpdateScheduler updateScheduler = getUpdateScheduler();
-            updateScheduler.scheduleNow();
-            return getImportService().getLastImport();
+    File tempFile = File.createTempFile("ocl", "zip");
+    ZipFile zipFile = null;
+    boolean scheduled = false;
+    try {
+      multipartFile.transferTo(tempFile);
+      zipFile = new ZipFile(tempFile);
+      importer.setZipFile(zipFile);
+
+      UpdateScheduler updateScheduler =
+          Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
+      updateScheduler.scheduleNow();
+      scheduled = true;
+    } catch (ZipException e) {
+      throw new IllegalRequestException("Supplied file is not a valid zip file");
+    } finally {
+      if (!scheduled) {
+        importer.setZipFile(null);
+        if (zipFile != null) {
+          try {
+            zipFile.close();
+          } catch (IOException ignored) {
+          }
         }
-        throw new GenericRestException("Import cannot be null");
+        tempFile.delete();
+      }
     }
 
-    @Override
-    public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
-        return new DelegatingResourceDescription();
-    }
+    return importService.getLastImport();
+  }
 
-    @Override
-    public Model getCREATEModel(Representation rep) {
-        return new ModelImpl().property("localDateStarted", new DateProperty()).property("subscriptionUrl", new StringProperty(StringProperty.Format.URL));
-    }
+  private static boolean isZipFileType(MultipartFile multipartFile) {
+    String contentType = multipartFile.getContentType();
+    return contentType != null && ALLOWED_MIME_TYPES.contains(contentType.toLowerCase());
+  }
 
-    @Override
-    public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
-
-    @Override
-    public void purge(Import delegate, RequestContext context) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
-
-    @Override
-    public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        if (rep instanceof FullRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("localDateStarted");
-            description.addProperty("localDateStopped");
-            description.addProperty("oclDateStarted");
-            description.addProperty("releaseVersion");
-            description.addProperty("errorMessage");
-            description.addProperty("importProgress");
-            description.addProperty("importTime");
-            description.addProperty("allItemsCount");
-            description.addProperty("errorItemsCount");
-            description.addProperty("ignoredErrorsCount");
-            description.addProperty("updatedItemsCount");
-            description.addProperty("upToDateItemsCount");
-            description.addProperty("retiredItemsCount");
-            description.addProperty("unretiredItemsCount");
-            description.addProperty("addedItemsCount");
-            description.addProperty("status");
-            description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
-            description.addSelfLink();
-            return description;
-        } else if (rep instanceof DefaultRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("localDateStarted");
-            description.addProperty("localDateStopped");
-            description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
-            description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
-            description.addSelfLink();
-            return description;
-        } else if (rep instanceof RefRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addSelfLink();
-            return description;
-        }
-        return null;
-    }
-
-    @Override
-    public Model getGETModel(Representation rep) {
-        ModelImpl model = (ModelImpl) super.getGETModel(rep);
-        if (rep instanceof FullRepresentation) {
-            model.property("uuid", new StringProperty().example("uuid"));
-            model.property("localDateStarted", new DateProperty());
-            model.property("localDateStopped", new DateProperty());
-            model.property("oclDateStarted", new DateProperty());
-            model.property("releaseVersion", new StringProperty());
-            model.property("errorMessage", new StringProperty());
-            model.property("importProgress", new StringProperty());
-            model.property("importTime", new StringProperty());
-            model.property("allItemsCount", new IntegerProperty());
-            model.property("errorItemsCount", new IntegerProperty());
-            model.property("ignoredErrorsCount", new IntegerProperty());
-            model.property("updatedItemsCount", new IntegerProperty());
-            model.property("upToDateItemsCount", new IntegerProperty());
-            model.property("retiredItemsCount", new IntegerProperty());
-            model.property("unretiredItemsCount", new IntegerProperty());
-            model.property("addedItemsCount", new IntegerProperty());
-            model.property("status", new StringProperty());
-        } else if (rep instanceof DefaultRepresentation) {
-            model.property("uuid", new StringProperty().example("uuid"));
-            model.property("localDateStarted", new DateProperty());
-            model.property("localDateStopped", new DateProperty());
-        } else if (rep instanceof RefRepresentation) {
-            model.property("uuid", new StringProperty().example("uuid"));
-        }
-        return model;
-    }
-
-    @Override
-    protected PageableResult doGetAll(RequestContext context) throws ResponseException {
-        requireManageConcepts();
-        return new NeedsPaging<Import>(getImportService().getImportsInOrder(0, 20), context);
-    }
-
-    @PropertyGetter("importProgress")
-    public static String getImportProgress(Import instance){
-        Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
-        ImportProgress importProgress = importer.getImportProgress(instance.getUuid());
-        return String.valueOf(importProgress.getProgress());
-    }
-
-    @PropertyGetter("importTime")
-    public static String getImportTime(Import instance){
-        Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
-        ImportProgress importProgress = importer.getImportProgress(instance.getUuid());
-        return importProgress.getTimeText();
-    }
-
-    @PropertyGetter("allItemsCount")
-    public static Integer getAllItemsCount(Import instance){
-        return getImportService().getImportItemsCount(instance, new HashSet<ItemState>());
-    }
-
-    @PropertyGetter("errorItemsCount")
-    public static Integer getErrorItemsCount(Import instance){
-        return getImportService().getImportItemsCount(instance, states(ItemState.ERROR));
-    }
-
-    @PropertyGetter("ignoredErrorsCount")
-    public static Integer getIgnoredErrorsCount(Import instance){
-        return getImportService().getImportItemsCount(instance, states(ItemState.IGNORED_ERROR));
-    }
-
-    @PropertyGetter("updatedItemsCount")
-    public static Integer getUpdatedItemsCount(Import instance){
-        return getImportService().getImportItemsCount(instance, states(ItemState.UPDATED));
-    }
-
-    @PropertyGetter("upToDateItemsCount")
-    public static Integer getUpToDateItemsCount(Import instance){
-        return getImportService().getImportItemsCount(instance, states(ItemState.UP_TO_DATE));
-    }
-    
-    @PropertyGetter("duplicateItems")
-    public static Integer getDuplicateItemCount(Import instance){
-        return getImportService().getImportItemsCount(instance, states(ItemState.DUPLICATE));
-    }
-
-    @PropertyGetter("addedItemsCount")
-    public static Integer getAddedItemsCount(Import instance){
-        return getImportService().getImportItemsCount(instance, states(ItemState.ADDED));
-    }
-
-    @PropertyGetter("retiredItemsCount")
-    public static Integer getRetiredItemsCount(Import instance){
-        return getImportService().getImportItemsCount(instance, states(ItemState.RETIRED));
-    }
-
-    @PropertyGetter("unretiredItemsCount")
-    public static Integer getUnretiredItemsCount(Import instance){
-        return getImportService().getImportItemsCount(instance, states(ItemState.UNRETIRED));
-    }
-
-    private static Set<ItemState> states(ItemState... states) {
-        Set<ItemState> set = new HashSet<ItemState>();
-        set.addAll(Arrays.asList(states));
-        return set;
-    }
-
-    @PropertyGetter("status")
-    public static String getStatus(Import instance){
-        String errorMessage = instance.getErrorMessage();
-        if(StringUtils.isNotBlank(errorMessage)){
-            return errorMessage;
-        }
-
-        Integer allItemsCount = getAllItemsCount(instance);
-        Integer errors = getErrorItemsCount(instance);
-
-        StringBuilder status = new StringBuilder();
-        status.append(allItemsCount).append(" items fetched");
-        if(errors > 0) {
-            status.append(", \n").append(String.valueOf(errors) + " errors");
-        }
-        return status.toString();
-    }
-
-    private UpdateScheduler getUpdateScheduler() {
-        return Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
-    }
-
-    private static ImportService getImportService() {
-        return Context.getService(ImportService.class);
-    }
-
-    @Override
-    public Object upload(MultipartFile multipartFile, RequestContext requestContext) throws ResponseException, IOException {
-        requireManageConcepts();
-
-        if (multipartFile.isEmpty()) {
-            throw new IllegalRequestException("File uploaded cannot be empty");
-        } else if (!isZipFileType(multipartFile)) {
-            throw new IllegalRequestException("Supplied file must be a zip file");
-        } else if (multipartFile.getSize() > getMaxImportUploadBytes()) {
-            throw new IllegalRequestException("Supplied file exceeds the maximum allowed upload size");
-        }
-
-        ImportService importService = getImportService();
-        Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
-
-        File tempFile = File.createTempFile("ocl", "zip");
-        ZipFile zipFile = null;
-        boolean scheduled = false;
-        try {
-            multipartFile.transferTo(tempFile);
-            zipFile = new ZipFile(tempFile);
-            importer.setZipFile(zipFile);
-
-            UpdateScheduler updateScheduler = Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
-            updateScheduler.scheduleNow();
-            scheduled = true;
-        } catch (ZipException e) {
-            throw new IllegalRequestException("Supplied file is not a valid zip file");
-        } finally {
-            if (!scheduled) {
-                importer.setZipFile(null);
-                if (zipFile != null) {
-                    try {
-                        zipFile.close();
-                    } catch (IOException ignored) {
-                    }
-                }
-                tempFile.delete();
-            }
-        }
-
-        return importService.getLastImport();
-    }
-
-    private static boolean isZipFileType(MultipartFile multipartFile) {
-        String contentType = multipartFile.getContentType();
-        return contentType != null && ALLOWED_MIME_TYPES.contains(contentType.toLowerCase());
-    }
-
-    private static long getMaxImportUploadBytes() {
-        String configuredValue = Context.getAdministrationService().getGlobalProperty(
+  private static long getMaxImportUploadBytes() {
+    String configuredValue =
+        Context.getAdministrationService()
+            .getGlobalProperty(
                 GP_MAX_IMPORT_UPLOAD_BYTES, String.valueOf(DEFAULT_MAX_IMPORT_UPLOAD_BYTES));
-        try {
-            long parsedValue = Long.parseLong(configuredValue);
-            return parsedValue > 0 ? parsedValue : DEFAULT_MAX_IMPORT_UPLOAD_BYTES;
-        } catch (NumberFormatException e) {
-            return DEFAULT_MAX_IMPORT_UPLOAD_BYTES;
-        }
+    try {
+      long parsedValue = Long.parseLong(configuredValue);
+      return parsedValue > 0 ? parsedValue : DEFAULT_MAX_IMPORT_UPLOAD_BYTES;
+    } catch (NumberFormatException e) {
+      return DEFAULT_MAX_IMPORT_UPLOAD_BYTES;
     }
+  }
 }

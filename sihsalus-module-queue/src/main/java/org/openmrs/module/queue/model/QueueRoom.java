@@ -17,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,25 +30,25 @@ import org.openmrs.BaseChangeableOpenmrsMetadata;
 @Entity
 @Table(name = "queue_room")
 public class QueueRoom extends BaseChangeableOpenmrsMetadata {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "queue_room_id")
-	private Integer queueRoom;
-	
-	@ManyToOne
-	@JoinColumn(name = "queue_id", nullable = false)
-	private Queue queue;
-	
-	@Override
-	public Integer getId() {
-		return getQueueRoom();
-	}
-	
-	@Override
-	public void setId(Integer integer) {
-		setQueueRoom(integer);
-	}
+
+  private static final long serialVersionUID = 1L;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "queue_room_id")
+  private Integer queueRoom;
+
+  @ManyToOne
+  @JoinColumn(name = "queue_id", nullable = false)
+  private Queue queue;
+
+  @Override
+  public Integer getId() {
+    return getQueueRoom();
+  }
+
+  @Override
+  public void setId(Integer integer) {
+    setQueueRoom(integer);
+  }
 }

@@ -10,31 +10,34 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Allergy;
 
-public interface AllergyIntoleranceReactionComponentTranslator extends ToFhirTranslator<Allergy, AllergyIntolerance.AllergyIntoleranceReactionComponent>, OpenmrsFhirUpdatableTranslator<Allergy, AllergyIntolerance.AllergyIntoleranceReactionComponent> {
-	
-	/**
-	 * Maps {@link org.openmrs.Allergy} element to a
-	 * {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent}
-	 *
-	 * @param allergy the OpenMRS allergy type to translate
-	 * @return the corresponding
-	 *         {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent}
-	 */
-	@Override
-	AllergyIntolerance.AllergyIntoleranceReactionComponent toFhirResource(@Nonnull Allergy allergy);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent} to a
-	 * {@link org.openmrs.Allergy}
-	 *
-	 * @param reactionComponent the FHIR allergyIntoleranceReactionComponent to translate
-	 * @return the updated {@link org.openmrs.Allergy} object
-	 */
-	@Override
-	Allergy toOpenmrsType(@Nonnull Allergy allergy,
-	        @Nonnull AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent);
+public interface AllergyIntoleranceReactionComponentTranslator
+    extends ToFhirTranslator<Allergy, AllergyIntolerance.AllergyIntoleranceReactionComponent>,
+        OpenmrsFhirUpdatableTranslator<
+            Allergy, AllergyIntolerance.AllergyIntoleranceReactionComponent> {
+
+  /**
+   * Maps {@link org.openmrs.Allergy} element to a {@link
+   * org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent}
+   *
+   * @param allergy the OpenMRS allergy type to translate
+   * @return the corresponding {@link
+   *     org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent}
+   */
+  @Override
+  AllergyIntolerance.AllergyIntoleranceReactionComponent toFhirResource(@Nonnull Allergy allergy);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent} to
+   * a {@link org.openmrs.Allergy}
+   *
+   * @param reactionComponent the FHIR allergyIntoleranceReactionComponent to translate
+   * @return the updated {@link org.openmrs.Allergy} object
+   */
+  @Override
+  Allergy toOpenmrsType(
+      @Nonnull Allergy allergy,
+      @Nonnull AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent);
 }

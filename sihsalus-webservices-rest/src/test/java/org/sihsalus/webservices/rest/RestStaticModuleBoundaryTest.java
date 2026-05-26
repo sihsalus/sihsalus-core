@@ -13,22 +13,25 @@ import org.junit.jupiter.api.Test;
 
 class RestStaticModuleBoundaryTest {
 
-    @Test
-    void importedRestCommonSourcesDoNotUseOmodRuntimeLoading() throws IOException {
-        Path sourceRoot = Path.of("src/main/java/org/openmrs/module/webservices");
-        assertTrue(Files.isDirectory(sourceRoot), "REST upstream sources must remain local");
+  @Test
+  void importedRestCommonSourcesDoNotUseOmodRuntimeLoading() throws IOException {
+    Path sourceRoot = Path.of("src/main/java/org/openmrs/module/webservices");
+    assertTrue(Files.isDirectory(sourceRoot), "REST upstream sources must remain local");
 
-        List<Path> javaSources;
-        try (Stream<Path> stream = Files.walk(sourceRoot)) {
-            javaSources = stream.filter(path -> path.toString().endsWith(".java")).toList();
-        }
-
-        assertFalse(javaSources.isEmpty(), "REST upstream source import should not be empty");
-        for (Path source : javaSources) {
-            String content = Files.readString(source, StandardCharsets.UTF_8);
-            assertFalse(content.contains("ModuleFactory"), source + " must not use dynamic module loading");
-            assertFalse(content.contains("BaseModuleActivator"), source + " must not declare an OMOD activator");
-            assertFalse(content.contains("ModuleActivator"), source + " must not declare an OMOD activator");
-        }
+    List<Path> javaSources;
+    try (Stream<Path> stream = Files.walk(sourceRoot)) {
+      javaSources = stream.filter(path -> path.toString().endsWith(".java")).toList();
     }
+
+    assertFalse(javaSources.isEmpty(), "REST upstream source import should not be empty");
+    for (Path source : javaSources) {
+      String content = Files.readString(source, StandardCharsets.UTF_8);
+      assertFalse(
+          content.contains("ModuleFactory"), source + " must not use dynamic module loading");
+      assertFalse(
+          content.contains("BaseModuleActivator"), source + " must not declare an OMOD activator");
+      assertFalse(
+          content.contains("ModuleActivator"), source + " must not declare an OMOD activator");
+    }
+  }
 }

@@ -10,37 +10,37 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Address;
 import org.openmrs.PersonAddress;
 
-public interface PersonAddressTranslator extends OpenmrsFhirUpdatableTranslator<PersonAddress, Address> {
-	
-	/**
-	 * Maps an {@link PersonAddress} to an {@link Address}
-	 * 
-	 * @param address the address to translate
-	 * @return the corresponding FHIR address
-	 */
-	@Override
-	Address toFhirResource(@Nonnull PersonAddress address);
-	
-	/**
-	 * Maps an {@link Address} to an {@link org.openmrs.Address}
-	 * 
-	 * @param address the address to translate
-	 * @return the corresponding OpenMRS address
-	 */
-	@Override
-	PersonAddress toOpenmrsType(@Nonnull Address address);
-	
-	/**
-	 * Maps an {@link Address} to an existing {@link org.openmrs.Address}
-	 * 
-	 * @param personAddress the person address to update
-	 * @param address the resource to translate
-	 * @return the updated OpenMRS address
-	 */
-	@Override
-	PersonAddress toOpenmrsType(@Nonnull PersonAddress personAddress, @Nonnull Address address);
+public interface PersonAddressTranslator
+    extends OpenmrsFhirUpdatableTranslator<PersonAddress, Address> {
+
+  /**
+   * Maps an {@link PersonAddress} to an {@link Address}
+   *
+   * @param address the address to translate
+   * @return the corresponding FHIR address
+   */
+  @Override
+  Address toFhirResource(@Nonnull PersonAddress address);
+
+  /**
+   * Maps an {@link Address} to an {@link org.openmrs.Address}
+   *
+   * @param address the address to translate
+   * @return the corresponding OpenMRS address
+   */
+  @Override
+  PersonAddress toOpenmrsType(@Nonnull Address address);
+
+  /**
+   * Maps an {@link Address} to an existing {@link org.openmrs.Address}
+   *
+   * @param personAddress the person address to update
+   * @param address the resource to translate
+   * @return the updated OpenMRS address
+   */
+  @Override
+  PersonAddress toOpenmrsType(@Nonnull PersonAddress personAddress, @Nonnull Address address);
 }

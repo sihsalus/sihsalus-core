@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import javax.annotation.Nonnull;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -23,31 +22,41 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  *
  * @param <T>
  */
-public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> extends BasePersonDao<T> {
-	
-	@Override
-	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull SearchParameterMap theParams) {
-		criteriaContext.addJoin("person", "p");
-		theParams.getParameters().forEach(entry -> {
-			switch (entry.getKey()) {
-				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleIdentifier(criteriaContext, (TokenAndListParam) param.getParam()));
-					break;
-				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
-					break;
-				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(criteriaContext, entry);
-					break;
-				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					break;
-			}
-		});
-	}
-	
-	protected abstract <U> void handleIdentifier(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        TokenAndListParam identifier);
+public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable>
+    extends BasePersonDao<T> {
+
+  @Override
+  protected <U> void setupSearchParams(
+      @Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+      @Nonnull SearchParameterMap theParams) {
+    criteriaContext.addJoin("person", "p");
+    theParams
+        .getParameters()
+        .forEach(
+            entry -> {
+              switch (entry.getKey()) {
+                case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
+                  entry
+                      .getValue()
+                      .forEach(
+                          param ->
+                              handleIdentifier(
+                                  criteriaContext, (TokenAndListParam) param.getParam()));
+                  break;
+                case FhirConstants.NAME_SEARCH_HANDLER:
+                  entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
+                  break;
+                case FhirConstants.ADDRESS_SEARCH_HANDLER:
+                  handleAddresses(criteriaContext, entry);
+                  break;
+                case FhirConstants.COMMON_SEARCH_HANDLER:
+                  handleCommonSearchParameters(criteriaContext, entry.getValue())
+                      .ifPresent(criteriaContext::addPredicate);
+                  break;
+              }
+            });
+  }
+
+  protected abstract <U> void handleIdentifier(
+      OpenmrsFhirCriteriaContext<T, U> criteriaContext, TokenAndListParam identifier);
 }

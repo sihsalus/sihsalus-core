@@ -10,18 +10,17 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.LocationTag;
 
 public interface LocationTagTranslator extends ToOpenmrsTranslator<LocationTag, Coding> {
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Coding} to an OpenMRS LcationTag
-	 *
-	 * @param tag the FHIR Coding to translate
-	 * @return the corresponding OpenMRS LocationTag
-	 */
-	@Override
-	LocationTag toOpenmrsType(@Nonnull Coding tag);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Coding} to an OpenMRS LcationTag
+   *
+   * @param tag the FHIR Coding to translate
+   * @return the corresponding OpenMRS LocationTag
+   */
+  @Override
+  LocationTag toOpenmrsType(@Nonnull Coding tag);
 }

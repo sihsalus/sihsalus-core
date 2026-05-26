@@ -13,10 +13,8 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
 
-import javax.annotation.Nonnull;
-
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -31,60 +29,69 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OrderReferenceTranslatorImpl implements OrderReferenceTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirMedicationRequestDao medicationRequestDao;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirOrderDao orderDao;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private OrderIdentifierTranslator orderIdentifierTranslator;
-	
-	@Override
-	public Reference toFhirResource(@Nonnull Order order) {
-		if (order == null) {
-			return null;
-		}
-		return getRequestReference(order);
-	}
-	
-	@Override
-	public Order toOpenmrsType(@Nonnull Reference reference) {
-		if (reference == null) {
-			return null;
-		}
-		
-		Optional<String> referenceType = getReferenceType(reference);
-		if (referenceType
-		        .map(ref -> !(ref.equals(FhirConstants.SERVICE_REQUEST) || ref.equals(FhirConstants.MEDICATION_REQUEST)))
-		        .orElse(true)) {
-			throw new IllegalArgumentException("Reference must be to a ServiceRequest or MedicationRequest");
-		}
-		
-		return getReferenceId(reference).map(uuid -> {
-			switch (referenceType.get()) {
-				case FhirConstants.MEDICATION_REQUEST:
-					return medicationRequestDao.get(uuid);
-				case FhirConstants.SERVICE_REQUEST:
-					return orderDao.get(uuid);
-				default:
-					return null;
-			}
-		}).orElse(null);
-	}
-	
-	private Reference getRequestReference(Order order) {
-		Reference orderReference = ReferenceHandlingTranslator.createOrderReference(order);
-		if (orderReference != null) {
-			return orderReference;
-		}
-		Reference reference = new Reference().setReference(FhirConstants.SERVICE_REQUEST + "/" + order.getUuid())
-		        .setType(FhirConstants.SERVICE_REQUEST);
-		reference.setIdentifier(orderIdentifierTranslator.toFhirResource(order));
-		return reference;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirMedicationRequestDao medicationRequestDao;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirOrderDao orderDao;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private OrderIdentifierTranslator orderIdentifierTranslator;
+
+  @Override
+  public Reference toFhirResource(@Nonnull Order order) {
+    if (order == null) {
+      return null;
+    }
+    return getRequestReference(order);
+  }
+
+  @Override
+  public Order toOpenmrsType(@Nonnull Reference reference) {
+    if (reference == null) {
+      return null;
+    }
+
+    Optional<String> referenceType = getReferenceType(reference);
+    if (referenceType
+        .map(
+            ref ->
+                !(ref.equals(FhirConstants.SERVICE_REQUEST)
+                    || ref.equals(FhirConstants.MEDICATION_REQUEST)))
+        .orElse(true)) {
+      throw new IllegalArgumentException(
+          "Reference must be to a ServiceRequest or MedicationRequest");
+    }
+
+    return getReferenceId(reference)
+        .map(
+            uuid -> {
+              switch (referenceType.get()) {
+                case FhirConstants.MEDICATION_REQUEST:
+                  return medicationRequestDao.get(uuid);
+                case FhirConstants.SERVICE_REQUEST:
+                  return orderDao.get(uuid);
+                default:
+                  return null;
+              }
+            })
+        .orElse(null);
+  }
+
+  private Reference getRequestReference(Order order) {
+    Reference orderReference = ReferenceHandlingTranslator.createOrderReference(order);
+    if (orderReference != null) {
+      return orderReference;
+    }
+    Reference reference =
+        new Reference()
+            .setReference(FhirConstants.SERVICE_REQUEST + "/" + order.getUuid())
+            .setType(FhirConstants.SERVICE_REQUEST);
+    reference.setIdentifier(orderIdentifierTranslator.toFhirResource(order));
+    return reference;
+  }
 }

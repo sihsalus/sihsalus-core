@@ -43,132 +43,133 @@ import org.springframework.context.annotation.FilterType;
 
 @Configuration
 @ComponentScans({
-        @ComponentScan(basePackageClasses = Legacy1xRestController.class),
-        @ComponentScan(
-                basePackageClasses = QueueModuleActivator.class,
-                useDefaultFilters = false,
-                includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Handler.class))
+  @ComponentScan(basePackageClasses = Legacy1xRestController.class),
+  @ComponentScan(
+      basePackageClasses = QueueModuleActivator.class,
+      useDefaultFilters = false,
+      includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Handler.class))
 })
 public class SihsalusQueueConfiguration {
 
-    @Bean
-    HibernateMappingContributor queueLiquibaseOrderingContributor() {
-        return List::of;
-    }
+  @Bean
+  HibernateMappingContributor queueLiquibaseOrderingContributor() {
+    return List::of;
+  }
 
-    @Bean
-    SmartInitializingSingleton queueTimerTaskStaticInitializer() {
-        return () -> {
-            QueueTimerTask.setDaemonToken(null);
-            QueueTimerTask.setEnabled(true);
-        };
-    }
+  @Bean
+  SmartInitializingSingleton queueTimerTaskStaticInitializer() {
+    return () -> {
+      QueueTimerTask.setDaemonToken(null);
+      QueueTimerTask.setEnabled(true);
+    };
+  }
 
-    @Bean
-    QueueTaskExecutor queueTaskExecutor() {
-        return new QueueTaskExecutor();
-    }
+  @Bean
+  QueueTaskExecutor queueTaskExecutor() {
+    return new QueueTaskExecutor();
+  }
 
-    @Bean
-    QueueDao queueDao(SessionFactory sessionFactory) {
-        return new QueueDaoImpl(sessionFactory);
-    }
+  @Bean
+  QueueDao queueDao(SessionFactory sessionFactory) {
+    return new QueueDaoImpl(sessionFactory);
+  }
 
-    @Bean
-    QueueEntryDao queueEntryDao(SessionFactory sessionFactory) {
-        return new QueueEntryDaoImpl(sessionFactory);
-    }
+  @Bean
+  QueueEntryDao queueEntryDao(SessionFactory sessionFactory) {
+    return new QueueEntryDaoImpl(sessionFactory);
+  }
 
-    @Bean
-    QueueRoomDao queueRoomDao(SessionFactory sessionFactory) {
-        return new QueueRoomDaoImpl(sessionFactory);
-    }
+  @Bean
+  QueueRoomDao queueRoomDao(SessionFactory sessionFactory) {
+    return new QueueRoomDaoImpl(sessionFactory);
+  }
 
-    @Bean
-    RoomProviderMapDao roomProviderMapDao(SessionFactory sessionFactory) {
-        return new RoomProviderMapDaoImpl(sessionFactory);
-    }
+  @Bean
+  RoomProviderMapDao roomProviderMapDao(SessionFactory sessionFactory) {
+    return new RoomProviderMapDaoImpl(sessionFactory);
+  }
 
-    @Bean(name = "queue.QueueService")
-    QueueService queueService(QueueDao queueDao) {
-        QueueServiceImpl service = new QueueServiceImpl();
-        service.setDao(queueDao);
-        return service;
-    }
+  @Bean(name = "queue.QueueService")
+  QueueService queueService(QueueDao queueDao) {
+    QueueServiceImpl service = new QueueServiceImpl();
+    service.setDao(queueDao);
+    return service;
+  }
 
-    @Bean(name = "queue.QueueEntryService")
-    QueueEntryService queueEntryService(
-            QueueEntryDao queueEntryDao,
-            VisitService visitService,
-            AdministrationService administrationService) {
-        QueueEntryServiceImpl service = new QueueEntryServiceImpl();
-        service.setDao(queueEntryDao);
-        service.setVisitService(visitService);
-        service.setAdministrationService(administrationService);
-        return service;
-    }
+  @Bean(name = "queue.QueueEntryService")
+  QueueEntryService queueEntryService(
+      QueueEntryDao queueEntryDao,
+      VisitService visitService,
+      AdministrationService administrationService) {
+    QueueEntryServiceImpl service = new QueueEntryServiceImpl();
+    service.setDao(queueEntryDao);
+    service.setVisitService(visitService);
+    service.setAdministrationService(administrationService);
+    return service;
+  }
 
-    @Bean(name = "queue.QueueRoomService")
-    QueueRoomService queueRoomService(QueueRoomDao queueRoomDao) {
-        QueueRoomServiceImpl service = new QueueRoomServiceImpl();
-        service.setDao(queueRoomDao);
-        return service;
-    }
+  @Bean(name = "queue.QueueRoomService")
+  QueueRoomService queueRoomService(QueueRoomDao queueRoomDao) {
+    QueueRoomServiceImpl service = new QueueRoomServiceImpl();
+    service.setDao(queueRoomDao);
+    return service;
+  }
 
-    @Bean(name = "queue.RoomProviderMapService")
-    RoomProviderMapService roomProviderMapService(RoomProviderMapDao roomProviderMapDao) {
-        RoomProviderMapServiceImpl service = new RoomProviderMapServiceImpl();
-        service.setDao(roomProviderMapDao);
-        return service;
-    }
+  @Bean(name = "queue.RoomProviderMapService")
+  RoomProviderMapService roomProviderMapService(RoomProviderMapDao roomProviderMapDao) {
+    RoomProviderMapServiceImpl service = new RoomProviderMapServiceImpl();
+    service.setDao(roomProviderMapDao);
+    return service;
+  }
 
-    @Bean(name = "queue.QueueServicesWrapper")
-    QueueServicesWrapper queueServicesWrapper(
-            QueueService queueService,
-            QueueEntryService queueEntryService,
-            QueueRoomService queueRoomService,
-            RoomProviderMapService roomProviderMapService,
-            AdministrationService administrationService,
-            ConceptService conceptService,
-            LocationService locationService,
-            PatientService patientService,
-            VisitService visitService,
-            ProviderService providerService) {
-        return new QueueServicesWrapper(
-                queueService,
-                queueEntryService,
-                queueRoomService,
-                roomProviderMapService,
-                administrationService,
-                conceptService,
-                locationService,
-                patientService,
-                visitService,
-                providerService);
-    }
+  @Bean(name = "queue.QueueServicesWrapper")
+  QueueServicesWrapper queueServicesWrapper(
+      QueueService queueService,
+      QueueEntryService queueEntryService,
+      QueueRoomService queueRoomService,
+      RoomProviderMapService roomProviderMapService,
+      AdministrationService administrationService,
+      ConceptService conceptService,
+      LocationService locationService,
+      PatientService patientService,
+      VisitService visitService,
+      ProviderService providerService) {
+    return new QueueServicesWrapper(
+        queueService,
+        queueEntryService,
+        queueRoomService,
+        roomProviderMapService,
+        administrationService,
+        conceptService,
+        locationService,
+        patientService,
+        visitService,
+        providerService);
+  }
 
-    @Bean(name = "existingValueSortWeightGenerator")
-    ExistingValueSortWeightGenerator existingValueSortWeightGenerator() {
-        return new ExistingValueSortWeightGenerator();
-    }
+  @Bean(name = "existingValueSortWeightGenerator")
+  ExistingValueSortWeightGenerator existingValueSortWeightGenerator() {
+    return new ExistingValueSortWeightGenerator();
+  }
 
-    @Bean(name = "basicPrioritySortWeightGenerator")
-    BasicPrioritySortWeightGenerator basicPrioritySortWeightGenerator(QueueServicesWrapper queueServicesWrapper) {
-        return new BasicPrioritySortWeightGenerator(queueServicesWrapper);
-    }
+  @Bean(name = "basicPrioritySortWeightGenerator")
+  BasicPrioritySortWeightGenerator basicPrioritySortWeightGenerator(
+      QueueServicesWrapper queueServicesWrapper) {
+    return new BasicPrioritySortWeightGenerator(queueServicesWrapper);
+  }
 
-    @Bean
-    SmartInitializingSingleton queueServiceRegistrar(
-            ServiceContext serviceContext,
-            QueueService queueService,
-            QueueEntryService queueEntryService,
-            QueueRoomService queueRoomService,
-            RoomProviderMapService roomProviderMapService) {
-        return () -> {
-            serviceContext.setService(QueueService.class, queueService);
-            serviceContext.setService(QueueEntryService.class, queueEntryService);
-            serviceContext.setService(QueueRoomService.class, queueRoomService);
-            serviceContext.setService(RoomProviderMapService.class, roomProviderMapService);
-        };
-    }
+  @Bean
+  SmartInitializingSingleton queueServiceRegistrar(
+      ServiceContext serviceContext,
+      QueueService queueService,
+      QueueEntryService queueEntryService,
+      QueueRoomService queueRoomService,
+      RoomProviderMapService roomProviderMapService) {
+    return () -> {
+      serviceContext.setService(QueueService.class, queueService);
+      serviceContext.setService(QueueEntryService.class, queueEntryService);
+      serviceContext.setService(QueueRoomService.class, queueRoomService);
+      serviceContext.setService(RoomProviderMapService.class, roomProviderMapService);
+    };
+  }
 }

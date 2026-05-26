@@ -1,14 +1,18 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
- * <p>
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
+ *
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reportingrest.web.resource;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.report.ReportRequest;
@@ -29,14 +33,15 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + ReportingRestController.REPORTING_REST_NAMESPACE + "/reportDefinitionsWithScheduledRequests",
-    supportedClass = SimpleObject.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
-public class ReportDefinitionsWithScheduledRequestsResource extends DelegatingCrudResource<SimpleObject> {
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + ReportingRestController.REPORTING_REST_NAMESPACE
+            + "/reportDefinitionsWithScheduledRequests",
+    supportedClass = SimpleObject.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+public class ReportDefinitionsWithScheduledRequestsResource
+    extends DelegatingCrudResource<SimpleObject> {
 
   @Override
   public DelegatingResourceDescription getRepresentationDescription(Representation representation) {
@@ -57,12 +62,14 @@ public class ReportDefinitionsWithScheduledRequestsResource extends DelegatingCr
   }
 
   @Override
-  public void purge(SimpleObject scheduledReport, RequestContext requestContext) throws ResponseException {
+  public void purge(SimpleObject scheduledReport, RequestContext requestContext)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
   @Override
-  protected void delete(SimpleObject scheduledReport, String s, RequestContext requestContext) throws ResponseException {
+  protected void delete(SimpleObject scheduledReport, String s, RequestContext requestContext)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -97,14 +104,19 @@ public class ReportDefinitionsWithScheduledRequestsResource extends DelegatingCr
     List<SimpleObject> scheduledReports = new ArrayList<SimpleObject>();
 
     for (ReportDefinition reportDefinition : reportDefinitions) {
-      List<ReportRequest> scheduledRequests = Context
-          .getService(ReportService.class)
-          .getReportRequests(reportDefinition, null, null, ReportRequest.Status.SCHEDULED,
-              ReportRequest.Status.SCHEDULE_COMPLETED);
+      List<ReportRequest> scheduledRequests =
+          Context.getService(ReportService.class)
+              .getReportRequests(
+                  reportDefinition,
+                  null,
+                  null,
+                  ReportRequest.Status.SCHEDULED,
+                  ReportRequest.Status.SCHEDULE_COMPLETED);
 
-      scheduledReports.add(new SimpleObject()
-          .add("reportDefinition", reportDefinition)
-          .add("scheduledRequests", scheduledRequests));
+      scheduledReports.add(
+          new SimpleObject()
+              .add("reportDefinition", reportDefinition)
+              .add("scheduledRequests", scheduledRequests));
     }
 
     return scheduledReports;

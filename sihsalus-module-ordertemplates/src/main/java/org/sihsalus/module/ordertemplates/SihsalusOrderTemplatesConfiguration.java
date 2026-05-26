@@ -14,26 +14,27 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackageClasses = {OrderTemplatesRestController.class, OrderTemplatesResource.class})
+@ComponentScan(
+    basePackageClasses = {OrderTemplatesRestController.class, OrderTemplatesResource.class})
 public class SihsalusOrderTemplatesConfiguration {
 
-    @Bean
-    OrderTemplatesDao orderTemplatesDao(DbSessionFactory dbSessionFactory) {
-        HibernateOrderTemplatesDao dao = new HibernateOrderTemplatesDao();
-        dao.setSessionFactory(dbSessionFactory);
-        return dao;
-    }
+  @Bean
+  OrderTemplatesDao orderTemplatesDao(DbSessionFactory dbSessionFactory) {
+    HibernateOrderTemplatesDao dao = new HibernateOrderTemplatesDao();
+    dao.setSessionFactory(dbSessionFactory);
+    return dao;
+  }
 
-    @Bean
-    OrderTemplatesService orderTemplatesService(OrderTemplatesDao orderTemplatesDao) {
-        OrderTemplatesServiceImpl service = new OrderTemplatesServiceImpl();
-        service.setDao(orderTemplatesDao);
-        return service;
-    }
+  @Bean
+  OrderTemplatesService orderTemplatesService(OrderTemplatesDao orderTemplatesDao) {
+    OrderTemplatesServiceImpl service = new OrderTemplatesServiceImpl();
+    service.setDao(orderTemplatesDao);
+    return service;
+  }
 
-    @Bean
-    SmartInitializingSingleton orderTemplatesServiceRegistrar(
-            ServiceContext serviceContext, OrderTemplatesService orderTemplatesService) {
-        return () -> serviceContext.setService(OrderTemplatesService.class, orderTemplatesService);
-    }
+  @Bean
+  SmartInitializingSingleton orderTemplatesServiceRegistrar(
+      ServiceContext serviceContext, OrderTemplatesService orderTemplatesService) {
+    return () -> serviceContext.setService(OrderTemplatesService.class, orderTemplatesService);
+  }
 }

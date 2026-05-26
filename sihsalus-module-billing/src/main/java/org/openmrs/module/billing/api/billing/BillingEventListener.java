@@ -19,19 +19,15 @@ import org.openmrs.module.DaemonTokenAware;
  * starts. Implementations declare which domain class and action they listen to. The module
  * activator discovers all registered {@code BillingEventListener} beans, sets the daemon token, and
  * subscribes them automatically.
- * <p>
- * To add a new listener, implement this interface and register the bean in
- * {@code moduleApplicationContext.xml} — no changes to the activator are needed.
+ *
+ * <p>To add a new listener, implement this interface and register the bean in {@code
+ * moduleApplicationContext.xml} — no changes to the activator are needed.
  */
 public interface BillingEventListener extends EventListener, DaemonTokenAware {
-	
-	/**
-	 * The OpenMRS domain class this listener subscribes to (e.g. {@code Order.class}).
-	 */
-	Class<? extends OpenmrsObject> getSubscribedClass();
-	
-	/**
-	 * The event action this listener subscribes to (e.g. {@link Event.Action#CREATED}).
-	 */
-	Event.Action getSubscribedAction();
+
+  /** The OpenMRS domain class this listener subscribes to (e.g. {@code Order.class}). */
+  Class<? extends OpenmrsObject> getSubscribedClass();
+
+  /** The event action this listener subscribes to (e.g. {@link Event.Action#CREATED}). */
+  Event.Action getSubscribedAction();
 }

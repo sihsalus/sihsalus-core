@@ -14,6 +14,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 
 public interface FhirDiagnosisService extends FhirService<Condition> {
-	
-	IBundleProvider searchDiagnoses(DiagnosisSearchParams diagnosisSearchParams);
+
+  IBundleProvider searchDiagnoses(DiagnosisSearchParams diagnosisSearchParams);
 }

@@ -8,11 +8,11 @@ import org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition.De
 
 class LogicDataSetDefinitionTest {
 
-	@Test
-	void decodeFormatterAllowsColonInsideReplacementValue() {
-		LogicDataSetDefinition definition = new LogicDataSetDefinition();
-		DecodeFormatter formatter = definition.new DecodeFormatter("code:label:with:colon");
+  @Test
+  void decodeFormatterAllowsColonInsideReplacementValue() {
+    LogicDataSetDefinition definition = new LogicDataSetDefinition();
+    DecodeFormatter formatter = definition.new DecodeFormatter("code:label:with:colon");
 
-		assertEquals("label:with:colon", formatter.format(new Result("code")));
-	}
+    assertEquals("label:with:colon", formatter.format(new Result("code")));
+  }
 }

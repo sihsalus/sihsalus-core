@@ -14,8 +14,12 @@
 
 package org.openmrs.module.reportingrest.web.resource;
 
-import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Cohort;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.cohort.Cohorts;
@@ -54,221 +58,236 @@ import org.openmrs.module.webservices.rest.web.resource.api.Creatable;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.util.OpenmrsUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Used for <em>evaluating</em> a list of queries +/- columns that refer to definition libraries on the fly.
+ * Used for <em>evaluating</em> a list of queries +/- columns that refer to definition libraries on
+ * the fly.
  *
- * If you want to persist an AdHocDataSet for later usage
+ * <p>If you want to persist an AdHocDataSet for later usage
+ *
  * @see {@link org.openmrs.module.reportingrest.web.resource.AdHocDataSetResource}
- *
- * If you POST with v=rowFilters, you will get back detailed results about the row filters, otherwise you will
- * get back the result of evaluating the data set itself
+ *     <p>If you POST with v=rowFilters, you will get back detailed results about the row filters,
+ *     otherwise you will get back the result of evaluating the data set itself
  */
-@Resource(name = RestConstants.VERSION_1 + ReportingRestController.REPORTING_REST_NAMESPACE + "/adhocquery",
-        supportedClass = AdHocDataSet.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+@Resource(
+    name =
+        RestConstants.VERSION_1 + ReportingRestController.REPORTING_REST_NAMESPACE + "/adhocquery",
+    supportedClass = AdHocDataSet.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
 public class AdHocQueryResource implements Creatable {
 
-    private AllDefinitionLibraries libraries;
+  private AllDefinitionLibraries libraries;
 
-    /**
-     * Resources are not Spring beans, so we can't autowire the libraries property.
-     * @return
-     */
-    private AllDefinitionLibraries getLibraries() {
-        if (libraries == null) {
-            libraries = Context.getRegisteredComponents(AllDefinitionLibraries.class).get(0);
-        }
-        return libraries;
+  /**
+   * Resources are not Spring beans, so we can't autowire the libraries property.
+   *
+   * @return
+   */
+  private AllDefinitionLibraries getLibraries() {
+    if (libraries == null) {
+      libraries = Context.getRegisteredComponents(AllDefinitionLibraries.class).get(0);
+    }
+    return libraries;
+  }
+
+  @Override
+  public Object create(SimpleObject post, RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireViewReports();
+    ObjectMapper jackson = new ObjectMapper();
+    AdHocDataSet adHocDataSet = jackson.convertValue(post, AdHocDataSet.class);
+
+    boolean previewMode =
+        context.getRepresentation().getRepresentation().equals("rowFilters")
+            || context.getRepresentation().getRepresentation().equals("preview");
+    AdHocRowFilterResults rowFilterResults = new AdHocRowFilterResults();
+
+    if (!PatientDataSetDefinition.class.getName().equals(adHocDataSet.getType())) {
+      throw new IllegalArgumentException(
+          "So far we only support ad hoc queries of PatientDataSetDefinition");
     }
 
-    @Override
-    public Object create(SimpleObject post, RequestContext context) throws ResponseException {
-        ReportingRestPrivileges.requireViewReports();
-        ObjectMapper jackson = new ObjectMapper();
-        AdHocDataSet adHocDataSet = jackson.convertValue(post, AdHocDataSet.class);
-
-        boolean previewMode = context.getRepresentation().getRepresentation().equals("rowFilters") || context.getRepresentation().getRepresentation().equals("preview");
-        AdHocRowFilterResults rowFilterResults = new AdHocRowFilterResults();
-
-        if (!PatientDataSetDefinition.class.getName().equals(adHocDataSet.getType())) {
-            throw new IllegalArgumentException("So far we only support ad hoc queries of PatientDataSetDefinition");
-        }
-
-        PatientDataSetDefinition dsd = new PatientDataSetDefinition();
-        for (AdHocParameter adHocParameter : adHocDataSet.getParameters()) {
-            try {
-                dsd.addParameter(adHocParameter.toParameter());
-            } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException("Invalid type or collectionType in parameter", e);
-            }
-        }
-
-        int colNumber = 0;
-        for (AdHocColumn column : adHocDataSet.getColumns()) {
-            colNumber += 1;
-            // {
-            //   "type":"org.openmrs.module.reporting.data.patient.definition.PatientIdDataDefinition",
-            //   "key":"reporting.patientDataCalculation.patientId",
-            //   "name":"reporting.patientDataCalculation.patientId.name",
-            //   "description":"reporting.patientDataCalculation.patientId.description",
-            //   "parameters":[]
-            // }
-            // if we have parameters they are like
-            // {
-            //   "name":"effectiveDate",
-            //   "type":"java.util.Date",
-            //   "collectionType":null,
-            //   "value":"2013-04-03T04:00:00.000Z"
-            // }
-
-            DefinitionLibraryPatientDataDefinition definition = new DefinitionLibraryPatientDataDefinition(column.getKey());
-            definition.loadParameters(getLibraries());
-            Map<String, Object> mappings = Mapped.straightThroughMappings(definition);
-
-            try {
-                definition.setParameterValues(ParameterUtil.convertParameterValues(definition.getParameters(), column.getParameterValues()));
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Error in column " + colNumber, e);
-            }
-
-            String columnName = column.getName();
-            if (previewMode) {
-                columnName = "(" + colNumber + ") " + columnName;
-            }
-            dsd.addColumn(columnName, definition, mappings);
-        }
-
-        CohortDefinitionService cohortDefinitionService = Context.getService(CohortDefinitionService.class);
-        EvaluationContext evaluationContext = new EvaluationContext();
-        try {
-            evaluationContext.setParameterValues(ParameterUtil.convertParameterValues(dsd.getParameters(), adHocDataSet.getParameterValues()));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error in parameter", e);
-        }
-
-        List<Mapped> queries = new ArrayList<Mapped>();
-        for (AdHocRowFilter rowFilter : adHocDataSet.getRowFilters()) {
-            DefinitionLibraryCohortDefinition cd = new DefinitionLibraryCohortDefinition(rowFilter.getKey());
-            cd.loadParameters(getLibraries());
-            try {
-                cd.setParameterValues(ParameterUtil.convertParameterValues(cd.getParameters(), rowFilter.getParameterValues()));
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Error in rowFilter " + rowFilter.getKey(), e);
-            }
-            Mapped<? extends Query> mappedQuery = mapMissingParametersStraightThrough(cd, rowFilter.getParameterValues());
-            queries.add(mappedQuery);
-
-            try {
-                EvaluatedCohort evaluated = cohortDefinitionService.evaluate((Mapped<CohortDefinition>) mappedQuery, evaluationContext);
-                rowFilterResults.addResult(simplify(evaluated));
-            } catch (EvaluationException e) {
-                throw new IllegalStateException("Failed to evaluate: " + rowFilter.getKey(), e);
-            }
-        }
-
-        EvaluatedCohort allRows;
-        if (queries.size() > 0) {
-            CompositionCohortDefinition cd = new CompositionCohortDefinition();
-            cd.setParameters(dsd.getParameters());
-            for (int i = 0; i < queries.size(); ++i) {
-                Mapped<CohortDefinition> mapped = queries.get(i);
-                cd.addSearch("" + (i + 1), mapped);
-            }
-            if (StringUtils.isEmpty(adHocDataSet.getCustomRowFilterCombination())) {
-                adHocDataSet.setCustomRowFilterCombination(defaultCompositionString(queries.size()));
-            }
-            cd.setCompositionString(adHocDataSet.getCustomRowFilterCombination());
-
-            try {
-                allRows = cohortDefinitionService.evaluate(cd, evaluationContext);
-                rowFilterResults.setResult(new SimpleIdSet(allRows.getMemberIds()));
-            } catch (EvaluationException e) {
-                throw new IllegalArgumentException("Failed to evaluate composition: " + adHocDataSet.getCustomRowFilterCombination(), e);
-            }
-
-            if (context.getRepresentation().getRepresentation().equals("rowFilters")) {
-                return rowFilterResults;
-            }
-
-            Cohort cohort;
-            if (context.getRepresentation().getRepresentation().equals("preview")) {
-                // for preview purposes, we just evaluate on a small number of rows
-                cohort = new Cohort();
-                int j = 0;
-                for (Integer member : rowFilterResults.getResult().getMemberIds()) {
-                    j += 1;
-                    cohort.addMember(member);
-                    if (j >= 10) {
-                        break;
-                    }
-                }
-            } else {
-                cohort = allRows;
-            }
-
-            evaluationContext.setBaseCohort(cohort);
-        }
-        else { // no row filters
-            allRows = Cohorts.allPatients(evaluationContext);
-            if (context.getRepresentation().getRepresentation().equals("preview")) {
-                Cohort cohort = new Cohort();
-                int j = 0;
-                for (Integer member : allRows.getMemberIds()) {
-                    j += 1;
-                    cohort.addMember(member);
-                    if (j >= 10) {
-                        break;
-                    }
-                }
-                evaluationContext.setBaseCohort(cohort);
-            }
-        }
-
-        DataSet data = null;
-        try {
-            data = Context.getService(DataSetDefinitionService.class).evaluate(dsd, evaluationContext);
-        } catch (EvaluationException e) {
-            throw new IllegalArgumentException("Error evaluating preview columns", e);
-        }
-
-        SimpleObject o = (SimpleObject) ConversionUtil.convertToRepresentation(data, Representation.DEFAULT);
-        if (previewMode) {
-            o.put("allRows", simplify(allRows));
-        }
-        return o;
-
+    PatientDataSetDefinition dsd = new PatientDataSetDefinition();
+    for (AdHocParameter adHocParameter : adHocDataSet.getParameters()) {
+      try {
+        dsd.addParameter(adHocParameter.toParameter());
+      } catch (ClassNotFoundException e) {
+        throw new IllegalArgumentException("Invalid type or collectionType in parameter", e);
+      }
     }
 
-    private Mapped<Query> mapMissingParametersStraightThrough(Query cd, Map<String, Object> parameterValues) {
-        Map<String, Object> mappings = new HashMap<String, Object>();
-        for (Parameter parameter : cd.getParameters()) {
-            if (parameterValues == null || parameterValues.get(parameter.getName()) == null) {
-                mappings.put(parameter.getName(), parameter.getExpression());
-            }
+    int colNumber = 0;
+    for (AdHocColumn column : adHocDataSet.getColumns()) {
+      colNumber += 1;
+      // {
+      //   "type":"org.openmrs.module.reporting.data.patient.definition.PatientIdDataDefinition",
+      //   "key":"reporting.patientDataCalculation.patientId",
+      //   "name":"reporting.patientDataCalculation.patientId.name",
+      //   "description":"reporting.patientDataCalculation.patientId.description",
+      //   "parameters":[]
+      // }
+      // if we have parameters they are like
+      // {
+      //   "name":"effectiveDate",
+      //   "type":"java.util.Date",
+      //   "collectionType":null,
+      //   "value":"2013-04-03T04:00:00.000Z"
+      // }
+
+      DefinitionLibraryPatientDataDefinition definition =
+          new DefinitionLibraryPatientDataDefinition(column.getKey());
+      definition.loadParameters(getLibraries());
+      Map<String, Object> mappings = Mapped.straightThroughMappings(definition);
+
+      try {
+        definition.setParameterValues(
+            ParameterUtil.convertParameterValues(
+                definition.getParameters(), column.getParameterValues()));
+      } catch (Exception e) {
+        throw new IllegalArgumentException("Error in column " + colNumber, e);
+      }
+
+      String columnName = column.getName();
+      if (previewMode) {
+        columnName = "(" + colNumber + ") " + columnName;
+      }
+      dsd.addColumn(columnName, definition, mappings);
+    }
+
+    CohortDefinitionService cohortDefinitionService =
+        Context.getService(CohortDefinitionService.class);
+    EvaluationContext evaluationContext = new EvaluationContext();
+    try {
+      evaluationContext.setParameterValues(
+          ParameterUtil.convertParameterValues(
+              dsd.getParameters(), adHocDataSet.getParameterValues()));
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Error in parameter", e);
+    }
+
+    List<Mapped> queries = new ArrayList<Mapped>();
+    for (AdHocRowFilter rowFilter : adHocDataSet.getRowFilters()) {
+      DefinitionLibraryCohortDefinition cd =
+          new DefinitionLibraryCohortDefinition(rowFilter.getKey());
+      cd.loadParameters(getLibraries());
+      try {
+        cd.setParameterValues(
+            ParameterUtil.convertParameterValues(
+                cd.getParameters(), rowFilter.getParameterValues()));
+      } catch (Exception e) {
+        throw new IllegalArgumentException("Error in rowFilter " + rowFilter.getKey(), e);
+      }
+      Mapped<? extends Query> mappedQuery =
+          mapMissingParametersStraightThrough(cd, rowFilter.getParameterValues());
+      queries.add(mappedQuery);
+
+      try {
+        EvaluatedCohort evaluated =
+            cohortDefinitionService.evaluate(
+                (Mapped<CohortDefinition>) mappedQuery, evaluationContext);
+        rowFilterResults.addResult(simplify(evaluated));
+      } catch (EvaluationException e) {
+        throw new IllegalStateException("Failed to evaluate: " + rowFilter.getKey(), e);
+      }
+    }
+
+    EvaluatedCohort allRows;
+    if (queries.size() > 0) {
+      CompositionCohortDefinition cd = new CompositionCohortDefinition();
+      cd.setParameters(dsd.getParameters());
+      for (int i = 0; i < queries.size(); ++i) {
+        Mapped<CohortDefinition> mapped = queries.get(i);
+        cd.addSearch("" + (i + 1), mapped);
+      }
+      if (StringUtils.isEmpty(adHocDataSet.getCustomRowFilterCombination())) {
+        adHocDataSet.setCustomRowFilterCombination(defaultCompositionString(queries.size()));
+      }
+      cd.setCompositionString(adHocDataSet.getCustomRowFilterCombination());
+
+      try {
+        allRows = cohortDefinitionService.evaluate(cd, evaluationContext);
+        rowFilterResults.setResult(new SimpleIdSet(allRows.getMemberIds()));
+      } catch (EvaluationException e) {
+        throw new IllegalArgumentException(
+            "Failed to evaluate composition: " + adHocDataSet.getCustomRowFilterCombination(), e);
+      }
+
+      if (context.getRepresentation().getRepresentation().equals("rowFilters")) {
+        return rowFilterResults;
+      }
+
+      Cohort cohort;
+      if (context.getRepresentation().getRepresentation().equals("preview")) {
+        // for preview purposes, we just evaluate on a small number of rows
+        cohort = new Cohort();
+        int j = 0;
+        for (Integer member : rowFilterResults.getResult().getMemberIds()) {
+          j += 1;
+          cohort.addMember(member);
+          if (j >= 10) {
+            break;
+          }
         }
+      } else {
+        cohort = allRows;
+      }
 
-        return new Mapped<Query>(cd, mappings);
-    }
-
-    private IdSet simplify(IdSet<?> complex) {
-        return new SimpleIdSet(complex.getMemberIds());
-    }
-
-    private String defaultCompositionString(int size) {
-        List<Integer> list = new ArrayList<Integer>();
-        for (int i = 1; i <= size; ++i) {
-            list.add(i);
+      evaluationContext.setBaseCohort(cohort);
+    } else { // no row filters
+      allRows = Cohorts.allPatients(evaluationContext);
+      if (context.getRepresentation().getRepresentation().equals("preview")) {
+        Cohort cohort = new Cohort();
+        int j = 0;
+        for (Integer member : allRows.getMemberIds()) {
+          j += 1;
+          cohort.addMember(member);
+          if (j >= 10) {
+            break;
+          }
         }
-        return OpenmrsUtil.join(list, " AND ");
+        evaluationContext.setBaseCohort(cohort);
+      }
     }
 
-    @Override
-    public String getUri(Object instance) {
-        return null;
+    DataSet data = null;
+    try {
+      data = Context.getService(DataSetDefinitionService.class).evaluate(dsd, evaluationContext);
+    } catch (EvaluationException e) {
+      throw new IllegalArgumentException("Error evaluating preview columns", e);
     }
 
+    SimpleObject o =
+        (SimpleObject) ConversionUtil.convertToRepresentation(data, Representation.DEFAULT);
+    if (previewMode) {
+      o.put("allRows", simplify(allRows));
+    }
+    return o;
+  }
+
+  private Mapped<Query> mapMissingParametersStraightThrough(
+      Query cd, Map<String, Object> parameterValues) {
+    Map<String, Object> mappings = new HashMap<String, Object>();
+    for (Parameter parameter : cd.getParameters()) {
+      if (parameterValues == null || parameterValues.get(parameter.getName()) == null) {
+        mappings.put(parameter.getName(), parameter.getExpression());
+      }
+    }
+
+    return new Mapped<Query>(cd, mappings);
+  }
+
+  private IdSet simplify(IdSet<?> complex) {
+    return new SimpleIdSet(complex.getMemberIds());
+  }
+
+  private String defaultCompositionString(int size) {
+    List<Integer> list = new ArrayList<Integer>();
+    for (int i = 1; i <= size; ++i) {
+      list.add(i);
+    }
+    return OpenmrsUtil.join(list, " AND ");
+  }
+
+  @Override
+  public String getUri(Object instance) {
+    return null;
+  }
 }

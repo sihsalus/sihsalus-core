@@ -9,32 +9,32 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Location;
 
-public interface LocationTypeTranslator extends ToFhirTranslator<Location, List<CodeableConcept>>, UpdatableOpenmrsTranslator<Location, List<CodeableConcept>> {
-	
-	/**
-	 * Maps an {@link Location} to a type {@link CodeableConcept}
-	 *
-	 * @param omrsLocation the location to translate
-	 * @return the FHIR CodeableConcept resource for the location's type
-	 */
-	@Override
-	List<CodeableConcept> toFhirResource(@Nonnull Location omrsLocation);
-	
-	/**
-	 * Maps an {@link Location} to a {@link Address}
-	 *
-	 * @param location the location resource to update
-	 * @param type the location type to translate
-	 * @return the updated OpenMRS location
-	 */
-	@Override
-	Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> type);
+public interface LocationTypeTranslator
+    extends ToFhirTranslator<Location, List<CodeableConcept>>,
+        UpdatableOpenmrsTranslator<Location, List<CodeableConcept>> {
+
+  /**
+   * Maps an {@link Location} to a type {@link CodeableConcept}
+   *
+   * @param omrsLocation the location to translate
+   * @return the FHIR CodeableConcept resource for the location's type
+   */
+  @Override
+  List<CodeableConcept> toFhirResource(@Nonnull Location omrsLocation);
+
+  /**
+   * Maps an {@link Location} to a {@link Address}
+   *
+   * @param location the location resource to update
+   * @param type the location type to translate
+   * @return the updated OpenMRS location
+   */
+  @Override
+  Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> type);
 }

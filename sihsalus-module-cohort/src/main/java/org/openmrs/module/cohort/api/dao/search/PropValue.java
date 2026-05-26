@@ -10,9 +10,7 @@
 package org.openmrs.module.cohort.api.dao.search;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Optional;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,13 +21,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PropValue {
-	
-	@NotNull
-	private String property;
-	
-	@NotNull
-	private Object value;
-	
-	@Builder.Default
-	private Optional<String> associationPath = Optional.empty();
+
+  @NotNull private String property;
+
+  @NotNull private Object value;
+
+  @Builder.Default private Optional<String> associationPath = Optional.empty();
 }

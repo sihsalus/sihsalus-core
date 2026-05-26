@@ -15,17 +15,15 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createOrderReference;
 
-import javax.annotation.Nonnull;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Period;
@@ -49,119 +47,136 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<TestOrder> {
-	
-	private static final int START_INDEX = 0;
-	
-	private static final int END_INDEX = 1;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirTaskService taskService;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ConceptTranslator conceptTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PatientReferenceTranslator patientReferenceTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PractitionerReferenceTranslator<Provider> providerReferenceTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private OrderIdentifierTranslator orderIdentifierTranslator;
-	
-	@Override
-	public ServiceRequest toFhirResource(@Nonnull TestOrder order) {
-		notNull(order, "The TestOrder object should not be null");
-		
-		ServiceRequest serviceRequest = new ServiceRequest();
-		
-		serviceRequest.setId(order.getUuid());
-		
-		serviceRequest.setStatus(determineServiceRequestStatus(order));
-		
-		serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
-		
-		serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		
-		serviceRequest.setSubject(patientReferenceTranslator.toFhirResource(order.getPatient()));
-		
-		serviceRequest.setEncounter(encounterReferenceTranslator.toFhirResource(order.getEncounter()));
-		
-		serviceRequest.setRequester(providerReferenceTranslator.toFhirResource(order.getOrderer()));
-		
-		serviceRequest.setPerformer(Collections.singletonList(determineServiceRequestPerformer(order.getUuid())));
-		
-		serviceRequest
-		        .setOccurrence(new Period().setStart(order.getEffectiveStartDate()).setEnd(order.getEffectiveStopDate()));
-		
-		if (order.getPreviousOrder() != null) {
-			Reference orderReference = createOrderReference(order.getPreviousOrder(), orderIdentifierTranslator);
-			if (orderReference != null) {
-				switch (order.getAction()) {
-					case DISCONTINUE:
-					case REVISE:
-						serviceRequest.setReplaces(Collections.singletonList(orderReference));
-						break;
-					case RENEW:
-						serviceRequest.setBasedOn(Collections.singletonList(orderReference));
-						break;
-				}
-			}
-		}
-		
-		serviceRequest.getMeta().setLastUpdated(getLastUpdated(order));
-		serviceRequest.getMeta().setVersionId(getVersionId(order));
-		
-		return serviceRequest;
-	}
-	
-	@Override
-	public TestOrder toOpenmrsType(@Nonnull ServiceRequest resource) {
-		throw new UnsupportedOperationException();
-	}
-	
-	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(TestOrder order) {
-		
-		Date currentDate = new Date();
-		
-		boolean isCompeted = order.isActivated()
-		        && ((order.getDateStopped() != null && currentDate.after(order.getDateStopped()))
-		                || (order.getAutoExpireDate() != null && currentDate.after(order.getAutoExpireDate())));
-		boolean isDiscontinued = order.isActivated() && order.getAction() == Order.Action.DISCONTINUE;
-		
-		if ((isCompeted && isDiscontinued)) {
-			return ServiceRequest.ServiceRequestStatus.UNKNOWN;
-		} else if (isDiscontinued) {
-			return ServiceRequest.ServiceRequestStatus.REVOKED;
-		} else if (isCompeted) {
-			return ServiceRequest.ServiceRequestStatus.COMPLETED;
-		} else {
-			return ServiceRequest.ServiceRequestStatus.ACTIVE;
-		}
-	}
-	
-	private Reference determineServiceRequestPerformer(String orderUuid) {
-		IBundleProvider results = taskService.searchForTasks(new TaskSearchParams(
-		        new ReferenceAndListParam()
-		                .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		        null, null, null, null, null, null, null, null));
-		
-		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
-		        .collect(Collectors.toList());
-		
-		if (serviceRequestTasks.size() != 1) {
-			return null;
-		}
-		
-		return serviceRequestTasks.iterator().next().getOwner();
-	}
+
+  private static final int START_INDEX = 0;
+
+  private static final int END_INDEX = 1;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirTaskService taskService;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ConceptTranslator conceptTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PatientReferenceTranslator patientReferenceTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PractitionerReferenceTranslator<Provider> providerReferenceTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private OrderIdentifierTranslator orderIdentifierTranslator;
+
+  @Override
+  public ServiceRequest toFhirResource(@Nonnull TestOrder order) {
+    notNull(order, "The TestOrder object should not be null");
+
+    ServiceRequest serviceRequest = new ServiceRequest();
+
+    serviceRequest.setId(order.getUuid());
+
+    serviceRequest.setStatus(determineServiceRequestStatus(order));
+
+    serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
+
+    serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+
+    serviceRequest.setSubject(patientReferenceTranslator.toFhirResource(order.getPatient()));
+
+    serviceRequest.setEncounter(encounterReferenceTranslator.toFhirResource(order.getEncounter()));
+
+    serviceRequest.setRequester(providerReferenceTranslator.toFhirResource(order.getOrderer()));
+
+    serviceRequest.setPerformer(
+        Collections.singletonList(determineServiceRequestPerformer(order.getUuid())));
+
+    serviceRequest.setOccurrence(
+        new Period().setStart(order.getEffectiveStartDate()).setEnd(order.getEffectiveStopDate()));
+
+    if (order.getPreviousOrder() != null) {
+      Reference orderReference =
+          createOrderReference(order.getPreviousOrder(), orderIdentifierTranslator);
+      if (orderReference != null) {
+        switch (order.getAction()) {
+          case DISCONTINUE:
+          case REVISE:
+            serviceRequest.setReplaces(Collections.singletonList(orderReference));
+            break;
+          case RENEW:
+            serviceRequest.setBasedOn(Collections.singletonList(orderReference));
+            break;
+        }
+      }
+    }
+
+    serviceRequest.getMeta().setLastUpdated(getLastUpdated(order));
+    serviceRequest.getMeta().setVersionId(getVersionId(order));
+
+    return serviceRequest;
+  }
+
+  @Override
+  public TestOrder toOpenmrsType(@Nonnull ServiceRequest resource) {
+    throw new UnsupportedOperationException();
+  }
+
+  private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(TestOrder order) {
+
+    Date currentDate = new Date();
+
+    boolean isCompeted =
+        order.isActivated()
+            && ((order.getDateStopped() != null && currentDate.after(order.getDateStopped()))
+                || (order.getAutoExpireDate() != null
+                    && currentDate.after(order.getAutoExpireDate())));
+    boolean isDiscontinued = order.isActivated() && order.getAction() == Order.Action.DISCONTINUE;
+
+    if ((isCompeted && isDiscontinued)) {
+      return ServiceRequest.ServiceRequestStatus.UNKNOWN;
+    } else if (isDiscontinued) {
+      return ServiceRequest.ServiceRequestStatus.REVOKED;
+    } else if (isCompeted) {
+      return ServiceRequest.ServiceRequestStatus.COMPLETED;
+    } else {
+      return ServiceRequest.ServiceRequestStatus.ACTIVE;
+    }
+  }
+
+  private Reference determineServiceRequestPerformer(String orderUuid) {
+    IBundleProvider results =
+        taskService.searchForTasks(
+            new TaskSearchParams(
+                new ReferenceAndListParam()
+                    .addAnd(
+                        new ReferenceOrListParam()
+                            .add(new ReferenceParam("ServiceRequest", null, orderUuid))),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
+
+    Collection<Task> serviceRequestTasks =
+        results.getResources(START_INDEX, END_INDEX).stream()
+            .map(p -> (Task) p)
+            .collect(Collectors.toList());
+
+    if (serviceRequestTasks.size() != 1) {
+      return null;
+    }
+
+    return serviceRequestTasks.iterator().next().getOwner();
+  }
 }

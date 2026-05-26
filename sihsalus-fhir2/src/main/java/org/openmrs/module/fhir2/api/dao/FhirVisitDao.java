@@ -9,39 +9,37 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.openmrs.Visit;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirVisitDao extends FhirDao<Visit> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_VISITS)
-	Visit get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_VISITS)
-	List<Visit> get(@Nonnull Collection<String> uuids);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_VISITS)
-	List<Visit> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_VISITS)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized({ PrivilegeConstants.ADD_VISITS, PrivilegeConstants.EDIT_VISITS })
-	Visit createOrUpdate(@Nonnull Visit newVisit);
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_VISITS)
-	Visit delete(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_VISITS)
+  Visit get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_VISITS)
+  List<Visit> get(@Nonnull Collection<String> uuids);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_VISITS)
+  List<Visit> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_VISITS)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized({PrivilegeConstants.ADD_VISITS, PrivilegeConstants.EDIT_VISITS})
+  Visit createOrUpdate(@Nonnull Visit newVisit);
+
+  @Override
+  @Authorized(PrivilegeConstants.DELETE_VISITS)
+  Visit delete(@Nonnull String uuid);
 }

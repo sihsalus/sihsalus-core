@@ -17,26 +17,26 @@ import org.springframework.validation.Validator;
 
 @Handler(supports = FhirDiagnosticReport.class, order = 50)
 public class DiagnosticReportValidator implements Validator {
-	
-	@Override
-	public boolean supports(@NonNull Class<?> clazz) {
-		return FhirDiagnosticReport.class.isAssignableFrom(clazz);
-	}
-	
-	@Override
-	public void validate(@NonNull Object target, @NonNull Errors errors) {
-		if (!(target instanceof FhirDiagnosticReport)) {
-			return;
-		}
-		
-		FhirDiagnosticReport diagnosticReport = (FhirDiagnosticReport) target;
-		
-		if (diagnosticReport.getStatus() == null) {
-			errors.rejectValue("status", "diagnosticReport.error.statusRequired");
-		}
-		
-		if (diagnosticReport.getCode() == null) {
-			errors.rejectValue("code", "diagnosticReport.error.codeRequired");
-		}
-	}
+
+  @Override
+  public boolean supports(@NonNull Class<?> clazz) {
+    return FhirDiagnosticReport.class.isAssignableFrom(clazz);
+  }
+
+  @Override
+  public void validate(@NonNull Object target, @NonNull Errors errors) {
+    if (!(target instanceof FhirDiagnosticReport)) {
+      return;
+    }
+
+    FhirDiagnosticReport diagnosticReport = (FhirDiagnosticReport) target;
+
+    if (diagnosticReport.getStatus() == null) {
+      errors.rejectValue("status", "diagnosticReport.error.statusRequired");
+    }
+
+    if (diagnosticReport.getCode() == null) {
+      errors.rejectValue("code", "diagnosticReport.error.codeRequired");
+    }
+  }
 }

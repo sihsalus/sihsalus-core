@@ -20,16 +20,16 @@ import org.openmrs.module.queue.tasks.QueueTimerTask;
  */
 @Slf4j
 public class QueueModuleActivator extends BaseModuleActivator implements DaemonTokenAware {
-	
-	@Override
-	public void started() {
-		super.started();
-		log.info("Queue Module Started");
-		QueueTimerTask.setEnabled(true);
-	}
-	
-	@Override
-	public void setDaemonToken(DaemonToken daemonToken) {
-		QueueTimerTask.setDaemonToken(daemonToken);
-	}
+
+  @Override
+  public void started() {
+    super.started();
+    log.info("Queue Module Started");
+    QueueTimerTask.setEnabled(true);
+  }
+
+  @Override
+  public void setDaemonToken(DaemonToken daemonToken) {
+    QueueTimerTask.setDaemonToken(daemonToken);
+  }
 }

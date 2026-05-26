@@ -11,7 +11,6 @@ package org.openmrs.module.billing.api.base.entity.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.billing.api.base.entity.model.BaseCustomizableMetadata;
 
@@ -20,22 +19,23 @@ import org.openmrs.module.billing.api.base.entity.model.BaseCustomizableMetadata
  *
  * @param <E> The model class.
  */
-public abstract class BaseCustomizableMetadataDataServiceImpl<E extends BaseCustomizableMetadata<?>> extends BaseMetadataDataServiceImpl<E> {
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	protected Collection<? extends OpenmrsObject> getRelatedObjects(E entity) {
-		Collection<? extends OpenmrsObject> result = super.getRelatedObjects(entity);
-		
-		if (result == null) {
-			result = new ArrayList<OpenmrsObject>();
-		}
-		
-		Collection attributes = entity.getAttributes();
-		if (attributes != null && !attributes.isEmpty()) {
-			result.addAll(attributes);
-		}
-		
-		return result;
-	}
+public abstract class BaseCustomizableMetadataDataServiceImpl<E extends BaseCustomizableMetadata<?>>
+    extends BaseMetadataDataServiceImpl<E> {
+
+  @Override
+  @SuppressWarnings("unchecked")
+  protected Collection<? extends OpenmrsObject> getRelatedObjects(E entity) {
+    Collection<? extends OpenmrsObject> result = super.getRelatedObjects(entity);
+
+    if (result == null) {
+      result = new ArrayList<OpenmrsObject>();
+    }
+
+    Collection attributes = entity.getAttributes();
+    if (attributes != null && !attributes.isEmpty()) {
+      result.addAll(attributes);
+    }
+
+    return result;
+  }
 }

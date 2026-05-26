@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.dataset.definition.evaluator;
 
@@ -38,59 +38,65 @@ import org.openmrs.module.reporting.evaluation.EvaluationException;
 
 /**
  * The logic that evaluates a {@link SimplePatientDataSetDefinition} and produces an {@link DataSet}
+ *
  * @see SimplePatientDataSetDefinition
  */
-@Handler(supports={SimplePatientDataSetDefinition.class})
+@Handler(supports = {SimplePatientDataSetDefinition.class})
 public class SimplePatientDataSetEvaluator implements DataSetEvaluator {
 
-	protected Log log = LogFactory.getLog(this.getClass());
+  protected Log log = LogFactory.getLog(this.getClass());
 
-	/**
-	 * Public constructor
-	 */
-	public SimplePatientDataSetEvaluator() { }
-	
-	/**
-	 * @see DataSetEvaluator#evaluate(DataSetDefinition, EvaluationContext)
-	 * @should evaluate a SimplePatientDataSetDefinition
-	 */
-	public DataSet evaluate(DataSetDefinition dataSetDefinition, EvaluationContext context) throws EvaluationException {
+  /** Public constructor */
+  public SimplePatientDataSetEvaluator() {}
 
-		SimplePatientDataSetDefinition definition = (SimplePatientDataSetDefinition) dataSetDefinition;
+  /**
+   * @see DataSetEvaluator#evaluate(DataSetDefinition, EvaluationContext)
+   * @should evaluate a SimplePatientDataSetDefinition
+   */
+  public DataSet evaluate(DataSetDefinition dataSetDefinition, EvaluationContext context)
+      throws EvaluationException {
 
-        PatientDataSetDefinition d = new PatientDataSetDefinition();
-        for (PatientIdentifierType t : definition.getIdentifierTypes()) {
-            PreferredIdentifierDataDefinition pidd = new PreferredIdentifierDataDefinition();
-            pidd.setIdentifierType(t);
-            d.addColumn(t.getName(), pidd, "", new PropertyConverter(PatientIdentifier.class, "identifier"));
-        }
+    SimplePatientDataSetDefinition definition = (SimplePatientDataSetDefinition) dataSetDefinition;
 
-        for (String s : definition.getPatientProperties()) {
-            try {
-                PatientObjectDataDefinition podd = new PatientObjectDataDefinition();
-                d.addColumn(s, podd, "", new PropertyConverter(Patient.class, s));
-            }
-            catch (Exception e) {
-                log.error("Unable to get property " + s + " on patient for dataset", e);
-            }
-        }
+    PatientDataSetDefinition d = new PatientDataSetDefinition();
+    for (PatientIdentifierType t : definition.getIdentifierTypes()) {
+      PreferredIdentifierDataDefinition pidd = new PreferredIdentifierDataDefinition();
+      pidd.setIdentifierType(t);
+      d.addColumn(
+          t.getName(), pidd, "", new PropertyConverter(PatientIdentifier.class, "identifier"));
+    }
 
-        for (PersonAttributeType t : definition.getPersonAttributeTypes()) {
-            PersonAttributeDataDefinition padd = new PersonAttributeDataDefinition(t);
-            d.addColumn(t.getName(), padd, "", new PropertyConverter(PersonAttribute.class, "value"), new AttributeValueConverter(t));
-        }
+    for (String s : definition.getPatientProperties()) {
+      try {
+        PatientObjectDataDefinition podd = new PatientObjectDataDefinition();
+        d.addColumn(s, podd, "", new PropertyConverter(Patient.class, s));
+      } catch (Exception e) {
+        log.error("Unable to get property " + s + " on patient for dataset", e);
+      }
+    }
 
-        for (ProgramWorkflow t : definition.getProgramWorkflows()) {
-            String name = ObjectUtil.format(t.getProgram()) + " - " + ObjectUtil.format(t);
-            CurrentPatientStateDataDefinition cpsdd = new CurrentPatientStateDataDefinition();
-            cpsdd.setWorkflow(t);
-            d.addColumn(name, cpsdd, "", new ObjectFormatter());
-        }
+    for (PersonAttributeType t : definition.getPersonAttributeTypes()) {
+      PersonAttributeDataDefinition padd = new PersonAttributeDataDefinition(t);
+      d.addColumn(
+          t.getName(),
+          padd,
+          "",
+          new PropertyConverter(PersonAttribute.class, "value"),
+          new AttributeValueConverter(t));
+    }
 
-        SimpleDataSet dataSet = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, context);
-        dataSet.setDefinition(definition);
-        dataSet.setContext(context);
+    for (ProgramWorkflow t : definition.getProgramWorkflows()) {
+      String name = ObjectUtil.format(t.getProgram()) + " - " + ObjectUtil.format(t);
+      CurrentPatientStateDataDefinition cpsdd = new CurrentPatientStateDataDefinition();
+      cpsdd.setWorkflow(t);
+      d.addColumn(name, cpsdd, "", new ObjectFormatter());
+    }
 
-		return dataSet;
-	}
+    SimpleDataSet dataSet =
+        (SimpleDataSet) Context.getService(DataSetDefinitionService.class).evaluate(d, context);
+    dataSet.setDefinition(definition);
+    dataSet.setContext(context);
+
+    return dataSet;
+  }
 }

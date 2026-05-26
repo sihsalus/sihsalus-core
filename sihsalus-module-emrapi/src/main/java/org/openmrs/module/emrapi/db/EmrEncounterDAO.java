@@ -9,40 +9,40 @@
  */
 package org.openmrs.module.emrapi.db;
 
+import java.util.List;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Patient;
 
-import java.util.List;
-
-/**
- * Useful queries for fetching OpenMRS objects beyond what are provided by the OpenMRS Core
- */
+/** Useful queries for fetching OpenMRS objects beyond what are provided by the OpenMRS Core */
 public interface EmrEncounterDAO {
-	
-	/**
-	 * Returns all encounters that have an obs with the specified value text for the specified patient
-	 *
-	 * @param obsConcept the concept associated with the obs
-	 * @param valueText the value text of the obs
-	 * @param encounterType optionally limit to encounters of a certain type
-	 * @param includeAll whether or not to include voided obs
-	 * @return
-	 */
-	List<Encounter> getEncountersByObsValueText(Patient patient, Concept obsConcept, String valueText,
-	        EncounterType encounterType, boolean includeAll);
-	
-	/**
-	 * Returns all encounters that have an obs with the specified value text
-	 *
-	 * @param obsConcept the concept associated with the obs
-	 * @param valueText the value text of the obs
-	 * @param encounterType optionally limit to encounters of a certain type
-	 * @param includeAll whether or not to include voided obs
-	 * @return
-	 */
-	List<Encounter> getEncountersByObsValueText(Concept obsConcept, String valueText, EncounterType encounterType,
-	        boolean includeAll);
-	
+
+  /**
+   * Returns all encounters that have an obs with the specified value text for the specified patient
+   *
+   * @param obsConcept the concept associated with the obs
+   * @param valueText the value text of the obs
+   * @param encounterType optionally limit to encounters of a certain type
+   * @param includeAll whether or not to include voided obs
+   * @return
+   */
+  List<Encounter> getEncountersByObsValueText(
+      Patient patient,
+      Concept obsConcept,
+      String valueText,
+      EncounterType encounterType,
+      boolean includeAll);
+
+  /**
+   * Returns all encounters that have an obs with the specified value text
+   *
+   * @param obsConcept the concept associated with the obs
+   * @param valueText the value text of the obs
+   * @param encounterType optionally limit to encounters of a certain type
+   * @param includeAll whether or not to include voided obs
+   * @return
+   */
+  List<Encounter> getEncountersByObsValueText(
+      Concept obsConcept, String valueText, EncounterType encounterType, boolean includeAll);
 }

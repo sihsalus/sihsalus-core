@@ -10,17 +10,15 @@
 package org.openmrs.module.fhir2.api;
 
 import java.util.Map;
-
 import org.openmrs.api.APIException;
 
 public interface FhirGlobalPropertyService extends FhirHelperService {
-	
-	String getGlobalProperty(String property) throws APIException;
-	
-	int getGlobalPropertyAsInteger(String property, int defaultValue);
-	
-	String getGlobalProperty(String property, String defaultValue);
-	
-	Map<String, String> getGlobalProperties(String... properties);
-	
+
+  String getGlobalProperty(String property) throws APIException;
+
+  int getGlobalPropertyAsInteger(String property, int defaultValue);
+
+  String getGlobalProperty(String property, String defaultValue);
+
+  Map<String, String> getGlobalProperties(String... properties);
 }

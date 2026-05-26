@@ -9,27 +9,26 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirPatientIdentifierSystemDao extends FhirDaoAop {
-	
-	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
-	String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
-	
-	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
-	PatientIdentifierType getPatientIdentifierTypeByUrl(String url);
-	
-	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
-	Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(@Nonnull PatientIdentifierType identifierType);
-	
-	@Authorized(PrivilegeConstants.MANAGE_IDENTIFIER_TYPES)
-	FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
-	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem);
+
+  @Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
+  String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
+
+  @Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
+  PatientIdentifierType getPatientIdentifierTypeByUrl(String url);
+
+  @Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
+  Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
+      @Nonnull PatientIdentifierType identifierType);
+
+  @Authorized(PrivilegeConstants.MANAGE_IDENTIFIER_TYPES)
+  FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
+      @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem);
 }

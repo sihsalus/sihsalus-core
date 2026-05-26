@@ -13,14 +13,14 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackageClasses = TeleconsultationController.class)
 public class SihsalusTeleconsultationConfiguration {
 
-    @Bean
-    TeleconsultationService teleconsultationService() {
-        return new TeleconsultationServiceImpl();
-    }
+  @Bean
+  TeleconsultationService teleconsultationService() {
+    return new TeleconsultationServiceImpl();
+  }
 
-    @Bean
-    SmartInitializingSingleton teleconsultationServiceRegistrar(
-            ServiceContext serviceContext, TeleconsultationService teleconsultationService) {
-        return () -> serviceContext.setService(TeleconsultationService.class, teleconsultationService);
-    }
+  @Bean
+  SmartInitializingSingleton teleconsultationServiceRegistrar(
+      ServiceContext serviceContext, TeleconsultationService teleconsultationService) {
+    return () -> serviceContext.setService(TeleconsultationService.class, teleconsultationService);
+  }
 }

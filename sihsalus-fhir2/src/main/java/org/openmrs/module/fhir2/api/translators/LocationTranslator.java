@@ -9,49 +9,49 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Location;
 
-public interface LocationTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Location, Location> {
-	
-	/**
-	 * Maps an {@link org.openmrs.Location} to a {@link org.hl7.fhir.r4.model.Location}
-	 * 
-	 * @param openmrsLocation the location to translate
-	 * @return the corresponding FHIR location resource
-	 */
-	@Override
-	Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation);
-	
-	/**
-	 * Maps a collection of {@link org.openmrs.Location}s to a {@link org.hl7.fhir.r4.model.Location}
-	 *
-	 * @param openmrsLocations the collection of locations to translate
-	 * @return the mapping of OpenMRS location to corresponding FHIR location resource
-	 */
-	@Override
-	List<Location> toFhirResources(Collection<org.openmrs.Location> openmrsLocations);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Location} to an {@link org.openmrs.Location}
-	 * 
-	 * @param fhirLocation the FHIR location to translate
-	 * @return the corresponding OpenMRS location
-	 */
-	@Override
-	org.openmrs.Location toOpenmrsType(@Nonnull Location fhirLocation);
-	
-	/**
-	 * Maps a {@link Location} to an existing {@link org.openmrs.Location}
-	 *
-	 * @param existingLocation the location to update
-	 * @param fhirLocation the FHIR location to map
-	 * @return the updated OpenMRS location
-	 */
-	@Override
-	org.openmrs.Location toOpenmrsType(@Nonnull org.openmrs.Location existingLocation, @Nonnull Location fhirLocation);
+public interface LocationTranslator
+    extends OpenmrsFhirUpdatableTranslator<org.openmrs.Location, Location> {
+
+  /**
+   * Maps an {@link org.openmrs.Location} to a {@link org.hl7.fhir.r4.model.Location}
+   *
+   * @param openmrsLocation the location to translate
+   * @return the corresponding FHIR location resource
+   */
+  @Override
+  Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation);
+
+  /**
+   * Maps a collection of {@link org.openmrs.Location}s to a {@link org.hl7.fhir.r4.model.Location}
+   *
+   * @param openmrsLocations the collection of locations to translate
+   * @return the mapping of OpenMRS location to corresponding FHIR location resource
+   */
+  @Override
+  List<Location> toFhirResources(Collection<org.openmrs.Location> openmrsLocations);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Location} to an {@link org.openmrs.Location}
+   *
+   * @param fhirLocation the FHIR location to translate
+   * @return the corresponding OpenMRS location
+   */
+  @Override
+  org.openmrs.Location toOpenmrsType(@Nonnull Location fhirLocation);
+
+  /**
+   * Maps a {@link Location} to an existing {@link org.openmrs.Location}
+   *
+   * @param existingLocation the location to update
+   * @param fhirLocation the FHIR location to map
+   * @return the updated OpenMRS location
+   */
+  @Override
+  org.openmrs.Location toOpenmrsType(
+      @Nonnull org.openmrs.Location existingLocation, @Nonnull Location fhirLocation);
 }

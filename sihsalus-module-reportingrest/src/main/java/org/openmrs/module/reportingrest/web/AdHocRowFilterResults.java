@@ -15,40 +15,36 @@
 package org.openmrs.module.reportingrest.web;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.openmrs.module.reporting.query.IdSet;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.openmrs.module.reporting.query.IdSet;
 
 public class AdHocRowFilterResults {
 
-    @JsonProperty
-    private IdSet<?> result;
+  @JsonProperty private IdSet<?> result;
 
-    @JsonProperty
-    private List<IdSet<?>> individualResults;
+  @JsonProperty private List<IdSet<?>> individualResults;
 
-    public IdSet<?> getResult() {
-        return result;
+  public IdSet<?> getResult() {
+    return result;
+  }
+
+  public void setResult(IdSet<?> result) {
+    this.result = result;
+  }
+
+  public List<IdSet<?>> getIndividualResults() {
+    return individualResults;
+  }
+
+  public void setIndividualResults(List<IdSet<?>> individualResults) {
+    this.individualResults = individualResults;
+  }
+
+  public void addResult(IdSet result) {
+    if (individualResults == null) {
+      individualResults = new ArrayList<IdSet<?>>();
     }
-
-    public void setResult(IdSet<?> result) {
-        this.result = result;
-    }
-
-    public List<IdSet<?>> getIndividualResults() {
-        return individualResults;
-    }
-
-    public void setIndividualResults(List<IdSet<?>> individualResults) {
-        this.individualResults = individualResults;
-    }
-
-    public void addResult(IdSet result) {
-        if (individualResults == null) {
-            individualResults = new ArrayList<IdSet<?>>();
-        }
-        individualResults.add(result);
-    }
-
+    individualResults.add(result);
+  }
 }

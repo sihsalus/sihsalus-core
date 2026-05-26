@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.api.db.hibernate;
 
@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
 import org.hibernate.collection.spi.PersistentSet;
@@ -37,161 +36,179 @@ import org.slf4j.LoggerFactory;
  *
  * @since 1.9
  */
-
 public class AuditableInterceptor implements Interceptor {
 
-	private static final Logger log = LoggerFactory.getLogger(AuditableInterceptor.class);
+  private static final Logger log = LoggerFactory.getLogger(AuditableInterceptor.class);
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	/**
-	 * This method is only called when inserting new objects.
-	 * <p>
-	 * <strong>Should</strong> return true if dateCreated was null<br/>
-	 * <strong>Should</strong> return true if creator was null<br/>
-	 * <strong>Should</strong> return false if dateCreated and creator was not null<br/>
-	 * <strong>Should</strong> be called when saving OpenmrsObject
-	 *
-	 * @return true if the object got the dateCreated and creator fields set
-	 */
-	@Override
-	public boolean onSave(Object entity, Object id, Object[] entityCurrentState, String[] propertyNames, Type[] types) {
-		return setCreatorAndDateCreatedIfNull(entity, entityCurrentState, propertyNames);
-	}
+  /**
+   * This method is only called when inserting new objects.
+   *
+   * <p><strong>Should</strong> return true if dateCreated was null<br>
+   * <strong>Should</strong> return true if creator was null<br>
+   * <strong>Should</strong> return false if dateCreated and creator was not null<br>
+   * <strong>Should</strong> be called when saving OpenmrsObject
+   *
+   * @return true if the object got the dateCreated and creator fields set
+   */
+  @Override
+  public boolean onSave(
+      Object entity, Object id, Object[] entityCurrentState, String[] propertyNames, Type[] types) {
+    return setCreatorAndDateCreatedIfNull(entity, entityCurrentState, propertyNames);
+  }
 
-	/**
-	 * This class method is only called when flushing an updated dirty object, not inserting objects
-	 * <p>
-	 * <strong>Should</strong> set the dateChanged field<br/>
-	 * <strong>Should</strong> set the changedBy field<br/>
-	 * <strong>Should</strong> be called when saving an Auditable<br/>
-	 * <strong>Should</strong> not enter into recursion on entity
-	 *
-	 * @return true if the object got the changedBy and dateChanged fields set
-	 */
+  /**
+   * This class method is only called when flushing an updated dirty object, not inserting objects
+   *
+   * <p><strong>Should</strong> set the dateChanged field<br>
+   * <strong>Should</strong> set the changedBy field<br>
+   * <strong>Should</strong> be called when saving an Auditable<br>
+   * <strong>Should</strong> not enter into recursion on entity
+   *
+   * @return true if the object got the changedBy and dateChanged fields set
+   */
+  @Override
+  public boolean onFlushDirty(
+      Object entity,
+      Object id,
+      Object[] currentState,
+      Object[] previousState,
+      String[] propertyNames,
+      Type[] types)
+      throws CallbackException {
+    boolean objectWasChanged;
 
-	@Override
-	public boolean onFlushDirty(Object entity, Object id, Object[] currentState, Object[] previousState,
-	        String[] propertyNames, Type[] types) throws CallbackException {
-		boolean objectWasChanged;
+    objectWasChanged = setCreatorAndDateCreatedIfNull(entity, currentState, propertyNames);
 
-		objectWasChanged = setCreatorAndDateCreatedIfNull(entity, currentState, propertyNames);
+    if (entity instanceof Auditable && propertyNames != null) {
+      log.debug("Setting changed by fields on {}", entity.getClass());
 
-		if (entity instanceof Auditable && propertyNames != null) {
-			log.debug("Setting changed by fields on {}", entity.getClass());
+      Map<String, Object> propertyValues = getPropertyValuesToUpdate();
+      objectWasChanged =
+          changeProperties(currentState, propertyNames, objectWasChanged, propertyValues, false);
+    }
+    return objectWasChanged;
+  }
 
-			Map<String, Object> propertyValues = getPropertyValuesToUpdate();
-			objectWasChanged = changeProperties(currentState, propertyNames, objectWasChanged, propertyValues, false);
-		}
-		return objectWasChanged;
-	}
+  @Override
+  public void onCollectionRecreate(Object collection, Object key) throws CallbackException {
+    handleCollectionChange(collection);
+  }
 
-	@Override
-	public void onCollectionRecreate(Object collection, Object key) throws CallbackException {
-		handleCollectionChange(collection);
-	}
+  @Override
+  public void onCollectionUpdate(Object collection, Object key) throws CallbackException {
+    handleCollectionChange(collection);
+  }
 
-	@Override
-	public void onCollectionUpdate(Object collection, Object key) throws CallbackException {
-		handleCollectionChange(collection);
-	}
+  @Override
+  public void onCollectionRemove(Object collection, Object key) throws CallbackException {
+    handleCollectionChange(collection);
+  }
 
-	@Override
-	public void onCollectionRemove(Object collection, Object key) throws CallbackException {
-		handleCollectionChange(collection);
-	}
+  /**
+   * Sets the creator and dateCreated fields to the current user and the current time if they are
+   * null. if is a Person Object, sets the personCreator and personDateCreated fields to the current
+   * user and the current time if they are null.
+   *
+   * @param entity
+   * @param currentState
+   * @param propertyNames
+   * @return true if creator and dateCreated were changed
+   */
+  private boolean setCreatorAndDateCreatedIfNull(
+      Object entity, Object[] currentState, String[] propertyNames) {
 
-	/**
-	 * Sets the creator and dateCreated fields to the current user and the current time if they are
-	 * null. if is a Person Object, sets the personCreator and personDateCreated fields to the current
-	 * user and the current time if they are null.
-	 *
-	 * @param entity
-	 * @param currentState
-	 * @param propertyNames
-	 * @return true if creator and dateCreated were changed
-	 */
-	private boolean setCreatorAndDateCreatedIfNull(Object entity, Object[] currentState, String[] propertyNames) {
+    boolean objectWasChanged = false;
 
-		boolean objectWasChanged = false;
+    if (entity instanceof OpenmrsObject) {
+      log.debug("Setting creator and dateCreated on {}", entity);
 
-		if (entity instanceof OpenmrsObject) {
-			log.debug("Setting creator and dateCreated on {}", entity);
+      Map<String, Object> propertyValues = getPropertyValuesToSave();
+      objectWasChanged =
+          changeProperties(currentState, propertyNames, objectWasChanged, propertyValues, true);
+    }
+    return objectWasChanged;
+  }
 
-			Map<String, Object> propertyValues = getPropertyValuesToSave();
-			objectWasChanged = changeProperties(currentState, propertyNames, objectWasChanged, propertyValues, true);
-		}
-		return objectWasChanged;
-	}
+  private boolean changeProperties(
+      Object[] currentState,
+      String[] propertyNames,
+      boolean objectWasChanged,
+      Map<String, Object> propertyValues,
+      Boolean setNullOnly) {
 
-	private boolean changeProperties(Object[] currentState, String[] propertyNames, boolean objectWasChanged,
-	        Map<String, Object> propertyValues, Boolean setNullOnly) {
+    for (Map.Entry<String, Object> e : propertyValues.entrySet()) {
+      if (changePropertyValue(currentState, propertyNames, e.getKey(), e.getValue(), setNullOnly)) {
+        objectWasChanged = true;
+      }
+    }
+    return objectWasChanged;
+  }
 
-		for (Map.Entry<String, Object> e : propertyValues.entrySet()) {
-			if (changePropertyValue(currentState, propertyNames, e.getKey(), e.getValue(), setNullOnly)) {
-				objectWasChanged = true;
-			}
-		}
-		return objectWasChanged;
-	}
+  private Map<String, Object> getPropertyValuesToSave() {
+    Map<String, Object> propertyValues = new HashMap<>();
+    propertyValues.put("creator", Context.getAuthenticatedUser());
+    propertyValues.put("dateCreated", new Date());
+    propertyValues.put("personCreator", Context.getAuthenticatedUser());
+    propertyValues.put("personDateCreated", new Date());
+    return propertyValues;
+  }
 
-	private Map<String, Object> getPropertyValuesToSave() {
-		Map<String, Object> propertyValues = new HashMap<>();
-		propertyValues.put("creator", Context.getAuthenticatedUser());
-		propertyValues.put("dateCreated", new Date());
-		propertyValues.put("personCreator", Context.getAuthenticatedUser());
-		propertyValues.put("personDateCreated", new Date());
-		return propertyValues;
-	}
+  private Map<String, Object> getPropertyValuesToUpdate() {
+    Map<String, Object> propertyValues = new HashMap<>();
+    propertyValues.put("changedBy", Context.getAuthenticatedUser());
+    propertyValues.put("dateChanged", new Date());
+    propertyValues.put("personChangedBy", Context.getAuthenticatedUser());
+    propertyValues.put("personDateChanged", new Date());
+    return propertyValues;
+  }
 
-	private Map<String, Object> getPropertyValuesToUpdate() {
-		Map<String, Object> propertyValues = new HashMap<>();
-		propertyValues.put("changedBy", Context.getAuthenticatedUser());
-		propertyValues.put("dateChanged", new Date());
-		propertyValues.put("personChangedBy", Context.getAuthenticatedUser());
-		propertyValues.put("personDateChanged", new Date());
-		return propertyValues;
-	}
+  /**
+   * Sets the property to the given value.
+   *
+   * @param currentState
+   * @param propertyNames
+   * @param propertyToSet
+   * @param value
+   * @param setNullOnly
+   * @return true if the property was changed
+   */
+  private boolean changePropertyValue(
+      Object[] currentState,
+      String[] propertyNames,
+      String propertyToSet,
+      Object value,
+      boolean setNullOnly) {
 
-	/**
-	 * Sets the property to the given value.
-	 *
-	 * @param currentState
-	 * @param propertyNames
-	 * @param propertyToSet
-	 * @param value
-	 * @param setNullOnly
-	 * @return true if the property was changed
-	 */
-	private boolean changePropertyValue(Object[] currentState, String[] propertyNames, String propertyToSet, Object value,
-	        boolean setNullOnly) {
+    int index = Arrays.asList(propertyNames).indexOf(propertyToSet);
 
-		int index = Arrays.asList(propertyNames).indexOf(propertyToSet);
+    if (value == null) {
+      return false;
+    }
 
-		if (value == null) {
-			return false;
-		}
+    if (index >= 0
+        && (currentState[index] == null || !setNullOnly)
+        && !value.equals(currentState[index])) {
+      currentState[index] = value;
+      return true;
+    }
+    return false;
+  }
 
-		if (index >= 0 && (currentState[index] == null || !setNullOnly) && !value.equals(currentState[index])) {
-			currentState[index] = value;
-			return true;
-		}
-		return false;
-	}
-
-	private void handleCollectionChange(Object collection) {
-		if (collection instanceof PersistentSet) {
-			PersistentSet persistentCollection = (PersistentSet) collection;
-			if ("org.openmrs.User.roles".equals(persistentCollection.getRole())) {
-				Object owner = persistentCollection.getOwner();
-				if (owner instanceof User) {
-					User user = (User) owner;
-					if (user.getCreator() != null) {
-						user.setChangedBy(Context.getAuthenticatedUser());
-						user.setDateChanged(new Date());
-					}
-				}
-			}
-		}
-	}
+  private void handleCollectionChange(Object collection) {
+    if (collection instanceof PersistentSet) {
+      PersistentSet persistentCollection = (PersistentSet) collection;
+      if ("org.openmrs.User.roles".equals(persistentCollection.getRole())) {
+        Object owner = persistentCollection.getOwner();
+        if (owner instanceof User) {
+          User user = (User) owner;
+          if (user.getCreator() != null) {
+            user.setChangedBy(Context.getAuthenticatedUser());
+            user.setDateChanged(new Date());
+          }
+        }
+      }
+    }
+  }
 }

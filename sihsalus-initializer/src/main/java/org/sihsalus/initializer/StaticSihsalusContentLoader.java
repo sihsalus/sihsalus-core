@@ -1,9 +1,9 @@
 package org.sihsalus.initializer;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -520,13 +520,15 @@ public final class StaticSihsalusContentLoader {
 
     Path configFile = null;
     for (Path xmlFile : xmlFiles(configRoot, "addresshierarchy", wildcardExclusions)) {
-      if ("addressconfiguration.xml".equals(xmlFile.getFileName().toString().toLowerCase(Locale.ROOT))) {
+      if ("addressconfiguration.xml"
+          .equals(xmlFile.getFileName().toString().toLowerCase(Locale.ROOT))) {
         configFile = xmlFile;
         break;
       }
     }
     if (configFile == null) {
-      log.warn("Address hierarchy configuration file was not found; skipping address hierarchy load.");
+      log.warn(
+          "Address hierarchy configuration file was not found; skipping address hierarchy load.");
       return;
     }
 
@@ -538,7 +540,8 @@ public final class StaticSihsalusContentLoader {
             "XML description of address formats"));
 
     List<Integer> levelIds = upsertAddressHierarchyLevels(config.components());
-    loadAddressHierarchyEntries(configFile.getParent().resolve(config.filename()), config, levelIds);
+    loadAddressHierarchyEntries(
+        configFile.getParent().resolve(config.filename()), config, levelIds);
   }
 
   private List<Integer> upsertAddressHierarchyLevels(List<AddressHierarchyComponent> components) {
@@ -549,7 +552,8 @@ public final class StaticSihsalusContentLoader {
     for (AddressHierarchyComponent component : components) {
       Integer id = findAddressHierarchyLevelId(component.field(), component.nameMapping());
       String uuid =
-          valueOrStableUuid(null, "address-hierarchy-level", component.field() + ":" + component.nameMapping());
+          valueOrStableUuid(
+              null, "address-hierarchy-level", component.field() + ":" + component.nameMapping());
       if (id == null) {
         id = nextLevelId++;
         jdbcTemplate.update(
@@ -697,10 +701,12 @@ public final class StaticSihsalusContentLoader {
     }
 
     Element hierarchyFile =
-        firstElement(document.getElementsByTagName("addressHierarchyFile"), xmlFile, "addressHierarchyFile");
+        firstElement(
+            document.getElementsByTagName("addressHierarchyFile"), xmlFile, "addressHierarchyFile");
     String filename = requiredElementText(hierarchyFile, "filename", xmlFile);
     String entryDelimiter = firstNonBlank(elementText(hierarchyFile, "entryDelimiter"), "|");
-    String identifierDelimiter = firstNonBlank(elementText(hierarchyFile, "identifierDelimiter"), "^");
+    String identifierDelimiter =
+        firstNonBlank(elementText(hierarchyFile, "identifierDelimiter"), "^");
 
     List<String> lineByLineFormat = new ArrayList<>();
     NodeList formatNodes = document.getElementsByTagName("lineByLineFormat");
@@ -721,10 +727,15 @@ public final class StaticSihsalusContentLoader {
   private String buildAddressTemplateXml(AddressHierarchyConfig config) {
     StringBuilder xml = new StringBuilder();
     xml.append("<org.openmrs.layout.address.AddressTemplate>\n");
-    appendProperties(xml, "nameMappings", config.components(), AddressHierarchyComponent::nameMapping);
     appendProperties(
-        xml, "sizeMappings", config.components(), component -> Integer.toString(component.sizeMapping()));
-    appendProperties(xml, "elementDefaults", config.components(), AddressHierarchyComponent::elementDefault);
+        xml, "nameMappings", config.components(), AddressHierarchyComponent::nameMapping);
+    appendProperties(
+        xml,
+        "sizeMappings",
+        config.components(),
+        component -> Integer.toString(component.sizeMapping()));
+    appendProperties(
+        xml, "elementDefaults", config.components(), AddressHierarchyComponent::elementDefault);
     xml.append("  <lineByLineFormat>\n");
     for (String line : config.lineByLineFormat()) {
       xml.append("    <string>").append(xmlEscape(line)).append("</string>\n");
@@ -828,7 +839,8 @@ public final class StaticSihsalusContentLoader {
       case "POSTAL_CODE" -> "postalCode";
       case "LONGITUDE" -> "longitude";
       case "LATITUDE" -> "latitude";
-      default -> throw new IllegalStateException("Unsupported address hierarchy field " + field + ".");
+      default ->
+          throw new IllegalStateException("Unsupported address hierarchy field " + field + ".");
     };
   }
 
@@ -1200,7 +1212,8 @@ public final class StaticSihsalusContentLoader {
     }
   }
 
-  private DataFilterObject resolveDataFilterObject(String uuid, String className, CsvRecord record) {
+  private DataFilterObject resolveDataFilterObject(
+      String uuid, String className, CsvRecord record) {
     DataFilterObjectType type = dataFilterObjectType(className);
     if (type == null) {
       throw new IllegalStateException(
@@ -1208,18 +1221,18 @@ public final class StaticSihsalusContentLoader {
     }
     if (!tableExists(type.table())) {
       throw new IllegalStateException(
-          "Datafilter mapping table '" + type.table() + "' is not available for " + record.source + ".");
+          "Datafilter mapping table '"
+              + type.table()
+              + "' is not available for "
+              + record.source
+              + ".");
     }
 
     String identifier;
     if (type.identifierColumn() != null) {
       identifier =
           queryString(
-              "select "
-                  + type.identifierColumn()
-                  + " from "
-                  + type.table()
-                  + " where uuid = ?",
+              "select " + type.identifierColumn() + " from " + type.table() + " where uuid = ?",
               uuid);
     } else {
       Integer id =
@@ -1245,8 +1258,7 @@ public final class StaticSihsalusContentLoader {
       return null;
     }
     return switch (className.trim()) {
-      case "org.openmrs.Role" ->
-          new DataFilterObjectType("org.openmrs.Role", "role", null, "role");
+      case "org.openmrs.Role" -> new DataFilterObjectType("org.openmrs.Role", "role", null, "role");
       case "org.openmrs.Privilege" ->
           new DataFilterObjectType("org.openmrs.Privilege", "privilege", null, "privilege");
       case "org.openmrs.Location" ->
@@ -1287,8 +1299,7 @@ public final class StaticSihsalusContentLoader {
 
   private void revokeDataFilterAccess(DataFilterObject entity, DataFilterObject basis) {
     jdbcTemplate.update(
-        "delete from datafilter_entity_basis_map where "
-            + dataFilterAccessPredicate(),
+        "delete from datafilter_entity_basis_map where " + dataFilterAccessPredicate(),
         entity.identifier(),
         entity.className(),
         basis.identifier(),
@@ -1367,11 +1378,7 @@ public final class StaticSihsalusContentLoader {
           formRetired,
           encounterTypeId);
       upsertFormResource(
-          formId,
-          formUuid,
-          JSON_SCHEMA_RESOURCE_NAME,
-          AMPATH_JSON_SCHEMA_DATATYPE,
-          jsonString);
+          formId, formUuid, JSON_SCHEMA_RESOURCE_NAME, AMPATH_JSON_SCHEMA_DATATYPE, jsonString);
       return;
     }
 
@@ -1497,7 +1504,9 @@ public final class StaticSihsalusContentLoader {
             : queryString(
                 "select value_reference from form_resource where form_resource_id = ?", resourceId);
     String clobUuid =
-        isBlank(valueReference) ? stableUuid("form-resource-clob", resourceUuidSeed) : valueReference;
+        isBlank(valueReference)
+            ? stableUuid("form-resource-clob", resourceUuidSeed)
+            : valueReference;
     upsertClob(clobUuid, value);
 
     if (resourceId == null) {
@@ -3401,7 +3410,8 @@ public final class StaticSihsalusContentLoader {
   private void upsertOrderFrequency(CsvRecord record) {
     Integer conceptId = requiredConceptId(record, "Concept frequency");
     String uuid = valueOrStableUuid(record.value("Uuid"), "order-frequency", conceptId.toString());
-    Integer id = queryInteger("select order_frequency_id from order_frequency where uuid = ?", uuid);
+    Integer id =
+        queryInteger("select order_frequency_id from order_frequency where uuid = ?", uuid);
     if (id == null) {
       id =
           queryInteger(
@@ -3598,14 +3608,12 @@ public final class StaticSihsalusContentLoader {
   private void upsertProgramWorkflow(CsvRecord record) {
     Integer programId = findProgramId(record.value("Program"), record.value("Program"));
     if (programId == null) {
-      throw new IllegalStateException(
-          "Program '" + record.value("Program") + "' was not loaded.");
+      throw new IllegalStateException("Program '" + record.value("Program") + "' was not loaded.");
     }
 
     Integer conceptId = requiredConceptId(record, "Workflow concept");
     String uuid =
-        valueOrStableUuid(
-            record.value("Uuid"), "program-workflow", programId + ":" + conceptId);
+        valueOrStableUuid(record.value("Uuid"), "program-workflow", programId + ":" + conceptId);
     Integer id = findProgramWorkflowId(uuid);
     if (id == null) {
       id =

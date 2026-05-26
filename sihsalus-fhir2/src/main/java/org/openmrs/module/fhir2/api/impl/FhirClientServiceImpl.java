@@ -18,24 +18,25 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirClientServiceImpl implements FhirClientService {
-	
-	private final FhirContext fhirR3;
-	
-	private final FhirContext fhirR4;
-	
-	@Autowired
-	public FhirClientServiceImpl(@Qualifier("fhirR3") FhirContext fhirR3, @Qualifier("fhirR4") FhirContext fhirR4) {
-		this.fhirR3 = fhirR3;
-		this.fhirR4 = fhirR4;
-	}
-	
-	@Override
-	public IGenericClient getClientForR3(String baseUrl) {
-		return fhirR3.newRestfulGenericClient(baseUrl);
-	}
-	
-	@Override
-	public IGenericClient getClientForR4(String baseUrl) {
-		return fhirR4.newRestfulGenericClient(baseUrl);
-	}
+
+  private final FhirContext fhirR3;
+
+  private final FhirContext fhirR4;
+
+  @Autowired
+  public FhirClientServiceImpl(
+      @Qualifier("fhirR3") FhirContext fhirR3, @Qualifier("fhirR4") FhirContext fhirR4) {
+    this.fhirR3 = fhirR3;
+    this.fhirR4 = fhirR4;
+  }
+
+  @Override
+  public IGenericClient getClientForR3(String baseUrl) {
+    return fhirR3.newRestfulGenericClient(baseUrl);
+  }
+
+  @Override
+  public IGenericClient getClientForR4(String baseUrl) {
+    return fhirR4.newRestfulGenericClient(baseUrl);
+  }
 }

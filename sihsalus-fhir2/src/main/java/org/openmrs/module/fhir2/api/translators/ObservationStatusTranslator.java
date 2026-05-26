@@ -10,28 +10,30 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 
-public interface ObservationStatusTranslator extends ToFhirTranslator<Obs, Observation.ObservationStatus>, UpdatableOpenmrsTranslator<Obs, Observation.ObservationStatus> {
-	
-	/**
-	 * Maps an {@link Obs} to an {@link org.hl7.fhir.r4.model.Observation.ObservationStatus}
-	 * 
-	 * @param observation the observation to translate
-	 * @return the corresponding observation status
-	 */
-	@Override
-	Observation.ObservationStatus toFhirResource(@Nonnull Obs observation);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Observation.ObservationStatus} to an {@link Obs}
-	 * 
-	 * @param observation the observation to update
-	 * @param observationStatus the observation status
-	 * @return the corresponding observation status
-	 */
-	@Override
-	Obs toOpenmrsType(@Nonnull Obs observation, @Nonnull Observation.ObservationStatus observationStatus);
+public interface ObservationStatusTranslator
+    extends ToFhirTranslator<Obs, Observation.ObservationStatus>,
+        UpdatableOpenmrsTranslator<Obs, Observation.ObservationStatus> {
+
+  /**
+   * Maps an {@link Obs} to an {@link org.hl7.fhir.r4.model.Observation.ObservationStatus}
+   *
+   * @param observation the observation to translate
+   * @return the corresponding observation status
+   */
+  @Override
+  Observation.ObservationStatus toFhirResource(@Nonnull Obs observation);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.Observation.ObservationStatus} to an {@link Obs}
+   *
+   * @param observation the observation to update
+   * @param observationStatus the observation status
+   * @return the corresponding observation status
+   */
+  @Override
+  Obs toOpenmrsType(
+      @Nonnull Obs observation, @Nonnull Observation.ObservationStatus observationStatus);
 }

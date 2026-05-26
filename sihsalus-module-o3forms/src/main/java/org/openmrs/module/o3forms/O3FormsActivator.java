@@ -17,21 +17,20 @@ import org.slf4j.LoggerFactory;
  * This class contains the logic that is run every time this module is either started or shutdown
  */
 public class O3FormsActivator extends BaseModuleActivator {
-	
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	
-	/**
-	 * @see #started()
-	 */
-	public void started() {
-		log.info("Started O3 Forms");
-	}
-	
-	/**
-	 * @see #shutdown()
-	 */
-	public void shutdown() {
-		log.info("Shutdown O3 Forms");
-	}
-	
+
+  private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+  /**
+   * @see #started()
+   */
+  public void started() {
+    log.info("Started O3 Forms");
+  }
+
+  /**
+   * @see #shutdown()
+   */
+  public void shutdown() {
+    log.info("Shutdown O3 Forms");
+  }
 }

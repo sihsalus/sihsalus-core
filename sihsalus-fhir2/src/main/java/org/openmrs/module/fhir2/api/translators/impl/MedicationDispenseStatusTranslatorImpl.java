@@ -12,10 +12,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -30,46 +28,51 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MedicationDispenseStatusTranslatorImpl implements MedicationDispenseStatusTranslator {
-	
-	public static final String CONCEPT_SOURCE_URI = "http://terminology.hl7.org/CodeSystem/medicationdispense-status";
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	FhirConceptSourceService conceptSourceService;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	FhirConceptService conceptService;
-	
-	@Override
-	public MedicationDispense.MedicationDispenseStatus toFhirResource(@Nonnull Concept concept) {
-		Optional<ConceptSource> conceptSource = conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI);
-		if (conceptSource.isPresent()) {
-			Optional<String> conceptCode = conceptService.getSameAsMappingForConceptInSource(conceptSource.get(), concept);
-			if (conceptCode.isPresent()) {
-				try {
-					return MedicationDispense.MedicationDispenseStatus.fromCode(conceptCode.get());
-				}
-				catch (FHIRException ignored) {
-					// unknown status code
-				}
-			}
-		}
-		
-		return null;
-	}
-	
-	@Override
-	public Concept toOpenmrsType(@Nonnull MedicationDispense.MedicationDispenseStatus status) {
-		Optional<Concept> concept = Optional.empty();
-		
-		if (status != null) {
-			Optional<ConceptSource> conceptSource = conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI);
-			if (conceptSource.isPresent()) {
-				concept = conceptService.getConceptWithSameAsMappingInSource(conceptSource.get(), status.toCode());
-			}
-		}
-		
-		return concept.orElse(null);
-	}
+
+  public static final String CONCEPT_SOURCE_URI =
+      "http://terminology.hl7.org/CodeSystem/medicationdispense-status";
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  FhirConceptSourceService conceptSourceService;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  FhirConceptService conceptService;
+
+  @Override
+  public MedicationDispense.MedicationDispenseStatus toFhirResource(@Nonnull Concept concept) {
+    Optional<ConceptSource> conceptSource =
+        conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI);
+    if (conceptSource.isPresent()) {
+      Optional<String> conceptCode =
+          conceptService.getSameAsMappingForConceptInSource(conceptSource.get(), concept);
+      if (conceptCode.isPresent()) {
+        try {
+          return MedicationDispense.MedicationDispenseStatus.fromCode(conceptCode.get());
+        } catch (FHIRException ignored) {
+          // unknown status code
+        }
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  public Concept toOpenmrsType(@Nonnull MedicationDispense.MedicationDispenseStatus status) {
+    Optional<Concept> concept = Optional.empty();
+
+    if (status != null) {
+      Optional<ConceptSource> conceptSource =
+          conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI);
+      if (conceptSource.isPresent()) {
+        concept =
+            conceptService.getConceptWithSameAsMappingInSource(
+                conceptSource.get(), status.toCode());
+      }
+    }
+
+    return concept.orElse(null);
+  }
 }

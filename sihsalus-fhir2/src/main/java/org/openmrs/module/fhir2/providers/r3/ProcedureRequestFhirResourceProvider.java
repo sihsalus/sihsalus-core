@@ -12,10 +12,6 @@ package org.openmrs.module.fhir2.providers.r3;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -31,6 +27,8 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.HashSet;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -53,76 +51,122 @@ import org.springframework.stereotype.Component;
 @Component("procedureRequestFhirR3ResourceProvider")
 @R3Provider
 public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirServiceRequestService serviceRequestService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return ProcedureRequest.class;
-	}
-	
-	@Read
-	@SuppressWarnings("unused")
-	public ProcedureRequest getProcedureRequestById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.ServiceRequest serviceRequest = serviceRequestService.get(id.getIdPart());
-		if (serviceRequest == null) {
-			throw new ResourceNotFoundException("Could not find serviceRequest with Id " + id.getIdPart());
-		}
-		return (ProcedureRequest) VersionConvertorFactory_30_40.convertResource(serviceRequest);
-	}
-	
-	public MethodOutcome createProcedureRequest(@ResourceParam ProcedureRequest procedureRequest) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(
-		    serviceRequestService.create((ServiceRequest) VersionConvertorFactory_30_40.convertResource(procedureRequest))));
-	}
-	
-	public MethodOutcome updateProcedureRequest(@IdParam IdType id, @ResourceParam ProcedureRequest procedureRequest) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update");
-		}
-		
-		procedureRequest.setId(id.getIdPart());
-		
-		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(serviceRequestService
-		        .update(id.getIdPart(), (ServiceRequest) VersionConvertorFactory_30_40.convertResource(procedureRequest))));
-	}
-	
-	public OperationOutcome deleteProcedureRequest(@IdParam @Nonnull IdType id) {
-		serviceRequestService.delete(id.getIdPart());
-		return FhirProviderUtils.buildDeleteR3();
-	}
-	
-	@Search
-	public IBundleProvider searchForProcedureRequests(
-	        @OptionalParam(name = ProcedureRequest.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
-	        @OptionalParam(name = ProcedureRequest.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
-	        @OptionalParam(name = ProcedureRequest.SP_CODE) TokenAndListParam code,
-	        @OptionalParam(name = ProcedureRequest.SP_ENCOUNTER, chainWhitelist = {
-	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
-	        @OptionalParam(name = ProcedureRequest.SP_REQUESTER, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
-	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
-	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
-	        @OptionalParam(name = ProcedureRequest.SP_OCCURRENCE) DateRangeParam occurrence,
-	        @OptionalParam(name = ProcedureRequest.SP_RES_ID) TokenAndListParam uuid,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
-	        @IncludeParam(allow = { "ProcedureRequest:" + ProcedureRequest.SP_PATIENT,
-	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
-	                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER }) HashSet<Include> includes) {
-		if (patientReference == null) {
-			patientReference = subjectReference;
-		}
-		
-		if (CollectionUtils.isEmpty(includes)) {
-			includes = null;
-		}
-		
-		return new SearchQueryBundleProviderR3Wrapper(serviceRequestService.searchForServiceRequests(patientReference, code,
-		    encounterReference, participantReference, occurrence, uuid, lastUpdated, includes));
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirServiceRequestService serviceRequestService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return ProcedureRequest.class;
+  }
+
+  @Read
+  @SuppressWarnings("unused")
+  public ProcedureRequest getProcedureRequestById(@IdParam @Nonnull IdType id) {
+    org.hl7.fhir.r4.model.ServiceRequest serviceRequest = serviceRequestService.get(id.getIdPart());
+    if (serviceRequest == null) {
+      throw new ResourceNotFoundException(
+          "Could not find serviceRequest with Id " + id.getIdPart());
+    }
+    return (ProcedureRequest) VersionConvertorFactory_30_40.convertResource(serviceRequest);
+  }
+
+  public MethodOutcome createProcedureRequest(@ResourceParam ProcedureRequest procedureRequest) {
+    return FhirProviderUtils.buildCreate(
+        VersionConvertorFactory_30_40.convertResource(
+            serviceRequestService.create(
+                (ServiceRequest) VersionConvertorFactory_30_40.convertResource(procedureRequest))));
+  }
+
+  public MethodOutcome updateProcedureRequest(
+      @IdParam IdType id, @ResourceParam ProcedureRequest procedureRequest) {
+    if (id == null || id.getIdPart() == null) {
+      throw new InvalidRequestException("id must be specified to update");
+    }
+
+    procedureRequest.setId(id.getIdPart());
+
+    return FhirProviderUtils.buildUpdate(
+        VersionConvertorFactory_30_40.convertResource(
+            serviceRequestService.update(
+                id.getIdPart(),
+                (ServiceRequest) VersionConvertorFactory_30_40.convertResource(procedureRequest))));
+  }
+
+  public OperationOutcome deleteProcedureRequest(@IdParam @Nonnull IdType id) {
+    serviceRequestService.delete(id.getIdPart());
+    return FhirProviderUtils.buildDeleteR3();
+  }
+
+  @Search
+  public IBundleProvider searchForProcedureRequests(
+      @OptionalParam(
+              name = ProcedureRequest.SP_PATIENT,
+              chainWhitelist = {
+                "",
+                Patient.SP_IDENTIFIER,
+                Patient.SP_GIVEN,
+                Patient.SP_FAMILY,
+                Patient.SP_NAME
+              },
+              targetTypes = Patient.class)
+          ReferenceAndListParam patientReference,
+      @OptionalParam(
+              name = ProcedureRequest.SP_SUBJECT,
+              chainWhitelist = {
+                "",
+                Patient.SP_IDENTIFIER,
+                Patient.SP_GIVEN,
+                Patient.SP_FAMILY,
+                Patient.SP_NAME
+              },
+              targetTypes = Patient.class)
+          ReferenceAndListParam subjectReference,
+      @OptionalParam(name = ProcedureRequest.SP_CODE) TokenAndListParam code,
+      @OptionalParam(
+              name = ProcedureRequest.SP_ENCOUNTER,
+              chainWhitelist = {""},
+              targetTypes = Encounter.class)
+          ReferenceAndListParam encounterReference,
+      @OptionalParam(
+              name = ProcedureRequest.SP_REQUESTER,
+              chainWhitelist = {
+                "",
+                Practitioner.SP_IDENTIFIER,
+                Practitioner.SP_GIVEN,
+                Practitioner.SP_FAMILY,
+                Practitioner.SP_NAME
+              },
+              targetTypes = Practitioner.class)
+          ReferenceAndListParam participantReference,
+      @OptionalParam(name = ProcedureRequest.SP_OCCURRENCE) DateRangeParam occurrence,
+      @OptionalParam(name = ProcedureRequest.SP_RES_ID) TokenAndListParam uuid,
+      @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+      @IncludeParam(
+              allow = {
+                "ProcedureRequest:" + ProcedureRequest.SP_PATIENT,
+                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
+                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER
+              })
+          HashSet<Include> includes) {
+    if (patientReference == null) {
+      patientReference = subjectReference;
+    }
+
+    if (CollectionUtils.isEmpty(includes)) {
+      includes = null;
+    }
+
+    return new SearchQueryBundleProviderR3Wrapper(
+        serviceRequestService.searchForServiceRequests(
+            patientReference,
+            code,
+            encounterReference,
+            participantReference,
+            occurrence,
+            uuid,
+            lastUpdated,
+            includes));
+  }
 }

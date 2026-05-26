@@ -9,42 +9,40 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.openmrs.Encounter;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirEncounterDao extends FhirDao<Encounter> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	Encounter get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	List<Encounter> get(@Nonnull Collection<String> uuids);
-	
-	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	List<Encounter> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized({ PrivilegeConstants.ADD_ENCOUNTERS, PrivilegeConstants.EDIT_ENCOUNTERS })
-	Encounter createOrUpdate(@Nonnull Encounter newEntry);
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_ENCOUNTERS)
-	Encounter delete(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+  Encounter get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+  List<Encounter> get(@Nonnull Collection<String> uuids);
+
+  @Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+  List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+  List<Encounter> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized({PrivilegeConstants.ADD_ENCOUNTERS, PrivilegeConstants.EDIT_ENCOUNTERS})
+  Encounter createOrUpdate(@Nonnull Encounter newEntry);
+
+  @Override
+  @Authorized(PrivilegeConstants.DELETE_ENCOUNTERS)
+  Encounter delete(@Nonnull String uuid);
 }

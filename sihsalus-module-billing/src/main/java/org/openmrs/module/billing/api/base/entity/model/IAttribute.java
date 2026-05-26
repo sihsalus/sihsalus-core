@@ -14,24 +14,23 @@ import org.openmrs.OpenmrsObject;
 // @formatter:off
 /**
  * Represents classes that define simple attribute data.
+ *
  * @param <TAttributeType> The {@link ISimpleAttributeType} class.
  */
-public interface IAttribute<
-			TOwner extends ICustomizable<?>,
-			TAttributeType extends IAttributeType>
-		extends OpenmrsObject {
-// @formatter:on
-	TOwner getOwner();
-	
-	void setOwner(TOwner owner);
-	
-	TAttributeType getAttributeType();
-	
-	void setAttributeType(TAttributeType attributeType);
-	
-	String getValue();
-	
-	void setValue(String value);
-	
-	Object getHydratedValue();
+public interface IAttribute<TOwner extends ICustomizable<?>, TAttributeType extends IAttributeType>
+    extends OpenmrsObject {
+  // @formatter:on
+  TOwner getOwner();
+
+  void setOwner(TOwner owner);
+
+  TAttributeType getAttributeType();
+
+  void setAttributeType(TAttributeType attributeType);
+
+  String getValue();
+
+  void setValue(String value);
+
+  Object getHydratedValue();
 }

@@ -15,20 +15,19 @@ import org.openmrs.module.emrapi.encounter.EncounterTransactionMapper;
 import org.openmrs.module.emrapi.visit.contract.VisitResponse;
 
 public class VisitResponseMapper {
-	
-	private EncounterTransactionMapper encounterTransactionMapper;
-	
-	public VisitResponseMapper(EncounterTransactionMapper encounterTransactionMapper) {
-		this.encounterTransactionMapper = encounterTransactionMapper;
-	}
-	
-	public VisitResponse map(Visit visit) {
-		if (visit == null)
-			return null;
-		VisitResponse visitResponse = new VisitResponse(visit.getUuid());
-		for (Encounter encounter : visit.getEncounters()) {
-			visitResponse.addEncounter(encounterTransactionMapper.map(encounter, true));
-		}
-		return visitResponse;
-	}
+
+  private EncounterTransactionMapper encounterTransactionMapper;
+
+  public VisitResponseMapper(EncounterTransactionMapper encounterTransactionMapper) {
+    this.encounterTransactionMapper = encounterTransactionMapper;
+  }
+
+  public VisitResponse map(Visit visit) {
+    if (visit == null) return null;
+    VisitResponse visitResponse = new VisitResponse(visit.getUuid());
+    for (Encounter encounter : visit.getEncounters()) {
+      visitResponse.addEncounter(encounterTransactionMapper.map(encounter, true));
+    }
+    return visitResponse;
+  }
 }

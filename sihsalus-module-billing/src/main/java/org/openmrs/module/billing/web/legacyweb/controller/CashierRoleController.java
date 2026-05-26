@@ -10,34 +10,29 @@
 package org.openmrs.module.billing.web.legacyweb.controller;
 
 import java.util.Set;
-
 import org.openmrs.Privilege;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.web.base.controller.RoleCreationControllerBase;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.billing.web.CashierWebConstants;
+import org.openmrs.module.billing.web.base.controller.RoleCreationControllerBase;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * Controller to manage the Cashier Role Creation page.
- */
+/** Controller to manage the Cashier Role Creation page. */
 @Controller
 @RequestMapping(CashierWebConstants.CASHIER_ROLE_ROOT)
 public class CashierRoleController extends RoleCreationControllerBase {
-	
-	public CashierRoleController() {
-		
-	}
-	
-	@Override
-	public UserService getUserService() {
-		return Context.getUserService();
-	}
-	
-	@Override
-	public Set<Privilege> privileges() {
-		return PrivilegeConstants.getDefaultPrivileges();
-	}
+
+  public CashierRoleController() {}
+
+  @Override
+  public UserService getUserService() {
+    return Context.getUserService();
+  }
+
+  @Override
+  public Set<Privilege> privileges() {
+    return PrivilegeConstants.getDefaultPrivileges();
+  }
 }

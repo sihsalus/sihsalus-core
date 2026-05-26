@@ -10,7 +10,6 @@
 package org.openmrs.module.billing.api.impl;
 
 import java.util.List;
-
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseObjectDataServiceImpl;
 import org.openmrs.module.billing.api.model.GroupSequence;
@@ -18,91 +17,92 @@ import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorMode
 import org.openmrs.module.billing.api.security.BasicEntityAuthorizationPrivileges;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Data service implementation class for {@link SequentialReceiptNumberGeneratorModel}s.
- */
+/** Data service implementation class for {@link SequentialReceiptNumberGeneratorModel}s. */
 @Transactional
-public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataServiceImpl<SequentialReceiptNumberGeneratorModel, BasicEntityAuthorizationPrivileges> implements ISequentialReceiptNumberGeneratorService {
-	
-	@Override
-	protected BasicEntityAuthorizationPrivileges getPrivileges() {
-		// No authorization required
-		return null;
-	}
-	
-	@Override
-	protected void validate(SequentialReceiptNumberGeneratorModel entity) {
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public SequentialReceiptNumberGeneratorModel getOnly() {
-		List<SequentialReceiptNumberGeneratorModel> records = getAll();
-		
-		if (!records.isEmpty()) {
-			return records.get(0);
-		} else {
-			return new SequentialReceiptNumberGeneratorModel();
-		}
-	}
-	
-	@Override
-	@Transactional
-	public int reserveNextSequence(String group) {
-		// Get the sequence
-		GroupSequence sequence = getSequence(group);
-		if (sequence == null) {
-			// Sequence not found so create it
-			sequence = new GroupSequence();
-			sequence.setGroup(group);
-			sequence.setValue(1);
-		} else {
-			// Increment the value
-			sequence.setValue(sequence.getValue() + 1);
-		}
-		
-		// Store the sequence and save the updated or new sequence
-		int result = sequence.getValue();
-		saveSequence(sequence);
-		
-		return result;
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public List<GroupSequence> getSequences() {
-		return getRepository().select(GroupSequence.class);
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public GroupSequence getSequence(String group) {
-		if (group == null) {
-			throw new IllegalArgumentException("The group must be defined.");
-		}
-		return (GroupSequence) getRepository()
-		        .createQuery("FROM GroupSequence gs WHERE gs.group = :group")
-		        .setParameter("group", group)
-		        .uniqueResult();
-	}
-	
-	@Override
-	@Transactional
-	public GroupSequence saveSequence(GroupSequence sequence) {
-		if (sequence == null) {
-			throw new NullPointerException("The sequence to save must be defined.");
-		}
-		
-		return getRepository().save(sequence);
-	}
-	
-	@Override
-	@Transactional
-	public void purgeSequence(GroupSequence sequence) {
-		if (sequence == null) {
-			throw new NullPointerException("The sequence to purge must be defined.");
-		}
-		
-		getRepository().delete(sequence);
-	}
+public class SequentialReceiptNumberGeneratorServiceImpl
+    extends BaseObjectDataServiceImpl<
+        SequentialReceiptNumberGeneratorModel, BasicEntityAuthorizationPrivileges>
+    implements ISequentialReceiptNumberGeneratorService {
+
+  @Override
+  protected BasicEntityAuthorizationPrivileges getPrivileges() {
+    // No authorization required
+    return null;
+  }
+
+  @Override
+  protected void validate(SequentialReceiptNumberGeneratorModel entity) {}
+
+  @Override
+  @Transactional(readOnly = true)
+  public SequentialReceiptNumberGeneratorModel getOnly() {
+    List<SequentialReceiptNumberGeneratorModel> records = getAll();
+
+    if (!records.isEmpty()) {
+      return records.get(0);
+    } else {
+      return new SequentialReceiptNumberGeneratorModel();
+    }
+  }
+
+  @Override
+  @Transactional
+  public int reserveNextSequence(String group) {
+    // Get the sequence
+    GroupSequence sequence = getSequence(group);
+    if (sequence == null) {
+      // Sequence not found so create it
+      sequence = new GroupSequence();
+      sequence.setGroup(group);
+      sequence.setValue(1);
+    } else {
+      // Increment the value
+      sequence.setValue(sequence.getValue() + 1);
+    }
+
+    // Store the sequence and save the updated or new sequence
+    int result = sequence.getValue();
+    saveSequence(sequence);
+
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<GroupSequence> getSequences() {
+    return getRepository().select(GroupSequence.class);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public GroupSequence getSequence(String group) {
+    if (group == null) {
+      throw new IllegalArgumentException("The group must be defined.");
+    }
+    return (GroupSequence)
+        getRepository()
+            .createQuery("FROM GroupSequence gs WHERE gs.group = :group")
+            .setParameter("group", group)
+            .uniqueResult();
+  }
+
+  @Override
+  @Transactional
+  public GroupSequence saveSequence(GroupSequence sequence) {
+    if (sequence == null) {
+      throw new NullPointerException("The sequence to save must be defined.");
+    }
+
+    return getRepository().save(sequence);
+  }
+
+  @Override
+  @Transactional
+  public void purgeSequence(GroupSequence sequence) {
+    if (sequence == null) {
+      throw new NullPointerException("The sequence to purge must be defined.");
+    }
+
+    getRepository().delete(sequence);
+  }
 }

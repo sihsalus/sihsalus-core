@@ -24,31 +24,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.Person> implements FhirPersonService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirPersonDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private PersonTranslator translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<Person> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator, SearchQueryInclude<Person>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForPeople(PersonSearchParams personSearchParams) {
-		return searchQuery.getQueryResults(personSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
-	}
-	
-	@Override
-	protected boolean isVoided(org.openmrs.Person person) {
-		return person.getPersonVoided();
-	}
+public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.Person>
+    implements FhirPersonService {
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private FhirPersonDao dao;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private PersonTranslator translator;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQueryInclude<Person> searchQueryInclude;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQuery<
+          org.openmrs.Person, Person, FhirPersonDao, PersonTranslator, SearchQueryInclude<Person>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForPeople(PersonSearchParams personSearchParams) {
+    return searchQuery.getQueryResults(
+        personSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+  }
+
+  @Override
+  protected boolean isVoided(org.openmrs.Person person) {
+    return person.getPersonVoided();
+  }
 }

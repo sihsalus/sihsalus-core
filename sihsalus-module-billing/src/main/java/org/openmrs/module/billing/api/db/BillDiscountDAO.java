@@ -10,7 +10,6 @@
 package org.openmrs.module.billing.api.db;
 
 import java.util.List;
-
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.DiscountStatus;
 
@@ -20,40 +19,46 @@ import org.openmrs.module.billing.api.model.DiscountStatus;
  * updates.
  */
 public interface BillDiscountDAO {
-	
-	/** @return the discount for the given primary key, or {@code null} if none. */
-	BillDiscount getBillDiscountById(Integer id);
-	
-	/** @return the discount with the given UUID, or {@code null} if none. */
-	BillDiscount getBillDiscountByUuid(String uuid);
-	
-	/**
-	 * @return the active <em>bill-level</em> discount on the bill (where {@code lineItem IS NULL} and
-	 *         {@code voided = false}), or {@code null}
-	 */
-	BillDiscount getBillDiscountByBillId(Integer billId);
-	
-	/** @return the active discount targeting the given line item, or {@code null}. */
-	BillDiscount getActiveLineItemDiscount(Integer lineItemId);
-	
-	/**
-	 * @return every discount on the bill (active and voided), newest first; never {@code null}
-	 */
-	List<BillDiscount> getDiscountsByBillId(Integer billId);
-	
-	/**
-	 * Returns the persisted status of a discount via a scalar query — without loading the entity into
-	 * the Hibernate session — so the validator can compare incoming vs persisted status during a save
-	 * without risking {@code NonUniqueObjectException}.
-	 *
-	 * @return the persisted status, or {@code null} if no row matches
-	 */
-	DiscountStatus getStatusById(Integer id);
-	
-	/**
-	 * Inserts or updates the given discount via {@code saveOrUpdate}.
-	 *
-	 * @return the persisted instance
-	 */
-	BillDiscount saveBillDiscount(BillDiscount billDiscount);
+
+  /**
+   * @return the discount for the given primary key, or {@code null} if none.
+   */
+  BillDiscount getBillDiscountById(Integer id);
+
+  /**
+   * @return the discount with the given UUID, or {@code null} if none.
+   */
+  BillDiscount getBillDiscountByUuid(String uuid);
+
+  /**
+   * @return the active <em>bill-level</em> discount on the bill (where {@code lineItem IS NULL} and
+   *     {@code voided = false}), or {@code null}
+   */
+  BillDiscount getBillDiscountByBillId(Integer billId);
+
+  /**
+   * @return the active discount targeting the given line item, or {@code null}.
+   */
+  BillDiscount getActiveLineItemDiscount(Integer lineItemId);
+
+  /**
+   * @return every discount on the bill (active and voided), newest first; never {@code null}
+   */
+  List<BillDiscount> getDiscountsByBillId(Integer billId);
+
+  /**
+   * Returns the persisted status of a discount via a scalar query — without loading the entity into
+   * the Hibernate session — so the validator can compare incoming vs persisted status during a save
+   * without risking {@code NonUniqueObjectException}.
+   *
+   * @return the persisted status, or {@code null} if no row matches
+   */
+  DiscountStatus getStatusById(Integer id);
+
+  /**
+   * Inserts or updates the given discount via {@code saveOrUpdate}.
+   *
+   * @return the persisted instance
+   */
+  BillDiscount saveBillDiscount(BillDiscount billDiscount);
 }

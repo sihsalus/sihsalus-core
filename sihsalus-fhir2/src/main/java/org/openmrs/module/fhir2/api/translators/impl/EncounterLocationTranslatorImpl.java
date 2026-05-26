@@ -15,7 +15,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTra
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -27,25 +26,28 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EncounterLocationTranslatorImpl implements EncounterLocationTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirLocationDao locationDao;
-	
-	@Override
-	public Encounter.EncounterLocationComponent toFhirResource(@Nonnull Location location) {
-		if (location == null) {
-			return null;
-		}
-		
-		return new Encounter.EncounterLocationComponent().setLocation(createLocationReference(location));
-	}
-	
-	@Override
-	public Location toOpenmrsType(@Nonnull Encounter.EncounterLocationComponent encounterLocationComponent) {
-		notNull(encounterLocationComponent, "The EncounterLocationComponent object should not be null");
-		
-		return getReferenceId(encounterLocationComponent.getLocation()).map(locationUuid -> locationDao.get(locationUuid))
-		        .orElse(null);
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirLocationDao locationDao;
+
+  @Override
+  public Encounter.EncounterLocationComponent toFhirResource(@Nonnull Location location) {
+    if (location == null) {
+      return null;
+    }
+
+    return new Encounter.EncounterLocationComponent()
+        .setLocation(createLocationReference(location));
+  }
+
+  @Override
+  public Location toOpenmrsType(
+      @Nonnull Encounter.EncounterLocationComponent encounterLocationComponent) {
+    notNull(encounterLocationComponent, "The EncounterLocationComponent object should not be null");
+
+    return getReferenceId(encounterLocationComponent.getLocation())
+        .map(locationUuid -> locationDao.get(locationUuid))
+        .orElse(null);
+  }
 }

@@ -10,7 +10,6 @@
 package org.openmrs.module.o3forms;
 
 public class O3FormsWebConstants {
-	
-	public static final String REST_NAMESPACE = "/o3";
-	
+
+  public static final String REST_NAMESPACE = "/o3";
 }

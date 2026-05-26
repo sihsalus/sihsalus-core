@@ -9,13 +9,11 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.annotation.Nonnull;
-
-import java.util.Collection;
-import java.util.List;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
@@ -23,21 +21,21 @@ import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 
 public interface FhirPatientService extends FhirService<Patient> {
-	
-	@Override
-	Patient get(@Nonnull String uuid);
-	
-	List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids);
-	
-	Patient getById(@Nonnull Integer id);
-	
-	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);
-	
-	IBundleProvider searchForPatients(PatientSearchParams patientSearchParams);
-	
-	IBundleProvider searchForPatients(OpenmrsPatientSearchParams patientSearchParams);
-	
-	IBundleProvider getPatientEverything(TokenParam identifier);
-	
-	IBundleProvider getPatientEverything();
+
+  @Override
+  Patient get(@Nonnull String uuid);
+
+  List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids);
+
+  Patient getById(@Nonnull Integer id);
+
+  PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);
+
+  IBundleProvider searchForPatients(PatientSearchParams patientSearchParams);
+
+  IBundleProvider searchForPatients(OpenmrsPatientSearchParams patientSearchParams);
+
+  IBundleProvider getPatientEverything(TokenParam identifier);
+
+  IBundleProvider getPatientEverything();
 }

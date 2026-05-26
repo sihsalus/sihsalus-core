@@ -10,37 +10,36 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Group;
 import org.openmrs.Cohort;
 
 public interface GroupTranslator extends OpenmrsFhirUpdatableTranslator<Cohort, Group> {
-	
-	/**
-	 * Maps an OpenMRS cohort to a FHIR group resource
-	 *
-	 * @param cohort the OpenMRS cohort to translate
-	 * @return the corresponding FHIR resource
-	 */
-	@Override
-	Group toFhirResource(@Nonnull Cohort cohort);
-	
-	/**
-	 * Maps a FHIR group resource to an OpenMRS cohort
-	 *
-	 * @param group the FHIR group resource to translate
-	 * @return the corresponding OpenMRS cohort
-	 */
-	@Override
-	Cohort toOpenmrsType(@Nonnull Group group);
-	
-	/**
-	 * Maps a FHIR group resource to an existing OpenMRS cohort
-	 *
-	 * @param existingCohort the existingCohort to update
-	 * @param group the group resource to map
-	 * @return an updated version of the existing cohort
-	 */
-	@Override
-	Cohort toOpenmrsType(@Nonnull Cohort existingCohort, @Nonnull Group group);
+
+  /**
+   * Maps an OpenMRS cohort to a FHIR group resource
+   *
+   * @param cohort the OpenMRS cohort to translate
+   * @return the corresponding FHIR resource
+   */
+  @Override
+  Group toFhirResource(@Nonnull Cohort cohort);
+
+  /**
+   * Maps a FHIR group resource to an OpenMRS cohort
+   *
+   * @param group the FHIR group resource to translate
+   * @return the corresponding OpenMRS cohort
+   */
+  @Override
+  Cohort toOpenmrsType(@Nonnull Group group);
+
+  /**
+   * Maps a FHIR group resource to an existing OpenMRS cohort
+   *
+   * @param existingCohort the existingCohort to update
+   * @param group the group resource to map
+   * @return an updated version of the existing cohort
+   */
+  @Override
+  Cohort toOpenmrsType(@Nonnull Cohort existingCohort, @Nonnull Group group);
 }

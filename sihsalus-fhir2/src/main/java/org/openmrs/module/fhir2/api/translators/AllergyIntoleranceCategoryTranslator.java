@@ -10,30 +10,32 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.AllergenType;
 
-public interface AllergyIntoleranceCategoryTranslator extends ToFhirTranslator<AllergenType, AllergyIntolerance.AllergyIntoleranceCategory>, ToOpenmrsTranslator<AllergenType, AllergyIntolerance.AllergyIntoleranceCategory> {
-	
-	/**
-	 * Maps {@link org.openmrs.AllergenType} element to a
-	 * {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory}
-	 *
-	 * @param allergenType the OpenMRS allergenType to translate
-	 * @return the corresponding
-	 *         {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory}
-	 */
-	@Override
-	AllergyIntolerance.AllergyIntoleranceCategory toFhirResource(@Nonnull AllergenType allergenType);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory} to a
-	 * {@link org.openmrs.AllergenType}
-	 *
-	 * @param allergyIntoleranceCategory the FHIR allergyIntoleranceCategory to translate
-	 * @return the corresponding {@link org.openmrs.AllergenType}
-	 */
-	@Override
-	AllergenType toOpenmrsType(@Nonnull AllergyIntolerance.AllergyIntoleranceCategory allergyIntoleranceCategory);
+public interface AllergyIntoleranceCategoryTranslator
+    extends ToFhirTranslator<AllergenType, AllergyIntolerance.AllergyIntoleranceCategory>,
+        ToOpenmrsTranslator<AllergenType, AllergyIntolerance.AllergyIntoleranceCategory> {
+
+  /**
+   * Maps {@link org.openmrs.AllergenType} element to a {@link
+   * org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory}
+   *
+   * @param allergenType the OpenMRS allergenType to translate
+   * @return the corresponding {@link
+   *     org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory}
+   */
+  @Override
+  AllergyIntolerance.AllergyIntoleranceCategory toFhirResource(@Nonnull AllergenType allergenType);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory} to a {@link
+   * org.openmrs.AllergenType}
+   *
+   * @param allergyIntoleranceCategory the FHIR allergyIntoleranceCategory to translate
+   * @return the corresponding {@link org.openmrs.AllergenType}
+   */
+  @Override
+  AllergenType toOpenmrsType(
+      @Nonnull AllergyIntolerance.AllergyIntoleranceCategory allergyIntoleranceCategory);
 }

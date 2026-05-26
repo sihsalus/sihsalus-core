@@ -10,39 +10,40 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 
-public interface DiagnosticReportTranslator extends OpenmrsFhirUpdatableTranslator<FhirDiagnosticReport, DiagnosticReport> {
-	
-	/**
-	 * Maps a {@link Obs} to a {@link DiagnosticReport}
-	 *
-	 * @param fhirDiagnosticReport the FhirDiagnosticReport object to translate
-	 * @return the corresponding FHIR DiagnosticReport
-	 */
-	@Override
-	DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport);
-	
-	/**
-	 * Maps {@link DiagnosticReport} to {@link FhirDiagnosticReport}
-	 *
-	 * @param diagnosticReport the FHIR diagnostic report to translate
-	 * @return the corresponding OpenMRS FhirDiagnosticReport
-	 */
-	@Override
-	FhirDiagnosticReport toOpenmrsType(@Nonnull DiagnosticReport diagnosticReport);
-	
-	/**
-	 * Maps a {@link DiagnosticReport} to an existing {@link FhirDiagnosticReport}
-	 *
-	 * @param existingDiagnosticReport the existing FhirDiagnosticReport to update
-	 * @param diagnosticReport the diagnostic report to map
-	 * @return an updated version of the existingObs
-	 */
-	@Override
-	FhirDiagnosticReport toOpenmrsType(@Nonnull FhirDiagnosticReport existingDiagnosticReport,
-	        @Nonnull DiagnosticReport diagnosticReport);
+public interface DiagnosticReportTranslator
+    extends OpenmrsFhirUpdatableTranslator<FhirDiagnosticReport, DiagnosticReport> {
+
+  /**
+   * Maps a {@link Obs} to a {@link DiagnosticReport}
+   *
+   * @param fhirDiagnosticReport the FhirDiagnosticReport object to translate
+   * @return the corresponding FHIR DiagnosticReport
+   */
+  @Override
+  DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport);
+
+  /**
+   * Maps {@link DiagnosticReport} to {@link FhirDiagnosticReport}
+   *
+   * @param diagnosticReport the FHIR diagnostic report to translate
+   * @return the corresponding OpenMRS FhirDiagnosticReport
+   */
+  @Override
+  FhirDiagnosticReport toOpenmrsType(@Nonnull DiagnosticReport diagnosticReport);
+
+  /**
+   * Maps a {@link DiagnosticReport} to an existing {@link FhirDiagnosticReport}
+   *
+   * @param existingDiagnosticReport the existing FhirDiagnosticReport to update
+   * @param diagnosticReport the diagnostic report to map
+   * @return an updated version of the existingObs
+   */
+  @Override
+  FhirDiagnosticReport toOpenmrsType(
+      @Nonnull FhirDiagnosticReport existingDiagnosticReport,
+      @Nonnull DiagnosticReport diagnosticReport);
 }

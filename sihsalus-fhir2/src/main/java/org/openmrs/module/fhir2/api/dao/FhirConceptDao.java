@@ -9,12 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSource;
 import org.openmrs.annotation.Authorized;
@@ -23,41 +21,41 @@ import org.openmrs.util.PrivilegeConstants;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface FhirConceptDao extends FhirDao<Concept> {
-	
-	@Transactional(readOnly = true)
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	Concept get(@Nonnull Integer id);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	Concept get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	List<Concept> get(@Nonnull Collection<String> uuids);
-	
-	@Transactional(readOnly = true)
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	Optional<Concept> getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode);
-	
-	@Transactional(readOnly = true)
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	List<Concept> getConceptsWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	List<Concept> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
-	Concept createOrUpdate(@Nonnull Concept newEntry);
-	
-	@Override
-	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
-	Concept delete(@Nonnull String uuid);
-	
+
+  @Transactional(readOnly = true)
+  @Authorized(PrivilegeConstants.GET_CONCEPTS)
+  Concept get(@Nonnull Integer id);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_CONCEPTS)
+  Concept get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_CONCEPTS)
+  List<Concept> get(@Nonnull Collection<String> uuids);
+
+  @Transactional(readOnly = true)
+  @Authorized(PrivilegeConstants.GET_CONCEPTS)
+  Optional<Concept> getConceptWithSameAsMappingInSource(
+      ConceptSource conceptSource, String mappingCode);
+
+  @Transactional(readOnly = true)
+  @Authorized(PrivilegeConstants.GET_CONCEPTS)
+  List<Concept> getConceptsWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_CONCEPTS)
+  List<Concept> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_CONCEPTS)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
+  Concept createOrUpdate(@Nonnull Concept newEntry);
+
+  @Override
+  @Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
+  Concept delete(@Nonnull String uuid);
 }

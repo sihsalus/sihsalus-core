@@ -14,27 +14,26 @@ import lombok.Setter;
 import org.openmrs.attribute.AttributeType;
 import org.openmrs.attribute.BaseAttributeType;
 
-public class CohortAttributeType extends BaseAttributeType<CohortM> implements AttributeType<CohortM> {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Setter
-	@Getter
-	private Integer cohortAttributeTypeId;
-	
-	/**
-	 * @return id - The unique Identifier for the object
-	 */
-	@Override
-	public Integer getId() {
-		return this.cohortAttributeTypeId;
-	}
-	
-	/**
-	 * @param id - The unique Identifier for the object
-	 */
-	@Override
-	public void setId(Integer id) {
-		this.setCohortAttributeTypeId(id);
-	}
+public class CohortAttributeType extends BaseAttributeType<CohortM>
+    implements AttributeType<CohortM> {
+
+  private static final long serialVersionUID = 1L;
+
+  @Setter @Getter private Integer cohortAttributeTypeId;
+
+  /**
+   * @return id - The unique Identifier for the object
+   */
+  @Override
+  public Integer getId() {
+    return this.cohortAttributeTypeId;
+  }
+
+  /**
+   * @param id - The unique Identifier for the object
+   */
+  @Override
+  public void setId(Integer id) {
+    this.setCohortAttributeTypeId(id);
+  }
 }

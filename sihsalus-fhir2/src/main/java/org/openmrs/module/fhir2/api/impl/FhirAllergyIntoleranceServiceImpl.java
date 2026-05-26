@@ -26,27 +26,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIntolerance, Allergy> implements FhirAllergyIntoleranceService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private AllergyIntoleranceTranslator translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirAllergyIntoleranceDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<AllergyIntolerance> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<org.openmrs.Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator, SearchQueryInclude<AllergyIntolerance>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForAllergies(FhirAllergyIntoleranceSearchParams allergyIntoleranceSearchParams) {
-		return searchQuery.getQueryResults(allergyIntoleranceSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
-	}
+public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIntolerance, Allergy>
+    implements FhirAllergyIntoleranceService {
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private AllergyIntoleranceTranslator translator;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirAllergyIntoleranceDao dao;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQueryInclude<AllergyIntolerance> searchQueryInclude;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQuery<
+          org.openmrs.Allergy,
+          AllergyIntolerance,
+          FhirAllergyIntoleranceDao,
+          AllergyIntoleranceTranslator,
+          SearchQueryInclude<AllergyIntolerance>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForAllergies(
+      FhirAllergyIntoleranceSearchParams allergyIntoleranceSearchParams) {
+    return searchQuery.getQueryResults(
+        allergyIntoleranceSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+  }
 }

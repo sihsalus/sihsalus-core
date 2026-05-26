@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.emrapi.encounter;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.EncounterProvider;
 import org.openmrs.Obs;
@@ -17,49 +20,47 @@ import org.openmrs.module.emrapi.diagnosis.Diagnosis;
 import org.openmrs.module.emrapi.diagnosis.DiagnosisMetadata;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 public class DiagnosisMapper {
-	
-	private final ConceptMapper conceptMapper = new ConceptMapper();
-	
-	private final EncounterProviderMapper encounterProviderMapper = new EncounterProviderMapper();
-	
-	public EncounterTransaction.Diagnosis map(Obs obs, DiagnosisMetadata diagnosisMetadata) {
-		Diagnosis diagnosis = diagnosisMetadata.toDiagnosis(obs);
-		return convert(diagnosis);
-	}
-	
-	public List<EncounterTransaction.Diagnosis> convert(List<Diagnosis> pastDiagnoses) {
-		List<EncounterTransaction.Diagnosis> pastEncounterDiagnoses = new ArrayList<EncounterTransaction.Diagnosis>();
-		for (Diagnosis diagnosis : pastDiagnoses) {
-			pastEncounterDiagnoses.add(convert(diagnosis));
-		}
-		return pastEncounterDiagnoses;
-	}
-	
-	public EncounterTransaction.Diagnosis convert(Diagnosis diagnosis) {
-		EncounterTransaction.Diagnosis encounterDiagnosis = new EncounterTransaction.Diagnosis();
-		encounterDiagnosis.setCertainty(String.valueOf(diagnosis.getCertainty()));
-		CodedOrFreeTextAnswer codedOrFreeTextAnswer = diagnosis.getDiagnosis();
-		if (StringUtils.isNotBlank(codedOrFreeTextAnswer.getNonCodedAnswer())) {
-			encounterDiagnosis.setFreeTextAnswer(codedOrFreeTextAnswer.getNonCodedAnswer());
-		} else {
-			encounterDiagnosis.setCodedAnswer(conceptMapper.map(codedOrFreeTextAnswer.getCodedAnswer()));
-		}
-		encounterDiagnosis.setOrder(String.valueOf(diagnosis.getOrder()));
-		Obs existingObs = diagnosis.getExistingObs();
-		if (existingObs != null) {
-			encounterDiagnosis.setDiagnosisDateTime(existingObs.getObsDatetime());
-			encounterDiagnosis.setExistingObs(existingObs.getUuid());
-			
-			Set<EncounterProvider> encounterProviders = existingObs.getEncounter().getEncounterProviders();
-			encounterDiagnosis.setProviders(encounterProviderMapper.convert(encounterProviders));
-			encounterDiagnosis.setComments(existingObs.getComment());
-		}
-		
-		return encounterDiagnosis;
-	}
+
+  private final ConceptMapper conceptMapper = new ConceptMapper();
+
+  private final EncounterProviderMapper encounterProviderMapper = new EncounterProviderMapper();
+
+  public EncounterTransaction.Diagnosis map(Obs obs, DiagnosisMetadata diagnosisMetadata) {
+    Diagnosis diagnosis = diagnosisMetadata.toDiagnosis(obs);
+    return convert(diagnosis);
+  }
+
+  public List<EncounterTransaction.Diagnosis> convert(List<Diagnosis> pastDiagnoses) {
+    List<EncounterTransaction.Diagnosis> pastEncounterDiagnoses =
+        new ArrayList<EncounterTransaction.Diagnosis>();
+    for (Diagnosis diagnosis : pastDiagnoses) {
+      pastEncounterDiagnoses.add(convert(diagnosis));
+    }
+    return pastEncounterDiagnoses;
+  }
+
+  public EncounterTransaction.Diagnosis convert(Diagnosis diagnosis) {
+    EncounterTransaction.Diagnosis encounterDiagnosis = new EncounterTransaction.Diagnosis();
+    encounterDiagnosis.setCertainty(String.valueOf(diagnosis.getCertainty()));
+    CodedOrFreeTextAnswer codedOrFreeTextAnswer = diagnosis.getDiagnosis();
+    if (StringUtils.isNotBlank(codedOrFreeTextAnswer.getNonCodedAnswer())) {
+      encounterDiagnosis.setFreeTextAnswer(codedOrFreeTextAnswer.getNonCodedAnswer());
+    } else {
+      encounterDiagnosis.setCodedAnswer(conceptMapper.map(codedOrFreeTextAnswer.getCodedAnswer()));
+    }
+    encounterDiagnosis.setOrder(String.valueOf(diagnosis.getOrder()));
+    Obs existingObs = diagnosis.getExistingObs();
+    if (existingObs != null) {
+      encounterDiagnosis.setDiagnosisDateTime(existingObs.getObsDatetime());
+      encounterDiagnosis.setExistingObs(existingObs.getUuid());
+
+      Set<EncounterProvider> encounterProviders =
+          existingObs.getEncounter().getEncounterProviders();
+      encounterDiagnosis.setProviders(encounterProviderMapper.convert(encounterProviders));
+      encounterDiagnosis.setComments(existingObs.getComment());
+    }
+
+    return encounterDiagnosis;
+  }
 }

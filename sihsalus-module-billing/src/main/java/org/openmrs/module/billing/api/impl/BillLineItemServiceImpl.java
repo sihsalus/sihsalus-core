@@ -12,7 +12,6 @@ package org.openmrs.module.billing.api.impl;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,50 +25,49 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillLineItemService {
-	
-	@Setter
-	private BillLineItemDAO billLineItemDAO;
-	
-	@Override
-	@Transactional(readOnly = true)
-	public List<Integer> getPersistedLineItemIds(Integer billId) {
-		if (billId == null) {
-			return Collections.emptyList();
-		}
-		return billLineItemDAO.getLineItemIdsByBillId(billId);
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public BillLineItem getBillLineItemByUuid(String uuid) {
-		if (StringUtils.isBlank(uuid)) {
-			return null;
-		}
-		return billLineItemDAO.getBillLineItemByUuid(uuid);
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public BillLineItem getBillLineItemByOrder(Order order) {
-		if (order == null) {
-			return null;
-		}
-		return billLineItemDAO.getBillLineItemByOrder(order);
-	}
-	
-	@Override
-	@Transactional
-	public void voidBillLineItem(BillLineItem lineItem, String voidReason) {
-		if (lineItem == null) {
-			throw new NullPointerException("The bill line item must be defined.");
-		}
-		if (StringUtils.isBlank(voidReason)) {
-			throw new IllegalArgumentException("voidReason cannot be null or empty");
-		}
-		lineItem.setVoided(true);
-		lineItem.setVoidedBy(Context.getAuthenticatedUser());
-		lineItem.setDateVoided(new Date());
-		lineItem.setVoidReason(voidReason);
-		billLineItemDAO.saveBillLineItem(lineItem);
-	}
+
+  @Setter private BillLineItemDAO billLineItemDAO;
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Integer> getPersistedLineItemIds(Integer billId) {
+    if (billId == null) {
+      return Collections.emptyList();
+    }
+    return billLineItemDAO.getLineItemIdsByBillId(billId);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BillLineItem getBillLineItemByUuid(String uuid) {
+    if (StringUtils.isBlank(uuid)) {
+      return null;
+    }
+    return billLineItemDAO.getBillLineItemByUuid(uuid);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BillLineItem getBillLineItemByOrder(Order order) {
+    if (order == null) {
+      return null;
+    }
+    return billLineItemDAO.getBillLineItemByOrder(order);
+  }
+
+  @Override
+  @Transactional
+  public void voidBillLineItem(BillLineItem lineItem, String voidReason) {
+    if (lineItem == null) {
+      throw new NullPointerException("The bill line item must be defined.");
+    }
+    if (StringUtils.isBlank(voidReason)) {
+      throw new IllegalArgumentException("voidReason cannot be null or empty");
+    }
+    lineItem.setVoided(true);
+    lineItem.setVoidedBy(Context.getAuthenticatedUser());
+    lineItem.setDateVoided(new Date());
+    lineItem.setVoidReason(voidReason);
+    billLineItemDAO.saveBillLineItem(lineItem);
+  }
 }

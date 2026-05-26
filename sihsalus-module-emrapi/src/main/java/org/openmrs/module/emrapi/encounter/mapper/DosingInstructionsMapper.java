@@ -12,36 +12,40 @@ package org.openmrs.module.emrapi.encounter.mapper;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 import org.openmrs.module.emrapi.encounter.OrderMetadataService;
+import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
 public class DosingInstructionsMapper {
-	
-	private ConceptService conceptService;
-	
-	private OrderMetadataService orderMetadataService;
-	
-	public DosingInstructionsMapper(ConceptService conceptService, OrderMetadataService orderMetadataService) {
-		this.conceptService = conceptService;
-		this.orderMetadataService = orderMetadataService;
-	}
-	
-	public DrugOrder map(EncounterTransaction.DosingInstructions dosingInstructions, DrugOrder drugOrder) {
-		drugOrder.setDose(dosingInstructions.getDose());
-		drugOrder.setDoseUnits(orderMetadataService.getDoseUnitsConceptByName(dosingInstructions.getDoseUnits()));
-		drugOrder.setDosingInstructions(dosingInstructions.getAdministrationInstructions());
-		drugOrder.setRoute(orderMetadataService.getRouteConceptByName(dosingInstructions.getRoute()));
-		drugOrder.setAsNeeded(dosingInstructions.getAsNeeded());
-		drugOrder.setFrequency(orderMetadataService.getOrderFrequencyByName(dosingInstructions.getFrequency(), false));
-		drugOrder.setQuantity(dosingInstructions.getQuantity());
-		drugOrder
-		        .setQuantityUnits(orderMetadataService.getDispenseUnitsConceptByName(dosingInstructions.getQuantityUnits()));
-		Integer numberOfRefills = dosingInstructions.getNumberOfRefills();
-		drugOrder.setNumRefills(numberOfRefills == null ? 0 : numberOfRefills);
-		return drugOrder;
-	}
-	
-	private Concept conceptByName(String name) {
-		return conceptService.getConceptByName(name);
-	}
+
+  private ConceptService conceptService;
+
+  private OrderMetadataService orderMetadataService;
+
+  public DosingInstructionsMapper(
+      ConceptService conceptService, OrderMetadataService orderMetadataService) {
+    this.conceptService = conceptService;
+    this.orderMetadataService = orderMetadataService;
+  }
+
+  public DrugOrder map(
+      EncounterTransaction.DosingInstructions dosingInstructions, DrugOrder drugOrder) {
+    drugOrder.setDose(dosingInstructions.getDose());
+    drugOrder.setDoseUnits(
+        orderMetadataService.getDoseUnitsConceptByName(dosingInstructions.getDoseUnits()));
+    drugOrder.setDosingInstructions(dosingInstructions.getAdministrationInstructions());
+    drugOrder.setRoute(orderMetadataService.getRouteConceptByName(dosingInstructions.getRoute()));
+    drugOrder.setAsNeeded(dosingInstructions.getAsNeeded());
+    drugOrder.setFrequency(
+        orderMetadataService.getOrderFrequencyByName(dosingInstructions.getFrequency(), false));
+    drugOrder.setQuantity(dosingInstructions.getQuantity());
+    drugOrder.setQuantityUnits(
+        orderMetadataService.getDispenseUnitsConceptByName(dosingInstructions.getQuantityUnits()));
+    Integer numberOfRefills = dosingInstructions.getNumberOfRefills();
+    drugOrder.setNumRefills(numberOfRefills == null ? 0 : numberOfRefills);
+    return drugOrder;
+  }
+
+  private Concept conceptByName(String name) {
+    return conceptService.getConceptByName(name);
+  }
 }

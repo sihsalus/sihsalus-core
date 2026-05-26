@@ -10,31 +10,29 @@
 package org.openmrs.module.queue.api.dao;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 import java.util.Optional;
-
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface BaseQueueDao<Q extends OpenmrsObject & Auditable> {
-	
-	@Transactional(readOnly = true)
-	Optional<Q> get(@NotNull int id);
-	
-	@Transactional(readOnly = true)
-	Optional<Q> get(@NotNull String uuid);
-	
-	Q createOrUpdate(Q object);
-	
-	void delete(Q object);
-	
-	void delete(@NotNull String uuid);
-	
-	@Transactional(readOnly = true)
-	List<Q> findAll();
-	
-	@Transactional(readOnly = true)
-	List<Q> findAll(boolean includeVoided);
+
+  @Transactional(readOnly = true)
+  Optional<Q> get(@NotNull int id);
+
+  @Transactional(readOnly = true)
+  Optional<Q> get(@NotNull String uuid);
+
+  Q createOrUpdate(Q object);
+
+  void delete(Q object);
+
+  void delete(@NotNull String uuid);
+
+  @Transactional(readOnly = true)
+  List<Q> findAll();
+
+  @Transactional(readOnly = true)
+  List<Q> findAll(boolean includeVoided);
 }

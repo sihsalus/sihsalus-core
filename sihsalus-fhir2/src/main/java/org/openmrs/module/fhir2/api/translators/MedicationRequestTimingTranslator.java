@@ -10,28 +10,28 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
 
-public interface MedicationRequestTimingTranslator extends ToFhirTranslator<DrugOrder, Timing>, UpdatableOpenmrsTranslator<DrugOrder, Timing> {
-	
-	/**
-	 * Maps an {@link org.openmrs.DrugOrder} to a {@link org.hl7.fhir.r4.model.Timing} FHIR Type
-	 *
-	 * @param drugOrder the OpenMRS drugOrder to translate
-	 * @return the corresponding FHIR Timing type
-	 */
-	@Override
-	Timing toFhirResource(@Nonnull DrugOrder drugOrder);
-	
-	/**
-	 * Populates a {@link DrugOrder} with dosage timing information from a {@link Timing}
-	 *
-	 * @param drugOrder the OpenMRS drugOrder to update
-	 * @param timing the {@link Timing} FHIR resource that the drugOrder should be updated with
-	 * @return the updated {@link DrugOrder}
-	 */
-	@Override
-	DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing timing);
+public interface MedicationRequestTimingTranslator
+    extends ToFhirTranslator<DrugOrder, Timing>, UpdatableOpenmrsTranslator<DrugOrder, Timing> {
+
+  /**
+   * Maps an {@link org.openmrs.DrugOrder} to a {@link org.hl7.fhir.r4.model.Timing} FHIR Type
+   *
+   * @param drugOrder the OpenMRS drugOrder to translate
+   * @return the corresponding FHIR Timing type
+   */
+  @Override
+  Timing toFhirResource(@Nonnull DrugOrder drugOrder);
+
+  /**
+   * Populates a {@link DrugOrder} with dosage timing information from a {@link Timing}
+   *
+   * @param drugOrder the OpenMRS drugOrder to update
+   * @param timing the {@link Timing} FHIR resource that the drugOrder should be updated with
+   * @return the updated {@link DrugOrder}
+   */
+  @Override
+  DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing timing);
 }

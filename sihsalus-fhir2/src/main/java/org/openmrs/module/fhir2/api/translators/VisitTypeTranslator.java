@@ -9,17 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeableConcept;
 
 public interface VisitTypeTranslator<T> extends OpenmrsFhirTranslator<T, List<CodeableConcept>> {
-	
-	@Override
-	List<CodeableConcept> toFhirResource(@Nonnull T visitType);
-	
-	@Override
-	T toOpenmrsType(@Nonnull List<CodeableConcept> visitTypes);
+
+  @Override
+  List<CodeableConcept> toFhirResource(@Nonnull T visitType);
+
+  @Override
+  T toOpenmrsType(@Nonnull List<CodeableConcept> visitTypes);
 }

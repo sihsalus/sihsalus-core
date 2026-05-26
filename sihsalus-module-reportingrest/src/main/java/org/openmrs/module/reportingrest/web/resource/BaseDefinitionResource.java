@@ -1,18 +1,17 @@
 /**
- * The contents of this file are subject to the OpenMRS Public License
- * Version 1.0 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://license.openmrs.org
+ * The contents of this file are subject to the OpenMRS Public License Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at http://license.openmrs.org
  *
- * Software distributed under the License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- * License for the specific language governing rights and limitations
- * under the License.
+ * <p>Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+ * ANY KIND, either express or implied. See the License for the specific language governing rights
+ * and limitations under the License.
  *
- * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ * <p>Copyright (C) OpenMRS, LLC. All Rights Reserved.
  */
 package org.openmrs.module.reportingrest.web.resource;
 
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.definition.DefinitionContext;
@@ -33,155 +32,152 @@ import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingC
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.List;
+/** Base {@link Resource} for {@link Definition}s, supporting standard CRUD operations */
+public abstract class BaseDefinitionResource<T extends Definition>
+    extends MetadataDelegatingCrudResource<T> implements Searchable {
 
-/**
- * Base {@link Resource} for {@link Definition}s, supporting standard CRUD operations
- */
-public abstract class BaseDefinitionResource<T extends Definition> extends MetadataDelegatingCrudResource<T> implements Searchable {
-	
-	/**
-	 * @return the definition type that this resource wraps
-	 */
-	public abstract Class<T> getDefinitionType();
-	
-	/**
-	 * @see BaseDelegatingResource#newDelegate()
-	 */
-	@Override
-    public T newDelegate() {
-		try {
-			return getDefinitionType().newInstance();
-		}
-		catch (Exception e) {
-			throw new RuntimeException("Unable to create new " + getDefinitionType());
-		}
-	}
-	
-	/**
-	 * @see BaseDelegatingResource#getByUniqueId(String)
-	 */
-	@Override
-	public T getByUniqueId(String uuid) {
-		ReportingRestPrivileges.requireViewReportObjects();
-		return DefinitionContext.getDefinitionByUuid(getDefinitionType(), uuid);
-	}
-	
-	/**
-	 * @see BaseDelegatingResource#save(Object)
-	 */
-	@Override
-	public T save(T definition) {
-		if (definition.getId() == null) {
-			ReportingRestPrivileges.requireAddReportObjects();
-		} else {
-			ReportingRestPrivileges.requireEditReportObjects();
-		}
-		return DefinitionContext.saveDefinition(definition);
-	}
+  /**
+   * @return the definition type that this resource wraps
+   */
+  public abstract Class<T> getDefinitionType();
 
-	/**
-	 * @see BaseDelegatingResource#delete(Object, String, RequestContext)
-	 */
-	@Override
-	public void delete(T definition, String reason, RequestContext context) throws ResponseException {
-		ReportingRestPrivileges.requireDeleteReportObjects();
-		definition.setRetireReason(reason);
-		DefinitionContext.retireDefinition(definition);
-	}
-	
-	/**
-	 * @see BaseDelegatingResource#purge(Object, RequestContext)
-	 */
-	@Override
-	public void purge(T definition, RequestContext context) throws ResponseException {
-		ReportingRestPrivileges.requireDeleteReportObjects();
-		DefinitionContext.purgeDefinition(getDefinitionType(), definition.getUuid());
-	}
-	
-	/**
-	 * @see BaseDelegatingResource#getRepresentationDescription(Representation)
-	 */
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = null;
-		
-		if (rep instanceof DefaultRepresentation) {
-			description = new DelegatingResourceDescription();
-			description.addProperty("uuid");
-			description.addProperty("name");
-			description.addProperty("display");
-			description.addProperty("description");
-			description.addProperty("descriptionDisplay");
-			description.addProperty("parameters");
-			description.addSelfLink();
-			description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
-		} 
-		else if (rep instanceof FullRepresentation) {
-			description = new DelegatingResourceDescription();
-			description.addProperty("uuid");
-			description.addProperty("name");
-			description.addProperty("display");
-			description.addProperty("description");
-			description.addProperty("descriptionDisplay");
-			description.addProperty("parameters");
-			description.addSelfLink();
-		}
-		return description;
-	}
+  /**
+   * @see BaseDelegatingResource#newDelegate()
+   */
+  @Override
+  public T newDelegate() {
+    try {
+      return getDefinitionType().newInstance();
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to create new " + getDefinitionType());
+    }
+  }
 
-	@Override
-	@PropertyGetter("display")
-	public String getDisplayString(T delegate) {
-		String display = Context.getMessageSourceService().getMessage(delegate.getName());
-		if (StringUtils.isBlank(display) || display.equals(delegate.getName())) {
-			display = super.getDisplayString(delegate);
-		}
-		return display;
-	}
+  /**
+   * @see BaseDelegatingResource#getByUniqueId(String)
+   */
+  @Override
+  public T getByUniqueId(String uuid) {
+    ReportingRestPrivileges.requireViewReportObjects();
+    return DefinitionContext.getDefinitionByUuid(getDefinitionType(), uuid);
+  }
 
-	@PropertyGetter("descriptionDisplay")
-	public String getDescriptionDisplay(T delegate) {
-		return Context.getMessageSourceService().getMessage(delegate.getDescription());
-	}
-	
-	/**
-	 * @see org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource#doSearch(org.openmrs.module.webservices.rest.web.RequestContext)
-	 */
-	@Override
-	protected PageableResult doSearch(RequestContext context) {
-		ReportingRestPrivileges.requireViewReportObjects();
-        String query = context.getParameter("q");
-		List<T> results = DefinitionContext.getDefinitionService(getDefinitionType()).getDefinitions(query, false);
-		return new NeedsPaging<T>(results, context);
-	}
-	
-	/**
-	 * @see org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource#doGetAll(org.openmrs.module.webservices.rest.web.RequestContext)
-	 */
-	public PageableResult doGetAll(RequestContext context) throws ResponseException {
-		ReportingRestPrivileges.requireViewReportObjects();
-		return new NeedsPaging<T>(DefinitionContext.getDefinitionService(getDefinitionType()).getAllDefinitions(false), context);
-	}
-	
-	/**
-	 * @param delegate
-	 * @return the URI for the given delegate object
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public String getUri(Object delegate) {
-		if (delegate == null)
-			return "";
-		
-		Resource res = getClass().getAnnotation(Resource.class);
-		if (res != null) {
-			String url = RestConstants.URI_PREFIX + res.name() + "/" + getUniqueId((T) delegate);
-			url = url.replace("/rest/", "/reporting/"); // hacky :-(
-			return url;
-		}
-		throw new RuntimeException(getClass() + " needs a @Resource or @SubResource annotation");
-		
-	}
-	
+  /**
+   * @see BaseDelegatingResource#save(Object)
+   */
+  @Override
+  public T save(T definition) {
+    if (definition.getId() == null) {
+      ReportingRestPrivileges.requireAddReportObjects();
+    } else {
+      ReportingRestPrivileges.requireEditReportObjects();
+    }
+    return DefinitionContext.saveDefinition(definition);
+  }
+
+  /**
+   * @see BaseDelegatingResource#delete(Object, String, RequestContext)
+   */
+  @Override
+  public void delete(T definition, String reason, RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireDeleteReportObjects();
+    definition.setRetireReason(reason);
+    DefinitionContext.retireDefinition(definition);
+  }
+
+  /**
+   * @see BaseDelegatingResource#purge(Object, RequestContext)
+   */
+  @Override
+  public void purge(T definition, RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireDeleteReportObjects();
+    DefinitionContext.purgeDefinition(getDefinitionType(), definition.getUuid());
+  }
+
+  /**
+   * @see BaseDelegatingResource#getRepresentationDescription(Representation)
+   */
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = null;
+
+    if (rep instanceof DefaultRepresentation) {
+      description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("name");
+      description.addProperty("display");
+      description.addProperty("description");
+      description.addProperty("descriptionDisplay");
+      description.addProperty("parameters");
+      description.addSelfLink();
+      description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
+    } else if (rep instanceof FullRepresentation) {
+      description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("name");
+      description.addProperty("display");
+      description.addProperty("description");
+      description.addProperty("descriptionDisplay");
+      description.addProperty("parameters");
+      description.addSelfLink();
+    }
+    return description;
+  }
+
+  @Override
+  @PropertyGetter("display")
+  public String getDisplayString(T delegate) {
+    String display = Context.getMessageSourceService().getMessage(delegate.getName());
+    if (StringUtils.isBlank(display) || display.equals(delegate.getName())) {
+      display = super.getDisplayString(delegate);
+    }
+    return display;
+  }
+
+  @PropertyGetter("descriptionDisplay")
+  public String getDescriptionDisplay(T delegate) {
+    return Context.getMessageSourceService().getMessage(delegate.getDescription());
+  }
+
+  /**
+   * @see
+   *     org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource#doSearch(org.openmrs.module.webservices.rest.web.RequestContext)
+   */
+  @Override
+  protected PageableResult doSearch(RequestContext context) {
+    ReportingRestPrivileges.requireViewReportObjects();
+    String query = context.getParameter("q");
+    List<T> results =
+        DefinitionContext.getDefinitionService(getDefinitionType()).getDefinitions(query, false);
+    return new NeedsPaging<T>(results, context);
+  }
+
+  /**
+   * @see
+   *     org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource#doGetAll(org.openmrs.module.webservices.rest.web.RequestContext)
+   */
+  public PageableResult doGetAll(RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireViewReportObjects();
+    return new NeedsPaging<T>(
+        DefinitionContext.getDefinitionService(getDefinitionType()).getAllDefinitions(false),
+        context);
+  }
+
+  /**
+   * @param delegate
+   * @return the URI for the given delegate object
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public String getUri(Object delegate) {
+    if (delegate == null) return "";
+
+    Resource res = getClass().getAnnotation(Resource.class);
+    if (res != null) {
+      String url = RestConstants.URI_PREFIX + res.name() + "/" + getUniqueId((T) delegate);
+      url = url.replace("/rest/", "/reporting/"); // hacky :-(
+      return url;
+    }
+    throw new RuntimeException(getClass() + " needs a @Resource or @SubResource annotation");
+  }
 }

@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
@@ -23,37 +22,41 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MedicationRequestTimingRepeatComponentTranslatorImpl implements MedicationRequestTimingRepeatComponentTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private DurationUnitTranslator durationUnitTranslator;
-	
-	@Override
-	public Timing.TimingRepeatComponent toFhirResource(@Nonnull DrugOrder drugOrder) {
-		if (drugOrder == null) {
-			return null;
-		}
-		Timing.TimingRepeatComponent repeatComponent = new Timing.TimingRepeatComponent();
-		if (drugOrder.getDuration() != null) {
-			repeatComponent.setDuration(drugOrder.getDuration());
-		}
-		
-		if (drugOrder.getDurationUnits() != null) {
-			repeatComponent.setDurationUnit(durationUnitTranslator.toFhirResource(drugOrder.getDurationUnits()));
-		}
-		
-		return repeatComponent;
-	}
-	
-	@Override
-	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing.TimingRepeatComponent repeatComponent) {
-		if (repeatComponent.getDuration() != null) {
-			drugOrder.setDuration(repeatComponent.getDuration().intValue());
-		}
-		if (repeatComponent.getDurationUnit() != null) {
-			drugOrder.setDurationUnits(durationUnitTranslator.toOpenmrsType(repeatComponent.getDurationUnit()));
-		}
-		return drugOrder;
-	}
+public class MedicationRequestTimingRepeatComponentTranslatorImpl
+    implements MedicationRequestTimingRepeatComponentTranslator {
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private DurationUnitTranslator durationUnitTranslator;
+
+  @Override
+  public Timing.TimingRepeatComponent toFhirResource(@Nonnull DrugOrder drugOrder) {
+    if (drugOrder == null) {
+      return null;
+    }
+    Timing.TimingRepeatComponent repeatComponent = new Timing.TimingRepeatComponent();
+    if (drugOrder.getDuration() != null) {
+      repeatComponent.setDuration(drugOrder.getDuration());
+    }
+
+    if (drugOrder.getDurationUnits() != null) {
+      repeatComponent.setDurationUnit(
+          durationUnitTranslator.toFhirResource(drugOrder.getDurationUnits()));
+    }
+
+    return repeatComponent;
+  }
+
+  @Override
+  public DrugOrder toOpenmrsType(
+      @Nonnull DrugOrder drugOrder, @Nonnull Timing.TimingRepeatComponent repeatComponent) {
+    if (repeatComponent.getDuration() != null) {
+      drugOrder.setDuration(repeatComponent.getDuration().intValue());
+    }
+    if (repeatComponent.getDurationUnit() != null) {
+      drugOrder.setDurationUnits(
+          durationUnitTranslator.toOpenmrsType(repeatComponent.getDurationUnit()));
+    }
+    return drugOrder;
+  }
 }

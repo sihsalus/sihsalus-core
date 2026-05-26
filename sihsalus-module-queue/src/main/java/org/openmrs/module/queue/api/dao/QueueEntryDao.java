@@ -10,40 +10,36 @@
 package org.openmrs.module.queue.api.dao;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Date;
 import java.util.List;
-
 import org.openmrs.module.queue.api.search.QueueEntrySearchCriteria;
 import org.openmrs.module.queue.model.QueueEntry;
 
 public interface QueueEntryDao extends BaseQueueDao<QueueEntry> {
-	
-	/**
-	 * @return {@link List} of queue entries that match the given %{@link QueueEntrySearchCriteria}
-	 */
-	List<QueueEntry> getQueueEntries(@NotNull QueueEntrySearchCriteria searchCriteria);
-	
-	/**
-	 * @return {@link Long} of the number of queue entries that match the given
-	 *         %{@link QueueEntrySearchCriteria}
-	 */
-	Long getCountOfQueueEntries(@NotNull QueueEntrySearchCriteria searchCriteria);
-	
-	List<QueueEntry> getOverlappingQueueEntries(@NotNull QueueEntrySearchCriteria searchCriteria);
-	
-	/**
-	 * Flushes the current session to ensure pending changes are persisted to the database.
-	 */
-	void flushSession();
-	
-	/**
-	 * Updates the queue entry only if it hasn't been modified since it was loaded. This provides
-	 * optimistic locking to prevent concurrent modifications.
-	 *
-	 * @param queueEntry the queue entry to update
-	 * @param expectedDateChanged the dateChanged value that was present when the entry was loaded
-	 * @return true if the update succeeded, false if the entry was modified by another transaction
-	 */
-	boolean updateIfUnmodified(QueueEntry queueEntry, Date expectedDateChanged);
+
+  /**
+   * @return {@link List} of queue entries that match the given %{@link QueueEntrySearchCriteria}
+   */
+  List<QueueEntry> getQueueEntries(@NotNull QueueEntrySearchCriteria searchCriteria);
+
+  /**
+   * @return {@link Long} of the number of queue entries that match the given %{@link
+   *     QueueEntrySearchCriteria}
+   */
+  Long getCountOfQueueEntries(@NotNull QueueEntrySearchCriteria searchCriteria);
+
+  List<QueueEntry> getOverlappingQueueEntries(@NotNull QueueEntrySearchCriteria searchCriteria);
+
+  /** Flushes the current session to ensure pending changes are persisted to the database. */
+  void flushSession();
+
+  /**
+   * Updates the queue entry only if it hasn't been modified since it was loaded. This provides
+   * optimistic locking to prevent concurrent modifications.
+   *
+   * @param queueEntry the queue entry to update
+   * @param expectedDateChanged the dateChanged value that was present when the entry was loaded
+   * @return true if the update succeeded, false if the entry was modified by another transaction
+   */
+  boolean updateIfUnmodified(QueueEntry queueEntry, Date expectedDateChanged);
 }

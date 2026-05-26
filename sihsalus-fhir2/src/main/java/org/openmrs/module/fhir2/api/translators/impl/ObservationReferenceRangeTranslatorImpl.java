@@ -9,11 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.annotation.Nonnull;
-
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
@@ -26,89 +24,102 @@ import org.openmrs.module.fhir2.api.translators.ObservationReferenceRangeTransla
 import org.springframework.stereotype.Component;
 
 @Component
-public class ObservationReferenceRangeTranslatorImpl implements ObservationReferenceRangeTranslator {
-	
-	@Override
-	public List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull Obs obs) {
-		
-		ConceptNumeric conceptNumeric = null;
-		if (obs.getConcept() instanceof ConceptNumeric) {
-			conceptNumeric = (ConceptNumeric) obs.getConcept();
-		}
-		
-		if (conceptNumeric != null) {
-			boolean allowDecimal = conceptNumeric.getAllowDecimal() != null ? conceptNumeric.getAllowDecimal() : true;
-			
-			Double hiNormal = conceptNumeric.getHiNormal();
-			Double lowNormal = conceptNumeric.getLowNormal();
-			Double hiCritical = conceptNumeric.getHiCritical();
-			Double lowCritical = conceptNumeric.getLowCritical();
-			Double hiAbsolute = conceptNumeric.getHiAbsolute();
-			Double lowAbsolute = conceptNumeric.getLowAbsolute();
-			
-			ObsReferenceRange referenceRange = obs.getReferenceRange();
-			if (referenceRange != null) {
-				hiNormal = referenceRange.getHiNormal();
-				lowNormal = referenceRange.getLowNormal();
-				hiCritical = referenceRange.getHiCritical();
-				lowCritical = referenceRange.getLowCritical();
-				hiAbsolute = referenceRange.getHiAbsolute();
-				lowAbsolute = referenceRange.getLowAbsolute();
-			}
-			
-			List<Observation.ObservationReferenceRangeComponent> observationReferenceRangeComponentList = new ArrayList<>();
-			if (hiNormal != null || lowNormal != null) {
-				observationReferenceRangeComponentList.add(createObservationReferenceRange(hiNormal, lowNormal,
-				    FhirConstants.OBSERVATION_REFERENCE_NORMAL, allowDecimal));
-			}
-			
-			if (hiCritical != null || lowCritical != null) {
-				observationReferenceRangeComponentList.add(createObservationReferenceRange(hiCritical, lowCritical,
-				    FhirConstants.OBSERVATION_REFERENCE_TREATMENT, allowDecimal));
-			}
-			
-			if (hiAbsolute != null || lowAbsolute != null) {
-				observationReferenceRangeComponentList.add(createObservationReferenceRange(hiAbsolute, lowAbsolute,
-				    FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE, allowDecimal));
-			}
-			
-			return observationReferenceRangeComponentList;
-		}
-		
-		return null;
-	}
-	
-	private Observation.ObservationReferenceRangeComponent createObservationReferenceRange(Double hiValue, Double lowValue,
-	        String code, boolean allowDecimal) {
-		Observation.ObservationReferenceRangeComponent component = new Observation.ObservationReferenceRangeComponent();
-		
-		if (hiValue != null) {
-			if (allowDecimal) {
-				component.setHigh(new Quantity().setValue(hiValue));
-			} else {
-				component.setHigh(new Quantity().setValue(hiValue.longValue()));
-			}
-		}
-		
-		if (lowValue != null) {
-			if (allowDecimal) {
-				component.setLow(new Quantity().setValue(lowValue));
-			} else {
-				component.setLow(new Quantity().setValue(lowValue.longValue()));
-			}
-		}
-		
-		CodeableConcept referenceRangeType = new CodeableConcept();
-		Coding coding = referenceRangeType.addCoding().setCode(code);
-		
-		if (FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE.equals(code)) {
-			coding.setSystem(FhirConstants.OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE);
-		} else {
-			coding.setSystem(FhirConstants.OBSERVATION_REFERENCE_RANGE_SYSTEM_URI);
-		}
-		
-		component.setType(referenceRangeType);
-		
-		return component;
-	}
+public class ObservationReferenceRangeTranslatorImpl
+    implements ObservationReferenceRangeTranslator {
+
+  @Override
+  public List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull Obs obs) {
+
+    ConceptNumeric conceptNumeric = null;
+    if (obs.getConcept() instanceof ConceptNumeric) {
+      conceptNumeric = (ConceptNumeric) obs.getConcept();
+    }
+
+    if (conceptNumeric != null) {
+      boolean allowDecimal =
+          conceptNumeric.getAllowDecimal() != null ? conceptNumeric.getAllowDecimal() : true;
+
+      Double hiNormal = conceptNumeric.getHiNormal();
+      Double lowNormal = conceptNumeric.getLowNormal();
+      Double hiCritical = conceptNumeric.getHiCritical();
+      Double lowCritical = conceptNumeric.getLowCritical();
+      Double hiAbsolute = conceptNumeric.getHiAbsolute();
+      Double lowAbsolute = conceptNumeric.getLowAbsolute();
+
+      ObsReferenceRange referenceRange = obs.getReferenceRange();
+      if (referenceRange != null) {
+        hiNormal = referenceRange.getHiNormal();
+        lowNormal = referenceRange.getLowNormal();
+        hiCritical = referenceRange.getHiCritical();
+        lowCritical = referenceRange.getLowCritical();
+        hiAbsolute = referenceRange.getHiAbsolute();
+        lowAbsolute = referenceRange.getLowAbsolute();
+      }
+
+      List<Observation.ObservationReferenceRangeComponent> observationReferenceRangeComponentList =
+          new ArrayList<>();
+      if (hiNormal != null || lowNormal != null) {
+        observationReferenceRangeComponentList.add(
+            createObservationReferenceRange(
+                hiNormal, lowNormal, FhirConstants.OBSERVATION_REFERENCE_NORMAL, allowDecimal));
+      }
+
+      if (hiCritical != null || lowCritical != null) {
+        observationReferenceRangeComponentList.add(
+            createObservationReferenceRange(
+                hiCritical,
+                lowCritical,
+                FhirConstants.OBSERVATION_REFERENCE_TREATMENT,
+                allowDecimal));
+      }
+
+      if (hiAbsolute != null || lowAbsolute != null) {
+        observationReferenceRangeComponentList.add(
+            createObservationReferenceRange(
+                hiAbsolute,
+                lowAbsolute,
+                FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE,
+                allowDecimal));
+      }
+
+      return observationReferenceRangeComponentList;
+    }
+
+    return null;
+  }
+
+  private Observation.ObservationReferenceRangeComponent createObservationReferenceRange(
+      Double hiValue, Double lowValue, String code, boolean allowDecimal) {
+    Observation.ObservationReferenceRangeComponent component =
+        new Observation.ObservationReferenceRangeComponent();
+
+    if (hiValue != null) {
+      if (allowDecimal) {
+        component.setHigh(new Quantity().setValue(hiValue));
+      } else {
+        component.setHigh(new Quantity().setValue(hiValue.longValue()));
+      }
+    }
+
+    if (lowValue != null) {
+      if (allowDecimal) {
+        component.setLow(new Quantity().setValue(lowValue));
+      } else {
+        component.setLow(new Quantity().setValue(lowValue.longValue()));
+      }
+    }
+
+    CodeableConcept referenceRangeType = new CodeableConcept();
+    Coding coding = referenceRangeType.addCoding().setCode(code);
+
+    if (FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE.equals(code)) {
+      coding.setSystem(FhirConstants.OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE);
+    } else {
+      coding.setSystem(FhirConstants.OBSERVATION_REFERENCE_RANGE_SYSTEM_URI);
+    }
+
+    component.setType(referenceRangeType);
+
+    return component;
+  }
 }

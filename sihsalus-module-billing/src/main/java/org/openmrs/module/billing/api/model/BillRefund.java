@@ -9,11 +9,6 @@
  */
 package org.openmrs.module.billing.api.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.openmrs.BaseOpenmrsData;
-import org.openmrs.User;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,63 +24,67 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.math.BigDecimal;
 import java.util.Date;
+import lombok.Getter;
+import lombok.Setter;
+import org.openmrs.BaseOpenmrsData;
+import org.openmrs.User;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "bill_refund")
 public class BillRefund extends BaseOpenmrsData {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "bill_refund_id")
-	private Integer billRefundId;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "bill_id", nullable = false)
-	private Bill bill;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "bill_line_item_id")
-	private BillLineItem lineItem;
-	
-	@Column(name = "refund_amount", nullable = false)
-	private BigDecimal refundAmount;
-	
-	@Column(name = "reason", nullable = false, length = 1000)
-	private String reason;
-	
-	@Enumerated(EnumType.STRING)
-	@Column(name = "refund_status", nullable = false, length = 20)
-	private RefundStatus status = RefundStatus.REQUESTED;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "initiator_id", nullable = false)
-	private User initiator;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "approver_id")
-	private User approver;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "completer_id")
-	private User completer;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "date_approved")
-	private Date dateApproved;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "date_completed")
-	private Date dateCompleted;
-	
-	@Override
-	public Integer getId() {
-		return billRefundId;
-	}
-	
-	@Override
-	public void setId(Integer id) {
-		this.billRefundId = id;
-	}
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "bill_refund_id")
+  private Integer billRefundId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bill_id", nullable = false)
+  private Bill bill;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bill_line_item_id")
+  private BillLineItem lineItem;
+
+  @Column(name = "refund_amount", nullable = false)
+  private BigDecimal refundAmount;
+
+  @Column(name = "reason", nullable = false, length = 1000)
+  private String reason;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "refund_status", nullable = false, length = 20)
+  private RefundStatus status = RefundStatus.REQUESTED;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "initiator_id", nullable = false)
+  private User initiator;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "approver_id")
+  private User approver;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "completer_id")
+  private User completer;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "date_approved")
+  private Date dateApproved;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "date_completed")
+  private Date dateCompleted;
+
+  @Override
+  public Integer getId() {
+    return billRefundId;
+  }
+
+  @Override
+  public void setId(Integer id) {
+    this.billRefundId = id;
+  }
 }

@@ -10,11 +10,10 @@
 package org.openmrs.module.fhir2.api;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 
 public interface FhirEpisodeOfCareService extends FhirService<EpisodeOfCare> {
-	
-	@Override
-	EpisodeOfCare get(@Nonnull String uuid);
+
+  @Override
+  EpisodeOfCare get(@Nonnull String uuid);
 }

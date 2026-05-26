@@ -7,7 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.attachments.AttachmentsConstants;
@@ -18,38 +17,40 @@ import org.springframework.stereotype.Component;
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 9.*")
 public class ComplexDataHelperImpl implements ComplexDataHelper {
 
-	@Override
-	public AttachmentComplexData build(String instructions, String title, Object data, String mimeType) {
-		return new AttachmentComplexDataImpl(instructions, title, data, mimeType);
-	}
+  @Override
+  public AttachmentComplexData build(
+      String instructions, String title, Object data, String mimeType) {
+    return new AttachmentComplexDataImpl(instructions, title, data, mimeType);
+  }
 
-	@Override
-	public AttachmentComplexData build(String instructions, ComplexData complexData) {
-		return build(instructions, complexData.getTitle(), complexData.getData(), getContentType(complexData));
-	}
+  @Override
+  public AttachmentComplexData build(String instructions, ComplexData complexData) {
+    return build(
+        instructions, complexData.getTitle(), complexData.getData(), getContentType(complexData));
+  }
 
-	@Override
-	public String getContentType(ComplexData complexData) {
+  @Override
+  public String getContentType(ComplexData complexData) {
 
-		if (complexData instanceof AttachmentComplexData) { // In case it's our module's implementation
-			AttachmentComplexData attComplexData = (AttachmentComplexData) complexData;
-			if (isMimeTypeHandled(attComplexData.getMimeType())) { // Perhaps too restrictive
-				return attComplexData.getMimeType();
-			}
-		}
+    if (complexData instanceof AttachmentComplexData) { // In case it's our module's implementation
+      AttachmentComplexData attComplexData = (AttachmentComplexData) complexData;
+      if (isMimeTypeHandled(attComplexData.getMimeType())) { // Perhaps too restrictive
+        return attComplexData.getMimeType();
+      }
+    }
 
-		byte[] bytes = BaseComplexData.getByteArray(complexData);
-		if (ArrayUtils.isEmpty(bytes)) {
-			return AttachmentsConstants.UNKNOWN_MIME_TYPE;
-		}
+    byte[] bytes = BaseComplexData.getByteArray(complexData);
+    if (ArrayUtils.isEmpty(bytes)) {
+      return AttachmentsConstants.UNKNOWN_MIME_TYPE;
+    }
 
-		// guessing the content type
-		InputStream stream = new BufferedInputStream(new ByteArrayInputStream(bytes));
-		try {
-			String mimeType = URLConnection.guessContentTypeFromStream(stream);
-			return mimeType == null ? AttachmentsConstants.UNKNOWN_MIME_TYPE : mimeType;
-		} catch (IOException e) {
-			return AttachmentsConstants.UNKNOWN_MIME_TYPE;
-		}
-	}
+    // guessing the content type
+    InputStream stream = new BufferedInputStream(new ByteArrayInputStream(bytes));
+    try {
+      String mimeType = URLConnection.guessContentTypeFromStream(stream);
+      return mimeType == null ? AttachmentsConstants.UNKNOWN_MIME_TYPE : mimeType;
+    } catch (IOException e) {
+      return AttachmentsConstants.UNKNOWN_MIME_TYPE;
+    }
+  }
 }

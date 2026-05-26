@@ -9,13 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.annotation.Nonnull;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.criteria.Join;
-
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.model.FhirObservationCategoryMap;
@@ -24,29 +22,36 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class FhirObservationCategoryMapDaoImpl extends BaseDao {
-	
-	public String getCategory(@Nonnull String conceptClassUuid) {
-		OpenmrsFhirCriteriaContext<FhirObservationCategoryMap, String> criteriaContext = createCriteriaContext(
-		    FhirObservationCategoryMap.class, String.class);
-		Join<?, ?> conceptClassJoin = criteriaContext.addJoin("conceptClass", "ct");
-		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptClassJoin.get("uuid"), conceptClassUuid));
-		
-		try {
-			List<String> results = criteriaContext.getEntityManager()
-			        .createQuery(
-			            criteriaContext.finalizeQuery().select(criteriaContext.getRoot().get("observationCategory")))
-			        .setMaxResults(2).getResultList();
-			if (results.size() > 1) {
-				throw new NonUniqueResultException(
-				        "Multiple observation categories mapped to concept class '" + conceptClassUuid + "'");
-			}
-			return results.isEmpty() ? null : results.get(0);
-		}
-		catch (PersistenceException e) {
-			log.error("Exception caught while trying to load category for concept class '{}'", conceptClassUuid, e);
-		}
-		
-		return null;
-	}
+
+  public String getCategory(@Nonnull String conceptClassUuid) {
+    OpenmrsFhirCriteriaContext<FhirObservationCategoryMap, String> criteriaContext =
+        createCriteriaContext(FhirObservationCategoryMap.class, String.class);
+    Join<?, ?> conceptClassJoin = criteriaContext.addJoin("conceptClass", "ct");
+    criteriaContext.addPredicate(
+        criteriaContext.getCriteriaBuilder().equal(conceptClassJoin.get("uuid"), conceptClassUuid));
+
+    try {
+      List<String> results =
+          criteriaContext
+              .getEntityManager()
+              .createQuery(
+                  criteriaContext
+                      .finalizeQuery()
+                      .select(criteriaContext.getRoot().get("observationCategory")))
+              .setMaxResults(2)
+              .getResultList();
+      if (results.size() > 1) {
+        throw new NonUniqueResultException(
+            "Multiple observation categories mapped to concept class '" + conceptClassUuid + "'");
+      }
+      return results.isEmpty() ? null : results.get(0);
+    } catch (PersistenceException e) {
+      log.error(
+          "Exception caught while trying to load category for concept class '{}'",
+          conceptClassUuid,
+          e);
+    }
+
+    return null;
+  }
 }

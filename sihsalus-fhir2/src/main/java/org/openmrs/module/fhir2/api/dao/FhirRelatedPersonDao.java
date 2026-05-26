@@ -9,40 +9,54 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.openmrs.Relationship;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirRelatedPersonDao extends FhirDao<Relationship> {
-	
-	@Override
-	@Authorized(value = { PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS }, requireAll = true)
-	Relationship get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(value = { PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS }, requireAll = true)
-	List<Relationship> get(@Nonnull Collection<String> uuids);
-	
-	@Override
-	@Authorized(value = { PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS }, requireAll = true)
-	List<Relationship> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(value = { PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS }, requireAll = true)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(value = { PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS,
-	        PrivilegeConstants.ADD_RELATIONSHIPS, PrivilegeConstants.EDIT_RELATIONSHIPS }, requireAll = true)
-	Relationship createOrUpdate(@Nonnull Relationship newEntry);
-	
-	@Override
-	@Authorized(value = { PrivilegeConstants.DELETE_PERSONS, PrivilegeConstants.DELETE_RELATIONSHIPS }, requireAll = true)
-	Relationship delete(@Nonnull String uuid);
+
+  @Override
+  @Authorized(
+      value = {PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS},
+      requireAll = true)
+  Relationship get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(
+      value = {PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS},
+      requireAll = true)
+  List<Relationship> get(@Nonnull Collection<String> uuids);
+
+  @Override
+  @Authorized(
+      value = {PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS},
+      requireAll = true)
+  List<Relationship> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(
+      value = {PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS},
+      requireAll = true)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(
+      value = {
+        PrivilegeConstants.ADD_PERSONS,
+        PrivilegeConstants.EDIT_PERSONS,
+        PrivilegeConstants.ADD_RELATIONSHIPS,
+        PrivilegeConstants.EDIT_RELATIONSHIPS
+      },
+      requireAll = true)
+  Relationship createOrUpdate(@Nonnull Relationship newEntry);
+
+  @Override
+  @Authorized(
+      value = {PrivilegeConstants.DELETE_PERSONS, PrivilegeConstants.DELETE_RELATIONSHIPS},
+      requireAll = true)
+  Relationship delete(@Nonnull String uuid);
 }

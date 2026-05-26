@@ -30,22 +30,22 @@ import org.springframework.stereotype.Component;
 @Component("episodeOfCareFhirR3ResourceProvider")
 @R3Provider
 public class EpisodeOfCareFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirEpisodeOfCareService episodeOfCareService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return EpisodeOfCare.class;
-	}
-	
-	@Read
-	public EpisodeOfCare getEpisodeOfCareById(@IdParam IdType id) {
-		org.hl7.fhir.r4.model.EpisodeOfCare episodeOfCare = episodeOfCareService.get(id.getIdPart());
-		if (episodeOfCare == null) {
-			throw new ResourceNotFoundException("Could not find EpisodeOfCare with Id " + id.getIdPart());
-		}
-		return (EpisodeOfCare) VersionConvertorFactory_30_40.convertResource(episodeOfCare);
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirEpisodeOfCareService episodeOfCareService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return EpisodeOfCare.class;
+  }
+
+  @Read
+  public EpisodeOfCare getEpisodeOfCareById(@IdParam IdType id) {
+    org.hl7.fhir.r4.model.EpisodeOfCare episodeOfCare = episodeOfCareService.get(id.getIdPart());
+    if (episodeOfCare == null) {
+      throw new ResourceNotFoundException("Could not find EpisodeOfCare with Id " + id.getIdPart());
+    }
+    return (EpisodeOfCare) VersionConvertorFactory_30_40.convertResource(episodeOfCare);
+  }
 }

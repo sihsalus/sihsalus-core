@@ -10,12 +10,10 @@
 package org.openmrs.module.queue.api.dao;
 
 import java.util.List;
-
 import org.openmrs.module.queue.api.search.RoomProviderMapSearchCriteria;
 import org.openmrs.module.queue.model.RoomProviderMap;
 
 public interface RoomProviderMapDao extends BaseQueueDao<RoomProviderMap> {
-	
-	List<RoomProviderMap> getRoomProviderMaps(RoomProviderMapSearchCriteria searchCriteria);
-	
+
+  List<RoomProviderMap> getRoomProviderMaps(RoomProviderMapSearchCriteria searchCriteria);
 }

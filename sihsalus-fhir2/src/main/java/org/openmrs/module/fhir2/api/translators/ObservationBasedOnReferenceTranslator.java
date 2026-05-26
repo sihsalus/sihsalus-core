@@ -10,27 +10,27 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Order;
 
-public interface ObservationBasedOnReferenceTranslator extends OpenmrsFhirTranslator<Order, Reference> {
-	
-	/**
-	 * Maps an {@link Order} to an {@link org.hl7.fhir.r4.model.Reference}
-	 *
-	 * @param order the OpenMRS order element to translate
-	 * @return a FHIR reference to the order which prompted this observation
-	 */
-	@Override
-	Reference toFhirResource(@Nonnull Order order);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Reference} to an {@link Order}
-	 *
-	 * @param reference the resource to map
-	 * @return the OpenMRS order matched by this reference
-	 */
-	@Override
-	Order toOpenmrsType(@Nonnull Reference reference);
+public interface ObservationBasedOnReferenceTranslator
+    extends OpenmrsFhirTranslator<Order, Reference> {
+
+  /**
+   * Maps an {@link Order} to an {@link org.hl7.fhir.r4.model.Reference}
+   *
+   * @param order the OpenMRS order element to translate
+   * @return a FHIR reference to the order which prompted this observation
+   */
+  @Override
+  Reference toFhirResource(@Nonnull Order order);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.Reference} to an {@link Order}
+   *
+   * @param reference the resource to map
+   * @return the OpenMRS order matched by this reference
+   */
+  @Override
+  Order toOpenmrsType(@Nonnull Reference reference);
 }

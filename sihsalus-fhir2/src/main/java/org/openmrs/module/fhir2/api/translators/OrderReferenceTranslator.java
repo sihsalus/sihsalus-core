@@ -14,8 +14,6 @@ import org.openmrs.Order;
 
 /**
  * This interface represents a generic means of resolving an Openmrs order to either a service
- * request or medication request reference.
- * 
- * @Since 2.8.1
+ * request or medication request reference. @Since 2.8.1
  */
 public interface OrderReferenceTranslator extends OpenmrsFhirTranslator<Order, Reference> {}

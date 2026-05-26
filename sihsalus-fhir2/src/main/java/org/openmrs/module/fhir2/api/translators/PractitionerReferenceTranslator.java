@@ -10,28 +10,27 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Reference;
 
 public interface PractitionerReferenceTranslator<T> extends OpenmrsFhirTranslator<T, Reference> {
-	
-	/**
-	 * Maps an {@link org.openmrs.User} or {@link org.openmrs.Provider} to a FHIR
-	 * {@link org.hl7.fhir.r4.model.Reference}
-	 *
-	 * @param userOrProvider the OpenMRS userOrProvider to translate
-	 * @return the corresponding FHIR Reference
-	 */
-	@Override
-	Reference toFhirResource(@Nonnull T userOrProvider);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Reference} to an {@link org.openmrs.User} or
-	 * {@link org.openmrs.Provider}
-	 *
-	 * @param reference the FHIR reference to translate
-	 * @return the corresponding OpenMRS user or provider
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull Reference reference);
+
+  /**
+   * Maps an {@link org.openmrs.User} or {@link org.openmrs.Provider} to a FHIR {@link
+   * org.hl7.fhir.r4.model.Reference}
+   *
+   * @param userOrProvider the OpenMRS userOrProvider to translate
+   * @return the corresponding FHIR Reference
+   */
+  @Override
+  Reference toFhirResource(@Nonnull T userOrProvider);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Reference} to an {@link org.openmrs.User} or {@link
+   * org.openmrs.Provider}
+   *
+   * @param reference the FHIR reference to translate
+   * @return the corresponding OpenMRS user or provider
+   */
+  @Override
+  T toOpenmrsType(@Nonnull Reference reference);
 }

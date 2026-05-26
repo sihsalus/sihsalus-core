@@ -5,8 +5,8 @@ import org.openmrs.module.cohort.CohortMemberAttribute;
 import org.openmrs.module.cohort.api.dao.search.SearchQueryHandler;
 
 public class CohortMemberAttributeDao extends AbstractGenericDao<CohortMemberAttribute> {
-	
-	public CohortMemberAttributeDao(SessionFactory sessionFactory, SearchQueryHandler searchHandler) {
-		super(sessionFactory, searchHandler);
-	}
+
+  public CohortMemberAttributeDao(SessionFactory sessionFactory, SearchQueryHandler searchHandler) {
+    super(sessionFactory, searchHandler);
+  }
 }

@@ -9,17 +9,15 @@
  */
 package org.openmrs.module.billing.uiframework;
 
-//import org.openmrs.module.openhmis.commons.uiframework.UiConfigurationFactory;
+// import org.openmrs.module.openhmis.commons.uiframework.UiConfigurationFactory;
 
-/**
- * The OpenMRS UI Framework configuration settings.
- */
+/** The OpenMRS UI Framework configuration settings. */
 public class UiConfigurationCashier {
-	//	extends
-	//} UiConfigurationFactory {
-	//
-	//	@Override
-	//	public String getModuleId() {
-	//		return "openhmis.cashier";
-	//	}
+  //	extends
+  // } UiConfigurationFactory {
+  //
+  //	@Override
+  //	public String getModuleId() {
+  //		return "openhmis.cashier";
+  //	}
 }

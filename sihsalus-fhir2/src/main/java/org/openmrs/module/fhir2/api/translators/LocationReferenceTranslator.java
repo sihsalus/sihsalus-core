@@ -10,27 +10,26 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Location;
 
 public interface LocationReferenceTranslator extends OpenmrsFhirTranslator<Location, Reference> {
-	
-	/**
-	 * Maps an {@link Location} to a FHIR reference
-	 *
-	 * @param location the location to translate
-	 * @return the corresponding FHIR reference
-	 */
-	@Override
-	Reference toFhirResource(@Nonnull Location location);
-	
-	/**
-	 * Maps a FHIR reference to a {@link Location}
-	 *
-	 * @param locationReference the location reference to translate
-	 * @return the corresponding location
-	 */
-	@Override
-	Location toOpenmrsType(@Nonnull Reference locationReference);
+
+  /**
+   * Maps an {@link Location} to a FHIR reference
+   *
+   * @param location the location to translate
+   * @return the corresponding FHIR reference
+   */
+  @Override
+  Reference toFhirResource(@Nonnull Location location);
+
+  /**
+   * Maps a FHIR reference to a {@link Location}
+   *
+   * @param locationReference the location reference to translate
+   * @return the corresponding location
+   */
+  @Override
+  Location toOpenmrsType(@Nonnull Reference locationReference);
 }

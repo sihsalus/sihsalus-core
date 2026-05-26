@@ -9,17 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import javax.annotation.Nonnull;
 import org.openmrs.module.fhir2.api.FhirGroupMemberService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FhirGroupMemberServiceImpl implements FhirGroupMemberService {
-	
-	@Override
-	public IBundleProvider getGroupMembers(@Nonnull String groupUuid) {
-		throw new UnsupportedOperationException("Not supported in this openmrs platform version");
-	}
+
+  @Override
+  public IBundleProvider getGroupMembers(@Nonnull String groupUuid) {
+    throw new UnsupportedOperationException("Not supported in this openmrs platform version");
+  }
 }

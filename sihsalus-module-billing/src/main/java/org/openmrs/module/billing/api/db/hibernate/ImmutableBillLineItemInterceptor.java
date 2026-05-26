@@ -21,36 +21,49 @@ import org.springframework.stereotype.Component;
  */
 @Component("immutableBillLineItemInterceptor")
 public class ImmutableBillLineItemInterceptor extends ImmutableEntityInterceptor {
-	
-	private static final String[] MUTABLE_PROPERTY_NAMES = new String[] { "voided", "dateVoided", "voidedBy", "voidReason",
-	        "paymentStatus", "changedBy", "dateChanged" };
-	
-	@Override
-	protected Class<?> getSupportedType() {
-		return BillLineItem.class;
-	}
-	
-	@Override
-	protected String[] getMutablePropertyNames() {
-		return MUTABLE_PROPERTY_NAMES;
-	}
-	
-	@Override
-	public boolean onFlushDirty(Object entity, Object id, Object[] currentState, Object[] previousState,
-	        String[] propertyNames, Type[] types) {
-		if (!BillLineItem.class.isAssignableFrom(entity.getClass())) {
-			return false;
-		}
-		
-		BillLineItem lineItem = (BillLineItem) entity;
-		Bill bill = lineItem.getBill();
-		
-		// If the bill is editable, allow all modifications
-		if (bill == null || bill.editable()) {
-			return false;
-		}
-		
-		// Bill is not editable - only allow mutable properties to be changed
-		return super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
-	}
+
+  private static final String[] MUTABLE_PROPERTY_NAMES =
+      new String[] {
+        "voided",
+        "dateVoided",
+        "voidedBy",
+        "voidReason",
+        "paymentStatus",
+        "changedBy",
+        "dateChanged"
+      };
+
+  @Override
+  protected Class<?> getSupportedType() {
+    return BillLineItem.class;
+  }
+
+  @Override
+  protected String[] getMutablePropertyNames() {
+    return MUTABLE_PROPERTY_NAMES;
+  }
+
+  @Override
+  public boolean onFlushDirty(
+      Object entity,
+      Object id,
+      Object[] currentState,
+      Object[] previousState,
+      String[] propertyNames,
+      Type[] types) {
+    if (!BillLineItem.class.isAssignableFrom(entity.getClass())) {
+      return false;
+    }
+
+    BillLineItem lineItem = (BillLineItem) entity;
+    Bill bill = lineItem.getBill();
+
+    // If the bill is editable, allow all modifications
+    if (bill == null || bill.editable()) {
+      return false;
+    }
+
+    // Bill is not editable - only allow mutable properties to be changed
+    return super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
+  }
 }

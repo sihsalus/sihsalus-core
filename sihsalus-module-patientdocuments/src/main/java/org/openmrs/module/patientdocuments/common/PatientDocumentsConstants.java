@@ -1,48 +1,50 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.patientdocuments.common;
 
 public class PatientDocumentsConstants {
-	
-	/*
-	 * Module ids
-	 */
-	public static final String MODULE_NAME = "Patient Documents";
-	
-	public static final String MODULE_ARTIFACT_ID = "patientdocuments";
-	
-	/*
-	 * Spring components qualifiers
-	 */
-	public static final String COMPONENT_CONTEXT = MODULE_ARTIFACT_ID + ".patientIdentificationStickersContext";
-	
-	public static final String PATIENT_ID_STICKER_ID = "patientIdSticker";
-	
-	public static final String COMPONENT_REPORTMANAGER_PATIENT_ID_STICKER = MODULE_ARTIFACT_ID + "." + PATIENT_ID_STICKER_ID;
-	
-	/**
-	 * The path to the style sheet for Patient History reports.
-	 */
-	public static final String PATIENT_ID_STICKER_XSL_PATH = "patientIdStickerFopStylesheet.xsl";
 
-	public static final String DEFAULT_ENCOUNTER_FORM_XSL_PATH = "defaultEncounterFormFopStylesheet.xsl";
+  /*
+   * Module ids
+   */
+  public static final String MODULE_NAME = "Patient Documents";
 
-	public static final String ENCOUNTER_PRINTING_HEADER_PREFIX = "report.encounterPrinting.header.";
+  public static final String MODULE_ARTIFACT_ID = "patientdocuments";
 
-	public static final String ENCOUNTER_PRINTING_FOOTER_PREFIX = "report.encounterPrinting.footer.";
+  /*
+   * Spring components qualifiers
+   */
+  public static final String COMPONENT_CONTEXT =
+      MODULE_ARTIFACT_ID + ".patientIdentificationStickersContext";
 
-	public static final String ENCOUNTER_PRINTING_STYLESHEET_KEY = "report.encounterPrinting.stylesheet";
+  public static final String PATIENT_ID_STICKER_ID = "patientIdSticker";
 
-	public static final String ENCOUNTER_PRINTING_LOGO_PATH_KEY = "report.encounterPrinting.logopath";
+  public static final String COMPONENT_REPORTMANAGER_PATIENT_ID_STICKER =
+      MODULE_ARTIFACT_ID + "." + PATIENT_ID_STICKER_ID;
 
-	public static final String NO_DATA_RECORDED_PLACEHOLDER = "No data recorded";
+  /** The path to the style sheet for Patient History reports. */
+  public static final String PATIENT_ID_STICKER_XSL_PATH = "patientIdStickerFopStylesheet.xsl";
 
-	public static final String MISSING_VALUE_PLACEHOLDER = "-";
+  public static final String DEFAULT_ENCOUNTER_FORM_XSL_PATH =
+      "defaultEncounterFormFopStylesheet.xsl";
+
+  public static final String ENCOUNTER_PRINTING_HEADER_PREFIX = "report.encounterPrinting.header.";
+
+  public static final String ENCOUNTER_PRINTING_FOOTER_PREFIX = "report.encounterPrinting.footer.";
+
+  public static final String ENCOUNTER_PRINTING_STYLESHEET_KEY =
+      "report.encounterPrinting.stylesheet";
+
+  public static final String ENCOUNTER_PRINTING_LOGO_PATH_KEY = "report.encounterPrinting.logopath";
+
+  public static final String NO_DATA_RECORDED_PLACEHOLDER = "No data recorded";
+
+  public static final String MISSING_VALUE_PLACEHOLDER = "-";
 }

@@ -5,11 +5,8 @@ package org.openmrs.module.bedmanagement;
  * and shutdown and the appropriate methods will be called
  */
 public interface BedManagementActivatorComponent {
-	
-	default void started() {
-	}
-	
-	default void willStop() {
-	}
-	
+
+  default void started() {}
+
+  default void willStop() {}
 }

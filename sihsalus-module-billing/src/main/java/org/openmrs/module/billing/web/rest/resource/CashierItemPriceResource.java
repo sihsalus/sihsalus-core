@@ -9,11 +9,13 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import java.math.BigDecimal;
+import java.util.List;
 import org.apache.commons.lang3.BooleanUtils;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.CashierItemPriceService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
+import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -31,135 +33,138 @@ import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingC
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
-import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
+import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/cashierItemPrice", supportedClass = CashierItemPrice.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
+@Resource(
+    name =
+        RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/cashierItemPrice",
+    supportedClass = CashierItemPrice.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class CashierItemPriceResource extends MetadataDelegatingCrudResource<CashierItemPrice> {
-	
-	private final CashierItemPriceService cashierItemPriceService = Context.getService(CashierItemPriceService.class);
-	
-	@Override
-	public CashierItemPrice newDelegate() {
-		return new CashierItemPrice();
-	}
-	
-	@Override
-	public CashierItemPrice save(CashierItemPrice cashierItemPrice) {
-		return cashierItemPriceService.saveCashierItemPrice(cashierItemPrice);
-	}
-	
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-			description.addProperty("name");
-			description.addProperty("price");
-			description.addProperty("paymentMode");
-			description.addProperty("item");
-			description.addProperty("billableService", Representation.REF);
-		} else if (rep instanceof CustomRepresentation) {
-			//For custom representation, must be null
-			// - let the user decide which properties should be included in the response
-			description = null;
-		}
-		return description;
-	}
-	
-	@Override
-	public CashierItemPrice getByUniqueId(String uuid) {
-		return cashierItemPriceService.getCashierItemPriceByUuid(uuid);
-	}
-	
-	@Override
-	public void purge(CashierItemPrice cashierItemPrice, RequestContext requestContext) throws ResponseException {
-		cashierItemPriceService.purgeCashierItemPrice(cashierItemPrice);
-	}
-	
-	@Override
-	public DelegatingResourceDescription getCreatableProperties() {
-		DelegatingResourceDescription description = new DelegatingResourceDescription();
-		description.addProperty("name");
-		description.addProperty("price");
-		description.addProperty("paymentMode");
-		description.addProperty("item");
-		description.addProperty("billableService");
-		return description;
-	}
-	
-	@Override
-	public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
-		return getCreatableProperties();
-	}
-	
-	@PropertySetter("price")
-	public void setPrice(CashierItemPrice instance, Object price) {
-		instance.setPrice(toBigDecimal(price));
-	}
-	
-	@PropertySetter(value = "item")
-	public void setItem(CashierItemPrice instance, Object item) {
-		if (item == null) {
-			instance.setItem(null);
-			return;
-		}
-		if (!(item instanceof String)) {
-			throw new ConversionException("Stock item must be referenced by uuid");
-		}
-		StockManagementService service = Context.getService(StockManagementService.class);
-		String itemUuid = (String) item;
-		StockItem stockItem = service.getStockItemByUuid(itemUuid);
-		if (stockItem == null) {
-			throw new ObjectNotFoundException("No stock item found with uuid: " + itemUuid);
-		}
-		instance.setItem(stockItem);
-	}
-	
-	@PropertyGetter(value = "item")
-	public String getItem(CashierItemPrice instance) {
-		try {
-			StockItem stockItem = instance.getItem();
-			return stockItem.getDrug().getName();
-		}
-		catch (Exception e) {
-			log.error(e);
-			return "";
-		}
-	}
-	
-	@Override
-	public void delete(CashierItemPrice cashierItemPrice, String reason, RequestContext context) throws ResponseException {
-		cashierItemPriceService.retireCashierItemPrice(cashierItemPrice, reason);
-	}
-	
-	@Override
-	public CashierItemPrice undelete(CashierItemPrice cashierItemPrice, RequestContext context) throws ResponseException {
-		return cashierItemPriceService.unretireCashierItemPrice(cashierItemPrice);
-	}
-	
-	@Override
-	protected PageableResult doGetAll(RequestContext context) throws ResponseException {
-		boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
-		List<CashierItemPrice> results = cashierItemPriceService.getCashierItemPrices(includeRetired);
-		return new NeedsPaging<>(results, context);
-	}
 
-	private BigDecimal toBigDecimal(Object value) {
-		if (value == null) {
-			return null;
-		}
-		if (value instanceof BigDecimal) {
-			return (BigDecimal) value;
-		}
-		try {
-			return new BigDecimal(value.toString());
-		}
-		catch (NumberFormatException e) {
-			throw new ConversionException("Cannot convert '" + value + "' to BigDecimal", e);
-		}
-	}
+  private final CashierItemPriceService cashierItemPriceService =
+      Context.getService(CashierItemPriceService.class);
+
+  @Override
+  public CashierItemPrice newDelegate() {
+    return new CashierItemPrice();
+  }
+
+  @Override
+  public CashierItemPrice save(CashierItemPrice cashierItemPrice) {
+    return cashierItemPriceService.saveCashierItemPrice(cashierItemPrice);
+  }
+
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+    if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+      description.addProperty("name");
+      description.addProperty("price");
+      description.addProperty("paymentMode");
+      description.addProperty("item");
+      description.addProperty("billableService", Representation.REF);
+    } else if (rep instanceof CustomRepresentation) {
+      // For custom representation, must be null
+      // - let the user decide which properties should be included in the response
+      description = null;
+    }
+    return description;
+  }
+
+  @Override
+  public CashierItemPrice getByUniqueId(String uuid) {
+    return cashierItemPriceService.getCashierItemPriceByUuid(uuid);
+  }
+
+  @Override
+  public void purge(CashierItemPrice cashierItemPrice, RequestContext requestContext)
+      throws ResponseException {
+    cashierItemPriceService.purgeCashierItemPrice(cashierItemPrice);
+  }
+
+  @Override
+  public DelegatingResourceDescription getCreatableProperties() {
+    DelegatingResourceDescription description = new DelegatingResourceDescription();
+    description.addProperty("name");
+    description.addProperty("price");
+    description.addProperty("paymentMode");
+    description.addProperty("item");
+    description.addProperty("billableService");
+    return description;
+  }
+
+  @Override
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
+    return getCreatableProperties();
+  }
+
+  @PropertySetter("price")
+  public void setPrice(CashierItemPrice instance, Object price) {
+    instance.setPrice(toBigDecimal(price));
+  }
+
+  @PropertySetter(value = "item")
+  public void setItem(CashierItemPrice instance, Object item) {
+    if (item == null) {
+      instance.setItem(null);
+      return;
+    }
+    if (!(item instanceof String)) {
+      throw new ConversionException("Stock item must be referenced by uuid");
+    }
+    StockManagementService service = Context.getService(StockManagementService.class);
+    String itemUuid = (String) item;
+    StockItem stockItem = service.getStockItemByUuid(itemUuid);
+    if (stockItem == null) {
+      throw new ObjectNotFoundException("No stock item found with uuid: " + itemUuid);
+    }
+    instance.setItem(stockItem);
+  }
+
+  @PropertyGetter(value = "item")
+  public String getItem(CashierItemPrice instance) {
+    try {
+      StockItem stockItem = instance.getItem();
+      return stockItem.getDrug().getName();
+    } catch (Exception e) {
+      log.error(e);
+      return "";
+    }
+  }
+
+  @Override
+  public void delete(CashierItemPrice cashierItemPrice, String reason, RequestContext context)
+      throws ResponseException {
+    cashierItemPriceService.retireCashierItemPrice(cashierItemPrice, reason);
+  }
+
+  @Override
+  public CashierItemPrice undelete(CashierItemPrice cashierItemPrice, RequestContext context)
+      throws ResponseException {
+    return cashierItemPriceService.unretireCashierItemPrice(cashierItemPrice);
+  }
+
+  @Override
+  protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+    boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
+    List<CashierItemPrice> results = cashierItemPriceService.getCashierItemPrices(includeRetired);
+    return new NeedsPaging<>(results, context);
+  }
+
+  private BigDecimal toBigDecimal(Object value) {
+    if (value == null) {
+      return null;
+    }
+    if (value instanceof BigDecimal) {
+      return (BigDecimal) value;
+    }
+    try {
+      return new BigDecimal(value.toString());
+    } catch (NumberFormatException e) {
+      throw new ConversionException("Cannot convert '" + value + "' to BigDecimal", e);
+    }
+  }
 }

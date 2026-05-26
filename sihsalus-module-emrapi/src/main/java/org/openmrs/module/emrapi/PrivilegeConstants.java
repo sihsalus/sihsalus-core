@@ -11,23 +11,22 @@ package org.openmrs.module.emrapi;
 
 /**
  * Privilege constants for the Procedure module.
- * 
+ *
  * @since 3.4.0
  */
 public class PrivilegeConstants {
-	
-	public static final String GET_PROCEDURES = "Get Procedures";
-	
-	public static final String MANAGE_PROCEDURES = "Manage Procedures";
-	
-	public static final String PURGE_PROCEDURES = "Purge Procedures";
-	
-	public static final String GET_PROCEDURE_TYPES = "Get Procedure Types";
-	
-	public static final String MANAGE_PROCEDURE_TYPES = "Manage Procedure Types";
-	
-	public static final String PURGE_PROCEDURE_TYPES = "Purge Procedure Types";
-	
-	private PrivilegeConstants() {
-	}
+
+  public static final String GET_PROCEDURES = "Get Procedures";
+
+  public static final String MANAGE_PROCEDURES = "Manage Procedures";
+
+  public static final String PURGE_PROCEDURES = "Purge Procedures";
+
+  public static final String GET_PROCEDURE_TYPES = "Get Procedure Types";
+
+  public static final String MANAGE_PROCEDURE_TYPES = "Manage Procedure Types";
+
+  public static final String PURGE_PROCEDURE_TYPES = "Purge Procedure Types";
+
+  private PrivilegeConstants() {}
 }

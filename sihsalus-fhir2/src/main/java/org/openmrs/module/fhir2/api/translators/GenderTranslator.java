@@ -10,26 +10,28 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Enumerations;
 
-public interface GenderTranslator extends OpenmrsFhirTranslator<String, Enumerations.AdministrativeGender> {
-	
-	/**
-	 * Maps an OpenMRS gender code to an {@link org.hl7.fhir.r4.model.Enumerations.AdministrativeGender}
-	 * 
-	 * @param gender the gender to translate
-	 * @return the corresponding FHIR gender
-	 */
-	@Override
-	Enumerations.AdministrativeGender toFhirResource(@Nonnull String gender);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Enumerations.AdministrativeGender} to an OpenMRS gender code
-	 * 
-	 * @param gender the gender to translate
-	 * @return the corresponding OpenMRS gender code
-	 */
-	@Override
-	String toOpenmrsType(@Nonnull Enumerations.AdministrativeGender gender);
+public interface GenderTranslator
+    extends OpenmrsFhirTranslator<String, Enumerations.AdministrativeGender> {
+
+  /**
+   * Maps an OpenMRS gender code to an {@link
+   * org.hl7.fhir.r4.model.Enumerations.AdministrativeGender}
+   *
+   * @param gender the gender to translate
+   * @return the corresponding FHIR gender
+   */
+  @Override
+  Enumerations.AdministrativeGender toFhirResource(@Nonnull String gender);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.Enumerations.AdministrativeGender} to an OpenMRS gender
+   * code
+   *
+   * @param gender the gender to translate
+   * @return the corresponding OpenMRS gender code
+   */
+  @Override
+  String toOpenmrsType(@Nonnull Enumerations.AdministrativeGender gender);
 }

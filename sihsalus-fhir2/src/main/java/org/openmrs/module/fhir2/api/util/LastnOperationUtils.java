@@ -18,40 +18,40 @@ import java.util.List;
  * $lastn-encounters operation
  */
 public final class LastnOperationUtils {
-	
-	/**
-	 * @param list List of resources
-	 * @param max The value of `N`, which specifies the maximum count of distinct effective datetime
-	 * @return The list of resource uuids
-	 */
-	public static <T> List<T> getTopNRankedIds(List<LastnResult<T>> list, int max) {
-		list.sort((a, b) -> b.getDatetime().compareTo(a.getDatetime()));
-		List<T> results = new ArrayList<>(Math.min(list.size(), max));
-		
-		int currentRank = 0;
-		
-		for (int var = 0; var <= list.size() - 1 && currentRank < max; var++, currentRank++) {
-			results.add(list.get(var).getId());
-			Date currentDate = list.get(var).getDatetime();
-			
-			if (var == list.size() - 1) {
-				return results;
-			}
-			
-			// Adding all objects which have the same Datetime as the current object Datetime since they will have the same rank
-			Date nextDate = list.get(var + 1).getDatetime();
-			while (nextDate.equals(currentDate)) {
-				results.add(list.get(var + 1).getId());
-				var++;
-				
-				if (var + 1 == list.size()) {
-					return results;
-				}
-				nextDate = list.get(var + 1).getDatetime();
-			}
-		}
-		
-		return results;
-	}
-	
+
+  /**
+   * @param list List of resources
+   * @param max The value of `N`, which specifies the maximum count of distinct effective datetime
+   * @return The list of resource uuids
+   */
+  public static <T> List<T> getTopNRankedIds(List<LastnResult<T>> list, int max) {
+    list.sort((a, b) -> b.getDatetime().compareTo(a.getDatetime()));
+    List<T> results = new ArrayList<>(Math.min(list.size(), max));
+
+    int currentRank = 0;
+
+    for (int var = 0; var <= list.size() - 1 && currentRank < max; var++, currentRank++) {
+      results.add(list.get(var).getId());
+      Date currentDate = list.get(var).getDatetime();
+
+      if (var == list.size() - 1) {
+        return results;
+      }
+
+      // Adding all objects which have the same Datetime as the current object Datetime since they
+      // will have the same rank
+      Date nextDate = list.get(var + 1).getDatetime();
+      while (nextDate.equals(currentDate)) {
+        results.add(list.get(var + 1).getId());
+        var++;
+
+        if (var + 1 == list.size()) {
+          return results;
+        }
+        nextDate = list.get(var + 1).getDatetime();
+      }
+    }
+
+    return results;
+  }
 }

@@ -10,66 +10,54 @@
 package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.openmrs.Provider;
 import org.openmrs.module.billing.api.base.entity.model.BaseInstanceCustomizableData;
 
-/**
- * Model class that represents the {@link Bill} payment information.
- */
+/** Model class that represents the {@link Bill} payment information. */
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Payment extends BaseInstanceCustomizableData<PaymentMode, PaymentAttribute> {
-	
-	private static final long serialVersionUID = 0L;
-	
-	private Integer paymentId;
-	
-	@Getter
-	@Setter
-	private Bill bill;
-	
-	@Getter
-	@Setter
-	private BigDecimal amount;
-	
-	@Getter
-	@Setter
-	private BigDecimal amountTendered;
-	
-	@Getter
-	@Setter
-	private Provider cashier;
-	
-	public Integer getId() {
-		return paymentId;
-	}
-	
-	public void setId(Integer id) {
-		paymentId = id;
-	}
-	
-	public PaymentAttribute addAttribute(PaymentModeAttributeType type, String value) {
-		if (type == null) {
-			throw new NullPointerException("The payment mode attribute type must be defined.");
-		}
-		if (value == null) {
-			throw new NullPointerException(("The payment attribute value must be defined."));
-		}
-		
-		PaymentAttribute attribute = new PaymentAttribute();
-		attribute.setAttributeType(type);
-		attribute.setValue(value);
-		
-		addAttribute(attribute);
-		
-		return attribute;
-	}
+
+  private static final long serialVersionUID = 0L;
+
+  private Integer paymentId;
+
+  @Getter @Setter private Bill bill;
+
+  @Getter @Setter private BigDecimal amount;
+
+  @Getter @Setter private BigDecimal amountTendered;
+
+  @Getter @Setter private Provider cashier;
+
+  public Integer getId() {
+    return paymentId;
+  }
+
+  public void setId(Integer id) {
+    paymentId = id;
+  }
+
+  public PaymentAttribute addAttribute(PaymentModeAttributeType type, String value) {
+    if (type == null) {
+      throw new NullPointerException("The payment mode attribute type must be defined.");
+    }
+    if (value == null) {
+      throw new NullPointerException(("The payment attribute value must be defined."));
+    }
+
+    PaymentAttribute attribute = new PaymentAttribute();
+    attribute.setAttributeType(type);
+    attribute.setValue(value);
+
+    addAttribute(attribute);
+
+    return attribute;
+  }
 }

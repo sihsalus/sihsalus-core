@@ -11,7 +11,6 @@ package org.openmrs.module.billing.web.base.resource;
 
 import java.util.HashSet;
 import java.util.List;
-
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.billing.api.base.entity.model.IAttribute;
 import org.openmrs.module.billing.api.base.entity.model.ICustomizable;
@@ -21,34 +20,34 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 
 // @formatter:off
 /**
- * REST resource for {@link org.openmrs.OpenmrsObject}
- * {@link org.openmrs.module.openhmis.commons.api.entity.model.ICustomizable}s.
+ * REST resource for {@link org.openmrs.OpenmrsObject} {@link
+ * org.openmrs.module.openhmis.commons.api.entity.model.ICustomizable}s.
+ *
  * @param <E> The customizable model class
  * @param <TAttribute> The model attribute class
  */
 public abstract class BaseRestCustomizableObjectResource<
-			E extends ICustomizable<TAttribute> & OpenmrsObject,
-			TAttribute extends IAttribute<E, ?>>
-		extends BaseRestObjectResource<E> {
-// @formatter:on
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-		if (!(rep instanceof RefRepresentation)) {
-			description.addProperty("attributes");
-		}
-		
-		return description;
-	}
-	
-	protected void baseSetAttributes(E instance, List<TAttribute> attributes) {
-		if (instance.getAttributes() == null) {
-			instance.setAttributes(new HashSet<TAttribute>());
-		}
-		
-		BaseRestDataResource.syncCollection(instance.getAttributes(), attributes);
-		for (TAttribute attribute : instance.getAttributes()) {
-			attribute.setOwner(instance);
-		}
-	}
+        E extends ICustomizable<TAttribute> & OpenmrsObject, TAttribute extends IAttribute<E, ?>>
+    extends BaseRestObjectResource<E> {
+  // @formatter:on
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+    if (!(rep instanceof RefRepresentation)) {
+      description.addProperty("attributes");
+    }
+
+    return description;
+  }
+
+  protected void baseSetAttributes(E instance, List<TAttribute> attributes) {
+    if (instance.getAttributes() == null) {
+      instance.setAttributes(new HashSet<TAttribute>());
+    }
+
+    BaseRestDataResource.syncCollection(instance.getAttributes(), attributes);
+    for (TAttribute attribute : instance.getAttributes()) {
+      attribute.setOwner(instance);
+    }
+  }
 }

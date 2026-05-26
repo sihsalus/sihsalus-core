@@ -11,18 +11,16 @@ package org.openmrs.module.billing.api;
 
 import org.openmrs.module.billing.api.model.CashierOptions;
 
-/**
- * Interface that represents classes which perform data operations for {@link CashierOptions}s.
- */
+/** Interface that represents classes which perform data operations for {@link CashierOptions}s. */
 public interface ICashierOptionsService {
-	
-	/**
-	 * Load cashier options from wherever
-	 *
-	 * @return CashierOptions Loaded options
-	 * @should load options
-	 * @should throw APIException if a rounding item ID is specified but the item cannot be retrieved
-	 * @should revert to defaults if there are problems loading options
-	 */
-	CashierOptions getOptions();
+
+  /**
+   * Load cashier options from wherever
+   *
+   * @return CashierOptions Loaded options
+   * @should load options
+   * @should throw APIException if a rounding item ID is specified but the item cannot be retrieved
+   * @should revert to defaults if there are problems loading options
+   */
+  CashierOptions getOptions();
 }

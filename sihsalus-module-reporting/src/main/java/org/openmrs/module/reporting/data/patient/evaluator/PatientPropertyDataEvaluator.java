@@ -1,14 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.patient.evaluator;
 
+import java.util.Map;
 import org.openmrs.Patient;
 import org.openmrs.module.reporting.data.patient.EvaluatedPatientData;
 import org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition;
@@ -18,31 +19,28 @@ import org.openmrs.module.reporting.evaluation.querybuilder.HqlQueryBuilder;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Map;
-
-/**
- * Evaluates a property on Patient to produce a PatientData
- */
+/** Evaluates a property on Patient to produce a PatientData */
 public abstract class PatientPropertyDataEvaluator implements PatientDataEvaluator {
 
-	@Autowired
-	private EvaluationService evaluationService;
+  @Autowired private EvaluationService evaluationService;
 
-	public abstract String getPropertyName();
+  public abstract String getPropertyName();
 
-	/**
-	 * @see PatientDataEvaluator#evaluate(PatientDataDefinition, EvaluationContext)
-	 * @should return all patient property values given the passed context
-	 */
-	@Override
-	public EvaluatedPatientData evaluate(PatientDataDefinition definition, EvaluationContext context) throws EvaluationException {
-		EvaluatedPatientData c = new EvaluatedPatientData(definition, context);
-		HqlQueryBuilder q = new HqlQueryBuilder();
-		q.select("p.patientId", "p."+getPropertyName());
-		q.from(Patient.class, "p");
-		q.wherePatientIn("p.patientId", context);
-		Map<Integer, Object> data = evaluationService.evaluateToMap(q, Integer.class, Object.class, context);
-		c.setData(data);
-		return c;
-	}
+  /**
+   * @see PatientDataEvaluator#evaluate(PatientDataDefinition, EvaluationContext)
+   * @should return all patient property values given the passed context
+   */
+  @Override
+  public EvaluatedPatientData evaluate(PatientDataDefinition definition, EvaluationContext context)
+      throws EvaluationException {
+    EvaluatedPatientData c = new EvaluatedPatientData(definition, context);
+    HqlQueryBuilder q = new HqlQueryBuilder();
+    q.select("p.patientId", "p." + getPropertyName());
+    q.from(Patient.class, "p");
+    q.wherePatientIn("p.patientId", context);
+    Map<Integer, Object> data =
+        evaluationService.evaluateToMap(q, Integer.class, Object.class, context);
+    c.setData(data);
+    return c;
+  }
 }

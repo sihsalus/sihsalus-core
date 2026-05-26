@@ -14,10 +14,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
-import javax.annotation.Nonnull;
-
 import java.util.Set;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,49 +30,54 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private GroupMemberTranslator groupMemberTranslator;
-	
-	@Override
-	public Group toFhirResource(@Nonnull Cohort cohort) {
-		notNull(cohort, "Cohort object should not be null");
-		Group group = super.toFhirResource(cohort);
-		
-		Set<Integer> memberIds = cohort.getMemberIds();
-		log.info("Number of members {} ", memberIds.size());
-		group.setQuantity(cohort.size());
-		memberIds.forEach(id -> {
-			Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
-			groupMemberComponent.setEntity(groupMemberTranslator.toFhirResource(id).getEntity());
-			group.addMember(groupMemberComponent);
-		});
-		
-		group.getMeta().setLastUpdated(getLastUpdated(cohort));
-		group.getMeta().setVersionId(getVersionId(cohort));
-		
-		return group;
-	}
-	
-	@Override
-	public Cohort toOpenmrsType(@Nonnull Group group) {
-		notNull(group, "Group resource should not be null");
-		return toOpenmrsType(new Cohort(), group);
-	}
-	
-	@Override
-	public Cohort toOpenmrsType(@Nonnull Cohort existingCohort, @Nonnull Group group) {
-		notNull(group, "group resource object should not be null");
-		notNull(existingCohort, "ExistingCohort object should not be null");
-		
-		Cohort finalExistingCohort = super.toOpenmrsType(existingCohort, group);
-		
-		if (group.hasMember()) {
-			group.getMember().forEach(member -> finalExistingCohort
-			        .addMember(groupMemberTranslator.toOpenmrsType(new GroupMember(member.getEntity()))));
-		}
-		
-		return finalExistingCohort;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private GroupMemberTranslator groupMemberTranslator;
+
+  @Override
+  public Group toFhirResource(@Nonnull Cohort cohort) {
+    notNull(cohort, "Cohort object should not be null");
+    Group group = super.toFhirResource(cohort);
+
+    Set<Integer> memberIds = cohort.getMemberIds();
+    log.info("Number of members {} ", memberIds.size());
+    group.setQuantity(cohort.size());
+    memberIds.forEach(
+        id -> {
+          Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
+          groupMemberComponent.setEntity(groupMemberTranslator.toFhirResource(id).getEntity());
+          group.addMember(groupMemberComponent);
+        });
+
+    group.getMeta().setLastUpdated(getLastUpdated(cohort));
+    group.getMeta().setVersionId(getVersionId(cohort));
+
+    return group;
+  }
+
+  @Override
+  public Cohort toOpenmrsType(@Nonnull Group group) {
+    notNull(group, "Group resource should not be null");
+    return toOpenmrsType(new Cohort(), group);
+  }
+
+  @Override
+  public Cohort toOpenmrsType(@Nonnull Cohort existingCohort, @Nonnull Group group) {
+    notNull(group, "group resource object should not be null");
+    notNull(existingCohort, "ExistingCohort object should not be null");
+
+    Cohort finalExistingCohort = super.toOpenmrsType(existingCohort, group);
+
+    if (group.hasMember()) {
+      group
+          .getMember()
+          .forEach(
+              member ->
+                  finalExistingCohort.addMember(
+                      groupMemberTranslator.toOpenmrsType(new GroupMember(member.getEntity()))));
+    }
+
+    return finalExistingCohort;
+  }
 }

@@ -10,34 +10,38 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 
-public interface MedicationRequestDispenseRequestComponentTranslator extends ToFhirTranslator<DrugOrder, MedicationRequest.MedicationRequestDispenseRequestComponent>, UpdatableOpenmrsTranslator<DrugOrder, MedicationRequest.MedicationRequestDispenseRequestComponent> {
-	
-	/**
-	 * Maps a {@link org.openmrs.DrugOrder} to a
-	 * {@link MedicationRequest.MedicationRequestDispenseRequestComponent} Fhir Type
-	 * 
-	 * @param drugOrder the OpenMRS drugOrder to translate
-	 * @return the corresponding MedicationRequest.MedicationRequestDispenseRequestComponent FHIR
-	 *         resource
-	 */
-	@Override
-	MedicationRequest.MedicationRequestDispenseRequestComponent toFhirResource(@Nonnull DrugOrder drugOrder);
-	
-	/**
-	 * Populates a {@link DrugOrder} with dispensing information from a
-	 * {@link MedicationRequest.MedicationRequestDispenseRequestComponent}
-	 *
-	 * @param drugOrder the OpenMRS drugOrder to update
-	 * @param resource the MedicationRequest.MedicationRequestDispenseRequestComponent FHIR resource
-	 *            that the drugOrder should be updated with
-	 * @return the updated {@link DrugOrder}
-	 */
-	@Override
-	DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder,
-	        @Nonnull MedicationRequest.MedicationRequestDispenseRequestComponent resource);
-	
+public interface MedicationRequestDispenseRequestComponentTranslator
+    extends ToFhirTranslator<
+            DrugOrder, MedicationRequest.MedicationRequestDispenseRequestComponent>,
+        UpdatableOpenmrsTranslator<
+            DrugOrder, MedicationRequest.MedicationRequestDispenseRequestComponent> {
+
+  /**
+   * Maps a {@link org.openmrs.DrugOrder} to a {@link
+   * MedicationRequest.MedicationRequestDispenseRequestComponent} Fhir Type
+   *
+   * @param drugOrder the OpenMRS drugOrder to translate
+   * @return the corresponding MedicationRequest.MedicationRequestDispenseRequestComponent FHIR
+   *     resource
+   */
+  @Override
+  MedicationRequest.MedicationRequestDispenseRequestComponent toFhirResource(
+      @Nonnull DrugOrder drugOrder);
+
+  /**
+   * Populates a {@link DrugOrder} with dispensing information from a {@link
+   * MedicationRequest.MedicationRequestDispenseRequestComponent}
+   *
+   * @param drugOrder the OpenMRS drugOrder to update
+   * @param resource the MedicationRequest.MedicationRequestDispenseRequestComponent FHIR resource
+   *     that the drugOrder should be updated with
+   * @return the updated {@link DrugOrder}
+   */
+  @Override
+  DrugOrder toOpenmrsType(
+      @Nonnull DrugOrder drugOrder,
+      @Nonnull MedicationRequest.MedicationRequestDispenseRequestComponent resource);
 }

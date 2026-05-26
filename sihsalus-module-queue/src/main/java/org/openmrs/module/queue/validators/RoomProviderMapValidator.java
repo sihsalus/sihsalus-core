@@ -17,26 +17,34 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 @Slf4j
-@Handler(supports = { RoomProviderMap.class }, order = 50)
+@Handler(
+    supports = {RoomProviderMap.class},
+    order = 50)
 public class RoomProviderMapValidator implements Validator {
-	
-	@Override
-	public boolean supports(Class<?> aClass) {
-		return RoomProviderMap.class.isAssignableFrom(aClass);
-	}
-	
-	@Override
-	public void validate(Object obj, Errors errors) {
-		log.debug("{}.validate", this.getClass().getName());
-		//instanceof checks for null
-		if (!(obj instanceof RoomProviderMap)) {
-			throw new IllegalArgumentException(
-			        "The parameter target should not be null & must be of type" + RoomProviderMap.class);
-		}
-		RoomProviderMap roomProviderMap = (RoomProviderMap) obj;
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "queueRoom", "roomProviderMap.queueRoom.null",
-		    "QueueRoom in RoomProviderMap can't be null");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "provider", "roomProviderMap.provider.null",
-		    "Provider in RoomProviderMap can't be null");
-	}
+
+  @Override
+  public boolean supports(Class<?> aClass) {
+    return RoomProviderMap.class.isAssignableFrom(aClass);
+  }
+
+  @Override
+  public void validate(Object obj, Errors errors) {
+    log.debug("{}.validate", this.getClass().getName());
+    // instanceof checks for null
+    if (!(obj instanceof RoomProviderMap)) {
+      throw new IllegalArgumentException(
+          "The parameter target should not be null & must be of type" + RoomProviderMap.class);
+    }
+    RoomProviderMap roomProviderMap = (RoomProviderMap) obj;
+    ValidationUtils.rejectIfEmptyOrWhitespace(
+        errors,
+        "queueRoom",
+        "roomProviderMap.queueRoom.null",
+        "QueueRoom in RoomProviderMap can't be null");
+    ValidationUtils.rejectIfEmptyOrWhitespace(
+        errors,
+        "provider",
+        "roomProviderMap.provider.null",
+        "Provider in RoomProviderMap can't be null");
+  }
 }

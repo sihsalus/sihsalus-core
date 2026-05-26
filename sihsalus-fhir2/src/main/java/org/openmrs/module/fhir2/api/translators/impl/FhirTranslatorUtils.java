@@ -10,42 +10,40 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import java.util.Date;
-
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 
 public class FhirTranslatorUtils {
 
-	public static String trimToNull(String value) {
-		if (value == null) {
-			return null;
-		}
-		
-		String trimmed = value.trim();
-		return trimmed.isEmpty() ? null : trimmed;
-	}
-	
-	public static Date getLastUpdated(OpenmrsObject object) {
-		if (object instanceof Auditable) {
-			Auditable auditable = (Auditable) object;
-			
-			if (auditable.getDateChanged() != null) {
-				return auditable.getDateChanged();
-			} else {
-				return auditable.getDateCreated();
-			}
-		}
-		
-		return null;
-	}
-	
-	public static String getVersionId(OpenmrsObject object) {
-		Date lastUpdate = getLastUpdated(object);
-		if (lastUpdate == null) {
-			return null;
-		}
-		
-		return String.valueOf(lastUpdate.getTime());
-	}
-	
+  public static String trimToNull(String value) {
+    if (value == null) {
+      return null;
+    }
+
+    String trimmed = value.trim();
+    return trimmed.isEmpty() ? null : trimmed;
+  }
+
+  public static Date getLastUpdated(OpenmrsObject object) {
+    if (object instanceof Auditable) {
+      Auditable auditable = (Auditable) object;
+
+      if (auditable.getDateChanged() != null) {
+        return auditable.getDateChanged();
+      } else {
+        return auditable.getDateCreated();
+      }
+    }
+
+    return null;
+  }
+
+  public static String getVersionId(OpenmrsObject object) {
+    Date lastUpdate = getLastUpdated(object);
+    if (lastUpdate == null) {
+      return null;
+    }
+
+    return String.valueOf(lastUpdate.getTime());
+  }
 }

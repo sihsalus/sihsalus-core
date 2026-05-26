@@ -10,29 +10,29 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceCriticalityTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AllergyIntoleranceCriticalityTranslatorImpl implements AllergyIntoleranceCriticalityTranslator {
-	
-	@Override
-	public AllergyIntolerance.AllergyIntoleranceCriticality toFhirResource(
-	        @Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity) {
-		if (allergyIntoleranceSeverity == null) {
-			return null;
-		}
-		
-		switch (allergyIntoleranceSeverity) {
-			case SEVERE:
-				return AllergyIntolerance.AllergyIntoleranceCriticality.HIGH;
-			case MILD:
-				return AllergyIntolerance.AllergyIntoleranceCriticality.LOW;
-			case MODERATE:
-			default:
-				return AllergyIntolerance.AllergyIntoleranceCriticality.UNABLETOASSESS;
-		}
-	}
+public class AllergyIntoleranceCriticalityTranslatorImpl
+    implements AllergyIntoleranceCriticalityTranslator {
+
+  @Override
+  public AllergyIntolerance.AllergyIntoleranceCriticality toFhirResource(
+      @Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity) {
+    if (allergyIntoleranceSeverity == null) {
+      return null;
+    }
+
+    switch (allergyIntoleranceSeverity) {
+      case SEVERE:
+        return AllergyIntolerance.AllergyIntoleranceCriticality.HIGH;
+      case MILD:
+        return AllergyIntolerance.AllergyIntoleranceCriticality.LOW;
+      case MODERATE:
+      default:
+        return AllergyIntolerance.AllergyIntoleranceCriticality.UNABLETOASSESS;
+    }
+  }
 }

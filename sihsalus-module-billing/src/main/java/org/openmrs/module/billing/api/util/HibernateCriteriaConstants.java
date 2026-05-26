@@ -9,17 +9,14 @@
  */
 package org.openmrs.module.billing.api.util;
 
-/**
- * Constants class for Hibernate criteria fields.
- */
+/** Constants class for Hibernate criteria fields. */
 public class HibernateCriteriaConstants {
-	
-	public static final String LOCATION = "location";
-	
-	public static final String NAME = "name";
-	
-	public static final String RETIRED = "retired";
-	
-	protected HibernateCriteriaConstants() {
-	}
+
+  public static final String LOCATION = "location";
+
+  public static final String NAME = "name";
+
+  public static final String RETIRED = "retired";
+
+  protected HibernateCriteriaConstants() {}
 }

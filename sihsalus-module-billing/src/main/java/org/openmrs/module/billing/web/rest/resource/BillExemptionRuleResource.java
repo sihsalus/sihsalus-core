@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.text.StringEscapeUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillExemptionService;
@@ -31,137 +33,138 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.ArrayList;
-import java.util.List;
+/** REST sub-resource representing a {@link BillExemptionRule}. */
+@SubResource(
+    parent = BillExemptionResource.class,
+    path = "rule",
+    supportedClass = BillExemptionRule.class,
+    supportedOpenmrsVersions = {"2.0 - 2.*"})
+public class BillExemptionRuleResource
+    extends DelegatingSubResource<BillExemptionRule, BillExemption, BillExemptionResource> {
 
-/**
- * REST sub-resource representing a {@link BillExemptionRule}.
- */
-@SubResource(parent = BillExemptionResource.class, path = "rule", supportedClass = BillExemptionRule.class, supportedOpenmrsVersions = {
-        "2.0 - 2.*" })
-public class BillExemptionRuleResource extends DelegatingSubResource<BillExemptionRule, BillExemption, BillExemptionResource> {
-	
-	@Override
-	public BillExemptionRule newDelegate() {
-		return new BillExemptionRule();
-	}
-	
-	@Override
-	public BillExemptionRule save(BillExemptionRule delegate) {
-		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
-		BillExemption exemption = delegate.getBillingExemption();
-		if (exemption != null) {
-			getService().save(exemption);
-		}
-		return delegate;
-	}
-	
-	@Override
-	public BillExemption getParent(BillExemptionRule instance) {
-		return instance.getBillingExemption();
-	}
-	
-	@Override
-	public void setParent(BillExemptionRule instance, BillExemption parent) {
-		instance.setBillingExemption(parent);
-	}
-	
-	@Override
-	public PageableResult doGetAll(BillExemption parent, RequestContext context) throws ResponseException {
-		List<BillExemptionRule> rules = parent.getRules();
-		if (rules == null) {
-			rules = new ArrayList<>();
-		}
-		return new NeedsPaging<>(rules, context);
-	}
-	
-	@Override
-	public BillExemptionRule getByUniqueId(String uniqueId) {
-		throw new ResourceDoesNotSupportOperationException("BillingExemptionRule does not support lookup by UUID");
-	}
-	
-	@Override
-	protected void delete(BillExemptionRule delegate, String reason, RequestContext context) throws ResponseException {
-		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
-		if (Boolean.TRUE.equals(delegate.getVoided())) {
-			return;
-		}
-		delegate.setVoided(true);
-		delegate.setVoidReason(reason);
-		BillExemption exemption = delegate.getBillingExemption();
-		if (exemption != null) {
-			getService().save(exemption);
-		}
-	}
-	
-	@Override
-	public void purge(BillExemptionRule delegate, RequestContext context) throws ResponseException {
-		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
-		BillExemption exemption = delegate.getBillingExemption();
-		if (exemption != null && exemption.getRules() != null) {
-			exemption.getRules().remove(delegate);
-			getService().save(exemption);
-		}
-	}
-	
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = new DelegatingResourceDescription();
-		
-		if (rep instanceof RefRepresentation) {
-			description.addProperty("uuid");
-			description.addProperty("scriptType");
-			description.addProperty("script");
-		} else if (rep instanceof DefaultRepresentation) {
-			description.addProperty("uuid");
-			description.addProperty("scriptType");
-			description.addProperty("script");
-			description.addProperty("voided");
-		} else if (rep instanceof FullRepresentation) {
-			description.addProperty("uuid");
-			description.addProperty("scriptType");
-			description.addProperty("script");
-			description.addProperty("voided");
-			description.addProperty("voidReason");
-			description.addProperty("auditInfo");
-		}
-		
-		return description;
-	}
-	
-	@Override
-	public DelegatingResourceDescription getCreatableProperties() {
-		DelegatingResourceDescription description = new DelegatingResourceDescription();
-		description.addProperty("scriptType");
-		description.addProperty("script");
-		return description;
-	}
-	
-	@Override
-	public DelegatingResourceDescription getUpdatableProperties() {
-		return getCreatableProperties();
-	}
-	
-	@PropertySetter("scriptType")
-	public void setScriptType(BillExemptionRule instance, String scriptType) {
-		if (scriptType != null) {
-			try {
-				instance.setScriptType(ScriptType.valueOf(scriptType));
-			}
-			catch (IllegalArgumentException e) {
-				throw new ConversionException("Unknown script type: '" + scriptType + "'", e);
-			}
-		}
-	}
-	
-	@PropertySetter("script")
-	public void setScript(BillExemptionRule instance, String script) {
-		if (script != null) {
-			instance.setScript(StringEscapeUtils.unescapeHtml4(script));
-		}
-	}
-	
-	private BillExemptionService getService() {
-		return Context.getService(BillExemptionService.class);
-	}
+  @Override
+  public BillExemptionRule newDelegate() {
+    return new BillExemptionRule();
+  }
+
+  @Override
+  public BillExemptionRule save(BillExemptionRule delegate) {
+    Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
+    BillExemption exemption = delegate.getBillingExemption();
+    if (exemption != null) {
+      getService().save(exemption);
+    }
+    return delegate;
+  }
+
+  @Override
+  public BillExemption getParent(BillExemptionRule instance) {
+    return instance.getBillingExemption();
+  }
+
+  @Override
+  public void setParent(BillExemptionRule instance, BillExemption parent) {
+    instance.setBillingExemption(parent);
+  }
+
+  @Override
+  public PageableResult doGetAll(BillExemption parent, RequestContext context)
+      throws ResponseException {
+    List<BillExemptionRule> rules = parent.getRules();
+    if (rules == null) {
+      rules = new ArrayList<>();
+    }
+    return new NeedsPaging<>(rules, context);
+  }
+
+  @Override
+  public BillExemptionRule getByUniqueId(String uniqueId) {
+    throw new ResourceDoesNotSupportOperationException(
+        "BillingExemptionRule does not support lookup by UUID");
+  }
+
+  @Override
+  protected void delete(BillExemptionRule delegate, String reason, RequestContext context)
+      throws ResponseException {
+    Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
+    if (Boolean.TRUE.equals(delegate.getVoided())) {
+      return;
+    }
+    delegate.setVoided(true);
+    delegate.setVoidReason(reason);
+    BillExemption exemption = delegate.getBillingExemption();
+    if (exemption != null) {
+      getService().save(exemption);
+    }
+  }
+
+  @Override
+  public void purge(BillExemptionRule delegate, RequestContext context) throws ResponseException {
+    Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
+    BillExemption exemption = delegate.getBillingExemption();
+    if (exemption != null && exemption.getRules() != null) {
+      exemption.getRules().remove(delegate);
+      getService().save(exemption);
+    }
+  }
+
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = new DelegatingResourceDescription();
+
+    if (rep instanceof RefRepresentation) {
+      description.addProperty("uuid");
+      description.addProperty("scriptType");
+      description.addProperty("script");
+    } else if (rep instanceof DefaultRepresentation) {
+      description.addProperty("uuid");
+      description.addProperty("scriptType");
+      description.addProperty("script");
+      description.addProperty("voided");
+    } else if (rep instanceof FullRepresentation) {
+      description.addProperty("uuid");
+      description.addProperty("scriptType");
+      description.addProperty("script");
+      description.addProperty("voided");
+      description.addProperty("voidReason");
+      description.addProperty("auditInfo");
+    }
+
+    return description;
+  }
+
+  @Override
+  public DelegatingResourceDescription getCreatableProperties() {
+    DelegatingResourceDescription description = new DelegatingResourceDescription();
+    description.addProperty("scriptType");
+    description.addProperty("script");
+    return description;
+  }
+
+  @Override
+  public DelegatingResourceDescription getUpdatableProperties() {
+    return getCreatableProperties();
+  }
+
+  @PropertySetter("scriptType")
+  public void setScriptType(BillExemptionRule instance, String scriptType) {
+    if (scriptType != null) {
+      try {
+        instance.setScriptType(ScriptType.valueOf(scriptType));
+      } catch (IllegalArgumentException e) {
+        throw new ConversionException("Unknown script type: '" + scriptType + "'", e);
+      }
+    }
+  }
+
+  @PropertySetter("script")
+  public void setScript(BillExemptionRule instance, String script) {
+    if (script != null) {
+      instance.setScript(StringEscapeUtils.unescapeHtml4(script));
+    }
+  }
+
+  private BillExemptionService getService() {
+    return Context.getService(BillExemptionService.class);
+  }
 }

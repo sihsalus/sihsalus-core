@@ -12,69 +12,46 @@ package org.openmrs.module.billing.api.base.entity.db.hibernate;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-
 import org.hibernate.query.Query;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.billing.api.base.criteria.BillingCriteria;
 
-/**
- * Represents types that can provide access to a data source through hibernate.
- */
+/** Represents types that can provide access to a data source through hibernate. */
 public interface BaseHibernateRepository {
 
-	/**
-	 * @return the underlying session factory for building queries
-	 */
-	DbSessionFactory getSessionFactory();
+  /**
+   * @return the underlying session factory for building queries
+   */
+  DbSessionFactory getSessionFactory();
 
-	/**
-	 * Creates an HQL query.
-	 */
-	Query<?> createQuery(String hql);
+  /** Creates an HQL query. */
+  Query<?> createQuery(String hql);
 
-	/**
-	 * Creates a new {@link BillingCriteria} for the given entity class.
-	 */
-	<E extends OpenmrsObject> BillingCriteria createCriteria(Class<E> cls);
+  /** Creates a new {@link BillingCriteria} for the given entity class. */
+  <E extends OpenmrsObject> BillingCriteria createCriteria(Class<E> cls);
 
-	/**
-	 * Saves an entity to the database.
-	 */
-	<E extends OpenmrsObject> E save(E entity);
+  /** Saves an entity to the database. */
+  <E extends OpenmrsObject> E save(E entity);
 
-	/**
-	 * Saves a collection of entities to the database.
-	 */
-	void saveAll(Collection<? extends OpenmrsObject> collection);
+  /** Saves a collection of entities to the database. */
+  void saveAll(Collection<? extends OpenmrsObject> collection);
 
-	/**
-	 * Deletes an entity from the database.
-	 */
-	<E extends OpenmrsObject> void delete(E entity);
+  /** Deletes an entity from the database. */
+  <E extends OpenmrsObject> void delete(E entity);
 
-	/**
-	 * Executes the {@link BillingCriteria} and returns the first result or null.
-	 */
-	<T> T selectValue(BillingCriteria criteria);
+  /** Executes the {@link BillingCriteria} and returns the first result or null. */
+  <T> T selectValue(BillingCriteria criteria);
 
-	/**
-	 * Selects a single entity by id.
-	 */
-	<E extends OpenmrsObject> E selectSingle(Class<E> cls, Serializable id);
+  /** Selects a single entity by id. */
+  <E extends OpenmrsObject> E selectSingle(Class<E> cls, Serializable id);
 
-	/**
-	 * Selects a single entity matching the criteria (first result if multiple).
-	 */
-	<E extends OpenmrsObject> E selectSingle(Class<E> cls, BillingCriteria criteria);
+  /** Selects a single entity matching the criteria (first result if multiple). */
+  <E extends OpenmrsObject> E selectSingle(Class<E> cls, BillingCriteria criteria);
 
-	/**
-	 * Selects all entities of the given class.
-	 */
-	<E extends OpenmrsObject> List<E> select(Class<E> cls);
+  /** Selects all entities of the given class. */
+  <E extends OpenmrsObject> List<E> select(Class<E> cls);
 
-	/**
-	 * Selects entities matching the criteria.
-	 */
-	<E extends OpenmrsObject> List<E> select(Class<E> cls, BillingCriteria criteria);
+  /** Selects entities matching the criteria. */
+  <E extends OpenmrsObject> List<E> select(Class<E> cls, BillingCriteria criteria);
 }

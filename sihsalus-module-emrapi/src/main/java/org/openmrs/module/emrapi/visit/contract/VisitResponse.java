@@ -9,30 +9,29 @@
  */
 package org.openmrs.module.emrapi.visit.contract;
 
-import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
 public class VisitResponse {
-	
-	private String visitUuid;
-	
-	private List<EncounterTransaction> encounters = new ArrayList<EncounterTransaction>();
-	
-	public VisitResponse(String visitUuid) {
-		this.visitUuid = visitUuid;
-	}
-	
-	public String getVisitUuid() {
-		return visitUuid;
-	}
-	
-	public List<EncounterTransaction> getEncounters() {
-		return encounters;
-	}
-	
-	public void addEncounter(EncounterTransaction encounter) {
-		encounters.add(encounter);
-	}
+
+  private String visitUuid;
+
+  private List<EncounterTransaction> encounters = new ArrayList<EncounterTransaction>();
+
+  public VisitResponse(String visitUuid) {
+    this.visitUuid = visitUuid;
+  }
+
+  public String getVisitUuid() {
+    return visitUuid;
+  }
+
+  public List<EncounterTransaction> getEncounters() {
+    return encounters;
+  }
+
+  public void addEncounter(EncounterTransaction encounter) {
+    encounters.add(encounter);
+  }
 }

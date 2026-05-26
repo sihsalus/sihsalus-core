@@ -15,8 +15,8 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 
 public interface FhirEncounterService extends FhirService<Encounter> {
-	
-	IBundleProvider searchForEncounters(EncounterSearchParams encounterSearchParams);
-	
-	IBundleProvider getEncounterEverything(TokenParam identifier);
+
+  IBundleProvider searchForEncounters(EncounterSearchParams encounterSearchParams);
+
+  IBundleProvider getEncounterEverything(TokenParam identifier);
 }

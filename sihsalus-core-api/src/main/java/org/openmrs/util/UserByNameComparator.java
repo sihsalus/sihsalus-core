@@ -1,17 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.util;
 
 import java.io.Serializable;
 import java.util.Comparator;
-
 import org.openmrs.User;
 
 /**
@@ -22,25 +21,24 @@ import org.openmrs.User;
  */
 public class UserByNameComparator implements Comparator<User>, Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	/**
-	 * <p>
-	 * <strong>Should</strong> sort users by personNames
-	 *
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public int compare(User user1, User user2) {
+  /**
+   * <strong>Should</strong> sort users by personNames
+   *
+   * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+   */
+  @Override
+  public int compare(User user1, User user2) {
 
-		// test for null cases (sorting them to be last in a list)
-		if (user1 == null) {
-			return 1;
-		} else if (user2 == null) {
-			return -1;
-		}
+    // test for null cases (sorting them to be last in a list)
+    if (user1 == null) {
+      return 1;
+    } else if (user2 == null) {
+      return -1;
+    }
 
-		// delegate to the personByNameComparator to sort by person names
-		return PersonByNameComparator.comparePersonsByName(user1.getPerson(), user2.getPerson());
-	}
+    // delegate to the personByNameComparator to sort by person names
+    return PersonByNameComparator.comparePersonsByName(user1.getPerson(), user2.getPerson());
+  }
 }

@@ -18,14 +18,14 @@ package org.openmrs.module.billing.api.base.f;
  * @param <TParm4> The fourth parameter class.
  */
 public interface Action4<TParm1, TParm2, TParm3, TParm4> {
-	
-	/**
-	 * Executes the action.
-	 *
-	 * @param parameter1 The first parameter.
-	 * @param parameter2 The second parameter.
-	 * @param parameter3 The third parameter.
-	 * @param parameter4 The fourth parameter.
-	 */
-	void apply(TParm1 parameter1, TParm2 parameter2, TParm3 parameter3, TParm4 parameter4);
+
+  /**
+   * Executes the action.
+   *
+   * @param parameter1 The first parameter.
+   * @param parameter2 The second parameter.
+   * @param parameter3 The third parameter.
+   * @param parameter4 The fourth parameter.
+   */
+  void apply(TParm1 parameter1, TParm2 parameter2, TParm3 parameter3, TParm4 parameter4);
 }

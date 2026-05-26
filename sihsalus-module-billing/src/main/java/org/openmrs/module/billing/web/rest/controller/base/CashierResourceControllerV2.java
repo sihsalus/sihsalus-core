@@ -14,17 +14,15 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * REST controller for v2 cashier resources.
- */
+/** REST controller for v2 cashier resources. */
 @Controller
 @RequestMapping("/rest/" + RestConstants.VERSION_2 + CashierResourceControllerV2.BILLING_NAMESPACE)
 public class CashierResourceControllerV2 extends MainResourceController {
-	
-	public static final String BILLING_NAMESPACE = "/billing";
-	
-	@Override
-	public String getNamespace() {
-		return RestConstants.VERSION_2 + CashierResourceControllerV2.BILLING_NAMESPACE;
-	}
+
+  public static final String BILLING_NAMESPACE = "/billing";
+
+  @Override
+  public String getNamespace() {
+    return RestConstants.VERSION_2 + CashierResourceControllerV2.BILLING_NAMESPACE;
+  }
 }

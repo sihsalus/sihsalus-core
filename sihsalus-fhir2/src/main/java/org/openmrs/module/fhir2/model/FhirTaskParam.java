@@ -15,9 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToOne;
-
 import java.util.Date;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,25 +27,25 @@ import org.openmrs.Concept;
 @NoArgsConstructor
 @MappedSuperclass
 public abstract class FhirTaskParam extends BaseOpenmrsMetadata {
-	
-	@ManyToOne
-	@JoinColumn(name = "task_id")
-	protected FhirTask task;
-	
-	@ManyToOne
-	@JoinColumn(name = "type_id", referencedColumnName = "concept_id", nullable = false)
-	protected Concept type;
-	
-	@Column(name = "value_datetime")
-	protected Date valueDatetime;
-	
-	@Column(name = "value_numeric")
-	protected Double valueNumeric;
-	
-	@Column(name = "value_text")
-	protected String valueText;
-	
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "value_reference_id")
-	protected FhirReference valueReference;
+
+  @ManyToOne
+  @JoinColumn(name = "task_id")
+  protected FhirTask task;
+
+  @ManyToOne
+  @JoinColumn(name = "type_id", referencedColumnName = "concept_id", nullable = false)
+  protected Concept type;
+
+  @Column(name = "value_datetime")
+  protected Date valueDatetime;
+
+  @Column(name = "value_numeric")
+  protected Double valueNumeric;
+
+  @Column(name = "value_text")
+  protected String valueText;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "value_reference_id")
+  protected FhirReference valueReference;
 }

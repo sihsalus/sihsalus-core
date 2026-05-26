@@ -9,65 +9,64 @@
  */
 package org.openmrs.module.billing.api.db.hibernate;
 
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.TypedQuery;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.billing.api.db.PaymentModeDAO;
 import org.openmrs.module.billing.api.model.PaymentMode;
 
-import jakarta.annotation.Nonnull;
-import jakarta.persistence.TypedQuery;
-import java.util.List;
-
-/**
- * Hibernate implementation of {@link PaymentModeDAO}.
- */
+/** Hibernate implementation of {@link PaymentModeDAO}. */
 @RequiredArgsConstructor
 public class HibernatePaymentModeDAOImpl implements PaymentModeDAO {
-	
-	private final SessionFactory sessionFactory;
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	public PaymentMode getPaymentMode(@Nonnull Integer id) {
-		return sessionFactory.getCurrentSession().get(PaymentMode.class, id);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	public PaymentMode getPaymentModeByUuid(@Nonnull String uuid) {
-		TypedQuery<PaymentMode> query = sessionFactory.getCurrentSession()
-		        .createQuery("select b from PaymentMode b where b.uuid = :uuid", PaymentMode.class);
-		query.setParameter("uuid", uuid);
-		return query.getResultStream().findFirst().orElse(null);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	public List<PaymentMode> getPaymentModes(boolean includeRetired) {
-		String hql = "from PaymentMode" + (includeRetired ? "" : " where retired = false");
-		return sessionFactory.getCurrentSession().createQuery(hql, PaymentMode.class).getResultList();
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	public PaymentMode savePaymentMode(@Nonnull PaymentMode paymentMode) {
-		sessionFactory.getCurrentSession().merge(paymentMode);
-		return paymentMode;
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	public void purgePaymentMode(@Nonnull PaymentMode paymentMode) {
-		sessionFactory.getCurrentSession().remove(paymentMode);
-	}
+
+  private final SessionFactory sessionFactory;
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  public PaymentMode getPaymentMode(@Nonnull Integer id) {
+    return sessionFactory.getCurrentSession().get(PaymentMode.class, id);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  public PaymentMode getPaymentModeByUuid(@Nonnull String uuid) {
+    TypedQuery<PaymentMode> query =
+        sessionFactory
+            .getCurrentSession()
+            .createQuery("select b from PaymentMode b where b.uuid = :uuid", PaymentMode.class);
+    query.setParameter("uuid", uuid);
+    return query.getResultStream().findFirst().orElse(null);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  public List<PaymentMode> getPaymentModes(boolean includeRetired) {
+    String hql = "from PaymentMode" + (includeRetired ? "" : " where retired = false");
+    return sessionFactory.getCurrentSession().createQuery(hql, PaymentMode.class).getResultList();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  public PaymentMode savePaymentMode(@Nonnull PaymentMode paymentMode) {
+    sessionFactory.getCurrentSession().merge(paymentMode);
+    return paymentMode;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  public void purgePaymentMode(@Nonnull PaymentMode paymentMode) {
+    sessionFactory.getCurrentSession().remove(paymentMode);
+  }
 }

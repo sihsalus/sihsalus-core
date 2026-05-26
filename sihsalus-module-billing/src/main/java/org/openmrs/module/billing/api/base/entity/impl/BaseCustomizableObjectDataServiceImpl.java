@@ -11,7 +11,6 @@ package org.openmrs.module.billing.api.base.entity.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.billing.api.base.entity.model.BaseCustomizableObject;
 import org.openmrs.module.billing.api.base.entity.security.IObjectAuthorizationPrivileges;
@@ -19,26 +18,27 @@ import org.openmrs.module.billing.api.base.entity.security.IObjectAuthorizationP
 // @formatter:off
 /**
  * Base data service for {@link BaseCustomizableObject} models.
+ *
  * @param <E> The model class.
  */
-public abstract class BaseCustomizableObjectDataServiceImpl<E extends BaseCustomizableObject<?>,
-			P extends IObjectAuthorizationPrivileges>
-		extends BaseObjectDataServiceImpl<E, P> {
-// @formatter:on
-	@Override
-	@SuppressWarnings("unchecked")
-	protected Collection<? extends OpenmrsObject> getRelatedObjects(E entity) {
-		Collection<? extends OpenmrsObject> result = super.getRelatedObjects(entity);
-		
-		if (result == null) {
-			result = new ArrayList<OpenmrsObject>();
-		}
-		
-		Collection attributes = entity.getAttributes();
-		if (attributes != null && !attributes.isEmpty()) {
-			result.addAll(attributes);
-		}
-		
-		return result;
-	}
+public abstract class BaseCustomizableObjectDataServiceImpl<
+        E extends BaseCustomizableObject<?>, P extends IObjectAuthorizationPrivileges>
+    extends BaseObjectDataServiceImpl<E, P> {
+  // @formatter:on
+  @Override
+  @SuppressWarnings("unchecked")
+  protected Collection<? extends OpenmrsObject> getRelatedObjects(E entity) {
+    Collection<? extends OpenmrsObject> result = super.getRelatedObjects(entity);
+
+    if (result == null) {
+      result = new ArrayList<OpenmrsObject>();
+    }
+
+    Collection attributes = entity.getAttributes();
+    if (attributes != null && !attributes.isEmpty()) {
+      result.addAll(attributes);
+    }
+
+    return result;
+  }
 }

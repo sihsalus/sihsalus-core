@@ -9,19 +9,16 @@
  */
 package org.openmrs.module.billing.api.base.web;
 
-/**
- * Base constants used to store module web resources and urls.
- */
+/** Base constants used to store module web resources and urls. */
 public class WebConstants {
-	
-	protected static final String MODULE_BASE = "/module/billing/";
-	
-	protected static final String MODULE_RESOURCE_BASE = "/moduleResources/billing/";
-	
-	public static final String OPENMRS_MSG_ATTR = "openmrs_msg";
-	
-	public static final String REPORT_DOWNLOAD_URL = "/moduleServlet/jasperreport/jreportDownload";
-	
-	protected WebConstants() {
-	}
+
+  protected static final String MODULE_BASE = "/module/billing/";
+
+  protected static final String MODULE_RESOURCE_BASE = "/moduleResources/billing/";
+
+  public static final String OPENMRS_MSG_ATTR = "openmrs_msg";
+
+  public static final String REPORT_DOWNLOAD_URL = "/moduleServlet/jasperreport/jreportDownload";
+
+  protected WebConstants() {}
 }

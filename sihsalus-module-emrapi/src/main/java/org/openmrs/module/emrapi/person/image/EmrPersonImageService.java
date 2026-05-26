@@ -14,20 +14,17 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.util.PrivilegeConstants;
 
-/**
- * Public API for person image functionality.
- */
+/** Public API for person image functionality. */
 public interface EmrPersonImageService extends OpenmrsService {
-	
-	/**
-	 * Saves the provided base64-encoded string as a jpeg image for the specified <code>Person</code>.
-	 *
-	 * @throws org.openmrs.api.APIException if save fails
-	 */
-	@Authorized({ PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS })
-	public PersonImage savePersonImage(PersonImage personImage);
-	
-	@Authorized(PrivilegeConstants.GET_PERSONS)
-	public PersonImage getCurrentPersonImage(Person person);
-	
+
+  /**
+   * Saves the provided base64-encoded string as a jpeg image for the specified <code>Person</code>.
+   *
+   * @throws org.openmrs.api.APIException if save fails
+   */
+  @Authorized({PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS})
+  public PersonImage savePersonImage(PersonImage personImage);
+
+  @Authorized(PrivilegeConstants.GET_PERSONS)
+  public PersonImage getCurrentPersonImage(Person person);
 }

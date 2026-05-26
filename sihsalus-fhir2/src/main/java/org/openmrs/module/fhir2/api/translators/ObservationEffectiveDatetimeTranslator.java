@@ -10,28 +10,28 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Type;
 import org.openmrs.Obs;
 
-public interface ObservationEffectiveDatetimeTranslator extends ToFhirTranslator<Obs, Type>, UpdatableOpenmrsTranslator<Obs, Type> {
-	
-	/**
-	 * Maps an {@link org.openmrs.Obs} to a corresponding {@link org.hl7.fhir.r4.model.Type}
-	 *
-	 * @param obs the obs to translate
-	 * @return the corresponding FHIR type
-	 */
-	@Override
-	Type toFhirResource(@Nonnull Obs obs);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Type} to a existing {@link org.openmrs.Obs}
-	 *
-	 * @param obs the obs to update
-	 * @param resource the resource to map
-	 * @return an updated version of the obs
-	 */
-	@Override
-	Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Type resource);
+public interface ObservationEffectiveDatetimeTranslator
+    extends ToFhirTranslator<Obs, Type>, UpdatableOpenmrsTranslator<Obs, Type> {
+
+  /**
+   * Maps an {@link org.openmrs.Obs} to a corresponding {@link org.hl7.fhir.r4.model.Type}
+   *
+   * @param obs the obs to translate
+   * @return the corresponding FHIR type
+   */
+  @Override
+  Type toFhirResource(@Nonnull Obs obs);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.Type} to a existing {@link org.openmrs.Obs}
+   *
+   * @param obs the obs to update
+   * @param resource the resource to map
+   * @return an updated version of the obs
+   */
+  @Override
+  Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Type resource);
 }

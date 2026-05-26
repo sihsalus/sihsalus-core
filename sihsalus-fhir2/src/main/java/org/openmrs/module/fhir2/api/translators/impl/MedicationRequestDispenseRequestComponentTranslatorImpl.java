@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
@@ -26,52 +25,57 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MedicationRequestDispenseRequestComponentTranslatorImpl implements MedicationRequestDispenseRequestComponentTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
-	
-	@Override
-	public MedicationRequest.MedicationRequestDispenseRequestComponent toFhirResource(@Nonnull DrugOrder drugOrder) {
-		MedicationRequest.MedicationRequestDispenseRequestComponent dispenseRequestComponent = new MedicationRequest.MedicationRequestDispenseRequestComponent();
-		if (drugOrder.getQuantity() != null) {
-			Quantity quantity = new Quantity();
-			quantity.setValue(drugOrder.getQuantity());
-			if (drugOrder.getQuantityUnits() != null) {
-				Coding coding = quantityCodingTranslator.toFhirResource(drugOrder.getQuantityUnits());
-				quantity.setSystem(coding.getSystem());
-				quantity.setCode(coding.getCode());
-				quantity.setUnit(coding.getDisplay());
-			}
-			dispenseRequestComponent.setQuantity(quantity);
-		}
-		if (drugOrder.getNumRefills() != null) {
-			dispenseRequestComponent.setNumberOfRepeatsAllowed(drugOrder.getNumRefills());
-		}
-		if (drugOrder.getDateActivated() != null) {
-			Period validityPeriod = new Period();
-			validityPeriod.setStart(drugOrder.getDateActivated());
-			dispenseRequestComponent.setValidityPeriod(validityPeriod);
-		}
-		return dispenseRequestComponent;
-	}
-	
-	@Override
-	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder,
-	        @Nonnull MedicationRequest.MedicationRequestDispenseRequestComponent resource) {
-		if (resource.hasQuantity()) {
-			Quantity quantity = resource.getQuantity();
-			if (quantity.hasValue()) {
-				drugOrder.setQuantity(quantity.getValue().doubleValue());
-				Concept units = quantityCodingTranslator.toOpenmrsType(quantity);
-				drugOrder.setQuantityUnits(units);
-			}
-		}
-		drugOrder.setNumRefills(resource.hasNumberOfRepeatsAllowed() ? resource.getNumberOfRepeatsAllowed() : null);
-		if (resource.getValidityPeriod() != null && resource.getValidityPeriod().getStart() != null) {
-			drugOrder.setDateActivated(resource.getValidityPeriod().getStart());
-		}
-		return drugOrder;
-	}
+public class MedicationRequestDispenseRequestComponentTranslatorImpl
+    implements MedicationRequestDispenseRequestComponentTranslator {
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
+
+  @Override
+  public MedicationRequest.MedicationRequestDispenseRequestComponent toFhirResource(
+      @Nonnull DrugOrder drugOrder) {
+    MedicationRequest.MedicationRequestDispenseRequestComponent dispenseRequestComponent =
+        new MedicationRequest.MedicationRequestDispenseRequestComponent();
+    if (drugOrder.getQuantity() != null) {
+      Quantity quantity = new Quantity();
+      quantity.setValue(drugOrder.getQuantity());
+      if (drugOrder.getQuantityUnits() != null) {
+        Coding coding = quantityCodingTranslator.toFhirResource(drugOrder.getQuantityUnits());
+        quantity.setSystem(coding.getSystem());
+        quantity.setCode(coding.getCode());
+        quantity.setUnit(coding.getDisplay());
+      }
+      dispenseRequestComponent.setQuantity(quantity);
+    }
+    if (drugOrder.getNumRefills() != null) {
+      dispenseRequestComponent.setNumberOfRepeatsAllowed(drugOrder.getNumRefills());
+    }
+    if (drugOrder.getDateActivated() != null) {
+      Period validityPeriod = new Period();
+      validityPeriod.setStart(drugOrder.getDateActivated());
+      dispenseRequestComponent.setValidityPeriod(validityPeriod);
+    }
+    return dispenseRequestComponent;
+  }
+
+  @Override
+  public DrugOrder toOpenmrsType(
+      @Nonnull DrugOrder drugOrder,
+      @Nonnull MedicationRequest.MedicationRequestDispenseRequestComponent resource) {
+    if (resource.hasQuantity()) {
+      Quantity quantity = resource.getQuantity();
+      if (quantity.hasValue()) {
+        drugOrder.setQuantity(quantity.getValue().doubleValue());
+        Concept units = quantityCodingTranslator.toOpenmrsType(quantity);
+        drugOrder.setQuantityUnits(units);
+      }
+    }
+    drugOrder.setNumRefills(
+        resource.hasNumberOfRepeatsAllowed() ? resource.getNumberOfRepeatsAllowed() : null);
+    if (resource.getValidityPeriod() != null && resource.getValidityPeriod().getStart() != null) {
+      drugOrder.setDateActivated(resource.getValidityPeriod().getStart());
+    }
+    return drugOrder;
+  }
 }

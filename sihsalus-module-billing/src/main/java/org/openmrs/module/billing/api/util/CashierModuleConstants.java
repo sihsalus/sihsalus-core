@@ -9,17 +9,14 @@
  */
 package org.openmrs.module.billing.api.util;
 
-/**
- * Constants class for module constants.
- */
+/** Constants class for module constants. */
 public class CashierModuleConstants {
-	
-	public static final String MODULE_NAME = "cashier";
-	
-	public static final String BILLING_EXEMPTIONS_CONFIG_FILE_PATH = "billing.exemptions.config";
-	
-	public static final String GLOBAL_PROPERTY_BILLING_CURRENCY = "billing.currencySymbol";
-	
-	protected CashierModuleConstants() {
-	}
+
+  public static final String MODULE_NAME = "cashier";
+
+  public static final String BILLING_EXEMPTIONS_CONFIG_FILE_PATH = "billing.exemptions.config";
+
+  public static final String GLOBAL_PROPERTY_BILLING_CURRENCY = "billing.currencySymbol";
+
+  protected CashierModuleConstants() {}
 }

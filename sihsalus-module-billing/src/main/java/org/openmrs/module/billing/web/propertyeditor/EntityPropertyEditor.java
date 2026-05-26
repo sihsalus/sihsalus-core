@@ -11,7 +11,6 @@ package org.openmrs.module.billing.web.propertyeditor;
 
 import java.beans.PropertyEditorSupport;
 import java.lang.reflect.ParameterizedType;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.OpenmrsObject;
@@ -24,48 +23,49 @@ import org.openmrs.module.billing.api.base.entity.IObjectDataService;
  * @param <E> The model class
  */
 public class EntityPropertyEditor<E extends OpenmrsObject> extends PropertyEditorSupport {
-	
-	private final IObjectDataService<E> service;
-	
-	public EntityPropertyEditor(Class<? extends IObjectDataService<E>> service) {
-		this.service = Context.getService(service);
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public String getAsText() {
-		E entity = (E) getValue();
-		
-		if (entity == null) {
-			return "";
-		} else {
-			return entity.getId().toString();
-		}
-	}
-	
-	@Override
-	public void setAsText(String text) {
-		if (StringUtils.isEmpty(text)) {
-			setValue(null);
-		} else {
-			E entity;
-			if (NumberUtils.isNumber(text)) {
-				entity = service.getById(Integer.valueOf(text));
-			} else {
-				entity = service.getByUuid(text);
-			}
-			
-			setValue(entity);
-			if (entity == null) {
-				throw new IllegalArgumentException("Entity ('" + getEntityClass().getName() + "') not found: " + text);
-			}
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	protected Class<E> getEntityClass() {
-		ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
-		
-		return (Class) parameterizedType.getActualTypeArguments()[0];
-	}
+
+  private final IObjectDataService<E> service;
+
+  public EntityPropertyEditor(Class<? extends IObjectDataService<E>> service) {
+    this.service = Context.getService(service);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public String getAsText() {
+    E entity = (E) getValue();
+
+    if (entity == null) {
+      return "";
+    } else {
+      return entity.getId().toString();
+    }
+  }
+
+  @Override
+  public void setAsText(String text) {
+    if (StringUtils.isEmpty(text)) {
+      setValue(null);
+    } else {
+      E entity;
+      if (NumberUtils.isNumber(text)) {
+        entity = service.getById(Integer.valueOf(text));
+      } else {
+        entity = service.getByUuid(text);
+      }
+
+      setValue(entity);
+      if (entity == null) {
+        throw new IllegalArgumentException(
+            "Entity ('" + getEntityClass().getName() + "') not found: " + text);
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  protected Class<E> getEntityClass() {
+    ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
+
+    return (Class) parameterizedType.getActualTypeArguments()[0];
+  }
 }

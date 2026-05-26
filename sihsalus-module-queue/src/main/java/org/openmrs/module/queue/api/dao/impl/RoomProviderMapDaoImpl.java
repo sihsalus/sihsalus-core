@@ -12,27 +12,27 @@ package org.openmrs.module.queue.api.dao.impl;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.hibernate.SessionFactory;
 import org.openmrs.module.queue.api.dao.RoomProviderMapDao;
 import org.openmrs.module.queue.api.search.RoomProviderMapSearchCriteria;
 import org.openmrs.module.queue.model.RoomProviderMap;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-public class RoomProviderMapDaoImpl extends AbstractBaseQueueDaoImpl<RoomProviderMap> implements RoomProviderMapDao {
-	
-	public RoomProviderMapDaoImpl(@Qualifier("sessionFactory") SessionFactory sessionFactory) {
-		super(sessionFactory);
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<RoomProviderMap> getRoomProviderMaps(RoomProviderMapSearchCriteria searchCriteria) {
-		StringBuilder hql = new StringBuilder("select rpm from RoomProviderMap rpm where 1 = 1");
-		Map<String, Object> parameters = new LinkedHashMap<>();
-		appendDeletedFilter(hql, "rpm", searchCriteria.isIncludeVoided());
-		limitByCollectionProperty(hql, parameters, "rpm.queueRoom", searchCriteria.getQueueRooms());
-		limitByCollectionProperty(hql, parameters, "rpm.provider", searchCriteria.getProviders());
-		return list(hql.toString(), RoomProviderMap.class, parameters);
-	}
+public class RoomProviderMapDaoImpl extends AbstractBaseQueueDaoImpl<RoomProviderMap>
+    implements RoomProviderMapDao {
+
+  public RoomProviderMapDaoImpl(@Qualifier("sessionFactory") SessionFactory sessionFactory) {
+    super(sessionFactory);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<RoomProviderMap> getRoomProviderMaps(RoomProviderMapSearchCriteria searchCriteria) {
+    StringBuilder hql = new StringBuilder("select rpm from RoomProviderMap rpm where 1 = 1");
+    Map<String, Object> parameters = new LinkedHashMap<>();
+    appendDeletedFilter(hql, "rpm", searchCriteria.isIncludeVoided());
+    limitByCollectionProperty(hql, parameters, "rpm.queueRoom", searchCriteria.getQueueRooms());
+    limitByCollectionProperty(hql, parameters, "rpm.provider", searchCriteria.getProviders());
+    return list(hql.toString(), RoomProviderMap.class, parameters);
+  }
 }

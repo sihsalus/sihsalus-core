@@ -12,44 +12,42 @@ package org.openmrs.module.billing.api.billing;
 import lombok.Getter;
 import org.openmrs.module.billing.api.model.Bill;
 
-/**
- * Represents the outcome of a billing strategy processing an order.
- */
+/** Represents the outcome of a billing strategy processing an order. */
 @Getter
 public class BillingResult {
-	
-	public enum Action {
-		CREATED,
-		UPDATED,
-		SKIPPED,
-		DISCONTINUED
-	}
-	
-	private final Action action;
-	
-	private final Bill bill;
-	
-	private final String reason;
-	
-	private BillingResult(Action action, Bill bill, String reason) {
-		this.action = action;
-		this.bill = bill;
-		this.reason = reason;
-	}
-	
-	public static BillingResult created(Bill bill) {
-		return new BillingResult(Action.CREATED, bill, null);
-	}
-	
-	public static BillingResult updated(Bill bill) {
-		return new BillingResult(Action.UPDATED, bill, null);
-	}
-	
-	public static BillingResult discontinued() {
-		return new BillingResult(Action.DISCONTINUED, null, null);
-	}
-	
-	public static BillingResult skipped(String reason) {
-		return new BillingResult(Action.SKIPPED, null, reason);
-	}
+
+  public enum Action {
+    CREATED,
+    UPDATED,
+    SKIPPED,
+    DISCONTINUED
+  }
+
+  private final Action action;
+
+  private final Bill bill;
+
+  private final String reason;
+
+  private BillingResult(Action action, Bill bill, String reason) {
+    this.action = action;
+    this.bill = bill;
+    this.reason = reason;
+  }
+
+  public static BillingResult created(Bill bill) {
+    return new BillingResult(Action.CREATED, bill, null);
+  }
+
+  public static BillingResult updated(Bill bill) {
+    return new BillingResult(Action.UPDATED, bill, null);
+  }
+
+  public static BillingResult discontinued() {
+    return new BillingResult(Action.DISCONTINUED, null, null);
+  }
+
+  public static BillingResult skipped(String reason) {
+    return new BillingResult(Action.SKIPPED, null, reason);
+  }
 }

@@ -12,23 +12,21 @@ package org.openmrs.module.billing.api.security;
 import org.openmrs.module.billing.api.base.entity.security.IObjectAuthorizationPrivileges;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
-/**
- * Default authorization privileges for {@link org.openmrs.OpenmrsObject} data services.
- */
+/** Default authorization privileges for {@link org.openmrs.OpenmrsObject} data services. */
 public class BasicEntityAuthorizationPrivileges implements IObjectAuthorizationPrivileges {
-	
-	@Override
-	public String getSavePrivilege() {
-		return PrivilegeConstants.MANAGE_METADATA;
-	}
-	
-	@Override
-	public String getPurgePrivilege() {
-		return PrivilegeConstants.PURGE_METADATA;
-	}
-	
-	@Override
-	public String getGetPrivilege() {
-		return PrivilegeConstants.VIEW_METADATA;
-	}
+
+  @Override
+  public String getSavePrivilege() {
+    return PrivilegeConstants.MANAGE_METADATA;
+  }
+
+  @Override
+  public String getPurgePrivilege() {
+    return PrivilegeConstants.PURGE_METADATA;
+  }
+
+  @Override
+  public String getGetPrivilege() {
+    return PrivilegeConstants.VIEW_METADATA;
+  }
 }

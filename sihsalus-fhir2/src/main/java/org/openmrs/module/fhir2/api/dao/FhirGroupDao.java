@@ -9,39 +9,37 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.openmrs.Cohort;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirGroupDao extends FhirDao<Cohort> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
-	Cohort get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
-	List<Cohort> get(@Nonnull Collection<String> uuids);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
-	List<Cohort> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized({ PrivilegeConstants.ADD_COHORTS, PrivilegeConstants.EDIT_COHORTS })
-	Cohort createOrUpdate(@Nonnull Cohort newEntry);
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_COHORTS)
-	Cohort delete(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
+  Cohort get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
+  List<Cohort> get(@Nonnull Collection<String> uuids);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
+  List<Cohort> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized({PrivilegeConstants.ADD_COHORTS, PrivilegeConstants.EDIT_COHORTS})
+  Cohort createOrUpdate(@Nonnull Cohort newEntry);
+
+  @Override
+  @Authorized(PrivilegeConstants.DELETE_COHORTS)
+  Cohort delete(@Nonnull String uuid);
 }

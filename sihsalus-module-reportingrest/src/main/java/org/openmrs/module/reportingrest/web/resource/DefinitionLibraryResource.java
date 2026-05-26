@@ -14,6 +14,10 @@
 
 package org.openmrs.module.reportingrest.web.resource;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.data.encounter.definition.EncounterDataDefinition;
@@ -36,99 +40,99 @@ import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-/**
- *
- */
-@Resource(name = RestConstants.VERSION_1 + "/reportingrest/definitionlibrary",
-        supportedClass = Definition.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+/** */
+@Resource(
+    name = RestConstants.VERSION_1 + "/reportingrest/definitionlibrary",
+    supportedClass = Definition.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
 public class DefinitionLibraryResource implements CrudResource, Searchable {
 
-    static Map<String, Class<? extends Definition>> types;
-    static {
-        types = new HashMap<String, Class<? extends Definition>>();
-        types.put("cohort", CohortDefinition.class);
-        types.put("dataSet", DataSetDefinition.class);
-        types.put("encounterQuery", EncounterQuery.class);
-        types.put("patientData", PatientDataDefinition.class);
-        types.put("encounterData", EncounterDataDefinition.class);
-    }
+  static Map<String, Class<? extends Definition>> types;
 
-    @Override
-    public List<Representation> getAvailableRepresentations() {
-        return Arrays.asList(Representation.DEFAULT);
-    }
+  static {
+    types = new HashMap<String, Class<? extends Definition>>();
+    types.put("cohort", CohortDefinition.class);
+    types.put("dataSet", DataSetDefinition.class);
+    types.put("encounterQuery", EncounterQuery.class);
+    types.put("patientData", PatientDataDefinition.class);
+    types.put("encounterData", EncounterDataDefinition.class);
+  }
 
-    @Override
-    public SimpleObject search(RequestContext context) throws ResponseException {
-        ReportingRestPrivileges.requireViewReportObjects();
-        Class<? extends Definition> definitionClass = getDefinitionClass(context, "q");
-        List<LibraryDefinitionSummary> summaries = getLibraries().getDefinitionSummaries(definitionClass);
-        SimpleObject results = new SimpleObject();
-        results.put("results", summaries);
-        return results;
-    }
+  @Override
+  public List<Representation> getAvailableRepresentations() {
+    return Arrays.asList(Representation.DEFAULT);
+  }
 
-    private Class<? extends Definition> getDefinitionClass(RequestContext context, String paramName) {
-        String typeName = context.getParameter(paramName);
-        Class<? extends Definition> definitionClass = types.get(typeName);
-        if (definitionClass == null) {
-            try {
-                definitionClass = (Class<? extends Definition>) Context.loadClass(typeName);
-            } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException("Unknown type: " + typeName);
-            }
-        }
-        return definitionClass;
-    }
+  @Override
+  public SimpleObject search(RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireViewReportObjects();
+    Class<? extends Definition> definitionClass = getDefinitionClass(context, "q");
+    List<LibraryDefinitionSummary> summaries =
+        getLibraries().getDefinitionSummaries(definitionClass);
+    SimpleObject results = new SimpleObject();
+    results.put("results", summaries);
+    return results;
+  }
 
-    @Override
-    public Object retrieve(String uuid, RequestContext context) throws ResponseException {
-        ReportingRestPrivileges.requireViewReportObjects();
-        Definition definition = getLibraries().getDefinition(null, uuid);
-        if (definition == null) {
-            throw new ObjectNotFoundException();
-        }
-        return ConversionUtil.convertToRepresentation(definition, context.getRepresentation());
+  private Class<? extends Definition> getDefinitionClass(RequestContext context, String paramName) {
+    String typeName = context.getParameter(paramName);
+    Class<? extends Definition> definitionClass = types.get(typeName);
+    if (definitionClass == null) {
+      try {
+        definitionClass = (Class<? extends Definition>) Context.loadClass(typeName);
+      } catch (ClassNotFoundException e) {
+        throw new IllegalArgumentException("Unknown type: " + typeName);
+      }
     }
+    return definitionClass;
+  }
 
-    @Override
-    public String getUri(Object instance) {
-        return RestConstants.URI_PREFIX + RestConstants.VERSION_1 +
-                "/reportingrest/definitionlibrary/" + ((Definition) instance).getUuid();
+  @Override
+  public Object retrieve(String uuid, RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireViewReportObjects();
+    Definition definition = getLibraries().getDefinition(null, uuid);
+    if (definition == null) {
+      throw new ObjectNotFoundException();
     }
+    return ConversionUtil.convertToRepresentation(definition, context.getRepresentation());
+  }
 
-    @Override
-    public Object create(SimpleObject simpleObject, RequestContext requestContext) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public String getUri(Object instance) {
+    return RestConstants.URI_PREFIX
+        + RestConstants.VERSION_1
+        + "/reportingrest/definitionlibrary/"
+        + ((Definition) instance).getUuid();
+  }
 
-    @Override
-    public void delete(String s, String s2, RequestContext requestContext) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public Object create(SimpleObject simpleObject, RequestContext requestContext)
+      throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public Object undelete(String s, RequestContext requestContext) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public void delete(String s, String s2, RequestContext requestContext) throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public void purge(String s, RequestContext requestContext) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public Object undelete(String s, RequestContext requestContext) throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public Object update(String s, SimpleObject simpleObject, RequestContext requestContext) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public void purge(String s, RequestContext requestContext) throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    private AllDefinitionLibraries getLibraries() {
-        return Context.getRegisteredComponents(AllDefinitionLibraries.class).get(0);
-    }
+  @Override
+  public Object update(String s, SimpleObject simpleObject, RequestContext requestContext)
+      throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
+  private AllDefinitionLibraries getLibraries() {
+    return Context.getRegisteredComponents(AllDefinitionLibraries.class).get(0);
+  }
 }

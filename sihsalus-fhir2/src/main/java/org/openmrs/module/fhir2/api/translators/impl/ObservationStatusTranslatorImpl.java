@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
@@ -18,19 +17,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ObservationStatusTranslatorImpl implements ObservationStatusTranslator {
-	
-	@Override
-	public Observation.ObservationStatus toFhirResource(@Nonnull Obs obs) {
-		return Observation.ObservationStatus.valueOf(obs.getStatus().toString());
-	}
-	
-	@Override
-	public Obs toOpenmrsType(@Nonnull Obs observation, @Nonnull Observation.ObservationStatus observationStatus) {
-		if (observationStatus.equals(Observation.ObservationStatus.PRELIMINARY)
-		        || observationStatus.equals(Observation.ObservationStatus.FINAL)
-		        || observationStatus.equals(Observation.ObservationStatus.AMENDED)) {
-			observation.setStatus(Obs.Status.valueOf(observationStatus.toString()));
-		}
-		return observation;
-	}
+
+  @Override
+  public Observation.ObservationStatus toFhirResource(@Nonnull Obs obs) {
+    return Observation.ObservationStatus.valueOf(obs.getStatus().toString());
+  }
+
+  @Override
+  public Obs toOpenmrsType(
+      @Nonnull Obs observation, @Nonnull Observation.ObservationStatus observationStatus) {
+    if (observationStatus.equals(Observation.ObservationStatus.PRELIMINARY)
+        || observationStatus.equals(Observation.ObservationStatus.FINAL)
+        || observationStatus.equals(Observation.ObservationStatus.AMENDED)) {
+      observation.setStatus(Obs.Status.valueOf(observationStatus.toString()));
+    }
+    return observation;
+  }
 }

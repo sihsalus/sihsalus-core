@@ -17,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -30,17 +29,17 @@ import org.openmrs.PatientIdentifierType;
 @Entity
 @Table(name = "fhir_patient_identifier_system")
 public class FhirPatientIdentifierSystem extends BaseOpenmrsMetadata {
-	
-	@EqualsAndHashCode.Include
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "fhir_patient_identifier_system_id")
-	private Integer id;
-	
-	@OneToOne
-	@JoinColumn(name = "patient_identifier_type_id")
-	private PatientIdentifierType patientIdentifierType;
-	
-	@Column(nullable = false)
-	private String url;
+
+  @EqualsAndHashCode.Include
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "fhir_patient_identifier_system_id")
+  private Integer id;
+
+  @OneToOne
+  @JoinColumn(name = "patient_identifier_type_id")
+  private PatientIdentifierType patientIdentifierType;
+
+  @Column(nullable = false)
+  private String url;
 }

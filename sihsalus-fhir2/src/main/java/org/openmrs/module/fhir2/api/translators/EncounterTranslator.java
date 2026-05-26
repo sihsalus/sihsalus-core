@@ -11,33 +11,34 @@ package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
 
-public interface EncounterTranslator<T> extends OpenmrsFhirUpdatableTranslator<T, org.hl7.fhir.r4.model.Encounter> {
-	
-	/**
-	 * Maps {@link org.openmrs.Encounter} to a {@link org.hl7.fhir.r4.model.Encounter} resource
-	 * 
-	 * @param encounter the OpenMRS encounter to translate
-	 * @return the corresponding FHIR Encounter resource
-	 */
-	@Override
-	org.hl7.fhir.r4.model.Encounter toFhirResource(@Nonnull T encounter);
-	
-	/**
-	 * Maps {@link org.hl7.fhir.r4.model.Encounter} to {@link org.openmrs.Encounter}
-	 * 
-	 * @param encounter the FHIR encounter to translate
-	 * @return the corresponding OpenMRS Encounter
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Encounter encounter);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Encounter} to an existing {@link org.openmrs.Encounter}
-	 * 
-	 * @param existingEncounter the existingEncounter to update
-	 * @param encounter the encounter to map
-	 * @return an updated version of the existingEncounter
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull T existingEncounter, @Nonnull org.hl7.fhir.r4.model.Encounter encounter);
+public interface EncounterTranslator<T>
+    extends OpenmrsFhirUpdatableTranslator<T, org.hl7.fhir.r4.model.Encounter> {
+
+  /**
+   * Maps {@link org.openmrs.Encounter} to a {@link org.hl7.fhir.r4.model.Encounter} resource
+   *
+   * @param encounter the OpenMRS encounter to translate
+   * @return the corresponding FHIR Encounter resource
+   */
+  @Override
+  org.hl7.fhir.r4.model.Encounter toFhirResource(@Nonnull T encounter);
+
+  /**
+   * Maps {@link org.hl7.fhir.r4.model.Encounter} to {@link org.openmrs.Encounter}
+   *
+   * @param encounter the FHIR encounter to translate
+   * @return the corresponding OpenMRS Encounter
+   */
+  @Override
+  T toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Encounter encounter);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Encounter} to an existing {@link org.openmrs.Encounter}
+   *
+   * @param existingEncounter the existingEncounter to update
+   * @param encounter the encounter to map
+   * @return an updated version of the existingEncounter
+   */
+  @Override
+  T toOpenmrsType(@Nonnull T existingEncounter, @Nonnull org.hl7.fhir.r4.model.Encounter encounter);
 }

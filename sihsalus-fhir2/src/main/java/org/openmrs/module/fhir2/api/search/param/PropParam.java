@@ -17,8 +17,8 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class PropParam<T> {
-	
-	private String propertyName;
-	
-	private T param;
+
+  private String propertyName;
+
+  private T param;
 }

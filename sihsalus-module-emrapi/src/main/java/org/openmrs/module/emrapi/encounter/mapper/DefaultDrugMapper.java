@@ -16,16 +16,16 @@ import org.springframework.stereotype.Component;
 
 @Component("drugMapper")
 public class DefaultDrugMapper implements DrugMapper {
-	
-	@Override
-	public EncounterTransaction.Drug map(Drug drug) {
-		EncounterTransaction.Drug encounterTransactionDrug = new EncounterTransaction.Drug();
-		encounterTransactionDrug.setName(drug.getDisplayName());
-		if (drug.getDosageForm() != null) {
-			encounterTransactionDrug.setForm(drug.getDosageForm().getName().getName());
-		}
-		encounterTransactionDrug.setStrength(drug.getStrength());
-		encounterTransactionDrug.setUuid(drug.getUuid());
-		return encounterTransactionDrug;
-	}
+
+  @Override
+  public EncounterTransaction.Drug map(Drug drug) {
+    EncounterTransaction.Drug encounterTransactionDrug = new EncounterTransaction.Drug();
+    encounterTransactionDrug.setName(drug.getDisplayName());
+    if (drug.getDosageForm() != null) {
+      encounterTransactionDrug.setForm(drug.getDosageForm().getName().getName());
+    }
+    encounterTransactionDrug.setStrength(drug.getStrength());
+    encounterTransactionDrug.setUuid(drug.getUuid());
+    return encounterTransactionDrug;
+  }
 }

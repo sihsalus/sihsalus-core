@@ -15,7 +15,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTra
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -27,29 +26,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MedicationRequestReferenceTranslatorImpl implements MedicationRequestReferenceTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirMedicationRequestDao medicationRequestDao;
-	
-	@Override
-	public Reference toFhirResource(@Nonnull DrugOrder drugOrder) {
-		if (drugOrder == null) {
-			return null;
-		}
-		return createDrugOrderReference(drugOrder);
-	}
-	
-	@Override
-	public DrugOrder toOpenmrsType(@Nonnull Reference medicationRequest) {
-		if (medicationRequest == null || !medicationRequest.hasReference()) {
-			return null;
-		}
-		if (getReferenceType(medicationRequest).map(ref -> !ref.equals(FhirConstants.MEDICATION_REQUEST)).orElse(true)) {
-			throw new IllegalArgumentException(
-			        "Reference must be to a MedicationRequest not a " + getReferenceType(medicationRequest).orElse(""));
-		}
-		return getReferenceId(medicationRequest).map(uuid -> medicationRequestDao.get(uuid)).orElse(null);
-	}
+public class MedicationRequestReferenceTranslatorImpl
+    implements MedicationRequestReferenceTranslator {
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirMedicationRequestDao medicationRequestDao;
+
+  @Override
+  public Reference toFhirResource(@Nonnull DrugOrder drugOrder) {
+    if (drugOrder == null) {
+      return null;
+    }
+    return createDrugOrderReference(drugOrder);
+  }
+
+  @Override
+  public DrugOrder toOpenmrsType(@Nonnull Reference medicationRequest) {
+    if (medicationRequest == null || !medicationRequest.hasReference()) {
+      return null;
+    }
+    if (getReferenceType(medicationRequest)
+        .map(ref -> !ref.equals(FhirConstants.MEDICATION_REQUEST))
+        .orElse(true)) {
+      throw new IllegalArgumentException(
+          "Reference must be to a MedicationRequest not a "
+              + getReferenceType(medicationRequest).orElse(""));
+    }
+    return getReferenceId(medicationRequest)
+        .map(uuid -> medicationRequestDao.get(uuid))
+        .orElse(null);
+  }
 }

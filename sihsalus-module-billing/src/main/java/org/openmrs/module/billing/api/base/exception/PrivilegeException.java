@@ -11,27 +11,24 @@ package org.openmrs.module.billing.api.base.exception;
 
 import org.openmrs.api.APIException;
 
-/**
- * Exception thrown when there are problems with privileges
- */
+/** Exception thrown when there are problems with privileges */
 public class PrivilegeException extends APIException {
-	
-	private static final long serialVersionUID = 22323L;
-	
-	public PrivilegeException() {
-		super();
-	}
-	
-	public PrivilegeException(String message) {
-		super(message);
-	}
-	
-	public PrivilegeException(Throwable cause) {
-		super(cause);
-	}
-	
-	public PrivilegeException(String message, Throwable cause) {
-		super(message, cause);
-	}
-	
+
+  private static final long serialVersionUID = 22323L;
+
+  public PrivilegeException() {
+    super();
+  }
+
+  public PrivilegeException(String message) {
+    super(message);
+  }
+
+  public PrivilegeException(Throwable cause) {
+    super(cause);
+  }
+
+  public PrivilegeException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

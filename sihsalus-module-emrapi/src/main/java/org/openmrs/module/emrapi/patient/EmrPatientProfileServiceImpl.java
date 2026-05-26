@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.emrapi.patient;
 
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Patient;
 import org.openmrs.Person;
@@ -19,78 +20,76 @@ import org.openmrs.api.PersonService;
 import org.openmrs.module.emrapi.person.image.EmrPersonImageService;
 import org.openmrs.module.emrapi.person.image.PersonImage;
 
-import java.util.List;
-
 public class EmrPatientProfileServiceImpl implements EmrPatientProfileService {
 
-	private PatientService patientService;
+  private PatientService patientService;
 
-	private PersonService personService;
+  private PersonService personService;
 
-	private EmrPersonImageService emrPersonImageService;
+  private EmrPersonImageService emrPersonImageService;
 
-	@Override
-	public PatientProfile save(PatientProfile patientProfile) {
-		if (patientProfile == null || patientProfile.getPatient() == null) {
-			throw new APIException("Patient profile with patient is required");
-		}
+  @Override
+  public PatientProfile save(PatientProfile patientProfile) {
+    if (patientProfile == null || patientProfile.getPatient() == null) {
+      throw new APIException("Patient profile with patient is required");
+    }
 
-		Patient patient = patientService.savePatient(patientProfile.getPatient());
+    Patient patient = patientService.savePatient(patientProfile.getPatient());
 
-		saveRelationships(patientProfile.getRelationships());
+    saveRelationships(patientProfile.getRelationships());
 
-		patientProfile.setPatient(patient);
+    patientProfile.setPatient(patient);
 
-		PersonImage personImage = new PersonImage();
-		personImage.setPerson(patient);
-		personImage.setBase64EncodedImage(patientProfile.getImage());
+    PersonImage personImage = new PersonImage();
+    personImage.setPerson(patient);
+    personImage.setBase64EncodedImage(patientProfile.getImage());
 
-		emrPersonImageService.savePersonImage(personImage);
-		return patientProfile;
-	}
+    emrPersonImageService.savePersonImage(personImage);
+    return patientProfile;
+  }
 
-	@Override
-	public PatientProfile get(String patientUuid) {
-		if (StringUtils.isBlank(patientUuid)) {
-			throw new APIException("Patient uuid is required");
-		}
+  @Override
+  public PatientProfile get(String patientUuid) {
+    if (StringUtils.isBlank(patientUuid)) {
+      throw new APIException("Patient uuid is required");
+    }
 
-		PatientProfile delegate = new PatientProfile();
+    PatientProfile delegate = new PatientProfile();
 
-		Patient patient = patientService.getPatientByUuid(patientUuid);
-		if (patient == null) {
-			throw new APIException("Patient not found: " + patientUuid);
-		}
-		delegate.setPatient(patient);
+    Patient patient = patientService.getPatientByUuid(patientUuid);
+    if (patient == null) {
+      throw new APIException("Patient not found: " + patientUuid);
+    }
+    delegate.setPatient(patient);
 
-		Person person = personService.getPerson(patient.getPersonId());
-		List<Relationship> relationships = personService.getRelationshipsByPerson(person);
-		delegate.setRelationships(relationships);
+    Person person = personService.getPerson(patient.getPersonId());
+    List<Relationship> relationships = personService.getRelationshipsByPerson(person);
+    delegate.setRelationships(relationships);
 
-		return delegate;
-	}
+    return delegate;
+  }
 
-	private void saveRelationships(List<Relationship> relationships) {
-		if (relationships == null) {
-			return;
-		}
+  private void saveRelationships(List<Relationship> relationships) {
+    if (relationships == null) {
+      return;
+    }
 
-		for (Relationship relationship : relationships) {
-			if (relationship != null) {
-				personService.saveRelationship(relationship);
-			}
-		}
-	}
+    for (Relationship relationship : relationships) {
+      if (relationship != null) {
+        personService.saveRelationship(relationship);
+      }
+    }
+  }
 
-	public void setPatientService(PatientService patientService) {
-		this.patientService = patientService;
-	}
+  public void setPatientService(PatientService patientService) {
+    this.patientService = patientService;
+  }
 
-	public void setPersonService(PersonService personService) {
-		this.personService = personService;
-	}
+  public void setPersonService(PersonService personService) {
+    this.personService = personService;
+  }
 
-	public void setEmrPersonImageService(EmrPersonImageService emrPersonImageService) {
-		this.emrPersonImageService = emrPersonImageService;
-	}
+  public void setEmrPersonImageService(EmrPersonImageService emrPersonImageService) {
+    this.emrPersonImageService = emrPersonImageService;
+  }
 }

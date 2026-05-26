@@ -10,27 +10,27 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.ContactPoint;
 
-public interface TelecomTranslator<T> extends ToFhirTranslator<T, ContactPoint>, UpdatableOpenmrsTranslator<T, ContactPoint> {
-	
-	/**
-	 * Maps an Openmrs Attribute representing a contact point to a FHIR {@link ContactPoint}
-	 * 
-	 * @param attribute the OpenMRS attribute element to translate
-	 * @return the corresponding FHIR ContactPoint resource
-	 */
-	@Override
-	ContactPoint toFhirResource(@Nonnull T attribute);
-	
-	/**
-	 * Maps a FHIR {@link ContactPoint} to a corresponding Openmrs attribute
-	 * 
-	 * @param existingAttribute the attribute to update
-	 * @param contactPoint the contactPoint to map
-	 * @return an updated or mapped version of the openMrs attribute
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull T existingAttribute, @Nonnull ContactPoint contactPoint);
+public interface TelecomTranslator<T>
+    extends ToFhirTranslator<T, ContactPoint>, UpdatableOpenmrsTranslator<T, ContactPoint> {
+
+  /**
+   * Maps an Openmrs Attribute representing a contact point to a FHIR {@link ContactPoint}
+   *
+   * @param attribute the OpenMRS attribute element to translate
+   * @return the corresponding FHIR ContactPoint resource
+   */
+  @Override
+  ContactPoint toFhirResource(@Nonnull T attribute);
+
+  /**
+   * Maps a FHIR {@link ContactPoint} to a corresponding Openmrs attribute
+   *
+   * @param existingAttribute the attribute to update
+   * @param contactPoint the contactPoint to map
+   * @return an updated or mapped version of the openMrs attribute
+   */
+  @Override
+  T toOpenmrsType(@Nonnull T existingAttribute, @Nonnull ContactPoint contactPoint);
 }

@@ -18,68 +18,72 @@ import org.openmrs.module.emrapi.diagnosis.DiagnosisMetadata;
 import org.openmrs.module.emrapi.encounter.exception.ConceptNotFoundException;
 
 public class ObservationTypeMatcher {
-	
-	private EmrApiProperties emrApiProperties;
-	
-	private DiagnosisMetadata diagnosisMetadata;
-	
-	private ConceptService conceptService;
-	
-	public static enum ObservationType {
-		DIAGNOSIS,
-		DISPOSITION,
-		OBSERVATION
-	};
-	
-	public ObservationTypeMatcher(EmrApiProperties emrApiProperties, ConceptService conceptService) {
-		this.emrApiProperties = emrApiProperties;
-		this.conceptService = conceptService;
-	}
-	
-	public ObservationType getObservationType(Obs obs) {
-		if (getDiagnosisMetadata().isDiagnosis(obs)) {
-			return ObservationType.DIAGNOSIS;
-		} else if (isDispositionGroup(obs) || isDisposition(obs)) {
-			return ObservationType.DISPOSITION;
-		}
-		return ObservationType.OBSERVATION;
-	}
-	
-	private DiagnosisMetadata getDiagnosisMetadata() {
-		if (this.diagnosisMetadata == null) {
-			this.diagnosisMetadata = emrApiProperties.getDiagnosisMetadata();
-		}
-		return this.diagnosisMetadata;
-	}
-	
-	private boolean isDispositionGroup(Obs obs) {
-		Concept dispositionGroupConcept = getDispositionGroupConcept();
-		return obs.getConcept().getUuid().equals(dispositionGroupConcept.getUuid());
-	}
-	
-	private boolean isDisposition(Obs obs) {
-		Concept dispositionConcept = getDispositionConcept();
-		return obs.getConcept().getUuid().equals(dispositionConcept.getUuid());
-	}
-	
-	private Concept getDispositionGroupConcept() {
-		EmrApiConceptMappings mappings = emrApiProperties.getConceptMappings();
-		Concept concept = conceptService.getConceptByMapping(mappings.getDispositionConceptSetCode(),
-		    mappings.getConceptSourceName());
-		if (concept == null) {
-			throw new ConceptNotFoundException("Disposition group concept does not exist. Code : "
-			        + mappings.getDispositionConceptSetCode());
-		}
-		return concept;
-	}
-	
-	private Concept getDispositionConcept() {
-		EmrApiConceptMappings mappings = emrApiProperties.getConceptMappings();
-		Concept concept = conceptService.getConceptByMapping(mappings.getDispositionCode(), mappings.getConceptSourceName());
-		if (concept == null) {
-			throw new ConceptNotFoundException(
-			        "Disposition concept does not exist. Code : " + mappings.getDispositionCode());
-		}
-		return concept;
-	}
+
+  private EmrApiProperties emrApiProperties;
+
+  private DiagnosisMetadata diagnosisMetadata;
+
+  private ConceptService conceptService;
+
+  public static enum ObservationType {
+    DIAGNOSIS,
+    DISPOSITION,
+    OBSERVATION
+  };
+
+  public ObservationTypeMatcher(EmrApiProperties emrApiProperties, ConceptService conceptService) {
+    this.emrApiProperties = emrApiProperties;
+    this.conceptService = conceptService;
+  }
+
+  public ObservationType getObservationType(Obs obs) {
+    if (getDiagnosisMetadata().isDiagnosis(obs)) {
+      return ObservationType.DIAGNOSIS;
+    } else if (isDispositionGroup(obs) || isDisposition(obs)) {
+      return ObservationType.DISPOSITION;
+    }
+    return ObservationType.OBSERVATION;
+  }
+
+  private DiagnosisMetadata getDiagnosisMetadata() {
+    if (this.diagnosisMetadata == null) {
+      this.diagnosisMetadata = emrApiProperties.getDiagnosisMetadata();
+    }
+    return this.diagnosisMetadata;
+  }
+
+  private boolean isDispositionGroup(Obs obs) {
+    Concept dispositionGroupConcept = getDispositionGroupConcept();
+    return obs.getConcept().getUuid().equals(dispositionGroupConcept.getUuid());
+  }
+
+  private boolean isDisposition(Obs obs) {
+    Concept dispositionConcept = getDispositionConcept();
+    return obs.getConcept().getUuid().equals(dispositionConcept.getUuid());
+  }
+
+  private Concept getDispositionGroupConcept() {
+    EmrApiConceptMappings mappings = emrApiProperties.getConceptMappings();
+    Concept concept =
+        conceptService.getConceptByMapping(
+            mappings.getDispositionConceptSetCode(), mappings.getConceptSourceName());
+    if (concept == null) {
+      throw new ConceptNotFoundException(
+          "Disposition group concept does not exist. Code : "
+              + mappings.getDispositionConceptSetCode());
+    }
+    return concept;
+  }
+
+  private Concept getDispositionConcept() {
+    EmrApiConceptMappings mappings = emrApiProperties.getConceptMappings();
+    Concept concept =
+        conceptService.getConceptByMapping(
+            mappings.getDispositionCode(), mappings.getConceptSourceName());
+    if (concept == null) {
+      throw new ConceptNotFoundException(
+          "Disposition concept does not exist. Code : " + mappings.getDispositionCode());
+    }
+    return concept;
+  }
 }

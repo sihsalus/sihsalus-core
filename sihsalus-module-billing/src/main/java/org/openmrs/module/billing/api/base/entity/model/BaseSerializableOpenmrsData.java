@@ -12,16 +12,14 @@ package org.openmrs.module.billing.api.base.entity.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.openmrs.BaseOpenmrsData;
 
-/**
- * Base class for {@link org.openmrs.OpenmrsData} that need to support JSON serialization.
- */
+/** Base class for {@link org.openmrs.OpenmrsData} that need to support JSON serialization. */
 public abstract class BaseSerializableOpenmrsData extends BaseOpenmrsData {
-	
-	private static final long serialVersionUID = 0L;
-	
-	@Override
-	@JsonIgnore
-	public Boolean getVoided() {
-		return super.getVoided();
-	}
+
+  private static final long serialVersionUID = 0L;
+
+  @Override
+  @JsonIgnore
+  public Boolean getVoided() {
+    return super.getVoided();
+  }
 }

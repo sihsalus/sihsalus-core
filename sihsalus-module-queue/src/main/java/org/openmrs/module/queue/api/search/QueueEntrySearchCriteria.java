@@ -12,7 +12,6 @@ package org.openmrs.module.queue.api.search;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,44 +37,44 @@ import org.openmrs.module.queue.model.Queue;
 @AllArgsConstructor
 @Data
 public class QueueEntrySearchCriteria implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	private Collection<Queue> queues;
-	
-	private Collection<Location> locations;
-	
-	private Collection<Concept> services;
-	
-	private Patient patient;
-	
-	private Visit visit;
-	
-	private Boolean hasVisit;
-	
-	private Collection<Concept> priorities;
-	
-	private Collection<Concept> statuses;
-	
-	private Collection<Location> locationsWaitingFor;
-	
-	private Collection<Provider> providersWaitingFor;
-	
-	private Collection<Queue> queuesComingFrom;
-	
-	private Date startedOnOrAfter;
-	
-	private Date startedOnOrBefore;
-	
-	private Date startedOn;
-	
-	private Boolean isEnded = null;
-	
-	private Date endedOnOrAfter;
-	
-	private Date endedOnOrBefore;
-	
-	private Date endedOn;
-	
-	private boolean includedVoided = false;
+
+  private static final long serialVersionUID = 1L;
+
+  private Collection<Queue> queues;
+
+  private Collection<Location> locations;
+
+  private Collection<Concept> services;
+
+  private Patient patient;
+
+  private Visit visit;
+
+  private Boolean hasVisit;
+
+  private Collection<Concept> priorities;
+
+  private Collection<Concept> statuses;
+
+  private Collection<Location> locationsWaitingFor;
+
+  private Collection<Provider> providersWaitingFor;
+
+  private Collection<Queue> queuesComingFrom;
+
+  private Date startedOnOrAfter;
+
+  private Date startedOnOrBefore;
+
+  private Date startedOn;
+
+  private Boolean isEnded = null;
+
+  private Date endedOnOrAfter;
+
+  private Date endedOnOrBefore;
+
+  private Date endedOn;
+
+  private boolean includedVoided = false;
 }

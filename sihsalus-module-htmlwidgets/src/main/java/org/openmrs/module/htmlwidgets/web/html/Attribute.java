@@ -1,133 +1,134 @@
 package org.openmrs.module.htmlwidgets.web.html;
 
-/**
- * Represents an attribute in an HTML Tag
- */
+/** Represents an attribute in an HTML Tag */
 public class Attribute {
-	
-	//****** Properties ******
-	private String name;
-	private String fixedValue;
-	private String configuredValue;
-	private String defaultValue;
-	
-	/**
-	 * Default Constructor
-	 */
-    public Attribute() { }
-    
-    /**
-     * Full constructor
-     * @param name
-     * @param fixedValue
-     * @param configuredValue
-     * @param defaultValue
-     */
-    public Attribute(String name, String fixedValue, String configuredValue, String defaultValue) {
-    	this.name = name;
-    	this.fixedValue = fixedValue;
-    	this.configuredValue = configuredValue;
-    	this.defaultValue = defaultValue;
+
+  // ****** Properties ******
+  private String name;
+  private String fixedValue;
+  private String configuredValue;
+  private String defaultValue;
+
+  /** Default Constructor */
+  public Attribute() {}
+
+  /**
+   * Full constructor
+   *
+   * @param name
+   * @param fixedValue
+   * @param configuredValue
+   * @param defaultValue
+   */
+  public Attribute(String name, String fixedValue, String configuredValue, String defaultValue) {
+    this.name = name;
+    this.fixedValue = fixedValue;
+    this.configuredValue = configuredValue;
+    this.defaultValue = defaultValue;
+  }
+
+  // ***** Instance Methods *****
+
+  /**
+   * @see Object#equals(Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (obj != null && obj instanceof Attribute) {
+      Attribute a = (Attribute) obj;
+      if (this.getName() != null) {
+        return (this.getName().equalsIgnoreCase(a.getName()));
+      }
     }
+    return this == obj;
+  }
 
-    //***** Instance Methods *****
-    
-	/** 
-	 * @see Object#equals(Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof Attribute) {
-			Attribute a = (Attribute) obj;
-			if (this.getName() != null) {
-				return (this.getName().equalsIgnoreCase(a.getName()));
-			}
-		}
-		return this == obj;
-	}
+  /**
+   * @see Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 31 * hash + (getName() == null ? 0 : getName().toLowerCase().hashCode());
+    return hash;
+  }
 
-	/** 
-	 * @see Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		int hash = 7;
-		hash = 31 * hash + (getName() == null ? 0 : getName().toLowerCase().hashCode());
-		return hash;
-	}
+  /**
+   * @see Object#toString()
+   */
+  @Override
+  public String toString() {
+    return " " + name + "=\"" + HtmlUtil.escapeAttribute(getValue()) + "\"";
+  }
 
-	/** 
-	 * @see Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return " " + name + "=\"" + HtmlUtil.escapeAttribute(getValue()) + "\"";
-	}
-	
-	/**
-	 * @return first not-null of fixedValue, configuredValue, defaultValue
-	 */
-	public String getValue() {
-		if (fixedValue != null) { return fixedValue; }
-		if (configuredValue != null) { return configuredValue; }
-		return defaultValue;
-	}
-	
-	//***** Property Access *****
+  /**
+   * @return first not-null of fixedValue, configuredValue, defaultValue
+   */
+  public String getValue() {
+    if (fixedValue != null) {
+      return fixedValue;
+    }
+    if (configuredValue != null) {
+      return configuredValue;
+    }
+    return defaultValue;
+  }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+  // ***** Property Access *****
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+  /**
+   * @return the name
+   */
+  public String getName() {
+    return name;
+  }
 
-	/**
-	 * @return the fixedValue
-	 */
-	public String getFixedValue() {
-		return fixedValue;
-	}
+  /**
+   * @param name the name to set
+   */
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	/**
-	 * @param fixedValue the fixedValue to set
-	 */
-	public void setFixedValue(String fixedValue) {
-		this.fixedValue = fixedValue;
-	}
+  /**
+   * @return the fixedValue
+   */
+  public String getFixedValue() {
+    return fixedValue;
+  }
 
-	/**
-	 * @return the configuredValue
-	 */
-	public String getConfiguredValue() {
-		return configuredValue;
-	}
+  /**
+   * @param fixedValue the fixedValue to set
+   */
+  public void setFixedValue(String fixedValue) {
+    this.fixedValue = fixedValue;
+  }
 
-	/**
-	 * @param configuredValue the configuredValue to set
-	 */
-	public void setConfiguredValue(String configuredValue) {
-		this.configuredValue = configuredValue;
-	}
+  /**
+   * @return the configuredValue
+   */
+  public String getConfiguredValue() {
+    return configuredValue;
+  }
 
-	/**
-	 * @return the defaultValue
-	 */
-	public String getDefaultValue() {
-		return defaultValue;
-	}
+  /**
+   * @param configuredValue the configuredValue to set
+   */
+  public void setConfiguredValue(String configuredValue) {
+    this.configuredValue = configuredValue;
+  }
 
-	/**
-	 * @param defaultValue the defaultValue to set
-	 */
-	public void setDefaultValue(String defaultValue) {
-		this.defaultValue = defaultValue;
-	}
+  /**
+   * @return the defaultValue
+   */
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+
+  /**
+   * @param defaultValue the defaultValue to set
+   */
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+  }
 }

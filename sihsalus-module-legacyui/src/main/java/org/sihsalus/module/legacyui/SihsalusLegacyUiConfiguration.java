@@ -10,14 +10,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SihsalusLegacyUiConfiguration {
 
-    @Bean
-    LegacyUIService legacyUiService() {
-        return new LegacyUIImpl();
-    }
+  @Bean
+  LegacyUIService legacyUiService() {
+    return new LegacyUIImpl();
+  }
 
-    @Bean
-    SmartInitializingSingleton legacyUiServiceRegistrar(
-            ServiceContext serviceContext, LegacyUIService legacyUiService) {
-        return () -> serviceContext.setService(LegacyUIService.class, legacyUiService);
-    }
+  @Bean
+  SmartInitializingSingleton legacyUiServiceRegistrar(
+      ServiceContext serviceContext, LegacyUIService legacyUiService) {
+    return () -> serviceContext.setService(LegacyUIService.class, legacyUiService);
+  }
 }

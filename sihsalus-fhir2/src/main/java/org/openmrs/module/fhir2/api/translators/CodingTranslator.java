@@ -10,28 +10,28 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ICoding;
 import org.openmrs.Concept;
 
-public interface CodingTranslator extends ToFhirTranslator<Concept, Coding>, ToOpenmrsTranslator<Concept, ICoding> {
-	
-	/**
-	 * Maps {@link Concept} to a {@link Coding}
-	 *
-	 * @param concept to translate
-	 * @return the corresponding FHIR {@link Coding}
-	 */
-	@Override
-	Coding toFhirResource(@Nonnull Concept concept);
-	
-	/**
-	 * Maps a {@link ICoding} to an OpenMRS {@link Concept}
-	 *
-	 * @param coding the FHIR Coding to translate
-	 * @return the corresponding OpenMRS {@link Concept}
-	 */
-	@Override
-	Concept toOpenmrsType(@Nonnull ICoding coding);
+public interface CodingTranslator
+    extends ToFhirTranslator<Concept, Coding>, ToOpenmrsTranslator<Concept, ICoding> {
+
+  /**
+   * Maps {@link Concept} to a {@link Coding}
+   *
+   * @param concept to translate
+   * @return the corresponding FHIR {@link Coding}
+   */
+  @Override
+  Coding toFhirResource(@Nonnull Concept concept);
+
+  /**
+   * Maps a {@link ICoding} to an OpenMRS {@link Concept}
+   *
+   * @param coding the FHIR Coding to translate
+   * @return the corresponding OpenMRS {@link Concept}
+   */
+  @Override
+  Concept toOpenmrsType(@Nonnull ICoding coding);
 }

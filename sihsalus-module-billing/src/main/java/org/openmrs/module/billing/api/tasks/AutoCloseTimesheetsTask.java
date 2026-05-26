@@ -14,32 +14,28 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.scheduler.tasks.AbstractTask;
 
-/**
- * A scheduled task that automatically closes all open timesheets
- */
+/** A scheduled task that automatically closes all open timesheets */
 @Slf4j
 public class AutoCloseTimesheetsTask extends AbstractTask {
-	
-	@Override
-	public void execute() {
-		if (!isExecuting) {
-			if (log.isDebugEnabled()) {
-				log.debug("Starting Auto Close Timesheets Task...");
-			}
-			
-			startExecuting();
-			
-			try {
-				ITimesheetService timesheetService = Context.getService(ITimesheetService.class);
-				
-				timesheetService.closeOpenTimesheets();
-			}
-			catch (Exception e) {
-				log.error("Error while auto closing open timesheets:", e);
-			}
-			finally {
-				stopExecuting();
-			}
-		}
-	}
+
+  @Override
+  public void execute() {
+    if (!isExecuting) {
+      if (log.isDebugEnabled()) {
+        log.debug("Starting Auto Close Timesheets Task...");
+      }
+
+      startExecuting();
+
+      try {
+        ITimesheetService timesheetService = Context.getService(ITimesheetService.class);
+
+        timesheetService.closeOpenTimesheets();
+      } catch (Exception e) {
+        log.error("Error while auto closing open timesheets:", e);
+      } finally {
+        stopExecuting();
+      }
+    }
+  }
 }

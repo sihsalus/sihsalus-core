@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.spring;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-
 import org.apache.commons.lang3.ClassUtils;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.aop.AuthorizationAdvice;
@@ -44,84 +43,92 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 @Configuration
 @EnableAspectJAutoProxy
 public class FhirAopConfiguration {
-	
-	@Bean
-	public Advisor createFhirAuthorizationAdvisor(@Autowired AuthorizationAdvice authorizationAdvice) {
-		MethodBeforeAdvice advice = (method, args, target) -> {
-			if (AnnotationUtils.findAnnotation(method, Authorized.class) == null) {
-				Method resolved = findAuthorizedInterfaceMethod(method, target.getClass());
-				if (resolved != null) {
-					method = resolved;
-				}
-			}
-			authorizationAdvice.before(method, args, target);
-		};
-		
-		return new StaticMethodMatcherPointcutAdvisor(advice) {
-			
-			@Override
-			public boolean matches(Method method, Class<?> targetClass) {
-				return FhirDaoAop.class.isAssignableFrom(targetClass);
-			}
-		};
-	}
-	
-	private static Method findAuthorizedInterfaceMethod(Method method, Class<?> targetClass) {
-		for (Class<?> iface : ClassUtils.getAllInterfaces(targetClass)) {
-			try {
-				Method ifaceMethod = iface.getMethod(method.getName(), method.getParameterTypes());
-				if (AnnotationUtils.findAnnotation(ifaceMethod, Authorized.class) != null) {
-					return ifaceMethod;
-				}
-			}
-			catch (NoSuchMethodException e) {}
-		}
-		return null;
-	}
-	
-	@Bean
-	public Advisor createFhirTransactionAdvisor(@Autowired(required = false) TransactionInterceptor transactionInterceptor) {
-		if (transactionInterceptor != null) {
-			// TransactionInterceptor is not available since core 2.8 as it is done via tx:annotation-driven on all beans
-			return new StaticMethodMatcherPointcutAdvisor(transactionInterceptor) {
-				
-				@Override
-				public boolean matches(Method method, Class<?> targetClass) {
-					return FhirDaoAop.class.isAssignableFrom(targetClass);
-				}
-			};
-		}
-		return null;
-	}
-	
-	/**
-	 * Creates advisors for FHIR beans using Spring caching. It is required before OpenMRS core 2.8.
-	 *
-	 * @param cacheInterceptor the cache interceptor
-	 * @return the cache advisor
-	 */
-	@Bean
-	public Advisor createFhirCacheAdvisor(@Autowired(required = false) CacheInterceptor cacheInterceptor) {
-		if (cacheInterceptor != null) {
-			// CacheInterceptor is not available since core 2.8 as it is done via cache:annotation-driven on all beans
-			return new StaticMethodMatcherPointcutAdvisor(cacheInterceptor) {
-				
-				@Override
-				public boolean matches(Method method, Class<?> targetClass) {
-					return (FhirTranslator.class.isAssignableFrom(targetClass)
-					        || FhirService.class.isAssignableFrom(targetClass)
-					        || FhirHelperService.class.isAssignableFrom(targetClass))
-					        && (AnnotationUtils.findAnnotation(targetClass, CacheConfig.class) != null
-					                || AnnotationUtils.findAnnotation(targetClass, Cacheable.class) != null
-					                || AnnotationUtils.findAnnotation(targetClass, CacheEvict.class) != null
-					                || AnnotationUtils.findAnnotation(targetClass, CachePut.class) != null
-					                || Arrays.stream(targetClass.getMethods())
-					                        .anyMatch((m) -> AnnotationUtils.findAnnotation(m, Cacheable.class) != null
-					                                || AnnotationUtils.findAnnotation(m, CacheEvict.class) != null
-					                                || AnnotationUtils.findAnnotation(m, CachePut.class) != null));
-				}
-			};
-		}
-		return null;
-	}
+
+  @Bean
+  public Advisor createFhirAuthorizationAdvisor(
+      @Autowired AuthorizationAdvice authorizationAdvice) {
+    MethodBeforeAdvice advice =
+        (method, args, target) -> {
+          if (AnnotationUtils.findAnnotation(method, Authorized.class) == null) {
+            Method resolved = findAuthorizedInterfaceMethod(method, target.getClass());
+            if (resolved != null) {
+              method = resolved;
+            }
+          }
+          authorizationAdvice.before(method, args, target);
+        };
+
+    return new StaticMethodMatcherPointcutAdvisor(advice) {
+
+      @Override
+      public boolean matches(Method method, Class<?> targetClass) {
+        return FhirDaoAop.class.isAssignableFrom(targetClass);
+      }
+    };
+  }
+
+  private static Method findAuthorizedInterfaceMethod(Method method, Class<?> targetClass) {
+    for (Class<?> iface : ClassUtils.getAllInterfaces(targetClass)) {
+      try {
+        Method ifaceMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+        if (AnnotationUtils.findAnnotation(ifaceMethod, Authorized.class) != null) {
+          return ifaceMethod;
+        }
+      } catch (NoSuchMethodException e) {
+      }
+    }
+    return null;
+  }
+
+  @Bean
+  public Advisor createFhirTransactionAdvisor(
+      @Autowired(required = false) TransactionInterceptor transactionInterceptor) {
+    if (transactionInterceptor != null) {
+      // TransactionInterceptor is not available since core 2.8 as it is done via
+      // tx:annotation-driven on all beans
+      return new StaticMethodMatcherPointcutAdvisor(transactionInterceptor) {
+
+        @Override
+        public boolean matches(Method method, Class<?> targetClass) {
+          return FhirDaoAop.class.isAssignableFrom(targetClass);
+        }
+      };
+    }
+    return null;
+  }
+
+  /**
+   * Creates advisors for FHIR beans using Spring caching. It is required before OpenMRS core 2.8.
+   *
+   * @param cacheInterceptor the cache interceptor
+   * @return the cache advisor
+   */
+  @Bean
+  public Advisor createFhirCacheAdvisor(
+      @Autowired(required = false) CacheInterceptor cacheInterceptor) {
+    if (cacheInterceptor != null) {
+      // CacheInterceptor is not available since core 2.8 as it is done via cache:annotation-driven
+      // on all beans
+      return new StaticMethodMatcherPointcutAdvisor(cacheInterceptor) {
+
+        @Override
+        public boolean matches(Method method, Class<?> targetClass) {
+          return (FhirTranslator.class.isAssignableFrom(targetClass)
+                  || FhirService.class.isAssignableFrom(targetClass)
+                  || FhirHelperService.class.isAssignableFrom(targetClass))
+              && (AnnotationUtils.findAnnotation(targetClass, CacheConfig.class) != null
+                  || AnnotationUtils.findAnnotation(targetClass, Cacheable.class) != null
+                  || AnnotationUtils.findAnnotation(targetClass, CacheEvict.class) != null
+                  || AnnotationUtils.findAnnotation(targetClass, CachePut.class) != null
+                  || Arrays.stream(targetClass.getMethods())
+                      .anyMatch(
+                          (m) ->
+                              AnnotationUtils.findAnnotation(m, Cacheable.class) != null
+                                  || AnnotationUtils.findAnnotation(m, CacheEvict.class) != null
+                                  || AnnotationUtils.findAnnotation(m, CachePut.class) != null));
+        }
+      };
+    }
+    return null;
+  }
 }

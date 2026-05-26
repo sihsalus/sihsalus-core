@@ -13,16 +13,16 @@ import lombok.Getter;
 
 @Getter
 public class QueueEntryTransitionRequest {
-	
-	private String queueEntryToTransition;
-	
-	private String transitionDate;
-	
-	private String newQueue;
-	
-	private String newStatus;
-	
-	private String newPriority;
-	
-	private String newPriorityComment;
+
+  private String queueEntryToTransition;
+
+  private String transitionDate;
+
+  private String newQueue;
+
+  private String newStatus;
+
+  private String newPriority;
+
+  private String newPriorityComment;
 }

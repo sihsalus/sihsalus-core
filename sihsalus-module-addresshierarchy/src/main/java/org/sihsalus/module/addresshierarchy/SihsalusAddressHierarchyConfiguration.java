@@ -27,92 +27,98 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SihsalusAddressHierarchyConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(SihsalusAddressHierarchyConfiguration.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(SihsalusAddressHierarchyConfiguration.class);
 
-    @Bean
-    HibernateMappingContributor addressHierarchyHibernateMappingContributor() {
-        return () -> List.of(
-                "org/openmrs/module/addresshierarchy/AddressHierarchyLevel.hbm.xml",
-                "org/openmrs/module/addresshierarchy/AddressHierarchyEntry.hbm.xml",
-                "org/openmrs/module/addresshierarchy/AddressToEntryMap.hbm.xml");
-    }
+  @Bean
+  HibernateMappingContributor addressHierarchyHibernateMappingContributor() {
+    return () ->
+        List.of(
+            "org/openmrs/module/addresshierarchy/AddressHierarchyLevel.hbm.xml",
+            "org/openmrs/module/addresshierarchy/AddressHierarchyEntry.hbm.xml",
+            "org/openmrs/module/addresshierarchy/AddressToEntryMap.hbm.xml");
+  }
 
-    @Bean
-    AddressHierarchyDAO addressHierarchyDAO(SessionFactory sessionFactory) {
-        HibernateAddressHierarchyDAO dao = new HibernateAddressHierarchyDAO();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
+  @Bean
+  AddressHierarchyDAO addressHierarchyDAO(SessionFactory sessionFactory) {
+    HibernateAddressHierarchyDAO dao = new HibernateAddressHierarchyDAO();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
 
-    @Bean
-    I18nCache addressHierarchyI18nCache() {
-        return new DisabledI18nCache();
-    }
+  @Bean
+  I18nCache addressHierarchyI18nCache() {
+    return new DisabledI18nCache();
+  }
 
-    @Bean
-    AddressHierarchyService addressHierarchyService(AddressHierarchyDAO addressHierarchyDAO, I18nCache i18nCache) {
-        AddressHierarchyServiceImpl service = new AddressHierarchyServiceImpl();
-        service.setAddressHierarchyDAO(addressHierarchyDAO);
-        service.setI18nCache(i18nCache);
-        return service;
-    }
+  @Bean
+  AddressHierarchyService addressHierarchyService(
+      AddressHierarchyDAO addressHierarchyDAO, I18nCache i18nCache) {
+    AddressHierarchyServiceImpl service = new AddressHierarchyServiceImpl();
+    service.setAddressHierarchyDAO(addressHierarchyDAO);
+    service.setI18nCache(i18nCache);
+    return service;
+  }
 
-    @Bean
-    SmartInitializingSingleton addressHierarchyServiceRegistrar(
-            ServiceContext serviceContext, AddressHierarchyService addressHierarchyService) {
-        return () -> serviceContext.setService(AddressHierarchyService.class, addressHierarchyService);
-    }
+  @Bean
+  SmartInitializingSingleton addressHierarchyServiceRegistrar(
+      ServiceContext serviceContext, AddressHierarchyService addressHierarchyService) {
+    return () -> serviceContext.setService(AddressHierarchyService.class, addressHierarchyService);
+  }
 
-    @Bean
-    AddressCacheResetSupport addressCacheResetSupport() {
-        return new AddressCacheResetSupport();
-    }
+  @Bean
+  AddressCacheResetSupport addressCacheResetSupport() {
+    return new AddressCacheResetSupport();
+  }
 
-    @Bean
-    SmartInitializingSingleton addressHierarchyGlobalPropertyListenerRegistrar(
-            EventListeners eventListeners, AddressCacheResetSupport addressCacheResetSupport) {
-        return () -> eventListeners.setGlobalPropertyListeners(new ArrayList<>(List.of(addressCacheResetSupport)));
-    }
+  @Bean
+  SmartInitializingSingleton addressHierarchyGlobalPropertyListenerRegistrar(
+      EventListeners eventListeners, AddressCacheResetSupport addressCacheResetSupport) {
+    return () ->
+        eventListeners.setGlobalPropertyListeners(
+            new ArrayList<>(List.of(addressCacheResetSupport)));
+  }
 
-    @Bean
-    AddressHierarchyLevelValidator addressHierarchyLevelValidator() {
-        return new AddressHierarchyLevelValidator();
-    }
+  @Bean
+  AddressHierarchyLevelValidator addressHierarchyLevelValidator() {
+    return new AddressHierarchyLevelValidator();
+  }
 
-    @Bean
-    SmartInitializingSingleton addressHierarchyStartupInitializer(
-            AddressHierarchyService addressHierarchyService,
-            @Value("${sihsalus.addresshierarchy.initialize-on-startup:false}") boolean enabled) {
-        return () -> {
-            if (enabled) {
-                addressHierarchyService.initializeFullAddressCache();
-                addressHierarchyService.initI18nCache();
-            }
-        };
-    }
+  @Bean
+  SmartInitializingSingleton addressHierarchyStartupInitializer(
+      AddressHierarchyService addressHierarchyService,
+      @Value("${sihsalus.addresshierarchy.initialize-on-startup:false}") boolean enabled) {
+    return () -> {
+      if (enabled) {
+        addressHierarchyService.initializeFullAddressCache();
+        addressHierarchyService.initI18nCache();
+      }
+    };
+  }
 
-    @Bean(destroyMethod = "shutdown")
-    ScheduledExecutorService addressHierarchyCacheScheduler(
-            AddressHierarchyService addressHierarchyService,
-            @Value("${sihsalus.addresshierarchy.cache-scheduler.enabled:false}") boolean enabled,
-            @Value("${sihsalus.addresshierarchy.cache-scheduler.initial-delay-ms:1200000}") long initialDelayMs,
-            @Value("${sihsalus.addresshierarchy.cache-scheduler.period-ms:600000}") long periodMs) {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        if (enabled) {
-            executor.scheduleWithFixedDelay(
-                    () -> initializeFullAddressCache(addressHierarchyService),
-                    initialDelayMs,
-                    periodMs,
-                    TimeUnit.MILLISECONDS);
-        }
-        return executor;
+  @Bean(destroyMethod = "shutdown")
+  ScheduledExecutorService addressHierarchyCacheScheduler(
+      AddressHierarchyService addressHierarchyService,
+      @Value("${sihsalus.addresshierarchy.cache-scheduler.enabled:false}") boolean enabled,
+      @Value("${sihsalus.addresshierarchy.cache-scheduler.initial-delay-ms:1200000}")
+          long initialDelayMs,
+      @Value("${sihsalus.addresshierarchy.cache-scheduler.period-ms:600000}") long periodMs) {
+    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    if (enabled) {
+      executor.scheduleWithFixedDelay(
+          () -> initializeFullAddressCache(addressHierarchyService),
+          initialDelayMs,
+          periodMs,
+          TimeUnit.MILLISECONDS);
     }
+    return executor;
+  }
 
-    private void initializeFullAddressCache(AddressHierarchyService addressHierarchyService) {
-        try {
-            addressHierarchyService.initializeFullAddressCache();
-        } catch (Exception e) {
-            log.warn("Failed to initialize address hierarchy full address cache", e);
-        }
+  private void initializeFullAddressCache(AddressHierarchyService addressHierarchyService) {
+    try {
+      addressHierarchyService.initializeFullAddressCache();
+    } catch (Exception e) {
+      log.warn("Failed to initialize address hierarchy full address cache", e);
     }
+  }
 }

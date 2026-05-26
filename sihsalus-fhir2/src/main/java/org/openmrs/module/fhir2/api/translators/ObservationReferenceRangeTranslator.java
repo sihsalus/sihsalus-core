@@ -9,15 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 
-public interface ObservationReferenceRangeTranslator extends ToFhirTranslator<Obs, List<Observation.ObservationReferenceRangeComponent>> {
-	
-	@Override
-	List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull Obs obs);
+public interface ObservationReferenceRangeTranslator
+    extends ToFhirTranslator<Obs, List<Observation.ObservationReferenceRangeComponent>> {
+
+  @Override
+  List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull Obs obs);
 }

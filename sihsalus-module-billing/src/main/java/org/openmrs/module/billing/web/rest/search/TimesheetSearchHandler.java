@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
@@ -32,43 +31,45 @@ import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.springframework.stereotype.Component;
 
-/**
- * Search handler for {@link Timesheet}s.
- */
+/** Search handler for {@link Timesheet}s. */
 @Component
 public class TimesheetSearchHandler implements SearchHandler {
-	
-	private final SearchConfig searchConfig = new SearchConfig("default", RestConstants.VERSION_2 + "/billing/timesheet",
-	        Collections.singletonList("*"),
-	        new SearchQuery.Builder("Find a timesheet by date").withRequiredParameters("date").build());
-	
-	@Override
-	public PageableResult search(RequestContext context) {
-		Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
-		ITimesheetService service = Context.getService(ITimesheetService.class);
-		Provider provider = ProviderUtil.getCurrentProvider();
-		Date date;
-		if (provider == null) {
-			return new AlreadyPagedWithLength<>(context, Collections.emptyList(), false, 0);
-		}
-		String dateParameter = context.getParameter("date");
-		if (StringUtils.isBlank(dateParameter)) {
-			throw new InvalidSearchException("'date' query parameter is required");
-		}
-		try {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-			dateFormat.setLenient(false);
-			date = dateFormat.parse(dateParameter);
-		}
-		catch (ParseException e) {
-			throw new InvalidSearchException("Invalid date parameter: " + dateParameter, e);
-		}
-		List<Timesheet> timesheets = service.getTimesheetsByDate(provider, date);
-		return new AlreadyPagedWithLength<>(context, timesheets, false, timesheets.size());
-	}
-	
-	@Override
-	public SearchConfig getSearchConfig() {
-		return searchConfig;
-	}
+
+  private final SearchConfig searchConfig =
+      new SearchConfig(
+          "default",
+          RestConstants.VERSION_2 + "/billing/timesheet",
+          Collections.singletonList("*"),
+          new SearchQuery.Builder("Find a timesheet by date")
+              .withRequiredParameters("date")
+              .build());
+
+  @Override
+  public PageableResult search(RequestContext context) {
+    Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
+    ITimesheetService service = Context.getService(ITimesheetService.class);
+    Provider provider = ProviderUtil.getCurrentProvider();
+    Date date;
+    if (provider == null) {
+      return new AlreadyPagedWithLength<>(context, Collections.emptyList(), false, 0);
+    }
+    String dateParameter = context.getParameter("date");
+    if (StringUtils.isBlank(dateParameter)) {
+      throw new InvalidSearchException("'date' query parameter is required");
+    }
+    try {
+      SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+      dateFormat.setLenient(false);
+      date = dateFormat.parse(dateParameter);
+    } catch (ParseException e) {
+      throw new InvalidSearchException("Invalid date parameter: " + dateParameter, e);
+    }
+    List<Timesheet> timesheets = service.getTimesheetsByDate(provider, date);
+    return new AlreadyPagedWithLength<>(context, timesheets, false, timesheets.size());
+  }
+
+  @Override
+  public SearchConfig getSearchConfig() {
+    return searchConfig;
+  }
 }

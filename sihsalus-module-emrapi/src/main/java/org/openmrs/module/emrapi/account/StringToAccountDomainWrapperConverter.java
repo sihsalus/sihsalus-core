@@ -14,22 +14,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-/**
- * Converts String to AccountDomainWrapper, interpreting it as a person id
- */
+/** Converts String to AccountDomainWrapper, interpreting it as a person id */
 @Component
-public class StringToAccountDomainWrapperConverter implements Converter<String, AccountDomainWrapper> {
-	
-	@Autowired
-	private AccountService accountService;
-	
-	/**
-	 * @see org.springframework.core.convert.converter.Converter#convert(Object)
-	 */
-	@Override
-	public AccountDomainWrapper convert(String personId) {
-		if (StringUtils.isNotBlank(personId))
-			return accountService.getAccount(Integer.valueOf(personId));
-		return null;
-	}
+public class StringToAccountDomainWrapperConverter
+    implements Converter<String, AccountDomainWrapper> {
+
+  @Autowired private AccountService accountService;
+
+  /**
+   * @see org.springframework.core.convert.converter.Converter#convert(Object)
+   */
+  @Override
+  public AccountDomainWrapper convert(String personId) {
+    if (StringUtils.isNotBlank(personId))
+      return accountService.getAccount(Integer.valueOf(personId));
+    return null;
+  }
 }

@@ -9,33 +9,32 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import org.openmrs.ConceptSource;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirConceptSourceDao extends FhirDaoAop {
-	
-	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
-	Collection<FhirConceptSource> getFhirConceptSources();
-	
-	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
-	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
-	
-	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
-	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName);
-	
-	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
-	Optional<FhirConceptSource> getFhirConceptSourceByConceptSource(@Nonnull ConceptSource conceptSource);
-	
-	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
-	Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code);
-	
-	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_SOURCES)
-	FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource);
+
+  @Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+  Collection<FhirConceptSource> getFhirConceptSources();
+
+  @Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+  Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
+
+  @Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+  Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName);
+
+  @Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+  Optional<FhirConceptSource> getFhirConceptSourceByConceptSource(
+      @Nonnull ConceptSource conceptSource);
+
+  @Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+  Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code);
+
+  @Authorized(PrivilegeConstants.MANAGE_CONCEPT_SOURCES)
+  FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource);
 }

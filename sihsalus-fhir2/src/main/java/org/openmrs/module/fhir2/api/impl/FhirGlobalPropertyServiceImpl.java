@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import java.util.Map;
-
 import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
@@ -18,24 +17,24 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService {
-	
-	@Override
-	public String getGlobalProperty(String property) throws APIException {
-		return FhirGlobalPropertyHolder.getGlobalProperty(property);
-	}
-	
-	@Override
-	public int getGlobalPropertyAsInteger(String property, int defaultValue) {
-		return FhirGlobalPropertyHolder.getGlobalPropertyAsInteger(property, defaultValue);
-	}
-	
-	@Override
-	public String getGlobalProperty(String property, String defaultValue) {
-		return FhirGlobalPropertyHolder.getGlobalProperty(property, defaultValue);
-	}
-	
-	@Override
-	public Map<String, String> getGlobalProperties(String... properties) {
-		return FhirGlobalPropertyHolder.getGlobalProperties(properties);
-	}
+
+  @Override
+  public String getGlobalProperty(String property) throws APIException {
+    return FhirGlobalPropertyHolder.getGlobalProperty(property);
+  }
+
+  @Override
+  public int getGlobalPropertyAsInteger(String property, int defaultValue) {
+    return FhirGlobalPropertyHolder.getGlobalPropertyAsInteger(property, defaultValue);
+  }
+
+  @Override
+  public String getGlobalProperty(String property, String defaultValue) {
+    return FhirGlobalPropertyHolder.getGlobalProperty(property, defaultValue);
+  }
+
+  @Override
+  public Map<String, String> getGlobalProperties(String... properties) {
+    return FhirGlobalPropertyHolder.getGlobalProperties(properties);
+  }
 }

@@ -9,52 +9,49 @@
  */
 package org.openmrs.module.billing.api.db;
 
-import org.openmrs.module.billing.api.model.PaymentMode;
-
 import jakarta.annotation.Nonnull;
 import java.util.List;
+import org.openmrs.module.billing.api.model.PaymentMode;
 
-/**
- * Data access object for {@link PaymentMode} entities.
- */
+/** Data access object for {@link PaymentMode} entities. */
 public interface PaymentModeDAO {
-	
-	/**
-	 * Gets the payment mode with the specified id.
-	 *
-	 * @param id the payment mode id
-	 * @return the payment mode or {@code null} if not found
-	 */
-	PaymentMode getPaymentMode(@Nonnull Integer id);
-	
-	/**
-	 * Gets the payment mode with the specified uuid.
-	 *
-	 * @param uuid the payment mode uuid
-	 * @return the payment mode or {@code null} if not found
-	 */
-	PaymentMode getPaymentModeByUuid(@Nonnull String uuid);
-	
-	/**
-	 * Gets all payment modes.
-	 *
-	 * @param includeRetired whether to include retired payment modes
-	 * @return a list of payment modes, or an empty list if none found
-	 */
-	List<PaymentMode> getPaymentModes(boolean includeRetired);
-	
-	/**
-	 * Saves or updates the specified payment mode.
-	 *
-	 * @param paymentMode the payment mode to save
-	 * @return the saved payment mode
-	 */
-	PaymentMode savePaymentMode(@Nonnull PaymentMode paymentMode);
-	
-	/**
-	 * Permanently deletes the specified payment mode from the database.
-	 *
-	 * @param paymentMode the payment mode to purge
-	 */
-	void purgePaymentMode(@Nonnull PaymentMode paymentMode);
+
+  /**
+   * Gets the payment mode with the specified id.
+   *
+   * @param id the payment mode id
+   * @return the payment mode or {@code null} if not found
+   */
+  PaymentMode getPaymentMode(@Nonnull Integer id);
+
+  /**
+   * Gets the payment mode with the specified uuid.
+   *
+   * @param uuid the payment mode uuid
+   * @return the payment mode or {@code null} if not found
+   */
+  PaymentMode getPaymentModeByUuid(@Nonnull String uuid);
+
+  /**
+   * Gets all payment modes.
+   *
+   * @param includeRetired whether to include retired payment modes
+   * @return a list of payment modes, or an empty list if none found
+   */
+  List<PaymentMode> getPaymentModes(boolean includeRetired);
+
+  /**
+   * Saves or updates the specified payment mode.
+   *
+   * @param paymentMode the payment mode to save
+   * @return the saved payment mode
+   */
+  PaymentMode savePaymentMode(@Nonnull PaymentMode paymentMode);
+
+  /**
+   * Permanently deletes the specified payment mode from the database.
+   *
+   * @param paymentMode the payment mode to purge
+   */
+  void purgePaymentMode(@Nonnull PaymentMode paymentMode);
 }

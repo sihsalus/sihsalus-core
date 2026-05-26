@@ -12,19 +12,14 @@ package org.openmrs.module.queue.api.sort;
 import org.openmrs.module.queue.model.QueueEntry;
 import org.springframework.stereotype.Component;
 
-/**
- * Sort weight generator that always returns the existing sort weight for the entry
- */
+/** Sort weight generator that always returns the existing sort weight for the entry */
 @Component("existingValueSortWeightGenerator")
 public class ExistingValueSortWeightGenerator implements SortWeightGenerator {
-	
-	public ExistingValueSortWeightGenerator() {
-	}
-	
-	/**
-	 * Always returns the existing queueEntry sort weight as the sort weight
-	 */
-	public Double generateSortWeight(QueueEntry queueEntry) {
-		return queueEntry.getSortWeight();
-	}
+
+  public ExistingValueSortWeightGenerator() {}
+
+  /** Always returns the existing queueEntry sort weight as the sort weight */
+  public Double generateSortWeight(QueueEntry queueEntry) {
+    return queueEntry.getSortWeight();
+  }
 }

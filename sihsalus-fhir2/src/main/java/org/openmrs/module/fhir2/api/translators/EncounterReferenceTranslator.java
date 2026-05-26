@@ -10,27 +10,26 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Encounter;
 
 public interface EncounterReferenceTranslator<T> extends OpenmrsFhirTranslator<T, Reference> {
-	
-	/**
-	 * Maps an {@link Encounter} to a FHIR reference
-	 *
-	 * @param encounter the encounter to translate
-	 * @return the corresponding FHIR reference
-	 */
-	@Override
-	Reference toFhirResource(@Nonnull T encounter);
-	
-	/**
-	 * Maps a FHIR reference to an {@link Encounter}
-	 *
-	 * @param encounter the FHIR reference to translate
-	 * @return the corresponding OpenMRS encounter
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull Reference encounter);
+
+  /**
+   * Maps an {@link Encounter} to a FHIR reference
+   *
+   * @param encounter the encounter to translate
+   * @return the corresponding FHIR reference
+   */
+  @Override
+  Reference toFhirResource(@Nonnull T encounter);
+
+  /**
+   * Maps a FHIR reference to an {@link Encounter}
+   *
+   * @param encounter the FHIR reference to translate
+   * @return the corresponding OpenMRS encounter
+   */
+  @Override
+  T toOpenmrsType(@Nonnull Reference encounter);
 }

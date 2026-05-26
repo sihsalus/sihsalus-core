@@ -11,10 +11,9 @@ package org.openmrs.module.billing.api.model;
 
 import org.openmrs.module.billing.api.base.entity.model.BaseInstanceAttributeData;
 
-/**
- * Model class that represents a payment mode attribute for a particular {@link Payment}.
- */
-public class PaymentAttribute extends BaseInstanceAttributeData<Payment, PaymentMode, PaymentModeAttributeType> {
-	
-	private static final long serialVersionUID = 1L;
+/** Model class that represents a payment mode attribute for a particular {@link Payment}. */
+public class PaymentAttribute
+    extends BaseInstanceAttributeData<Payment, PaymentMode, PaymentModeAttributeType> {
+
+  private static final long serialVersionUID = 1L;
 }

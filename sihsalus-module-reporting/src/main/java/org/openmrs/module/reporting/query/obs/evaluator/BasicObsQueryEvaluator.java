@@ -1,14 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.query.obs.evaluator;
 
+import java.util.List;
 import org.openmrs.Obs;
 import org.openmrs.annotation.Handler;
 import org.openmrs.module.reporting.common.ObjectUtil;
@@ -22,45 +23,39 @@ import org.openmrs.module.reporting.query.obs.definition.BasicObsQuery;
 import org.openmrs.module.reporting.query.obs.definition.ObsQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-
-/**
- * Evaluates a BasicObsQuery
- */
+/** Evaluates a BasicObsQuery */
 @Handler(supports = BasicObsQuery.class)
 public class BasicObsQueryEvaluator implements ObsQueryEvaluator {
 
-    @Autowired
-	EvaluationService evaluationService;
+  @Autowired EvaluationService evaluationService;
 
-    @Override
-    public ObsQueryResult evaluate(ObsQuery definition, EvaluationContext context) {
-        context = ObjectUtil.nvl(context, new EvaluationContext());
-        BasicObsQuery query = (BasicObsQuery) definition;
-        ObsQueryResult result = new ObsQueryResult(query, context);
+  @Override
+  public ObsQueryResult evaluate(ObsQuery definition, EvaluationContext context) {
+    context = ObjectUtil.nvl(context, new EvaluationContext());
+    BasicObsQuery query = (BasicObsQuery) definition;
+    ObsQueryResult result = new ObsQueryResult(query, context);
 
-		if (context.getBaseCohort() != null && context.getBaseCohort().isEmpty()) {
-			return result;
-		}
-		if (context instanceof ObsEvaluationContext) {
-			ObsIdSet basObs = ((ObsEvaluationContext) context).getBaseObs();
-			if (basObs != null && basObs.getMemberIds().isEmpty()) {
-				return result;
-			}
-		}
-
-		HqlQueryBuilder q = new HqlQueryBuilder();
-		q.select("o.obsId");
-		q.from(Obs.class, "o");
-		q.whereIn("o.concept", query.getConceptList());
-		q.whereGreaterOrEqualTo("o.obsDatetime", query.getOnOrAfter());
-		q.whereLessOrEqualTo("o.obsDatetime", query.getOnOrBefore());
-		q.whereObsIn("o.obsId", context);
-
-		List<Integer> results = evaluationService.evaluateToList(q, Integer.class, context);
-		result.addAll(results);
-
-		return result;
+    if (context.getBaseCohort() != null && context.getBaseCohort().isEmpty()) {
+      return result;
+    }
+    if (context instanceof ObsEvaluationContext) {
+      ObsIdSet basObs = ((ObsEvaluationContext) context).getBaseObs();
+      if (basObs != null && basObs.getMemberIds().isEmpty()) {
+        return result;
+      }
     }
 
+    HqlQueryBuilder q = new HqlQueryBuilder();
+    q.select("o.obsId");
+    q.from(Obs.class, "o");
+    q.whereIn("o.concept", query.getConceptList());
+    q.whereGreaterOrEqualTo("o.obsDatetime", query.getOnOrAfter());
+    q.whereLessOrEqualTo("o.obsDatetime", query.getOnOrBefore());
+    q.whereObsIn("o.obsId", context);
+
+    List<Integer> results = evaluationService.evaluateToList(q, Integer.class, context);
+    result.addAll(results);
+
+    return result;
+  }
 }

@@ -8,12 +8,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AppointmentEventPublisher implements ApplicationEventPublisherAware {
-    private ApplicationEventPublisher eventPublisher;
-    public void setApplicationEventPublisher(@NonNull ApplicationEventPublisher applicationEventPublisher) {
-        this.eventPublisher = applicationEventPublisher;
-    }
+  private ApplicationEventPublisher eventPublisher;
 
-    public void publishEvent(AppointmentEvent event) {
-        this.eventPublisher.publishEvent(event);
-    }
+  public void setApplicationEventPublisher(
+      @NonNull ApplicationEventPublisher applicationEventPublisher) {
+    this.eventPublisher = applicationEventPublisher;
+  }
+
+  public void publishEvent(AppointmentEvent event) {
+    this.eventPublisher.publishEvent(event);
+  }
 }

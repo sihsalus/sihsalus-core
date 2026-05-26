@@ -12,9 +12,8 @@ package org.openmrs.module.fhir2.api;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public interface FhirClientService extends FhirHelperService {
-	
-	IGenericClient getClientForR3(String baseUrl);
-	
-	IGenericClient getClientForR4(String baseUrl);
-	
+
+  IGenericClient getClientForR3(String baseUrl);
+
+  IGenericClient getClientForR4(String baseUrl);
 }

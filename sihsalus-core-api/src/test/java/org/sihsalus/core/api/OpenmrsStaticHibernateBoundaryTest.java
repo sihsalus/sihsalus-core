@@ -11,26 +11,25 @@ import org.openmrs.api.db.hibernate.HibernateSessionFactoryBean;
 
 class OpenmrsStaticHibernateBoundaryTest {
 
-    private static final String OPENMRS_APPLICATION_DATA_DIRECTORY = "OPENMRS_APPLICATION_DATA_DIRECTORY";
+  private static final String OPENMRS_APPLICATION_DATA_DIRECTORY =
+      "OPENMRS_APPLICATION_DATA_DIRECTORY";
 
-    @TempDir
-    Path openmrsApplicationDirectory;
+  @TempDir Path openmrsApplicationDirectory;
 
-    @Test
-    void hibernateMappingsDoNotUseDynamicModuleDiscovery() throws Exception {
-        System.setProperty(OPENMRS_APPLICATION_DATA_DIRECTORY, openmrsApplicationDirectory.toString());
-        Files.createDirectories(openmrsApplicationDirectory.resolve("configuration"));
+  @Test
+  void hibernateMappingsDoNotUseDynamicModuleDiscovery() throws Exception {
+    System.setProperty(OPENMRS_APPLICATION_DATA_DIRECTORY, openmrsApplicationDirectory.toString());
+    Files.createDirectories(openmrsApplicationDirectory.resolve("configuration"));
 
-        HibernateSessionFactoryBean sessionFactory = new HibernateSessionFactoryBean();
+    HibernateSessionFactoryBean sessionFactory = new HibernateSessionFactoryBean();
 
-        assertTrue(sessionFactory.getModulePackagesWithMappedClasses().isEmpty());
-        assertTrue(sessionFactory.getModuleMappingResources().isEmpty());
+    assertTrue(sessionFactory.getModulePackagesWithMappedClasses().isEmpty());
+    assertTrue(sessionFactory.getModuleMappingResources().isEmpty());
 
-        String source =
-                Files.readString(
-                        Path.of(
-                                "src/main/java/org/openmrs/api/db/hibernate/HibernateSessionFactoryBean.java"));
-        assertFalse(source.contains("ModuleFactory"));
-        assertFalse(source.contains("getStartedModules"));
-    }
+    String source =
+        Files.readString(
+            Path.of("src/main/java/org/openmrs/api/db/hibernate/HibernateSessionFactoryBean.java"));
+    assertFalse(source.contains("ModuleFactory"));
+    assertFalse(source.contains("getStartedModules"));
+  }
 }

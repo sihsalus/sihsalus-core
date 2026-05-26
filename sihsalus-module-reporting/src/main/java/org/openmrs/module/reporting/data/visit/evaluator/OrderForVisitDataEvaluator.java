@@ -1,16 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.visit.evaluator;
 
 import java.util.List;
-
 import org.openmrs.Order;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.EncounterService;
@@ -31,69 +30,63 @@ import org.openmrs.util.OpenmrsConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Evaluates an ObsForVisitDataDefinition to produce a VisitData that contains the observations recorded for a visit, based on a provided concept
+ * Evaluates an ObsForVisitDataDefinition to produce a VisitData that contains the observations
+ * recorded for a visit, based on a provided concept
  */
-@Handler(supports=OrderForVisitDataDefinition.class, order=50)
+@Handler(supports = OrderForVisitDataDefinition.class, order = 50)
 public class OrderForVisitDataEvaluator implements VisitDataEvaluator {
 
-	@Autowired
-	EvaluationService evaluationService;
+  @Autowired EvaluationService evaluationService;
 
-	@Autowired
-	PatientDataService patientDataService;
+  @Autowired PatientDataService patientDataService;
 
-	@Autowired
-	OrderService orderService;
+  @Autowired OrderService orderService;
 
-	@Autowired
-	EncounterService encounterService;
+  @Autowired EncounterService encounterService;
 
-	@Autowired
-	PatientService patientService;
-	
-	@Autowired
-	VisitDataService visitDataService;
+  @Autowired PatientService patientService;
 
-	/** 
-	 * @see VisitDataEvaluator#evaluate(VisitDataDefinition, EvaluationContext)
-	 * @should return the orders that matches the passed definition configuration
-	 */
-	public EvaluatedVisitData evaluate(VisitDataDefinition definition, EvaluationContext context) throws EvaluationException {
+  @Autowired VisitDataService visitDataService;
 
-		OrderForVisitDataDefinition visitDef = (OrderForVisitDataDefinition) definition;
+  /**
+   * @see VisitDataEvaluator#evaluate(VisitDataDefinition, EvaluationContext)
+   * @should return the orders that matches the passed definition configuration
+   */
+  public EvaluatedVisitData evaluate(VisitDataDefinition definition, EvaluationContext context)
+      throws EvaluationException {
 
-		EvaluatedVisitData evaluatedData = new EvaluatedVisitData(visitDef, context);
-		if (context.getBaseCohort() != null && context.getBaseCohort().isEmpty()) {
-			return evaluatedData;
-		}
-		HqlQueryBuilder q = new HqlQueryBuilder();
+    OrderForVisitDataDefinition visitDef = (OrderForVisitDataDefinition) definition;
 
-		q.select("v.visitId", "o");
-		q.from(Order.class, "o");
-		q.whereIn("o.orderType", visitDef.getTypes());
-		q.innerJoin("o.encounter", "e");
-		q.innerJoin("e.visit", "v");
-		q.whereVisitIn("v.visitId", context);
-		
-		if (ModuleUtil.compareVersion(OpenmrsConstants.OPENMRS_VERSION, "1.10") < 0) {
-            q.orderAsc("o.startDate");
-        }
-		else {
-		    q.orderAsc("o.dateActivated");
-        }
-		
-		List<Object[]> queryResult = evaluationService.evaluateToList(q, context);
-		
-		ListMap<Integer, Order> ordersForVisits = new ListMap<Integer, Order>();
-		for (Object[] row : queryResult) {
-			ordersForVisits.putInList((Integer)row[0], (Order)row[1]);
-		}
-		
-		for (Integer vid : ordersForVisits.keySet()) {
-			List<Order> l = ordersForVisits.get(vid);
-			evaluatedData.addData(vid, l);
-		}
-		return evaluatedData;
-	}
+    EvaluatedVisitData evaluatedData = new EvaluatedVisitData(visitDef, context);
+    if (context.getBaseCohort() != null && context.getBaseCohort().isEmpty()) {
+      return evaluatedData;
+    }
+    HqlQueryBuilder q = new HqlQueryBuilder();
 
+    q.select("v.visitId", "o");
+    q.from(Order.class, "o");
+    q.whereIn("o.orderType", visitDef.getTypes());
+    q.innerJoin("o.encounter", "e");
+    q.innerJoin("e.visit", "v");
+    q.whereVisitIn("v.visitId", context);
+
+    if (ModuleUtil.compareVersion(OpenmrsConstants.OPENMRS_VERSION, "1.10") < 0) {
+      q.orderAsc("o.startDate");
+    } else {
+      q.orderAsc("o.dateActivated");
+    }
+
+    List<Object[]> queryResult = evaluationService.evaluateToList(q, context);
+
+    ListMap<Integer, Order> ordersForVisits = new ListMap<Integer, Order>();
+    for (Object[] row : queryResult) {
+      ordersForVisits.putInList((Integer) row[0], (Order) row[1]);
+    }
+
+    for (Integer vid : ordersForVisits.keySet()) {
+      List<Order> l = ordersForVisits.get(vid);
+      evaluatedData.addData(vid, l);
+    }
+    return evaluatedData;
+  }
 }

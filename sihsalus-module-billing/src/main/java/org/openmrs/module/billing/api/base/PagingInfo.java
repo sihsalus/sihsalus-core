@@ -23,38 +23,38 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class PagingInfo {
-	
-	private int page;
-	
-	private int pageSize;
-	
-	private Long totalRecordCount;
-	
-	private boolean loadRecordCount;
 
-	public boolean getLoadRecordCount() {
-		return loadRecordCount;
-	}
-	
-	/**
-	 * Creates a new {@link PagingInfo} instance.
-	 *
-	 * @param page The 1-based number of the page being requested.
-	 * @param pageSize The number of records to include on each page.
-	 */
-	public PagingInfo(int page, int pageSize) {
-		this.page = page;
-		this.pageSize = pageSize;
-		this.loadRecordCount = true;
-	}
-	
-	public void setTotalRecordCount(Long totalRecordCount) {
-		this.totalRecordCount = totalRecordCount;
-		// If the total records is set to anything other than null, than don't reload the count
-		this.loadRecordCount = totalRecordCount == null;
-	}
-	
-	public Boolean hasMoreResults() {
-		return ((long) page * pageSize) < totalRecordCount;
-	}
+  private int page;
+
+  private int pageSize;
+
+  private Long totalRecordCount;
+
+  private boolean loadRecordCount;
+
+  public boolean getLoadRecordCount() {
+    return loadRecordCount;
+  }
+
+  /**
+   * Creates a new {@link PagingInfo} instance.
+   *
+   * @param page The 1-based number of the page being requested.
+   * @param pageSize The number of records to include on each page.
+   */
+  public PagingInfo(int page, int pageSize) {
+    this.page = page;
+    this.pageSize = pageSize;
+    this.loadRecordCount = true;
+  }
+
+  public void setTotalRecordCount(Long totalRecordCount) {
+    this.totalRecordCount = totalRecordCount;
+    // If the total records is set to anything other than null, than don't reload the count
+    this.loadRecordCount = totalRecordCount == null;
+  }
+
+  public Boolean hasMoreResults() {
+    return ((long) page * pageSize) < totalRecordCount;
+  }
 }

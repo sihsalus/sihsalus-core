@@ -13,13 +13,12 @@
  */
 package org.openmrs.module.stockmanagement.api.impl;
 
-import org.openmrs.module.stockmanagement.api.utils.Action2;
+import java.math.BigDecimal;
 import org.openmrs.module.stockmanagement.api.model.ReservedTransaction;
 import org.openmrs.module.stockmanagement.api.model.StockItemTransaction;
 import org.openmrs.module.stockmanagement.api.model.StockOperation;
 import org.openmrs.module.stockmanagement.api.model.StockOperationType;
-
-import java.math.BigDecimal;
+import org.openmrs.module.stockmanagement.api.utils.Action2;
 
 /**
  * The initial operation type is used to populate a stockroom with the initial set of item stock at
@@ -28,58 +27,59 @@ import java.math.BigDecimal;
  * implementation if we extend the behavior of receipt operations.
  */
 public class InitialOperationTypeProcessorProcessor extends StockOperationTypeProcessorBase {
-	
-	public InitialOperationTypeProcessorProcessor(StockOperationType stockOperationType) {
-		super(stockOperationType);
-	}
-	
-	public boolean isNegativeItemQuantityAllowed() {
-		return false;
-	}
-	
-	@Override
-	public boolean requiresActualBatchInformation() {
-		return true;
-	}
-	
-	@Override
-	public boolean requiresBatchUuid() {
-		return false;
-	}
-	
-	@Override
-	public boolean canCapturePurchasePrice() {
-		return true;
-	}
-	
-	@Override
-	public boolean shouldVerifyNegativeStockAmountsAtSource() {
-		return false;
-	}
-	
-	@Override
-	public void onPending(StockOperation operation) {
-	}
-	
-	@Override
-	public BigDecimal getQuantityToApplyAtSource(BigDecimal quantity) {
-		return BigDecimal.valueOf(0);
-	}
-	
-	@Override
-	public void onCancelled(StockOperation operation) {
-		// Clear out the transactions for the operation
-		clearReservedTransactions(operation);
-	}
-	
-	@Override
-	public void onCompleted(final StockOperation operation) {
-		executeCopyReservedAndClear(operation, new Action2<ReservedTransaction, StockItemTransaction>() {
-			
-			@Override
-			public void apply(ReservedTransaction reserved, StockItemTransaction tx) {
-				tx.setParty(operation.getSource());
-			}
-		});
-	}
+
+  public InitialOperationTypeProcessorProcessor(StockOperationType stockOperationType) {
+    super(stockOperationType);
+  }
+
+  public boolean isNegativeItemQuantityAllowed() {
+    return false;
+  }
+
+  @Override
+  public boolean requiresActualBatchInformation() {
+    return true;
+  }
+
+  @Override
+  public boolean requiresBatchUuid() {
+    return false;
+  }
+
+  @Override
+  public boolean canCapturePurchasePrice() {
+    return true;
+  }
+
+  @Override
+  public boolean shouldVerifyNegativeStockAmountsAtSource() {
+    return false;
+  }
+
+  @Override
+  public void onPending(StockOperation operation) {}
+
+  @Override
+  public BigDecimal getQuantityToApplyAtSource(BigDecimal quantity) {
+    return BigDecimal.valueOf(0);
+  }
+
+  @Override
+  public void onCancelled(StockOperation operation) {
+    // Clear out the transactions for the operation
+    clearReservedTransactions(operation);
+  }
+
+  @Override
+  public void onCompleted(final StockOperation operation) {
+    executeCopyReservedAndClear(
+        operation,
+        new Action2<ReservedTransaction, StockItemTransaction>() {
+
+          @Override
+          public void apply(ReservedTransaction reserved, StockItemTransaction tx) {
+            tx.setParty(operation.getSource());
+          }
+        });
+  }
 }

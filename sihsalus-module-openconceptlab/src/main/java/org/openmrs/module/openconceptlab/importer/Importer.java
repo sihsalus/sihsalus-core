@@ -1,21 +1,32 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.openconceptlab.importer;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openconceptlab.CacheService;
@@ -39,528 +50,530 @@ import org.sihsalus.core.api.StaticModuleTaskRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.zip.ZipFile;
-
 public class Importer implements Runnable {
 
-	private static final Logger log = LoggerFactory.getLogger(Importer.class);
+  private static final Logger log = LoggerFactory.getLogger(Importer.class);
 
-	public final static int BATCH_SIZE = 256;
+  public static final int BATCH_SIZE = 256;
 
-	private static final String[] STATIC_IMPORT_PRIVILEGES = {
-		PrivilegeConstants.GET_CONCEPTS,
-		PrivilegeConstants.GET_CONCEPT_CLASSES,
-		PrivilegeConstants.GET_CONCEPT_DATATYPES,
-		PrivilegeConstants.GET_CONCEPT_SOURCES,
-		PrivilegeConstants.GET_CONCEPT_MAP_TYPES,
-		PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS,
-		PrivilegeConstants.GET_GLOBAL_PROPERTIES,
-		PrivilegeConstants.GET_OBS,
-		PrivilegeConstants.MANAGE_CONCEPTS,
-		PrivilegeConstants.MANAGE_CONCEPT_CLASSES,
-		PrivilegeConstants.MANAGE_CONCEPT_DATATYPES,
-		PrivilegeConstants.MANAGE_CONCEPT_SOURCES,
-		PrivilegeConstants.MANAGE_CONCEPT_MAP_TYPES,
-		PrivilegeConstants.MANAGE_CONCEPT_REFERENCE_TERMS,
-		PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES
-	};
+  private static final String[] STATIC_IMPORT_PRIVILEGES = {
+    PrivilegeConstants.GET_CONCEPTS,
+    PrivilegeConstants.GET_CONCEPT_CLASSES,
+    PrivilegeConstants.GET_CONCEPT_DATATYPES,
+    PrivilegeConstants.GET_CONCEPT_SOURCES,
+    PrivilegeConstants.GET_CONCEPT_MAP_TYPES,
+    PrivilegeConstants.GET_CONCEPT_REFERENCE_TERMS,
+    PrivilegeConstants.GET_GLOBAL_PROPERTIES,
+    PrivilegeConstants.GET_OBS,
+    PrivilegeConstants.MANAGE_CONCEPTS,
+    PrivilegeConstants.MANAGE_CONCEPT_CLASSES,
+    PrivilegeConstants.MANAGE_CONCEPT_DATATYPES,
+    PrivilegeConstants.MANAGE_CONCEPT_SOURCES,
+    PrivilegeConstants.MANAGE_CONCEPT_MAP_TYPES,
+    PrivilegeConstants.MANAGE_CONCEPT_REFERENCE_TERMS,
+    PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES
+  };
 
-	private ImportService importService;
+  private ImportService importService;
 
-	private ConceptService conceptService;
-	
-	private OclConceptService oclConceptService;
+  private ConceptService conceptService;
 
-	private OclClient oclClient;
+  private OclConceptService oclConceptService;
 
-	private Saver saver;
+  private OclClient oclClient;
 
-	private volatile Import anImport;
+  private Saver saver;
 
-	private CountingInputStream in = null;
+  private volatile Import anImport;
 
-	private volatile long totalBytesToProcess;
+  private CountingInputStream in = null;
 
-	private ZipFile zipFile;
+  private volatile long totalBytesToProcess;
 
-	private interface Task {
-		void run() throws Exception;
-	}
+  private ZipFile zipFile;
 
-    public void setImportService(ImportService importService) {
-	    this.importService = importService;
-    }
+  private interface Task {
+    void run() throws Exception;
+  }
 
-    public void setConceptService(ConceptService conceptService) {
-	    this.conceptService = conceptService;
-    }
-    
-    public void setOclConceptService(OclConceptService oclConceptService) {
-		this.oclConceptService = oclConceptService;
-    }
+  public void setImportService(ImportService importService) {
+    this.importService = importService;
+  }
 
-    public void setOclClient(OclClient oclClient) {
-	    this.oclClient = oclClient;
-    }
+  public void setConceptService(ConceptService conceptService) {
+    this.conceptService = conceptService;
+  }
 
-    public void setSaver(Saver persister) {
-	    this.saver = persister;
-    }
+  public void setOclConceptService(OclConceptService oclConceptService) {
+    this.oclConceptService = oclConceptService;
+  }
 
-	public void setZipFile(ZipFile zipFile) {
-		this.zipFile = zipFile;
-	}
+  public void setOclClient(OclClient oclClient) {
+    this.oclClient = oclClient;
+  }
 
-	/**
-	 * Runs an import for a configured subscription.
-	 * <p>
-	 * It is not run directly, rather by a dedicated scheduler {@link UpdateScheduler}.
-	 * if input stream is already defined from file, subscription logic is skipped by calling run(InputStream).
-	 *
-	 * @should start first import with response date
-	 * @should start next import with updated since
-	 * @should create item for each concept and mapping
-	 */
-	@Override
-	public void run() {
-		if (zipFile != null) {
-			run(zipFile);
-		} else {
-			runWithOpenmrsDaemonContext(new Runnable() {
-				@Override
-				public void run() {
-					runTask();
-				}
-			});
-		}
-	}
+  public void setSaver(Saver persister) {
+    this.saver = persister;
+  }
 
-    public void runTask() {
-        runAndHandleErrors(new Task() {
+  public void setZipFile(ZipFile zipFile) {
+    this.zipFile = zipFile;
+  }
 
+  /**
+   * Runs an import for a configured subscription.
+   *
+   * <p>It is not run directly, rather by a dedicated scheduler {@link UpdateScheduler}. if input
+   * stream is already defined from file, subscription logic is skipped by calling run(InputStream).
+   *
+   * @should start first import with response date
+   * @should start next import with updated since
+   * @should create item for each concept and mapping
+   */
+  @Override
+  public void run() {
+    if (zipFile != null) {
+      run(zipFile);
+    } else {
+      runWithOpenmrsDaemonContext(
+          new Runnable() {
             @Override
-            public void run() throws Exception {
-                Subscription subscription = importService.getSubscription();
-                Import lastImport = importService.getLastSuccessfulSubscriptionImport();
-                Date updatedSince = null;
-                if (lastImport != null) {
-                    updatedSince = lastImport.getOclDateStarted();
-                }
-
-                OclResponse oclResponse;
-
-                if (updatedSince == null) {
-                    oclResponse = oclClient.fetchOclConcepts(subscription.getUrl(), subscription.getToken());
-					importService.updateReleaseVersion(anImport,
-                            oclClient.getOclReleaseVersion(subscription.getUrl(), subscription.getToken()));
-                } else {
-                    if (subscription.isSubscribedToSnapshot()) {
-                        oclResponse = oclClient.fetchSnapshotUpdates(subscription.getUrl(), subscription.getToken(),
-                                updatedSince);
-                    }
-                    else {
-                        oclResponse = oclClient.fetchOclConcepts(subscription.getUrl(), subscription.getToken(), lastImport.getReleaseVersion());
-						importService.updateReleaseVersion(anImport,
-                                oclClient.getOclReleaseVersion(subscription.getUrl(), subscription.getToken()));
-                    }
-                }
-
-				if (oclResponse != null) {
-					importService.updateOclDateStarted(anImport, oclResponse.getUpdatedTo());
-					importService.updateSubscriptionUrl(anImport, subscription.getUrl());
-					in = new CountingInputStream(oclResponse.getContentStream());
-					totalBytesToProcess = oclResponse.getContentLength();
-
-					processInput();
-
-					in.close();
-				}
+            public void run() {
+              runTask();
             }
+          });
+    }
+  }
+
+  public void runTask() {
+    runAndHandleErrors(
+        new Task() {
+
+          @Override
+          public void run() throws Exception {
+            Subscription subscription = importService.getSubscription();
+            Import lastImport = importService.getLastSuccessfulSubscriptionImport();
+            Date updatedSince = null;
+            if (lastImport != null) {
+              updatedSince = lastImport.getOclDateStarted();
+            }
+
+            OclResponse oclResponse;
+
+            if (updatedSince == null) {
+              oclResponse =
+                  oclClient.fetchOclConcepts(subscription.getUrl(), subscription.getToken());
+              importService.updateReleaseVersion(
+                  anImport,
+                  oclClient.getOclReleaseVersion(subscription.getUrl(), subscription.getToken()));
+            } else {
+              if (subscription.isSubscribedToSnapshot()) {
+                oclResponse =
+                    oclClient.fetchSnapshotUpdates(
+                        subscription.getUrl(), subscription.getToken(), updatedSince);
+              } else {
+                oclResponse =
+                    oclClient.fetchOclConcepts(
+                        subscription.getUrl(),
+                        subscription.getToken(),
+                        lastImport.getReleaseVersion());
+                importService.updateReleaseVersion(
+                    anImport,
+                    oclClient.getOclReleaseVersion(subscription.getUrl(), subscription.getToken()));
+              }
+            }
+
+            if (oclResponse != null) {
+              importService.updateOclDateStarted(anImport, oclResponse.getUpdatedTo());
+              importService.updateSubscriptionUrl(anImport, subscription.getUrl());
+              in = new CountingInputStream(oclResponse.getContentStream());
+              totalBytesToProcess = oclResponse.getContentLength();
+
+              processInput();
+
+              in.close();
+            }
+          }
         });
+  }
+
+  /** This run is used to update sources from zip file */
+  public void run(final ZipFile zipPackage) {
+    runWithOpenmrsDaemonContext(
+        () ->
+            runAndHandleErrors(
+                () -> {
+                  InputStream zipInputStream = Utils.extractExportInputStreamFromZip(zipPackage);
+                  try {
+                    in = new CountingInputStream(zipInputStream);
+                    String subscriptionUrl =
+                        Context.getAdministrationService()
+                            .getGlobalProperty(OpenConceptLabConstants.GP_OCL_LOAD_AT_STARTUP_PATH);
+                    importService.updateSubscriptionUrl(anImport, subscriptionUrl);
+                    processInput();
+                  } finally {
+                    in.close();
+                  }
+                }));
+  }
+
+  private void runWithOpenmrsDaemonContext(Runnable task) {
+    StaticModuleTaskRunner.runAndWait(
+        OpenConceptLabActivator.getDaemonToken(), () -> runWithStaticModulePrivileges(task));
+  }
+
+  private void runWithStaticModulePrivileges(Runnable task) {
+    boolean openedSession = !Context.isSessionOpen();
+    if (openedSession) {
+      Context.openSession();
     }
 
-	/**
-	 * This run is used to update sources from zip file
-	 */
-	public void run(final ZipFile zipPackage) {
-		runWithOpenmrsDaemonContext(() -> runAndHandleErrors(() -> {
-            InputStream zipInputStream = Utils.extractExportInputStreamFromZip(zipPackage);
-            try {
-                in = new CountingInputStream(zipInputStream);
-                String subscriptionUrl = Context.getAdministrationService()
-                        .getGlobalProperty(OpenConceptLabConstants.GP_OCL_LOAD_AT_STARTUP_PATH);
-                importService.updateSubscriptionUrl(anImport, subscriptionUrl);
-                processInput();
-            } finally {
-                in.close();
-            }
-        }));
-	}
+    Context.addProxyPrivilege(STATIC_IMPORT_PRIVILEGES);
+    try {
+      task.run();
+    } finally {
+      Context.removeProxyPrivilege(STATIC_IMPORT_PRIVILEGES);
+      if (openedSession) {
+        Context.closeSession();
+      }
+    }
+  }
 
-	private void runWithOpenmrsDaemonContext(Runnable task) {
-		StaticModuleTaskRunner.runAndWait(
-				OpenConceptLabActivator.getDaemonToken(), () -> runWithStaticModulePrivileges(task));
-	}
+  private void runAndHandleErrors(Task task) {
+    Import newUpdate = new Import();
+    importService.startImport(newUpdate);
+    anImport = newUpdate;
+    totalBytesToProcess = -1; // unknown
 
-	private void runWithStaticModulePrivileges(Runnable task) {
-		boolean openedSession = !Context.isSessionOpen();
-		if (openedSession) {
-			Context.openSession();
-		}
+    try {
+      task.run();
 
-		Context.addProxyPrivilege(STATIC_IMPORT_PRIVILEGES);
-		try {
-			task.run();
-		} finally {
-			Context.removeProxyPrivilege(STATIC_IMPORT_PRIVILEGES);
-			if (openedSession) {
-				Context.closeSession();
-			}
-		}
-	}
+      Integer errors =
+          importService.getImportItemsCount(
+              anImport, new HashSet<>(Collections.singletonList(ItemState.ERROR)));
+      if (errors > 0) {
+        importService.failImport(anImport);
+      }
+    } catch (Throwable e) {
+      importService.failImport(anImport, getErrorMessage(e));
+      throw new ImportException(e);
+    } finally {
+      File zipFileOnDisk = zipFile != null ? new File(zipFile.getName()) : null;
+      IOUtils.closeQuietly(in);
+      IOUtils.closeQuietly(zipFile);
 
-	private void runAndHandleErrors(Task task) {
-		Import newUpdate = new Import();
-		importService.startImport(newUpdate);
-		anImport = newUpdate;
-		totalBytesToProcess = -1; //unknown
+      zipFile = null;
+      if (zipFileOnDisk != null && zipFileOnDisk.exists() && !zipFileOnDisk.delete()) {
+        log.warn(
+            "Failed to delete temporary Open Concept Lab import file {}",
+            zipFileOnDisk.getAbsolutePath());
+      }
 
-		try {
-			task.run();
+      try {
+        if (anImport != null && anImport.getImportId() != null) {
+          importService.stopImport(anImport);
+        }
+      } catch (Exception e) {
+        log.error("Failed to stop anImport", e);
+      }
 
-			Integer errors = importService.getImportItemsCount(anImport, new HashSet<>(
-					Collections.singletonList(ItemState.ERROR)));
-			if (errors > 0) {
-				importService.failImport(anImport);
-			}
-		}
-		catch (Throwable e) {
-			importService.failImport(anImport, getErrorMessage(e));
-			throw new ImportException(e);
-		}
-		finally {
-			File zipFileOnDisk = zipFile != null ? new File(zipFile.getName()) : null;
-			IOUtils.closeQuietly(in);
-			IOUtils.closeQuietly(zipFile);
+      in = null;
+      totalBytesToProcess = 0;
+      anImport = null;
+    }
+  }
 
-			zipFile = null;
-			if (zipFileOnDisk != null && zipFileOnDisk.exists() && !zipFileOnDisk.delete()) {
-				log.warn("Failed to delete temporary Open Concept Lab import file {}", zipFileOnDisk.getAbsolutePath());
-			}
+  public static String getErrorMessage(Throwable e) {
+    String message = e.getMessage();
+    Throwable rootCause = ExceptionUtils.getRootCause(e);
+    if (rootCause == null) {
+      rootCause = e;
+    }
 
-			try {
-				if (anImport != null && anImport.getImportId() != null) {
-					importService.stopImport(anImport);
-				}
-			}
-			catch (Exception e) {
-				log.error("Failed to stop anImport", e);
-			}
+    String[] stackFrames = ExceptionUtils.getStackFrames(rootCause);
+    int endIndex = Math.min(stackFrames.length, 5);
+    message += "\n caused by: " + StringUtils.join(stackFrames, "\n", 0, endIndex);
 
-			in = null;
-			totalBytesToProcess = 0;
-			anImport = null;
-		}
-	}
+    if (message.length() > 1024) {
+      return message.substring(0, 1024);
+    } else {
+      return message;
+    }
+  }
 
-	public static String getErrorMessage(Throwable e) {
-		String message = e.getMessage();
-		Throwable rootCause = ExceptionUtils.getRootCause(e);
-		if (rootCause == null) {
-			rootCause = e;
-		}
+  public static String getUserFriendlyErrorMessage(Throwable e) {
+    String message = e.getMessage();
+    Throwable rootCause = ExceptionUtils.getRootCause(e);
+    if (rootCause != null) {
+      message += " [CAUSE]: " + rootCause.getMessage();
+    }
 
-		String[] stackFrames = ExceptionUtils.getStackFrames(rootCause);
-		int endIndex = Math.min(stackFrames.length, 5);
-		message += "\n caused by: " + StringUtils.join(stackFrames, "\n", 0, endIndex);
+    return message;
+  }
 
-		if (message.length() > 1024) {
-			return message.substring(0, 1024);
-		} else {
-			return message;
-		}
-	}
-	
-	public static String getUserFriendlyErrorMessage(Throwable e) {
-		String message = e.getMessage();
-		Throwable rootCause = ExceptionUtils.getRootCause(e);
-		if (rootCause != null) {
-			message += " [CAUSE]: " + rootCause.getMessage();
-		}
+  public long getBytesDownloaded() {
+    return oclClient.getBytesDownloaded();
+  }
 
-		return message;
-	}
+  public long getTotalBytesToDownload() {
+    return oclClient.getTotalBytesToDownload();
+  }
 
-	public long getBytesDownloaded() {
-		return oclClient.getBytesDownloaded();
-	}
+  public boolean isDownloaded() {
+    return oclClient.isDownloaded();
+  }
 
-	public long getTotalBytesToDownload() {
-		return oclClient.getTotalBytesToDownload();
-	}
+  public long getBytesProcessed() {
+    if (in != null) {
+      return in.getByteCount();
+    } else {
+      return 0;
+    }
+  }
 
-	public boolean isDownloaded() {
-		return oclClient.isDownloaded();
-	}
+  public long getTotalBytesToProcess() {
+    return totalBytesToProcess;
+  }
 
-	public long getBytesProcessed() {
-		if (in != null) {
-			return in.getByteCount();
-		} else {
-			return 0;
-		}
-	}
+  public boolean isProcessed() {
+    return totalBytesToProcess == getBytesProcessed();
+  }
 
-	public long getTotalBytesToProcess() {
-		return totalBytesToProcess;
-	}
+  public boolean isRunning() {
+    Import lastUpdate = importService.getLastImport();
+    if (lastUpdate == null) {
+      return false;
+    }
 
-	public boolean isProcessed() {
-		return totalBytesToProcess == getBytesProcessed();
-	}
+    if (anImport == null && !lastUpdate.isStopped()) {
+      lastUpdate.setErrorMessage("Process terminated before completion");
+      importService.stopImport(lastUpdate);
+    }
 
-	public boolean isRunning() {
-		Import lastUpdate = importService.getLastImport();
-		if (lastUpdate == null) {
-			return false;
-		}
+    return anImport != null;
+  }
 
-		if (anImport == null && !lastUpdate.isStopped()) {
-			lastUpdate.setErrorMessage("Process terminated before completion");
-			importService.stopImport(lastUpdate);
-		}
+  private void processInput() throws IOException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+    JsonParser parser = objectMapper.getFactory().createParser(in);
 
-		return anImport != null;
-	}
+    JsonToken token = parser.nextToken();
+    if (token != JsonToken.START_OBJECT) {
+      throw new IOException("JSON must start from an object");
+    }
 
-	private void processInput() throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
-		JsonParser parser = objectMapper.getFactory().createParser(in);
+    token = advanceToListOf("concepts", "mappings", parser);
 
-		JsonToken token = parser.nextToken();
-		if (token != JsonToken.START_OBJECT) {
-			throw new IOException("JSON must start from an object");
-		}
+    if (token == JsonToken.END_OBJECT || token == null) {
+      return;
+    }
 
-		token = advanceToListOf("concepts", "mappings", parser);
+    String baseUrl = "";
+    if (importService.getSubscription() != null) {
+      baseUrl = importService.getSubscription().getUrl();
+      if (baseUrl != null) {
+        try {
+          URI uri = new URI(baseUrl);
+          baseUrl = uri.getScheme() + "://" + uri.getHost();
+          if (uri.getPort() != -1) {
+            baseUrl += ":" + uri.getPort();
+          }
+        } catch (Exception e) {
+          throw new IllegalStateException(baseUrl + " is not valid", e);
+        }
+      }
+    }
 
-		if (token == JsonToken.END_OBJECT || token == null) {
-			return;
-		}
+    CacheService cacheService = new CacheService(conceptService, oclConceptService);
 
-		String baseUrl = "";
-		if (importService.getSubscription() != null) {
-			baseUrl = importService.getSubscription().getUrl();
-			if (baseUrl != null) {
-				try {
-					URI uri = new URI(baseUrl);
-					baseUrl = uri.getScheme() + "://" + uri.getHost();
-					if (uri.getPort() != -1) {
-						baseUrl += ":" + uri.getPort();
-					}
-				}
-				catch (Exception e) {
-					throw new IllegalStateException(baseUrl + " is not valid", e);
-				}
-			}
-		}
+    List<Item> items = new ArrayList<>(BATCH_SIZE);
+    while (parser.nextToken() != JsonToken.END_ARRAY) {
+      OclConcept oclConcept = parser.readValueAs(OclConcept.class);
+      oclConcept.setVersionUrl(prependBaseUrl(baseUrl, oclConcept.getVersionUrl()));
+      oclConcept.setUrl(prependBaseUrl(baseUrl, oclConcept.getUrl()));
 
-		CacheService cacheService = new CacheService(conceptService, oclConceptService);
+      Item item;
+      try {
+        item = saver.saveConcept(cacheService, anImport, oclConcept);
+        log.info("Imported concept {}", oclConcept);
+      } catch (Throwable e) {
+        log.error("Failed to import concept {}", oclConcept, e);
+        Context.clearSession();
+        cacheService.clearCache();
 
-		List<Item> items = new ArrayList<>(BATCH_SIZE);
-		while (parser.nextToken() != JsonToken.END_ARRAY) {
-			OclConcept oclConcept = parser.readValueAs(OclConcept.class);
-			oclConcept.setVersionUrl(prependBaseUrl(baseUrl, oclConcept.getVersionUrl()));
-			oclConcept.setUrl(prependBaseUrl(baseUrl, oclConcept.getUrl()));
+        item = new Item(anImport, oclConcept, ItemState.ERROR);
+        item.setErrorMessage(getUserFriendlyErrorMessage(e));
+      }
+      items.add(item);
 
-			Item item;
-			try {
-				item = saver.saveConcept(cacheService, anImport, oclConcept);
-				log.info("Imported concept {}", oclConcept);
-			} catch (Throwable e) {
-				log.error("Failed to import concept {}", oclConcept, e);
-				Context.clearSession();
-				cacheService.clearCache();
+      if (items.size() >= BATCH_SIZE) {
+        importService.saveItems(items);
+        items = new ArrayList<>(BATCH_SIZE);
+        // Flush and clear session to prevent memory buildup, then clear cache since entities are
+        // detached
+        importService.flushAndClearSession();
+        cacheService.clearCache();
+      }
+    }
 
-				item = new Item(anImport, oclConcept, ItemState.ERROR);
-				item.setErrorMessage(getUserFriendlyErrorMessage(e));
-			}
-			items.add(item);
+    if (!items.isEmpty()) {
+      importService.saveItems(items);
+      items = new ArrayList<>(BATCH_SIZE);
+    }
 
-			if (items.size() >= BATCH_SIZE) {
-				importService.saveItems(items);
-				items = new ArrayList<>(BATCH_SIZE);
-				// Flush and clear session to prevent memory buildup, then clear cache since entities are detached
-				importService.flushAndClearSession();
-				cacheService.clearCache();
-			}
-		}
+    // Flush and clear before processing mappings to start fresh
+    importService.flushAndClearSession();
+    cacheService.clearCache();
 
-		if (!items.isEmpty()) {
-			importService.saveItems(items);
-			items = new ArrayList<>(BATCH_SIZE);
-		}
+    token = advanceToListOf("mappings", null, parser);
 
-		// Flush and clear before processing mappings to start fresh
-		importService.flushAndClearSession();
-		cacheService.clearCache();
+    if (token == JsonToken.END_OBJECT) {
+      return;
+    }
 
-		token = advanceToListOf("mappings", null, parser);
+    while (parser.nextToken() != JsonToken.END_ARRAY) {
+      OclMapping oclMapping = parser.readValueAs(OclMapping.class);
+      oclMapping.setUrl(prependBaseUrl(baseUrl, oclMapping.getUrl()));
+      oclMapping.setFromConceptUrl(prependBaseUrl(baseUrl, oclMapping.getFromConceptUrl()));
+      oclMapping.setFromSourceUrl(prependBaseUrl(baseUrl, oclMapping.getFromSourceUrl()));
+      oclMapping.setToConceptUrl(prependBaseUrl(baseUrl, oclMapping.getToConceptUrl()));
+      oclMapping.setToSourceUrl(prependBaseUrl(baseUrl, oclMapping.getToSourceUrl()));
 
-		if (token == JsonToken.END_OBJECT) {
-			return;
-		}
+      Item item;
+      try {
+        item = saver.saveMapping(cacheService, anImport, oclMapping);
+        log.info("Imported mapping {}", oclMapping);
+      } catch (SavingException e) {
+        log.error("Failed to save mapping {}", oclMapping, e);
+        Context.clearSession();
+        cacheService.clearCache();
 
-		while (parser.nextToken() != JsonToken.END_ARRAY) {
-			OclMapping oclMapping = parser.readValueAs(OclMapping.class);
-			oclMapping.setUrl(prependBaseUrl(baseUrl, oclMapping.getUrl()));
-			oclMapping.setFromConceptUrl(prependBaseUrl(baseUrl, oclMapping.getFromConceptUrl()));
-			oclMapping.setFromSourceUrl(prependBaseUrl(baseUrl, oclMapping.getFromSourceUrl()));
-			oclMapping.setToConceptUrl(prependBaseUrl(baseUrl, oclMapping.getToConceptUrl()));
-			oclMapping.setToSourceUrl(prependBaseUrl(baseUrl, oclMapping.getToSourceUrl()));
+        item = new Item(anImport, oclMapping, ItemState.ERROR, e.getMessage());
+      } catch (Throwable e) {
+        log.error("Failed to import mapping {}", oclMapping, e);
+        Context.clearSession();
+        cacheService.clearCache();
 
-			Item item;
-			try {
-				item = saver.saveMapping(cacheService, anImport, oclMapping);
-				log.info("Imported mapping {}", oclMapping);
-			} catch (SavingException e) {
-				log.error("Failed to save mapping {}", oclMapping, e);
-				Context.clearSession();
-				cacheService.clearCache();
+        item = new Item(anImport, oclMapping, ItemState.ERROR);
+        item.setErrorMessage(getUserFriendlyErrorMessage(e));
+      }
+      items.add(item);
 
-				item = new Item(anImport, oclMapping, ItemState.ERROR, e.getMessage());
-			} catch (Throwable e) {
-				log.error("Failed to import mapping {}", oclMapping, e);
-				Context.clearSession();
-				cacheService.clearCache();
+      if (items.size() >= BATCH_SIZE) {
+        importService.saveItems(items);
+        items = new ArrayList<>(BATCH_SIZE);
+        // Flush and clear session to prevent memory buildup, then clear cache since entities are
+        // detached
+        importService.flushAndClearSession();
+        cacheService.clearCache();
+      }
+    }
 
-				item = new Item(anImport, oclMapping, ItemState.ERROR);
-				item.setErrorMessage(getUserFriendlyErrorMessage(e));
-			}
-			items.add(item);
+    if (!items.isEmpty()) {
+      importService.saveItems(items);
+    }
+  }
 
-			if (items.size() >= BATCH_SIZE) {
-				importService.saveItems(items);
-				items = new ArrayList<>(BATCH_SIZE);
-				// Flush and clear session to prevent memory buildup, then clear cache since entities are detached
-				importService.flushAndClearSession();
-				cacheService.clearCache();
-			}
-		}
+  private String prependBaseUrl(String baseUrl, String url) {
+    if (baseUrl == null) {
+      return url;
+    }
+    if (StringUtils.isBlank(url)) {
+      return null;
+    }
+    if (StringUtils.startsWithAny(url, "http://", "https://")) {
+      return url;
+    }
 
-		if (!items.isEmpty()) {
-			importService.saveItems(items);
-		}
-	}
+    if (!url.startsWith("/")) {
+      url = "/" + url;
+    }
+    return baseUrl + url;
+  }
 
-	private String prependBaseUrl(String baseUrl, String url) {
-		if (baseUrl == null) {
-			return url;
-		}
-		if (StringUtils.isBlank(url)) {
-			return null;
-		}
-		if (StringUtils.startsWithAny(url, "http://", "https://")) {
-			return url;
-		}
+  private JsonToken advanceToListOf(String field, String stopAtField, JsonParser parser)
+      throws IOException {
+    JsonToken token = parser.getCurrentToken();
+    if (token == null) {
+      token = parser.nextToken();
+    }
 
-		if (!url.startsWith("/")) {
-			url = "/" + url;
-		}
-		return baseUrl + url;
-	}
+    do {
+      if (token == JsonToken.START_OBJECT) {
+        String text = parser.getText();
+        while ((token = parser.nextToken()) != JsonToken.END_OBJECT) {
+          if (token == null) {
+            throw new IOException("Missing end of object: " + text);
+          }
+        }
+      } else if (parser.getText().equals(field)) {
+        token = parser.nextToken();
+        if (token != JsonToken.START_ARRAY) {
+          throw new ImportException(field + " must be a list");
+        }
+        return token;
+      } else if (token == JsonToken.START_ARRAY) {
+        String text = parser.getText();
+        while ((token = parser.nextToken()) != JsonToken.END_ARRAY) {
+          if (token == null) {
+            throw new IOException("Missing end of array: " + text);
+          }
+        }
+      } else if (stopAtField != null && parser.getText().equals(stopAtField)) {
+        return token;
+      }
+    } while ((token = parser.nextToken()) != null);
 
-	private JsonToken advanceToListOf(String field, String stopAtField, JsonParser parser) throws IOException {
-		JsonToken token = parser.getCurrentToken();
-		if (token == null) {
-			token = parser.nextToken();
-		}
+    return null;
+  }
 
-		do {
-			if (token == JsonToken.START_OBJECT) {
-				String text = parser.getText();
-				while ((token = parser.nextToken()) != JsonToken.END_OBJECT) {
-					if (token == null) {
-						throw new IOException("Missing end of object: " + text);
-					}
-				}
-			} else if (parser.getText().equals(field)) {
-				token = parser.nextToken();
-				if (token != JsonToken.START_ARRAY) {
-					throw new ImportException(field + " must be a list");
-				}
-				return token;
-			} else if (token == JsonToken.START_ARRAY) {
-				String text = parser.getText();
-				while ((token = parser.nextToken()) != JsonToken.END_ARRAY) {
-					if (token == null) {
-						throw new IOException("Missing end of array: " + text);
-					}
-				}
-			} else if (stopAtField != null && parser.getText().equals(stopAtField)) {
-				return token;
-			}
-		} while ((token = parser.nextToken()) != null);
+  public ImportProgress getImportProgress(String uuid) {
+    ImportProgress updateProgress = new ImportProgress();
 
-		return null;
-	}
+    Import oclImport;
+    if (StringUtils.isNotBlank(uuid)) {
+      oclImport = importService.getImport(uuid);
+    } else {
+      oclImport = importService.getLastImport();
+    }
 
-	public ImportProgress getImportProgress(String uuid){
-		ImportProgress updateProgress = new ImportProgress();
+    if (oclImport.getLocalDateStopped() == null) {
+      long time = (new Date().getTime() - oclImport.getLocalDateStarted().getTime()) / 1000;
+      updateProgress.setTime(time);
 
-		Import oclImport;
-		if (StringUtils.isNotBlank(uuid)) {
-			oclImport = importService.getImport(uuid);
-		} else {
-			oclImport = importService.getLastImport();
-		}
+      if (!isDownloaded()) {
+        double totalBytesToDownload = getTotalBytesToDownload();
+        double progress;
+        if (getBytesDownloaded() == 0) {
+          // simulate download progress until first bytes are downloaded
+          progress = (double) time / (time + 5) * 10.0;
+        } else if (getTotalBytesToDownload() == -1) {
+          // simulate download progress since total bytes to download are unknown
+          progress = 10.0 + ((double) time / (time + 100) * 20.0);
+        } else {
+          progress = 10.0 + ((double) getBytesDownloaded() / totalBytesToDownload * 20.0);
+        }
+        updateProgress.setProgress((int) progress);
+      } else if (!isProcessed()) {
+        double progress = 30;
+        if (getTotalBytesToProcess() == -1) {
+          progress += ((double) time / (time + 100) * 70.0);
+        } else {
+          progress += ((double) getBytesProcessed() / getTotalBytesToProcess() * 70.0);
+        }
 
-		if (oclImport.getLocalDateStopped() == null) {
-			long time = (new Date().getTime() - oclImport.getLocalDateStarted().getTime()) / 1000;
-			updateProgress.setTime(time);
+        updateProgress.setProgress((int) progress);
+      } else {
+        updateProgress.setProgress(100);
+      }
+    } else {
+      updateProgress.setProgress(100);
+      updateProgress.setTime(
+          (oclImport.getLocalDateStopped().getTime() - oclImport.getLocalDateStarted().getTime())
+              / 1000);
+    }
 
-			if (!isDownloaded()) {
-				double totalBytesToDownload = getTotalBytesToDownload();
-				double progress;
-				if (getBytesDownloaded() == 0) {
-					//simulate download progress until first bytes are downloaded
-					progress = (double) time / (time + 5) * 10.0;
-				} else if (getTotalBytesToDownload() == -1) {
-					//simulate download progress since total bytes to download are unknown
-					progress = 10.0 + ((double) time / (time + 100) * 20.0);
-				} else {
-					progress = 10.0 + ((double) getBytesDownloaded() / totalBytesToDownload * 20.0);
-				}
-				updateProgress.setProgress((int) progress);
-			} else if (!isProcessed()) {
-				double progress = 30;
-				if (getTotalBytesToProcess() == -1) {
-					progress += ((double) time / (time + 100) * 70.0);
-				} else {
-					progress += ((double) getBytesProcessed() / getTotalBytesToProcess() * 70.0);
-				}
-
-				updateProgress.setProgress((int) progress);
-			} else {
-				updateProgress.setProgress(100);
-			}
-		} else {
-			updateProgress.setProgress(100);
-			updateProgress.setTime((oclImport.getLocalDateStopped().getTime() - oclImport.getLocalDateStarted().getTime()) / 1000);
-		}
-
-		return updateProgress;
-	}
-
+    return updateProgress;
+  }
 }

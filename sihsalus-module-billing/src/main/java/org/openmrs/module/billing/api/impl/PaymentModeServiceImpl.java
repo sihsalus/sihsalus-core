@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import java.util.Date;
+import java.util.List;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
@@ -19,107 +21,102 @@ import org.openmrs.module.billing.api.model.PaymentMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-
-/**
- * Default implementation of {@link PaymentModeService}.
- */
+/** Default implementation of {@link PaymentModeService}. */
 @Transactional
 public class PaymentModeServiceImpl extends BaseOpenmrsService implements PaymentModeService {
-	
-	@Setter(onMethod_ = { @Autowired })
-	private PaymentModeDAO paymentModeDAO;
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public PaymentMode getPaymentMode(Integer id) {
-		if (id == null) {
-			return null;
-		}
-		return paymentModeDAO.getPaymentMode(id);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public PaymentMode getPaymentModeByUuid(String uuid) {
-		if (StringUtils.isEmpty(uuid)) {
-			return null;
-		}
-		return paymentModeDAO.getPaymentModeByUuid(uuid);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public List<PaymentMode> getPaymentModes(boolean includeRetired) {
-		return paymentModeDAO.getPaymentModes(includeRetired);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	@Transactional
-	public PaymentMode savePaymentMode(PaymentMode paymentMode) {
-		if (paymentMode == null) {
-			throw new NullPointerException("Payment mode cannot be null");
-		}
-		return paymentModeDAO.savePaymentMode(paymentMode);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	@Transactional
-	public PaymentMode retirePaymentMode(PaymentMode paymentMode, String reason) {
-		if (paymentMode == null) {
-			throw new NullPointerException("Payment mode cannot be null");
-		}
-		if (StringUtils.isEmpty(reason)) {
-			throw new IllegalArgumentException("Retire reason cannot be null");
-		}
-		paymentMode.setRetired(true);
-		paymentMode.setRetiredBy(Context.getAuthenticatedUser());
-		paymentMode.setDateRetired(new Date());
-		paymentMode.setRetireReason(reason);
-		return paymentModeDAO.savePaymentMode(paymentMode);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	@Transactional
-	public PaymentMode unretirePaymentMode(PaymentMode paymentMode) {
-		if (paymentMode == null) {
-			throw new NullPointerException("Payment mode cannot be null");
-		}
-		paymentMode.setRetired(false);
-		paymentMode.setRetiredBy(null);
-		paymentMode.setDateRetired(null);
-		paymentMode.setRetireReason(null);
-		return paymentModeDAO.savePaymentMode(paymentMode);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	@Transactional
-	public void purgePaymentMode(PaymentMode paymentMode) {
-		if (paymentMode == null) {
-			throw new NullPointerException("Payment mode cannot be null");
-		}
-		paymentModeDAO.purgePaymentMode(paymentMode);
-	}
+
+  @Setter(onMethod_ = {@Autowired})
+  private PaymentModeDAO paymentModeDAO;
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public PaymentMode getPaymentMode(Integer id) {
+    if (id == null) {
+      return null;
+    }
+    return paymentModeDAO.getPaymentMode(id);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public PaymentMode getPaymentModeByUuid(String uuid) {
+    if (StringUtils.isEmpty(uuid)) {
+      return null;
+    }
+    return paymentModeDAO.getPaymentModeByUuid(uuid);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<PaymentMode> getPaymentModes(boolean includeRetired) {
+    return paymentModeDAO.getPaymentModes(includeRetired);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  @Transactional
+  public PaymentMode savePaymentMode(PaymentMode paymentMode) {
+    if (paymentMode == null) {
+      throw new NullPointerException("Payment mode cannot be null");
+    }
+    return paymentModeDAO.savePaymentMode(paymentMode);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  @Transactional
+  public PaymentMode retirePaymentMode(PaymentMode paymentMode, String reason) {
+    if (paymentMode == null) {
+      throw new NullPointerException("Payment mode cannot be null");
+    }
+    if (StringUtils.isEmpty(reason)) {
+      throw new IllegalArgumentException("Retire reason cannot be null");
+    }
+    paymentMode.setRetired(true);
+    paymentMode.setRetiredBy(Context.getAuthenticatedUser());
+    paymentMode.setDateRetired(new Date());
+    paymentMode.setRetireReason(reason);
+    return paymentModeDAO.savePaymentMode(paymentMode);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  @Transactional
+  public PaymentMode unretirePaymentMode(PaymentMode paymentMode) {
+    if (paymentMode == null) {
+      throw new NullPointerException("Payment mode cannot be null");
+    }
+    paymentMode.setRetired(false);
+    paymentMode.setRetiredBy(null);
+    paymentMode.setDateRetired(null);
+    paymentMode.setRetireReason(null);
+    return paymentModeDAO.savePaymentMode(paymentMode);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  @Transactional
+  public void purgePaymentMode(PaymentMode paymentMode) {
+    if (paymentMode == null) {
+      throw new NullPointerException("Payment mode cannot be null");
+    }
+    paymentModeDAO.purgePaymentMode(paymentMode);
+  }
 }

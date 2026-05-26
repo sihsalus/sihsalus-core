@@ -10,7 +10,6 @@
 package org.openmrs.module.cohort.web.resource;
 
 import java.util.List;
-
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cohort.CohortMember;
 import org.openmrs.module.cohort.CohortMemberAttribute;
@@ -25,54 +24,65 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9.BaseAttributeCrudResource1_9;
 
 @SuppressWarnings("unused")
-@SubResource(parent = CohortMemberResource.class, path = "attribute", supportedClass = CohortMemberAttribute.class, supportedOpenmrsVersions = {
-        "1.8 - 9.*" })
-public class CohortMemberAttributeResource extends BaseAttributeCrudResource1_9<CohortMemberAttribute, CohortMember, CohortMemberResource> {
-	
-	@Override
-	public CohortMember getParent(CohortMemberAttribute cohortMemberAttribute) {
-		return cohortMemberAttribute.getCohortMember();
-	}
-	
-	@Override
-	public void setParent(CohortMemberAttribute cohortMemberAttribute, CohortMember cohortMember) {
-		cohortMemberAttribute.setCohortMember(cohortMember);
-	}
-	
-	@Override
-	public PageableResult doGetAll(CohortMember cohortMember, RequestContext requestContext) throws ResponseException {
-		return new NeedsPaging<>((List<CohortMemberAttribute>) cohortMember.getActiveAttributes(), requestContext);
-	}
-	
-	@Override
-	public CohortMemberAttribute getByUniqueId(String uuid) {
-		return Context.getService(CohortMemberService.class).getCohortMemberAttributeByUuid(uuid);
-	}
-	
-	@Override
-	public CohortMemberAttribute save(CohortMemberAttribute cohortMemberAttribute) {
-		return Context.getService(CohortMemberService.class).saveCohortMemberAttribute(cohortMemberAttribute);
-	}
-	
-	@Override
-	protected void delete(CohortMemberAttribute cohortMemberAttribute, String reason, RequestContext requestContext)
-	        throws ResponseException {
-		Context.getService(CohortMemberService.class).voidCohortMemberAttribute(cohortMemberAttribute, reason);
-	}
-	
-	@Override
-	public CohortMemberAttribute newDelegate() {
-		return new CohortMemberAttribute();
-	}
-	
-	@Override
-	public void purge(CohortMemberAttribute cohortMemberAttribute, RequestContext requestContext) throws ResponseException {
-		Context.getService(CohortMemberService.class).purgeCohortMemberAttribute(cohortMemberAttribute);
-	}
-	
-	@PropertySetter("attributeType")
-	public static void setAttributeType(CohortMemberAttribute cohortMemberAttribute,
-	        CohortMemberAttributeType attributeType) {
-		cohortMemberAttribute.setAttributeType(attributeType);
-	}
+@SubResource(
+    parent = CohortMemberResource.class,
+    path = "attribute",
+    supportedClass = CohortMemberAttribute.class,
+    supportedOpenmrsVersions = {"1.8 - 9.*"})
+public class CohortMemberAttributeResource
+    extends BaseAttributeCrudResource1_9<
+        CohortMemberAttribute, CohortMember, CohortMemberResource> {
+
+  @Override
+  public CohortMember getParent(CohortMemberAttribute cohortMemberAttribute) {
+    return cohortMemberAttribute.getCohortMember();
+  }
+
+  @Override
+  public void setParent(CohortMemberAttribute cohortMemberAttribute, CohortMember cohortMember) {
+    cohortMemberAttribute.setCohortMember(cohortMember);
+  }
+
+  @Override
+  public PageableResult doGetAll(CohortMember cohortMember, RequestContext requestContext)
+      throws ResponseException {
+    return new NeedsPaging<>(
+        (List<CohortMemberAttribute>) cohortMember.getActiveAttributes(), requestContext);
+  }
+
+  @Override
+  public CohortMemberAttribute getByUniqueId(String uuid) {
+    return Context.getService(CohortMemberService.class).getCohortMemberAttributeByUuid(uuid);
+  }
+
+  @Override
+  public CohortMemberAttribute save(CohortMemberAttribute cohortMemberAttribute) {
+    return Context.getService(CohortMemberService.class)
+        .saveCohortMemberAttribute(cohortMemberAttribute);
+  }
+
+  @Override
+  protected void delete(
+      CohortMemberAttribute cohortMemberAttribute, String reason, RequestContext requestContext)
+      throws ResponseException {
+    Context.getService(CohortMemberService.class)
+        .voidCohortMemberAttribute(cohortMemberAttribute, reason);
+  }
+
+  @Override
+  public CohortMemberAttribute newDelegate() {
+    return new CohortMemberAttribute();
+  }
+
+  @Override
+  public void purge(CohortMemberAttribute cohortMemberAttribute, RequestContext requestContext)
+      throws ResponseException {
+    Context.getService(CohortMemberService.class).purgeCohortMemberAttribute(cohortMemberAttribute);
+  }
+
+  @PropertySetter("attributeType")
+  public static void setAttributeType(
+      CohortMemberAttribute cohortMemberAttribute, CohortMemberAttributeType attributeType) {
+    cohortMemberAttribute.setAttributeType(attributeType);
+  }
 }

@@ -10,27 +10,26 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Patient;
 
 public interface PatientReferenceTranslator extends OpenmrsFhirTranslator<Patient, Reference> {
-	
-	/**
-	 * Maps an {@link Patient} to a FHIR reference
-	 *
-	 * @param patient the patient to translate
-	 * @return the corresponding FHIR reference
-	 */
-	@Override
-	Reference toFhirResource(@Nonnull Patient patient);
-	
-	/**
-	 * Maps a FHIR reference to an {@link Patient}
-	 *
-	 * @param patient the FHIR reference to translate
-	 * @return the corresponding OpenMRS patient
-	 */
-	@Override
-	Patient toOpenmrsType(@Nonnull Reference patient);
+
+  /**
+   * Maps an {@link Patient} to a FHIR reference
+   *
+   * @param patient the patient to translate
+   * @return the corresponding FHIR reference
+   */
+  @Override
+  Reference toFhirResource(@Nonnull Patient patient);
+
+  /**
+   * Maps a FHIR reference to an {@link Patient}
+   *
+   * @param patient the FHIR reference to translate
+   * @return the corresponding OpenMRS patient
+   */
+  @Override
+  Patient toOpenmrsType(@Nonnull Reference patient);
 }

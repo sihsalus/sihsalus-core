@@ -9,20 +9,19 @@
  */
 package org.openmrs.module.emrapi.procedure;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.openmrs.BaseOpenmrsMetadata;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import org.openmrs.BaseOpenmrsMetadata;
 
 /**
  * Metadata entity representing a type/category of procedure.
- * 
+ *
  * @since 3.4.0
  */
 @Getter
@@ -30,29 +29,28 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "emrapi_procedure_type")
 public class ProcedureType extends BaseOpenmrsMetadata {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "procedure_type_id")
-	private Integer procedureTypeId;
-	
-	public ProcedureType() {
-	}
-	
-	public ProcedureType(String name, String description) {
-		setName(name);
-		setDescription(description);
-	}
-	
-	@Override
-	public Integer getId() {
-		return procedureTypeId;
-	}
-	
-	@Override
-	public void setId(Integer id) {
-		this.procedureTypeId = id;
-	}
+
+  private static final long serialVersionUID = 1L;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "procedure_type_id")
+  private Integer procedureTypeId;
+
+  public ProcedureType() {}
+
+  public ProcedureType(String name, String description) {
+    setName(name);
+    setDescription(description);
+  }
+
+  @Override
+  public Integer getId() {
+    return procedureTypeId;
+  }
+
+  @Override
+  public void setId(Integer id) {
+    this.procedureTypeId = id;
+  }
 }

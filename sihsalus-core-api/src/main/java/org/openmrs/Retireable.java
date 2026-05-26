@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs;
 
@@ -26,47 +26,47 @@ import java.util.Date;
  */
 public interface Retireable extends OpenmrsObject {
 
-	/**
-	 * @return Boolean - whether of not this object is retired
-	 * @deprecated as of 2.0, use {@link #getRetired()}
-	 */
-	@Deprecated
-	public Boolean isRetired();
+  /**
+   * @return Boolean - whether of not this object is retired
+   * @deprecated as of 2.0, use {@link #getRetired()}
+   */
+  @Deprecated
+  public Boolean isRetired();
 
-	public Boolean getRetired();
+  public Boolean getRetired();
 
-	/**
-	 * @param retired - whether of not this object is retired
-	 */
-	public void setRetired(Boolean retired);
+  /**
+   * @param retired - whether of not this object is retired
+   */
+  public void setRetired(Boolean retired);
 
-	/**
-	 * @return User - the user who retired the object
-	 */
-	public User getRetiredBy();
+  /**
+   * @return User - the user who retired the object
+   */
+  public User getRetiredBy();
 
-	/**
-	 * @param retiredBy - the user who retired the object
-	 */
-	public void setRetiredBy(User retiredBy);
+  /**
+   * @param retiredBy - the user who retired the object
+   */
+  public void setRetiredBy(User retiredBy);
 
-	/**
-	 * @return Date - the date the object was retired
-	 */
-	public Date getDateRetired();
+  /**
+   * @return Date - the date the object was retired
+   */
+  public Date getDateRetired();
 
-	/**
-	 * @param dateRetired - the date the object was retired
-	 */
-	public void setDateRetired(Date dateRetired);
+  /**
+   * @param dateRetired - the date the object was retired
+   */
+  public void setDateRetired(Date dateRetired);
 
-	/**
-	 * @return String - the reason the object was retired
-	 */
-	public String getRetireReason();
+  /**
+   * @return String - the reason the object was retired
+   */
+  public String getRetireReason();
 
-	/**
-	 * @param retireReason - the reason the object was retired
-	 */
-	public void setRetireReason(String retireReason);
+  /**
+   * @param retireReason - the reason the object was retired
+   */
+  public void setRetireReason(String retireReason);
 }

@@ -15,10 +15,8 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createLocationReferenceByUuid;
 
-import javax.annotation.Nonnull;
-
 import java.util.function.Supplier;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -50,143 +48,148 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ObservationTranslatorImpl implements ObservationTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationStatusTranslator observationStatusTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationReferenceTranslator observationReferenceTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationValueTranslator observationValueTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ConceptTranslator conceptTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationCategoryTranslator categoryTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PatientReferenceTranslator patientReferenceTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationInterpretationTranslator interpretationTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationReferenceRangeTranslator referenceRangeTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationBasedOnReferenceTranslator basedOnReferenceTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationEffectiveDatetimeTranslator datetimeTranslator;
-	
-	@Override
-	public Observation toFhirResource(@Nonnull Obs observation) {
-		notNull(observation, "The Obs object should not be null");
-		
-		Observation obs = new Observation();
-		obs.setId(observation.getUuid());
-		obs.setStatus(observationStatusTranslator.toFhirResource(observation));
-		
-		obs.setEncounter(encounterReferenceTranslator.toFhirResource(observation.getEncounter()));
-		
-		Person obsPerson = observation.getPerson();
-		if (obsPerson != null) {
-			if (obsPerson instanceof HibernateProxy) {
-				obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
-			}
-			
-			if (obsPerson instanceof Patient) {
-				obs.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
-			}
-		}
-		
-		obs.setCode(conceptTranslator.toFhirResource(observation.getConcept()));
-		obs.addCategory(categoryTranslator.toFhirResource(observation.getConcept()));
-		
-		if (observation.isObsGrouping()) {
-			for (Obs groupObs : observation.getGroupMembers()) {
-				if (!groupObs.getVoided()) {
-					obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
-				}
-			}
-		}
-		
-		obs.setValue(observationValueTranslator.toFhirResource(observation));
-		
-		obs.addInterpretation(interpretationTranslator.toFhirResource(observation));
-		
-		if (observation.getValueNumeric() != null) {
-			Concept concept = observation.getConcept();
-			if (concept instanceof ConceptNumeric) {
-				obs.setReferenceRange(referenceRangeTranslator.toFhirResource(observation));
-			}
-		}
-		
-		if (observation.getValueText() != null && StringUtils.equals(observation.getComment(), "org.openmrs.Location")) {
-			obs.addExtension(FhirConstants.OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE,
-			    createLocationReferenceByUuid(observation.getValueText()));
-		}
-		
-		obs.setIssued(observation.getDateCreated());
-		obs.setEffective(datetimeTranslator.toFhirResource(observation));
-		obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
-		
-		obs.getMeta().setLastUpdated(getLastUpdated(observation));
-		obs.getMeta().setVersionId(getVersionId(observation));
-		
-		return obs;
-	}
-	
-	@Override
-	public Obs toOpenmrsType(@Nonnull Observation fhirObservation) {
-		notNull(fhirObservation, "The Observation object should not be null");
-		return toOpenmrsType(new Obs(), fhirObservation);
-	}
-	
-	@Override
-	public Obs toOpenmrsType(Obs existingObs, Observation observation, Supplier<Obs> groupedObsFactory) {
-		notNull(existingObs, "The existing Obs object should not be null");
-		notNull(observation, "The Observation object should not be null");
-		
-		observationStatusTranslator.toOpenmrsType(existingObs, observation.getStatus());
-		
-		existingObs.setEncounter(encounterReferenceTranslator.toOpenmrsType(observation.getEncounter()));
-		existingObs.setPerson(patientReferenceTranslator.toOpenmrsType(observation.getSubject()));
-		
-		existingObs.setConcept(conceptTranslator.toOpenmrsType(observation.getCode()));
-		
-		for (Reference reference : observation.getHasMember()) {
-			existingObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(reference));
-		}
-		
-		observationValueTranslator.toOpenmrsType(existingObs, observation.getValue());
-		
-		if (!observation.getInterpretation().isEmpty()) {
-			interpretationTranslator.toOpenmrsType(existingObs, observation.getInterpretation().get(0));
-		}
-		
-		datetimeTranslator.toOpenmrsType(existingObs, observation.getEffectiveDateTimeType());
-		
-		if (observation.hasBasedOn()) {
-			existingObs.setOrder(basedOnReferenceTranslator.toOpenmrsType(observation.getBasedOn().get(0)));
-		}
-		
-		return existingObs;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationStatusTranslator observationStatusTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationReferenceTranslator observationReferenceTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationValueTranslator observationValueTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ConceptTranslator conceptTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationCategoryTranslator categoryTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PatientReferenceTranslator patientReferenceTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationInterpretationTranslator interpretationTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationReferenceRangeTranslator referenceRangeTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationBasedOnReferenceTranslator basedOnReferenceTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationEffectiveDatetimeTranslator datetimeTranslator;
+
+  @Override
+  public Observation toFhirResource(@Nonnull Obs observation) {
+    notNull(observation, "The Obs object should not be null");
+
+    Observation obs = new Observation();
+    obs.setId(observation.getUuid());
+    obs.setStatus(observationStatusTranslator.toFhirResource(observation));
+
+    obs.setEncounter(encounterReferenceTranslator.toFhirResource(observation.getEncounter()));
+
+    Person obsPerson = observation.getPerson();
+    if (obsPerson != null) {
+      if (obsPerson instanceof HibernateProxy) {
+        obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
+      }
+
+      if (obsPerson instanceof Patient) {
+        obs.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
+      }
+    }
+
+    obs.setCode(conceptTranslator.toFhirResource(observation.getConcept()));
+    obs.addCategory(categoryTranslator.toFhirResource(observation.getConcept()));
+
+    if (observation.isObsGrouping()) {
+      for (Obs groupObs : observation.getGroupMembers()) {
+        if (!groupObs.getVoided()) {
+          obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
+        }
+      }
+    }
+
+    obs.setValue(observationValueTranslator.toFhirResource(observation));
+
+    obs.addInterpretation(interpretationTranslator.toFhirResource(observation));
+
+    if (observation.getValueNumeric() != null) {
+      Concept concept = observation.getConcept();
+      if (concept instanceof ConceptNumeric) {
+        obs.setReferenceRange(referenceRangeTranslator.toFhirResource(observation));
+      }
+    }
+
+    if (observation.getValueText() != null
+        && StringUtils.equals(observation.getComment(), "org.openmrs.Location")) {
+      obs.addExtension(
+          FhirConstants.OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE,
+          createLocationReferenceByUuid(observation.getValueText()));
+    }
+
+    obs.setIssued(observation.getDateCreated());
+    obs.setEffective(datetimeTranslator.toFhirResource(observation));
+    obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
+
+    obs.getMeta().setLastUpdated(getLastUpdated(observation));
+    obs.getMeta().setVersionId(getVersionId(observation));
+
+    return obs;
+  }
+
+  @Override
+  public Obs toOpenmrsType(@Nonnull Observation fhirObservation) {
+    notNull(fhirObservation, "The Observation object should not be null");
+    return toOpenmrsType(new Obs(), fhirObservation);
+  }
+
+  @Override
+  public Obs toOpenmrsType(
+      Obs existingObs, Observation observation, Supplier<Obs> groupedObsFactory) {
+    notNull(existingObs, "The existing Obs object should not be null");
+    notNull(observation, "The Observation object should not be null");
+
+    observationStatusTranslator.toOpenmrsType(existingObs, observation.getStatus());
+
+    existingObs.setEncounter(
+        encounterReferenceTranslator.toOpenmrsType(observation.getEncounter()));
+    existingObs.setPerson(patientReferenceTranslator.toOpenmrsType(observation.getSubject()));
+
+    existingObs.setConcept(conceptTranslator.toOpenmrsType(observation.getCode()));
+
+    for (Reference reference : observation.getHasMember()) {
+      existingObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(reference));
+    }
+
+    observationValueTranslator.toOpenmrsType(existingObs, observation.getValue());
+
+    if (!observation.getInterpretation().isEmpty()) {
+      interpretationTranslator.toOpenmrsType(existingObs, observation.getInterpretation().get(0));
+    }
+
+    datetimeTranslator.toOpenmrsType(existingObs, observation.getEffectiveDateTimeType());
+
+    if (observation.hasBasedOn()) {
+      existingObs.setOrder(
+          basedOnReferenceTranslator.toOpenmrsType(observation.getBasedOn().get(0)));
+    }
+
+    return existingObs;
+  }
 }

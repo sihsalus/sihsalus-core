@@ -12,28 +12,26 @@ package org.openmrs.module.billing.api.base.entity.model;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.customdatatype.CustomValueDescriptor;
 
-/**
- * Represents classes that define attribute type information.
- */
+/** Represents classes that define attribute type information. */
 public interface IAttributeType extends OpenmrsMetadata, CustomValueDescriptor {
-	
-	Integer getAttributeOrder();
-	
-	void setAttributeOrder(Integer attributeOrder);
-	
-	String getFormat();
-	
-	void setFormat(String format);
-	
-	Integer getForeignKey();
-	
-	void setForeignKey(Integer foreignKey);
-	
-	String getRegExp();
-	
-	void setRegExp(String regExp);
-	
-	Boolean getRequired();
-	
-	void setRequired(Boolean required);
+
+  Integer getAttributeOrder();
+
+  void setAttributeOrder(Integer attributeOrder);
+
+  String getFormat();
+
+  void setFormat(String format);
+
+  Integer getForeignKey();
+
+  void setForeignKey(Integer foreignKey);
+
+  String getRegExp();
+
+  void setRegExp(String regExp);
+
+  Boolean getRequired();
+
+  void setRequired(Boolean required);
 }

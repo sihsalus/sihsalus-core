@@ -10,41 +10,44 @@
 package org.openmrs.module.billing.api.base.entity.model;
 
 /**
- * Base class for {@link org.openmrs.OpenmrsData} models that can be customized based on an
- * {@link IInstanceType}
- * 
+ * Base class for {@link org.openmrs.OpenmrsData} models that can be customized based on an {@link
+ * IInstanceType}
+ *
  * @param <TInstanceType> The model instance type class.
  * @param <TAttribute> The model attribute class.
  */
-public abstract class BaseInstanceCustomizableData<TInstanceType extends IInstanceType<?>, TAttribute extends IInstanceAttribute<?, ?, ?>> extends BaseCustomizableData<TAttribute> implements IInstanceCustomizable<TInstanceType, TAttribute> {
-	
-	// @formatter:on
-	private static final long serialVersionUID = 1L;
-	
-	private TInstanceType instanceType;
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	protected void onAddAttribute(TAttribute attribute) {
-		super.onAddAttribute(attribute);
-		
-		((IInstanceAttribute) attribute).setOwner(this);
-	}
-	
-	@Override
-	protected void onRemoveAttribute(TAttribute attribute) {
-		super.onRemoveAttribute(attribute);
-		
-		attribute.setOwner(null);
-	}
-	
-	@Override
-	public TInstanceType getInstanceType() {
-		return instanceType;
-	}
-	
-	@Override
-	public void setInstanceType(TInstanceType instanceType) {
-		this.instanceType = instanceType;
-	}
+public abstract class BaseInstanceCustomizableData<
+        TInstanceType extends IInstanceType<?>, TAttribute extends IInstanceAttribute<?, ?, ?>>
+    extends BaseCustomizableData<TAttribute>
+    implements IInstanceCustomizable<TInstanceType, TAttribute> {
+
+  // @formatter:on
+  private static final long serialVersionUID = 1L;
+
+  private TInstanceType instanceType;
+
+  @Override
+  @SuppressWarnings("unchecked")
+  protected void onAddAttribute(TAttribute attribute) {
+    super.onAddAttribute(attribute);
+
+    ((IInstanceAttribute) attribute).setOwner(this);
+  }
+
+  @Override
+  protected void onRemoveAttribute(TAttribute attribute) {
+    super.onRemoveAttribute(attribute);
+
+    attribute.setOwner(null);
+  }
+
+  @Override
+  public TInstanceType getInstanceType() {
+    return instanceType;
+  }
+
+  @Override
+  public void setInstanceType(TInstanceType instanceType) {
+    this.instanceType = instanceType;
+  }
 }

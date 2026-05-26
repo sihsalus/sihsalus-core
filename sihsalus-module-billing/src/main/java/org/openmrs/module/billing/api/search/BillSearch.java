@@ -10,7 +10,6 @@
 package org.openmrs.module.billing.api.search;
 
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,18 +28,18 @@ import org.openmrs.module.billing.api.model.BillStatus;
 @AllArgsConstructor
 @Builder
 public class BillSearch {
-	
-	private String patientUuid;
-	
-	private String cashierUuid;
-	
-	private String cashPointUuid;
-	
-	private List<BillStatus> statuses;
-	
-	private String patientName;
-	
-	private Boolean includeVoided = false;
-	
-	private Boolean includeVoidedLineItems = false;
+
+  private String patientUuid;
+
+  private String cashierUuid;
+
+  private String cashPointUuid;
+
+  private List<BillStatus> statuses;
+
+  private String patientName;
+
+  private Boolean includeVoided = false;
+
+  private Boolean includeVoidedLineItems = false;
 }

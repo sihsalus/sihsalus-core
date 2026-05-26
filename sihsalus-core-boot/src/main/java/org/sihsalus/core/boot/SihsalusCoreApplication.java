@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "org.sihsalus")
 public class SihsalusCoreApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(SihsalusCoreApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(SihsalusCoreApplication.class, args);
+  }
 }

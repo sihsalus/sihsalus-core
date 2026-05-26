@@ -11,7 +11,6 @@ package org.openmrs.module.cohort.extension.html;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.openmrs.module.Extension;
 
 /**
@@ -19,30 +18,23 @@ import org.openmrs.module.Extension;
  * heading.
  */
 public class AdminList extends Extension {
-	
-	/**
-	 * Legacy UI extension media type.
-	 */
-	public Extension.MEDIA_TYPE getMediaType() {
-		return Extension.MEDIA_TYPE.html;
-	}
-	
-	/**
-	 * Legacy UI administration section title.
-	 */
-	public String getTitle() {
-		return "cohort.title";
-	}
-	
-	/**
-	 * Legacy UI administration links.
-	 */
-	public Map<String, String> getLinks() {
-		LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
-		map.put("/module/cohort/cohortDashboard.form", "Cohort Dashboard");
-		map.put("/module/cohort/patientSearch.form", "Cohort Patient Search");
-		map.put("/module/cohort/cohortSearch.form", "Cohort Search");
-		return map;
-	}
-	
+
+  /** Legacy UI extension media type. */
+  public Extension.MEDIA_TYPE getMediaType() {
+    return Extension.MEDIA_TYPE.html;
+  }
+
+  /** Legacy UI administration section title. */
+  public String getTitle() {
+    return "cohort.title";
+  }
+
+  /** Legacy UI administration links. */
+  public Map<String, String> getLinks() {
+    LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+    map.put("/module/cohort/cohortDashboard.form", "Cohort Dashboard");
+    map.put("/module/cohort/patientSearch.form", "Cohort Patient Search");
+    map.put("/module/cohort/cohortSearch.form", "Cohort Search");
+    return map;
+  }
 }

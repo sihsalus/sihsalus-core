@@ -23,10 +23,9 @@ import org.openmrs.module.reportingrest.adhoc.AdHocExportManager;
  */
 public class DeleteOldOldAdHocReportDefinitionsTask extends ReportingTask {
 
-	@Override
-	public synchronized void executeTask() {
-		AdHocExportManager m = Context.getRegisteredComponents(AdHocExportManager.class).get(0);
-		m.deleteTransientReportDefinitions();
-	}
-
+  @Override
+  public synchronized void executeTask() {
+    AdHocExportManager m = Context.getRegisteredComponents(AdHocExportManager.class).get(0);
+    m.deleteTransientReportDefinitions();
+  }
 }

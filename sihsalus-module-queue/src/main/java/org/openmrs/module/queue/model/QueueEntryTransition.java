@@ -11,7 +11,6 @@ package org.openmrs.module.queue.model;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import lombok.Data;
 import org.openmrs.Concept;
 
@@ -21,38 +20,41 @@ import org.openmrs.Concept;
  */
 @Data
 public class QueueEntryTransition implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	private QueueEntry queueEntryToTransition;
-	
-	private Date transitionDate;
-	
-	private Queue newQueue;
-	
-	private Concept newStatus;
-	
-	private Concept newPriority;
-	
-	private String newPriorityComment;
-	
-	/**
-	 * @return a new queue entry representing what one intends to transition into
-	 */
-	public QueueEntry constructNewQueueEntry() {
-		QueueEntry queueEntry = new QueueEntry();
-		queueEntry.setQueue(newQueue == null ? queueEntryToTransition.getQueue() : newQueue);
-		queueEntry.setPatient(queueEntryToTransition.getPatient());
-		queueEntry.setVisit(queueEntryToTransition.getVisit());
-		queueEntry.setPriority(newPriority == null ? queueEntryToTransition.getPriority() : newPriority);
-		queueEntry.setPriorityComment(
-		    newPriorityComment == null ? queueEntryToTransition.getPriorityComment() : newPriorityComment);
-		queueEntry.setStatus(newStatus == null ? queueEntryToTransition.getStatus() : newStatus);
-		queueEntry.setSortWeight(queueEntryToTransition.getSortWeight());
-		queueEntry.setLocationWaitingFor(queueEntryToTransition.getLocationWaitingFor());
-		queueEntry.setProviderWaitingFor(queueEntryToTransition.getProviderWaitingFor());
-		queueEntry.setQueueComingFrom(queueEntryToTransition.getQueue());
-		queueEntry.setStartedAt(transitionDate);
-		return queueEntry;
-	}
+
+  private static final long serialVersionUID = 1L;
+
+  private QueueEntry queueEntryToTransition;
+
+  private Date transitionDate;
+
+  private Queue newQueue;
+
+  private Concept newStatus;
+
+  private Concept newPriority;
+
+  private String newPriorityComment;
+
+  /**
+   * @return a new queue entry representing what one intends to transition into
+   */
+  public QueueEntry constructNewQueueEntry() {
+    QueueEntry queueEntry = new QueueEntry();
+    queueEntry.setQueue(newQueue == null ? queueEntryToTransition.getQueue() : newQueue);
+    queueEntry.setPatient(queueEntryToTransition.getPatient());
+    queueEntry.setVisit(queueEntryToTransition.getVisit());
+    queueEntry.setPriority(
+        newPriority == null ? queueEntryToTransition.getPriority() : newPriority);
+    queueEntry.setPriorityComment(
+        newPriorityComment == null
+            ? queueEntryToTransition.getPriorityComment()
+            : newPriorityComment);
+    queueEntry.setStatus(newStatus == null ? queueEntryToTransition.getStatus() : newStatus);
+    queueEntry.setSortWeight(queueEntryToTransition.getSortWeight());
+    queueEntry.setLocationWaitingFor(queueEntryToTransition.getLocationWaitingFor());
+    queueEntry.setProviderWaitingFor(queueEntryToTransition.getProviderWaitingFor());
+    queueEntry.setQueueComingFrom(queueEntryToTransition.getQueue());
+    queueEntry.setStartedAt(transitionDate);
+    return queueEntry;
+  }
 }

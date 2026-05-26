@@ -14,10 +14,10 @@ import org.hl7.fhir.r4.model.Location;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 
 public interface FhirLocationService extends FhirService<Location> {
-	
-	org.openmrs.Location get(Integer id);
-	
-	org.openmrs.Location getByUuid(String uuid);
-	
-	IBundleProvider searchForLocations(LocationSearchParams locationSearchParams);
+
+  org.openmrs.Location get(Integer id);
+
+  org.openmrs.Location getByUuid(String uuid);
+
+  IBundleProvider searchForLocations(LocationSearchParams locationSearchParams);
 }

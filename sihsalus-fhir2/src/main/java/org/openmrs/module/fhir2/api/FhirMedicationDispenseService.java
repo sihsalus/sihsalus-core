@@ -14,6 +14,6 @@ import org.hl7.fhir.r4.model.MedicationDispense;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 
 public interface FhirMedicationDispenseService extends FhirService<MedicationDispense> {
-	
-	IBundleProvider searchMedicationDispenses(MedicationDispenseSearchParams searchParams);
+
+  IBundleProvider searchMedicationDispenses(MedicationDispenseSearchParams searchParams);
 }

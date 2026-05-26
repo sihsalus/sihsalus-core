@@ -9,39 +9,37 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirDiagnosticReportDao extends FhirDao<FhirDiagnosticReport> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_OBS)
-	FhirDiagnosticReport get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_OBS)
-	List<FhirDiagnosticReport> get(@Nonnull Collection<String> uuids);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_OBS)
-	List<FhirDiagnosticReport> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_OBS)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized({ PrivilegeConstants.ADD_OBS, PrivilegeConstants.EDIT_OBS })
-	FhirDiagnosticReport createOrUpdate(@Nonnull FhirDiagnosticReport newEntry);
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_OBS)
-	FhirDiagnosticReport delete(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_OBS)
+  FhirDiagnosticReport get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_OBS)
+  List<FhirDiagnosticReport> get(@Nonnull Collection<String> uuids);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_OBS)
+  List<FhirDiagnosticReport> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_OBS)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized({PrivilegeConstants.ADD_OBS, PrivilegeConstants.EDIT_OBS})
+  FhirDiagnosticReport createOrUpdate(@Nonnull FhirDiagnosticReport newEntry);
+
+  @Override
+  @Authorized(PrivilegeConstants.DELETE_OBS)
+  FhirDiagnosticReport delete(@Nonnull String uuid);
 }

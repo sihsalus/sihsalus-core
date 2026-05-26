@@ -9,81 +9,78 @@
  */
 package org.openmrs.module.billing.api;
 
-import org.openmrs.api.OpenmrsService;
+import java.util.List;
 import org.openmrs.annotation.Authorized;
+import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
-import java.util.List;
-
-/**
- * Service for managing {@link PaymentMode} entities.
- */
+/** Service for managing {@link PaymentMode} entities. */
 public interface PaymentModeService extends OpenmrsService {
-	
-	/**
-	 * Gets the payment mode with the specified id.
-	 *
-	 * @param id the payment mode id
-	 * @return the payment mode or {@code null} if not found
-	 */
-	@Authorized(PrivilegeConstants.VIEW_METADATA)
-	PaymentMode getPaymentMode(Integer id);
-	
-	/**
-	 * Gets the payment mode with the specified uuid.
-	 *
-	 * @param uuid the payment mode uuid
-	 * @return the payment mode or {@code null} if not found
-	 */
-	@Authorized(PrivilegeConstants.VIEW_METADATA)
-	PaymentMode getPaymentModeByUuid(String uuid);
-	
-	/**
-	 * Gets all payment modes.
-	 *
-	 * @param includeRetired whether to include retired payment modes
-	 * @return a list of payment modes, or an empty list if none found
-	 */
-	@Authorized(PrivilegeConstants.VIEW_METADATA)
-	List<PaymentMode> getPaymentModes(boolean includeRetired);
-	
-	/**
-	 * Saves or updates the specified payment mode.
-	 *
-	 * @param paymentMode the payment mode to save
-	 * @return the saved payment mode
-	 * @throws NullPointerException if paymentMode is null
-	 */
-	@Authorized(PrivilegeConstants.MANAGE_METADATA)
-	PaymentMode savePaymentMode(PaymentMode paymentMode);
-	
-	/**
-	 * Retires the specified payment mode with the given reason.
-	 *
-	 * @param paymentMode the payment mode to retire
-	 * @param reason the reason for retiring
-	 * @return the retired payment mode
-	 * @throws IllegalArgumentException if reason is empty or null
-	 */
-	@Authorized(PrivilegeConstants.MANAGE_METADATA)
-	PaymentMode retirePaymentMode(PaymentMode paymentMode, String reason);
-	
-	/**
-	 * Unretires the specified payment mode.
-	 *
-	 * @param paymentMode the payment mode to unretire
-	 * @return the unretired payment mode
-	 */
-	@Authorized(PrivilegeConstants.MANAGE_METADATA)
-	PaymentMode unretirePaymentMode(PaymentMode paymentMode);
-	
-	/**
-	 * Permanently deletes the specified payment mode from the database.
-	 *
-	 * @param paymentMode the payment mode to purge
-	 * @throws NullPointerException if paymentMode is null
-	 */
-	@Authorized(PrivilegeConstants.PURGE_METADATA)
-	void purgePaymentMode(PaymentMode paymentMode);
+
+  /**
+   * Gets the payment mode with the specified id.
+   *
+   * @param id the payment mode id
+   * @return the payment mode or {@code null} if not found
+   */
+  @Authorized(PrivilegeConstants.VIEW_METADATA)
+  PaymentMode getPaymentMode(Integer id);
+
+  /**
+   * Gets the payment mode with the specified uuid.
+   *
+   * @param uuid the payment mode uuid
+   * @return the payment mode or {@code null} if not found
+   */
+  @Authorized(PrivilegeConstants.VIEW_METADATA)
+  PaymentMode getPaymentModeByUuid(String uuid);
+
+  /**
+   * Gets all payment modes.
+   *
+   * @param includeRetired whether to include retired payment modes
+   * @return a list of payment modes, or an empty list if none found
+   */
+  @Authorized(PrivilegeConstants.VIEW_METADATA)
+  List<PaymentMode> getPaymentModes(boolean includeRetired);
+
+  /**
+   * Saves or updates the specified payment mode.
+   *
+   * @param paymentMode the payment mode to save
+   * @return the saved payment mode
+   * @throws NullPointerException if paymentMode is null
+   */
+  @Authorized(PrivilegeConstants.MANAGE_METADATA)
+  PaymentMode savePaymentMode(PaymentMode paymentMode);
+
+  /**
+   * Retires the specified payment mode with the given reason.
+   *
+   * @param paymentMode the payment mode to retire
+   * @param reason the reason for retiring
+   * @return the retired payment mode
+   * @throws IllegalArgumentException if reason is empty or null
+   */
+  @Authorized(PrivilegeConstants.MANAGE_METADATA)
+  PaymentMode retirePaymentMode(PaymentMode paymentMode, String reason);
+
+  /**
+   * Unretires the specified payment mode.
+   *
+   * @param paymentMode the payment mode to unretire
+   * @return the unretired payment mode
+   */
+  @Authorized(PrivilegeConstants.MANAGE_METADATA)
+  PaymentMode unretirePaymentMode(PaymentMode paymentMode);
+
+  /**
+   * Permanently deletes the specified payment mode from the database.
+   *
+   * @param paymentMode the payment mode to purge
+   * @throws NullPointerException if paymentMode is null
+   */
+  @Authorized(PrivilegeConstants.PURGE_METADATA)
+  void purgePaymentMode(PaymentMode paymentMode);
 }

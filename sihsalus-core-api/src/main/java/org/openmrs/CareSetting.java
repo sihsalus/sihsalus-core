@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs;
 
@@ -17,7 +17,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.envers.Audited;
 import org.hibernate.type.SqlTypes;
@@ -42,53 +41,52 @@ import org.hibernate.type.SqlTypes;
 @Table(name = "care_setting")
 public class CareSetting extends BaseChangeableOpenmrsMetadata {
 
-	public enum CareSettingType {
-		OUTPATIENT,
-		INPATIENT
-	}
+  public enum CareSettingType {
+    OUTPATIENT,
+    INPATIENT
+  }
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "care_setting_id")
-	private Integer careSettingId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "care_setting_id")
+  private Integer careSettingId;
 
-	@Enumerated(EnumType.STRING)
-	@JdbcTypeCode(SqlTypes.VARCHAR)
-	@Column(name = "care_setting_type", length = 50, nullable = false)
-	private CareSettingType careSettingType;
+  @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
+  @Column(name = "care_setting_type", length = 50, nullable = false)
+  private CareSettingType careSettingType;
 
-	public CareSetting() {
-	}
+  public CareSetting() {}
 
-	public CareSetting(String name, String description, CareSettingType careSettingType) {
-		setName(name);
-		setDescription(description);
-		setCareSettingType(careSettingType);
-	}
+  public CareSetting(String name, String description, CareSettingType careSettingType) {
+    setName(name);
+    setDescription(description);
+    setCareSettingType(careSettingType);
+  }
 
-	public Integer getCareSettingId() {
-		return careSettingId;
-	}
+  public Integer getCareSettingId() {
+    return careSettingId;
+  }
 
-	public void setCareSettingId(Integer careSettingId) {
-		this.careSettingId = careSettingId;
-	}
+  public void setCareSettingId(Integer careSettingId) {
+    this.careSettingId = careSettingId;
+  }
 
-	public CareSettingType getCareSettingType() {
-		return careSettingType;
-	}
+  public CareSettingType getCareSettingType() {
+    return careSettingType;
+  }
 
-	public void setCareSettingType(CareSettingType careSettingType) {
-		this.careSettingType = careSettingType;
-	}
+  public void setCareSettingType(CareSettingType careSettingType) {
+    this.careSettingType = careSettingType;
+  }
 
-	@Override
-	public Integer getId() {
-		return getCareSettingId();
-	}
+  @Override
+  public Integer getId() {
+    return getCareSettingId();
+  }
 
-	@Override
-	public void setId(Integer id) {
-		setCareSettingId(id);
-	}
+  @Override
+  public void setId(Integer id) {
+    setCareSettingId(id);
+  }
 }

@@ -12,10 +12,6 @@ package org.openmrs.module.fhir2.providers.r4;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -31,6 +27,8 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.HashSet;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -50,78 +48,119 @@ import org.springframework.stereotype.Component;
 @Component("serviceRequestFhirR4ResourceProvider")
 @R4Provider
 public class ServiceRequestFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirServiceRequestService serviceRequestService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return ServiceRequest.class;
-	}
-	
-	@Read
-	@SuppressWarnings("unused")
-	public ServiceRequest getServiceRequestById(@IdParam @Nonnull IdType id) {
-		ServiceRequest serviceRequest = serviceRequestService.get(id.getIdPart());
-		
-		if (serviceRequest == null) {
-			throw new ResourceNotFoundException("Could not find Service Request with Id " + id.getIdPart());
-		}
-		
-		return serviceRequest;
-	}
-	
-	public MethodOutcome createServiceRequest(@ResourceParam ServiceRequest serviceRequest) {
-		return FhirProviderUtils.buildCreate(serviceRequestService.create(serviceRequest));
-	}
-	
-	@SuppressWarnings("unused")
-	public MethodOutcome updateServiceRequest(@IdParam IdType id, @ResourceParam ServiceRequest serviceRequest) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update");
-		}
-		
-		serviceRequest.setId(id.getIdPart());
-		
-		return FhirProviderUtils.buildUpdate(serviceRequestService.update(id.getIdPart(), serviceRequest));
-	}
-	
-	@SuppressWarnings("unused")
-	public OperationOutcome deleteServiceRequest(@IdParam @Nonnull IdType id) {
-		serviceRequestService.delete(id.getIdPart());
-		return FhirProviderUtils.buildDeleteR4();
-	}
-	
-	@Search
-	public IBundleProvider searchForServiceRequests(
-	        @OptionalParam(name = ServiceRequest.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
-	                Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
-	        @OptionalParam(name = ServiceRequest.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
-	                Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
-	        @OptionalParam(name = ServiceRequest.SP_CODE) TokenAndListParam code,
-	        @OptionalParam(name = ServiceRequest.SP_ENCOUNTER, chainWhitelist = {
-	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
-	        @OptionalParam(name = ServiceRequest.SP_REQUESTER, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
-	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
-	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
-	        @OptionalParam(name = ServiceRequest.SP_OCCURRENCE) DateRangeParam occurrence,
-	        @OptionalParam(name = ServiceRequest.SP_RES_ID) TokenAndListParam uuid,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
-	        @IncludeParam(allow = { "ServiceRequest:" + ServiceRequest.SP_PATIENT,
-	                "ServiceRequest:" + ServiceRequest.SP_REQUESTER,
-	                "ServiceRequest:" + ServiceRequest.SP_ENCOUNTER }) HashSet<Include> includes) {
-		if (patientReference == null) {
-			patientReference = subjectReference;
-		}
-		
-		if (CollectionUtils.isEmpty(includes)) {
-			includes = null;
-		}
-		
-		return serviceRequestService.searchForServiceRequests(patientReference, code, encounterReference,
-		    participantReference, occurrence, uuid, lastUpdated, includes);
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirServiceRequestService serviceRequestService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return ServiceRequest.class;
+  }
+
+  @Read
+  @SuppressWarnings("unused")
+  public ServiceRequest getServiceRequestById(@IdParam @Nonnull IdType id) {
+    ServiceRequest serviceRequest = serviceRequestService.get(id.getIdPart());
+
+    if (serviceRequest == null) {
+      throw new ResourceNotFoundException(
+          "Could not find Service Request with Id " + id.getIdPart());
+    }
+
+    return serviceRequest;
+  }
+
+  public MethodOutcome createServiceRequest(@ResourceParam ServiceRequest serviceRequest) {
+    return FhirProviderUtils.buildCreate(serviceRequestService.create(serviceRequest));
+  }
+
+  @SuppressWarnings("unused")
+  public MethodOutcome updateServiceRequest(
+      @IdParam IdType id, @ResourceParam ServiceRequest serviceRequest) {
+    if (id == null || id.getIdPart() == null) {
+      throw new InvalidRequestException("id must be specified to update");
+    }
+
+    serviceRequest.setId(id.getIdPart());
+
+    return FhirProviderUtils.buildUpdate(
+        serviceRequestService.update(id.getIdPart(), serviceRequest));
+  }
+
+  @SuppressWarnings("unused")
+  public OperationOutcome deleteServiceRequest(@IdParam @Nonnull IdType id) {
+    serviceRequestService.delete(id.getIdPart());
+    return FhirProviderUtils.buildDeleteR4();
+  }
+
+  @Search
+  public IBundleProvider searchForServiceRequests(
+      @OptionalParam(
+              name = ServiceRequest.SP_PATIENT,
+              chainWhitelist = {
+                "",
+                Patient.SP_IDENTIFIER,
+                Patient.SP_GIVEN,
+                Patient.SP_FAMILY,
+                Patient.SP_NAME
+              },
+              targetTypes = Patient.class)
+          ReferenceAndListParam patientReference,
+      @OptionalParam(
+              name = ServiceRequest.SP_SUBJECT,
+              chainWhitelist = {
+                "",
+                Patient.SP_IDENTIFIER,
+                Patient.SP_GIVEN,
+                Patient.SP_FAMILY,
+                Patient.SP_NAME
+              },
+              targetTypes = Patient.class)
+          ReferenceAndListParam subjectReference,
+      @OptionalParam(name = ServiceRequest.SP_CODE) TokenAndListParam code,
+      @OptionalParam(
+              name = ServiceRequest.SP_ENCOUNTER,
+              chainWhitelist = {""},
+              targetTypes = Encounter.class)
+          ReferenceAndListParam encounterReference,
+      @OptionalParam(
+              name = ServiceRequest.SP_REQUESTER,
+              chainWhitelist = {
+                "",
+                Practitioner.SP_IDENTIFIER,
+                Practitioner.SP_GIVEN,
+                Practitioner.SP_FAMILY,
+                Practitioner.SP_NAME
+              },
+              targetTypes = Practitioner.class)
+          ReferenceAndListParam participantReference,
+      @OptionalParam(name = ServiceRequest.SP_OCCURRENCE) DateRangeParam occurrence,
+      @OptionalParam(name = ServiceRequest.SP_RES_ID) TokenAndListParam uuid,
+      @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+      @IncludeParam(
+              allow = {
+                "ServiceRequest:" + ServiceRequest.SP_PATIENT,
+                "ServiceRequest:" + ServiceRequest.SP_REQUESTER,
+                "ServiceRequest:" + ServiceRequest.SP_ENCOUNTER
+              })
+          HashSet<Include> includes) {
+    if (patientReference == null) {
+      patientReference = subjectReference;
+    }
+
+    if (CollectionUtils.isEmpty(includes)) {
+      includes = null;
+    }
+
+    return serviceRequestService.searchForServiceRequests(
+        patientReference,
+        code,
+        encounterReference,
+        participantReference,
+        occurrence,
+        uuid,
+        lastUpdated,
+        includes);
+  }
 }

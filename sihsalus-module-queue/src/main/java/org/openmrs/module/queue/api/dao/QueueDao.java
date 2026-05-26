@@ -10,16 +10,14 @@
 package org.openmrs.module.queue.api.dao;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
-
 import org.openmrs.module.queue.api.search.QueueSearchCriteria;
 import org.openmrs.module.queue.model.Queue;
 
 public interface QueueDao extends BaseQueueDao<Queue> {
-	
-	/**
-	 * @return {@link List} of queues that match the given %{@link QueueSearchCriteria}
-	 */
-	List<Queue> getQueues(@NotNull QueueSearchCriteria searchCriteria);
+
+  /**
+   * @return {@link List} of queues that match the given %{@link QueueSearchCriteria}
+   */
+  List<Queue> getQueues(@NotNull QueueSearchCriteria searchCriteria);
 }

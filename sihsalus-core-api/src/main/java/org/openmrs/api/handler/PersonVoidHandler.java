@@ -1,16 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.api.handler;
 
 import java.util.Date;
-
 import org.openmrs.Person;
 import org.openmrs.User;
 import org.openmrs.annotation.Handler;
@@ -30,44 +29,43 @@ import org.openmrs.api.context.Context;
 @Handler(supports = Person.class)
 public class PersonVoidHandler implements VoidHandler<Person> {
 
-	/**
-	 * Sets all personVoid* attributes to the given parameters.
-	 * <p>
-	 * <strong>Should</strong> set the personVoided bit<br/>
-	 * <strong>Should</strong> set the personVoidReason<br/>
-	 * <strong>Should</strong> set personVoidedBy<br/>
-	 * <strong>Should</strong> not set personVoidedBy if non null<br/>
-	 * <strong>Should</strong> set personDateVoided<br/>
-	 * <strong>Should</strong> not set personDateVoided if non null<br/>
-	 * <strong>Should</strong> not set the personVoidReason if already personVoided<br/>
-	 * <strong>Should</strong> retire users
-	 *
-	 * @see org.openmrs.api.handler.RequiredDataHandler#handle(org.openmrs.OpenmrsObject,
-	 *      org.openmrs.User, java.util.Date, java.lang.String)
-	 */
-	@Override
-	public void handle(Person person, User voidingUser, Date voidedDate, String voidReason) {
+  /**
+   * Sets all personVoid* attributes to the given parameters.
+   *
+   * <p><strong>Should</strong> set the personVoided bit<br>
+   * <strong>Should</strong> set the personVoidReason<br>
+   * <strong>Should</strong> set personVoidedBy<br>
+   * <strong>Should</strong> not set personVoidedBy if non null<br>
+   * <strong>Should</strong> set personDateVoided<br>
+   * <strong>Should</strong> not set personDateVoided if non null<br>
+   * <strong>Should</strong> not set the personVoidReason if already personVoided<br>
+   * <strong>Should</strong> retire users
+   *
+   * @see org.openmrs.api.handler.RequiredDataHandler#handle(org.openmrs.OpenmrsObject,
+   *     org.openmrs.User, java.util.Date, java.lang.String)
+   */
+  @Override
+  public void handle(Person person, User voidingUser, Date voidedDate, String voidReason) {
 
-		// skip over all work if the object is already voided
-		if (!person.getPersonVoided()) {
-			if (person.getPersonId() != null) {
-				// Skip if person is not persisted
-				UserService us = Context.getUserService();
-				for (User user : us.getUsersByPerson(person, false)) {
-					us.retireUser(user, voidReason);
-				}
-			}
+    // skip over all work if the object is already voided
+    if (!person.getPersonVoided()) {
+      if (person.getPersonId() != null) {
+        // Skip if person is not persisted
+        UserService us = Context.getUserService();
+        for (User user : us.getUsersByPerson(person, false)) {
+          us.retireUser(user, voidReason);
+        }
+      }
 
-			person.setPersonVoided(true);
-			person.setPersonVoidReason(voidReason);
+      person.setPersonVoided(true);
+      person.setPersonVoidReason(voidReason);
 
-			if (person.getPersonVoidedBy() == null) {
-				person.setPersonVoidedBy(voidingUser);
-			}
-			if (person.getPersonDateVoided() == null) {
-				person.setPersonDateVoided(voidedDate);
-			}
-		}
-	}
-
+      if (person.getPersonVoidedBy() == null) {
+        person.setPersonVoidedBy(voidingUser);
+      }
+      if (person.getPersonDateVoided() == null) {
+        person.setPersonDateVoided(voidedDate);
+      }
+    }
+  }
 }

@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.scheduler.tasks;
 
@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.User;
 import org.openmrs.api.UserService;
@@ -34,66 +33,71 @@ import org.slf4j.LoggerFactory;
  */
 public class AutoRetireUsersTask extends AbstractTask {
 
-	private static final Logger log = LoggerFactory.getLogger(AutoRetireUsersTask.class);
+  private static final Logger log = LoggerFactory.getLogger(AutoRetireUsersTask.class);
 
-	private static final String AUTO_RETIRE_REASON = "User retired due to inactivity";
+  private static final String AUTO_RETIRE_REASON = "User retired due to inactivity";
 
-	/**
-	 * @see org.openmrs.scheduler.tasks.AbstractTask#execute()
-	 */
-	@Override
-	public void execute() {
-		if (!isExecuting) {
-			log.debug("Auto-retiring users task Started");
+  /**
+   * @see org.openmrs.scheduler.tasks.AbstractTask#execute()
+   */
+  @Override
+  public void execute() {
+    if (!isExecuting) {
+      log.debug("Auto-retiring users task Started");
 
-			startExecuting();
+      startExecuting();
 
-			try {
-				UserService userService = Context.getUserService();
-				Set<User> usersToRetire = getUsersToRetire(userService);
+      try {
+        UserService userService = Context.getUserService();
+        Set<User> usersToRetire = getUsersToRetire(userService);
 
-				usersToRetire.forEach(user -> userService.retireUser(user, AUTO_RETIRE_REASON));
-			} catch (Exception e) {
-				log.error("Error occurred while auto-retiring users: ", e);
-			} finally {
-				log.debug("Auto-retiring users task ended");
-				stopExecuting();
-			}
-		}
-	}
+        usersToRetire.forEach(user -> userService.retireUser(user, AUTO_RETIRE_REASON));
+      } catch (Exception e) {
+        log.error("Error occurred while auto-retiring users: ", e);
+      } finally {
+        log.debug("Auto-retiring users task ended");
+        stopExecuting();
+      }
+    }
+  }
 
-	private Set<User> getUsersToRetire(UserService userService) {
-		final List<User> allUsers = userService.getAllUsers();
-		String numberOfDaysToRetire = Context.getAdministrationService()
-		        .getGlobalProperty(OpenmrsConstants.GP_NUMBER_OF_DAYS_TO_AUTO_RETIRE_USERS);
+  private Set<User> getUsersToRetire(UserService userService) {
+    final List<User> allUsers = userService.getAllUsers();
+    String numberOfDaysToRetire =
+        Context.getAdministrationService()
+            .getGlobalProperty(OpenmrsConstants.GP_NUMBER_OF_DAYS_TO_AUTO_RETIRE_USERS);
 
-		if (StringUtils.isBlank(numberOfDaysToRetire)) {
-			return Collections.emptySet();
-		}
+    if (StringUtils.isBlank(numberOfDaysToRetire)) {
+      return Collections.emptySet();
+    }
 
-		long numberOfMillisecondsToRetire = TimeUnit.DAYS.toMillis(Long.parseLong(numberOfDaysToRetire));
+    long numberOfMillisecondsToRetire =
+        TimeUnit.DAYS.toMillis(Long.parseLong(numberOfDaysToRetire));
 
-		return allUsers.stream()
-		        .filter(user -> !user.isSuperUser() && !user.isRetired()
-		                && userInactivityExceedsDaysToRetire(user, numberOfMillisecondsToRetire))
-		        .collect(Collectors.toSet());
-	}
+    return allUsers.stream()
+        .filter(
+            user ->
+                !user.isSuperUser()
+                    && !user.isRetired()
+                    && userInactivityExceedsDaysToRetire(user, numberOfMillisecondsToRetire))
+        .collect(Collectors.toSet());
+  }
 
-	private boolean userInactivityExceedsDaysToRetire(User user, long numberOfMillisecondsToRetire) {
-		String lastLoginTimeString = Context.getUserService().getLastLoginTime(user);
+  private boolean userInactivityExceedsDaysToRetire(User user, long numberOfMillisecondsToRetire) {
+    String lastLoginTimeString = Context.getUserService().getLastLoginTime(user);
 
-		if (StringUtils.isNotBlank(lastLoginTimeString)) {
-			long lastLoginTime = Long.parseLong(lastLoginTimeString);
+    if (StringUtils.isNotBlank(lastLoginTimeString)) {
+      long lastLoginTime = Long.parseLong(lastLoginTimeString);
 
-			return System.currentTimeMillis() - lastLoginTime >= numberOfMillisecondsToRetire;
-		} else {
-			Date dateCreated = user.getDateCreated();
+      return System.currentTimeMillis() - lastLoginTime >= numberOfMillisecondsToRetire;
+    } else {
+      Date dateCreated = user.getDateCreated();
 
-			if (dateCreated != null) {
-				return System.currentTimeMillis() - dateCreated.getTime() >= numberOfMillisecondsToRetire;
-			}
-		}
+      if (dateCreated != null) {
+        return System.currentTimeMillis() - dateCreated.getTime() >= numberOfMillisecondsToRetire;
+      }
+    }
 
-		return false;
-	}
+    return false;
+  }
 }

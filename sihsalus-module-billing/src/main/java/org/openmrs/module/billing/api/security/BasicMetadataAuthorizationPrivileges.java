@@ -12,13 +12,12 @@ package org.openmrs.module.billing.api.security;
 import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
-/**
- * Default authorization privileges for {@link org.openmrs.OpenmrsMetadata} data services.
- */
-public class BasicMetadataAuthorizationPrivileges extends BasicEntityAuthorizationPrivileges implements IMetadataAuthorizationPrivileges {
-	
-	@Override
-	public String getRetirePrivilege() {
-		return PrivilegeConstants.MANAGE_METADATA;
-	}
+/** Default authorization privileges for {@link org.openmrs.OpenmrsMetadata} data services. */
+public class BasicMetadataAuthorizationPrivileges extends BasicEntityAuthorizationPrivileges
+    implements IMetadataAuthorizationPrivileges {
+
+  @Override
+  public String getRetirePrivilege() {
+    return PrivilegeConstants.MANAGE_METADATA;
+  }
 }

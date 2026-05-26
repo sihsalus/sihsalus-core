@@ -15,62 +15,65 @@
 package org.openmrs.module.reportingrest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.openmrs.module.reporting.query.IdSet;
-
 import java.util.HashSet;
 import java.util.Set;
+import org.openmrs.module.reporting.query.IdSet;
 
-/**
- * A simple implementation of IdSet that can be safely serialized by Jackson or XStream.
- */
+/** A simple implementation of IdSet that can be safely serialized by Jackson or XStream. */
 public class SimpleIdSet implements IdSet {
 
-    @JsonProperty
-    private Set<Integer> memberIds;
+  @JsonProperty private Set<Integer> memberIds;
 
-    public SimpleIdSet() {
-        memberIds = new HashSet<Integer>();
-    }
+  public SimpleIdSet() {
+    memberIds = new HashSet<Integer>();
+  }
 
-    public SimpleIdSet(Set<Integer> memberIds) {
-        this.memberIds = memberIds;
-    }
+  public SimpleIdSet(Set<Integer> memberIds) {
+    this.memberIds = memberIds;
+  }
 
-    @Override
-    public Set<Integer> getMemberIds() {
-        return memberIds;
-    }
+  @Override
+  public Set<Integer> getMemberIds() {
+    return memberIds;
+  }
 
-    @Override
-    public boolean contains(Integer id) {
-        return memberIds.contains(id);
-    }
+  @Override
+  public boolean contains(Integer id) {
+    return memberIds.contains(id);
+  }
 
-    @Override
-    public int getSize() {
-        return memberIds.size();
-    }
+  @Override
+  public int getSize() {
+    return memberIds.size();
+  }
 
-    @Override
-    public boolean isEmpty() {
-        return memberIds.isEmpty();
-    }
+  @Override
+  public boolean isEmpty() {
+    return memberIds.isEmpty();
+  }
 
-    @Override
-    public IdSet clone() {
-        return new SimpleIdSet(new HashSet<Integer>(memberIds));
-    }
+  @Override
+  public IdSet clone() {
+    return new SimpleIdSet(new HashSet<Integer>(memberIds));
+  }
 
-    @Override
-    public void retainAll(IdSet idSet) { memberIds.retainAll(idSet.getMemberIds()); }
+  @Override
+  public void retainAll(IdSet idSet) {
+    memberIds.retainAll(idSet.getMemberIds());
+  }
 
-    @Override
-    public void removeAll(IdSet idSet) { memberIds.removeAll(idSet.getMemberIds()); }
+  @Override
+  public void removeAll(IdSet idSet) {
+    memberIds.removeAll(idSet.getMemberIds());
+  }
 
-    @Override
-    public void addAll(IdSet idSet) { memberIds.addAll(idSet.getMemberIds()); }
+  @Override
+  public void addAll(IdSet idSet) {
+    memberIds.addAll(idSet.getMemberIds());
+  }
 
-    @Override
-    public void setMemberIds(Set set) { memberIds = set; }
-
+  @Override
+  public void setMemberIds(Set set) {
+    memberIds = set;
+  }
 }

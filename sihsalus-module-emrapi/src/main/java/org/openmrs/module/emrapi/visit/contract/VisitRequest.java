@@ -10,19 +10,18 @@
 package org.openmrs.module.emrapi.visit.contract;
 
 public class VisitRequest {
-	
-	private String visitUuid;
-	
-	public VisitRequest(String visitUuid) {
-		this.visitUuid = visitUuid;
-	}
-	
-	public String getVisitUuid() {
-		return visitUuid;
-	}
-	
-	public void setVisitUuid(String visitUuid) {
-		this.visitUuid = visitUuid;
-	}
-	
+
+  private String visitUuid;
+
+  public VisitRequest(String visitUuid) {
+    this.visitUuid = visitUuid;
+  }
+
+  public String getVisitUuid() {
+    return visitUuid;
+  }
+
+  public void setVisitUuid(String visitUuid) {
+    this.visitUuid = visitUuid;
+  }
 }

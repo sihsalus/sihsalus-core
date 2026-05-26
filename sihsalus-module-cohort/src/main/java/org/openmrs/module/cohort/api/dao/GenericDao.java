@@ -10,37 +10,36 @@
 package org.openmrs.module.cohort.api.dao;
 
 import java.util.Collection;
-
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.cohort.api.dao.search.ISearchQuery;
 import org.openmrs.module.cohort.api.dao.search.PropValue;
 
 public interface GenericDao<W extends OpenmrsObject & Auditable> {
-	
-	ISearchQuery getSearchHandler();
-	
-	W get(final int id);
-	
-	W get(final String uuid);
-	
-	W get(final String uuid, boolean includeDeleted);
-	
-	W createOrUpdate(W object);
-	
-	void delete(W object);
-	
-	void delete(String uuid);
-	
-	Collection<W> findAll();
-	
-	Collection<W> findAll(boolean includeRetired);
-	
-	Collection<W> findBy(PropValue propValue);
-	
-	Collection<W> findBy(PropValue propValue, boolean includeRetired);
-	
-	W findByUniqueProp(PropValue propValue);
-	
-	W findByUniqueProp(PropValue propValue, boolean includeRetired);
+
+  ISearchQuery getSearchHandler();
+
+  W get(final int id);
+
+  W get(final String uuid);
+
+  W get(final String uuid, boolean includeDeleted);
+
+  W createOrUpdate(W object);
+
+  void delete(W object);
+
+  void delete(String uuid);
+
+  Collection<W> findAll();
+
+  Collection<W> findAll(boolean includeRetired);
+
+  Collection<W> findBy(PropValue propValue);
+
+  Collection<W> findBy(PropValue propValue, boolean includeRetired);
+
+  W findByUniqueProp(PropValue propValue);
+
+  W findByUniqueProp(PropValue propValue, boolean includeRetired);
 }

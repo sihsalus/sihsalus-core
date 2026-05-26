@@ -13,37 +13,20 @@
  */
 package org.openmrs.module.stockmanagement.api.model;
 
-import java.util.Date;
-
-/**
- * The allowable {@link BatchJobStatus} statuses.
- */
+/** The allowable {@link BatchJobStatus} statuses. */
 public enum BatchJobStatus {
-	/**
-	 * The batch job is pending.
-	 */
-	Pending(),
-	/**
-	 * The batch job is running.
-	 */
-	Running(),
-	/**
-	 * The batch job failed.
-	 */
-	Failed(),
-	/**
-	 * The batch job completed.
-	 */
-	Completed(),
-	/**
-	 * The batch job is cancelled.
-	 */
-	Cancelled(),
-	/**
-	 * The batch job has not been run before it is expired.
-	 */
-	Expired();
-	
-	BatchJobStatus() {
-	}
+  /** The batch job is pending. */
+  Pending(),
+  /** The batch job is running. */
+  Running(),
+  /** The batch job failed. */
+  Failed(),
+  /** The batch job completed. */
+  Completed(),
+  /** The batch job is cancelled. */
+  Cancelled(),
+  /** The batch job has not been run before it is expired. */
+  Expired();
+
+  BatchJobStatus() {}
 }

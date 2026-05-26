@@ -1,11 +1,11 @@
 package org.openmrs.module.appointments.service;
 
 public interface AppointmentNumberGeneratorLocator {
-    AppointmentNumberGenerator retrieveAppointmentNumberGenerator();
+  AppointmentNumberGenerator retrieveAppointmentNumberGenerator();
 
-    void registerAppointmentNumberGenerator(AppointmentNumberGenerator generator);
+  void registerAppointmentNumberGenerator(AppointmentNumberGenerator generator);
 
-    RecurringAppointmentNumberGenerator retrieveRecurringAppointmentNumberGenerator();
+  RecurringAppointmentNumberGenerator retrieveRecurringAppointmentNumberGenerator();
 
-    void registerRecurringAppointmentNumberGenerator(RecurringAppointmentNumberGenerator generator);
+  void registerRecurringAppointmentNumberGenerator(RecurringAppointmentNumberGenerator generator);
 }

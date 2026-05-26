@@ -12,9 +12,10 @@ package org.openmrs.module.billing.api.base.entity.model;
 // @formatter:off
 /**
  * Represents a class that can be customized with simple attributes.
+ *
  * @param <TAttribute> The {@link ISimpleAttribute} class.
  */
 public interface ISimpleCustomizable<TAttribute extends ISimpleAttribute<?, ?>>
-		extends ICustomizable<TAttribute> {
-// @formatter:on
+    extends ICustomizable<TAttribute> {
+  // @formatter:on
 }

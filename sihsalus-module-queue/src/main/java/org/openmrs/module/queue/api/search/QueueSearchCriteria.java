@@ -11,7 +11,6 @@ package org.openmrs.module.queue.api.search;
 
 import java.io.Serializable;
 import java.util.Collection;
-
 import lombok.Data;
 import org.openmrs.Concept;
 import org.openmrs.Location;
@@ -27,12 +26,12 @@ import org.openmrs.Location;
  */
 @Data
 public class QueueSearchCriteria implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	private Collection<Location> locations;
-	
-	private Collection<Concept> services;
-	
-	private boolean includeRetired = false;
+
+  private static final long serialVersionUID = 1L;
+
+  private Collection<Location> locations;
+
+  private Collection<Concept> services;
+
+  private boolean includeRetired = false;
 }

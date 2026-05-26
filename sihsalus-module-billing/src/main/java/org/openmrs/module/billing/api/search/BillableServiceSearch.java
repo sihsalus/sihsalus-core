@@ -22,17 +22,16 @@ import org.openmrs.module.billing.api.model.BillableServiceStatus;
 @AllArgsConstructor
 @Builder
 public class BillableServiceSearch {
-	
-	private BillableServiceStatus serviceStatus;
-	
-	private String serviceCategoryUuid;
-	
-	private String serviceTypeUuid;
-	
-	private String conceptUuid;
-	
-	private String name;
-	
-	private Boolean includeRetired = false;
-	
+
+  private BillableServiceStatus serviceStatus;
+
+  private String serviceCategoryUuid;
+
+  private String serviceTypeUuid;
+
+  private String conceptUuid;
+
+  private String name;
+
+  private Boolean includeRetired = false;
 }

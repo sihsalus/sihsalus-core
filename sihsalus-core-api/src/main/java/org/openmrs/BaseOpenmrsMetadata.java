@@ -1,22 +1,20 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs;
-
-import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
-
+import java.util.Date;
 import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
@@ -35,232 +33,228 @@ import org.openmrs.api.db.hibernate.search.SearchAnalysis;
 @Audited
 public abstract class BaseOpenmrsMetadata extends BaseOpenmrsObject implements OpenmrsMetadata {
 
-	//***** Properties *****
-	@Column(name = "name", nullable = false, length = 255)
-	@FullTextField(analyzer = SearchAnalysis.NAME_ANALYZER)
-	private String name;
+  // ***** Properties *****
+  @Column(name = "name", nullable = false, length = 255)
+  @FullTextField(analyzer = SearchAnalysis.NAME_ANALYZER)
+  private String name;
 
-	@Column(name = "description", length = 255)
-	private String description;
+  @Column(name = "description", length = 255)
+  private String description;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "creator")
-	private User creator;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "creator")
+  private User creator;
 
-	@Column(name = "date_created", nullable = false)
-	private Date dateCreated;
+  @Column(name = "date_created", nullable = false)
+  private Date dateCreated;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "changed_by")
-	private User changedBy;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "changed_by")
+  private User changedBy;
 
-	@Column(name = "date_changed")
-	private Date dateChanged;
+  @Column(name = "date_changed")
+  private Date dateChanged;
 
-	@Column(name = "retired", nullable = false)
-	@GenericField
-	private Boolean retired = Boolean.FALSE;
+  @Column(name = "retired", nullable = false)
+  @GenericField
+  private Boolean retired = Boolean.FALSE;
 
-	@Column(name = "date_retired")
-	private Date dateRetired;
+  @Column(name = "date_retired")
+  private Date dateRetired;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "retired_by")
-	private User retiredBy;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "retired_by")
+  private User retiredBy;
 
-	@Column(name = "retire_reason", length = 255)
-	private String retireReason;
+  @Column(name = "retire_reason", length = 255)
+  private String retireReason;
 
-	//***** Constructors *****
+  // ***** Constructors *****
 
-	/**
-	 * Default Constructor
-	 */
-	public BaseOpenmrsMetadata() {
-	}
+  /** Default Constructor */
+  public BaseOpenmrsMetadata() {}
 
-	//***** Property Access *****
+  // ***** Property Access *****
 
-	/**
-	 * @return the name
-	 */
-	@Override
-	public String getName() {
-		return name;
-	}
+  /**
+   * @return the name
+   */
+  @Override
+  public String getName() {
+    return name;
+  }
 
-	/**
-	 * @param name the name to set
-	 */
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+  /**
+   * @param name the name to set
+   */
+  @Override
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	/**
-	 * @return the description
-	 */
-	@Override
-	public String getDescription() {
-		return description;
-	}
+  /**
+   * @return the description
+   */
+  @Override
+  public String getDescription() {
+    return description;
+  }
 
-	/**
-	 * @param description the description to set
-	 */
-	@Override
-	public void setDescription(String description) {
-		this.description = description;
-	}
+  /**
+   * @param description the description to set
+   */
+  @Override
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsMetadata#getCreator()
-	 */
-	@Override
-	public User getCreator() {
-		return creator;
-	}
+  /**
+   * @see org.openmrs.OpenmrsMetadata#getCreator()
+   */
+  @Override
+  public User getCreator() {
+    return creator;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsMetadata#setCreator(org.openmrs.User)
-	 */
-	@Override
-	public void setCreator(User creator) {
-		this.creator = creator;
-	}
+  /**
+   * @see org.openmrs.OpenmrsMetadata#setCreator(org.openmrs.User)
+   */
+  @Override
+  public void setCreator(User creator) {
+    this.creator = creator;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsMetadata#getDateCreated()
-	 */
-	@Override
-	public Date getDateCreated() {
-		return dateCreated;
-	}
+  /**
+   * @see org.openmrs.OpenmrsMetadata#getDateCreated()
+   */
+  @Override
+  public Date getDateCreated() {
+    return dateCreated;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsMetadata#setDateCreated(java.util.Date)
-	 */
-	@Override
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
+  /**
+   * @see org.openmrs.OpenmrsMetadata#setDateCreated(java.util.Date)
+   */
+  @Override
+  public void setDateCreated(Date dateCreated) {
+    this.dateCreated = dateCreated;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsMetadata#getChangedBy()
-	 * @deprecated as of version 2.2
-	 */
-	@Override
-	@Deprecated
-	public User getChangedBy() {
-		return changedBy;
-	}
+  /**
+   * @see org.openmrs.OpenmrsMetadata#getChangedBy()
+   * @deprecated as of version 2.2
+   */
+  @Override
+  @Deprecated
+  public User getChangedBy() {
+    return changedBy;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsMetadata#setChangedBy(User)
-	 * @deprecated as of version 2.2
-	 */
-	@Override
-	@Deprecated
-	public void setChangedBy(User changedBy) {
-		this.changedBy = changedBy;
-	}
+  /**
+   * @see org.openmrs.OpenmrsMetadata#setChangedBy(User)
+   * @deprecated as of version 2.2
+   */
+  @Override
+  @Deprecated
+  public void setChangedBy(User changedBy) {
+    this.changedBy = changedBy;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsMetadata#getDateChanged()
-	 * @deprecated as of version 2.2
-	 */
-	@Override
-	@Deprecated
-	public Date getDateChanged() {
-		return dateChanged;
-	}
+  /**
+   * @see org.openmrs.OpenmrsMetadata#getDateChanged()
+   * @deprecated as of version 2.2
+   */
+  @Override
+  @Deprecated
+  public Date getDateChanged() {
+    return dateChanged;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsMetadata#setDateChanged(Date)
-	 * @deprecated as of version 2.2
-	 */
-	@Override
-	@Deprecated
-	public void setDateChanged(Date dateChanged) {
-		this.dateChanged = dateChanged;
-	}
+  /**
+   * @see org.openmrs.OpenmrsMetadata#setDateChanged(Date)
+   * @deprecated as of version 2.2
+   */
+  @Override
+  @Deprecated
+  public void setDateChanged(Date dateChanged) {
+    this.dateChanged = dateChanged;
+  }
 
-	/**
-	 * @deprecated as of 2.0, use {@link #getRetired()}
-	 * @see org.openmrs.Retireable#isRetired()
-	 */
-	@Override
-	@Deprecated
-	public Boolean isRetired() {
-		return getRetired();
-	}
+  /**
+   * @deprecated as of 2.0, use {@link #getRetired()}
+   * @see org.openmrs.Retireable#isRetired()
+   */
+  @Override
+  @Deprecated
+  public Boolean isRetired() {
+    return getRetired();
+  }
 
-	/**
-	 * This method delegates to {@link #isRetired()}. This is only needed for jstl syntax like
-	 * ${fieldType.retired} because the return type is a Boolean object instead of a boolean primitive
-	 * type.
-	 *
-	 * @see org.openmrs.Retireable#isRetired()
-	 */
-	@Override
-	public Boolean getRetired() {
-		return retired;
-	}
+  /**
+   * This method delegates to {@link #isRetired()}. This is only needed for jstl syntax like
+   * ${fieldType.retired} because the return type is a Boolean object instead of a boolean primitive
+   * type.
+   *
+   * @see org.openmrs.Retireable#isRetired()
+   */
+  @Override
+  public Boolean getRetired() {
+    return retired;
+  }
 
-	/**
-	 * @see org.openmrs.Retireable#setRetired(java.lang.Boolean)
-	 */
-	@Override
-	public void setRetired(Boolean retired) {
-		this.retired = retired;
-	}
+  /**
+   * @see org.openmrs.Retireable#setRetired(java.lang.Boolean)
+   */
+  @Override
+  public void setRetired(Boolean retired) {
+    this.retired = retired;
+  }
 
-	/**
-	 * @see org.openmrs.Retireable#getDateRetired()
-	 */
-	@Override
-	public Date getDateRetired() {
-		return dateRetired;
-	}
+  /**
+   * @see org.openmrs.Retireable#getDateRetired()
+   */
+  @Override
+  public Date getDateRetired() {
+    return dateRetired;
+  }
 
-	/**
-	 * @see org.openmrs.Retireable#setDateRetired(java.util.Date)
-	 */
-	@Override
-	public void setDateRetired(Date dateRetired) {
-		this.dateRetired = dateRetired;
-	}
+  /**
+   * @see org.openmrs.Retireable#setDateRetired(java.util.Date)
+   */
+  @Override
+  public void setDateRetired(Date dateRetired) {
+    this.dateRetired = dateRetired;
+  }
 
-	/**
-	 * @see org.openmrs.Retireable#getRetiredBy()
-	 */
-	@Override
-	public User getRetiredBy() {
-		return retiredBy;
-	}
+  /**
+   * @see org.openmrs.Retireable#getRetiredBy()
+   */
+  @Override
+  public User getRetiredBy() {
+    return retiredBy;
+  }
 
-	/**
-	 * @see org.openmrs.Retireable#setRetiredBy(org.openmrs.User)
-	 */
-	@Override
-	public void setRetiredBy(User retiredBy) {
-		this.retiredBy = retiredBy;
-	}
+  /**
+   * @see org.openmrs.Retireable#setRetiredBy(org.openmrs.User)
+   */
+  @Override
+  public void setRetiredBy(User retiredBy) {
+    this.retiredBy = retiredBy;
+  }
 
-	/**
-	 * @see org.openmrs.Retireable#getRetireReason()
-	 */
-	@Override
-	public String getRetireReason() {
-		return retireReason;
-	}
+  /**
+   * @see org.openmrs.Retireable#getRetireReason()
+   */
+  @Override
+  public String getRetireReason() {
+    return retireReason;
+  }
 
-	/**
-	 * @see org.openmrs.Retireable#setRetireReason(java.lang.String)
-	 */
-	@Override
-	public void setRetireReason(String retireReason) {
-		this.retireReason = retireReason;
-	}
-
+  /**
+   * @see org.openmrs.Retireable#setRetireReason(java.lang.String)
+   */
+  @Override
+  public void setRetireReason(String retireReason) {
+    this.retireReason = retireReason;
+  }
 }

@@ -16,24 +16,25 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class SihsalusAuthenticationConfiguration {
 
-    @Bean
-    @Primary
-    AuthenticationScheme authenticationScheme() {
-        AuthenticationConfig.registerClassLoader(getClass().getClassLoader());
-        return new DelegatingAuthenticationScheme();
-    }
+  @Bean
+  @Primary
+  AuthenticationScheme authenticationScheme() {
+    AuthenticationConfig.registerClassLoader(getClass().getClassLoader());
+    return new DelegatingAuthenticationScheme();
+  }
 
-    @Bean
-    UserSessionListener authenticationUserSessionListener() {
-        return new AuthenticationUserSessionListener();
-    }
+  @Bean
+  UserSessionListener authenticationUserSessionListener() {
+    return new AuthenticationUserSessionListener();
+  }
 
-    @Bean
-    SmartInitializingSingleton authenticationConfigInitializer() {
-        return () -> {
-            Properties runtimeProperties = Context.getRuntimeProperties();
-            AuthenticationConfig.setConfig(
-                    AuthenticationUtil.getPropertiesWithPrefix(runtimeProperties, AuthenticationConfig.PREFIX, false));
-        };
-    }
+  @Bean
+  SmartInitializingSingleton authenticationConfigInitializer() {
+    return () -> {
+      Properties runtimeProperties = Context.getRuntimeProperties();
+      AuthenticationConfig.setConfig(
+          AuthenticationUtil.getPropertiesWithPrefix(
+              runtimeProperties, AuthenticationConfig.PREFIX, false));
+    };
+  }
 }

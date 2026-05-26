@@ -7,14 +7,13 @@ import org.openmrs.util.PrivilegeConstants;
 
 public final class OpenConceptLabRestPrivileges {
 
-    private OpenConceptLabRestPrivileges() {
-    }
+  private OpenConceptLabRestPrivileges() {}
 
-    public static void requireManageConcepts() {
-        try {
-            Context.requirePrivilege(PrivilegeConstants.MANAGE_CONCEPTS);
-        } catch (ContextAuthenticationException e) {
-            throw new APIAuthenticationException(e.getMessage(), e);
-        }
+  public static void requireManageConcepts() {
+    try {
+      Context.requirePrivilege(PrivilegeConstants.MANAGE_CONCEPTS);
+    } catch (ContextAuthenticationException e) {
+      throw new APIAuthenticationException(e.getMessage(), e);
     }
+  }
 }

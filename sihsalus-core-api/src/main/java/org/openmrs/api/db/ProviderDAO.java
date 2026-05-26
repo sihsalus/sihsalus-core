@@ -1,18 +1,17 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.api.db;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.openmrs.Person;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
@@ -27,138 +26,136 @@ import org.openmrs.api.ProviderService;
  */
 public interface ProviderDAO {
 
-	/**
-	 * Gets all Providers
-	 *
-	 * @param includeRetired - whether or not to include retired Provider
-	 */
-	List<Provider> getAllProviders(boolean includeRetired);
+  /**
+   * Gets all Providers
+   *
+   * @param includeRetired - whether or not to include retired Provider
+   */
+  List<Provider> getAllProviders(boolean includeRetired);
 
-	/**
-	 * Saves/Updates a given Provider
-	 */
-	public Provider saveProvider(Provider provider);
+  /** Saves/Updates a given Provider */
+  public Provider saveProvider(Provider provider);
 
-	/**
-	 * deletes an exisiting Provider
-	 */
-	public void deleteProvider(Provider provider);
+  /** deletes an exisiting Provider */
+  public void deleteProvider(Provider provider);
 
-	/**
-	 * @param id
-	 * @return Provider gets the Provider based on id
-	 */
-	public Provider getProvider(Integer id);
+  /**
+   * @param id
+   * @return Provider gets the Provider based on id
+   */
+  public Provider getProvider(Integer id);
 
-	/**
-	 * @param uuid
-	 * @return Provider gets the Provider based on uuid
-	 */
+  /**
+   * @param uuid
+   * @return Provider gets the Provider based on uuid
+   */
+  public Provider getProviderByUuid(String uuid);
 
-	public Provider getProviderByUuid(String uuid);
+  /**
+   * @see ProviderService#getProvidersByPerson( Person, boolean )
+   */
+  public Collection<Provider> getProvidersByPerson(Person person, boolean includeRetired);
 
-	/**
-	 * @see ProviderService#getProvidersByPerson( Person, boolean )
-	 */
-	public Collection<Provider> getProvidersByPerson(Person person, boolean includeRetired);
+  /**
+   * @param name
+   * @param serializedAttributeValues
+   * @param start
+   * @param length
+   * @param includeRetired
+   * @return List of Providers
+   */
+  public List<Provider> getProviders(
+      String name,
+      Map<ProviderAttributeType, String> serializedAttributeValues,
+      Integer start,
+      Integer length,
+      boolean includeRetired);
 
-	/**
-	 * @param name
-	 * @param serializedAttributeValues
-	 * @param start
-	 * @param length
-	 * @param includeRetired
-	 * @return List of Providers
-	 */
-	public List<Provider> getProviders(String name, Map<ProviderAttributeType, String> serializedAttributeValues,
-	        Integer start, Integer length, boolean includeRetired);
+  /**
+   * @param name
+   * @param includeRetired
+   * @return Count of providers satisfying the given query
+   */
+  public Long getCountOfProviders(String name, boolean includeRetired);
 
-	/**
-	 * @param name
-	 * @param includeRetired
-	 * @return Count of providers satisfying the given query
-	 */
-	public Long getCountOfProviders(String name, boolean includeRetired);
+  /**
+   * @see ProviderService#getAllProviderAttributeTypes(boolean)
+   * @see ProviderService#getAllProviderAttributeTypes()
+   */
+  List<ProviderAttributeType> getAllProviderAttributeTypes(boolean includeRetired);
 
-	/**
-	 * @see ProviderService#getAllProviderAttributeTypes(boolean)
-	 * @see ProviderService#getAllProviderAttributeTypes()
-	 */
-	List<ProviderAttributeType> getAllProviderAttributeTypes(boolean includeRetired);
+  /**
+   * @see ProviderService#getProviderAttributeType(Integer)
+   */
+  ProviderAttributeType getProviderAttributeType(Integer providerAttributeTypeId);
 
-	/**
-	 * @see ProviderService#getProviderAttributeType(Integer)
-	 */
-	ProviderAttributeType getProviderAttributeType(Integer providerAttributeTypeId);
+  /**
+   * @see ProviderService#getProviderAttributeTypeByUuid(String)
+   */
+  ProviderAttributeType getProviderAttributeTypeByUuid(String uuid);
 
-	/**
-	 * @see ProviderService#getProviderAttributeTypeByUuid(String)
-	 */
-	ProviderAttributeType getProviderAttributeTypeByUuid(String uuid);
+  /**
+   * @see ProviderService#getProviderAttributeTypeByName(String)
+   */
+  ProviderAttributeType getProviderAttributeTypeByName(String name);
 
-	/**
-	 * @see ProviderService#getProviderAttributeTypeByName(String)
-	 */
-	ProviderAttributeType getProviderAttributeTypeByName(String name);
+  /**
+   * @see ProviderService#saveProviderAttributeType(ProviderAttributeType)
+   */
+  ProviderAttributeType saveProviderAttributeType(ProviderAttributeType providerAttributeType);
 
-	/**
-	 * @see ProviderService#saveProviderAttributeType(ProviderAttributeType)
-	 */
-	ProviderAttributeType saveProviderAttributeType(ProviderAttributeType providerAttributeType);
+  /**
+   * @see ProviderService#purgeProviderAttributeType(ProviderAttributeType)
+   */
+  void deleteProviderAttributeType(ProviderAttributeType providerAttributeType);
 
-	/**
-	 * @see ProviderService#purgeProviderAttributeType(ProviderAttributeType)
-	 */
-	void deleteProviderAttributeType(ProviderAttributeType providerAttributeType);
+  /**
+   * @see ProviderService#getProviderAttribute(Integer)
+   */
+  ProviderAttribute getProviderAttribute(Integer providerAttributeID);
 
-	/**
-	 * @see ProviderService#getProviderAttribute(Integer)
-	 */
+  /**
+   * @see ProviderService#getProviderAttributeByUuid(String)
+   */
+  ProviderAttribute getProviderAttributeByUuid(String uuid);
 
-	ProviderAttribute getProviderAttribute(Integer providerAttributeID);
+  /**
+   * @see ProviderService#isProviderIdentifierUnique(Provider)
+   */
+  public boolean isProviderIdentifierUnique(Provider provider) throws DAOException;
 
-	/**
-	 * @see ProviderService#getProviderAttributeByUuid(String)
-	 */
-	ProviderAttribute getProviderAttributeByUuid(String uuid);
+  /**
+   * @see ProviderService#getProviderByIdentifier(String)
+   */
+  public Provider getProviderByIdentifier(String identifier);
 
-	/**
-	 * @see ProviderService#isProviderIdentifierUnique(Provider)
-	 */
-	public boolean isProviderIdentifierUnique(Provider provider) throws DAOException;
+  /**
+   * @see ProviderService#getProviderRole(Integer)
+   */
+  ProviderRole getProviderRole(Integer providerRoleId);
 
-	/**
-	 * @see ProviderService#getProviderByIdentifier(String)
-	 */
-	public Provider getProviderByIdentifier(String identifier);
+  /**
+   * @see ProviderService#getProviderRoleByUuid(String)
+   */
+  ProviderRole getProviderRoleByUuid(String uuid);
 
-	/**
-	 * @see ProviderService#getProviderRole(Integer)
-	 */
-	ProviderRole getProviderRole(Integer providerRoleId);
+  /**
+   * @see ProviderService#getProvidersByRoles(List)
+   */
+  List<Provider> getProvidersByRoles(List<ProviderRole> roles, boolean includeRetired);
 
-	/**
-	 * @see ProviderService#getProviderRoleByUuid(String)
-	 */
-	ProviderRole getProviderRoleByUuid(String uuid);
+  /**
+   * @see ProviderService#getAllProviderRoles(boolean)
+   */
+  List<ProviderRole> getAllProviderRoles(boolean includeRetired);
 
-	/**
-	 * @see ProviderService#getProvidersByRoles(List)
-	 */
-	List<Provider> getProvidersByRoles(List<ProviderRole> roles, boolean includeRetired);
+  /**
+   * @see ProviderService#saveProviderRole(ProviderRole)
+   */
+  ProviderRole saveProviderRole(ProviderRole providerRole);
 
-	/**
-	 * @see ProviderService#getAllProviderRoles(boolean)
-	 */
-	List<ProviderRole> getAllProviderRoles(boolean includeRetired);
-
-	/**
-	 * @see ProviderService#saveProviderRole(ProviderRole)
-	 */
-	ProviderRole saveProviderRole(ProviderRole providerRole);
-
-	/**
-	 * @see ProviderService#purgeProviderRole(ProviderRole)
-	 */
-	void deleteProviderRole(ProviderRole providerRole);
+  /**
+   * @see ProviderService#purgeProviderRole(ProviderRole)
+   */
+  void deleteProviderRole(ProviderRole providerRole);
 }

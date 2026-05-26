@@ -14,6 +14,4 @@ import org.openmrs.module.fhir2.api.dao.FhirOrderDao;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirOrderDaoImpl extends BaseFhirDao<Order> implements FhirOrderDao {
-	
-}
+public class FhirOrderDaoImpl extends BaseFhirDao<Order> implements FhirOrderDao {}

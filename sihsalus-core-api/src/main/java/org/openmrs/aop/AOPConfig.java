@@ -1,18 +1,17 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.aop;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.aopalliance.aop.Advice;
 import org.openmrs.annotation.AuthorizedAnnotationAttributes;
 import org.openmrs.api.OpenmrsService;
@@ -35,28 +34,28 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
  * AOPConfig registers AOP advisors used across the OpenMRS service layer. It enables method-level
  * interception using AspectJ-style pointcuts and integrates multiple aspects such as authorization,
  * logging, required data handling, and caching.
- * <p>
- * The advisors apply to classes annotated with {@link Service}, OpenMRS service
- * implementations, and methods that declare supported advice annotations.
- * <p>
- * The configured advisors include:
+ *
+ * <p>The advisors apply to classes annotated with {@link Service}, OpenMRS service implementations,
+ * and methods that declare supported advice annotations.
+ *
+ * <p>The configured advisors include:
+ *
  * <ul>
- * <li><b>AuthorizationAdvisor</b> – Ensures access control based on authorization annotations.</li>
- * <li><b>LoggingAdvisor</b> – Logs service method invocations and exceptions for auditing and
- * debugging.</li>
- * <li><b>RequiredDataAdvisor</b> – Automatically sets required metadata like `creator`,
- * `dateCreated`, etc.</li>
- * <li><b>CacheInterceptor</b> - Supports caching for methods annotated with {@link Cacheable}</li>
- * <li><b>TransactionalInterceptor</b> - Supports transactions for methods annotated with
- * {@link Transactional}</li>
+ *   <li><b>AuthorizationAdvisor</b> – Ensures access control based on authorization annotations.
+ *   <li><b>LoggingAdvisor</b> – Logs service method invocations and exceptions for auditing and
+ *       debugging.
+ *   <li><b>RequiredDataAdvisor</b> – Automatically sets required metadata like `creator`,
+ *       `dateCreated`, etc.
+ *   <li><b>CacheInterceptor</b> - Supports caching for methods annotated with {@link Cacheable}
+ *   <li><b>TransactionalInterceptor</b> - Supports transactions for methods annotated with {@link
+ *       Transactional}
  * </ul>
- * <p>
- * In order to add advisors from a module create beans wrapped with
- * {@link #createAdvisor(Advice, Integer)}, see e.g.
- * {@link #authorizationAdvisor(AuthorizationAdvice)}. Please note the order should be null or
- * higher than 100 in order not to interfere with core advisors.
- * <p>
- * This configuration replaces the older XML-based AOP setup.
+ *
+ * <p>In order to add advisors from a module create beans wrapped with {@link #createAdvisor(Advice,
+ * Integer)}, see e.g. {@link #authorizationAdvisor(AuthorizationAdvice)}. Please note the order
+ * should be null or higher than 100 in order not to interfere with core advisors.
+ *
+ * <p>This configuration replaces the older XML-based AOP setup.
  *
  * @since 3.0.0
  */
@@ -66,76 +65,82 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class AOPConfig {
 
-	private static final AuthorizedAnnotationAttributes AUTHORIZED_ATTRIBUTES = new AuthorizedAnnotationAttributes();
+  private static final AuthorizedAnnotationAttributes AUTHORIZED_ATTRIBUTES =
+      new AuthorizedAnnotationAttributes();
 
-	/**
-	 * Added for backwards compatibility with services defined in xml with TransactionProxyFactoryBean
-	 *
-	 * @param authorizationAdvice
-	 * @param loggingAdvice
-	 * @param requiredDataAdvice
-	 * @param cacheInterceptor
-	 * @return serviceInterceptors
-	 * @deprecated since 3.0.0 use {@link Service} annotation instead
-	 */
-	@Bean
-	public List<Advice> serviceInterceptors(AuthorizationAdvice authorizationAdvice, LoggingAdvice loggingAdvice,
-	        RequiredDataAdvice requiredDataAdvice, CacheInterceptor cacheInterceptor) {
-		List<Advice> interceptors = new ArrayList<>();
-		interceptors.add(authorizationAdvice);
-		interceptors.add(loggingAdvice);
-		interceptors.add(requiredDataAdvice);
-		interceptors.add(cacheInterceptor);
-		return interceptors;
-	}
+  /**
+   * Added for backwards compatibility with services defined in xml with TransactionProxyFactoryBean
+   *
+   * @param authorizationAdvice
+   * @param loggingAdvice
+   * @param requiredDataAdvice
+   * @param cacheInterceptor
+   * @return serviceInterceptors
+   * @deprecated since 3.0.0 use {@link Service} annotation instead
+   */
+  @Bean
+  public List<Advice> serviceInterceptors(
+      AuthorizationAdvice authorizationAdvice,
+      LoggingAdvice loggingAdvice,
+      RequiredDataAdvice requiredDataAdvice,
+      CacheInterceptor cacheInterceptor) {
+    List<Advice> interceptors = new ArrayList<>();
+    interceptors.add(authorizationAdvice);
+    interceptors.add(loggingAdvice);
+    interceptors.add(requiredDataAdvice);
+    interceptors.add(cacheInterceptor);
+    return interceptors;
+  }
 
-	/**
-	 * Added for backwards compatibility with services defined in xml with TransactionProxyFactoryBean
-	 *
-	 * @return transactionAttributeSource
-	 * @deprecated since 3.0.0 use {@link Service} annotation instead
-	 */
-	@Bean(name = "openmrsTransactionAttributeSource")
-	public TransactionAttributeSource transactionAttributeSource() {
-		return new AnnotationTransactionAttributeSource();
-	}
+  /**
+   * Added for backwards compatibility with services defined in xml with TransactionProxyFactoryBean
+   *
+   * @return transactionAttributeSource
+   * @deprecated since 3.0.0 use {@link Service} annotation instead
+   */
+  @Bean(name = "openmrsTransactionAttributeSource")
+  public TransactionAttributeSource transactionAttributeSource() {
+    return new AnnotationTransactionAttributeSource();
+  }
 
-	@Bean
-	public Advisor authorizationAdvisor(AuthorizationAdvice advice) {
-		return createAdvisor(advice, 1);
-	}
+  @Bean
+  public Advisor authorizationAdvisor(AuthorizationAdvice advice) {
+    return createAdvisor(advice, 1);
+  }
 
-	@Bean
-	public Advisor loggingAdvisor(LoggingAdvice advice) {
-		return createAdvisor(advice, 2);
-	}
+  @Bean
+  public Advisor loggingAdvisor(LoggingAdvice advice) {
+    return createAdvisor(advice, 2);
+  }
 
-	@Bean
-	public Advisor requiredDataAdvisor(RequiredDataAdvice advice) {
-		return createAdvisor(advice, 3);
-	}
+  @Bean
+  public Advisor requiredDataAdvisor(RequiredDataAdvice advice) {
+    return createAdvisor(advice, 3);
+  }
 
-	public Advisor createAdvisor(Advice advice, Integer order) {
-		StaticMethodMatcherPointcutAdvisor advisor = new StaticMethodMatcherPointcutAdvisor(advice) {
+  public Advisor createAdvisor(Advice advice, Integer order) {
+    StaticMethodMatcherPointcutAdvisor advisor =
+        new StaticMethodMatcherPointcutAdvisor(advice) {
 
-			@Override
-			public boolean matches(Method method, Class<?> targetClass) {
-				return isServiceClass(targetClass) || hasMethodLevelAdvice(method);
-			}
-		};
-		if (order != null) {
-			advisor.setOrder(order);
-		}
-		return advisor;
-	}
+          @Override
+          public boolean matches(Method method, Class<?> targetClass) {
+            return isServiceClass(targetClass) || hasMethodLevelAdvice(method);
+          }
+        };
+    if (order != null) {
+      advisor.setOrder(order);
+    }
+    return advisor;
+  }
 
-	private static boolean isServiceClass(Class<?> targetClass) {
-		return targetClass.isAnnotationPresent(Service.class) || OpenmrsService.class.isAssignableFrom(targetClass);
-	}
+  private static boolean isServiceClass(Class<?> targetClass) {
+    return targetClass.isAnnotationPresent(Service.class)
+        || OpenmrsService.class.isAssignableFrom(targetClass);
+  }
 
-	private static boolean hasMethodLevelAdvice(Method method) {
-		return AUTHORIZED_ATTRIBUTES.hasAuthorizedAnnotation(method)
-		        || AnnotationUtils.findAnnotation(method, Transactional.class) != null
-		        || AnnotationUtils.findAnnotation(method, Cacheable.class) != null;
-	}
+  private static boolean hasMethodLevelAdvice(Method method) {
+    return AUTHORIZED_ATTRIBUTES.hasAuthorizedAnnotation(method)
+        || AnnotationUtils.findAnnotation(method, Transactional.class) != null
+        || AnnotationUtils.findAnnotation(method, Cacheable.class) != null;
+  }
 }

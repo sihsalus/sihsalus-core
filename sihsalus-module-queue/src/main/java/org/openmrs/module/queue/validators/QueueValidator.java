@@ -18,39 +18,45 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
-/**
- * Validates Queue object
- */
+/** Validates Queue object */
 @Slf4j
-@Handler(supports = { Queue.class }, order = 50)
+@Handler(
+    supports = {Queue.class},
+    order = 50)
 public class QueueValidator implements Validator {
-	
-	@Override
-	public boolean supports(Class<?> clazz) {
-		return Queue.class.isAssignableFrom(clazz);
-	}
-	
-	@Override
-	public void validate(Object target, Errors errors) {
-		log.debug("{}.validate", this.getClass().getName());
-		//instanceof checks for null
-		if (!(target instanceof Queue)) {
-			throw new IllegalArgumentException("Invalid Queue class: " + target.getClass().getName());
-		}
-		Queue queue = (Queue) target;
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "queue.name.null", "Queue name can't be null");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "location", "queue.location.null", "Location can't be null");
-		
-		// TODO: Check if the location is tagged as a Queue Location?
-		
-		QueueServicesWrapper queueServices = Context.getRegisteredComponents(QueueServicesWrapper.class).get(0);
-		if (queue.getService() == null) {
-			errors.rejectValue("service", "QueueEntry.service.null", "The property service should not be null");
-		} else {
-			if (!queueServices.getAllowedServices().contains(queue.getService())) {
-				errors.rejectValue("service", "Queue.service.invalid",
-				    "The property service should be a member of configured queue service conceptSet.");
-			}
-		}
-	}
+
+  @Override
+  public boolean supports(Class<?> clazz) {
+    return Queue.class.isAssignableFrom(clazz);
+  }
+
+  @Override
+  public void validate(Object target, Errors errors) {
+    log.debug("{}.validate", this.getClass().getName());
+    // instanceof checks for null
+    if (!(target instanceof Queue)) {
+      throw new IllegalArgumentException("Invalid Queue class: " + target.getClass().getName());
+    }
+    Queue queue = (Queue) target;
+    ValidationUtils.rejectIfEmptyOrWhitespace(
+        errors, "name", "queue.name.null", "Queue name can't be null");
+    ValidationUtils.rejectIfEmptyOrWhitespace(
+        errors, "location", "queue.location.null", "Location can't be null");
+
+    // TODO: Check if the location is tagged as a Queue Location?
+
+    QueueServicesWrapper queueServices =
+        Context.getRegisteredComponents(QueueServicesWrapper.class).get(0);
+    if (queue.getService() == null) {
+      errors.rejectValue(
+          "service", "QueueEntry.service.null", "The property service should not be null");
+    } else {
+      if (!queueServices.getAllowedServices().contains(queue.getService())) {
+        errors.rejectValue(
+            "service",
+            "Queue.service.invalid",
+            "The property service should be a member of configured queue service conceptSet.");
+      }
+    }
+  }
 }

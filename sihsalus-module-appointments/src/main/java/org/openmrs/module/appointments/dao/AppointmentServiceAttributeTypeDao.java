@@ -1,15 +1,14 @@
 package org.openmrs.module.appointments.dao;
 
+import java.util.List;
 import org.openmrs.module.appointments.model.AppointmentServiceAttributeType;
 
-import java.util.List;
-
 public interface AppointmentServiceAttributeTypeDao {
-    List<AppointmentServiceAttributeType> getAllAttributeTypes(boolean includeRetired);
+  List<AppointmentServiceAttributeType> getAllAttributeTypes(boolean includeRetired);
 
-    AppointmentServiceAttributeType getAttributeTypeByUuid(String uuid);
+  AppointmentServiceAttributeType getAttributeTypeByUuid(String uuid);
 
-    AppointmentServiceAttributeType getAttributeTypeById(Integer id);
+  AppointmentServiceAttributeType getAttributeTypeById(Integer id);
 
-    AppointmentServiceAttributeType save(AppointmentServiceAttributeType attributeType);
+  AppointmentServiceAttributeType save(AppointmentServiceAttributeType attributeType);
 }

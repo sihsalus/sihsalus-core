@@ -21,18 +21,18 @@ import org.openmrs.module.stockmanagement.api.model.StockOperationType;
  * reporting) to warrant it's own type.
  */
 public class DisposedOperationTypeProcessor extends AdjustmentOperationTypeProcessor {
-	
-	public DisposedOperationTypeProcessor(StockOperationType stockOperationType) {
-		super(stockOperationType);
-	}
-	
-	@Override
-	protected boolean negateAppliedQuantity() {
-		return true;
-	}
-	
-	@Override
-	public boolean isNegativeItemQuantityAllowed() {
-		return false;
-	}
+
+  public DisposedOperationTypeProcessor(StockOperationType stockOperationType) {
+    super(stockOperationType);
+  }
+
+  @Override
+  protected boolean negateAppliedQuantity() {
+    return true;
+  }
+
+  @Override
+  public boolean isNegativeItemQuantityAllowed() {
+    return false;
+  }
 }

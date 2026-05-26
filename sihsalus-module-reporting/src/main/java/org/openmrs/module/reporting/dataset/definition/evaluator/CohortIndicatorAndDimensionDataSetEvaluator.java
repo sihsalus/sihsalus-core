@@ -1,16 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.dataset.definition.evaluator;
 
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
@@ -33,77 +32,86 @@ import org.openmrs.module.reporting.indicator.dimension.service.DimensionService
 import org.openmrs.module.reporting.indicator.service.IndicatorService;
 import org.openmrs.module.reporting.indicator.util.IndicatorUtil;
 
-/**
- * Evaluates a CohortIndicatorAndDimensionDataSetDefinition and produces a DataSet
- */
-@Handler(supports={CohortIndicatorAndDimensionDataSetDefinition.class})
+/** Evaluates a CohortIndicatorAndDimensionDataSetDefinition and produces a DataSet */
+@Handler(supports = {CohortIndicatorAndDimensionDataSetDefinition.class})
 public class CohortIndicatorAndDimensionDataSetEvaluator implements DataSetEvaluator {
-	
-	protected Log log = LogFactory.getLog(this.getClass());
-	
-	/**
-	 * Default Constructor
-	 */
-	public CohortIndicatorAndDimensionDataSetEvaluator() { }
-	
-	/**
-	 * @throws EvaluationException 
-	 * @see DataSetEvaluator#evaluate(DataSetDefinition, EvaluationContext)
-	 * @should evaluate a CohortIndicatorDataSetDefinition
-	 */
-	public MapDataSet evaluate(DataSetDefinition dataSetDefinition, EvaluationContext context) throws EvaluationException {
-		
-		CohortIndicatorAndDimensionDataSetDefinition dsd = (CohortIndicatorAndDimensionDataSetDefinition) dataSetDefinition;
-		MapDataSet ret = new MapDataSet(dataSetDefinition, context);
 
-		context = ObjectUtil.nvl(context, new EvaluationContext());
-		
-		IndicatorService is = Context.getService(IndicatorService.class);
-		DimensionService ds = Context.getService(DimensionService.class);
+  protected Log log = LogFactory.getLog(this.getClass());
 
-		for (CohortIndicatorAndDimensionSpecification spec : dsd.getSpecifications()) {
+  /** Default Constructor */
+  public CohortIndicatorAndDimensionDataSetEvaluator() {}
 
-			// Get all dimension combinations to include
-			List<String> combinations = IndicatorUtil.compileColumnDimensionOptions(spec.getDimensionOptions());
-			combinations.add(0, null); // Add in the "no dimension" case at the start
-			
-			for (String combination : combinations) {
-				
-				// First evaluate the indicator and create the result object
-				CohortIndicatorResult result;
-				try {
-					result = (CohortIndicatorResult) is.evaluate(spec.getIndicator(), context);
-				} catch (Exception ex) {
-					throw new EvaluationException("indicator " + spec.getLabel() + " (" + spec.getIndicatorNumber() + ")");
-				}
-				log.debug("Evaluated Indicator: " + spec.getLabel() + " = " + result.getValue());
-				CohortIndicatorAndDimensionResult resultWithDimensions = new CohortIndicatorAndDimensionResult(result, context);
-				
-				// Set up the basic column definition
-				DataSetColumn column = new DataSetColumn(spec.getIndicatorNumber(), spec.getLabel(), Object.class);	
+  /**
+   * @throws EvaluationException
+   * @see DataSetEvaluator#evaluate(DataSetDefinition, EvaluationContext)
+   * @should evaluate a CohortIndicatorDataSetDefinition
+   */
+  public MapDataSet evaluate(DataSetDefinition dataSetDefinition, EvaluationContext context)
+      throws EvaluationException {
 
-				if (combination != null) {
-					for (String option : combination.split(",")) {
-						String[] dimOpt = option.split("=");
-						column.setName(column.getName() + "." + option);
-						column.setLabel(column.getLabel() + (column.getLabel().equals(spec.getLabel()) ? " (" : ", ") + dimOpt[0] + " - " + dimOpt[1]);
-	
-						Mapped<CohortDefinitionDimension> dimension = dsd.getDimension(dimOpt[0]);
-						try { 
-							CohortDimensionResult dimensionResult = (CohortDimensionResult)ds.evaluate(dimension, context);
-							Cohort dimensionCohort = dimensionResult.getCohort(dimOpt[1]);
-							
-							resultWithDimensions.addDimensionResult(dimension.getParameterizable(), dimensionCohort);
-						} catch (Exception ex) {
-							throw new EvaluationException("dimension " + option, ex);
-						}
-					}
-					column.setLabel(column.getLabel() + ")");
-				}
+    CohortIndicatorAndDimensionDataSetDefinition dsd =
+        (CohortIndicatorAndDimensionDataSetDefinition) dataSetDefinition;
+    MapDataSet ret = new MapDataSet(dataSetDefinition, context);
 
-				ret.addData(column, resultWithDimensions);
-			}
-		}
-		return ret;
-	}
+    context = ObjectUtil.nvl(context, new EvaluationContext());
+
+    IndicatorService is = Context.getService(IndicatorService.class);
+    DimensionService ds = Context.getService(DimensionService.class);
+
+    for (CohortIndicatorAndDimensionSpecification spec : dsd.getSpecifications()) {
+
+      // Get all dimension combinations to include
+      List<String> combinations =
+          IndicatorUtil.compileColumnDimensionOptions(spec.getDimensionOptions());
+      combinations.add(0, null); // Add in the "no dimension" case at the start
+
+      for (String combination : combinations) {
+
+        // First evaluate the indicator and create the result object
+        CohortIndicatorResult result;
+        try {
+          result = (CohortIndicatorResult) is.evaluate(spec.getIndicator(), context);
+        } catch (Exception ex) {
+          throw new EvaluationException(
+              "indicator " + spec.getLabel() + " (" + spec.getIndicatorNumber() + ")");
+        }
+        log.debug("Evaluated Indicator: " + spec.getLabel() + " = " + result.getValue());
+        CohortIndicatorAndDimensionResult resultWithDimensions =
+            new CohortIndicatorAndDimensionResult(result, context);
+
+        // Set up the basic column definition
+        DataSetColumn column =
+            new DataSetColumn(spec.getIndicatorNumber(), spec.getLabel(), Object.class);
+
+        if (combination != null) {
+          for (String option : combination.split(",")) {
+            String[] dimOpt = option.split("=");
+            column.setName(column.getName() + "." + option);
+            column.setLabel(
+                column.getLabel()
+                    + (column.getLabel().equals(spec.getLabel()) ? " (" : ", ")
+                    + dimOpt[0]
+                    + " - "
+                    + dimOpt[1]);
+
+            Mapped<CohortDefinitionDimension> dimension = dsd.getDimension(dimOpt[0]);
+            try {
+              CohortDimensionResult dimensionResult =
+                  (CohortDimensionResult) ds.evaluate(dimension, context);
+              Cohort dimensionCohort = dimensionResult.getCohort(dimOpt[1]);
+
+              resultWithDimensions.addDimensionResult(
+                  dimension.getParameterizable(), dimensionCohort);
+            } catch (Exception ex) {
+              throw new EvaluationException("dimension " + option, ex);
+            }
+          }
+          column.setLabel(column.getLabel() + ")");
+        }
+
+        ret.addData(column, resultWithDimensions);
+      }
+    }
+    return ret;
+  }
 }

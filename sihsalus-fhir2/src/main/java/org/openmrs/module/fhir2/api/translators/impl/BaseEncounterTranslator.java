@@ -20,24 +20,23 @@ import org.openmrs.module.fhir2.api.dao.impl.FhirEncounterClassMapDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseEncounterTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirEncounterClassMapDaoImpl encounterClassMap;
-	
-	protected Coding mapLocationToClass(Location location) {
-		Coding coding = new Coding();
-		coding.setSystem(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI);
-		// The default code for anything that cannot be matched with FHIR codes.
-		coding.setCode("AMB");
-		if (location == null) {
-			return coding;
-		}
-		String classCode = encounterClassMap.getFhirClass(location.getUuid());
-		if (classCode != null) {
-			coding.setCode(classCode);
-		}
-		return coding;
-	}
-	
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirEncounterClassMapDaoImpl encounterClassMap;
+
+  protected Coding mapLocationToClass(Location location) {
+    Coding coding = new Coding();
+    coding.setSystem(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI);
+    // The default code for anything that cannot be matched with FHIR codes.
+    coding.setCode("AMB");
+    if (location == null) {
+      return coding;
+    }
+    String classCode = encounterClassMap.getFhirClass(location.getUuid());
+    if (classCode != null) {
+      coding.setCode(classCode);
+    }
+    return coding;
+  }
 }

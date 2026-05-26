@@ -10,21 +10,20 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Obs;
 
 public interface ObservationReferenceTranslator extends OpenmrsFhirTranslator<Obs, Reference> {
-	
-	/**
-	 * Maps an {@link Obs} to a FHIR reference
-	 *
-	 * @param obs the Obs to translate
-	 * @return the corresponding FHIR reference
-	 */
-	@Override
-	Reference toFhirResource(@Nonnull Obs obs);
-	
-	@Override
-	Obs toOpenmrsType(@Nonnull Reference obsReference);
+
+  /**
+   * Maps an {@link Obs} to a FHIR reference
+   *
+   * @param obs the Obs to translate
+   * @return the corresponding FHIR reference
+   */
+  @Override
+  Reference toFhirResource(@Nonnull Obs obs);
+
+  @Override
+  Obs toOpenmrsType(@Nonnull Reference obsReference);
 }

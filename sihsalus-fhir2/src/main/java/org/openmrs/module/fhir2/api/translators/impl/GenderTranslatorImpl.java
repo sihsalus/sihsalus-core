@@ -10,51 +10,50 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Enumerations;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GenderTranslatorImpl implements GenderTranslator {
-	
-	@Override
-	public Enumerations.AdministrativeGender toFhirResource(@Nonnull String gender) {
-		if (gender == null) {
-			return Enumerations.AdministrativeGender.NULL;
-		}
-		
-		switch (gender.toUpperCase()) {
-			case "M":
-				return Enumerations.AdministrativeGender.MALE;
-			case "F":
-				return Enumerations.AdministrativeGender.FEMALE;
-			case "U":
-				return Enumerations.AdministrativeGender.UNKNOWN;
-			case "O":
-				return Enumerations.AdministrativeGender.OTHER;
-			default:
-				return Enumerations.AdministrativeGender.NULL;
-		}
-	}
-	
-	@Override
-	public String toOpenmrsType(@Nonnull Enumerations.AdministrativeGender gender) {
-		if (gender == null) {
-			return null;
-		}
-		
-		switch (gender) {
-			case MALE:
-				return "M";
-			case FEMALE:
-				return "F";
-			case UNKNOWN:
-				return "U";
-			case OTHER:
-				return "O";
-			default:
-				return null;
-		}
-	}
+
+  @Override
+  public Enumerations.AdministrativeGender toFhirResource(@Nonnull String gender) {
+    if (gender == null) {
+      return Enumerations.AdministrativeGender.NULL;
+    }
+
+    switch (gender.toUpperCase()) {
+      case "M":
+        return Enumerations.AdministrativeGender.MALE;
+      case "F":
+        return Enumerations.AdministrativeGender.FEMALE;
+      case "U":
+        return Enumerations.AdministrativeGender.UNKNOWN;
+      case "O":
+        return Enumerations.AdministrativeGender.OTHER;
+      default:
+        return Enumerations.AdministrativeGender.NULL;
+    }
+  }
+
+  @Override
+  public String toOpenmrsType(@Nonnull Enumerations.AdministrativeGender gender) {
+    if (gender == null) {
+      return null;
+    }
+
+    switch (gender) {
+      case MALE:
+        return "M";
+      case FEMALE:
+        return "F";
+      case UNKNOWN:
+        return "U";
+      case OTHER:
+        return "O";
+      default:
+        return null;
+    }
+  }
 }

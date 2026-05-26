@@ -14,19 +14,17 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -79,224 +77,255 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Slf4j
 public class Legacy1xRestController extends BaseRestController {
 
-	private final QueueServicesWrapper services;
+  private final QueueServicesWrapper services;
 
-	@Autowired
-	private QueueEntryMetricRestController queueEntryMetricRestController;
+  @Autowired private QueueEntryMetricRestController queueEntryMetricRestController;
 
-	private final QueueEntryResource queueEntryResource;
+  private final QueueEntryResource queueEntryResource;
 
-	private final QueueRoomResource queueRoomResource;
+  private final QueueRoomResource queueRoomResource;
 
-	private final RoomProviderMapResource roomProviderMapResource;
+  private final RoomProviderMapResource roomProviderMapResource;
 
-	@Autowired
-	public Legacy1xRestController(QueueServicesWrapper services,
-	        QueueEntrySearchCriteriaParser queueEntrySearchCriteriaParser,
-	        QueueRoomSearchCriteriaParser queueRoomSearchCriteriaParser,
-	        RoomProviderMapSearchCriteriaParser roomProviderMapSearchCriteriaParser) {
-		this.services = services;
-		queueEntryResource = new QueueEntryResource(services, queueEntrySearchCriteriaParser);
-		queueRoomResource = new QueueRoomResource(services, queueRoomSearchCriteriaParser);
-		roomProviderMapResource = new RoomProviderMapResource(services, roomProviderMapSearchCriteriaParser);
-	}
-	
-	@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/visit-queue-entry", method = GET)
-	@ResponseBody
-	@SuppressWarnings("unchecked")
-	public Object getVisitQueueEntries(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		SimpleObject result = new SimpleObject();
-		List<SimpleObject> visitQueueEntries = new ArrayList<>();
-		result.add("results", visitQueueEntries);
-		RequestContext requestContext = RestUtil.getRequestContext(request, response, Representation.REF);
-		Map<String, String[]> parameters = new HashMap<String, String[]>(requestContext.getRequest().getParameterMap());
-		// The queueEntryResource does not limit to active by default, but the legacy resource does
-		if (!parameters.containsKey("isEnded")) {
-			parameters.put("isEnded", new String[] { "false" });
-		}
-		QueueEntrySearchCriteria criteria = queueEntryResource.getSearchCriteriaParser().constructFromRequest(parameters);
-		List<QueueEntry> queueEntryList = services.getQueueEntryService().getQueueEntries(criteria);
-		PageableResult pageableResult = new NeedsPaging<>(queueEntryList, requestContext);
-		Map<String, Object> searchResult = pageableResult.toSimpleObject(queueEntryResource);
-		List<Map<String, Object>> queueEntries = (List<Map<String, Object>>) PropertyUtils.getProperty(searchResult,
-		    "results");
-		for (Map<String, Object> queueEntry : queueEntries) {
-			SimpleObject visitQueueEntry = new SimpleObject();
-			visitQueueEntry.add("visit", queueEntry.get("visit"));
-			visitQueueEntry.add("queueEntry", queueEntry);
-			visitQueueEntries.add(visitQueueEntry);
-		}
-		return result;
-	}
-	
-	@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/visit-queue-entry", method = POST)
-	@ResponseBody
-	public Object postVisitQueueEntry(HttpServletRequest request, HttpServletResponse response,
-	        @RequestBody SimpleObject post) {
-		RequestContext requestContext = RestUtil.getRequestContext(request, response);
-		SimpleObject queueEntry = new SimpleObject();
-		Map<String, Object> postedQueueEntry = post.get("queueEntry");
-		for (Map.Entry<String, Object> entry : postedQueueEntry.entrySet()) {
-			queueEntry.add(entry.getKey(), entry.getValue());
-		}
-		queueEntry.add("visit", post.get("visit"));
-		Object created = queueEntryResource.create(queueEntry, requestContext);
-		return RestUtil.created(response, created);
-	}
-	
-	@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/queueroom", method = GET)
-	@ResponseBody
-	public Object getQueueRooms(HttpServletRequest request, HttpServletResponse response) {
-		RequestContext requestContext = RestUtil.getRequestContext(request, response, Representation.REF);
-		return queueRoomResource.search(requestContext);
-	}
-	
-	@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/roomprovidermap", method = GET)
-	@ResponseBody
-	public Object getRoomProviderMaps(HttpServletRequest request, HttpServletResponse response) {
-		RequestContext requestContext = RestUtil.getRequestContext(request, response, Representation.REF);
-		return roomProviderMapResource.search(requestContext);
-	}
-	
-	@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/roomprovidermap", method = POST)
-	@ResponseBody
-	public Object postRoomProviderMap(HttpServletRequest request, HttpServletResponse response,
-	        @RequestBody SimpleObject post) {
-		RequestContext requestContext = RestUtil.getRequestContext(request, response);
-		Object created = roomProviderMapResource.create(post, requestContext);
-		return RestUtil.created(response, created);
-	}
-	
-	@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/roomprovidermap/{uuid}", method = POST)
-	@ResponseBody
-	public Object updateRoomProviderMap(@PathVariable("uuid") String uuid, @RequestBody SimpleObject post,
-	        HttpServletRequest request, HttpServletResponse response) throws ResponseException {
-		RequestContext context = RestUtil.getRequestContext(request, response);
-		if (post.get("deleted") != null && "false".equals(post.get("deleted")) && post.size() == 1) {
-			return RestUtil.updated(response, roomProviderMapResource.undelete(uuid, context));
-		}
-		return RestUtil.updated(response, roomProviderMapResource.update(uuid, post, context));
-	}
-	
-	@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/queue-entry-metrics", method = { GET, POST })
-	@ResponseBody
-	public Object getQueueEntryMetrics(HttpServletRequest request) {
-		return queueEntryMetricRestController.handleRequest(request);
-	}
-	
-	@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/queue-metrics", method = GET)
-	@ResponseBody
-	public Object getQueueMetrics(HttpServletRequest request) {
-		SimpleObject results = (SimpleObject) getQueueEntryMetrics(request);
-		String queueUuid = request.getParameter("queue");
-		Queue queue = (StringUtils.isNotBlank(queueUuid) ? services.getQueue(queueUuid) : null);
-		String queueName = (queue != null ? queue.getName() : "");
-		return new GenericSingleObjectResult(Arrays.asList(new PropValue("queue", queueName),
-		    new PropValue("averageWaitTime", results.get(AVERAGE_WAIT_TIME))));
-	}
-	
-	@RequestMapping(method = POST, value = "/rest/" + RestConstants.VERSION_1 + "/queueutil/assignticket")
-	@ResponseBody
-	@Authorized(PrivilegeConstants.MANAGE_QUEUE_ENTRIES)
-	public Object assignTicketToServicePoint(HttpServletRequest request) throws Exception {
-		requireAnyPrivilege(PrivilegeConstants.MANAGE_QUEUE_ENTRIES);
-		String requestBody = IOUtils.toString(request.getReader());
-		if (requestBody != null) {
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode actualObj = mapper.readTree(requestBody);
-			
-			if (!actualObj.has("ticketNumber")) {
-				String msg = "No ticketNumber passed, skipping ticket assignment";
-				return new ResponseEntity<Object>(msg, new HttpHeaders(), HttpStatus.OK);
-			}
-			
-			String servicePointName = actualObj.path("servicePointName").asText("");
-			String ticketNumber = actualObj.path("ticketNumber").asText("");
-			String status = actualObj.path("status").asText("");
-			
-			if (StringUtils.isBlank(servicePointName) || StringUtils.isBlank(ticketNumber) || StringUtils.isBlank(status)) {
-				return new ResponseEntity<Object>("One of the required fields is empty", new HttpHeaders(), BAD_REQUEST);
-			}
-			
-			QueueTicketAssignments.updateTicketAssignment(servicePointName, ticketNumber, status);
-			return new ResponseEntity<Object>("Ticket successfully assigned!", new HttpHeaders(), HttpStatus.OK);
-		}
-		return new ResponseEntity<Object>("The request could not be interpreted", new HttpHeaders(), BAD_REQUEST);
-	}
-	
-	@RequestMapping(method = GET, value = "/rest/" + RestConstants.VERSION_1 + "/queueutil/active-tickets")
-	@Authorized(PrivilegeConstants.GET_QUEUE_ENTRIES)
-	public Object getActiveTickets() {
-		requireAnyPrivilege(PrivilegeConstants.GET_QUEUE_ENTRIES);
-		return new ResponseEntity<>(QueueTicketAssignments.getActiveTicketAssignments(), new HttpHeaders(), HttpStatus.OK);
-	}
-	
-	@RequestMapping(method = { GET, POST }, value = "/rest/" + RestConstants.VERSION_1 + "/queue-entry-number")
-	@ResponseBody
-	public Object generateQueueEntryNumber(HttpServletRequest request) {
-		String serviceType = "";
-		String visitQueueNumber = "";
-		String vatUuid = request.getParameter("visitAttributeType");
-		if (StringUtils.isNotEmpty(vatUuid)) {
-			requireAnyPrivilege(PrivilegeConstants.MANAGE_QUEUE_ENTRIES,
-			    org.openmrs.util.PrivilegeConstants.ADD_VISITS,
-			    org.openmrs.util.PrivilegeConstants.EDIT_VISITS);
-			VisitAttributeType vat = services.getVisitService().getVisitAttributeTypeByUuid(vatUuid);
-			if (vat != null) {
-				Location l = services.getLocation(request.getParameter("location"));
-				Visit v = services.getVisit(request.getParameter("visit"));
-				Queue q = services.getQueue(request.getParameter("queue"));
-				if (q != null) {
-					serviceType = q.getName();
-					visitQueueNumber = services.getQueueEntryService().generateVisitQueueNumber(l, q, v, vat);
-				}
-			}
-		}
-		SimpleObject result = new SimpleObject();
-		result.add("serviceType", serviceType);
-		result.add("visitQueueNumber", visitQueueNumber);
-		return result;
-	}
+  @Autowired
+  public Legacy1xRestController(
+      QueueServicesWrapper services,
+      QueueEntrySearchCriteriaParser queueEntrySearchCriteriaParser,
+      QueueRoomSearchCriteriaParser queueRoomSearchCriteriaParser,
+      RoomProviderMapSearchCriteriaParser roomProviderMapSearchCriteriaParser) {
+    this.services = services;
+    queueEntryResource = new QueueEntryResource(services, queueEntrySearchCriteriaParser);
+    queueRoomResource = new QueueRoomResource(services, queueRoomSearchCriteriaParser);
+    roomProviderMapResource =
+        new RoomProviderMapResource(services, roomProviderMapSearchCriteriaParser);
+  }
 
-	private void requireAnyPrivilege(String... privileges) {
-		for (String privilege : privileges) {
-			if (Context.hasPrivilege(privilege)) {
-				return;
-			}
-		}
-		throw new APIAuthenticationException("Privileges required: " + StringUtils.join(privileges, ", "));
-	}
-	
-	@Data
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class GenericSingleObjectResult implements PageableResult {
-		
-		private List<PropValue> propValues;
-		
-		@Override
-		public SimpleObject toSimpleObject(Converter<?> converter) throws ResponseException {
-			SimpleObject ret = new SimpleObject();
-			this.propValues.forEach(propValue -> ret.add(propValue.getProperty(), propValue.getValue()));
-			return ret;
-		}
-		
-		public void add(@NotNull String property, @NotNull Object value) {
-			if (propValues == null) {
-				this.propValues = new ArrayList<>();
-			}
-			this.propValues.add(new PropValue(property, value));
-		}
-	}
-	
-	@Data
-	@AllArgsConstructor
-	public static class PropValue implements Serializable {
-		
-		private static final long serialVersionUID = 45L;
-		
-		private String property;
-		
-		private Object value;
-	}
+  @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/visit-queue-entry", method = GET)
+  @ResponseBody
+  @SuppressWarnings("unchecked")
+  public Object getVisitQueueEntries(HttpServletRequest request, HttpServletResponse response)
+      throws Exception {
+    SimpleObject result = new SimpleObject();
+    List<SimpleObject> visitQueueEntries = new ArrayList<>();
+    result.add("results", visitQueueEntries);
+    RequestContext requestContext =
+        RestUtil.getRequestContext(request, response, Representation.REF);
+    Map<String, String[]> parameters =
+        new HashMap<String, String[]>(requestContext.getRequest().getParameterMap());
+    // The queueEntryResource does not limit to active by default, but the legacy resource does
+    if (!parameters.containsKey("isEnded")) {
+      parameters.put("isEnded", new String[] {"false"});
+    }
+    QueueEntrySearchCriteria criteria =
+        queueEntryResource.getSearchCriteriaParser().constructFromRequest(parameters);
+    List<QueueEntry> queueEntryList = services.getQueueEntryService().getQueueEntries(criteria);
+    PageableResult pageableResult = new NeedsPaging<>(queueEntryList, requestContext);
+    Map<String, Object> searchResult = pageableResult.toSimpleObject(queueEntryResource);
+    List<Map<String, Object>> queueEntries =
+        (List<Map<String, Object>>) PropertyUtils.getProperty(searchResult, "results");
+    for (Map<String, Object> queueEntry : queueEntries) {
+      SimpleObject visitQueueEntry = new SimpleObject();
+      visitQueueEntry.add("visit", queueEntry.get("visit"));
+      visitQueueEntry.add("queueEntry", queueEntry);
+      visitQueueEntries.add(visitQueueEntry);
+    }
+    return result;
+  }
+
+  @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/visit-queue-entry", method = POST)
+  @ResponseBody
+  public Object postVisitQueueEntry(
+      HttpServletRequest request, HttpServletResponse response, @RequestBody SimpleObject post) {
+    RequestContext requestContext = RestUtil.getRequestContext(request, response);
+    SimpleObject queueEntry = new SimpleObject();
+    Map<String, Object> postedQueueEntry = post.get("queueEntry");
+    for (Map.Entry<String, Object> entry : postedQueueEntry.entrySet()) {
+      queueEntry.add(entry.getKey(), entry.getValue());
+    }
+    queueEntry.add("visit", post.get("visit"));
+    Object created = queueEntryResource.create(queueEntry, requestContext);
+    return RestUtil.created(response, created);
+  }
+
+  @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/queueroom", method = GET)
+  @ResponseBody
+  public Object getQueueRooms(HttpServletRequest request, HttpServletResponse response) {
+    RequestContext requestContext =
+        RestUtil.getRequestContext(request, response, Representation.REF);
+    return queueRoomResource.search(requestContext);
+  }
+
+  @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/roomprovidermap", method = GET)
+  @ResponseBody
+  public Object getRoomProviderMaps(HttpServletRequest request, HttpServletResponse response) {
+    RequestContext requestContext =
+        RestUtil.getRequestContext(request, response, Representation.REF);
+    return roomProviderMapResource.search(requestContext);
+  }
+
+  @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/roomprovidermap", method = POST)
+  @ResponseBody
+  public Object postRoomProviderMap(
+      HttpServletRequest request, HttpServletResponse response, @RequestBody SimpleObject post) {
+    RequestContext requestContext = RestUtil.getRequestContext(request, response);
+    Object created = roomProviderMapResource.create(post, requestContext);
+    return RestUtil.created(response, created);
+  }
+
+  @RequestMapping(
+      value = "/rest/" + RestConstants.VERSION_1 + "/roomprovidermap/{uuid}",
+      method = POST)
+  @ResponseBody
+  public Object updateRoomProviderMap(
+      @PathVariable("uuid") String uuid,
+      @RequestBody SimpleObject post,
+      HttpServletRequest request,
+      HttpServletResponse response)
+      throws ResponseException {
+    RequestContext context = RestUtil.getRequestContext(request, response);
+    if (post.get("deleted") != null && "false".equals(post.get("deleted")) && post.size() == 1) {
+      return RestUtil.updated(response, roomProviderMapResource.undelete(uuid, context));
+    }
+    return RestUtil.updated(response, roomProviderMapResource.update(uuid, post, context));
+  }
+
+  @RequestMapping(
+      value = "/rest/" + RestConstants.VERSION_1 + "/queue-entry-metrics",
+      method = {GET, POST})
+  @ResponseBody
+  public Object getQueueEntryMetrics(HttpServletRequest request) {
+    return queueEntryMetricRestController.handleRequest(request);
+  }
+
+  @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/queue-metrics", method = GET)
+  @ResponseBody
+  public Object getQueueMetrics(HttpServletRequest request) {
+    SimpleObject results = (SimpleObject) getQueueEntryMetrics(request);
+    String queueUuid = request.getParameter("queue");
+    Queue queue = (StringUtils.isNotBlank(queueUuid) ? services.getQueue(queueUuid) : null);
+    String queueName = (queue != null ? queue.getName() : "");
+    return new GenericSingleObjectResult(
+        Arrays.asList(
+            new PropValue("queue", queueName),
+            new PropValue("averageWaitTime", results.get(AVERAGE_WAIT_TIME))));
+  }
+
+  @RequestMapping(
+      method = POST,
+      value = "/rest/" + RestConstants.VERSION_1 + "/queueutil/assignticket")
+  @ResponseBody
+  @Authorized(PrivilegeConstants.MANAGE_QUEUE_ENTRIES)
+  public Object assignTicketToServicePoint(HttpServletRequest request) throws Exception {
+    requireAnyPrivilege(PrivilegeConstants.MANAGE_QUEUE_ENTRIES);
+    String requestBody = IOUtils.toString(request.getReader());
+    if (requestBody != null) {
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode actualObj = mapper.readTree(requestBody);
+
+      if (!actualObj.has("ticketNumber")) {
+        String msg = "No ticketNumber passed, skipping ticket assignment";
+        return new ResponseEntity<Object>(msg, new HttpHeaders(), HttpStatus.OK);
+      }
+
+      String servicePointName = actualObj.path("servicePointName").asText("");
+      String ticketNumber = actualObj.path("ticketNumber").asText("");
+      String status = actualObj.path("status").asText("");
+
+      if (StringUtils.isBlank(servicePointName)
+          || StringUtils.isBlank(ticketNumber)
+          || StringUtils.isBlank(status)) {
+        return new ResponseEntity<Object>(
+            "One of the required fields is empty", new HttpHeaders(), BAD_REQUEST);
+      }
+
+      QueueTicketAssignments.updateTicketAssignment(servicePointName, ticketNumber, status);
+      return new ResponseEntity<Object>(
+          "Ticket successfully assigned!", new HttpHeaders(), HttpStatus.OK);
+    }
+    return new ResponseEntity<Object>(
+        "The request could not be interpreted", new HttpHeaders(), BAD_REQUEST);
+  }
+
+  @RequestMapping(
+      method = GET,
+      value = "/rest/" + RestConstants.VERSION_1 + "/queueutil/active-tickets")
+  @Authorized(PrivilegeConstants.GET_QUEUE_ENTRIES)
+  public Object getActiveTickets() {
+    requireAnyPrivilege(PrivilegeConstants.GET_QUEUE_ENTRIES);
+    return new ResponseEntity<>(
+        QueueTicketAssignments.getActiveTicketAssignments(), new HttpHeaders(), HttpStatus.OK);
+  }
+
+  @RequestMapping(
+      method = {GET, POST},
+      value = "/rest/" + RestConstants.VERSION_1 + "/queue-entry-number")
+  @ResponseBody
+  public Object generateQueueEntryNumber(HttpServletRequest request) {
+    String serviceType = "";
+    String visitQueueNumber = "";
+    String vatUuid = request.getParameter("visitAttributeType");
+    if (StringUtils.isNotEmpty(vatUuid)) {
+      requireAnyPrivilege(
+          PrivilegeConstants.MANAGE_QUEUE_ENTRIES,
+          org.openmrs.util.PrivilegeConstants.ADD_VISITS,
+          org.openmrs.util.PrivilegeConstants.EDIT_VISITS);
+      VisitAttributeType vat = services.getVisitService().getVisitAttributeTypeByUuid(vatUuid);
+      if (vat != null) {
+        Location l = services.getLocation(request.getParameter("location"));
+        Visit v = services.getVisit(request.getParameter("visit"));
+        Queue q = services.getQueue(request.getParameter("queue"));
+        if (q != null) {
+          serviceType = q.getName();
+          visitQueueNumber = services.getQueueEntryService().generateVisitQueueNumber(l, q, v, vat);
+        }
+      }
+    }
+    SimpleObject result = new SimpleObject();
+    result.add("serviceType", serviceType);
+    result.add("visitQueueNumber", visitQueueNumber);
+    return result;
+  }
+
+  private void requireAnyPrivilege(String... privileges) {
+    for (String privilege : privileges) {
+      if (Context.hasPrivilege(privilege)) {
+        return;
+      }
+    }
+    throw new APIAuthenticationException(
+        "Privileges required: " + StringUtils.join(privileges, ", "));
+  }
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class GenericSingleObjectResult implements PageableResult {
+
+    private List<PropValue> propValues;
+
+    @Override
+    public SimpleObject toSimpleObject(Converter<?> converter) throws ResponseException {
+      SimpleObject ret = new SimpleObject();
+      this.propValues.forEach(propValue -> ret.add(propValue.getProperty(), propValue.getValue()));
+      return ret;
+    }
+
+    public void add(@NotNull String property, @NotNull Object value) {
+      if (propValues == null) {
+        this.propValues = new ArrayList<>();
+      }
+      this.propValues.add(new PropValue(property, value));
+    }
+  }
+
+  @Data
+  @AllArgsConstructor
+  public static class PropValue implements Serializable {
+
+    private static final long serialVersionUID = 45L;
+
+    private String property;
+
+    private Object value;
+  }
 }

@@ -12,8 +12,6 @@ package org.openmrs.module.fhir2.providers.r4;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -29,6 +27,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,69 +45,79 @@ import org.springframework.stereotype.Component;
 @Component("GroupFhirR4ResourceProvider")
 @R4Provider
 public class GroupFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirGroupService groupService;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirGroupMemberService groupMemberService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return Group.class;
-	}
-	
-	@Read
-	public Group getGroupByUuid(@IdParam @Nonnull IdType id) {
-		Group group = groupService.get(id.getIdPart());
-		if (group == null) {
-			throw new ResourceNotFoundException("Could not find Group with Id " + id.getIdPart());
-		}
-		return group;
-	}
-	
-	@Create
-	@SuppressWarnings("unused")
-	public MethodOutcome createGroup(@ResourceParam Group group) {
-		return FhirProviderUtils.buildCreate(groupService.create(group));
-	}
-	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateGroup(@IdParam IdType id, @ResourceParam Group group) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update");
-		}
-		
-		group.setId(id.getIdPart());
-		
-		return FhirProviderUtils.buildUpdate(groupService.update(id.getIdPart(), group));
-	}
-	
-	@Delete
-	@SuppressWarnings("unused")
-	public OperationOutcome deleteGroup(@IdParam @Nonnull IdType id) {
-		groupService.delete(id.getIdPart());
-		return FhirProviderUtils.buildDeleteR4();
-	}
-	
-	@Operation(name = "$members", idempotent = true)
-	public IBundleProvider getGroupMembers(@IdParam @Nonnull IdType groupId) {
-		Group group = groupService.get(groupId.getIdPart());
-		if (group == null) {
-			throw new ResourceNotFoundException("Could not find group with the id " + groupId.getIdPart());
-		}
-		return groupMemberService.getGroupMembers(groupId.getIdPart());
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public IBundleProvider searchForGroups(@OptionalParam(name = Group.SP_MANAGING_ENTITY, chainWhitelist = { "",
-	        Practitioner.SP_RES_ID, Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
-	        Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference) {
-		
-		return groupService.searchForGroups(participantReference);
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirGroupService groupService;
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirGroupMemberService groupMemberService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return Group.class;
+  }
+
+  @Read
+  public Group getGroupByUuid(@IdParam @Nonnull IdType id) {
+    Group group = groupService.get(id.getIdPart());
+    if (group == null) {
+      throw new ResourceNotFoundException("Could not find Group with Id " + id.getIdPart());
+    }
+    return group;
+  }
+
+  @Create
+  @SuppressWarnings("unused")
+  public MethodOutcome createGroup(@ResourceParam Group group) {
+    return FhirProviderUtils.buildCreate(groupService.create(group));
+  }
+
+  @Update
+  @SuppressWarnings("unused")
+  public MethodOutcome updateGroup(@IdParam IdType id, @ResourceParam Group group) {
+    if (id == null || id.getIdPart() == null) {
+      throw new InvalidRequestException("id must be specified to update");
+    }
+
+    group.setId(id.getIdPart());
+
+    return FhirProviderUtils.buildUpdate(groupService.update(id.getIdPart(), group));
+  }
+
+  @Delete
+  @SuppressWarnings("unused")
+  public OperationOutcome deleteGroup(@IdParam @Nonnull IdType id) {
+    groupService.delete(id.getIdPart());
+    return FhirProviderUtils.buildDeleteR4();
+  }
+
+  @Operation(name = "$members", idempotent = true)
+  public IBundleProvider getGroupMembers(@IdParam @Nonnull IdType groupId) {
+    Group group = groupService.get(groupId.getIdPart());
+    if (group == null) {
+      throw new ResourceNotFoundException(
+          "Could not find group with the id " + groupId.getIdPart());
+    }
+    return groupMemberService.getGroupMembers(groupId.getIdPart());
+  }
+
+  @Search
+  @SuppressWarnings("unused")
+  public IBundleProvider searchForGroups(
+      @OptionalParam(
+              name = Group.SP_MANAGING_ENTITY,
+              chainWhitelist = {
+                "",
+                Practitioner.SP_RES_ID,
+                Practitioner.SP_GIVEN,
+                Practitioner.SP_FAMILY,
+                Practitioner.SP_NAME
+              },
+              targetTypes = Practitioner.class)
+          ReferenceAndListParam participantReference) {
+
+    return groupService.searchForGroups(participantReference);
+  }
 }

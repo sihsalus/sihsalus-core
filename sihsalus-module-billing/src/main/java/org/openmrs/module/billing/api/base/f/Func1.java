@@ -16,6 +16,6 @@ package org.openmrs.module.billing.api.base.f;
  * @param <TResult> The return value class.
  */
 public interface Func1<TParm1, TResult> {
-	
-	TResult apply(TParm1 parameter1);
+
+  TResult apply(TParm1 parameter1);
 }

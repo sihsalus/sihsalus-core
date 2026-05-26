@@ -29,22 +29,22 @@ import org.springframework.stereotype.Component;
 @Component("episodeOfCareFhirR4ResourceProvider")
 @R4Provider
 public class EpisodeOfCareFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirEpisodeOfCareService episodeOfCareService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return EpisodeOfCare.class;
-	}
-	
-	@Read
-	public EpisodeOfCare getEpisodeOfCareById(@IdParam IdType id) {
-		EpisodeOfCare episodeOfCare = episodeOfCareService.get(id.getIdPart());
-		if (episodeOfCare == null) {
-			throw new ResourceNotFoundException("Could not find EpisodeOfCare with Id " + id.getIdPart());
-		}
-		return episodeOfCare;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirEpisodeOfCareService episodeOfCareService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return EpisodeOfCare.class;
+  }
+
+  @Read
+  public EpisodeOfCare getEpisodeOfCareById(@IdParam IdType id) {
+    EpisodeOfCare episodeOfCare = episodeOfCareService.get(id.getIdPart());
+    if (episodeOfCare == null) {
+      throw new ResourceNotFoundException("Could not find EpisodeOfCare with Id " + id.getIdPart());
+    }
+    return episodeOfCare;
+  }
 }

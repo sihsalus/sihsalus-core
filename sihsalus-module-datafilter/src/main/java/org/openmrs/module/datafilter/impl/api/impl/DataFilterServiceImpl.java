@@ -1,18 +1,17 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.datafilter.impl.api.impl;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.openmrs.OpenmrsMetadata;
@@ -32,144 +31,155 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class DataFilterServiceImpl extends BaseOpenmrsService implements DataFilterService {
 
-	private DataFilterDAO dao;
+  private DataFilterDAO dao;
 
-	/**
-	 * Sets the dao
-	 *
-	 * @param dao the dao to set
-	 */
-	public void setDao(DataFilterDAO dao) {
-		this.dao = dao;
-	}
+  /**
+   * Sets the dao
+   *
+   * @param dao the dao to set
+   */
+  public void setDao(DataFilterDAO dao) {
+    this.dao = dao;
+  }
 
-	/**
-	 * @see DataFilterService#grantAccess(OpenmrsObject, OpenmrsObject)
-	 */
-	@Transactional
-	@Override
-	public void grantAccess(OpenmrsObject entity, OpenmrsObject basis) {
-		Context.getService(DataFilterService.class).grantAccess(entity, Collections.singleton(basis));
-	}
+  /**
+   * @see DataFilterService#grantAccess(OpenmrsObject, OpenmrsObject)
+   */
+  @Transactional
+  @Override
+  public void grantAccess(OpenmrsObject entity, OpenmrsObject basis) {
+    Context.getService(DataFilterService.class).grantAccess(entity, Collections.singleton(basis));
+  }
 
-	/**
-	 * @see DataFilterService#grantAccess(OpenmrsObject, Collection)
-	 */
-	@Transactional
-	@Override
-	public void grantAccess(OpenmrsObject entity, Collection<OpenmrsObject> bases) {
-		for (OpenmrsObject basis : bases) {
-			if (!hasAccess(entity, basis)) {
-				EntityBasisMap map = new EntityBasisMap();
-				map.setEntityIdentifier(getIdentifier(entity));
-				map.setEntityType(Hibernate.getClass(entity).getName());
-				map.setBasisIdentifier(getIdentifier(basis));
-				map.setBasisType(Hibernate.getClass(basis).getName());
-				map.setCreator(getAuthenticatedUser());
-				map.setDateCreated(new Date());
+  /**
+   * @see DataFilterService#grantAccess(OpenmrsObject, Collection)
+   */
+  @Transactional
+  @Override
+  public void grantAccess(OpenmrsObject entity, Collection<OpenmrsObject> bases) {
+    for (OpenmrsObject basis : bases) {
+      if (!hasAccess(entity, basis)) {
+        EntityBasisMap map = new EntityBasisMap();
+        map.setEntityIdentifier(getIdentifier(entity));
+        map.setEntityType(Hibernate.getClass(entity).getName());
+        map.setBasisIdentifier(getIdentifier(basis));
+        map.setBasisType(Hibernate.getClass(basis).getName());
+        map.setCreator(getAuthenticatedUser());
+        map.setDateCreated(new Date());
 
-				dao.saveEntityBasisMap(map);
-			}
-		}
+        dao.saveEntityBasisMap(map);
+      }
+    }
 
-		DataFilterSessionContext.reset();
-	}
+    DataFilterSessionContext.reset();
+  }
 
-	/**
-	 * @see DataFilterService#revokeAccess(OpenmrsObject, OpenmrsObject)
-	 */
-	@Transactional
-	@Override
-	public void revokeAccess(OpenmrsObject entity, OpenmrsObject basis) {
-		Context.getService(DataFilterService.class).revokeAccess(entity, Collections.singleton(basis));
-	}
+  /**
+   * @see DataFilterService#revokeAccess(OpenmrsObject, OpenmrsObject)
+   */
+  @Transactional
+  @Override
+  public void revokeAccess(OpenmrsObject entity, OpenmrsObject basis) {
+    Context.getService(DataFilterService.class).revokeAccess(entity, Collections.singleton(basis));
+  }
 
-	/**
-	 * @see DataFilterService#revokeAccess(OpenmrsObject, Collection)
-	 */
-	@Transactional
-	@Override
-	public void revokeAccess(OpenmrsObject entity, Collection<OpenmrsObject> bases) {
-		for (OpenmrsObject basis : bases) {
-			EntityBasisMap map = dao.getEntityBasisMap(getIdentifier(entity), Hibernate.getClass(entity).getName(),
-			    getIdentifier(basis), Hibernate.getClass(basis).getName());
-			if (map != null) {
-				dao.deleteEntityBasisMap(map);
-			}
-		}
+  /**
+   * @see DataFilterService#revokeAccess(OpenmrsObject, Collection)
+   */
+  @Transactional
+  @Override
+  public void revokeAccess(OpenmrsObject entity, Collection<OpenmrsObject> bases) {
+    for (OpenmrsObject basis : bases) {
+      EntityBasisMap map =
+          dao.getEntityBasisMap(
+              getIdentifier(entity),
+              Hibernate.getClass(entity).getName(),
+              getIdentifier(basis),
+              Hibernate.getClass(basis).getName());
+      if (map != null) {
+        dao.deleteEntityBasisMap(map);
+      }
+    }
 
-		DataFilterSessionContext.reset();
-	}
+    DataFilterSessionContext.reset();
+  }
 
-	/**
-	 * @see DataFilterService#hasAccess(OpenmrsObject, OpenmrsObject)
-	 */
-	@Override
-	public boolean hasAccess(OpenmrsObject entity, OpenmrsObject basis) {
-		EntityBasisMap map = dao.getEntityBasisMap(getIdentifier(entity), Hibernate.getClass(entity).getName(),
-		    getIdentifier(basis), Hibernate.getClass(basis).getName());
+  /**
+   * @see DataFilterService#hasAccess(OpenmrsObject, OpenmrsObject)
+   */
+  @Override
+  public boolean hasAccess(OpenmrsObject entity, OpenmrsObject basis) {
+    EntityBasisMap map =
+        dao.getEntityBasisMap(
+            getIdentifier(entity),
+            Hibernate.getClass(entity).getName(),
+            getIdentifier(basis),
+            Hibernate.getClass(basis).getName());
 
-		if (map != null) {
-			return true;
-		}
+    if (map != null) {
+      return true;
+    }
 
-		return false;
-	}
+    return false;
+  }
 
-	private String getIdentifier(OpenmrsObject openmrsObject) {
-		if (openmrsObject == null) {
-			throw new APIException("Failed to determine id for null Object");
-		}
+  private String getIdentifier(OpenmrsObject openmrsObject) {
+    if (openmrsObject == null) {
+      throw new APIException("Failed to determine id for null Object");
+    }
 
-		Object id = null;
-		try {
-			id = openmrsObject.getId();
-		}
-		catch (UnsupportedOperationException e) {
-			// Role and Privilege are metadata keyed by name in OpenMRS, not integer ids.
-		}
+    Object id = null;
+    try {
+      id = openmrsObject.getId();
+    } catch (UnsupportedOperationException e) {
+      // Role and Privilege are metadata keyed by name in OpenMRS, not integer ids.
+    }
 
-		if (id != null) {
-			return id.toString();
-		}
+    if (id != null) {
+      return id.toString();
+    }
 
-		if (openmrsObject instanceof Role || openmrsObject instanceof Privilege) {
-			String metadataName = ((OpenmrsMetadata) openmrsObject).getName();
-			if (StringUtils.isNotBlank(metadataName)) {
-				return metadataName;
-			}
-		}
+    if (openmrsObject instanceof Role || openmrsObject instanceof Privilege) {
+      String metadataName = ((OpenmrsMetadata) openmrsObject).getName();
+      if (StringUtils.isNotBlank(metadataName)) {
+        return metadataName;
+      }
+    }
 
-		throw new APIException("Failed to determine id for Object: " + openmrsObject);
-	}
+    throw new APIException("Failed to determine id for Object: " + openmrsObject);
+  }
 
-	private User getAuthenticatedUser() {
-		User authenticatedUser = Context.getAuthenticatedUser();
-		if (authenticatedUser == null) {
-			throw new APIException("Data Filter access grants require an authenticated user");
-		}
-		return authenticatedUser;
-	}
+  private User getAuthenticatedUser() {
+    User authenticatedUser = Context.getAuthenticatedUser();
+    if (authenticatedUser == null) {
+      throw new APIException("Data Filter access grants require an authenticated user");
+    }
+    return authenticatedUser;
+  }
 
-	/**
-	 * @see DataFilterService#getEntityBasisMaps(OpenmrsObject, String)
-	 */
-	@Override
-	public Collection<EntityBasisMap> getEntityBasisMaps(OpenmrsObject entity, String basisClassName) {
-		return dao.getEntityBasisMaps(getIdentifier(entity), Hibernate.getClass(entity).getName(), basisClassName);
-	}
+  /**
+   * @see DataFilterService#getEntityBasisMaps(OpenmrsObject, String)
+   */
+  @Override
+  public Collection<EntityBasisMap> getEntityBasisMaps(
+      OpenmrsObject entity, String basisClassName) {
+    return dao.getEntityBasisMaps(
+        getIdentifier(entity), Hibernate.getClass(entity).getName(), basisClassName);
+  }
 
-	@Override
-	public Collection<EntityBasisMap> getEntityBasisMapsByBasis(Class<? extends OpenmrsObject> entityClass,
-			OpenmrsObject basis) {
-		if (entityClass == null) {
-			throw new APIException("Failed to determine entity class for null Class");
-		}
-		return getEntityBasisMapsByBasis(entityClass.getName(), basis);
-	}
+  @Override
+  public Collection<EntityBasisMap> getEntityBasisMapsByBasis(
+      Class<? extends OpenmrsObject> entityClass, OpenmrsObject basis) {
+    if (entityClass == null) {
+      throw new APIException("Failed to determine entity class for null Class");
+    }
+    return getEntityBasisMapsByBasis(entityClass.getName(), basis);
+  }
 
-	@Override
-	public Collection<EntityBasisMap> getEntityBasisMapsByBasis(String entityClassName, OpenmrsObject basis) {
-		return dao.getEntityBasisMapsByBasis(entityClassName, Hibernate.getClass(basis).getName(), getIdentifier(basis));
-	}
+  @Override
+  public Collection<EntityBasisMap> getEntityBasisMapsByBasis(
+      String entityClassName, OpenmrsObject basis) {
+    return dao.getEntityBasisMapsByBasis(
+        entityClassName, Hibernate.getClass(basis).getName(), getIdentifier(basis));
+  }
 }

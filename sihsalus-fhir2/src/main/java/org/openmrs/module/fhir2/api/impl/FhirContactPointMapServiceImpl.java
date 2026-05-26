@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import java.util.Optional;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,29 +23,30 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirContactPointMapServiceImpl implements FhirContactPointMapService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private FhirContactPointMapDao dao;
-	
-	@Override
-	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
-		return dao.getFhirContactPointMapByUuid(uuid);
-	}
-	
-	@Override
-	public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(PersonAttributeType attributeType) {
-		return dao.getFhirContactPointMapForPersonAttributeType(attributeType);
-	}
-	
-	@Override
-	public Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(BaseAttributeType<?> attributeType) {
-		return dao.getFhirContactPointMapForAttributeType(attributeType);
-	}
-	
-	@Override
-	public FhirContactPointMap saveFhirContactPointMap(FhirContactPointMap contactPointMap) {
-		return dao.saveFhirContactPointMap(contactPointMap);
-	}
-	
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+  private FhirContactPointMapDao dao;
+
+  @Override
+  public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
+    return dao.getFhirContactPointMapByUuid(uuid);
+  }
+
+  @Override
+  public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(
+      PersonAttributeType attributeType) {
+    return dao.getFhirContactPointMapForPersonAttributeType(attributeType);
+  }
+
+  @Override
+  public Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(
+      BaseAttributeType<?> attributeType) {
+    return dao.getFhirContactPointMapForAttributeType(attributeType);
+  }
+
+  @Override
+  public FhirContactPointMap saveFhirContactPointMap(FhirContactPointMap contactPointMap) {
+    return dao.saveFhirContactPointMap(contactPointMap);
+  }
 }

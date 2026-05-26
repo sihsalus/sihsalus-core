@@ -11,7 +11,6 @@ package org.openmrs.module.billing.web.legacyweb.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
@@ -24,27 +23,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Controller to manage the payment mode fragments.
- */
+/** Controller to manage the payment mode fragments. */
 @Controller
 @RequestMapping("/module/billing/paymentModeFragment")
 public class PaymentModeFragmentController {
-	
-	@RequestMapping(method = RequestMethod.GET)
-	public void paymentModeFragment(@RequestParam("uuid") String uuid, ModelMap model) {
-		PaymentModeService service = Context.getService(PaymentModeService.class);
-		PaymentMode paymentMode = service.getPaymentModeByUuid(uuid);
-		ConceptService conceptService = Context.getConceptService();
-		
-		Map<Integer, Concept> conceptMap = new HashMap<Integer, Concept>();
-		for (PaymentModeAttributeType type : paymentMode.getAttributeTypes()) {
-			if (type.getFormat().equals("org.openmrs.Concept") && type.getForeignKey() != null) {
-				conceptMap.put(type.getForeignKey(), conceptService.getConcept(type.getForeignKey()));
-			}
-		}
-		
-		model.addAttribute("paymentMode", paymentMode);
-		model.addAttribute("conceptMap", conceptMap);
-	}
+
+  @RequestMapping(method = RequestMethod.GET)
+  public void paymentModeFragment(@RequestParam("uuid") String uuid, ModelMap model) {
+    PaymentModeService service = Context.getService(PaymentModeService.class);
+    PaymentMode paymentMode = service.getPaymentModeByUuid(uuid);
+    ConceptService conceptService = Context.getConceptService();
+
+    Map<Integer, Concept> conceptMap = new HashMap<Integer, Concept>();
+    for (PaymentModeAttributeType type : paymentMode.getAttributeTypes()) {
+      if (type.getFormat().equals("org.openmrs.Concept") && type.getForeignKey() != null) {
+        conceptMap.put(type.getForeignKey(), conceptService.getConcept(type.getForeignKey()));
+      }
+    }
+
+    model.addAttribute("paymentMode", paymentMode);
+    model.addAttribute("conceptMap", conceptMap);
+  }
 }

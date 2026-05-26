@@ -30,63 +30,66 @@ import org.openmrs.module.webservices.rest.web.resource.api.Creatable;
 import org.openmrs.module.webservices.rest.web.resource.api.Purgeable;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + ReportingRestController.REPORTING_REST_NAMESPACE + "/adhocdataset",
-        supportedClass = AdHocDataSet.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + ReportingRestController.REPORTING_REST_NAMESPACE
+            + "/adhocdataset",
+    supportedClass = AdHocDataSet.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
 public class AdHocDataSetResource implements Creatable, Purgeable {
 
-    private ObjectMapper jackson = new ObjectMapper();
+  private ObjectMapper jackson = new ObjectMapper();
 
-    // since Resources are not Spring beans, we cannot autowire these properties
-    private AdHocExportManager manager;
-    private AllDefinitionLibraries libraries;
+  // since Resources are not Spring beans, we cannot autowire these properties
+  private AdHocExportManager manager;
+  private AllDefinitionLibraries libraries;
 
-    private AdHocExportManager getManager() {
-        if (manager == null) {
-            manager = Context.getRegisteredComponents(AdHocExportManager.class).get(0);
-        }
-        return manager;
+  private AdHocExportManager getManager() {
+    if (manager == null) {
+      manager = Context.getRegisteredComponents(AdHocExportManager.class).get(0);
     }
+    return manager;
+  }
 
-    private AllDefinitionLibraries getLibraries() {
-        if (libraries == null) {
-            libraries = Context.getRegisteredComponents(AllDefinitionLibraries.class).get(0);
-        }
-        return libraries;
+  private AllDefinitionLibraries getLibraries() {
+    if (libraries == null) {
+      libraries = Context.getRegisteredComponents(AllDefinitionLibraries.class).get(0);
     }
+    return libraries;
+  }
 
-    @Override
-    public Object create(SimpleObject post, RequestContext requestContext) throws ResponseException {
-        ReportingRestPrivileges.requireAddReportObjects();
-        AdHocDataSet adHocDataSet = jackson.convertValue(post, AdHocDataSet.class);
+  @Override
+  public Object create(SimpleObject post, RequestContext requestContext) throws ResponseException {
+    ReportingRestPrivileges.requireAddReportObjects();
+    AdHocDataSet adHocDataSet = jackson.convertValue(post, AdHocDataSet.class);
 
-        try {
-            RowPerObjectDataSetDefinition dsd = adHocDataSet.toDataSetDefinition(getManager(), getLibraries());
-            getManager().saveAdHocDataSet(dsd);
-            return new AdHocDataSet(dsd);
-        }
-        catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+    try {
+      RowPerObjectDataSetDefinition dsd =
+          adHocDataSet.toDataSetDefinition(getManager(), getLibraries());
+      getManager().saveAdHocDataSet(dsd);
+      return new AdHocDataSet(dsd);
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e);
     }
+  }
 
-    @Override
-    public String getUri(Object delegate) {
-        if (delegate == null)
-            return "";
+  @Override
+  public String getUri(Object delegate) {
+    if (delegate == null) return "";
 
-        Resource res = getClass().getAnnotation(Resource.class);
-        return RestConstants.URI_PREFIX + res.name() + "/" + getUniqueId((AdHocDataSet) delegate);
-    }
+    Resource res = getClass().getAnnotation(Resource.class);
+    return RestConstants.URI_PREFIX + res.name() + "/" + getUniqueId((AdHocDataSet) delegate);
+  }
 
-    private String getUniqueId(AdHocDataSet adHocDataSet) {
-        return adHocDataSet.getUuid();
-    }
+  private String getUniqueId(AdHocDataSet adHocDataSet) {
+    return adHocDataSet.getUuid();
+  }
 
-    @Override
-    public void purge(String uuid, RequestContext context) throws ResponseException {
-        ReportingRestPrivileges.requireDeleteReportObjects();
-        RowPerObjectDataSetDefinition dsd = getManager().getAdHocDataSetByUuid(uuid);
-        getManager().purgeAdHocDataSet(dsd);
-    }
-
+  @Override
+  public void purge(String uuid, RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireDeleteReportObjects();
+    RowPerObjectDataSetDefinition dsd = getManager().getAdHocDataSetByUuid(uuid);
+    getManager().purgeAdHocDataSet(dsd);
+  }
 }

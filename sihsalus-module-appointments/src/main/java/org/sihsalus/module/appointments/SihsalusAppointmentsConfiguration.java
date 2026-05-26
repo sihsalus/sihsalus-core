@@ -37,9 +37,9 @@ import org.openmrs.module.appointments.service.AppointmentServiceDefinitionServi
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.RecurringAppointmentNumberGenerator;
 import org.openmrs.module.appointments.service.SpecialityService;
-import org.openmrs.module.appointments.service.impl.AppointmentRecurringPatternServiceImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentArgumentsMapperImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl;
+import org.openmrs.module.appointments.service.impl.AppointmentRecurringPatternServiceImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentServiceAttributeTypeServiceImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentServiceDefinitionServiceImpl;
 import org.openmrs.module.appointments.service.impl.AppointmentsServiceImpl;
@@ -54,8 +54,8 @@ import org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusCh
 import org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator;
 import org.openmrs.module.appointments.validator.impl.DefaultEditAppointmentValidator;
 import org.sihsalus.core.api.HibernateMappingContributor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -64,228 +64,242 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackageClasses = AppointmentsActivator.class)
 public class SihsalusAppointmentsConfiguration {
 
-    @Bean
-    HibernateMappingContributor appointmentsHibernateMappingContributor() {
-        return () -> List.of(
-                "Appointment.hbm.xml",
-                "AppointmentAudit.hbm.xml",
-                "AppointmentProvider.hbm.xml",
-                "AppointmentReason.hbm.xml",
-                "AppointmentRecurringPattern.hbm.xml",
-                "AppointmentServiceAttribute.hbm.xml",
-                "AppointmentServiceAttributeType.hbm.xml",
-                "AppointmentServiceDefinition.hbm.xml",
-                "AppointmentServiceType.hbm.xml",
-                "ServiceWeeklyAvailability.hbm.xml",
-                "Speciality.hbm.xml");
-    }
+  @Bean
+  HibernateMappingContributor appointmentsHibernateMappingContributor() {
+    return () ->
+        List.of(
+            "Appointment.hbm.xml",
+            "AppointmentAudit.hbm.xml",
+            "AppointmentProvider.hbm.xml",
+            "AppointmentReason.hbm.xml",
+            "AppointmentRecurringPattern.hbm.xml",
+            "AppointmentServiceAttribute.hbm.xml",
+            "AppointmentServiceAttributeType.hbm.xml",
+            "AppointmentServiceDefinition.hbm.xml",
+            "AppointmentServiceType.hbm.xml",
+            "ServiceWeeklyAvailability.hbm.xml",
+            "Speciality.hbm.xml");
+  }
 
-    @Bean
-    AppointmentDao appointmentDao(SessionFactory sessionFactory) {
-        AppointmentDaoImpl dao = new AppointmentDaoImpl();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
+  @Bean
+  AppointmentDao appointmentDao(SessionFactory sessionFactory) {
+    AppointmentDaoImpl dao = new AppointmentDaoImpl();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
 
-    @Bean
-    AppointmentAuditDao appointmentAuditDao(SessionFactory sessionFactory) {
-        AppointmentAuditDaoImpl dao = new AppointmentAuditDaoImpl();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
+  @Bean
+  AppointmentAuditDao appointmentAuditDao(SessionFactory sessionFactory) {
+    AppointmentAuditDaoImpl dao = new AppointmentAuditDaoImpl();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
 
-    @Bean
-    AppointmentServiceDao appointmentServiceDao(SessionFactory sessionFactory) {
-        AppointmentServiceDaoImpl dao = new AppointmentServiceDaoImpl();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
+  @Bean
+  AppointmentServiceDao appointmentServiceDao(SessionFactory sessionFactory) {
+    AppointmentServiceDaoImpl dao = new AppointmentServiceDaoImpl();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
 
-    @Bean
-    AppointmentServiceAttributeTypeDao appointmentServiceAttributeTypeDao(SessionFactory sessionFactory) {
-        AppointmentServiceAttributeTypeDaoImpl dao = new AppointmentServiceAttributeTypeDaoImpl();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
+  @Bean
+  AppointmentServiceAttributeTypeDao appointmentServiceAttributeTypeDao(
+      SessionFactory sessionFactory) {
+    AppointmentServiceAttributeTypeDaoImpl dao = new AppointmentServiceAttributeTypeDaoImpl();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
 
-    @Bean
-    SpecialityDao specialityDao(SessionFactory sessionFactory) {
-        SpecialityDaoImpl dao = new SpecialityDaoImpl();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
+  @Bean
+  SpecialityDao specialityDao(SessionFactory sessionFactory) {
+    SpecialityDaoImpl dao = new SpecialityDaoImpl();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
 
-    @Bean
-    AppointmentRecurringPatternDao appointmentRecurringPatternDao(SessionFactory sessionFactory) {
-        AppointmentRecurringPatternDaoImpl dao = new AppointmentRecurringPatternDaoImpl();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
+  @Bean
+  AppointmentRecurringPatternDao appointmentRecurringPatternDao(SessionFactory sessionFactory) {
+    AppointmentRecurringPatternDaoImpl dao = new AppointmentRecurringPatternDaoImpl();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
 
-    @Bean
-    AppointmentServiceHelper appointmentServiceHelper() {
-        return new AppointmentServiceHelper();
-    }
+  @Bean
+  AppointmentServiceHelper appointmentServiceHelper() {
+    return new AppointmentServiceHelper();
+  }
 
-    @Bean
-    AppointmentValidator defaultAppointmentValidator() {
-        return new DefaultAppointmentValidator();
-    }
+  @Bean
+  AppointmentValidator defaultAppointmentValidator() {
+    return new DefaultAppointmentValidator();
+  }
 
-    @Bean
-    AppointmentValidator defaultEditAppointmentValidator(AppointmentDao appointmentDao) {
-        DefaultEditAppointmentValidator validator = new DefaultEditAppointmentValidator();
-        validator.setAppointmentDao(appointmentDao);
-        return validator;
-    }
+  @Bean
+  AppointmentValidator defaultEditAppointmentValidator(AppointmentDao appointmentDao) {
+    DefaultEditAppointmentValidator validator = new DefaultEditAppointmentValidator();
+    validator.setAppointmentDao(appointmentDao);
+    return validator;
+  }
 
-    @Bean
-    AppointmentStatusChangeValidator defaultAppointmentStatusChangeValidator() {
-        return new DefaultAppointmentStatusChangeValidator();
-    }
+  @Bean
+  AppointmentStatusChangeValidator defaultAppointmentStatusChangeValidator() {
+    return new DefaultAppointmentStatusChangeValidator();
+  }
 
-    @Bean
-    AppointmentConflict appointmentServiceUnavailabilityConflict() {
-        return new AppointmentServiceUnavailabilityConflict();
-    }
+  @Bean
+  AppointmentConflict appointmentServiceUnavailabilityConflict() {
+    return new AppointmentServiceUnavailabilityConflict();
+  }
 
-    @Bean
-    AppointmentConflict patientDoubleBookingConflict(AppointmentDao appointmentDao) {
-        PatientDoubleBookingConflict conflict = new PatientDoubleBookingConflict();
-        conflict.setAppointmentDao(appointmentDao);
-        return conflict;
-    }
+  @Bean
+  AppointmentConflict patientDoubleBookingConflict(AppointmentDao appointmentDao) {
+    PatientDoubleBookingConflict conflict = new PatientDoubleBookingConflict();
+    conflict.setAppointmentDao(appointmentDao);
+    return conflict;
+  }
 
-    @Bean
-    MailSender defaultTCApptMailSender(AdministrationService administrationService) {
-        return new DefaultMailSender(administrationService);
-    }
+  @Bean
+  MailSender defaultTCApptMailSender(AdministrationService administrationService) {
+    return new DefaultMailSender(administrationService);
+  }
 
-    @Bean
-    AppointmentEventNotifier defaultPatientEmailNotifier(MailSender defaultTCApptMailSender) {
-        return new DefaultTCAppointmentPatientEmailNotifier(defaultTCApptMailSender);
-    }
+  @Bean
+  AppointmentEventNotifier defaultPatientEmailNotifier(MailSender defaultTCApptMailSender) {
+    return new DefaultTCAppointmentPatientEmailNotifier(defaultTCApptMailSender);
+  }
 
-    @Bean
-    PatientAppointmentNotifierService patientAppointmentNotifierService(List<AppointmentEventNotifier> eventNotifiers) {
-        return new PatientAppointmentNotifierService(eventNotifiers);
-    }
+  @Bean
+  PatientAppointmentNotifierService patientAppointmentNotifierService(
+      List<AppointmentEventNotifier> eventNotifiers) {
+    return new PatientAppointmentNotifierService(eventNotifiers);
+  }
 
-    @Bean
-    AppointmentArgumentsMapper appointmentArgumentsMapper() {
-        return new AppointmentArgumentsMapperImpl();
-    }
+  @Bean
+  AppointmentArgumentsMapper appointmentArgumentsMapper() {
+    return new AppointmentArgumentsMapperImpl();
+  }
 
-    @Bean
-    TeleconsultationAppointmentService teleconsultationAppointmentService(
-            PatientService patientService, PatientAppointmentNotifierService patientAppointmentNotifierService) {
-        TeleconsultationAppointmentService service = new TeleconsultationAppointmentService();
-        service.setPatientService(patientService);
-        service.setPatientAppointmentNotifierService(patientAppointmentNotifierService);
-        return service;
-    }
+  @Bean
+  TeleconsultationAppointmentService teleconsultationAppointmentService(
+      PatientService patientService,
+      PatientAppointmentNotifierService patientAppointmentNotifierService) {
+    TeleconsultationAppointmentService service = new TeleconsultationAppointmentService();
+    service.setPatientService(patientService);
+    service.setPatientAppointmentNotifierService(patientAppointmentNotifierService);
+    return service;
+  }
 
-    @Bean
-    AppointmentNumberGenerator appointmentNumberGenerator() {
-        return new DefaultAppointmentNumberGeneratorImpl();
-    }
+  @Bean
+  AppointmentNumberGenerator appointmentNumberGenerator() {
+    return new DefaultAppointmentNumberGeneratorImpl();
+  }
 
-    @Bean
-    AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator(AppointmentNumberGenerator appointmentNumberGenerator) {
-        AppointmentNumberGeneratorLocatorImpl locator = new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator);
-        RecurringAppointmentNumberGenerator recurring = new DefaultRecurringAppointmentNumberGeneratorImpl(locator);
-        locator.registerRecurringAppointmentNumberGenerator(recurring);
-        return locator;
-    }
+  @Bean
+  AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator(
+      AppointmentNumberGenerator appointmentNumberGenerator) {
+    AppointmentNumberGeneratorLocatorImpl locator =
+        new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator);
+    RecurringAppointmentNumberGenerator recurring =
+        new DefaultRecurringAppointmentNumberGeneratorImpl(locator);
+    locator.registerRecurringAppointmentNumberGenerator(recurring);
+    return locator;
+  }
 
-    @Bean
-    AppointmentsService appointmentsService(
-            AppointmentDao appointmentDao,
-            AppointmentAuditDao appointmentAuditDao,
-            AppointmentServiceHelper appointmentServiceHelper,
-            @Qualifier("defaultAppointmentValidator") AppointmentValidator defaultAppointmentValidator,
-            @Qualifier("defaultEditAppointmentValidator") AppointmentValidator defaultEditAppointmentValidator,
-            List<AppointmentStatusChangeValidator> statusChangeValidators,
-            List<AppointmentConflict> appointmentConflicts,
-            TeleconsultationAppointmentService teleconsultationAppointmentService,
-            PatientAppointmentNotifierService patientAppointmentNotifierService,
-            AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
-        AppointmentsServiceImpl service = new AppointmentsServiceImpl();
-        service.setAppointmentDao(appointmentDao);
-        service.setAppointmentAuditDao(appointmentAuditDao);
-        service.setAppointmentServiceHelper(appointmentServiceHelper);
-        service.setAppointmentValidators(List.of(defaultAppointmentValidator));
-        service.setEditAppointmentValidators(List.of(defaultEditAppointmentValidator));
-        service.setStatusChangeValidators(statusChangeValidators);
-        service.setAppointmentConflicts(appointmentConflicts);
-        service.setTeleconsultationAppointmentService(teleconsultationAppointmentService);
-        service.setAppointmentNotifierService(patientAppointmentNotifierService);
-        service.setAppointmentNumberGeneratorLocator(appointmentNumberGeneratorLocator);
-        return service;
-    }
+  @Bean
+  AppointmentsService appointmentsService(
+      AppointmentDao appointmentDao,
+      AppointmentAuditDao appointmentAuditDao,
+      AppointmentServiceHelper appointmentServiceHelper,
+      @Qualifier("defaultAppointmentValidator") AppointmentValidator defaultAppointmentValidator,
+      @Qualifier("defaultEditAppointmentValidator")
+          AppointmentValidator defaultEditAppointmentValidator,
+      List<AppointmentStatusChangeValidator> statusChangeValidators,
+      List<AppointmentConflict> appointmentConflicts,
+      TeleconsultationAppointmentService teleconsultationAppointmentService,
+      PatientAppointmentNotifierService patientAppointmentNotifierService,
+      AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
+    AppointmentsServiceImpl service = new AppointmentsServiceImpl();
+    service.setAppointmentDao(appointmentDao);
+    service.setAppointmentAuditDao(appointmentAuditDao);
+    service.setAppointmentServiceHelper(appointmentServiceHelper);
+    service.setAppointmentValidators(List.of(defaultAppointmentValidator));
+    service.setEditAppointmentValidators(List.of(defaultEditAppointmentValidator));
+    service.setStatusChangeValidators(statusChangeValidators);
+    service.setAppointmentConflicts(appointmentConflicts);
+    service.setTeleconsultationAppointmentService(teleconsultationAppointmentService);
+    service.setAppointmentNotifierService(patientAppointmentNotifierService);
+    service.setAppointmentNumberGeneratorLocator(appointmentNumberGeneratorLocator);
+    return service;
+  }
 
-    @Bean
-    AppointmentServiceDefinitionService appointmentServiceDefinitionService(
-            AppointmentServiceDao appointmentServiceDao, AppointmentsService appointmentsService) {
-        AppointmentServiceDefinitionServiceImpl service = new AppointmentServiceDefinitionServiceImpl();
-        service.setAppointmentServiceDao(appointmentServiceDao);
-        service.setAppointmentsService(appointmentsService);
-        return service;
-    }
+  @Bean
+  AppointmentServiceDefinitionService appointmentServiceDefinitionService(
+      AppointmentServiceDao appointmentServiceDao, AppointmentsService appointmentsService) {
+    AppointmentServiceDefinitionServiceImpl service = new AppointmentServiceDefinitionServiceImpl();
+    service.setAppointmentServiceDao(appointmentServiceDao);
+    service.setAppointmentsService(appointmentsService);
+    return service;
+  }
 
-    @Bean
-    AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService(
-            AppointmentServiceAttributeTypeDao appointmentServiceAttributeTypeDao) {
-        AppointmentServiceAttributeTypeServiceImpl service = new AppointmentServiceAttributeTypeServiceImpl();
-        service.setAppointmentServiceAttributeTypeDao(appointmentServiceAttributeTypeDao);
-        return service;
-    }
+  @Bean
+  AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService(
+      AppointmentServiceAttributeTypeDao appointmentServiceAttributeTypeDao) {
+    AppointmentServiceAttributeTypeServiceImpl service =
+        new AppointmentServiceAttributeTypeServiceImpl();
+    service.setAppointmentServiceAttributeTypeDao(appointmentServiceAttributeTypeDao);
+    return service;
+  }
 
-    @Bean
-    SpecialityService specialityService(SpecialityDao specialityDao) {
-        SpecialityServiceImpl service = new SpecialityServiceImpl();
-        service.setSpecialityDao(specialityDao);
-        return service;
-    }
+  @Bean
+  SpecialityService specialityService(SpecialityDao specialityDao) {
+    SpecialityServiceImpl service = new SpecialityServiceImpl();
+    service.setSpecialityDao(specialityDao);
+    return service;
+  }
 
-    @Bean
-    AppointmentRecurringPatternService appointmentRecurringPatternService(
-            AppointmentRecurringPatternDao appointmentRecurringPatternDao,
-            AppointmentDao appointmentDao,
-            AppointmentServiceHelper appointmentServiceHelper,
-            @Qualifier("defaultAppointmentValidator") AppointmentValidator defaultAppointmentValidator,
-            @Qualifier("defaultEditAppointmentValidator") AppointmentValidator defaultEditAppointmentValidator,
-            List<AppointmentStatusChangeValidator> statusChangeValidators,
-            AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
-        AppointmentRecurringPatternServiceImpl service = new AppointmentRecurringPatternServiceImpl();
-        service.setAppointmentRecurringPatternDao(appointmentRecurringPatternDao);
-        service.setAppointmentDao(appointmentDao);
-        service.setAppointmentServiceHelper(appointmentServiceHelper);
-        service.setAppointmentValidators(List.of(defaultAppointmentValidator));
-        service.setEditAppointmentValidators(List.of(defaultEditAppointmentValidator));
-        service.setStatusChangeValidators(statusChangeValidators);
-        service.setAppointmentNumberGeneratorLocator(appointmentNumberGeneratorLocator);
-        return service;
-    }
+  @Bean
+  AppointmentRecurringPatternService appointmentRecurringPatternService(
+      AppointmentRecurringPatternDao appointmentRecurringPatternDao,
+      AppointmentDao appointmentDao,
+      AppointmentServiceHelper appointmentServiceHelper,
+      @Qualifier("defaultAppointmentValidator") AppointmentValidator defaultAppointmentValidator,
+      @Qualifier("defaultEditAppointmentValidator")
+          AppointmentValidator defaultEditAppointmentValidator,
+      List<AppointmentStatusChangeValidator> statusChangeValidators,
+      AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
+    AppointmentRecurringPatternServiceImpl service = new AppointmentRecurringPatternServiceImpl();
+    service.setAppointmentRecurringPatternDao(appointmentRecurringPatternDao);
+    service.setAppointmentDao(appointmentDao);
+    service.setAppointmentServiceHelper(appointmentServiceHelper);
+    service.setAppointmentValidators(List.of(defaultAppointmentValidator));
+    service.setEditAppointmentValidators(List.of(defaultEditAppointmentValidator));
+    service.setStatusChangeValidators(statusChangeValidators);
+    service.setAppointmentNumberGeneratorLocator(appointmentNumberGeneratorLocator);
+    return service;
+  }
 
-    @Bean
-    SmartInitializingSingleton appointmentsServiceRegistrar(
-            ServiceContext serviceContext,
-            AppointmentsService appointmentsService,
-            AppointmentServiceDefinitionService appointmentServiceDefinitionService,
-            AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService,
-            SpecialityService specialityService,
-            AppointmentRecurringPatternService appointmentRecurringPatternService,
-            AppointmentArgumentsMapper appointmentArgumentsMapper) {
-        return () -> {
-            serviceContext.setService(AppointmentsService.class, appointmentsService);
-            serviceContext.setService(AppointmentServiceDefinitionService.class, appointmentServiceDefinitionService);
-            serviceContext.setService(AppointmentServiceAttributeTypeService.class, appointmentServiceAttributeTypeService);
-            serviceContext.setService(SpecialityService.class, specialityService);
-            serviceContext.setService(AppointmentRecurringPatternService.class, appointmentRecurringPatternService);
-            serviceContext.setService(AppointmentArgumentsMapper.class, appointmentArgumentsMapper);
-            serviceContext.addAdvice(AppointmentsService.class, new AppointmentEventsAdvice());
-            serviceContext.addAdvice(AppointmentRecurringPatternService.class, new RecurringAppointmentEventsAdvice());
-        };
-    }
+  @Bean
+  SmartInitializingSingleton appointmentsServiceRegistrar(
+      ServiceContext serviceContext,
+      AppointmentsService appointmentsService,
+      AppointmentServiceDefinitionService appointmentServiceDefinitionService,
+      AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService,
+      SpecialityService specialityService,
+      AppointmentRecurringPatternService appointmentRecurringPatternService,
+      AppointmentArgumentsMapper appointmentArgumentsMapper) {
+    return () -> {
+      serviceContext.setService(AppointmentsService.class, appointmentsService);
+      serviceContext.setService(
+          AppointmentServiceDefinitionService.class, appointmentServiceDefinitionService);
+      serviceContext.setService(
+          AppointmentServiceAttributeTypeService.class, appointmentServiceAttributeTypeService);
+      serviceContext.setService(SpecialityService.class, specialityService);
+      serviceContext.setService(
+          AppointmentRecurringPatternService.class, appointmentRecurringPatternService);
+      serviceContext.setService(AppointmentArgumentsMapper.class, appointmentArgumentsMapper);
+      serviceContext.addAdvice(AppointmentsService.class, new AppointmentEventsAdvice());
+      serviceContext.addAdvice(
+          AppointmentRecurringPatternService.class, new RecurringAppointmentEventsAdvice());
+    };
+  }
 }

@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = "org.openmrs.module.serialization.xstream")
 public class SihsalusSerializationXstreamConfiguration {
 
-    @Bean
-    CollectionCompatibility serializationXstreamCollectionCompatibility() {
-        return new CollectionCompatibilityConverter();
-    }
+  @Bean
+  CollectionCompatibility serializationXstreamCollectionCompatibility() {
+    return new CollectionCompatibilityConverter();
+  }
 
-    @Bean
-    XStreamShortSerializer xstreamShortSerializer() throws SerializationException {
-        return new XStreamShortSerializer();
-    }
+  @Bean
+  XStreamShortSerializer xstreamShortSerializer() throws SerializationException {
+    return new XStreamShortSerializer();
+  }
 }

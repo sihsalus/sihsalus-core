@@ -11,44 +11,44 @@ package org.openmrs.module.fhir2.api.util;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.util.xmlpatch.XmlPatchException;
 import org.openmrs.module.fhir2.api.util.xmlpatch.XmlPatcher;
 
 public class XmlPatchUtils {
-	
-	/**
-	 * Applies an XML Patch to a FHIR Resource
-	 *
-	 * @param theCtx The {@link FhirContext} object representing the FHIR context.
-	 * @param theResourceToUpdate the resource of type {@link T} to be updated.
-	 * @param thePatchBody The XML patch to apply to the resource.
-	 * @param <T> A type that extends IBaseResource.
-	 * @return The updated resource after applying the XML patch.
-	 */
-	public static <T extends IBaseResource> T applyXmlPatch(FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
-		@SuppressWarnings("unchecked")
-		Class<T> clazz = (Class<T>) theResourceToUpdate.getClass();
-		
-		String inputResource = theCtx.newXmlParser().encodeResourceToString(theResourceToUpdate);
-		
-		ByteArrayOutputStream result = new ByteArrayOutputStream();
-		try {
-			XmlPatcher.patch(new ByteArrayInputStream(inputResource.getBytes(Constants.CHARSET_UTF8)),
-			    new ByteArrayInputStream(thePatchBody.getBytes(Constants.CHARSET_UTF8)), result);
-		}
-		catch (IOException | XmlPatchException e) {
-			throw new InvalidRequestException(e);
-		}
-		
-		return theCtx.newXmlParser().parseResource(clazz, toUtf8String(result.toByteArray()));
-	}
-	
+
+  /**
+   * Applies an XML Patch to a FHIR Resource
+   *
+   * @param theCtx The {@link FhirContext} object representing the FHIR context.
+   * @param theResourceToUpdate the resource of type {@link T} to be updated.
+   * @param thePatchBody The XML patch to apply to the resource.
+   * @param <T> A type that extends IBaseResource.
+   * @return The updated resource after applying the XML patch.
+   */
+  public static <T extends IBaseResource> T applyXmlPatch(
+      FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
+    @SuppressWarnings("unchecked")
+    Class<T> clazz = (Class<T>) theResourceToUpdate.getClass();
+
+    String inputResource = theCtx.newXmlParser().encodeResourceToString(theResourceToUpdate);
+
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    try {
+      XmlPatcher.patch(
+          new ByteArrayInputStream(inputResource.getBytes(Constants.CHARSET_UTF8)),
+          new ByteArrayInputStream(thePatchBody.getBytes(Constants.CHARSET_UTF8)),
+          result);
+    } catch (IOException | XmlPatchException e) {
+      throw new InvalidRequestException(e);
+    }
+
+    return theCtx.newXmlParser().parseResource(clazz, toUtf8String(result.toByteArray()));
+  }
 }

@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.api.handler;
 
@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
 import org.openmrs.Encounter;
 import org.openmrs.User;
 import org.openmrs.Visit;
@@ -33,16 +32,18 @@ import org.openmrs.api.context.Context;
 @Handler(supports = Visit.class)
 public class VisitVoidHandler implements VoidHandler<Visit> {
 
-	@Override
-	public void handle(Visit voidableObject, User voidingUser, Date voidedDate, String voidReason) {
-		List<Encounter> encountersByVisit = Context.getEncounterService().getEncountersByVisit(voidableObject, false);
-		// void the encounters in reverse order of encounterDatetime, so that
-		// encounters that require another prior encounter (ex: a discharge must happen after an admission encounter) are voided properly.
-		Collections.sort(encountersByVisit, Comparator.comparing(Encounter::getEncounterDatetime).reversed());
-		for (Encounter encounter : encountersByVisit) {
-			encounter.setDateVoided(voidedDate);
-			Context.getEncounterService().voidEncounter(encounter, voidReason);
-		}
-	}
-
+  @Override
+  public void handle(Visit voidableObject, User voidingUser, Date voidedDate, String voidReason) {
+    List<Encounter> encountersByVisit =
+        Context.getEncounterService().getEncountersByVisit(voidableObject, false);
+    // void the encounters in reverse order of encounterDatetime, so that
+    // encounters that require another prior encounter (ex: a discharge must happen after an
+    // admission encounter) are voided properly.
+    Collections.sort(
+        encountersByVisit, Comparator.comparing(Encounter::getEncounterDatetime).reversed());
+    for (Encounter encounter : encountersByVisit) {
+      encounter.setDateVoided(voidedDate);
+      Context.getEncounterService().voidEncounter(encounter, voidReason);
+    }
+  }
 }

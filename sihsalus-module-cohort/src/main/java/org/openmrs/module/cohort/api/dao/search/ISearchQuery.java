@@ -10,25 +10,25 @@
 package org.openmrs.module.cohort.api.dao.search;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.openmrs.module.cohort.CohortM;
 import org.openmrs.module.cohort.CohortMember;
 import org.openmrs.module.cohort.CohortType;
 
-/**
- * ISearchQuery interface
- */
+/** ISearchQuery interface */
 public interface ISearchQuery {
-	
-	//Add cohort search methods
-	List<CohortM> findCohorts(String nameMatching, Map<String, String> attributes, CohortType cohortType,
-	        boolean includeVoided);
-	
-	Collection<CohortMember> findCohortMembersByPatientNames(@NotNull String name);
-	
-	Collection<CohortMember> findCohortMembersByCohortAndPatient(@NotNull String cohortUuid, @NotNull String query);
+
+  // Add cohort search methods
+  List<CohortM> findCohorts(
+      String nameMatching,
+      Map<String, String> attributes,
+      CohortType cohortType,
+      boolean includeVoided);
+
+  Collection<CohortMember> findCohortMembersByPatientNames(@NotNull String name);
+
+  Collection<CohortMember> findCohortMembersByCohortAndPatient(
+      @NotNull String cohortUuid, @NotNull String query);
 }
