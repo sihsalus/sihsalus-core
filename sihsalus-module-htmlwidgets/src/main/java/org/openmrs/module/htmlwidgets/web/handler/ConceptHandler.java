@@ -95,7 +95,11 @@ public class ConceptHandler extends CodedHandler {
       String includeClasses = config.getAttributeValue("includeClasses");
       if (StringUtils.isNotBlank(includeClasses)) {
         for (String ccId : includeClasses.split(",")) {
-          ConceptClass cc = Context.getConceptService().getConceptClass(Integer.parseInt(ccId));
+          Integer conceptClassId = parseInteger(ccId);
+          if (conceptClassId == null) {
+            continue;
+          }
+          ConceptClass cc = Context.getConceptService().getConceptClass(conceptClassId);
           for (Concept c : Context.getConceptService().getConceptsByClass(cc)) {
             widget.addOption(
                 new Option(c.getId().toString(), c.getDisplayString(), null, c), config);
@@ -104,7 +108,11 @@ public class ConceptHandler extends CodedHandler {
       }
       String questionConceptId = config.getAttributeValue("questionConceptId");
       if (StringUtils.isNotBlank(questionConceptId)) {
-        Concept c = Context.getConceptService().getConcept(Integer.parseInt(questionConceptId));
+        Integer conceptId = parseInteger(questionConceptId);
+        if (conceptId == null) {
+          return;
+        }
+        Concept c = Context.getConceptService().getConcept(conceptId);
         for (ConceptAnswer answer : c.getAnswers()) {
           Concept a = answer.getAnswerConcept();
           widget.addOption(new Option(a.getId().toString(), a.getDisplayString(), null, a), config);
@@ -120,7 +128,8 @@ public class ConceptHandler extends CodedHandler {
   @Override
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
-      return Context.getConceptService().getConcept(Integer.parseInt(input));
+      Integer conceptId = parseInteger(input);
+      return conceptId == null ? null : Context.getConceptService().getConcept(conceptId);
     }
     return null;
   }

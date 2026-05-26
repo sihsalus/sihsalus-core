@@ -45,9 +45,9 @@ public class IntegerHandler extends WidgetHandler {
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
       if (type == Long.class) {
-        return Long.valueOf(input);
+        return parseLong(input);
       }
-      return Integer.valueOf(input);
+      return parseInteger(input);
     }
     return null;
   }

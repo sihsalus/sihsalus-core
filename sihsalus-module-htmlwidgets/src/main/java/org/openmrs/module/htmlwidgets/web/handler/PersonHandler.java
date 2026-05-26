@@ -85,7 +85,8 @@ public class PersonHandler extends CodedHandler {
   @Override
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
-      return Context.getPersonService().getPerson(Integer.parseInt(input));
+      Integer personId = parseInteger(input);
+      return personId == null ? null : Context.getPersonService().getPerson(personId);
     }
     return null;
   }

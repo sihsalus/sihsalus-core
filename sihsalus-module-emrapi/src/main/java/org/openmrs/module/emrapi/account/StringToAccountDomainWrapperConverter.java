@@ -26,8 +26,13 @@ public class StringToAccountDomainWrapperConverter
    */
   @Override
   public AccountDomainWrapper convert(String personId) {
-    if (StringUtils.isNotBlank(personId))
-      return accountService.getAccount(Integer.valueOf(personId));
+    if (StringUtils.isNotBlank(personId)) {
+      try {
+        return accountService.getAccount(Integer.valueOf(personId));
+      } catch (NumberFormatException e) {
+        return null;
+      }
+    }
     return null;
   }
 }

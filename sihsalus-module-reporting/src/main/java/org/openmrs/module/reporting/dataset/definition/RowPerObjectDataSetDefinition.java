@@ -129,6 +129,7 @@ public abstract class RowPerObjectDataSetDefinition extends BaseDataSetDefinitio
   /**
    * @return the columnDefinitions
    */
+  @SuppressWarnings("java/internal-representation-exposure")
   public List<RowPerObjectColumnDefinition> getColumnDefinitions() {
     if (columnDefinitions == null) {
       columnDefinitions = new ArrayList<RowPerObjectColumnDefinition>();

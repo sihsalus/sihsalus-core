@@ -239,6 +239,7 @@ public class Order extends BaseCustomizableData<OrderAttribute> implements FormR
    * @param target an Order that will have the state of <code>this</code> copied into it
    * @return Returns the Order that was passed in, with state copied into it
    */
+  @SuppressWarnings("java/confusing-method-signature")
   protected Order copyHelper(Order target) {
     target.setPatient(getPatient());
     target.setOrderType(getOrderType());
@@ -877,6 +878,7 @@ public class Order extends BaseCustomizableData<OrderAttribute> implements FormR
    * @param target an Order that will have the state of <code>this</code> copied into it
    * @return Returns the Order that was passed in, with state copied into it
    */
+  @SuppressWarnings("java/confusing-method-signature")
   protected Order cloneForRevisionHelper(Order target) {
     if (getAction() == Action.DISCONTINUE) {
       target.setAction(Action.DISCONTINUE);

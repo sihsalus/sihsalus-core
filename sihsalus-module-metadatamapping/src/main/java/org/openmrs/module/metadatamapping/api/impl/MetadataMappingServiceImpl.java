@@ -578,6 +578,7 @@ public class MetadataMappingServiceImpl extends BaseOpenmrsService
 
   @Override
   @Transactional(readOnly = true)
+  @SuppressWarnings("java/confusing-method-signature")
   public List<MetadataTermMapping> getMetadataTermMappings(OpenmrsMetadata referredObject) {
     MetadataTermMappingSearchCriteria searchCriteria =
         new MetadataTermMappingSearchCriteriaBuilder()

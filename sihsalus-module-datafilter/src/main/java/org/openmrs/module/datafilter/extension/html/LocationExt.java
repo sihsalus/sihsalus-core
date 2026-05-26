@@ -22,8 +22,12 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.Extension;
 import org.openmrs.module.datafilter.impl.EntityBasisMap;
 import org.openmrs.module.datafilter.impl.api.DataFilterService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LocationExt extends Extension {
+
+  private static final Logger log = LoggerFactory.getLogger(LocationExt.class);
 
   /**
    * Returns the required privilege in order to see this section. Can be a comma delimited list of
@@ -55,7 +59,13 @@ public class LocationExt extends Extension {
         Context.getRegisteredComponents(DataFilterService.class).get(0);
     UserService userService = Context.getUserService();
 
-    User user = userService.getUser(Integer.parseInt(userId));
+    User user;
+    try {
+      user = userService.getUser(Integer.parseInt(userId));
+    } catch (NumberFormatException e) {
+      log.warn("Invalid user id: " + userId, e);
+      return new ArrayList<>();
+    }
     Collection<EntityBasisMap> userLocations =
         dataFilterService.getEntityBasisMaps(user, Location.class.getName());
 
@@ -72,7 +82,12 @@ public class LocationExt extends Extension {
   private String getLocationName(String basisIdentifier) {
     LocationService locationService = Context.getLocationService();
 
-    return locationService.getLocation(Integer.parseInt(basisIdentifier)).getName();
+    try {
+      return locationService.getLocation(Integer.parseInt(basisIdentifier)).getName();
+    } catch (NumberFormatException e) {
+      log.warn("Invalid location basis identifier: " + basisIdentifier, e);
+      return "";
+    }
   }
 
   @Override

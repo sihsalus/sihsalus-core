@@ -204,8 +204,7 @@ public class StockOperationDTOValidator implements Validator {
 
     if (stockOperationType.requiresReason() && StringUtils.isBlank(object.getReasonUuid())) {
       errors.rejectValue(
-          "reasonUuid",
-          messageSourceService.getMessage("stockmanagement.stockoperation.noreason"));
+          "reasonUuid", messageSourceService.getMessage("stockmanagement.stockoperation.noreason"));
       return;
     }
 

@@ -143,8 +143,15 @@ public class Cohort extends BaseChangeableOpenmrsData {
   public Cohort(String commaSeparatedIds) {
     this();
     String[] ids = StringUtils.split(commaSeparatedIds, ',');
-    Arrays.stream(ids)
-        .forEach(id -> addMembership(new CohortMembership(Integer.valueOf(id.trim()))));
+    Arrays.stream(ids).forEach(id -> addMembership(new CohortMembership(parsePatientId(id))));
+  }
+
+  private Integer parsePatientId(String patientId) {
+    try {
+      return Integer.valueOf(patientId.trim());
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Invalid patient id: " + patientId, e);
+    }
   }
 
   /**

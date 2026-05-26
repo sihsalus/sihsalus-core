@@ -1166,7 +1166,11 @@ public class OpenmrsUtil {
     for (String token : tokens) {
       token = token.trim();
       if (token.length() != 0) {
-        ret.add(Integer.valueOf(token));
+        try {
+          ret.add(Integer.valueOf(token));
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("Invalid integer value: " + token, e);
+        }
       }
     }
     return ret;

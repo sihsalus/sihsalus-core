@@ -26,8 +26,8 @@ import org.apache.logging.log4j.core.config.Property;
  *
  * @deprecated As of 2.4.4, 2.5.1, and 2.6.0 this class is moved to the org.openmrs.logging package
  */
-// codeql[java/class-name-matches-super-class]
 @Deprecated
+@SuppressWarnings("java/class-name-matches-super-class")
 public class MemoryAppender extends org.openmrs.logging.MemoryAppender {
 
   private final org.openmrs.logging.MemoryAppender implementation;

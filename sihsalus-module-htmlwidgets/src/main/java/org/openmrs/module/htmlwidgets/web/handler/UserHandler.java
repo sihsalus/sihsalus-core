@@ -83,7 +83,8 @@ public class UserHandler extends CodedHandler {
   @Override
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
-      return Context.getUserService().getUser(Integer.parseInt(input));
+      Integer userId = parseInteger(input);
+      return userId == null ? null : Context.getUserService().getUser(userId);
     }
     return null;
   }

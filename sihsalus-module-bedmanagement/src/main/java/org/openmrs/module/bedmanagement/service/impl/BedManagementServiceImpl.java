@@ -131,7 +131,13 @@ public class BedManagementServiceImpl extends BaseOpenmrsService implements BedM
   @Transactional
   public BedDetails assignPatientToBed(Patient patient, Encounter encounter, String bedId) {
     BedDetails prev = getBedManagementService().unAssignPatientFromBed(patient);
-    Bed bed = bedManagementDao.getBedById(Integer.parseInt(bedId));
+    int parsedBedId;
+    try {
+      parsedBedId = Integer.parseInt(bedId);
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Invalid bed id: " + bedId, e);
+    }
+    Bed bed = bedManagementDao.getBedById(parsedBedId);
 
     BedPatientAssignment bedPatientAssignment = new BedPatientAssignment();
     bedPatientAssignment.setPatient(patient);
@@ -165,7 +171,13 @@ public class BedManagementServiceImpl extends BaseOpenmrsService implements BedM
   @Override
   @Transactional(readOnly = true)
   public BedDetails getBedDetailsById(String id) {
-    Bed bed = bedManagementDao.getBedById(Integer.parseInt(id));
+    int bedId;
+    try {
+      bedId = Integer.parseInt(id);
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Invalid bed id: " + id, e);
+    }
+    Bed bed = bedManagementDao.getBedById(bedId);
     return getBedDetails(bed);
   }
 

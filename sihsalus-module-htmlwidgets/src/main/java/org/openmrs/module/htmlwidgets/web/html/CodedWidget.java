@@ -111,6 +111,7 @@ public abstract class CodedWidget implements Widget {
   /**
    * @return the options
    */
+  @SuppressWarnings("java/internal-representation-exposure")
   public List<Option> getOptions() {
     if (options == null) {
       options = new ArrayList<Option>();

@@ -65,7 +65,8 @@ public class PatientHandler extends CodedHandler {
   @Override
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
-      return Context.getPatientService().getPatient(Integer.parseInt(input));
+      Integer patientId = parseInteger(input);
+      return patientId == null ? null : Context.getPatientService().getPatient(patientId);
     }
     return null;
   }

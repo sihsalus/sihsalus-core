@@ -90,8 +90,17 @@ public class UserServiceImpl extends BaseOpenmrsService implements UserService, 
     String validTimeGp =
         Context.getAdministrationService()
             .getGlobalProperty(OpenmrsConstants.GP_PASSWORD_RESET_VALIDTIME);
-    final int validTime =
-        StringUtils.isBlank(validTimeGp) ? DEFAULT_VALID_TIME : Integer.parseInt(validTimeGp);
+    final int validTime;
+    if (StringUtils.isBlank(validTimeGp)) {
+      validTime = DEFAULT_VALID_TIME;
+    } else {
+      try {
+        validTime = Integer.parseInt(validTimeGp);
+      } catch (NumberFormatException e) {
+        log.warn("Invalid password reset valid time global property: " + validTimeGp, e);
+        return DEFAULT_VALID_TIME;
+      }
+    }
     // if valid time is less that a minute or greater than 12hrs reset valid time to 1 minutes else
     // set it to the required time.
     return (validTime < MIN_VALID_TIME) || (validTime > MAX_VALID_TIME)
@@ -758,7 +767,14 @@ public class UserServiceImpl extends BaseOpenmrsService implements UserService, 
     LoginCredential loginCred = dao.getLoginCredentialByActivationKey(activationKey);
     if (loginCred != null) {
       String[] credTokens = loginCred.getActivationKey().split(":");
-      if (System.currentTimeMillis() <= Long.parseLong(credTokens[1])) {
+      long activationKeyExpiration;
+      try {
+        activationKeyExpiration = Long.parseLong(credTokens[1]);
+      } catch (NumberFormatException e) {
+        log.warn("Invalid activation key expiration for user {}", loginCred.getUserId(), e);
+        return null;
+      }
+      if (System.currentTimeMillis() <= activationKeyExpiration) {
         return getUser(loginCred.getUserId());
       }
     }

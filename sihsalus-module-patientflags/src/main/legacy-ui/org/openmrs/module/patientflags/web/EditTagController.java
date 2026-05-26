@@ -86,7 +86,12 @@ public class EditTagController {
 			
 			@Override
 			public Object convertElement(Object element) {
-				return Context.getService(FlagService.class).getDisplayPoint(Integer.valueOf((String) element));
+				try {
+					return Context.getService(FlagService.class).getDisplayPoint(Integer.valueOf((String) element));
+				}
+				catch (NumberFormatException e) {
+					return null;
+				}
 			}
 		});
 	}

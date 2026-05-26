@@ -148,6 +148,7 @@ public class CohortM extends BaseCustomizableData<CohortAttribute>
     this.cohortType = cohortType;
   }
 
+  @SuppressWarnings("java/internal-representation-exposure")
   public Set<CohortMember> getCohortMembers() {
     if (cohortMembers == null) {
       cohortMembers = new HashSet<>();
@@ -155,6 +156,7 @@ public class CohortM extends BaseCustomizableData<CohortAttribute>
     return cohortMembers;
   }
 
+  @SuppressWarnings("java/internal-representation-exposure")
   public Set<CohortMember> getActiveCohortMembers() {
     if (activeCohortMembers == null) {
       activeCohortMembers = new HashSet<>();

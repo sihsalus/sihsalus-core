@@ -128,7 +128,11 @@ public class ExistingOrNewVisitAssignmentHandler extends ExistingVisitAssignment
             String visitTypeIdOrUuid = mapping.substring(index + 1).trim();
             VisitType visitType;
             if (StringUtils.isNumeric(visitTypeIdOrUuid)) {
-              visitType = visitService.getVisitType(Integer.parseInt(visitTypeIdOrUuid));
+              try {
+                visitType = visitService.getVisitType(Integer.parseInt(visitTypeIdOrUuid));
+              } catch (NumberFormatException e) {
+                throw new APIException("Invalid visit type id: " + visitTypeIdOrUuid, e);
+              }
             } else {
               visitType = visitService.getVisitTypeByUuid(visitTypeIdOrUuid);
             }

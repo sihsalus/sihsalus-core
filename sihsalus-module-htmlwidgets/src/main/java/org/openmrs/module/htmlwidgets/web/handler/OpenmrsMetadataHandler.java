@@ -60,8 +60,10 @@ public abstract class OpenmrsMetadataHandler<T extends OpenmrsMetadata> extends 
   @SuppressWarnings("unchecked")
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
-      return Context.getService(HtmlWidgetsService.class)
-          .getObject((Class<T>) type, Integer.parseInt(input));
+      Integer metadataId = parseInteger(input);
+      return metadataId == null
+          ? null
+          : Context.getService(HtmlWidgetsService.class).getObject((Class<T>) type, metadataId);
     }
     return null;
   }
