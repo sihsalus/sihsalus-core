@@ -386,6 +386,9 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
     Map<Locale, Set<String>> duplicateNamesByLocale = localeDuplicateNamesMap;
     if (duplicateNamesByLocale != null && !duplicateNamesByLocale.isEmpty()) {
       for (Map.Entry<Locale, Set<String>> entry : duplicateNamesByLocale.entrySet()) {
+        if (entry == null) {
+          continue;
+        }
         Set<String> duplicateNames = entry.getValue();
         // no duplicates found in the locale
         if (CollectionUtils.isEmpty(duplicateNames)) {
