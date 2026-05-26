@@ -37,8 +37,6 @@ import java.util.Enumeration;
 /**
  * Base controller that handles exceptions (via {@link BaseRestController}) and also standard CRUD
  * operations based on a {@link SubResource}.
- * 
- * @param <R>
  */
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1)

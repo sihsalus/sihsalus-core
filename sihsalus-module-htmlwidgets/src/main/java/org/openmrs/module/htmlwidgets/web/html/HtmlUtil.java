@@ -89,8 +89,9 @@ public class HtmlUtil  {
 	
 	/**
 	 * Render the specified resource in the page
-	 * @param pageContext
-	 * @param resources
+	 * @param w The writer to write the rendered resource tag to
+	 * @param request the active request
+	 * @param resource the resource path to render
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")

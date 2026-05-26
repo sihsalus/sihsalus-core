@@ -1631,10 +1631,12 @@ public class OpenmrsUtil {
 	 * @param propertyFile the properties file to read
 	 */
 	public static void loadProperties(Properties props, File propertyFile) {
-		try {
-			loadProperties(props, new FileInputStream(propertyFile));
+		try (FileInputStream inputStream = new FileInputStream(propertyFile)) {
+			loadProperties(props, inputStream);
 		} catch (FileNotFoundException fnfe) {
 			log.error("Unable to find properties file" + fnfe);
+		} catch (IOException ioe) {
+			log.error("Unable to close properties file " + ioe);
 		}
 	}
 

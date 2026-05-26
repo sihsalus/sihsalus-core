@@ -463,6 +463,11 @@ public class StockItemImportJob {
                 }
 
                 if (isNew) {
+                    if (stockItem == null) {
+                        result.getErrors().add(String.format("Row %1s: %2s", recordToProcess.getKey(),
+                            Context.getMessageSourceService().getMessage("stockmanagement.importoperation.stockitemmismatch")));
+                        continue;
+                    }
                     stockItem.setCreator(Context.getAuthenticatedUser());
                     stockItem.setDateCreated(new Date());
                 }

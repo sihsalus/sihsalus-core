@@ -131,9 +131,15 @@ public abstract class BaseObsCohortDefinitionEvaluator implements CohortDefiniti
 
         if (value1 != null || value2 != null) {
             if (value1 != null) {
+                if (operator1 == null) {
+                    throw new IllegalArgumentException("operator1 is required when value1 is specified");
+                }
                 valueClauses.add(valueSql + operator1.getSqlRepresentation() + " :value1 ");
             }
             if (value2 != null) {
+                if (operator2 == null) {
+                    throw new IllegalArgumentException("operator2 is required when value2 is specified");
+                }
                 valueClauses.add(valueSql + operator2.getSqlRepresentation() + " :value2 ");
             }
         }

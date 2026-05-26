@@ -86,9 +86,9 @@ public class UpdateFileParser {
 
 			if ("1.0".equals(configVersion)) {
 				// the only update in the xml file is the 'best fit'
-				this.moduleId = getElement(rootNode, configVersion, "moduleId");
-				this.currentVersion = getElement(rootNode, configVersion, "currentVersion");
-				this.downloadURL = getElement(rootNode, configVersion, "downloadURL");
+				this.moduleId = getElement(rootNode, "moduleId");
+				this.currentVersion = getElement(rootNode, "currentVersion");
+				this.downloadURL = getElement(rootNode, "downloadURL");
 			} else if ("1.1".equals(configVersion)) {
 
 				this.moduleId = rootNode.getAttribute("moduleId");
@@ -100,15 +100,15 @@ public class UpdateFileParser {
 				// loop over all 'update' tags
 				for (int i = 0; i < nodes.getLength(); i++) {
 					Element currentNode = (Element) nodes.item(i);
-					String currentVersion = getElement(currentNode, configVersion, "currentVersion");
+					String currentVersion = getElement(currentNode, "currentVersion");
 					// if the currently saved version is less than the current tag
 					if (ModuleUtil.compareVersion(this.currentVersion, currentVersion) < 0) {
-						String requireOpenMRSVersion = getElement(currentNode, configVersion, "requireOpenMRSVersion");
+						String requireOpenMRSVersion = getElement(currentNode, "requireOpenMRSVersion");
 						// if the openmrs code version is compatible, this node is a winner
 						if (requireOpenMRSVersion == null || ModuleUtil
 						        .matchRequiredVersions(OpenmrsConstants.OPENMRS_VERSION_SHORT, requireOpenMRSVersion)) {
 							this.currentVersion = currentVersion;
-							this.downloadURL = getElement(currentNode, configVersion, "downloadURL");
+							this.downloadURL = getElement(currentNode, "downloadURL");
 						}
 					}
 				}
@@ -128,11 +128,10 @@ public class UpdateFileParser {
 	 * Generic method to get a module tag
 	 *
 	 * @param element
-	 * @param version
 	 * @param tag
 	 * @return
 	 */
-	private static String getElement(Element element, String version, String tag) {
+	private static String getElement(Element element, String tag) {
 		if (element.getElementsByTagName(tag).getLength() > 0) {
 			return element.getElementsByTagName(tag).item(0).getTextContent();
 		}

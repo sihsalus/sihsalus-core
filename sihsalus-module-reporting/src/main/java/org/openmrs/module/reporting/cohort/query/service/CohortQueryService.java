@@ -102,7 +102,7 @@ public interface CohortQueryService extends OpenmrsService {
 	 * @should get patients with an attribute of given attribute type and containing given values
 	 * @should get patients with an attribute containing given values  
 	 * 
-	 * @param attribute
+	 * @param attributeType
 	 * @param values
 	 * @return	cohort of patients matching the query
 	 */

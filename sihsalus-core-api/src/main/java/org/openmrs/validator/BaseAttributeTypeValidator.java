@@ -63,7 +63,7 @@ public abstract class BaseAttributeTypeValidator<T extends AttributeType<?>> imp
 			if (maxOccurs != null) {
 				if (maxOccurs < 1) {
 					errors.rejectValue("maxOccurs", "AttributeType.maxOccursShouldNotBeLessThanOne");
-				} else if (maxOccurs < minOccurs) {
+				} else if (minOccurs != null && maxOccurs < minOccurs) {
 					errors.rejectValue("maxOccurs", "AttributeType.maxOccursShouldNotBeLessThanMinOccurs");
 				}
 			}

@@ -71,7 +71,7 @@ public class CalculationUtil {
 	/**
 	 * Utility method that constructs a Calculation instance from a CalculationRegistration instance
 	 * 
-	 * @param calculationRegistration
+	 * @param r the CalculationRegistration to use
 	 * @return the Calculation represented by the passed CalculationRegistration
 	 * @throws InvalidCalculationException if the CalculationRegistration is invalid
 	 */

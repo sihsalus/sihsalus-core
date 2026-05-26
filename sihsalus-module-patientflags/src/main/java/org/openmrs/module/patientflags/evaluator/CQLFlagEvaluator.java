@@ -68,7 +68,9 @@ public class CQLFlagEvaluator implements FlagEvaluator {
 	
 	private List<Patient> getPatients(Cohort cohort) {
 		Set<Integer> memberIds = new HashSet<>();
-		cohort.getMemberships().forEach(member -> memberIds.add(member.getPatientId()));
+		if (cohort != null) {
+			cohort.getMemberships().forEach(member -> memberIds.add(member.getPatientId()));
+		}
 
 		PatientService patientService = Context.getPatientService();
 		

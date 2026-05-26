@@ -340,12 +340,12 @@ public class AccountDomainWrapper implements DomainWrapper {
 	
 	public void setUserEnabled(Boolean userEnabled) {
 		if (user != null) {
-			if (userEnabled && user.isRetired()) {
+			if (Boolean.TRUE.equals(userEnabled) && user.isRetired()) {
 				user.setRetired(false);
 				user.setRetireReason(null);
 				user.setRetiredBy(null);
 				user.setDateRetired(null);
-			} else if (!userEnabled && !user.isRetired()) {
+			} else if (Boolean.FALSE.equals(userEnabled) && !user.isRetired()) {
 				user.setRetired(true);
 				user.setRetireReason("retired during account management");
 				user.setDateRetired(new Date());

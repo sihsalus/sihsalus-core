@@ -817,7 +817,9 @@ public class DatabaseUpdater {
 			throw new LockException(e);
 		} finally {
 			try {
-				database.getConnection().close();
+				if (database != null && database.getConnection() != null) {
+					database.getConnection().close();
+				}
 			} catch (Exception e) {
 				// pass
 			}

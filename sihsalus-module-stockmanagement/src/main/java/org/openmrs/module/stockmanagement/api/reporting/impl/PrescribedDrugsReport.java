@@ -199,7 +199,9 @@ public class PrescribedDrugsReport extends ReportGenerator {
 			hasMoreRecords = rows.size() >= pageSize;
 			}
 			
-			csvWriter.close();
+			if (csvWriter != null) {
+				csvWriter.close();
+			}
 			long fileSizeInBytes = Files.size(resultsFile.toPath());
 			completeBatchJob(batchJob, fileSizeInBytes, "csv", fileSizeInBytes <= (1024 * 1024), stockManagementService);
 		}

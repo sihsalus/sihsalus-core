@@ -79,13 +79,12 @@ public class OpenConceptLabActivator extends BaseModuleActivator implements Daem
 					"There is more than one file in ocl/loadAtStartup directory\n" +
 							"Ensure that there is only one file\n" +
 							"Absolute directory path: " + loadAtStartupDir.getAbsolutePath());
-		} else if (files != null && files.length != 0) {
-			if (files[0].getName().endsWith(".zip")) {
-				try {
-					ZipFile zipFile = (new ZipFile(files[0]));
-					Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
-					importer.run(zipFile);
-				}
+			} else if (files != null && files.length != 0) {
+				if (files[0].getName().endsWith(".zip")) {
+					try (ZipFile zipFile = new ZipFile(files[0])) {
+						Importer importer = Context.getRegisteredComponent("openconceptlab.importer", Importer.class);
+						importer.run(zipFile);
+					}
 				catch (IOException e) {
 					throw new IllegalStateException("Failed to open zip file", e);
 				}

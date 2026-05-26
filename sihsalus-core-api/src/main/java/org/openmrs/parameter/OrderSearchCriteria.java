@@ -116,7 +116,7 @@ public class OrderSearchCriteria {
 	    Order.Action action, Order.FulfillerStatus fulfillerStatus, Boolean includeNullFulfillerStatus,
 	    boolean excludeCanceledAndExpired, boolean excludeDiscontinueOrders, boolean includeVoided) {
 
-		this(patient, careSetting, concepts, orderTypes, null, null, activatedOnOrBeforeDate, activatedOnOrAfterDate,
+		this(patient, careSetting, concepts, orderTypes, accessionNumber, orderNumber, activatedOnOrBeforeDate, activatedOnOrAfterDate,
 		        isStopped, autoExpireOnOrBeforeDate, canceledOrExpiredOnOrBeforeDate, action, fulfillerStatus,
 		        includeNullFulfillerStatus, excludeCanceledAndExpired, excludeDiscontinueOrders, includeVoided, null);
 	}

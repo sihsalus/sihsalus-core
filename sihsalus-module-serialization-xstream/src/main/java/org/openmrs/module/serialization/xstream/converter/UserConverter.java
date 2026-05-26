@@ -30,7 +30,7 @@ public class UserConverter implements Converter {
 	private XStream xstream;
 	
 	/**
-	 * @param converterLookup
+	 * @param xstream the xstream instance
 	 */
 	public UserConverter(XStream xstream) {
 		this.xstream = xstream;

@@ -296,7 +296,7 @@ public class ConfigDirUtil {
 	 *
 	 * @param checksumDirPath The absolute path to the checksum directory, eg.
 	 *            "../configuration_checksums"
-	 * @param configFileName The config file name, eg. "config.xml"
+	 * @param checksumFileName The checksum file name, eg. "config.xml.md5"
 	 * @param checksum The checksum hash of the config file.
 	 */
 	protected static void writeChecksum(String checksumDirPath, String checksumFileName, String checksum) {
@@ -327,7 +327,7 @@ public class ConfigDirUtil {
 	 *
 	 * @param checksumDirPath The absolute path to the checksum directory, eg.
 	 *            "../configuration_checksums"
-	 * @param configFileName The config file name, eg. "config.xml"
+	 * @param checksumFileName The checksum file name, eg. "config.xml.md5"
 	 */
 	protected static void deleteChecksum(String checksumDirPath, String checksumFileName) {
 

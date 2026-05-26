@@ -249,10 +249,14 @@ public class ModuleClassLoader extends URLClassLoader {
 				log.warn("Unable to copy tmpModuleFile", io);
 			} finally {
 				try {
-					in.close();
+					if (in != null) {
+						in.close();
+					}
 				} catch (Exception e) { /* pass */}
 				try {
-					out.close();
+					if (out != null) {
+						out.close();
+					}
 				} catch (Exception e) { /* pass */}
 			}
 

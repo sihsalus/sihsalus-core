@@ -759,7 +759,7 @@ public class ModuleFactory {
 
 		}
 
-		if (applicationContext != null) {
+		if (applicationContext != null && module != null) {
 			log.debug("Run module refresh application context: {}", module.getModuleId());
 			ModuleUtil.refreshApplicationContext(applicationContext, isOpenmrsStartup, module);
 		}

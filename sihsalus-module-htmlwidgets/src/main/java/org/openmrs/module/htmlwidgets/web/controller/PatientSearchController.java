@@ -16,13 +16,11 @@ package org.openmrs.module.htmlwidgets.web.controller;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -33,8 +31,7 @@ public class PatientSearchController {
 	 * Patient Search
 	 */
 	@RequestMapping("/module/htmlwidgets/patientSearch.form")
-	public void patienSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response,
-	                         @RequestParam(required = true, value = "q") String query)
+	public void patienSearch(HttpServletResponse response, @RequestParam(required = true, value = "q") String query)
 	    throws Exception {
 		
 		response.setContentType("text/plain");

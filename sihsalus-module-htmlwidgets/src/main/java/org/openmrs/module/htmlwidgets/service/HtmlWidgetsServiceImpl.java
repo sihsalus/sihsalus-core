@@ -71,7 +71,7 @@ public class HtmlWidgetsServiceImpl extends BaseOpenmrsService implements HtmlWi
 	}
 
 	/**
-	 * @param reportDAO the reportDAO to set
+	 * @param dao the DAO to set
 	 */
 	public void setDao(HtmlWidgetsDAO dao) {
 		this.dao = dao;
