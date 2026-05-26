@@ -40,8 +40,7 @@ public class SearchQueryHandler extends AbstractSearchHandler implements ISearch
       hql.append(
           " and exists (select a.id from org.openmrs.module.cohort.CohortAttribute a "
               + "where a.cohort = c and a.voided = false and (");
-      int index = 0;
-      for (String ignored : attributes.keySet()) {
+      for (int index = 0; index < attributes.size(); index++) {
         if (index > 0) {
           hql.append(" or ");
         }
@@ -50,7 +49,6 @@ public class SearchQueryHandler extends AbstractSearchHandler implements ISearch
             .append(" and lower(a.valueReference) like :attributeValue")
             .append(index)
             .append(")");
-        index++;
       }
       hql.append("))");
     }

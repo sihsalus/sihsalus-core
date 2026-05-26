@@ -1117,7 +1117,6 @@ public class StockItemImportJob {
     try {
       try (Writer writer =
           Files.newBufferedWriter(new File(file.toString() + "_errors").toPath())) {
-        boolean resetErrors = false;
         try (Reader reader = Files.newBufferedReader(file)) {
           RFC4180Parser parser =
               new RFC4180ParserBuilder().withSeparator(',').withQuoteChar('\"').build();
@@ -1132,7 +1131,6 @@ public class StockItemImportJob {
           while ((csvLine = csvReader.readNext()) != null) {
             row++;
             processedPending = false;
-            resetErrors = false;
             if (result.getErrors().size() > 10) {
               hasErrors = true;
               for (String error : result.getErrors()) {

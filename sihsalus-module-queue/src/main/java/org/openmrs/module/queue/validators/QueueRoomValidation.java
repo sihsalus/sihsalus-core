@@ -35,7 +35,6 @@ public class QueueRoomValidation implements Validator {
       throw new IllegalArgumentException(
           "The parameter target should not be null & must be of type" + QueueRoom.class);
     }
-    QueueRoom queueRoom = (QueueRoom) obj;
     ValidationUtils.rejectIfEmptyOrWhitespace(
         errors, "name", "queueRoom.name.null", "QueueRoom name can't be null");
     ValidationUtils.rejectIfEmptyOrWhitespace(

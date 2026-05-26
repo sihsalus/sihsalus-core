@@ -173,7 +173,6 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
       model.property("url", new StringProperty(StringProperty.Format.URL));
       return model;
     } else if (rep instanceof RefRepresentation) {
-      DelegatingResourceDescription description = new DelegatingResourceDescription();
       model.property("uuid", new StringProperty().example("uuid"));
       model.property("url", new StringProperty(StringProperty.Format.URL));
       return model;
