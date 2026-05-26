@@ -205,7 +205,7 @@ public class CustomReflectionConverter extends ReflectionConverter {
                 throw new ConversionException("Element "
                     + itemFieldName
                     + " of type "
-                    + value.getClass().getName()
+                    + (value == null ? "null" : value.getClass().getName())
                     + " is not defined as field in type "
                     + result.getClass().getName());
             }

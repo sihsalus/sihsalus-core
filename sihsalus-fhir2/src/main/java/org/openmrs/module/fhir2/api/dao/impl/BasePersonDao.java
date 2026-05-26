@@ -168,6 +168,9 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 					break;
 			}
 			
+			if (sortState.getSortOrder() == null) {
+				return super.paramToProps(criteriaContext, sortState);
+			}
 			List<Order> sortStateOrders = new ArrayList<>();
 			switch (sortState.getSortOrder()) {
 				case ASC:

@@ -145,22 +145,23 @@ public class DispensingLogsReport extends ReportGenerator {
 					}
 					hasAppendedHeaders = true;
 				}
-				if (!data.getData().isEmpty()) {
-					for (DispensingLineItem row : data.getData()) {
-						writeRow(csvWriter, row);
-					}
-					csvWriter.flush();
-					recordsProcessed += data.getData().size();
-					pageIndex++;
-					DispensingLineItem lastRecord = data.getData().get(data.getData().size() - 1);
-					updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed,
-					    lastRecord.getStockItemTransactionId(), null, stockManagementService, null);
-				} else if (pageIndex == 0) {
+			java.util.List<DispensingLineItem> rows = (data == null || data.getData() == null) ? java.util.Collections.emptyList() : data.getData();
+			if (!rows.isEmpty()) {
+				for (DispensingLineItem row : rows) {
+					writeRow(csvWriter, row);
+				}
+				csvWriter.flush();
+				recordsProcessed += rows.size();
+				pageIndex++;
+				DispensingLineItem lastRecord = rows.get(rows.size() - 1);
+				updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed,
+				    lastRecord.getStockItemTransactionId(), null, stockManagementService, null);
+			} else if (pageIndex == 0) {
 					updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, null, null,
 					    stockManagementService, null);
 				}
 				
-				hasMoreRecords = data.getData().size() >= pageSize;
+			hasMoreRecords = rows.size() >= pageSize;
 			}
 			
 			csvWriter.close();
@@ -205,7 +206,7 @@ public class DispensingLogsReport extends ReportGenerator {
 		    row.getExpiration() != null ? DATE_FORMATTER.format(row.getExpiration()) : "",
 		    row.getQuantity().multiply(negativeOne).toPlainString(), row.getStockItemPackagingUOMName(), row
 		            .getStockItemPackagingUOMFactor().toPlainString(), row.getOrderNumber() == null ? "" : row
-		            .getOrderNumber().toString(), row.getStockItemTransactionId().toString(),
+			            .getOrderNumber().toString(), row.getStockItemTransactionId(),
 		    row.getStockItemDrugId() == null ? "" : row.getStockItemDrugId().toString(),
 		    row.getStockItemConceptId() == null ? "" : row.getStockItemConceptId().toString());
 	}

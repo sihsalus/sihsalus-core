@@ -230,7 +230,9 @@ public class ModuleClassLoader extends URLClassLoader {
 
 			if (!tmpModuleJar.exists()) {
 				try {
-					tmpModuleJar.createNewFile();
+					if (!tmpModuleJar.createNewFile() && !tmpModuleJar.exists()) {
+						log.warn("Unable to create tmpModuleFile: " + tmpModuleJar.getAbsolutePath());
+					}
 				} catch (IOException io) {
 					log.warn("Unable to create tmpModuleFile", io);
 				}

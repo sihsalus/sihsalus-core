@@ -29,7 +29,7 @@ public abstract class IdentifierSource implements OpenmrsMetadata {
 	public abstract PatientIdentifierType getIdentifierType();
 	
 	/**
-	 * @param the PatientIdentifierType that this source supplies
+	 * @param type PatientIdentifierType that this source supplies
 	 */
 	public abstract void setIdentifierType(PatientIdentifierType type);
 
@@ -39,12 +39,12 @@ public abstract class IdentifierSource implements OpenmrsMetadata {
 	public abstract Set<String> getReservedIdentifiers();
 	
 	/**
-	 * @param - the reserved identifiers to set
+	 * @param reservedIdentifiers the reserved identifiers to set
 	 */
 	public abstract void setReservedIdentifiers(Set<String> reservedIdentifiers);
 	
 	/**
-	 * @param - the reserved identifier to add
+	 * @param reservedIdentifier the reserved identifier to add
 	 */
 	public abstract void addReservedIdentifier(String reservedIdentifier);
 }	

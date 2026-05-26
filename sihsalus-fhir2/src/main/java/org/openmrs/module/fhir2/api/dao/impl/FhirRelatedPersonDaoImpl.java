@@ -231,6 +231,9 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					break;
 			}
 			
+			if (sortState.getSortOrder() == null) {
+				return super.paramToProps(criteriaContext, sortState);
+			}
 			switch (sortState.getSortOrder()) {
 				case ASC:
 					for (String property : properties) {

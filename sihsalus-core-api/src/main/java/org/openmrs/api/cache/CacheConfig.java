@@ -110,9 +110,9 @@ public class CacheConfig {
 			        .transport(transport);
 		}
 		// Determine cache type based on loaded template for "entity"
-		String cacheType = baseConfigBuilder.getNamedConfigurationBuilders().get("entity").build().elementName();
-		cacheType = StringUtils.removeEnd(cacheType, "-configuration");
-		cacheType = CaseUtils.toCamelCase(cacheType, false, '-');
+		String entityCacheType = baseConfigBuilder.getNamedConfigurationBuilders().get("entity").build().elementName();
+		entityCacheType = StringUtils.removeEnd(entityCacheType, "-configuration");
+		entityCacheType = CaseUtils.toCamelCase(entityCacheType, false, '-');
 
 		DumperOptions options = new DumperOptions();
 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -123,8 +123,8 @@ public class CacheConfig {
 			// Apply cache type for caches using the 'entity' template
 			// and add the 'infinispan.cacheContainer.caches' parent.
 			// Skip already defined caches.
-			try (InputStream fullConfig = buildFullConfig(yaml, configFile,
-			        baseConfigBuilder.getNamedConfigurationBuilders().keySet(), cacheType)) {
+				try (InputStream fullConfig = buildFullConfig(yaml, configFile,
+				        baseConfigBuilder.getNamedConfigurationBuilders().keySet(), entityCacheType)) {
 				parser.parse(fullConfig, baseConfigBuilder, ConfigurationResourceResolver.DEFAULT, MediaType.APPLICATION_YAML);
 			}
 		}

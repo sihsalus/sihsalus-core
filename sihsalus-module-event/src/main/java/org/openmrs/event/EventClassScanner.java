@@ -73,10 +73,11 @@ public class EventClassScanner implements AutoCloseable {
         if (resources == null) {
             synchronized (this) {
                 if (resources == null) {
-                    resources = resourceResolver.getResources(PATTERN);
+                    Resource[] resolvedResources = resourceResolver.getResources(PATTERN);
                     if (metadataReaderFactory instanceof CachingMetadataReaderFactory) {
-                        ((CachingMetadataReaderFactory) metadataReaderFactory).setCacheLimit(resources.length);
+                        ((CachingMetadataReaderFactory) metadataReaderFactory).setCacheLimit(resolvedResources.length);
                     }
+                    resources = resolvedResources;
                 }
             }
         }

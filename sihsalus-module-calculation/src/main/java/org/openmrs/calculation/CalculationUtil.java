@@ -91,7 +91,7 @@ public class CalculationUtil {
 	 * specified value
 	 * 
 	 * @see ConversionException
-	 * @param valueToCast the value to be cast
+	 * @param value the value to be cast
 	 * @param clazz the class to cast to
 	 * @return a value of the specified type
 	 * <strong>Should</strong> fail if the value to convert is not of a compatible type

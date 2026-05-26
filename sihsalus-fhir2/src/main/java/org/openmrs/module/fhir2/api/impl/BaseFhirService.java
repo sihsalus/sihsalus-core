@@ -150,7 +150,9 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			//We need to communicate to the resource provider whether this operation resulted in a creation or an
 			//update but the return type provides no way, so we use the user data map on the request details object
 			//for this purpose as the recommended way, please refer to the javadocs of RequestDetails.getUserData().
-			requestDetails.getUserData().put(FhirConstants.USER_DATA_KEY_OUTCOME_CREATED, true);
+			if (requestDetails != null && requestDetails.getUserData() != null) {
+				requestDetails.getUserData().put(FhirConstants.USER_DATA_KEY_OUTCOME_CREATED, true);
+			}
 		}
 		
 		return applyUpdate(existingObject, updatedResource);

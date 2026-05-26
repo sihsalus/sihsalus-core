@@ -231,9 +231,8 @@ public class Mapped<T extends Parameterizable> implements Serializable {
 	 * @return
 	 */
 	public String getUuidOfMappedOpenmrsObject() {
-		if (parameterizable != null && parameterizable instanceof OpenmrsObject) {
-			OpenmrsObject o = (OpenmrsObject) parameterizable;
-			return o.getUuid();
+		if (parameterizable != null) {
+			return parameterizable.getUuid();
 		}
 		else {
 			log.warn("Mapped.getUuidOfMappedOpenmrsObject is null or called for a mapped object that is not an OpenmrsObject.");

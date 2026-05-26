@@ -68,12 +68,6 @@ public class DelimitedKeyComparator implements Comparator<String> {
 		}
 		
 		// If all common levels are the same, one with least number of sub-levels is greater
-		if (s1Split.length > s2Split.length) {
-			return 1;
-		}
-		if (s2Split.length > s2Split.length) {
-			return -1;
-		}
-		return 0;
+		return Integer.compare(s1Split.length, s2Split.length);
 	}
 }

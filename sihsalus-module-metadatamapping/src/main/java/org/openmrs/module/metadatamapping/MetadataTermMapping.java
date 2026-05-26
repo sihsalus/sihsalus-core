@@ -174,7 +174,7 @@ public class MetadataTermMapping extends BaseOpenmrsMetadata {
 	
 	/**
 	 *
-	 * @param metadataClass, reference class of mapped object, may not be null
+	 * @param metadataClass reference class of mapped object, may not be null
 	 */
 	public void setMetadataClass(String metadataClass) {
 		this.metadataClass = metadataClass;
@@ -182,7 +182,7 @@ public class MetadataTermMapping extends BaseOpenmrsMetadata {
 	
 	/**
 	 *
-	 * @param metadataUuid, reference uuid of mapped object
+	 * @param metadataUuid reference uuid of mapped object
 	 */
 	public void setMetadataUuid(String metadataUuid) {
 		this.metadataUuid = metadataUuid;

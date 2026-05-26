@@ -142,8 +142,8 @@ public class OclClient {
 	/**
 	 * This gets the desired collection release version
 	 *
-	 * @param url,   the subscription url
-	 * @param token, the subscription API token
+	 * @param url   the subscription url
+	 * @param token the subscription API token
 	 * @return the retrieved collection version
 	 * @throws IOException if the URL cannot be parsed
 	 */
@@ -172,7 +172,7 @@ public class OclClient {
 	/**
 	 * This changes the url by removing the last forward slash if it exists
 	 *
-	 * @param url, this is the subscription url
+	 * @param url this is the subscription url
 	 * @return the url format expected by the ocl server
 	 */
 	public String removeLastUrlForwardSlashIfExist(String url) {

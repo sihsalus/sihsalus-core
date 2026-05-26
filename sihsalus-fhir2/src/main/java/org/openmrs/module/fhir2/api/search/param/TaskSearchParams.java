@@ -26,6 +26,16 @@ import org.openmrs.module.fhir2.FhirConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class TaskSearchParams extends BaseResourceSearchParams {
+
+	private ReferenceAndListParam basedOnReference;
+
+	private ReferenceAndListParam ownerReference;
+
+	private ReferenceAndListParam forReference;
+
+	private TokenAndListParam taskCode;
+
+	private TokenAndListParam status;
 	
 	/**
 	 * Get collection of tasks corresponding to the provided search parameters
@@ -37,19 +47,7 @@ public class TaskSearchParams extends BaseResourceSearchParams {
 	 * @param lastUpdated A date range corresponding to when the Tasks were last updated
 	 * @param sort The sort parameters for the search results
 	 * @param includes request for specified referenced resources
-	 * @return the collection of Tasks that match the search parameters
 	 */
-	
-	private ReferenceAndListParam basedOnReference;
-	
-	private ReferenceAndListParam ownerReference;
-	
-	private ReferenceAndListParam forReference;
-	
-	private TokenAndListParam taskCode;
-	
-	private TokenAndListParam status;
-	
 	@Builder
 	public TaskSearchParams(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
 	    ReferenceAndListParam forReference, TokenAndListParam taskCode, TokenAndListParam status, TokenAndListParam id,

@@ -156,22 +156,25 @@ public abstract class StockOperationLineItemReport extends ReportGenerator {
 					}
 					hasAppendedHeaders = true;
 				}
-				if (!data.getData().isEmpty()) {
-					for (StockOperationLineItem row : data.getData()) {
-						writeRow(csvWriter, row);
-					}
-					csvWriter.flush();
-					recordsProcessed += data.getData().size();
-					pageIndex++;
-					StockOperationLineItem lastRecord = data.getData().get(data.getData().size() - 1);
-					updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed,
-					    lastRecord.getStockOperationItemId(), lastRecord.getStockOperationId(), stockManagementService, null);
+			java.util.List<StockOperationLineItem> rows = (data == null || data.getData() == null)
+			        ? java.util.Collections.emptyList()
+			        : data.getData();
+			if (!rows.isEmpty()) {
+				for (StockOperationLineItem row : rows) {
+					writeRow(csvWriter, row);
+				}
+				csvWriter.flush();
+				recordsProcessed += rows.size();
+				pageIndex++;
+				StockOperationLineItem lastRecord = rows.get(rows.size() - 1);
+				updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed,
+				    lastRecord.getStockOperationItemId(), lastRecord.getStockOperationId(), stockManagementService, null);
 				} else if (pageIndex == 0) {
 					updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, null, null,
 					    stockManagementService, null);
 				}
 				
-				hasMoreRecords = data.getData().size() >= pageSize;
+			hasMoreRecords = rows.size() >= pageSize;
 			}
 			
 			csvWriter.close();

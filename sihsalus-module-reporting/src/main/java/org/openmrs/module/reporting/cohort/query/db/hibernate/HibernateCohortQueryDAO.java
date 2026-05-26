@@ -777,7 +777,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 	public Query prepareQuery(String sqlQuery, Map<String, Object> paramMap) { 
 		Query query = null;
 		try { 			
-			query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery.toString());					
+			query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery);
 			//query.setCacheMode(CacheMode.IGNORE);	// TODO figure out what this does before using it
 						
 			// Bind the query parameters (query is mutable)

@@ -138,19 +138,13 @@ public class ReportUtil {
 	}
 	
 	public static void compressFile(File inFile, File outFile) {
-		FileInputStream in = null;
-		GZIPOutputStream out = null;
-		try {
-			in = new FileInputStream(inFile);
-			out = new GZIPOutputStream(new FileOutputStream(outFile));
+		try (FileInputStream in = new FileInputStream(inFile);
+		        FileOutputStream fileOut = new FileOutputStream(outFile);
+		        GZIPOutputStream out = new GZIPOutputStream(fileOut)) {
 			IOUtils.copy(in, out);
 		}
 		catch (Exception e) {
 			log.warn("Unable to zip file: " + inFile);
-		}
-		finally {
-			IOUtils.closeQuietly(in);
-			IOUtils.closeQuietly(out);
 		}
 	}
 	

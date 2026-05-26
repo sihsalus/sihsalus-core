@@ -76,8 +76,10 @@ public class QueueUtils {
 	}
 	
 	/**
-	 * @param startDate1, endDate1 - the start and end date of one timeframe
-	 * @param startDate2, endDate2 - the start and end date of second timeframe
+	 * @param startDate1 the start date of one timeframe
+	 * @param endDate1 the end date of one timeframe
+	 * @param startDate2 the start date of the second timeframe
+	 * @param endDate2 the end date of the second timeframe
 	 * @return boolean - indicating whether the timeframes overlap
 	 */
 	public static boolean datesOverlap(Date startDate1, Date endDate1, Date startDate2, Date endDate2) {

@@ -45,7 +45,7 @@ public class CohortDefinitionEditor extends PropertyEditorSupport {
 		if (cd == null) {
 			return "";
 		} else {
-			return cd.getUuid().toString();
+			return cd.getUuid();
 		}
 	}
 	

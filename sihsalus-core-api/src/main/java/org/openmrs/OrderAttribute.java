@@ -47,7 +47,7 @@ public class OrderAttribute extends BaseAttribute<OrderAttributeType, Order> imp
 	}
 
 	/**
-	 * @param order, the order to set
+	 * @param order the order to set
 	 */
 	public void setOrder(Order order) {
 		setOwner(order);

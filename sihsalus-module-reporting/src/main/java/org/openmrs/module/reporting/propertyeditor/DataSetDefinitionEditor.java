@@ -45,7 +45,7 @@ public class DataSetDefinitionEditor extends PropertyEditorSupport {
 		if (dsd == null) {
 			return "";
 		} else {
-			return dsd.getUuid().toString();
+			return dsd.getUuid();
 		}
 	}
 	

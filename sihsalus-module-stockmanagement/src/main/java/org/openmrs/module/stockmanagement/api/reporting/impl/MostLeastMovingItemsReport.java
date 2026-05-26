@@ -138,27 +138,30 @@ public class MostLeastMovingItemsReport extends ReportGenerator {
             inventorySearchFilter.setDoSetPartyNameField(true);
             inventorySearchFilter.setDoSetQuantityUoM(true);
 
-            StockInventoryResult stockInventoryResult=new StockInventoryResult();
-            stockInventoryResult.setData(new ArrayList<>());
-            boolean includeBatchInfo = inventoryGroupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo;
-            boolean includeLocationInfo = inventoryGroupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo ||
-                    inventoryGroupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItem;
-            boolean hasWritenRecords = false;
-            boolean hasMoreRecordsToRead = false;
-            int writePageIndex = 0;
-            do{
-                if (shouldStopExecution.apply(batchJob)) {
-                    return;
-                }
-                stockInventoryResult.getData().addAll(result.getData().stream().skip(writePageIndex * 100).limit(100).collect(Collectors.toList()));
-                if(stockInventoryResult.getData().isEmpty()){
-                    break;
-                }else{
-                    writeBuffer(batchJob, inventorySearchFilter, stockInventoryResult, includeBatchInfo, includeLocationInfo, shouldStopExecution);
-                    hasWritenRecords = true;
-                }
-                writePageIndex++;
-            }while (hasMoreRecordsToRead);
+			StockInventoryResult stockInventoryResult=new StockInventoryResult();
+			stockInventoryResult.setData(new ArrayList<>());
+			boolean includeBatchInfo = inventoryGroupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo;
+			boolean includeLocationInfo = inventoryGroupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo ||
+					inventoryGroupBy == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItem;
+			boolean hasWritenRecords = false;
+			boolean hasMoreRecordsToRead = true;
+			int writePageIndex = 0;
+			List<StockItemInventory> pageRecords;
+			do{
+				if (shouldStopExecution.apply(batchJob)) {
+					return;
+				}
+                pageRecords = result.getData().stream().skip(writePageIndex * 100).limit(100).collect(Collectors.toList());
+                stockInventoryResult.setData(pageRecords);
+				if(stockInventoryResult.getData().isEmpty()){
+					break;
+				}else{
+					writeBuffer(batchJob, inventorySearchFilter, stockInventoryResult, includeBatchInfo, includeLocationInfo, shouldStopExecution);
+					hasWritenRecords = true;
+				}
+				writePageIndex++;
+				hasMoreRecordsToRead = pageRecords.size() == 100;
+			}while (hasMoreRecordsToRead);
 
             if(!hasWritenRecords){
                 writeBuffer(batchJob, inventorySearchFilter, stockInventoryResult, includeBatchInfo, includeLocationInfo, shouldStopExecution);

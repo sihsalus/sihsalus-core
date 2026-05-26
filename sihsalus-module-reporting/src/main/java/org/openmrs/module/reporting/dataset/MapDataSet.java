@@ -34,8 +34,7 @@ public class MapDataSet extends SimpleDataSet {
 	
 	/**
      * Adds a Data Element to this DataSet
-     * @param key - The column key to add this element to
-     * @param dataElement - The data to add
+     * @param column - The column key to add this element to
      */
     public void addData(DataSetColumn column, Object dataElement) {
     	addColumnValue(SINGLE_ROW_ID, column, dataElement);
@@ -54,8 +53,7 @@ public class MapDataSet extends SimpleDataSet {
 
 	/**
      * Gets a Data Element from this DataSet
-     * @param key - The column key to add this element to
-     * @param dataElement - The data to add
+     * @param column - The column key to get this element from
      */
     public Object getData(DataSetColumn column) {
     	return getColumnValue(SINGLE_ROW_ID, column.getName());

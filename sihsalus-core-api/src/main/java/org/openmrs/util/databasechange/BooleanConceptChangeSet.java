@@ -191,8 +191,6 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
 	 * changes all obs which have boolean values to the new (coded) representation of boolean values.
 	 *
 	 * @param connection a DatabaseConnection
-	 * @param trueConceptName the concept name for boolean true values
-	 * @param falseConceptName the concept name for boolean false values
 	 * @throws CustomChangeException
 	 */
 	private void changeObs(JdbcConnection connection) throws CustomChangeException {

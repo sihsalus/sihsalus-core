@@ -55,7 +55,7 @@ public class UpgradeUtil {
 				}
 			}
 		} catch (NumberFormatException e) {
-			throw new APIException("Your order entry upgrade settings file" + "contains invalid mapping from " + units
+			throw new APIException("Your order entry upgrade settings file contains invalid mapping from " + units
 			        + " to concept ID " + conceptId
 			        + ". ID must be an integer or null. Please refer to upgrade instructions for more details. https://wiki.openmrs.org/x/OALpAw Cause:"
 			        + e.getMessage());

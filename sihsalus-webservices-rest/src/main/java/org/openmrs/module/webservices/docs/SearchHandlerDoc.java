@@ -58,7 +58,7 @@ public class SearchHandlerDoc implements Comparable<SearchHandlerDoc> {
 	}
 	
 	/**
-	 * @param resourceURL the resourceURL to set
+	 * @param resourceName the resourceName to set
 	 */
 	public void setResourceName(String resourceName) {
 		this.resourceName = resourceName;

@@ -43,7 +43,7 @@ public class ReportDefinitionEditor extends PropertyEditorSupport {
 		if (rd == null) {
 			return "";
 		} else {
-			return rd.getUuid().toString();
+			return rd.getUuid();
 		}
 	}
 	

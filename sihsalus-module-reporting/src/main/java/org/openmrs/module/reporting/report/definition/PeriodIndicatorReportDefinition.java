@@ -60,7 +60,7 @@ public class PeriodIndicatorReportDefinition extends ReportDefinition {
 
 	/**
 	 * Add a period cohort indicator to the report definition with no dimension categories.
-	 * @param periodCohortIndicator
+	 * @param indicator
 	 */
 	public void addIndicator(CohortIndicator indicator) {				
 		addIndicator(indicator.getUuid(), indicator.getName(), indicator, new HashMap<String,String>());
@@ -68,7 +68,7 @@ public class PeriodIndicatorReportDefinition extends ReportDefinition {
 	
 	/**
 	 * Add a period cohort indicator to the report definition with no dimension categories.
-	 * @param CohortIndicator
+	 * @param indicator
 	 */
 	public void addIndicator(String uniqueName, String displayName, CohortIndicator indicator) {				
 		addIndicator(uniqueName, displayName, indicator, new HashMap<String,String>());
@@ -76,7 +76,8 @@ public class PeriodIndicatorReportDefinition extends ReportDefinition {
 
 	/**
 	 * Add a period cohort indicator to the report definition with dimension categories.
-	 * @param CohortIndicator
+	 * @param indicator
+	 * @param dimensionCategories
 	 */
 	public void addIndicator(CohortIndicator indicator, String dimensionCategories) { 		
 		addIndicator(indicator.getUuid(), indicator.getName(), indicator, dimensionCategories);
@@ -84,7 +85,10 @@ public class PeriodIndicatorReportDefinition extends ReportDefinition {
 	
 	/**
 	 * Add a period cohort indicator to the report definition with dimension categories.
-	 * @param CohortIndicator
+	 * @param uniqueName
+	 * @param displayName
+	 * @param indicator
+	 * @param dimensionCategories
 	 */
 	public void addIndicator(String uniqueName, String displayName, CohortIndicator indicator, String dimensionCategories) { 		
 		addIndicator(uniqueName, displayName, indicator, OpenmrsUtil.parseParameterList(dimensionCategories));
@@ -92,7 +96,8 @@ public class PeriodIndicatorReportDefinition extends ReportDefinition {
 	
 	/**
 	 * Add a period cohort indicator to the report definition with dimension cateogies.
-	 * @param CohortIndicator
+	 * @param indicator
+	 * @param dimensionCategories
 	 */
 	public void addIndicator(CohortIndicator indicator, Map<String,String> dimensionCategories) { 		
 		addIndicator(indicator.getName(), indicator.getName(), indicator, dimensionCategories);
@@ -100,7 +105,10 @@ public class PeriodIndicatorReportDefinition extends ReportDefinition {
 	
 	/**
 	 * Add a period cohort indicator to the report definition with no dimension options
-	 * @param CohortIndicator
+	 * @param key
+	 * @param displayName
+	 * @param indicator
+	 * @param dimensionOptions
 	 */
 	public void addIndicator(String key, String displayName, CohortIndicator indicator, Map<String,String> dimensionOptions) { 
 		Mapped<CohortIndicator> m = new Mapped<CohortIndicator>(indicator, IndicatorUtil.getDefaultParameterMappings());
