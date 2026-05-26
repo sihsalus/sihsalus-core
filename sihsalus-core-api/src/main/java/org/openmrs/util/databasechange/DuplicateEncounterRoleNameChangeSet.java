@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openmrs.util.DatabaseUpdater;
-import org.openmrs.util.DatabaseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,8 +120,16 @@ public class DuplicateEncounterRoleNameChangeSet implements CustomTaskChange {
 					boolean duplicateName;
 					Connection con = DatabaseUpdater.getConnection();
 					do {
-						String sqlValidatorString = "select * from encounter_role where name = '" + newName + "'";
-						duplicateResult = DatabaseUtil.executeSQL(con, sqlValidatorString, true);
+						try (PreparedStatement validatorStmt = con
+						        .prepareStatement("select 1 from encounter_role where name = ?")) {
+							validatorStmt.setString(1, newName);
+							try (ResultSet validatorRs = validatorStmt.executeQuery()) {
+								duplicateResult = new ArrayList<>();
+								if (validatorRs.next()) {
+									duplicateResult.add(new ArrayList<>());
+								}
+							}
+						}
 
 						if (!duplicateResult.isEmpty()) {
 
@@ -136,10 +143,6 @@ public class DuplicateEncounterRoleNameChangeSet implements CustomTaskChange {
 
 					pStmt = connection.prepareStatement(
 					    "update encounter_role set name = ?, changed_by = ?, date_changed = ? where encounter_role_id = ?");
-					if (!duplicateResult.isEmpty()) {
-						pStmt.setString(1, newName);
-					}
-
 					pStmt.setString(1, newName);
 					pStmt.setInt(2, DatabaseUpdater.getAuthenticatedUserId());
 
@@ -177,7 +180,7 @@ public class DuplicateEncounterRoleNameChangeSet implements CustomTaskChange {
 					connection.setAutoCommit(initialAutoCommit);
 				}
 			} catch (DatabaseException e) {
-				log.warn("Failed to set auto commit to ids initial state", e);
+				log.warn("Failed to set auto commit to its initial state", e);
 			}
 
 			if (rs != null) {

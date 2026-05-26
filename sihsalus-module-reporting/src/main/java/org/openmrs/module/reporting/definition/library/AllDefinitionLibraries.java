@@ -27,7 +27,7 @@ import java.util.Set;
 public class AllDefinitionLibraries {
 
     @Autowired(required = false)
-    private List<DefinitionLibrary<?>> libraries;
+    private List<DefinitionLibrary<?>> libraries = new ArrayList<DefinitionLibrary<?>>();
 
     public List<LibraryDefinitionSummary> getDefinitionSummaries(Class<? extends Definition> returnType) {
         if (returnType == null) {
@@ -76,7 +76,7 @@ public class AllDefinitionLibraries {
      * @return
      */
     List<DefinitionLibrary<?>> getLibraries() {
-        return Collections.unmodifiableList(libraries);
+        return libraries == null ? Collections.<DefinitionLibrary<?>>emptyList() : Collections.unmodifiableList(libraries);
     }
 
     /**

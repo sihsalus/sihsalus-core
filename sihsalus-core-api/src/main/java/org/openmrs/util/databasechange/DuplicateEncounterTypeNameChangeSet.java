@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openmrs.util.DatabaseUpdater;
-import org.openmrs.util.DatabaseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,20 +115,22 @@ public class DuplicateEncounterTypeNameChangeSet implements CustomTaskChange {
 				for (int i = 1; i < ids.size(); i++) {
 					String newName = pairs.getKey() + "_" + duplicateNameId;
 
-					List<List<Object>> duplicateResult;
 					boolean duplicateName;
 					Connection con = DatabaseUpdater.getConnection();
 
 					do {
-						String sqlValidatorString = "select * from encounter_type where name = '" + newName + "'";
-						duplicateResult = DatabaseUtil.executeSQL(con, sqlValidatorString, true);
-
-						if (!duplicateResult.isEmpty()) {
-							duplicateNameId += 1;
-							newName = pairs.getKey() + "_" + duplicateNameId;
-							duplicateName = true;
-						} else {
-							duplicateName = false;
+						try (PreparedStatement validatorStmt = con
+						        .prepareStatement("select 1 from encounter_type where name = ? limit 1")) {
+							validatorStmt.setString(1, newName);
+							try (ResultSet validatorRs = validatorStmt.executeQuery()) {
+								if (validatorRs.next()) {
+									duplicateNameId += 1;
+									newName = pairs.getKey() + "_" + duplicateNameId;
+									duplicateName = true;
+								} else {
+									duplicateName = false;
+								}
+							}
 						}
 					} while (duplicateName);
 
@@ -163,7 +164,7 @@ public class DuplicateEncounterTypeNameChangeSet implements CustomTaskChange {
 					connection.setAutoCommit(initialAutoCommit);
 				}
 			} catch (DatabaseException e) {
-				log.warn("Failed to set auto commit to ids initial state", e);
+				log.warn("Failed to set auto commit to its initial state", e);
 			}
 			if (rs != null) {
 				try {

@@ -10,7 +10,6 @@
 package org.openmrs.util.databasechange;
 
 import java.sql.BatchUpdateException;
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openmrs.util.DatabaseUpdater;
-import org.openmrs.util.DatabaseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,10 +110,17 @@ public class DuplicateLocationAttributeTypeNameChangeSet implements CustomTaskCh
 					String newName = pairs.getKey() + "_" + duplicateNameId;
 					List<List<Object>> duplicateResult;
 					boolean duplicateName;
-					Connection con = DatabaseUpdater.getConnection();
 					do {
-						String sqlValidatorString = "select * from location_attribute_type where name = '" + newName + "'";
-						duplicateResult = DatabaseUtil.executeSQL(con, sqlValidatorString, true);
+						duplicateResult = new ArrayList<List<Object>>();
+						try (PreparedStatement validatorStmt = connection
+						        .prepareStatement("select 1 from location_attribute_type where name = ?")) {
+							validatorStmt.setString(1, newName);
+							try (ResultSet validatorRs = validatorStmt.executeQuery()) {
+								if (validatorRs.next()) {
+									duplicateResult.add(new ArrayList<Object>());
+								}
+							}
+						}
 						if (!duplicateResult.isEmpty()) {
 							duplicateNameId += 1;
 							newName = pairs.getKey() + "_" + duplicateNameId;
@@ -126,9 +131,6 @@ public class DuplicateLocationAttributeTypeNameChangeSet implements CustomTaskCh
 					} while (duplicateName);
 					pStmt = connection.prepareStatement(
 					    "update location_attribute_type set name = ?, changed_by = ?, date_changed = ? where location_attribute_type_id = ?");
-					if (!duplicateResult.isEmpty()) {
-						pStmt.setString(1, newName);
-					}
 					pStmt.setString(1, newName);
 					pStmt.setInt(2, DatabaseUpdater.getAuthenticatedUserId());
 
