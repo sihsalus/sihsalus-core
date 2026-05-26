@@ -204,11 +204,8 @@ public class ConceptAnswersEditor extends PropertyEditorSupport {
    * @return
    */
   private Integer getConceptId(String conceptId) {
-    if (conceptId.contains("^")) {
-      return Integer.valueOf(conceptId.substring(0, conceptId.indexOf("^")));
-    } else {
-      return Integer.valueOf(conceptId);
-    }
+    String id = conceptId.contains("^") ? conceptId.substring(0, conceptId.indexOf("^")) : conceptId;
+    return parseInteger(id, "concept id");
   }
 
   /**
@@ -220,9 +217,17 @@ public class ConceptAnswersEditor extends PropertyEditorSupport {
    */
   private Integer getDrugId(String conceptId) {
     if (conceptId.contains("^")) {
-      return Integer.valueOf(conceptId.substring(conceptId.indexOf("^") + 1));
+      return parseInteger(conceptId.substring(conceptId.indexOf("^") + 1), "drug id");
     }
 
     return null;
+  }
+
+  private Integer parseInteger(String value, String fieldName) {
+    try {
+      return Integer.valueOf(value);
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Invalid " + fieldName + ": " + value, e);
+    }
   }
 }

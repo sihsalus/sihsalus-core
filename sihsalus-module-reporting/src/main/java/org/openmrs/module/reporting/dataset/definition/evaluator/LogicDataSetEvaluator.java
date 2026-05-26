@@ -113,10 +113,11 @@ public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
       if (forPatient == null) {
         forPatient = new ArrayList<Result>();
       }
+      List<Result> patientResults = forPatient;
       DataSetRow row = new DataSetRow();
       for (int i = 0; i < def.getColumns().size(); ++i) {
         Column col = def.getColumns().get(i);
-        Result result = forPatient.get(i);
+        Result result = patientResults.get(i);
         row.addColumnValue(col, columnFormatters.get(i).format(result));
       }
       ret.add(row);

@@ -386,12 +386,13 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
 
     if (!MapUtils.isEmpty(localeDuplicateNamesMap)) {
       for (Map.Entry<Locale, Set<String>> entry : localeDuplicateNamesMap.entrySet()) {
+        Set<String> duplicateNames = entry.getValue();
         // no duplicates found in the locale
-        if (CollectionUtils.isEmpty(entry.getValue())) {
+        if (CollectionUtils.isEmpty(duplicateNames)) {
           continue;
         }
 
-        for (String duplicateName : entry.getValue()) {
+        for (String duplicateName : duplicateNames) {
           updateWarnings.add(
               "Concept Name '"
                   + duplicateName

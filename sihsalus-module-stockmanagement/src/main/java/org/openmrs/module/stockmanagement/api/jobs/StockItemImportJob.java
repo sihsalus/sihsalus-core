@@ -552,14 +552,14 @@ public class StockItemImportJob {
       if (isNewRecord) {
         boolean isNew = true;
         if (updates[DRUG_ID] != null) {
-          stockItem = prevStockItemDrugs.getOrDefault(updates[DRUG_ID], null);
+          stockItem = prevStockItemDrugs.get(updates[DRUG_ID]);
           if (stockItem != null) {
             isNew = false;
           } else {
             isVeryNewRecordDrug = true;
             stockItem = new StockItem();
-            List<Drug> drugCollection = drugs.getOrDefault(updates[DRUG_ID], null);
-            if (drugCollection == null) {
+            List<Drug> drugCollection = drugs.get(updates[DRUG_ID]);
+            if (drugCollection == null || drugCollection.isEmpty()) {
               result
                   .getErrors()
                   .add(
@@ -577,14 +577,14 @@ public class StockItemImportJob {
             stockItem.setIsDrug(true);
           }
         } else if (updates[CONCEPT_ID] != null) {
-          stockItem = prevStockItemConcepts.getOrDefault(updates[CONCEPT_ID], null);
+          stockItem = prevStockItemConcepts.get(updates[CONCEPT_ID]);
           if (stockItem != null) {
             isNew = false;
           } else {
             isVeryNewRecordDrug = false;
             stockItem = new StockItem();
-            List<Concept> conceptCollection = concepts.getOrDefault(updates[CONCEPT_ID], null);
-            if (conceptCollection == null) {
+            List<Concept> conceptCollection = concepts.get(updates[CONCEPT_ID]);
+            if (conceptCollection == null || conceptCollection.isEmpty()) {
               result
                   .getErrors()
                   .add(
@@ -643,8 +643,8 @@ public class StockItemImportJob {
           continue;
         }
         List<StockItem> stockItemCollection =
-            stockItemsToUpdate.getOrDefault(stockItemDto.get().getId(), null);
-        if (stockItemCollection != null && !stockItemCollection.isEmpty()) {
+            stockItemsToUpdate.getOrDefault(stockItemDto.get().getId(), Collections.emptyList());
+        if (!stockItemCollection.isEmpty()) {
           stockItem = stockItemCollection.get(0);
         }
       }
@@ -689,8 +689,8 @@ public class StockItemImportJob {
       if (updates[CATEGORY] != null
           && (stockItem.getCategory() == null
               || !stockItem.getCategory().getId().equals(updates[CATEGORY]))) {
-        List<Concept> conceptCollection = concepts.getOrDefault(updates[CATEGORY], null);
-        if (conceptCollection == null) {
+        List<Concept> conceptCollection = concepts.get(updates[CATEGORY]);
+        if (conceptCollection == null || conceptCollection.isEmpty()) {
           result
               .getErrors()
               .add(
@@ -706,14 +706,14 @@ public class StockItemImportJob {
         categoryConceptToSet = conceptCollection.get(0);
       }
 
-      List<StockItemPackagingUOM> uoms = null;
+      List<StockItemPackagingUOM> uoms = Collections.emptyList();
       if (!isNewRecord) {
-        uoms = stockItemPackagingUoms.getOrDefault(stockItem.getId(), null);
+        uoms = stockItemPackagingUoms.getOrDefault(stockItem.getId(), Collections.emptyList());
       }
 
       if (DISPENSING_UNIT < updates.length && updates[DISPENSING_UNIT] != null) {
-        List<Concept> conceptCollection = concepts.getOrDefault(updates[DISPENSING_UNIT], null);
-        if (conceptCollection == null) {
+        List<Concept> conceptCollection = concepts.get(updates[DISPENSING_UNIT]);
+        if (conceptCollection == null || conceptCollection.isEmpty()) {
           result
               .getErrors()
               .add(
@@ -736,8 +736,8 @@ public class StockItemImportJob {
       }
 
       if (DISPENSING_PUOM < updates.length && updates[DISPENSING_PUOM] != null) {
-        List<Concept> conceptCollection = concepts.getOrDefault(updates[DISPENSING_PUOM], null);
-        if (conceptCollection == null) {
+        List<Concept> conceptCollection = concepts.get(updates[DISPENSING_PUOM]);
+        if (conceptCollection == null || conceptCollection.isEmpty()) {
           result
               .getErrors()
               .add(
@@ -757,18 +757,16 @@ public class StockItemImportJob {
           packSize = (BigDecimal) updates[PACK_SIZE_FOR_DISPENSING_PUOM];
         }
 
-        if (uoms != null) {
-          Optional<StockItemPackagingUOM> uom =
-              uoms.stream()
-                  .filter(
-                      p ->
-                          p.getPackagingUom()
-                              .getConceptId()
-                              .equals((Integer) updates[DISPENSING_PUOM]))
-                  .findFirst();
-          if (uom.isPresent()) {
-            dispensingStockItemPackagingUOM = uom.get();
-          }
+        Optional<StockItemPackagingUOM> uom =
+            uoms.stream()
+                .filter(
+                    p ->
+                        p.getPackagingUom()
+                            .getConceptId()
+                            .equals((Integer) updates[DISPENSING_PUOM]))
+                .findFirst();
+        if (uom.isPresent()) {
+          dispensingStockItemPackagingUOM = uom.get();
         }
 
         if (dispensingStockItemPackagingUOM != null) {
@@ -892,8 +890,8 @@ public class StockItemImportJob {
       }
 
       if (REORDER_LVEL_PUOM < updates.length && updates[REORDER_LVEL_PUOM] != null) {
-        List<Concept> conceptCollection = concepts.getOrDefault(updates[REORDER_LVEL_PUOM], null);
-        if (conceptCollection == null) {
+        List<Concept> conceptCollection = concepts.get(updates[REORDER_LVEL_PUOM]);
+        if (conceptCollection == null || conceptCollection.isEmpty()) {
           result
               .getErrors()
               .add(
@@ -908,18 +906,16 @@ public class StockItemImportJob {
         }
 
         StockItemPackagingUOM uom = null;
-        if (uoms != null) {
-          Optional<StockItemPackagingUOM> uomOptional =
-              uoms.stream()
-                  .filter(
-                      p ->
-                          p.getPackagingUom()
-                              .getConceptId()
-                              .equals((Integer) updates[REORDER_LVEL_PUOM]))
-                  .findFirst();
-          if (uomOptional.isPresent()) {
-            uom = uomOptional.get();
-          }
+        Optional<StockItemPackagingUOM> uomOptional =
+            uoms.stream()
+                .filter(
+                    p ->
+                        p.getPackagingUom()
+                            .getConceptId()
+                            .equals((Integer) updates[REORDER_LVEL_PUOM]))
+                .findFirst();
+        if (uomOptional.isPresent()) {
+          uom = uomOptional.get();
         }
 
         if (uom == null) {
@@ -956,8 +952,8 @@ public class StockItemImportJob {
       }
 
       if (PURCHASE_PRICE_PUOM < updates.length && updates[PURCHASE_PRICE_PUOM] != null) {
-        List<Concept> conceptCollection = concepts.getOrDefault(updates[PURCHASE_PRICE_PUOM], null);
-        if (conceptCollection == null) {
+        List<Concept> conceptCollection = concepts.get(updates[PURCHASE_PRICE_PUOM]);
+        if (conceptCollection == null || conceptCollection.isEmpty()) {
           result
               .getErrors()
               .add(
@@ -972,18 +968,16 @@ public class StockItemImportJob {
         }
 
         StockItemPackagingUOM uom = null;
-        if (uoms != null) {
-          Optional<StockItemPackagingUOM> uomOptional =
-              uoms.stream()
-                  .filter(
-                      p ->
-                          p.getPackagingUom()
-                              .getConceptId()
-                              .equals((Integer) updates[PURCHASE_PRICE_PUOM]))
-                  .findFirst();
-          if (uomOptional.isPresent()) {
-            uom = uomOptional.get();
-          }
+        Optional<StockItemPackagingUOM> uomOptional =
+            uoms.stream()
+                .filter(
+                    p ->
+                        p.getPackagingUom()
+                            .getConceptId()
+                            .equals((Integer) updates[PURCHASE_PRICE_PUOM]))
+                .findFirst();
+        if (uomOptional.isPresent()) {
+          uom = uomOptional.get();
         }
 
         if (uom == null) {

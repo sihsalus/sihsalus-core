@@ -36,7 +36,11 @@ public class StringToProviderRoleConverter implements Converter<String, Provider
     }
     ProviderRole role = providerService.getProviderRoleByUuid(id);
     if (role == null) {
-      role = providerService.getProviderRole(Integer.valueOf(id));
+      try {
+        role = providerService.getProviderRole(Integer.valueOf(id));
+      } catch (NumberFormatException e) {
+        return null;
+      }
     }
     return role;
   }

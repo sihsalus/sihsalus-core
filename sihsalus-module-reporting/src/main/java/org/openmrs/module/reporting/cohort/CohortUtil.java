@@ -90,7 +90,7 @@ public class CohortUtil {
     int cohortSize =
         (size != null && size > 0)
             ? size
-            : Integer.parseInt(
+            : parseCohortSize(
                 Context.getAdministrationService()
                     .getGlobalProperty("reporting.preview.cohortSize", "100"));
 
@@ -122,6 +122,14 @@ public class CohortUtil {
       }
     }
     return randomCohort;
+  }
+
+  private static int parseCohortSize(String value) {
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+      return 100;
+    }
   }
 
   /**

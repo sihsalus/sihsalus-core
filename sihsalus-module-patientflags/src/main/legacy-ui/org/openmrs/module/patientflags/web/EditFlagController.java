@@ -82,7 +82,8 @@ public class EditFlagController {
 			
 			@Override
 			public Object convertElement(Object element) {
-				return Context.getService(FlagService.class).getTag(Integer.valueOf((String) element));
+				Integer tagId = parseInteger((String) element);
+				return tagId == null ? null : Context.getService(FlagService.class).getTag(tagId);
 			}
 		});
 		
@@ -94,7 +95,8 @@ public class EditFlagController {
 					setValue(null);
 				}
 				else {
-					setValue(Context.getService(FlagService.class).getPriority(Integer.valueOf((String) priority)));
+					Integer priorityId = parseInteger(priority);
+					setValue(priorityId == null ? null : Context.getService(FlagService.class).getPriority(priorityId));
 				}
 			}
 			
@@ -113,6 +115,15 @@ public class EditFlagController {
 				}
 			}
 		});
+	}
+
+	private Integer parseInteger(String value) {
+		try {
+			return Integer.valueOf(value);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
 	}
 	
 	@ModelAttribute("tags")
