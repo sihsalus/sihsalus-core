@@ -447,12 +447,28 @@ public class HibernateAdministrationDAO implements AdministrationDAO, Applicatio
 
             @Override
             public void execute(Connection con) throws SQLException {
-              try (Statement stmt = con.createStatement()) {
+              Statement stmt = null;
+              try {
+                stmt = con.createStatement();
                 stmt.addBatch(postgresSequences);
                 stmt.executeBatch();
+              } finally {
+                closeResource(stmt);
               }
             }
           });
+    }
+  }
+
+  private static void closeResource(AutoCloseable resource) throws SQLException {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (SQLException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new SQLException("Unable to close database resource", e);
+      }
     }
   }
 }

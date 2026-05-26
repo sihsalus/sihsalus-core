@@ -174,8 +174,11 @@ public class SqlQueryBuilder implements QueryBuilder {
 
                 @Override
                 public void execute(Connection connection) throws SQLException {
-                  try (PreparedStatement statement = createPreparedStatement(connection);
-                      ResultSet resultSet = statement.executeQuery()) {
+                  PreparedStatement statement = null;
+                  ResultSet resultSet = null;
+                  try {
+                    statement = createPreparedStatement(connection);
+                    resultSet = statement.executeQuery();
                     if (resultSet != null) {
                       ResultSetMetaData metaData = resultSet.getMetaData();
                       while (resultSet.next()) {
@@ -186,6 +189,9 @@ public class SqlQueryBuilder implements QueryBuilder {
                         ret.add(row);
                       }
                     }
+                  } finally {
+                    closeResource(resultSet);
+                    closeResource(statement);
                   }
                 }
               });
@@ -391,5 +397,17 @@ public class SqlQueryBuilder implements QueryBuilder {
           }
         });
     return parametersToReplace;
+  }
+
+  private static void closeResource(AutoCloseable resource) throws SQLException {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (SQLException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new SQLException("Unable to close database resource", e);
+      }
+    }
   }
 }

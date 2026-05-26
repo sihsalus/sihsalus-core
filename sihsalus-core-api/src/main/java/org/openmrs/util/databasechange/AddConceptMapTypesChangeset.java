@@ -191,8 +191,11 @@ public class AddConceptMapTypesChangeset implements CustomTaskChange {
    */
   private int getInt(JdbcConnection connection, String sql) {
     int result = 0;
-    try (Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(sql)) {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery(sql);
       if (rs.next()) {
         result = rs.getInt(1);
       } else {
@@ -206,9 +209,22 @@ public class AddConceptMapTypesChangeset implements CustomTaskChange {
       return result;
     } catch (DatabaseException | SQLException e) {
       log.warn("Error generated", e);
+    } finally {
+      closeQuietly(rs, "result set");
+      closeQuietly(stmt, "statement");
     }
 
     return result;
+  }
+
+  private void closeQuietly(AutoCloseable resource, String resourceName) {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (Exception e) {
+        log.warn("Failed to close {}", resourceName, e);
+      }
+    }
   }
 
   /**

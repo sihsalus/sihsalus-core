@@ -126,6 +126,7 @@ public class GenerateUuid implements CustomTaskChange {
           try {
             Statement idStatement = null;
             PreparedStatement updateStatement = null;
+            ResultSet ids = null;
             try {
               String idSql = genericIdSql.replace("tablename", tableName);
               String updateSql = genericUpdateSql.replace("tablename", tableName);
@@ -139,24 +140,24 @@ public class GenerateUuid implements CustomTaskChange {
               idStatement = connection.createStatement();
               updateStatement = connection.prepareStatement(updateSql);
 
-              try (ResultSet ids = idStatement.executeQuery(idSql)) {
-                while (ids.next()) {
-                  updateStatement.setObject(2, ids.getObject(1)); // set the primary key number
-                  updateStatement.setString(
-                      1, UUID.randomUUID().toString()); // set the uuid for this row
-                  updateStatement.executeUpdate();
+              ids = idStatement.executeQuery(idSql);
+              while (ids.next()) {
+                updateStatement.setObject(2, ids.getObject(1)); // set the primary key number
+                updateStatement.setString(
+                    1, UUID.randomUUID().toString()); // set the uuid for this row
+                updateStatement.executeUpdate();
 
-                  transactionBatchSize++;
-                  if (transactionBatchSize > TRANSACTION_BATCH_SIZE_LIMIT) {
-                    transactionBatchSize = 0;
-                    connection.commit();
-                  }
+                transactionBatchSize++;
+                if (transactionBatchSize > TRANSACTION_BATCH_SIZE_LIMIT) {
+                  transactionBatchSize = 0;
+                  connection.commit();
                 }
               }
 
               idStatement.close();
               updateStatement.close();
             } finally {
+              closeQuietly(ids, "result set");
               if (idStatement != null) {
                 try {
                   idStatement.close();
@@ -188,6 +189,16 @@ public class GenerateUuid implements CustomTaskChange {
         connection.setAutoCommit(initialAutoCommit);
       } catch (DatabaseException e) {
         // silently ignore so that the actual error is not hidden
+      }
+    }
+  }
+
+  private void closeQuietly(AutoCloseable resource, String resourceName) {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (Exception e) {
+        log.warn("Failed to close {}", resourceName, e);
       }
     }
   }
