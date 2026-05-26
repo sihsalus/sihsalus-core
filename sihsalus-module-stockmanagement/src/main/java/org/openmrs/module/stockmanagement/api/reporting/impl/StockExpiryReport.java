@@ -241,7 +241,10 @@ public class StockExpiryReport extends ReportGenerator {
         hasMoreRecords = rows.size() >= pageSize;
       }
 
-      csvWriter.close();
+      if (csvWriter != null) {
+        csvWriter.close();
+        csvWriter = null;
+      }
       long fileSizeInBytes = Files.size(resultsFile.toPath());
       completeBatchJob(
           batchJob,

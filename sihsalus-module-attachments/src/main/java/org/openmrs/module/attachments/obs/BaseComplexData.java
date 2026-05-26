@@ -42,15 +42,16 @@ public class BaseComplexData extends ComplexData {
       return (byte[]) data;
     } else if (data instanceof String) {
       return ((String) data).getBytes();
-    } else if (RenderedImage.class.isAssignableFrom(data.getClass())) {
+    } else if (data instanceof RenderedImage) {
       RenderedImage image = (RenderedImage) data;
 
       ByteArrayOutputStream bytesOutStream = new ByteArrayOutputStream();
-      try {
-        ImageOutputStream imgOutStream = ImageIO.createImageOutputStream(bytesOutStream);
-        String extension = FilenameUtils.getExtension(complexData.getTitle());
+      String extension = FilenameUtils.getExtension(complexData.getTitle());
+      try (ImageOutputStream imgOutStream = ImageIO.createImageOutputStream(bytesOutStream)) {
+        if (imgOutStream == null) {
+          return emptyContent;
+        }
         ImageIO.write(image, extension, imgOutStream);
-        imgOutStream.close();
       } catch (IOException e) {
         return emptyContent;
       }

@@ -466,8 +466,10 @@ public class DatabaseUpdater {
       database.setDatabaseChangeLogTableName("liquibasechangelog");
       database.setDatabaseChangeLogLockTableName("liquibasechangeloglock");
 
-      if (connection.getMetaData().getDatabaseProductName().contains("HSQL Database Engine")
-          || connection.getMetaData().getDatabaseProductName().contains("H2")) {
+      String databaseProductName = connection.getMetaData().getDatabaseProductName();
+      if (databaseProductName != null
+          && (databaseProductName.contains("HSQL Database Engine")
+              || databaseProductName.contains("H2"))) {
         // a hack because hsqldb and h2 seem to be checking table names in the metadata section case
         // sensitively
         database.setDatabaseChangeLogTableName(

@@ -816,7 +816,7 @@ public class ModuleClassLoader extends URLClassLoader {
    */
   @Override
   protected String findLibrary(final String name) {
-    if ((name == null) || "".equals(name.trim())) {
+    if ((name == null) || name.trim().isEmpty()) {
       return null;
     }
 

@@ -59,6 +59,7 @@ public interface ModuleActivator {
    * @param previousModuleVersion previous module version or <code>null</code> if first install
    * @since 2.9.0
    */
+  @SuppressWarnings("unused")
   default void setupOnVersionChangeBeforeSchemaChanges(
       String previousCoreVersion, String previousModuleVersion) {}
 
@@ -69,5 +70,6 @@ public interface ModuleActivator {
    * @param previousModuleVersion previous module version or <code>null</code> if first install
    * @since 2.9.0
    */
+  @SuppressWarnings("unused")
   default void setupOnVersionChange(String previousCoreVersion, String previousModuleVersion) {}
 }

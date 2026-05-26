@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationListener;
  * Listener to support more than one type of transaction event, and ensures that all events that
  * occur after a transaction has completed are processed in a separate Daemon thread
  */
+@SuppressWarnings("unused")
 public abstract class TransactionEventListener implements ApplicationListener<TransactionEvent> {
 
   @Setter private static DaemonToken daemonToken = null;

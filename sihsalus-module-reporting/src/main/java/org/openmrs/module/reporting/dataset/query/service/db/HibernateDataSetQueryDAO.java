@@ -126,14 +126,14 @@ public class HibernateDataSetQueryDAO implements DataSetQueryDAO {
     }
 
     Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
-    if (hql.toString().contains(":ids")) {
+    if (hql.toString().contains(":ids") && baseCohort != null) {
       query.setParameterList("ids", baseCohort.getMemberIds());
     }
 
     for (Object o : query.list()) {
       Object[] vals = (Object[]) o;
       Integer ptId = (Integer) vals[0];
-      if (doNotFilterInJava || baseCohort.contains(ptId)) {
+      if (doNotFilterInJava || (baseCohort != null && baseCohort.contains(ptId))) {
         ret.put(ptId, vals[1]);
       }
     }

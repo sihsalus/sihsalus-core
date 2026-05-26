@@ -80,6 +80,7 @@ public class FindFlaggedPatientsController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET)
+	@SuppressWarnings("unused")
 	public ModelAndView showForm(HttpServletRequest request, ModelMap model) throws ServletRequestBindingException {
 		
 		// add the command object for the flag form

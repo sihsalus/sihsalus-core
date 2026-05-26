@@ -141,7 +141,7 @@ public abstract class ConceptSetDescriptor {
     Obs member = findMember(obsGroup, memberConcept);
     boolean needToVoid =
         member != null
-            && (!memberAnswer.equals(member.getValueCoded())
+            && (!OpenmrsUtil.nullSafeEquals(memberAnswer, member.getValueCoded())
                 || !OpenmrsUtil.nullSafeEquals(specificAnswer, member.getValueCodedName()));
     boolean needToCreate = memberAnswer != null && (member == null || needToVoid);
     if (needToVoid) {

@@ -28,9 +28,14 @@ public class ResultSetIterator implements Iterator<DataSetRow> {
 
   public ResultSetIterator(ResultSet resultSet) throws SQLException {
     this.resultSet = resultSet;
-    this.statement = resultSet.getStatement();
-    this.connection = resultSet.getStatement().getConnection();
-    this.createDataSetColumns(resultSet.getMetaData());
+    try {
+      this.statement = resultSet.getStatement();
+      this.connection = statement.getConnection();
+      this.createDataSetColumns(resultSet.getMetaData());
+    } catch (SQLException e) {
+      closeConnection();
+      throw e;
+    }
   }
 
   @Override
@@ -49,7 +54,7 @@ public class ResultSetIterator implements Iterator<DataSetRow> {
         if (rawNext()) {
           return createDataSetRow();
         } else {
-          return null;
+          throw new NoSuchElementException("No more rows are available");
         }
       } else {
         isNextUsed = true;
@@ -90,18 +95,44 @@ public class ResultSetIterator implements Iterator<DataSetRow> {
   }
 
   public void closeConnection() {
+    closeResultSet();
+    closeStatement();
+    closeDatabaseConnection();
+  }
+
+  private void closeResultSet() {
     try {
       if (resultSet != null) {
         resultSet.close();
       }
+    } catch (Exception ex) {
+      log.warn("Failed to close ResultSetIterator result set.", ex);
+    } finally {
+      resultSet = null;
+    }
+  }
+
+  private void closeStatement() {
+    try {
       if (statement != null) {
         statement.close();
       }
+    } catch (Exception ex) {
+      log.warn("Failed to close ResultSetIterator statement.", ex);
+    } finally {
+      statement = null;
+    }
+  }
+
+  private void closeDatabaseConnection() {
+    try {
       if (connection != null) {
         connection.close();
       }
     } catch (Exception ex) {
-      log.error("Failed to close ResultSetIterator connection.", ex);
+      log.warn("Failed to close ResultSetIterator connection.", ex);
+    } finally {
+      connection = null;
     }
   }
 

@@ -16,6 +16,7 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 @Handler(supports = Mapped.class, order = 0)
 public class MappedConverter implements Converter<Mapped> {
 
+  @SuppressWarnings("unused")
   public DelegatingResourceDescription getResourceDescription(
       Mapped mapped, Representation representation) {
     if (representation instanceof CustomRepresentation) {

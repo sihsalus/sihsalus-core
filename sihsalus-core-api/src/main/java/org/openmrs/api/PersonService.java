@@ -42,6 +42,7 @@ import org.openmrs.util.PrivilegeConstants;
  * @see org.openmrs.api.context.Context
  * @see org.openmrs.Patient
  */
+@SuppressWarnings("unused")
 public interface PersonService extends OpenmrsService {
 
   /**

@@ -137,15 +137,16 @@ public abstract class BaseImplementerConfiguredDefinitionLibrary<T extends Defin
       }
     }
 
-    if (directory.exists() && directory.isDirectory()) {
-      for (File file : directory.listFiles()) {
+    File[] files = directory.listFiles();
+    if (directory.exists() && directory.isDirectory() && files != null) {
+      for (File file : files) {
         String filename = file.getName();
         String definitionName = filename.substring(0, filename.lastIndexOf('.'));
         String key = getKeyPrefix() + definitionName;
         try {
           log.info("Loading " + file.getAbsolutePath());
           Definition definition = null;
-          if (filename.endsWith(".reportingserializerxml")) {
+          if (filename.endsWith(".reportingserializerxml") && serializer != null) {
             try {
               definition =
                   serializer.deserialize(OpenmrsUtil.getFileAsString(file), Definition.class);

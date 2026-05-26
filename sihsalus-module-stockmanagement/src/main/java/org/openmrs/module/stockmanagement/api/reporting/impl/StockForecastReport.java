@@ -676,5 +676,6 @@ public class StockForecastReport extends ReportGenerator {
     }
   }
 
+  @SuppressWarnings("unused")
   protected void setFilters(StockItemInventorySearchFilter filter, Properties parameters) {}
 }

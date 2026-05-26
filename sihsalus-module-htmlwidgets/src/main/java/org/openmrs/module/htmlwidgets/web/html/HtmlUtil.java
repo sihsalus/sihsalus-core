@@ -282,7 +282,7 @@ public class HtmlUtil {
         String attributeName = a.getName() == null ? null : a.getName().toLowerCase().trim();
         if (isValidTagAttribute(tagName, attributeName)) {
           if (StringUtils.isNotEmpty(a.getValue())
-              || ("value".equals(attributeName) && "".equals(a.getValue()))) {
+              || ("value".equals(attributeName) && a.getValue().isEmpty())) {
             w.write(" " + attributeName + "=\"" + escapeAttribute(a.getValue()) + "\"");
           }
         }
@@ -310,7 +310,7 @@ public class HtmlUtil {
         String attributeName = nameVal[0].toLowerCase().trim();
         if (isValidTagAttribute(tagName, attributeName)) {
           if (StringUtils.isNotEmpty(nameVal[1])
-              || ("value".equals(attributeName) && "".equals(nameVal[1]))) {
+              || ("value".equals(attributeName) && nameVal[1].isEmpty())) {
             w.write(" " + attributeName + "=\"" + escapeAttribute(nameVal[1]) + "\"");
           }
         }

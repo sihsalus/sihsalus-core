@@ -464,18 +464,17 @@ public class StockBatchExpiryJob extends AbstractTask {
         moreInfo = String.format("<br>%1s<br/>", mailMoreInfoMessage);
       }
 
+      String recipientName =
+          receipients.size() > 1 || user == null
+              ? "Hello"
+              : String.format("Dear <b>%1s %2s</b>", user.getFamilyName(), user.getGivenName());
       String body =
           template
               .getTemplate()
               .replace("%STOCK_ITEMS%", stringBuilder.toString())
               .replace("%MORE_INFO%", moreInfo)
               .replace("%CENTER_NAME%", healthCenterName)
-              .replace(
-                  "%RECPT_NAME%",
-                  receipients.size() > 1
-                      ? "Hello"
-                      : String.format(
-                          "Dear <b>%1s %2s</b>", user.getFamilyName(), user.getGivenName()));
+              .replace("%RECPT_NAME%", recipientName);
       try {
         SmtpUtil.sendEmail(
             template.getSubject().replace("%CENTER_NAME%", healthCenterName),

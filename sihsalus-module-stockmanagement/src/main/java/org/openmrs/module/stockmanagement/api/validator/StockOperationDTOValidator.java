@@ -318,7 +318,7 @@ public class StockOperationDTOValidator implements Validator {
         if (!StringUtils.isBlank(stockOperationItemDTO.getUuid())) {
           Optional<StockOperationItemDTO> existingItemDto =
               stockOperationItems.getData().stream()
-                  .filter(p -> p.getUuid().equals(stockOperationItemDTO.getUuid()))
+                  .filter(p -> stockOperationItemDTO.getUuid().equals(p.getUuid()))
                   .findFirst();
           if (existingItemDto.isPresent() && existingItemDto.get().getHasExpiration()) {
             if (stockOperationItemDTO.getExpiration() == null) {

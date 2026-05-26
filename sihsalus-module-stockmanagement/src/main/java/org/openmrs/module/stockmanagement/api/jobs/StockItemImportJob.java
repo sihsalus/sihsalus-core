@@ -624,9 +624,31 @@ public class StockItemImportJob {
         }
       } else {
         List<Object[]> rowToUpdate = rowsToUpdate.get(recordToProcess.getKey());
+        if (rowToUpdate == null || rowToUpdate.isEmpty()) {
+          result
+              .getErrors()
+              .add(
+                  String.format(
+                      "Row %1s: %2s",
+                      recordToProcess.getKey(),
+                      Context.getMessageSourceService()
+                          .getMessage("stockmanagement.importoperation.stockitemmismatch")));
+          continue;
+        }
+        Optional<StockItemDTO> stockItemDto = (Optional<StockItemDTO>) (rowToUpdate.get(0)[1]);
+        if (stockItemDto == null || !stockItemDto.isPresent()) {
+          result
+              .getErrors()
+              .add(
+                  String.format(
+                      "Row %1s: %2s",
+                      recordToProcess.getKey(),
+                      Context.getMessageSourceService()
+                          .getMessage("stockmanagement.importoperation.stockitemmismatch")));
+          continue;
+        }
         List<StockItem> stockItemCollection =
-            stockItemsToUpdate.getOrDefault(
-                ((Optional<StockItemDTO>) (rowToUpdate.get(0)[1])).get().getId(), null);
+            stockItemsToUpdate.getOrDefault(stockItemDto.get().getId(), null);
         if (stockItemCollection != null) {
           stockItem = stockItemCollection.get(0);
         }

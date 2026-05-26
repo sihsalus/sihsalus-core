@@ -18,6 +18,7 @@ import org.openmrs.module.reporting.evaluation.querybuilder.QueryBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 /** DataSetEvaluation DAO Queries */
+@SuppressWarnings("unused")
 public interface EvaluationService extends OpenmrsService {
 
   /** Returns the columns that the query builder returns */

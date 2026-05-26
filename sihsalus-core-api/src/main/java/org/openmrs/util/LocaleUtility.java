@@ -114,7 +114,7 @@ public class LocaleUtility implements GlobalPropertyListener {
    */
   public static boolean areCompatible(Locale lhs, Locale rhs) {
     return lhs.equals(rhs)
-        || (("".equals(lhs.getCountry())) || ("".equals(rhs.getCountry())))
+        || (lhs.getCountry().isEmpty() || rhs.getCountry().isEmpty())
             && lhs.getLanguage().equals(rhs.getLanguage());
   }
 

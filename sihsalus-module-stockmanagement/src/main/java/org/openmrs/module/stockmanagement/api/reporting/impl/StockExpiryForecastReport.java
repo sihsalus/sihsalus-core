@@ -853,5 +853,6 @@ public class StockExpiryForecastReport extends ReportGenerator {
     }
   }
 
+  @SuppressWarnings("unused")
   protected void setFilters(StockItemInventorySearchFilter filter, Properties parameters) {}
 }

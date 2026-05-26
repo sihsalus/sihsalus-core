@@ -30,6 +30,7 @@ import org.openmrs.calculation.result.CalculationResultMap;
  * @see PatientCalculation
  * @see BaseCalculation
  */
+@SuppressWarnings("unused")
 public abstract class PatientAtATimeCalculation extends BaseCalculation
     implements PatientCalculation {
 

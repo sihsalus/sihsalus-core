@@ -8,6 +8,7 @@ import org.openmrs.api.context.ContextAuthenticationException;
  *
  * @see OAuth2UserInfoAuthenticationScheme#setPostProcessor
  */
+@SuppressWarnings("unused")
 public interface AuthenticationPostProcessor {
 
   void process(UserInfo userInfo) throws ContextAuthenticationException;

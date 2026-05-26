@@ -506,10 +506,10 @@ public class EventEngine {
     if ("getMapNames".equals(methodName)) {
       return Collections.enumeration(body.keySet());
     }
-    if ("itemExists".equals(methodName)) {
+    if ("itemExists".equals(methodName) && args != null && args.length > 0) {
       return body.containsKey(args[0]);
     }
-    if ("getObject".equals(methodName)) {
+    if ("getObject".equals(methodName) && args != null && args.length > 0) {
       return body.get(args[0]);
     }
     if (methodName.startsWith("get")
