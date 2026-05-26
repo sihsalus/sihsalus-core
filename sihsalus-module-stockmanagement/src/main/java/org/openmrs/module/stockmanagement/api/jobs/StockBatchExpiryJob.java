@@ -143,21 +143,20 @@ public class StockBatchExpiryJob extends AbstractTask {
             stockManagementService);
     log.debug("Processing mail notifications");
 
-    boolean sentEmails =
-        processMailNotifications(
-            stockBatchBalance,
-            stockBatchNumbers,
-            usersToNotify,
-            mainStoreLocationIds,
-            locationMap,
-            partyDTOLocationMap,
-            locationPartyDTOMap,
-            stockItemNameMap,
-            partyStockItemMap,
-            users,
-            userLocationsToNotify,
-            batchNumbersNotified,
-            stockManagementService);
+    processMailNotifications(
+        stockBatchBalance,
+        stockBatchNumbers,
+        usersToNotify,
+        mainStoreLocationIds,
+        locationMap,
+        partyDTOLocationMap,
+        locationPartyDTOMap,
+        stockItemNameMap,
+        partyStockItemMap,
+        users,
+        userLocationsToNotify,
+        batchNumbersNotified,
+        stockManagementService);
     if (!batchNumbersNotified.isEmpty()) {
       stockManagementService.updateStockBatchExpiryNotificationDate(
           batchNumbersNotified.keySet(), new Date());
@@ -409,7 +408,6 @@ public class StockBatchExpiryJob extends AbstractTask {
         int stockItemsCount = 0;
         for (Map.Entry<Pair<Integer, Integer>, List<StockItemInventory>> stockItem :
             partyItems.getValue()) {
-          int batchCount = stockItem.getValue().size();
           stringBuilder.append("<tr>");
           stringBuilder.append(
               String.format(

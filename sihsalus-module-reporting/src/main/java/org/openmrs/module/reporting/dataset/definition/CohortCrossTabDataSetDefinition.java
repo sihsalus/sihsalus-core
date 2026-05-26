@@ -153,7 +153,7 @@ public class CohortCrossTabDataSetDefinition extends BaseDataSetDefinition {
   }
 
   /** Inner class representing a single Column in the DataSet */
-  public class CohortDataSetColumn extends DataSetColumn {
+  public static class CohortDataSetColumn extends DataSetColumn {
 
     public static final long serialVersionUID = 1L;
 

@@ -19,7 +19,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Location;
-import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
@@ -497,7 +496,6 @@ public class StockForecastReport extends ReportGenerator {
               ? (balance.compareTo(BigDecimal.ZERO) < 0 ? "0" : balance.toPlainString())
               : balance.toPlainString();
     }
-    Patient patient;
     line[columnIndex++] = row.getDrugId() == null ? "" : row.getDrugId().toString();
     line[columnIndex++] = row.getConceptId() == null ? "" : row.getConceptId().toString();
     writeLineToCsv(csvWriter, line);

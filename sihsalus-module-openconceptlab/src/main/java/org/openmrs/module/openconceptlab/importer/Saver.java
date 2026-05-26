@@ -221,7 +221,7 @@ public class Saver {
       conceptClass.setName(oclConcept.getConceptClass());
       conceptClass.setDescription("Imported from Open Concept Lab");
       conceptClass.setUuid(version5Uuid("conceptClass/" + oclConcept.getConceptClass()).toString());
-      ensureAuditInfo(conceptClass);
+      ensureAuditInfoWithDefaults(conceptClass);
       conceptService.saveConceptClass(conceptClass);
     }
     concept.setConceptClass(conceptClass);
@@ -427,7 +427,7 @@ public class Saver {
           toSource.setName(oclMapping.getToSourceName());
           toSource.setDescription("Imported from " + oclMapping.getUrl());
           toSource.setUuid(version5Uuid("source/" + oclMapping.getToSourceName()).toString());
-          ensureAuditInfo(toSource);
+          ensureAuditInfoWithDefaults(toSource);
           conceptService.saveConceptSource(toSource);
           cacheService.addConceptSource(toSource);
         }
@@ -439,7 +439,7 @@ public class Saver {
           mapType.setName(mapTypeName);
           mapType.setDescription("Imported from " + oclMapping.getUrl());
           mapType.setUuid(version5Uuid("mapType/" + mapTypeName).toString());
-          ensureAuditInfo(mapType);
+          ensureAuditInfoWithDefaults(mapType);
           conceptService.saveConceptMapType(mapType);
         }
 
@@ -452,7 +452,7 @@ public class Saver {
             term = new ConceptReferenceTerm();
             term.setConceptSource(toSource);
             term.setCode(oclMapping.getToConceptCode());
-            ensureAuditInfo(term);
+            ensureAuditInfoWithDefaults(term);
             conceptService.saveConceptReferenceTerm(term);
             cacheService.addConceptReferenceTerm(term);
           } else {
@@ -682,29 +682,29 @@ public class Saver {
   private void ensureAuditInfo(Concept concept) {
     Date now = new Date();
     User creator = getAuditCreator();
-    ensureAuditInfo((Auditable) concept, creator, now);
+    applyAuditInfo((Auditable) concept, creator, now);
     for (ConceptName name : concept.getNames(true)) {
-      ensureAuditInfo(name, creator, now);
+      applyAuditInfo(name, creator, now);
     }
     for (ConceptDescription description : concept.getDescriptions()) {
-      ensureAuditInfo(description, creator, now);
+      applyAuditInfo(description, creator, now);
     }
     for (ConceptMap mapping : concept.getConceptMappings()) {
-      ensureAuditInfo(mapping, creator, now);
+      applyAuditInfo(mapping, creator, now);
     }
     for (ConceptSet conceptSet : concept.getConceptSets()) {
-      ensureAuditInfo(conceptSet, creator, now);
+      applyAuditInfo(conceptSet, creator, now);
     }
     for (ConceptAnswer answer : concept.getAnswers()) {
-      ensureAuditInfo(answer, creator, now);
+      applyAuditInfo(answer, creator, now);
     }
   }
 
-  private void ensureAuditInfo(Auditable auditable) {
-    ensureAuditInfo(auditable, getAuditCreator(), new Date());
+  private void ensureAuditInfoWithDefaults(Auditable auditable) {
+    applyAuditInfo(auditable, getAuditCreator(), new Date());
   }
 
-  private void ensureAuditInfo(Auditable auditable, User creator, Date now) {
+  private void applyAuditInfo(Auditable auditable, User creator, Date now) {
     if (auditable.getCreator() == null) {
       auditable.setCreator(creator);
     }

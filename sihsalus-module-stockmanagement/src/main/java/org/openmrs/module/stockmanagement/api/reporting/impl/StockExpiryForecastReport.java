@@ -105,8 +105,6 @@ public class StockExpiryForecastReport extends ReportGenerator {
     String locationUuid = getLocation(parameters);
     Boolean childLocations = getChildLocations(parameters);
     String stockItemCategoryUuid = getStockItemCategory(parameters);
-    StockItemInventorySearchFilter.InventoryGroupBy inventoryGroupBy =
-        getInventoryGroupBy(parameters);
     String stockItemUuid = getStockItem(parameters);
     limit = getLimit(parameters);
     if (limit == null) {

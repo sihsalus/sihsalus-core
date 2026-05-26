@@ -61,6 +61,8 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
     PreparedStatement updateMapTerm = null;
     PreparedStatement insertTerm = null;
     PreparedStatement updateMapType = null;
+    ResultSet selectTypeResult = null;
+    ResultSet selectMapResult = null;
 
     try {
       prevAutoCommit = connection.getAutoCommit();
@@ -71,9 +73,9 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
 
       selectTypes = connection.prepareStatement("select * from concept_map_type");
       selectTypes.execute();
-      ResultSet selectTypeResult = selectTypes.getResultSet();
+      selectTypeResult = selectTypes.getResultSet();
 
-      while (selectTypeResult.next()) {
+      while (selectTypeResult != null && selectTypeResult.next()) {
         typesToIds.put(
             selectTypeResult.getString("name").trim().toUpperCase(),
             selectTypeResult.getInt("concept_map_type_id"));
@@ -117,9 +119,9 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
               "select * from concept_reference_map" + " order by source, source_code, uuid");
       selectMap.execute();
 
-      final ResultSet selectMapResult = selectMap.getResultSet();
+      selectMapResult = selectMap.getResultSet();
 
-      while (selectMapResult.next()) {
+      while (selectMapResult != null && selectMapResult.next()) {
         final int conceptMapId = selectMapResult.getInt("concept_map_id");
         final int source = selectMapResult.getInt("source");
         final String sourceCode = selectMapResult.getString("source_code");
@@ -210,6 +212,8 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
 
       throw new CustomChangeException(e);
     } finally {
+      closeResultSetQuietly(selectTypeResult);
+      closeResultSetQuietly(selectMapResult);
       closeStatementQuietly(selectTypes);
       closeStatementQuietly(batchUpdateMap);
       closeStatementQuietly(selectMap);
@@ -238,6 +242,16 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
         statement.close();
       } catch (SQLException e) {
         log.error("Failed to close statement", e);
+      }
+    }
+  }
+
+  private void closeResultSetQuietly(ResultSet resultSet) {
+    if (resultSet != null) {
+      try {
+        resultSet.close();
+      } catch (SQLException e) {
+        log.error("Failed to close result set", e);
       }
     }
   }

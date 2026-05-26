@@ -10,8 +10,7 @@ class LogicDataSetDefinitionTest {
 
   @Test
   void decodeFormatterAllowsColonInsideReplacementValue() {
-    LogicDataSetDefinition definition = new LogicDataSetDefinition();
-    DecodeFormatter formatter = definition.new DecodeFormatter("code:label:with:colon");
+    DecodeFormatter formatter = new DecodeFormatter("code:label:with:colon");
 
     assertEquals("label:with:colon", formatter.format(new Result("code")));
   }

@@ -123,14 +123,14 @@ public class Reflect {
    * @return true if given type is a subclass, or a generic type bounded by a subclass of the
    *     parameterized class
    */
-  public boolean isSuperClass(Type t) {
+  public boolean isSuperClassOfType(Type t) {
     if (t instanceof TypeVariable<?>) {
       TypeVariable<?> typeVar = (TypeVariable<?>) t;
       if (typeVar.getBounds() == null || typeVar.getBounds().length == 0) {
         return parametrizedClass.equals(Object.class);
       }
       for (Type typeBound : typeVar.getBounds()) {
-        if (isSuperClass(typeBound)) {
+        if (isSuperClassOfType(typeBound)) {
           return true;
         }
       }
@@ -158,7 +158,7 @@ public class Reflect {
    * @param object Object
    * @return true if, given object is accessible from the parameterized class
    */
-  public boolean isSuperClass(Object object) {
+  public boolean isSuperClassOfObject(Object object) {
     return isSuperClass(object.getClass());
   }
 
@@ -183,7 +183,7 @@ public class Reflect {
         if (type.getActualTypeArguments()[0] instanceof Class) {
           return (parametrizedClass.isAssignableFrom((Class) type.getActualTypeArguments()[0]));
         } else if (type.getActualTypeArguments()[0] instanceof TypeVariable) {
-          return isSuperClass(type.getActualTypeArguments()[0]);
+          return isSuperClassOfType(type.getActualTypeArguments()[0]);
         }
       } catch (ClassCastException e) {
         // Do nothing.  If this exception is thrown, then field is not a Collection of

@@ -93,7 +93,7 @@ public class CohortsWithVaryingParametersDataSetDefinition extends BaseDataSetDe
     return rowLabelTemplate;
   }
 
-  public class Column extends DataSetColumn {
+  public static class Column extends DataSetColumn {
 
     private Mapped<? extends CohortDefinition> cohortDefinition;
     private String labelTemplate;

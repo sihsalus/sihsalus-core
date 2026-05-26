@@ -246,7 +246,7 @@ public class AdHocExportManager {
     reportDefinitionService.purgeDefinition(definition);
   }
 
-  public class AdHocDataSet {
+  public static class AdHocDataSet {
 
     private String uuid;
 

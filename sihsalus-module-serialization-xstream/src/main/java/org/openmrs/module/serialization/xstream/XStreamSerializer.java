@@ -389,7 +389,7 @@ public class XStreamSerializer implements OpenmrsSerializer {
    *
    * @see <a href="http://tinyurl.com/ord2rry">this blog</a>
    */
-  private class CustomDynamicProxyConverter extends DynamicProxyConverter {
+  private static class CustomDynamicProxyConverter extends DynamicProxyConverter {
 
     CustomDynamicProxyConverter() {
       super(null);

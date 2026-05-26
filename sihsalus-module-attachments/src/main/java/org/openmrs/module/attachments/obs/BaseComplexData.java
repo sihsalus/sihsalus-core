@@ -47,6 +47,9 @@ public class BaseComplexData extends ComplexData {
 
       ByteArrayOutputStream bytesOutStream = new ByteArrayOutputStream();
       String title = complexData == null ? null : complexData.getTitle();
+      if (title == null || title.isEmpty()) {
+        return emptyContent;
+      }
       String extension = FilenameUtils.getExtension(title);
       if (extension == null || extension.isEmpty()) {
         return emptyContent;

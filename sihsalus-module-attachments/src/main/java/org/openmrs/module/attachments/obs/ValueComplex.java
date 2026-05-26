@@ -101,7 +101,7 @@ public class ValueComplex {
     // now parse the filename and key set
     String parsedFileNameAndKey = fileNameAndKey;
     if (parsedFileNameAndKey != null
-        && StringUtils.isNotBlank(parsedFileNameAndKey)
+        && !parsedFileNameAndKey.trim().isEmpty()
         && PIPE_WITH_LEADING_SPACE_AND_NO_TRAILING_SPACE_REGEX
             .matcher(parsedFileNameAndKey)
             .find()) {

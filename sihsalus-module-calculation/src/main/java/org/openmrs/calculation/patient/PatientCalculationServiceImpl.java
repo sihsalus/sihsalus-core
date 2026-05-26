@@ -193,7 +193,7 @@ public class PatientCalculationServiceImpl extends BaseOpenmrsService
   }
 
   /** Base class for {@link PatientCalculationContext}s */
-  public class SimplePatientCalculationContext implements PatientCalculationContext {
+  public static class SimplePatientCalculationContext implements PatientCalculationContext {
 
     private Date now = null;
 

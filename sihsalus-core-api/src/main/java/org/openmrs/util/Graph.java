@@ -18,9 +18,9 @@ public class Graph<T> {
 
   private Set<T> nodes = new HashSet<>();
 
-  private Set<Edge> edges = new HashSet<>();
+  private Set<Edge<T>> edges = new HashSet<>();
 
-  public class Edge {
+  public static class Edge<T> {
 
     private T fromNode;
 
@@ -57,7 +57,7 @@ public class Graph<T> {
     nodes.add(aNode);
   }
 
-  public void addEdge(Edge anEdge) {
+  public void addEdge(Edge<T> anEdge) {
     edges.add(anEdge);
   }
 
@@ -65,7 +65,7 @@ public class Graph<T> {
     return nodes;
   }
 
-  public Set<Edge> getEdges() {
+  public Set<Edge<T>> getEdges() {
     return edges;
   }
 
@@ -85,7 +85,7 @@ public class Graph<T> {
    */
   private Set<T> getNodesWithNoIncomingEdges() {
     Set<T> nodesWithIncomingEdges = new HashSet<>();
-    for (Edge edge : edges) {
+    for (Edge<T> edge : edges) {
       nodesWithIncomingEdges.add(edge.getToNode());
     }
     Set<T> nodesWithoutIncomingEdges = new HashSet<>(nodes);
@@ -102,7 +102,7 @@ public class Graph<T> {
    * @return true if the node has an incoming edge, otherwise false
    */
   private boolean hasIncomingEdges(T node) {
-    for (Edge edge : edges) {
+    for (Edge<T> edge : edges) {
       if (edge.getToNode().equals(node)) {
         return true;
       }
@@ -116,9 +116,9 @@ public class Graph<T> {
    * @param aNode
    * @return set of edges
    */
-  private Set<Edge> getEdgesStartingWith(T aNode) {
-    Set<Edge> edgesPointing = new HashSet<>();
-    for (Edge edge : edges) {
+  private Set<Edge<T>> getEdgesStartingWith(T aNode) {
+    Set<Edge<T>> edgesPointing = new HashSet<>();
+    for (Edge<T> edge : edges) {
       if (edge.getFromNode().equals(aNode)) {
         edgesPointing.add(edge);
       }
@@ -132,9 +132,9 @@ public class Graph<T> {
    * @param aNode
    * @return set of edges
    */
-  public Set<Edge> getEdgesEndingWith(T aNode) {
-    Set<Edge> edgesPointing = new HashSet<>();
-    for (Edge edge : edges) {
+  public Set<Edge<T>> getEdgesEndingWith(T aNode) {
+    Set<Edge<T>> edgesPointing = new HashSet<>();
+    for (Edge<T> edge : edges) {
       if (edge.getToNode().equals(aNode)) {
         edgesPointing.add(edge);
       }
@@ -154,13 +154,13 @@ public class Graph<T> {
     List<T> result = new ArrayList<>();
 
     // The initial edges are stored.
-    List<Edge> initialEdges = new ArrayList<>(edges);
+    List<Edge<T>> initialEdges = new ArrayList<>(edges);
     while (!queue.isEmpty()) {
       T node = queue.iterator().next();
       queue.remove(node);
       result.add(node);
-      Set<Edge> edgesStarting = getEdgesStartingWith(node);
-      for (Edge edge : edgesStarting) {
+      Set<Edge<T>> edgesStarting = getEdgesStartingWith(node);
+      for (Edge<T> edge : edgesStarting) {
         edges.remove(edge);
         if (!hasIncomingEdges(edge.getToNode())) {
           queue.add(edge.getToNode());

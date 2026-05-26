@@ -133,7 +133,7 @@ public class DelegatingResourceDescription implements RepresentationDescription 
   }
 
   /** A property that will be included in a representation */
-  public class Property {
+  public static class Property {
 
     private String delegateProperty;
 

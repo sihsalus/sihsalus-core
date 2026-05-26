@@ -558,7 +558,7 @@ public class ExcelTemplateRenderer extends ReportTemplateRenderer {
   }
 
   /** Inner class to encapsulate a sheet that should be rendered */
-  public class SheetToAdd {
+  public static class SheetToAdd {
 
     private Sheet sheet;
     private Integer originalSheetNum;
@@ -635,7 +635,7 @@ public class ExcelTemplateRenderer extends ReportTemplateRenderer {
   }
 
   /** Inner class to encapsulate a row that should be rendered */
-  public class RowToAdd {
+  public static class RowToAdd {
 
     private Row rowToClone;
     private Map<String, Object> replacementData;
@@ -676,7 +676,7 @@ public class ExcelTemplateRenderer extends ReportTemplateRenderer {
   }
 
   /** Inner class to encapsulate a cell that should be cloned */
-  public class CellToAdd {
+  public static class CellToAdd {
 
     private Cell cellToClone;
     private Map<String, Object> replacementData;

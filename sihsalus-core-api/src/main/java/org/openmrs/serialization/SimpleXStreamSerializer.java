@@ -256,7 +256,7 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
    *
    * @see <a href="http://tinyurl.com/ord2rry">this blog</a>
    */
-  private class OpenmrsDynamicProxyConverter extends DynamicProxyConverter {
+  private static class OpenmrsDynamicProxyConverter extends DynamicProxyConverter {
 
     OpenmrsDynamicProxyConverter() {
       super(null);

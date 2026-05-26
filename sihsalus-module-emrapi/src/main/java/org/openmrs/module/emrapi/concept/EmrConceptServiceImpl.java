@@ -72,8 +72,6 @@ public class EmrConceptServiceImpl extends BaseOpenmrsService implements EmrConc
   @Override
   @Transactional(readOnly = true)
   public Concept getConcept(String mappingOrUuid) {
-    Concept concept = null;
-
     Matcher matcher = codePattern.matcher(mappingOrUuid);
     if (matcher.matches()) {
       String sourceName = matcher.group(1);

@@ -10,6 +10,7 @@
 package org.openmrs.logic;
 
 import org.openmrs.logic.op.ComparisonOperator;
+import org.openmrs.logic.op.ComparisonOperators;
 import org.openmrs.logic.op.Operand;
 
 /**
@@ -252,6 +253,6 @@ public class Duration implements Operand {
    */
   @Override
   public boolean supports(ComparisonOperator operator) {
-    return (ComparisonOperator.WITHIN.equals(operator));
+    return ComparisonOperators.WITHIN.equals(operator);
   }
 }

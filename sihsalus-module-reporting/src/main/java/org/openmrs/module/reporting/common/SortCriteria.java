@@ -85,7 +85,7 @@ public class SortCriteria {
 
   // ***** INNER CLASSES *****
 
-  public class SortElement implements Serializable {
+  public static class SortElement implements Serializable {
 
     public static final long serialVersionUID = 1L;
 

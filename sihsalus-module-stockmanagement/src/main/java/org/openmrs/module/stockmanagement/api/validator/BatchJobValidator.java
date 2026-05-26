@@ -2,7 +2,6 @@ package org.openmrs.module.stockmanagement.api.validator;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -244,7 +243,7 @@ public class BatchJobValidator implements Validator {
       StockManagementService stockManagementService) {
     if (reportParameter.isDate()) {
       try {
-        Date date = DateUtil.parseDate(value);
+        DateUtil.parseDate(value);
       } catch (Exception exception) {
         return false;
       }

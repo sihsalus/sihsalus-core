@@ -133,7 +133,7 @@ public class HibernateDataSetQueryDAO implements DataSetQueryDAO {
     for (Object o : query.list()) {
       Object[] vals = (Object[]) o;
       Integer ptId = (Integer) vals[0];
-      if (doNotFilterInJava || (baseCohort != null && baseCohort.contains(ptId))) {
+      if (doNotFilterInJava || baseCohort.contains(ptId)) {
         ret.put(ptId, vals[1]);
       }
     }

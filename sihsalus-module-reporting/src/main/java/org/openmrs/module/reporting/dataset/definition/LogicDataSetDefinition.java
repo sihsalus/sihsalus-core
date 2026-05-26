@@ -146,7 +146,7 @@ public class LogicDataSetDefinition extends BaseDataSetDefinition
     public Object format(Result input);
   }
 
-  public class ConceptFormatter implements ColumnFormatter {
+  public static class ConceptFormatter implements ColumnFormatter {
     private String format;
 
     public ConceptFormatter(String format) {
@@ -175,13 +175,13 @@ public class LogicDataSetDefinition extends BaseDataSetDefinition
     }
   }
 
-  public class ValueFormatter implements ColumnFormatter {
+  public static class ValueFormatter implements ColumnFormatter {
     public Object format(Result input) {
       return input;
     }
   }
 
-  public class DateFormatter implements ColumnFormatter {
+  public static class DateFormatter implements ColumnFormatter {
     public Object format(Result input) {
       if (input.isEmpty()) {
         return null;
@@ -197,7 +197,7 @@ public class LogicDataSetDefinition extends BaseDataSetDefinition
     }
   }
 
-  public class BooleanFormatter implements ColumnFormatter {
+  public static class BooleanFormatter implements ColumnFormatter {
     String ifTrue;
     String ifFalse;
 
@@ -211,7 +211,7 @@ public class LogicDataSetDefinition extends BaseDataSetDefinition
     }
   }
 
-  public class DecodeFormatter implements ColumnFormatter {
+  public static class DecodeFormatter implements ColumnFormatter {
     Map<String, String> decodings;
 
     /**

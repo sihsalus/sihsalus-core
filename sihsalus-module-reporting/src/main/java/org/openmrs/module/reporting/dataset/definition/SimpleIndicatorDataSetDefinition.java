@@ -59,7 +59,7 @@ public class SimpleIndicatorDataSetDefinition extends BaseDataSetDefinition {
     }
   }
 
-  public class SimpleIndicatorColumn extends DataSetColumn implements Cloneable {
+  public static class SimpleIndicatorColumn extends DataSetColumn implements Cloneable {
 
     public static final long serialVersionUID = 1L;
 

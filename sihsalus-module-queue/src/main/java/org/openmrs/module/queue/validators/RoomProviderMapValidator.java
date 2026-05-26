@@ -35,7 +35,6 @@ public class RoomProviderMapValidator implements Validator {
       throw new IllegalArgumentException(
           "The parameter target should not be null & must be of type" + RoomProviderMap.class);
     }
-    RoomProviderMap roomProviderMap = (RoomProviderMap) obj;
     ValidationUtils.rejectIfEmptyOrWhitespace(
         errors,
         "queueRoom",
