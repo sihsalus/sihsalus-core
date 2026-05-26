@@ -66,7 +66,7 @@ public class StockOperationDTOValidator implements Validator {
     if (object.getOperationDate() == null) {
       errors.rejectValue(
           "operationDate",
-          messageSourceService.getMessage("stockmanagement.stockoperation.sourcerequired"));
+          messageSourceService.getMessage("stockmanagement.stockoperation.operationdaterequired"));
       return;
     }
 
@@ -211,14 +211,14 @@ public class StockOperationDTOValidator implements Validator {
 
     if (stockOperationType.requiresReason() && StringUtils.isBlank(object.getReasonUuid())) {
       errors.rejectValue(
-          "operationTypeUuid",
+          "reasonUuid",
           messageSourceService.getMessage("stockmanagement.stockoperation.noreason"));
       return;
     }
 
     if (object.getStockOperationItems() == null || object.getStockOperationItems().isEmpty()) {
       errors.rejectValue(
-          "operationTypeUuid",
+          "stockOperationItems",
           messageSourceService.getMessage("stockmanagement.stockoperation.itemsrequired"));
       return;
     }
@@ -390,7 +390,7 @@ public class StockOperationDTOValidator implements Validator {
 
       if (stockOperationType.getOperationType().equals(StockOperationType.STOCK_ISSUE)) {
         if (stockOperationItemDTO.getQuantityRequested() != null
-            || stockOperationItemDTO.getStockItemPackagingUOMUuid() != null) {
+            || stockOperationItemDTO.getQuantityRequestedPackagingUOMUuid() != null) {
           if (stockOperationItemDTO.getQuantityRequested() != null
               && stockOperationItemDTO.getQuantityRequested().compareTo(zero) <= 0) {
             errors.rejectValue(
@@ -402,7 +402,7 @@ public class StockOperationDTOValidator implements Validator {
             return;
           }
 
-          if (stockOperationItemDTO.getStockItemPackagingUOMUuid() == null) {
+          if (stockOperationItemDTO.getQuantityRequestedPackagingUOMUuid() == null) {
             errors.rejectValue(
                 "stockOperationItems",
                 String.format(
