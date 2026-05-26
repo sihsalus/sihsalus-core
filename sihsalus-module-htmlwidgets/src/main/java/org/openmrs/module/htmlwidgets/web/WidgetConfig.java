@@ -79,7 +79,7 @@ public class WidgetConfig {
   }
 
   /**
-   * @param request the request to set
+   * @param pageContext the page context to set
    */
   public void setPageContext(PageContext pageContext) {
     this.pageContext = pageContext;

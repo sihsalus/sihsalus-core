@@ -166,11 +166,7 @@ public class MemoryAppender extends org.openmrs.logging.MemoryAppender {
 
   @Override
   public String toString() {
-    if (implementation != null) {
-      return implementation.toString();
-    } else {
-      return super.toString();
-    }
+    return "MemoryAppender{name='" + getName() + "'}";
   }
 
   @Override

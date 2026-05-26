@@ -79,7 +79,7 @@ public interface DataSetDefinitionPersister extends DefinitionPersister<DataSetD
   /**
    * Deletes a {@link DataSetDefinition} from the system.
    *
-   * @param datasetDefinition the {@link DataSetDefinition} to purge
+   * @param dataSetDefinition the {@link DataSetDefinition} to purge
    * @should remove the DataSetDefinition
    */
   public void purgeDefinition(DataSetDefinition dataSetDefinition);

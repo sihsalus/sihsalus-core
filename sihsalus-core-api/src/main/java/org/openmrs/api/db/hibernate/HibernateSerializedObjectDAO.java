@@ -350,12 +350,6 @@ public class HibernateSerializedObjectDAO implements SerializedObjectDAO {
   // ***** Property access *****
 
   /**
-   * Set session factory
-   *
-   * @param sessionFactory
-   */
-
-  /**
    * @return the supportedTypes
    */
   @Override

@@ -182,7 +182,8 @@ public class HtmlUtil {
   /**
    * Render each specified resource as an HtmlInclude in the page
    *
-   * @param pageContext
+   * @param w
+   * @param request
    * @param resources
    * @throws IOException
    */

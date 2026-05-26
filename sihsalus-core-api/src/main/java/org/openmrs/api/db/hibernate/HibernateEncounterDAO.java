@@ -618,8 +618,8 @@ public class HibernateEncounterDAO implements EncounterDAO {
   /**
    * Convenience method since this DAO fetches several different domain objects by uuid
    *
+   * @param clazz domain class to fetch
    * @param uuid uuid to fetch
-   * @param table a simple classname (e.g. "Encounter")
    * @return
    */
   private <T> T getClassByUuid(Class<T> clazz, String uuid) {

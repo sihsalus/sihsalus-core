@@ -186,11 +186,6 @@ public class Patient extends Person {
   }
 
   /**
-   * Adds this PatientIdentifier if the patient doesn't contain it already
-   *
-   * @param patientIdentifier
-   */
-  /**
    * Will only add PatientIdentifiers in this list that this patient does not have already
    *
    * @param patientIdentifiers

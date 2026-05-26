@@ -1183,7 +1183,6 @@ public class SwaggerSpecificationCreator {
    * @param operationName get, post, delete
    * @param resourceName
    * @param resourceParentName
-   * @param representation
    * @param operationEnum
    * @return
    */

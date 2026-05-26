@@ -151,7 +151,7 @@ public abstract class BaseFhirCriteriaHolder<V> {
   /**
    * Adds a join to the query managed by this {@link OpenmrsFhirCriteriaContext}. This join is
    * explicitly joined to the {@link From} object passed in, which should be either the root or
-   * another join. This join is filtered using the resulting predicate returned from the {@param
+   * another join. This join is filtered using the resulting predicate returned from the {@code
    * onGenerator} parameter.
    *
    * @param from The {@link From} object that represents the table to join with
@@ -172,7 +172,7 @@ public abstract class BaseFhirCriteriaHolder<V> {
   /**
    * Adds a join to the query managed by this {@link OpenmrsFhirCriteriaContext}. This join is
    * explicitly joined to the {@link From} object passed in, which should be either the root or
-   * another join. This join is filtered using the resulting predicate returned from the {@param
+   * another join. This join is filtered using the resulting predicate returned from the {@code
    * onGenerator} parameter. <br>
    * If a join with the given alias already exists, this method will reuse that join. If the
    * existing join has an ON clause and a new {@code onGenerator} is provided, the new predicate

@@ -418,15 +418,15 @@ public class RestUtil implements GlobalPropertyListener {
    *
    * TODO: look into whether this can use PropertyUtils instead
    *
-   * /** Helper method to use the superclass of param class as well
+   * Helper method to use the superclass of param class as well
    *
-   * @param c
+   * param c
    *
-   * @param name
+   * param name
    *
-   * @param param
+   * param param
    *
-   * @return
+   * return
    *
    * public Method getMethod(Class<?> c, String name, Class<?> param) {
    *

@@ -127,7 +127,7 @@ public class EditTagController {
 	/**
 	 * Processes the form to edit (or add) a Flag
 	 * 
-	 * @param flag the flag to add/update
+	 * @param tag the tag to add/update
 	 * @param result
 	 * @param status
 	 * @return new ModelAndView

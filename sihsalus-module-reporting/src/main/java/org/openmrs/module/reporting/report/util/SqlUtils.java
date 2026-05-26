@@ -184,7 +184,7 @@ public class SqlUtils {
           // String, et al (this might break since this is a catch all for all other classes)
           else {
             for (Integer position : positions) {
-              statement.setString(position, new String(paramValue.toString()));
+              statement.setString(position, paramValue.toString());
             }
           }
         }

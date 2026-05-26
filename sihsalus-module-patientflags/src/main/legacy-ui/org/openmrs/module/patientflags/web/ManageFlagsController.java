@@ -84,7 +84,7 @@ public class ManageFlagsController {
 	/**
 	 * Handles a request to filter the results
 	 * 
-	 * @param filterTags
+	 * @param filter
 	 * @param result
 	 * @param status
 	 * @return

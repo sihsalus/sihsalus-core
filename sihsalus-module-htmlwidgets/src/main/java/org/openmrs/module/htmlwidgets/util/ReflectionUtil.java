@@ -32,7 +32,7 @@ public class ReflectionUtil {
    * Returns the field with the given name from the passed class, including it's superclasses
    *
    * @param type - The type to look at
-   * @param propertyName - The name of the field to return
+   * @param fieldName - The name of the field to return
    * @return - The field with the given name, or null if not found
    */
   public static Field getField(Class<?> type, String fieldName) {

@@ -825,9 +825,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
         }
         // String, Integer, et al (this might break since this is a catch all for all other classes)
         else {
-          query.setParameter(
-              paramName,
-              new String(paramValue.toString())); // need to create new string for some reason
+          query.setParameter(paramName, paramValue.toString());
         }
       }
     }

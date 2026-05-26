@@ -60,7 +60,7 @@ public class MostRecentEncounterForPatientQuery extends BaseQuery<Encounter>
   }
 
   /**
-   * @param types the types to set
+   * @param encounterTypes the types to set
    */
   public void setEncounterTypes(List<EncounterType> encounterTypes) {
     this.encounterTypes = encounterTypes;
