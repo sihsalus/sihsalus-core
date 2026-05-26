@@ -136,7 +136,7 @@ public class ValueComplex {
   }
 
   public boolean isOwnImplementation() {
-    return instructions != INSTRUCTIONS_NONE;
+    return !INSTRUCTIONS_NONE.equals(instructions);
   }
 
   public String getInstructions() {

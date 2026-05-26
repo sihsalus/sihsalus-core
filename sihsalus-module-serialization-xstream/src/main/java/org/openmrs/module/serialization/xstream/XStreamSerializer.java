@@ -106,7 +106,7 @@ public class XStreamSerializer implements OpenmrsSerializer {
        * use own-defined mapper to wrap xstream's default mapper,
        * The purpose:
        * (1) we can use the reasonable name for cglib and Hibernate's Collection
-       * (2) ignore unknow element while deserializing
+       * (2) ignore unknown element while deserializing
        */
       xstream =
           new XStream() {

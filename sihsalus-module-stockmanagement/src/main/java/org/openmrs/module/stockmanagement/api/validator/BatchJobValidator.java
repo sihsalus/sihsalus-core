@@ -58,7 +58,7 @@ public class BatchJobValidator implements Validator {
       return;
     } else {
       BatchJobType batchJobType = object.getBatchJobType();
-      if (batchJobType == null || !batchJobType.equals(BatchJobType.Report)) {
+      if (!batchJobType.equals(BatchJobType.Report)) {
         errors.rejectValue(
             "batchJobType",
             String.format(
