@@ -229,7 +229,11 @@ public class Context {
 	 * @param ctx UserContext to set
 	 */
 	public static void setUserContext(UserContext ctx) {
-		log.trace("Setting user context {}", ctx);
+		Integer userId = null;
+		if (ctx != null && ctx.getAuthenticatedUser() != null) {
+			userId = ctx.getAuthenticatedUser().getUserId();
+		}
+		log.trace("Setting user context [userId={}]", userId);
 
 		Object[] arr = new Object[] { ctx };
 		userContextHolder.set(arr);

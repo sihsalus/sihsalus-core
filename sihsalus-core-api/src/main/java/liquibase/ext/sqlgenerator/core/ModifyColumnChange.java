@@ -92,10 +92,20 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
 	public SqlStatement[] generateStatements(Database database) {
 		ModifyColumnStatement statement = new ModifyColumnStatement(getSchemaName(), getTableName(),
 		        getColumns().toArray(new ColumnConfig[0]));
-
-		log.debug("modify column statement is '{}'", statement);
+		log.debug("modify column statement for table '{}' in schema '{}' with columns {}", statement.getTableName(),
+		    statement.getSchemaName(), getColumnDescriptions());
 
 		return new SqlStatement[] { statement };
+	}
+
+	private List<String> getColumnDescriptions() {
+		List<String> names = new ArrayList<>(columns.size());
+		for (ColumnConfig col : columns) {
+			String columnName = col == null ? null : col.getName();
+			String columnType = col == null ? null : col.getType();
+			names.add(columnName + (columnType == null ? "" : "(" + columnType + ")"));
+		}
+		return names;
 	}
 
 	public String getConfirmationMessage() {

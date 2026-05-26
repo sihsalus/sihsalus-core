@@ -187,7 +187,7 @@ public class MessageServiceImpl implements MessageService {
 	 */
 	@Override
 	public void sendMessage(Message message, User user) throws MessageException {
-		log.debug("Sending message to user " + user);
+		log.debug("Sending message to userId {}", user == null ? null : user.getUserId());
 		String address = user.getUserProperty(OpenmrsConstants.USER_PROPERTY_NOTIFICATION_ADDRESS);
 		if (address != null) {
 			message.addRecipient(address);
@@ -200,7 +200,13 @@ public class MessageServiceImpl implements MessageService {
 	 */
 	@Override
 	public void sendMessage(Message message, Collection<User> users) throws MessageException {
-		log.debug("Sending message to users " + users);
+		List<Integer> recipientIds = new ArrayList<>();
+		if (users != null) {
+			for (User user : users) {
+				recipientIds.add(user == null ? null : user.getUserId());
+			}
+		}
+		log.debug("Sending message to recipient user IDs {}", recipientIds);
 		for (User user : users) {
 			String address = user.getUserProperty(OpenmrsConstants.USER_PROPERTY_NOTIFICATION_ADDRESS);
 			if (address != null) {
@@ -225,15 +231,16 @@ public class MessageServiceImpl implements MessageService {
 	 */
 	@Override
 	public void sendMessage(Message message, Role role) throws MessageException {
-		log.debug("Sending message to role " + role);
-		log.debug("User Service : " + Context.getUserService());
+		log.debug("Sending message to role {}", role == null ? null : role.getRole());
+		log.debug("User Service : {}", Context.getUserService() == null ? null : Context.getUserService().getClass().getName());
 
 		List<Role> roles = new ArrayList<>();
 		roles.add(role);
 
 		Collection<User> users = Context.getUserService().getUsers(null, roles, false);
 
-		log.debug("Sending message " + message + " to " + users);
+		Integer messageId = message == null ? null : message.getId();
+		log.debug("Sending message id {} to {} users", messageId, users == null ? 0 : users.size());
 		Context.getMessageService().sendMessage(message, users);
 	}
 

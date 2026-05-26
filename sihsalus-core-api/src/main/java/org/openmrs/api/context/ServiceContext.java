@@ -179,7 +179,13 @@ public class ServiceContext implements ApplicationContextAware {
 				ServiceContextHolder.instance.moduleOpenmrsServices = null;
 			}
 		}
-		log.debug("Destroying ServiceContext instance: {}", ServiceContextHolder.instance);
+		ServiceContext instance = ServiceContextHolder.instance;
+		if (instance != null) {
+			int serviceCount = instance.services == null ? -1 : instance.services.size();
+			int moduleServiceCount = instance.moduleOpenmrsServices == null ? -1 : instance.moduleOpenmrsServices.size();
+			log.debug("Destroying ServiceContext instance [serviceCount={}, moduleServiceCount={}]", serviceCount,
+			    moduleServiceCount);
+		}
 		ServiceContextHolder.instance = null;
 	}
 
