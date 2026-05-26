@@ -251,7 +251,6 @@ public class ExcelTemplateRenderer extends ReportTemplateRenderer {
   }
 
   /** Adds in a Row to the given Sheet */
-  @SuppressWarnings("unused")
   public Row addRow(
       Workbook wb,
       SheetToAdd sheetToAdd,

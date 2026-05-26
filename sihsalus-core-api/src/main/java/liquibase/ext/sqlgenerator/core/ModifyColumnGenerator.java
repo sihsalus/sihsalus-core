@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
  *
  * @since 2.4
  */
-@SuppressWarnings("unused")
 public class ModifyColumnGenerator extends AbstractSqlGenerator<ModifyColumnStatement> {
 
   private static final Logger log = LoggerFactory.getLogger(ModifyColumnGenerator.class);

@@ -19,7 +19,6 @@ import org.openmrs.module.reporting.report.definition.ReportDefinition;
  * This is the base interface that should be implemented by any report author who wishes their
  * ReportDefinition to be automatically installed upon startup.
  */
-@SuppressWarnings("unused")
 public interface ReportManager {
 
   /**

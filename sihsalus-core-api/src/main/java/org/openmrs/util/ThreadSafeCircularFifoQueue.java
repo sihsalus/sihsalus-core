@@ -60,7 +60,6 @@ public class ThreadSafeCircularFifoQueue<E> extends AbstractQueue<E>
   // tracks the state of any iterators
   private transient Iterators iterators = null;
 
-  @SuppressWarnings("unused")
   public ThreadSafeCircularFifoQueue() {
     this(32);
   }
@@ -76,7 +75,6 @@ public class ThreadSafeCircularFifoQueue<E> extends AbstractQueue<E>
     this.maxElements = elements.length;
   }
 
-  @SuppressWarnings("unused")
   public ThreadSafeCircularFifoQueue(Collection<E> collection) {
     this(collection.size());
     this.addAll(collection);

@@ -34,7 +34,6 @@ import org.openmrs.util.OpenmrsConstants;
 import org.openmrs.util.PrivilegeConstants;
 
 /** Contains methods pertaining to creating/deleting/voiding Orders */
-@SuppressWarnings("unused")
 public interface OrderService extends OpenmrsService {
 
   public static final String PARALLEL_ORDERS = "PARALLEL_ORDERS";

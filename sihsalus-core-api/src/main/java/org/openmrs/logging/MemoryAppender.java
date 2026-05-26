@@ -71,7 +71,6 @@ public class MemoryAppender extends AbstractAppender {
   }
 
   @PluginFactory
-  @SuppressWarnings("unused")
   protected static MemoryAppender createAppender(
       @PluginAttribute("name") final String name,
       @PluginAttribute("bufferSize") final int bufferSize,

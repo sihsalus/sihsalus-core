@@ -54,7 +54,6 @@ import org.slf4j.LoggerFactory;
  */
 @Plugin(name = "OpenmrsConfigurationFactory", category = ConfigurationFactory.CATEGORY)
 @Order(10)
-@SuppressWarnings("unused")
 public class OpenmrsConfigurationFactory extends ConfigurationFactory {
 
   private static final org.slf4j.Logger log =

@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
     description = "Modifies an existing column on an existing table",
     priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "column")
-@SuppressWarnings("unused")
 public class ModifyColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
   private static final Logger log = LoggerFactory.getLogger(ModifyColumnChange.class);

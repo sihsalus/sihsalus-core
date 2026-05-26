@@ -18,7 +18,6 @@ import org.openmrs.module.reporting.report.ReportRequest;
 import org.openmrs.module.reporting.report.renderer.RenderingException;
 
 /** An abstract Web Renderer implementation that stubs all render methods. */
-@SuppressWarnings("unused")
 public abstract class AbstractWebReportRenderer implements WebReportRenderer {
 
   /**

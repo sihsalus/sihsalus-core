@@ -184,14 +184,16 @@ public class Importer implements Runnable {
             }
 
             if (oclResponse != null) {
-              importService.updateOclDateStarted(anImport, oclResponse.getUpdatedTo());
-              importService.updateSubscriptionUrl(anImport, subscription.getUrl());
-              in = new CountingInputStream(oclResponse.getContentStream());
-              totalBytesToProcess = oclResponse.getContentLength();
+              try (OclResponse response = oclResponse;
+                  CountingInputStream countingInputStream =
+                      new CountingInputStream(response.getContentStream())) {
+                importService.updateOclDateStarted(anImport, response.getUpdatedTo());
+                importService.updateSubscriptionUrl(anImport, subscription.getUrl());
+                in = countingInputStream;
+                totalBytesToProcess = response.getContentLength();
 
-              processInput();
-
-              in.close();
+                processInput();
+              }
             }
           }
         });
@@ -203,16 +205,16 @@ public class Importer implements Runnable {
         () ->
             runAndHandleErrors(
                 () -> {
-                  InputStream zipInputStream = Utils.extractExportInputStreamFromZip(zipPackage);
-                  try {
-                    in = new CountingInputStream(zipInputStream);
+                  try (InputStream zipInputStream =
+                          Utils.extractExportInputStreamFromZip(zipPackage);
+                      CountingInputStream countingInputStream =
+                          new CountingInputStream(zipInputStream)) {
+                    in = countingInputStream;
                     String subscriptionUrl =
                         Context.getAdministrationService()
                             .getGlobalProperty(OpenConceptLabConstants.GP_OCL_LOAD_AT_STARTUP_PATH);
                     importService.updateSubscriptionUrl(anImport, subscriptionUrl);
                     processInput();
-                  } finally {
-                    in.close();
                   }
                 }));
   }
