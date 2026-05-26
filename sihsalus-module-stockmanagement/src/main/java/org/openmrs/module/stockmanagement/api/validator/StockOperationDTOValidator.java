@@ -238,11 +238,16 @@ public class StockOperationDTOValidator implements Validator {
       return;
     }
     Result<StockOperationItemDTO> stockOperationItems = null;
+    List<StockOperationItemDTO> existingStockOperationItems = Collections.emptyList();
     if (object.getUuid() != null) {
       StockOperationItemSearchFilter itemsFilter = new StockOperationItemSearchFilter();
       itemsFilter.setStockOperationUuids(Arrays.asList(object.getUuid()));
       stockOperationItems = service.findStockOperationItems(itemsFilter);
-      if (!stockOperationItems.getData().stream()
+      existingStockOperationItems =
+          stockOperationItems == null || stockOperationItems.getData() == null
+              ? Collections.emptyList()
+              : stockOperationItems.getData();
+      if (!existingStockOperationItems.stream()
           .allMatch(
               p ->
                   object.getStockOperationItems().stream()
@@ -317,7 +322,7 @@ public class StockOperationDTOValidator implements Validator {
 
         if (!StringUtils.isBlank(stockOperationItemDTO.getUuid())) {
           Optional<StockOperationItemDTO> existingItemDto =
-              stockOperationItems.getData().stream()
+              existingStockOperationItems.stream()
                   .filter(p -> stockOperationItemDTO.getUuid().equals(p.getUuid()))
                   .findFirst();
           if (existingItemDto.isPresent() && existingItemDto.get().getHasExpiration()) {

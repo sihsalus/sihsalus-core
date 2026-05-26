@@ -471,10 +471,10 @@ public class StockItemImportJob {
     Map<String, StockSource> stockSources = new HashMap<>();
     Concept unknownConcept = null;
 
-    Map<Integer, List<StockItem>> stockItemsToUpdate = null;
-    Map<Integer, List<StockItemPackagingUOM>> stockItemPackagingUoms = null;
-    Map<Integer, StockItem> prevStockItemDrugs = null;
-    Map<Integer, StockItem> prevStockItemConcepts = null;
+    Map<Integer, List<StockItem>> stockItemsToUpdate = Collections.emptyMap();
+    Map<Integer, List<StockItemPackagingUOM>> stockItemPackagingUoms = Collections.emptyMap();
+    Map<Integer, StockItem> prevStockItemDrugs = new HashMap<>();
+    Map<Integer, StockItem> prevStockItemConcepts = new HashMap<>();
 
     if (!rowsToUpdate.isEmpty()) {
       stockItemsToUpdate =
@@ -525,11 +525,6 @@ public class StockItemImportJob {
                       .collect(Collectors.toList()))
               .stream()
               .collect(Collectors.groupingBy(p -> p.getStockItem().getId()));
-    }
-
-    if (!rowsToCreate.isEmpty()) {
-      prevStockItemDrugs = new HashMap<>();
-      prevStockItemConcepts = new HashMap<>();
     }
 
     for (Map.Entry<Integer, Object[]> recordToProcess : stockItems.entrySet()) {
@@ -649,7 +644,7 @@ public class StockItemImportJob {
         }
         List<StockItem> stockItemCollection =
             stockItemsToUpdate.getOrDefault(stockItemDto.get().getId(), null);
-        if (stockItemCollection != null) {
+        if (stockItemCollection != null && !stockItemCollection.isEmpty()) {
           stockItem = stockItemCollection.get(0);
         }
       }

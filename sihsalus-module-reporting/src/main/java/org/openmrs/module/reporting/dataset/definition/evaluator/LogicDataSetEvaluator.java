@@ -110,6 +110,9 @@ public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
         throw new ReportingException(
             "Logic Module did not return results for all patients in cohort");
       }
+      if (forPatient == null) {
+        forPatient = new ArrayList<Result>();
+      }
       DataSetRow row = new DataSetRow();
       for (int i = 0; i < def.getColumns().size(); ++i) {
         Column col = def.getColumns().get(i);
