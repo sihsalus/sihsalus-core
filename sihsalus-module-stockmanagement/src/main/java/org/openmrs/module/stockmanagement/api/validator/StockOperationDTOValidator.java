@@ -53,14 +53,12 @@ public class StockOperationDTOValidator implements Validator {
       object.setOperationTypeUuid(stockOperation.getStockOperationType().getUuid());
     }
 
-    if (object.getOperationTypeUuid() == null) {
-      if (StringUtils.isBlank(object.getOperationTypeUuid())) {
-        errors.rejectValue(
-            "operationTypeUuid",
-            messageSourceService.getMessage(
-                "stockmanagement.stockoperation.operationtypeuuidrequired"));
-        return;
-      }
+    if (StringUtils.isBlank(object.getOperationTypeUuid())) {
+      errors.rejectValue(
+          "operationTypeUuid",
+          messageSourceService.getMessage(
+              "stockmanagement.stockoperation.operationtypeuuidrequired"));
+      return;
     }
 
     if (object.getOperationDate() == null) {
@@ -137,11 +135,6 @@ public class StockOperationDTOValidator implements Validator {
           return;
         }
       }
-    } else if (object.getDestinationUuid() != null) {
-      errors.rejectValue(
-          "sourceUuid",
-          messageSourceService.getMessage("stockmanagement.stockoperation.sourcenotrequired"));
-      return;
     }
 
     if (stockOperationType.getHasDestination() != null && stockOperationType.getHasDestination()) {
@@ -226,15 +219,15 @@ public class StockOperationDTOValidator implements Validator {
 
     if (permissionLocation == null) {
       errors.rejectValue(
-          "operationTypeUuid",
-          messageSourceService.getMessage("stockmanagement.stockoperation.nopermission"));
+          "atLocationUuid",
+          messageSourceService.getMessage("stockmanagement.stockoperation.locationrequired"));
       return;
     }
 
     object.setAtLocationUuid(permissionLocation.getUuid());
     if (!stockOperationType.userCanProcess(Context.getAuthenticatedUser(), permissionLocation)) {
       errors.rejectValue(
-          "operationTypeUuid",
+          "atLocationUuid",
           messageSourceService.getMessage("stockmanagement.stockoperation.nopermission"));
       return;
     }
@@ -379,11 +372,12 @@ public class StockOperationDTOValidator implements Validator {
       }
 
       if (stockOperationItemDTO.getPurchasePrice() != null
-          && stockOperationItemDTO.getPurchasePrice().compareTo(zero) < -1) {
+          && stockOperationItemDTO.getPurchasePrice().compareTo(zero) < 0) {
         errors.rejectValue(
             "stockOperationItems",
             String.format(
-                messageSourceService.getMessage("stockmanagement.stockoperation.uomrequired"),
+                messageSourceService.getMessage(
+                    "stockmanagement.stockoperation.purchasepriceinvalid"),
                 index));
         return;
       }

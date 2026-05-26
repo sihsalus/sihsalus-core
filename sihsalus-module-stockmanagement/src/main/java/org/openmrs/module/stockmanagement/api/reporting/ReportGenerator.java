@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.dto.StockItemInventorySearchFilter;
-import org.openmrs.module.stockmanagement.api.dto.reporting.Fullfillment;
+import org.openmrs.module.stockmanagement.api.dto.reporting.Fulfillment;
 import org.openmrs.module.stockmanagement.api.dto.reporting.MostLeastMoving;
 import org.openmrs.module.stockmanagement.api.model.BatchJob;
 import org.openmrs.module.stockmanagement.api.model.BatchJobStatus;
@@ -271,7 +271,7 @@ public abstract class ReportGenerator {
     return null;
   }
 
-  public List<Fullfillment> getFullfillment(Properties properties) {
+  public List<Fulfillment> getFullfillment(Properties properties) {
     try {
       String key = "param." + ReportParameter.Fullfillment.name() + ".value";
       if (properties.containsKey(key)) {
@@ -281,9 +281,9 @@ public abstract class ReportGenerator {
           return null;
         }
         String[] values = value.split(",");
-        List<Fullfillment> fullfillments = new ArrayList<>();
+        List<Fulfillment> fullfillments = new ArrayList<>();
         for (String token : values) {
-          fullfillments.add(Fullfillment.valueOf(token));
+          fullfillments.add(Fulfillment.valueOf(token));
         }
         return fullfillments;
       }

@@ -106,7 +106,7 @@ public class XStreamSerializer implements OpenmrsSerializer {
        * use own-defined mapper to wrap xstream's default mapper,
        * The purpose:
        * (1) we can use the reasonable name for cglib and Hibernate's Collection
-       * (2) ignore unknow element while deserializing
+       * (2) ignore unknown element while deserializing
        */
       xstream =
           new XStream() {
@@ -146,12 +146,12 @@ public class XStreamSerializer implements OpenmrsSerializer {
     xstream.omitField(User.class, "log");
 
     /*
-     * alias className for all classses current need to serialize
+     * alias className for all classes current need to serialize
      */
     this.commonConfig();
 
     // CustomReflectionConverter to avoid the exception thrown when xstream deserialize a unknown
-    // elment
+    // element
     xstream.registerConverter(
         new CustomReflectionConverter(xstream.getMapper(), xstream.getReflectionProvider()),
         xstream.PRIORITY_LOW);

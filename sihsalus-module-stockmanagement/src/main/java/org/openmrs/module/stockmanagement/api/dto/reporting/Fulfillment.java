@@ -1,18 +1,18 @@
 package org.openmrs.module.stockmanagement.api.dto.reporting;
 
-public enum Fullfillment {
+public enum Fulfillment {
   All(),
   Full(),
   Partial(),
   None;
 
-  public static Fullfillment findByName(String name) {
+  public static Fulfillment findByName(String name) {
     return findInList(name, values());
   }
 
-  public static Fullfillment findInList(String name, Fullfillment[] parameterList) {
-    Fullfillment result = null;
-    for (Fullfillment enumValue : parameterList) {
+  public static Fulfillment findInList(String name, Fulfillment[] parameterList) {
+    Fulfillment result = null;
+    for (Fulfillment enumValue : parameterList) {
       if (enumValue.name().equalsIgnoreCase(name)) {
         result = enumValue;
         break;

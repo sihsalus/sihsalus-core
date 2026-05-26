@@ -1109,8 +1109,6 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
           // result is never null
           if (!result.isEmpty()) {
             return Optional.of(result);
-          } else {
-            return Optional.empty();
           }
         }
       }

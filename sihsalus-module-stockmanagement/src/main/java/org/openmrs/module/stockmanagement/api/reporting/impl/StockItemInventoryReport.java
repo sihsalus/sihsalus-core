@@ -1,6 +1,7 @@
 package org.openmrs.module.stockmanagement.api.reporting.impl;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -224,11 +225,17 @@ public class StockItemInventoryReport<T extends StockItemInventory> extends Repo
         String[] lineParts = inventoryLine.split(",", -1);
         StockItemInventory stockItemInventory = null;
         try {
-          stockItemInventory = getStockItemInventoryClass().newInstance();
+          stockItemInventory = getStockItemInventoryClass().getDeclaredConstructor().newInstance();
         } catch (InstantiationException e) {
           log.error(e.getMessage(), e);
           throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
+          log.error(e.getMessage(), e);
+          throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+          log.error(e.getMessage(), e);
+          throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
           log.error(e.getMessage(), e);
           throw new RuntimeException(e);
         }
@@ -370,10 +377,11 @@ public class StockItemInventoryReport<T extends StockItemInventory> extends Repo
     if (shouldStopExecution.apply(batchJob)) {
       return null;
     }
+    int bufferSize = stockInventoryResult.getData().size();
     writeRows(stockInventoryResult.getData(), includeBatchInfo, includeLocationInfo);
     stockInventoryResult.clearData();
     csvWriter.flush();
-    recordsProcessed += stockInventoryResult.getData().size();
+    recordsProcessed += bufferSize;
     updateExecutionState(
         batchJob,
         executionState,
@@ -454,7 +462,7 @@ public class StockItemInventoryReport<T extends StockItemInventory> extends Repo
             [13
                 + (includeBatchInfo ? 2 : 0)
                 + (includeLocationInfo ? 1 : 0)
-                + (includeConsumptionInfo() ? 4 : 0)];
+                + (includeConsumptionInfo() ? 5 : 0)];
     int columnIndex = 0;
     headers[columnIndex++] = messageSourceService.getMessage("stockmanagement.report.genericname");
     headers[columnIndex++] = messageSourceService.getMessage("stockmanagement.report.tradename");
