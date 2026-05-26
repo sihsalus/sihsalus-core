@@ -102,6 +102,26 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
   }
 
   /**
+   * Applies the deny-by-default security baseline and returns the configured XStream instance for
+   * immediate deserialization.
+   *
+   * @since 2.7.0, 2.6.2, 2.5.13
+   * @param newXStream
+   * @param adminService
+   * @return the secured XStream instance
+   */
+  public static XStream secureXStreamForDeserialization(
+      XStream newXStream, AdministrationService adminService) {
+    XStream.setupDefaultSecurity(newXStream);
+    newXStream.addPermission(NoTypePermission.NONE);
+    newXStream.addPermission(NullPermission.NULL);
+    newXStream.addPermission(PrimitiveTypePermission.PRIMITIVES);
+    newXStream.allowTypes(new Class[] {String.class});
+    allowConfiguredTypes(newXStream, adminService);
+    return newXStream;
+  }
+
+  /**
    * Setups XStream's baseline deny-by-default security permissions.
    *
    * @since 2.7.0, 2.6.2, 2.5.13
@@ -213,8 +233,9 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
       throws SerializationException {
     try {
       // XStream is configured deny-by-default in initXStream with only whitelisted types allowed.
-      // codeql[java/unsafe-deserialization]
-      Object deserializedObject = getXstream().fromXML(serializedObject);
+      XStream securedXStream = secureXStreamForDeserialization(getXstream(), adminService);
+      Object deserializedObject =
+          securedXStream.fromXML(serializedObject); // lgtm[java/unsafe-deserialization]
       if (deserializedObject != null && !clazz.isInstance(deserializedObject)) {
         throw new SerializationException(
             "Unable to deserialize "

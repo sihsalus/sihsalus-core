@@ -367,8 +367,10 @@ public class XStreamSerializer implements OpenmrsSerializer {
     try {
       // XStream is configured deny-by-default in initXStreamSecurity with only whitelisted types
       // allowed.
-      // codeql[java/unsafe-deserialization]
-      Object deserializedObject = xstream.fromXML(serializedObject);
+      XStream securedXStream =
+          SimpleXStreamSerializer.secureXStreamForDeserialization(xstream, adminService);
+      Object deserializedObject =
+          securedXStream.fromXML(serializedObject); // lgtm[java/unsafe-deserialization]
       if (deserializedObject != null && !clazz.isInstance(deserializedObject)) {
         throw new SerializationException(
             "Unable to deserialize "

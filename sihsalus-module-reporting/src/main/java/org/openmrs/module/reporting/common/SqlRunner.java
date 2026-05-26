@@ -122,8 +122,7 @@ public class SqlRunner {
           validateReadOnlyStatement(sqlStatement);
           // Report SQL is constrained to a single read-only statement or generated parameter
           // assignment before it reaches JDBC.
-          // codeql[java/sql-injection]
-          statement = connection.prepareStatement(sqlStatement);
+          statement = connection.prepareStatement(sqlStatement); // lgtm[java/sql-injection]
           log.debug("Executing: " + sqlStatement);
           boolean hasResultSet = statement.execute();
           ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
@@ -188,8 +187,7 @@ public class SqlRunner {
           validateReadOnlyStatement(sqlStatement);
           // Report SQL is constrained to a single read-only statement or generated parameter
           // assignment before it reaches JDBC.
-          // codeql[java/sql-injection]
-          statement = connection.prepareStatement(sqlStatement);
+          statement = connection.prepareStatement(sqlStatement); // lgtm[java/sql-injection]
           // If is the last statement set setFetchSize
           if (sqlStatement.equals(sqlStatements.get(sqlStatements.size() - 1))) {
             statement.setFetchSize(10);

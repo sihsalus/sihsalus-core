@@ -184,9 +184,9 @@ public class DatabaseUtil {
 
   private static void populateResultsFromSQLQuery(
       Connection conn, String sql, boolean dataManipulation, List<List<Object>> results) {
-    // SQL is either selectOnly/read-only validated above or explicitly invoked by SQL-level callers.
-    // codeql[java/sql-injection]
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+    // SQL is either selectOnly/read-only validated above or explicitly invoked by SQL-level
+    // callers.
+    try (PreparedStatement ps = conn.prepareStatement(sql)) { // lgtm[java/sql-injection]
       if (dataManipulation) {
         Integer i = ps.executeUpdate();
         List<Object> row = new ArrayList<>();
