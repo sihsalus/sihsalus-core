@@ -103,7 +103,7 @@ public class BillExemptionRuleResource
     Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
     BillExemption exemption = delegate.getBillingExemption();
     if (exemption != null && exemption.getRules() != null) {
-      exemption.getRules().remove(delegate);
+      exemption.removeRule(delegate);
       getService().save(exemption);
     }
   }

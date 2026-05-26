@@ -148,11 +148,18 @@ public class StockItemInventorySearchFilter {
   }
 
   public List<ItemGroupFilter> getItemGroupFilters() {
-    return itemGroupFilters;
+    return itemGroupFilters == null ? null : new ArrayList<>(itemGroupFilters);
   }
 
   public void setItemGroupFilters(List<ItemGroupFilter> itemGroupFilters) {
-    this.itemGroupFilters = itemGroupFilters;
+    this.itemGroupFilters = itemGroupFilters == null ? null : new ArrayList<>(itemGroupFilters);
+  }
+
+  public void addItemGroupFilter(ItemGroupFilter itemGroupFilter) {
+    if (itemGroupFilters == null) {
+      itemGroupFilters = new ArrayList<>();
+    }
+    itemGroupFilters.add(itemGroupFilter);
   }
 
   public InventoryGroupBy getInventoryGroupBy() {

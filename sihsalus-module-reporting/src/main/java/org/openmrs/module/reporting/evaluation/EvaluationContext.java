@@ -287,7 +287,6 @@ public class EvaluationContext implements PatientCalculationContext {
   /**
    * @return the contextValues
    */
-  @SuppressWarnings("java/internal-representation-exposure")
   public Map<String, Object> getContextValues() {
     if (contextValues == null) {
       contextValues = new HashMap<String, Object>();
@@ -310,7 +309,6 @@ public class EvaluationContext implements PatientCalculationContext {
   /**
    * @return the parameterValues
    */
-  @SuppressWarnings("java/internal-representation-exposure")
   public Map<String, Object> getParameterValues() {
     if (parameterValues == null) {
       parameterValues = new HashMap<String, Object>();

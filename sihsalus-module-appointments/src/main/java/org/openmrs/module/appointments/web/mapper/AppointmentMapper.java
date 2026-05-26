@@ -327,7 +327,7 @@ public class AppointmentMapper {
                   })
               .collect(Collectors.toList());
       if (!collect.isEmpty()) {
-        response.getExtensions().put("notificationResults", collect);
+        response.putExtension("notificationResults", collect);
       }
     }
     return response;

@@ -156,7 +156,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
         StockItemInventorySearchFilter.ItemGroupFilter itemGroupFilter =
             new StockItemInventorySearchFilter.ItemGroupFilter();
         itemGroupFilter.setStockItemId(stockItem.getId());
-        inventorySearchFilter.getItemGroupFilters().add(itemGroupFilter);
+        inventorySearchFilter.addItemGroupFilter(itemGroupFilter);
       }
 
       if (!StringUtils.isBlank(stockItemCategoryUuid)) {
@@ -245,7 +245,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
         int countOfSummed = 0;
         for (int linePartIndex = 3; linePartIndex < maxLinePartIndex; linePartIndex++) {
           BigDecimal consumed = new BigDecimal(lineParts[linePartIndex]);
-          stockItemInventory.getQuantityConsumed().add(consumed);
+          stockItemInventory.addQuantityConsumed(consumed);
           if (countOfSummed > 0 || consumed.compareTo(BigDecimal.ZERO) != 0) {
             countOfSummed++;
             sumConsumed = sumConsumed.add(consumed);
@@ -401,7 +401,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
       for (LocalDate forecastDate : dates) {
         datesToProcess--;
         if (forecastDate.isBefore(balanceStartDate)) {
-          forecast.getForecastBalances().add(balance);
+          forecast.addForecastBalance(balance);
         } else {
           // Check if we are in the balance month
           // if((forecastDate.getYear() == balanceStartDate.getYear()) && (forecastDate.getMonth()
@@ -440,10 +440,10 @@ public class StockExpiryForecastReport extends ReportGenerator {
               balance = BigDecimal.ZERO;
               balanceStartDate = expiration;
             }
-            forecast.getForecastBalances().add(balance);
+            forecast.addForecastBalance(balance);
             if (datesToProcess > 0) {
               while (datesToProcess > 0) {
-                forecast.getForecastBalances().add(balance);
+                forecast.addForecastBalance(balance);
                 datesToProcess--;
               }
             }
@@ -503,17 +503,17 @@ public class StockExpiryForecastReport extends ReportGenerator {
                           ? daysToAddOnStartDate.intValue()
                           : Integer.MAX_VALUE);
               balance = BigDecimal.ZERO;
-              forecast.getForecastBalances().add(balance);
+              forecast.addForecastBalance(balance);
               if (datesToProcess > 0) {
                 while (datesToProcess > 0) {
-                  forecast.getForecastBalances().add(balance);
+                  forecast.addForecastBalance(balance);
                   datesToProcess--;
                 }
               }
               break;
             } else {
               balance = tempBalance;
-              forecast.getForecastBalances().add(balance);
+              forecast.addForecastBalance(balance);
               balanceStartDate = balanceStartDate.withDayOfMonth(1).plusMonths(1);
             }
           }

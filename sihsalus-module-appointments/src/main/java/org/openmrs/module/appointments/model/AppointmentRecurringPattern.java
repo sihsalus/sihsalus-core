@@ -64,7 +64,6 @@ public class AppointmentRecurringPattern {
     this.daysOfWeek = daysOfWeek;
   }
 
-  @SuppressWarnings("java/internal-representation-exposure")
   public Set<Appointment> getAppointments() {
     return appointments;
   }

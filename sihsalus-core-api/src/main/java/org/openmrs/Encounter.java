@@ -590,7 +590,7 @@ public class Encounter extends BaseChangeableOpenmrsData {
    * @since 1.9.1
    */
   public Set<EncounterProvider> getEncounterProviders() {
-    return encounterProviders;
+    return encounterProviders == null ? null : new LinkedHashSet<>(encounterProviders);
   }
 
   /**
@@ -606,7 +606,8 @@ public class Encounter extends BaseChangeableOpenmrsData {
    * @since 1.9.1
    */
   public void setEncounterProviders(Set<EncounterProvider> encounterProviders) {
-    this.encounterProviders = encounterProviders;
+    this.encounterProviders =
+        encounterProviders == null ? null : new LinkedHashSet<>(encounterProviders);
   }
 
   /**
@@ -886,7 +887,7 @@ public class Encounter extends BaseChangeableOpenmrsData {
     for (EncounterProvider encounterProvider : getEncounterProviders()) {
       EncounterProvider encounterProviderCopy = encounterProvider.copy();
       encounterProviderCopy.setEncounter(target);
-      target.getEncounterProviders().add(encounterProviderCopy);
+      target.encounterProviders.add(encounterProviderCopy);
     }
 
     Context.getEncounterService().saveEncounter(target);

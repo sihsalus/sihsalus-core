@@ -54,7 +54,7 @@ public class ConceptNameSaveHandler implements SaveHandler<ConceptName> {
     if (conceptName.getTags() != null) {
       Collection<ConceptNameTag> replacementTags = new ArrayList<>();
 
-      Iterator<ConceptNameTag> tagsIt = conceptName.getTags().iterator();
+      Iterator<ConceptNameTag> tagsIt = new ArrayList<>(conceptName.getTags()).iterator();
       while (tagsIt.hasNext()) {
         ConceptNameTag tag = tagsIt.next();
 
@@ -63,14 +63,14 @@ public class ConceptNameSaveHandler implements SaveHandler<ConceptName> {
               Context.getConceptService().getConceptNameTagByName(tag.getTag());
 
           if (replacementTag != null) {
-            tagsIt.remove();
+            conceptName.removeTag(tag);
             replacementTags.add(replacementTag);
           }
         }
       }
 
       if (!replacementTags.isEmpty()) {
-        conceptName.getTags().addAll(replacementTags);
+        replacementTags.forEach(conceptName::addTag);
       }
     }
   }

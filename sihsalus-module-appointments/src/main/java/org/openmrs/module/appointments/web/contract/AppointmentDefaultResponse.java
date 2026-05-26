@@ -167,12 +167,18 @@ public class AppointmentDefaultResponse {
   }
 
   public void setExtensions(HashMap extensions) {
-    this.extensions = extensions;
+    this.extensions = extensions == null ? null : new HashMap(extensions);
   }
 
-  @SuppressWarnings("java/internal-representation-exposure")
   public HashMap getExtensions() {
-    return extensions;
+    return extensions == null ? null : new HashMap(extensions);
+  }
+
+  public void putExtension(Object key, Object value) {
+    if (extensions == null) {
+      extensions = new HashMap();
+    }
+    extensions.put(key, value);
   }
 
   public void setTeleconsultationLink(String teleconsultationLink) {

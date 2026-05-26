@@ -136,7 +136,6 @@ public class AppointmentServiceDefinition extends BaseOpenmrsData
     this.weeklyAvailability.addAll(availability);
   }
 
-  @SuppressWarnings("java/internal-representation-exposure")
   public Set<AppointmentServiceType> getServiceTypes(boolean includeVoided) {
     if (this.serviceTypes == null) {
       this.serviceTypes = new LinkedHashSet<>();
@@ -176,7 +175,6 @@ public class AppointmentServiceDefinition extends BaseOpenmrsData
     this.initialAppointmentStatus = initialAppointmentStatus;
   }
 
-  @SuppressWarnings("java/internal-representation-exposure")
   public Set<AppointmentServiceAttribute> getAttributes(boolean includeVoided) {
     if (this.attributes == null) {
       this.attributes = new LinkedHashSet<>();

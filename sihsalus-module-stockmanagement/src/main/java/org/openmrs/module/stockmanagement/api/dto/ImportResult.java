@@ -52,7 +52,6 @@ public class ImportResult {
     this.success = success;
   }
 
-  @SuppressWarnings("java/internal-representation-exposure")
   public List<String> getErrors() {
     return errors;
   }
