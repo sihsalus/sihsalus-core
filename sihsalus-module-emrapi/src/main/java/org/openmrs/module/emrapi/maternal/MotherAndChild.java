@@ -21,9 +21,7 @@ public class MotherAndChild {
 
   private Patient child;
 
-  @ToString.Exclude
-  private InpatientAdmission motherAdmission;
+  @ToString.Exclude private InpatientAdmission motherAdmission;
 
-  @ToString.Exclude
-  private InpatientAdmission childAdmission;
+  @ToString.Exclude private InpatientAdmission childAdmission;
 }

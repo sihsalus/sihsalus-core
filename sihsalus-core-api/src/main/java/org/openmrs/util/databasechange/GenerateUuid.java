@@ -139,17 +139,18 @@ public class GenerateUuid implements CustomTaskChange {
               idStatement = connection.createStatement();
               updateStatement = connection.prepareStatement(updateSql);
 
-              ResultSet ids = idStatement.executeQuery(idSql);
-              while (ids.next()) {
-                updateStatement.setObject(2, ids.getObject(1)); // set the primary key number
-                updateStatement.setString(
-                    1, UUID.randomUUID().toString()); // set the uuid for this row
-                updateStatement.executeUpdate();
+              try (ResultSet ids = idStatement.executeQuery(idSql)) {
+                while (ids.next()) {
+                  updateStatement.setObject(2, ids.getObject(1)); // set the primary key number
+                  updateStatement.setString(
+                      1, UUID.randomUUID().toString()); // set the uuid for this row
+                  updateStatement.executeUpdate();
 
-                transactionBatchSize++;
-                if (transactionBatchSize > TRANSACTION_BATCH_SIZE_LIMIT) {
-                  transactionBatchSize = 0;
-                  connection.commit();
+                  transactionBatchSize++;
+                  if (transactionBatchSize > TRANSACTION_BATCH_SIZE_LIMIT) {
+                    transactionBatchSize = 0;
+                    connection.commit();
+                  }
                 }
               }
 
