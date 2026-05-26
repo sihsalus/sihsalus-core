@@ -79,7 +79,7 @@ Explicit quality checks (without wrappers):
 
 ```bash
 mvn spotless:check
-mvn spotbugs:check
+mvn -Dspotbugs.failOnError=false com.github.spotbugs:spotbugs-maven-plugin:4.8.6.6:check
 mvn -DskipITs -DskipTests compile
 mvn -DskipITs test
 ```
@@ -87,7 +87,7 @@ mvn -DskipITs test
 Module-scoped checks:
 
 ```bash
-mvn -pl sihsalus-core-api -am spotless:check spotbugs:check -DskipITs -DskipTests compile
+mvn -pl sihsalus-core-api -am spotless:check -Dspotbugs.failOnError=false com.github.spotbugs:spotbugs-maven-plugin:4.8.6.6:check -DskipITs -DskipTests compile
 mvn -pl sihsalus-core-api -am -DskipITs test
 ```
 

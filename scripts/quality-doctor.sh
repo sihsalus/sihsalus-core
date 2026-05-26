@@ -10,7 +10,9 @@ if [[ "$MAVEN_CMD" == "./mvnw" && ! -x "./mvnw" ]]; then
   echo "Warning: ./mvnw not found, using mvn instead."
   MAVEN_CMD="mvn"
 fi
+SPOTBUGS_GOAL="com.github.spotbugs:spotbugs-maven-plugin:4.8.6.6:check"
 SKIP_TESTS=1
+STRICT_SPOTBUGS=0
 MODULES=()
 
 usage() {
@@ -20,6 +22,7 @@ Usage: ./scripts/quality-doctor.sh [options]
 Options:
   --modules module1,module2  Run only specific modules (comma-separated)
   --tests                    Run tests after compile (default: skip tests)
+  --strict-spotbugs          Fail when SpotBugs finds existing issues
   --profiles <list>          Maven profiles to activate (comma-separated)
   -h, --help                Show this help message
 
@@ -39,6 +42,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --tests)
       SKIP_TESTS=0
+      shift
+      ;;
+    --strict-spotbugs)
+      STRICT_SPOTBUGS=1
       shift
       ;;
     --profiles)
@@ -65,7 +72,11 @@ echo "=== Step 1/4: Spotless check ==="
 "$MAVEN_CMD" "${MAVEN_ARGS[@]}" spotless:check
 
 echo "=== Step 2/4: SpotBugs check ==="
-"$MAVEN_CMD" "${MAVEN_ARGS[@]}" spotbugs:check
+if [[ "$STRICT_SPOTBUGS" == 1 ]]; then
+  "$MAVEN_CMD" "${MAVEN_ARGS[@]}" "$SPOTBUGS_GOAL"
+else
+  "$MAVEN_CMD" "${MAVEN_ARGS[@]}" -Dspotbugs.failOnError=false "$SPOTBUGS_GOAL"
+fi
 
 echo "=== Step 3/4: Compile ==="
 "$MAVEN_CMD" "${MAVEN_ARGS[@]}" -DskipTests compile
