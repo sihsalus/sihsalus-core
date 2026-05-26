@@ -444,10 +444,6 @@ public class DatabaseUpdater {
           "Unable to get a connection to the database.  Please check your openmrs runtime properties file and make sure you have the correct connection.username and connection.password set",
           e);
     }
-    if (connection == null) {
-      throw new Exception("Unable to get a connection to the database.");
-    }
-
     if (cl == null) {
       cl = OpenmrsClassLoader.getInstance();
     }
