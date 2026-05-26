@@ -76,8 +76,6 @@ public interface ModuleActivator {
   }
 
   private static void ignore(Object... values) {
-    if (values.length == -1) {
-      throw new IllegalStateException();
-    }
+    values.getClass();
   }
 }
