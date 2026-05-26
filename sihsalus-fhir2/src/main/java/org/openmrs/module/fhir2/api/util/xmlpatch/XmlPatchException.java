@@ -10,14 +10,14 @@
 package org.openmrs.module.fhir2.api.util.xmlpatch;
 
 public class XmlPatchException extends RuntimeException {
-	
-	private static final long serialVersionUID = 1L;
-	
-	public XmlPatchException(String message) {
-		super(message);
-	}
-	
-	public XmlPatchException(String message, Throwable cause) {
-		super(message, cause);
-	}
+
+  private static final long serialVersionUID = 1L;
+
+  public XmlPatchException(String message) {
+    super(message);
+  }
+
+  public XmlPatchException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

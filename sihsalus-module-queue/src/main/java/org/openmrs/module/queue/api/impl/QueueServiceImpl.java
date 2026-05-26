@@ -10,11 +10,9 @@
 package org.openmrs.module.queue.api.impl;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.api.APIException;
@@ -29,82 +27,82 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.MODULE)
 public class QueueServiceImpl extends BaseOpenmrsService implements QueueService {
-	
-	private QueueDao dao;
-	
-	public void setDao(QueueDao dao) {
-		this.dao = dao;
-	}
-	
-	/**
-	 * @see org.openmrs.module.queue.api.QueueService#getQueueByUuid(String)
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<Queue> getQueueByUuid(@NotNull String queueUuid) {
-		return dao.get(queueUuid);
-	}
-	
-	/**
-	 * @see org.openmrs.module.queue.api.QueueService#getQueueById(Integer)
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<Queue> getQueueById(@NotNull Integer queueId) {
-		return dao.get(queueId);
-	}
-	
-	/**
-	 * @see org.openmrs.module.queue.api.QueueService#createQueue(Queue)
-	 */
-	@Override
-	public Queue createQueue(@NotNull Queue queue) {
-		return saveQueue(queue);
-	}
-	
-	/**
-	 * @see org.openmrs.module.queue.api.QueueService#saveQueue(Queue)
-	 */
-	@Override
-	public Queue saveQueue(@NotNull Queue queue) {
-		return dao.createOrUpdate(queue);
-	}
-	
-	/**
-	 * @see org.openmrs.module.queue.api.QueueService#getQueues(QueueSearchCriteria)
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public List<Queue> getQueues(@NotNull QueueSearchCriteria searchCriteria) {
-		return dao.getQueues(searchCriteria);
-	}
-	
-	/**
-	 * @see org.openmrs.module.queue.api.QueueService#getAllQueues()
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public List<Queue> getAllQueues() {
-		return dao.findAll();
-	}
-	
-	/**
-	 * @see org.openmrs.module.queue.api.QueueService#retireQueue(Queue, String)
-	 */
-	@Override
-	public void retireQueue(@NotNull Queue queue, String retireReason) {
-		queue.setRetired(true);
-		queue.setDateRetired(new Date());
-		queue.setRetireReason(retireReason);
-		queue.setRetiredBy(Context.getAuthenticatedUser());
-		dao.createOrUpdate(queue);
-	}
-	
-	/**
-	 * @see org.openmrs.module.queue.api.QueueService#purgeQueue(Queue)
-	 */
-	@Override
-	public void purgeQueue(Queue queue) throws APIException {
-		this.dao.delete(queue);
-	}
+
+  private QueueDao dao;
+
+  public void setDao(QueueDao dao) {
+    this.dao = dao;
+  }
+
+  /**
+   * @see org.openmrs.module.queue.api.QueueService#getQueueByUuid(String)
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<Queue> getQueueByUuid(@NotNull String queueUuid) {
+    return dao.get(queueUuid);
+  }
+
+  /**
+   * @see org.openmrs.module.queue.api.QueueService#getQueueById(Integer)
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<Queue> getQueueById(@NotNull Integer queueId) {
+    return dao.get(queueId);
+  }
+
+  /**
+   * @see org.openmrs.module.queue.api.QueueService#createQueue(Queue)
+   */
+  @Override
+  public Queue createQueue(@NotNull Queue queue) {
+    return saveQueue(queue);
+  }
+
+  /**
+   * @see org.openmrs.module.queue.api.QueueService#saveQueue(Queue)
+   */
+  @Override
+  public Queue saveQueue(@NotNull Queue queue) {
+    return dao.createOrUpdate(queue);
+  }
+
+  /**
+   * @see org.openmrs.module.queue.api.QueueService#getQueues(QueueSearchCriteria)
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<Queue> getQueues(@NotNull QueueSearchCriteria searchCriteria) {
+    return dao.getQueues(searchCriteria);
+  }
+
+  /**
+   * @see org.openmrs.module.queue.api.QueueService#getAllQueues()
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<Queue> getAllQueues() {
+    return dao.findAll();
+  }
+
+  /**
+   * @see org.openmrs.module.queue.api.QueueService#retireQueue(Queue, String)
+   */
+  @Override
+  public void retireQueue(@NotNull Queue queue, String retireReason) {
+    queue.setRetired(true);
+    queue.setDateRetired(new Date());
+    queue.setRetireReason(retireReason);
+    queue.setRetiredBy(Context.getAuthenticatedUser());
+    dao.createOrUpdate(queue);
+  }
+
+  /**
+   * @see org.openmrs.module.queue.api.QueueService#purgeQueue(Queue)
+   */
+  @Override
+  public void purgeQueue(Queue queue) throws APIException {
+    this.dao.delete(queue);
+  }
 }

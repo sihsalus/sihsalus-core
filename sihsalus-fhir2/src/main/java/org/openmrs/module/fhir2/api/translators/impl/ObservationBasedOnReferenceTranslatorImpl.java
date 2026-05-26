@@ -15,7 +15,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTra
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -29,46 +28,54 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ObservationBasedOnReferenceTranslatorImpl implements ObservationBasedOnReferenceTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirServiceRequestDao<TestOrder> serviceRequestDao;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirMedicationRequestDao medicationRequestDao;
-	
-	@Override
-	public Reference toFhirResource(@Nonnull Order order) {
-		if (order == null) {
-			return null;
-		}
-		
-		return createOrderReference(order);
-	}
-	
-	@Override
-	public Order toOpenmrsType(@Nonnull Reference reference) {
-		if (reference == null) {
-			return null;
-		}
-		
-		if (getReferenceType(reference)
-		        .map(ref -> !(ref.equals(FhirConstants.SERVICE_REQUEST) || ref.equals(FhirConstants.MEDICATION_REQUEST)))
-		        .orElse(true)) {
-			throw new IllegalArgumentException("Reference must be to a ServiceRequest or MedicationRequest");
-		}
-		
-		return getReferenceId(reference).map(uuid -> {
-			switch (reference.getType()) {
-				case FhirConstants.MEDICATION_REQUEST:
-					return medicationRequestDao.get(uuid);
-				case FhirConstants.SERVICE_REQUEST:
-					return serviceRequestDao.get(uuid);
-				default:
-					return null;
-			}
-		}).orElse(null);
-	}
+public class ObservationBasedOnReferenceTranslatorImpl
+    implements ObservationBasedOnReferenceTranslator {
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirServiceRequestDao<TestOrder> serviceRequestDao;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirMedicationRequestDao medicationRequestDao;
+
+  @Override
+  public Reference toFhirResource(@Nonnull Order order) {
+    if (order == null) {
+      return null;
+    }
+
+    return createOrderReference(order);
+  }
+
+  @Override
+  public Order toOpenmrsType(@Nonnull Reference reference) {
+    if (reference == null) {
+      return null;
+    }
+
+    if (getReferenceType(reference)
+        .map(
+            ref ->
+                !(ref.equals(FhirConstants.SERVICE_REQUEST)
+                    || ref.equals(FhirConstants.MEDICATION_REQUEST)))
+        .orElse(true)) {
+      throw new IllegalArgumentException(
+          "Reference must be to a ServiceRequest or MedicationRequest");
+    }
+
+    return getReferenceId(reference)
+        .map(
+            uuid -> {
+              switch (reference.getType()) {
+                case FhirConstants.MEDICATION_REQUEST:
+                  return medicationRequestDao.get(uuid);
+                case FhirConstants.SERVICE_REQUEST:
+                  return serviceRequestDao.get(uuid);
+                default:
+                  return null;
+              }
+            })
+        .orElse(null);
+  }
 }

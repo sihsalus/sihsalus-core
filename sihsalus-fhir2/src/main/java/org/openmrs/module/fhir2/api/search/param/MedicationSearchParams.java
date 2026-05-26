@@ -9,11 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.search.param;
 
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import java.util.HashSet;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,28 +23,34 @@ import org.openmrs.module.fhir2.FhirConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class MedicationSearchParams extends BaseResourceSearchParams {
-	
-	private TokenAndListParam code;
-	
-	private TokenAndListParam dosageForm;
-	
-	private TokenAndListParam ingredientCode;
-	
-	@Builder
-	public MedicationSearchParams(TokenAndListParam code, TokenAndListParam dosageForm, TokenAndListParam ingredientCode,
-	    TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> revIncludes) {
-		
-		super(id, lastUpdated, null, null, revIncludes);
-		
-		this.code = code;
-		this.dosageForm = dosageForm;
-		this.ingredientCode = ingredientCode;
-	}
-	
-	@Override
-	public SearchParameterMap toSearchParameterMap() {
-		return baseSearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, getCode())
-		        .addParameter(FhirConstants.DOSAGE_FORM_SEARCH_HANDLER, getDosageForm())
-		        .addParameter(FhirConstants.INGREDIENT_SEARCH_HANDLER, getIngredientCode());
-	}
+
+  private TokenAndListParam code;
+
+  private TokenAndListParam dosageForm;
+
+  private TokenAndListParam ingredientCode;
+
+  @Builder
+  public MedicationSearchParams(
+      TokenAndListParam code,
+      TokenAndListParam dosageForm,
+      TokenAndListParam ingredientCode,
+      TokenAndListParam id,
+      DateRangeParam lastUpdated,
+      HashSet<Include> revIncludes) {
+
+    super(id, lastUpdated, null, null, revIncludes);
+
+    this.code = code;
+    this.dosageForm = dosageForm;
+    this.ingredientCode = ingredientCode;
+  }
+
+  @Override
+  public SearchParameterMap toSearchParameterMap() {
+    return baseSearchParameterMap()
+        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, getCode())
+        .addParameter(FhirConstants.DOSAGE_FORM_SEARCH_HANDLER, getDosageForm())
+        .addParameter(FhirConstants.INGREDIENT_SEARCH_HANDLER, getIngredientCode());
+  }
 }

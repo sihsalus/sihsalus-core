@@ -1,144 +1,140 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.query;
-
-import org.openmrs.OpenmrsObject;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.openmrs.OpenmrsObject;
 
-/**
- * Encapsulates a set of OpenmrsObject ids
- */
+/** Encapsulates a set of OpenmrsObject ids */
 public abstract class BaseIdSet<T extends OpenmrsObject> implements IdSet<T> {
-	
-	//***** PROPERTIES *****
 
-    private Set<Integer> memberIds;
-    
-    //***** CONSTRUCTORS *****
-    
-    public BaseIdSet() {
-    	super();
+  // ***** PROPERTIES *****
+
+  private Set<Integer> memberIds;
+
+  // ***** CONSTRUCTORS *****
+
+  public BaseIdSet() {
+    super();
+  }
+
+  public BaseIdSet(Set<Integer> memberIds) {
+    this();
+    setMemberIds(memberIds);
+  }
+
+  public BaseIdSet(Integer... memberIds) {
+    this();
+    add(memberIds);
+  }
+
+  public void retainAll(IdSet<T> set) {
+    getMutableMemberIds().retainAll(set.getMemberIds());
+  }
+
+  public void retainAll(Collection<Integer> memberIds) {
+    getMutableMemberIds().retainAll(memberIds);
+  }
+
+  public void removeAll(IdSet<T> set) {
+    getMutableMemberIds().removeAll(set.getMemberIds());
+  }
+
+  public void removeAll(Collection<Integer> memberIds) {
+    getMutableMemberIds().removeAll(memberIds);
+  }
+
+  public void addAll(IdSet<T> set) {
+    getMutableMemberIds().addAll(set.getMemberIds());
+  }
+
+  // ***** PROPERTY ACCESS *****
+
+  /**
+   * @return the memberIds
+   */
+  public Set<Integer> getMemberIds() {
+    return Collections.unmodifiableSet(getMutableMemberIds());
+  }
+
+  private Set<Integer> getMutableMemberIds() {
+    if (memberIds == null) {
+      memberIds = new HashSet<Integer>();
     }
-    
-    public BaseIdSet(Set<Integer> memberIds) {
-		this();
-    	setMemberIds(memberIds);
+    return memberIds;
+  }
+
+  /**
+   * @param memberIds the memberIds to set
+   */
+  public void setMemberIds(Set<Integer> memberIds) {
+    this.memberIds = memberIds == null ? null : new HashSet<Integer>(memberIds);
+  }
+
+  /**
+   * @param memberIds to add to the Query
+   */
+  public void add(Integer... memberIds) {
+    for (Integer memberId : memberIds) {
+      getMutableMemberIds().add(memberId);
     }
-    
-    public BaseIdSet(Integer... memberIds) {
-		this();
-    	add(memberIds);
+  }
+
+  /**
+   * @param memberIds to add to the Query
+   */
+  public void addAll(Collection<Integer> memberIds) {
+    getMutableMemberIds().addAll(memberIds);
+  }
+
+  /**
+   * @see IdSet#contains(Integer)
+   */
+  public boolean contains(Integer memberId) {
+    return getMutableMemberIds().contains(memberId);
+  }
+
+  /**
+   * @see IdSet#getSize() ()
+   */
+  public int getSize() {
+    return getMutableMemberIds().size();
+  }
+
+  /**
+   * @see IdSet#isEmpty()
+   */
+  public boolean isEmpty() {
+    return getMutableMemberIds().isEmpty();
+  }
+
+  /**
+   * @see Object#clone()
+   */
+  @Override
+  @SuppressWarnings("unchecked")
+  public BaseIdSet<T> clone() {
+    try {
+      BaseIdSet<T> ret = this.getClass().newInstance();
+      ret.setMemberIds(new HashSet<Integer>(getMemberIds()));
+      return ret;
+    } catch (Exception e) {
+      throw new RuntimeException("Error while cloning an IdSet", e);
     }
+  }
 
-    public void retainAll(IdSet<T> set) {
-        getMutableMemberIds().retainAll(set.getMemberIds());
-    }
-
-	public void retainAll(Collection<Integer> memberIds) {
-		getMutableMemberIds().retainAll(memberIds);
-	}
-
-    public void removeAll(IdSet<T> set) {
-        getMutableMemberIds().removeAll(set.getMemberIds());
-    }
-
-	public void removeAll(Collection<Integer> memberIds) {
-		getMutableMemberIds().removeAll(memberIds);
-	}
-
-    public void addAll(IdSet<T> set) {
-        getMutableMemberIds().addAll(set.getMemberIds());
-    }
-
-    //***** PROPERTY ACCESS *****
-
-	/**
-	 * @return the memberIds
-	 */
-	public Set<Integer> getMemberIds() {
-		return Collections.unmodifiableSet(getMutableMemberIds());
-	}
-
-	private Set<Integer> getMutableMemberIds() {
-		if (memberIds == null) {
-			memberIds = new HashSet<Integer>();
-		}
-		return memberIds;
-	}
-
-	/**
-	 * @param memberIds the memberIds to set
-	 */
-	public void setMemberIds(Set<Integer> memberIds) {
-		this.memberIds = memberIds == null ? null : new HashSet<Integer>(memberIds);
-	}
-	
-	/**
-	 * @param memberIds to add to the Query
-	 */
-	public void add(Integer... memberIds) {
-		for (Integer memberId : memberIds) {
-			getMutableMemberIds().add(memberId);
-		}
-	}
-
-	/**
-	 * @param memberIds to add to the Query
-	 */
-	public void addAll(Collection<Integer> memberIds) {
-		getMutableMemberIds().addAll(memberIds);
-	}
-
-	/**
-	 * @see IdSet#contains(Integer)
-	 */
-	public boolean contains(Integer memberId) {
-		return getMutableMemberIds().contains(memberId);
-	}
-
-	/**
-	 * @see IdSet#getSize() ()
-	 */
-	public int getSize() {
-		return getMutableMemberIds().size();
-	}
-	
-	/**
-	 * @see IdSet#isEmpty()
-	 */
-	public boolean isEmpty() {
-		return getMutableMemberIds().isEmpty();
-	}
-
-	/**
-	 * @see Object#clone()
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public BaseIdSet<T> clone() {
-		try {
-			BaseIdSet<T> ret = this.getClass().newInstance();
-			ret.setMemberIds(new HashSet<Integer>(getMemberIds()));
-			return ret;
-		}
-		catch (Exception e) {
-			throw new RuntimeException("Error while cloning an IdSet", e);
-		}
-	}
-
-	@Override
-	public String toString() {
-		return getMutableMemberIds().toString();
-	}
+  @Override
+  public String toString() {
+    return getMutableMemberIds().toString();
+  }
 }

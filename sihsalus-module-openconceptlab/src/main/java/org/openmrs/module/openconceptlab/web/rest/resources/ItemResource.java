@@ -1,9 +1,14 @@
 package org.openmrs.module.openconceptlab.web.rest.resources;
 
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
+
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.DateProperty;
 import io.swagger.models.properties.StringProperty;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openconceptlab.Import;
 import org.openmrs.module.openconceptlab.ImportService;
@@ -25,138 +30,137 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubResour
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-
-import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
-
 @SubResource(
-        parent = ImportResource.class,
-        path = "item",
-        supportedClass = Item.class,
-        supportedOpenmrsVersions = { "1.8.* - 9.*" }
-)
-public class ItemResource extends DelegatingSubResource<Item, Import, ImportResource>{
+    parent = ImportResource.class,
+    path = "item",
+    supportedClass = Item.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.*"})
+public class ItemResource extends DelegatingSubResource<Item, Import, ImportResource> {
 
-    @Override
-    public Import getParent(Item instance) {
-        return instance.getAnImport();
-    }
+  @Override
+  public Import getParent(Item instance) {
+    return instance.getAnImport();
+  }
 
-    @Override
-    public void setParent(Item instance, Import parent) {
-        instance.setAnImport(parent);
-    }
+  @Override
+  public void setParent(Item instance, Import parent) {
+    instance.setAnImport(parent);
+  }
 
-    @Override
-    public PageableResult doGetAll(Import parent, RequestContext context) throws ResponseException {
-        requireManageConcepts();
-        ImportService importService = getImportService();
-        HashSet<ItemState> states = new HashSet<ItemState>();
-        Integer updateItemsCount = importService.getImportItemsCount(parent, states);
-        if (context.getStartIndex() >= updateItemsCount) {
-            return new AlreadyPaged<Item>(context, Collections.emptyList(), false, updateItemsCount.longValue());
-        }
-        List<Item> updateItems = importService.getImportItems(parent, context.getStartIndex(), context.getLimit(), states);
-        boolean hasMoreResults = context.getStartIndex() + context.getLimit() < updateItemsCount;
-        return new AlreadyPaged<Item>(context, updateItems, hasMoreResults, updateItemsCount.longValue());
+  @Override
+  public PageableResult doGetAll(Import parent, RequestContext context) throws ResponseException {
+    requireManageConcepts();
+    ImportService importService = getImportService();
+    HashSet<ItemState> states = new HashSet<ItemState>();
+    Integer updateItemsCount = importService.getImportItemsCount(parent, states);
+    if (context.getStartIndex() >= updateItemsCount) {
+      return new AlreadyPaged<Item>(
+          context, Collections.emptyList(), false, updateItemsCount.longValue());
     }
+    List<Item> updateItems =
+        importService.getImportItems(parent, context.getStartIndex(), context.getLimit(), states);
+    boolean hasMoreResults = context.getStartIndex() + context.getLimit() < updateItemsCount;
+    return new AlreadyPaged<Item>(
+        context, updateItems, hasMoreResults, updateItemsCount.longValue());
+  }
 
-    @Override
-    public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public Item getByUniqueId(String uuid) {
-        requireManageConcepts();
-        return getImportService().getItem(uuid);
-    }
+  @Override
+  public Item getByUniqueId(String uuid) {
+    requireManageConcepts();
+    return getImportService().getItem(uuid);
+  }
 
-    @Override
-    protected void delete(Item delegate, String reason, RequestContext context) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  protected void delete(Item delegate, String reason, RequestContext context)
+      throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public Item newDelegate() {
-        return new Item();
-    }
+  @Override
+  public Item newDelegate() {
+    return new Item();
+  }
 
-    @Override
-    public Item save(Item delegate) {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public Item save(Item delegate) {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public void purge(Item delegate, RequestContext context) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public void purge(Item delegate, RequestContext context) throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        if (rep instanceof DefaultRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("type");
-            description.addProperty("url");
-            description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
-            description.addSelfLink();
-            return description;
-        } else if (rep instanceof FullRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("type");
-            description.addProperty("url");
-            description.addProperty("state");
-            description.addProperty("hashedUrl");
-            description.addProperty("versionUrl");
-            description.addProperty("errorMessage");
-            description.addProperty("updatedOn");
-            description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
-            description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
-            description.addSelfLink();
-            return description;
-        } else if (rep instanceof RefRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("type");
-            description.addSelfLink();
-            return description;
-        }
-        return null;
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    if (rep instanceof DefaultRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("type");
+      description.addProperty("url");
+      description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
+      description.addSelfLink();
+      return description;
+    } else if (rep instanceof FullRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("type");
+      description.addProperty("url");
+      description.addProperty("state");
+      description.addProperty("hashedUrl");
+      description.addProperty("versionUrl");
+      description.addProperty("errorMessage");
+      description.addProperty("updatedOn");
+      description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
+      description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
+      description.addSelfLink();
+      return description;
+    } else if (rep instanceof RefRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("type");
+      description.addSelfLink();
+      return description;
     }
+    return null;
+  }
 
-    @Override
-    public Model getGETModel(Representation rep) {
-        ModelImpl model = (ModelImpl) super.getGETModel(rep);
-        if (rep instanceof DefaultRepresentation) {
-            model.property("uuid", new StringProperty().example("uuid"));
-            model.property("type", new EnumProperty(ItemType.class));
-            model.property("url", new StringProperty(StringProperty.Format.URL));
-        } else if (rep instanceof FullRepresentation) {
-            model.property("uuid", new StringProperty().example("uuid"));
-            model.property("type", new EnumProperty(ItemType.class));
-            model.property("url", new StringProperty(StringProperty.Format.URL));
-            model.property("state", new EnumProperty(ItemState.class));
-            model.property("hashedUrl", new StringProperty(StringProperty.Format.URL));
-            model.property("versionUrl", new StringProperty(StringProperty.Format.URL));
-            model.property("errorMessage", new StringProperty());
-            model.property("updatedOn", new DateProperty());
-        } else if (rep instanceof RefRepresentation) {
-            model.property("uuid", new StringProperty().example("uuid"));
-            model.property("type", new EnumProperty(ItemType.class));
-        }
-        return model;
+  @Override
+  public Model getGETModel(Representation rep) {
+    ModelImpl model = (ModelImpl) super.getGETModel(rep);
+    if (rep instanceof DefaultRepresentation) {
+      model.property("uuid", new StringProperty().example("uuid"));
+      model.property("type", new EnumProperty(ItemType.class));
+      model.property("url", new StringProperty(StringProperty.Format.URL));
+    } else if (rep instanceof FullRepresentation) {
+      model.property("uuid", new StringProperty().example("uuid"));
+      model.property("type", new EnumProperty(ItemType.class));
+      model.property("url", new StringProperty(StringProperty.Format.URL));
+      model.property("state", new EnumProperty(ItemState.class));
+      model.property("hashedUrl", new StringProperty(StringProperty.Format.URL));
+      model.property("versionUrl", new StringProperty(StringProperty.Format.URL));
+      model.property("errorMessage", new StringProperty());
+      model.property("updatedOn", new DateProperty());
+    } else if (rep instanceof RefRepresentation) {
+      model.property("uuid", new StringProperty().example("uuid"));
+      model.property("type", new EnumProperty(ItemType.class));
     }
+    return model;
+  }
 
-    private ImportService getImportService() {
-        return Context.getService(ImportService.class);
-    }
+  private ImportService getImportService() {
+    return Context.getService(ImportService.class);
+  }
 }

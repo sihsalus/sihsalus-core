@@ -12,7 +12,6 @@ package org.openmrs.module.queue.api.dao.impl;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.hibernate.SessionFactory;
 import org.openmrs.module.queue.api.dao.QueueDao;
 import org.openmrs.module.queue.api.search.QueueSearchCriteria;
@@ -21,18 +20,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 @SuppressWarnings("unchecked")
 public class QueueDaoImpl extends AbstractBaseQueueDaoImpl<Queue> implements QueueDao {
-	
-	public QueueDaoImpl(@Qualifier(value = "sessionFactory") SessionFactory sessionFactory) {
-		super(sessionFactory);
-	}
-	
-	@Override
-	public List<Queue> getQueues(QueueSearchCriteria searchCriteria) {
-		StringBuilder hql = new StringBuilder("select q from Queue q where 1 = 1");
-		Map<String, Object> parameters = new LinkedHashMap<>();
-		appendDeletedFilter(hql, "q", searchCriteria.isIncludeRetired());
-		limitByCollectionProperty(hql, parameters, "q.location", searchCriteria.getLocations());
-		limitByCollectionProperty(hql, parameters, "q.service", searchCriteria.getServices());
-		return list(hql.toString(), Queue.class, parameters);
-	}
+
+  public QueueDaoImpl(@Qualifier(value = "sessionFactory") SessionFactory sessionFactory) {
+    super(sessionFactory);
+  }
+
+  @Override
+  public List<Queue> getQueues(QueueSearchCriteria searchCriteria) {
+    StringBuilder hql = new StringBuilder("select q from Queue q where 1 = 1");
+    Map<String, Object> parameters = new LinkedHashMap<>();
+    appendDeletedFilter(hql, "q", searchCriteria.isIncludeRetired());
+    limitByCollectionProperty(hql, parameters, "q.location", searchCriteria.getLocations());
+    limitByCollectionProperty(hql, parameters, "q.service", searchCriteria.getServices());
+    return list(hql.toString(), Queue.class, parameters);
+  }
 }

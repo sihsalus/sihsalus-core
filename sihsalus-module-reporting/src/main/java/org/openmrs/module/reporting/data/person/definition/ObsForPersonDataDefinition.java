@@ -1,14 +1,17 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.person.definition;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import org.openmrs.Concept;
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
@@ -22,312 +25,289 @@ import org.openmrs.module.reporting.definition.configuration.ConfigurationProper
 import org.openmrs.module.reporting.definition.configuration.ConfigurationPropertyCachingStrategy;
 import org.openmrs.module.reporting.evaluation.caching.Caching;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-/**
- * Obs Data Definition
- */
-@Caching(strategy=ConfigurationPropertyCachingStrategy.class)
+/** Obs Data Definition */
+@Caching(strategy = ConfigurationPropertyCachingStrategy.class)
 @Localized("reporting.ObsForPersonDataDefinition")
 public class ObsForPersonDataDefinition extends BaseDataDefinition implements PersonDataDefinition {
-	
-	//***** PROPERTIES *****
-	
-	@ConfigurationProperty
-	private TimeQualifier which;
-	
-	@ConfigurationProperty(required=true)
-	private Concept question;
-	
-	@ConfigurationProperty(group="whichEncounter")
-	private List<EncounterType> encounterTypeList;
 
-	@ConfigurationProperty(group="whichEncounter")
-	private List<Location> locationList;
-	
-	@ConfigurationProperty(group="whichEncounter")
-	private List<Form> formList;
-	
-	@ConfigurationProperty
-	private Date onOrAfter;
-	
-	@ConfigurationProperty
-	private Date onOrBefore;
+  // ***** PROPERTIES *****
 
-    @ConfigurationProperty
-    private List<Concept> valueCodedList;
+  @ConfigurationProperty private TimeQualifier which;
 
-	@ConfigurationProperty
-    private Double valueNumericGreaterThan;
+  @ConfigurationProperty(required = true)
+  private Concept question;
 
-	@ConfigurationProperty
-    private Double valueNumericGreaterThanOrEqual;
+  @ConfigurationProperty(group = "whichEncounter")
+  private List<EncounterType> encounterTypeList;
 
-    @ConfigurationProperty
-    private Double valueNumericLessThan;
+  @ConfigurationProperty(group = "whichEncounter")
+  private List<Location> locationList;
 
-    @ConfigurationProperty
-    private Double valueNumericLessThanOrEqual;
+  @ConfigurationProperty(group = "whichEncounter")
+  private List<Form> formList;
 
-    @ConfigurationProperty
-    private Date valueDatetimeOrAfter;
+  @ConfigurationProperty private Date onOrAfter;
 
-    @ConfigurationProperty
-    private Date valueDatetimeOnOrBefore;
+  @ConfigurationProperty private Date onOrBefore;
 
-    @ConfigurationProperty
-    private Date createdOnOrAfter;
+  @ConfigurationProperty private List<Concept> valueCodedList;
 
-    @ConfigurationProperty
-    private Date createdOnOrBefore;
-	
-	//****** CONSTRUCTORS ******
-	
-	/**
-	 * Default Constructor
-	 */
-	public ObsForPersonDataDefinition() {
-		super();
-	}
-	
-	/**
-	 * Name only Constructor
-	 */
-	public ObsForPersonDataDefinition(String name) {
-		super(name);
-	}
-	
-	/**
-	 * Constructor to populate all properties only
-	 */
-	public ObsForPersonDataDefinition(String name, TimeQualifier which, Concept question, Date onOrBefore, Date onOrAfter) {
-		this(name);
-		this.which = which;
-		this.question = question;
-		this.onOrBefore = onOrBefore;
-		this.onOrAfter = onOrAfter;
-	}
-	
-	//***** INSTANCE METHODS *****
-	
-	/** 
-	 * @see DataDefinition#getDataType()
-	 */
-	public Class<?> getDataType() {
-		if (which == TimeQualifier.LAST || which == TimeQualifier.FIRST) {
-			return Obs.class;
-		}
-		return List.class;
-	}
-	
-	//****** PROPERTY ACCESS ******
+  @ConfigurationProperty private Double valueNumericGreaterThan;
 
-	/**
-	 * @return the which
-	 */
-	public TimeQualifier getWhich() {
-		return which;
-	}
+  @ConfigurationProperty private Double valueNumericGreaterThanOrEqual;
 
-	/**
-	 * @param which the which to set
-	 */
-	public void setWhich(TimeQualifier which) {
-		this.which = which;
-	}
-	
-	/**
-	 * @return the question
-	 */
-	public Concept getQuestion() {
-		return question;
-	}
+  @ConfigurationProperty private Double valueNumericLessThan;
 
-	/**
-	 * @param question the question to set
-	 */
-	public void setQuestion(Concept question) {
-		this.question = question;
-	}
-	
-	/**
-     * @return the encounterTypeList
-     */
-    public List<EncounterType> getEncounterTypeList() {
-    	return encounterTypeList;
+  @ConfigurationProperty private Double valueNumericLessThanOrEqual;
+
+  @ConfigurationProperty private Date valueDatetimeOrAfter;
+
+  @ConfigurationProperty private Date valueDatetimeOnOrBefore;
+
+  @ConfigurationProperty private Date createdOnOrAfter;
+
+  @ConfigurationProperty private Date createdOnOrBefore;
+
+  // ****** CONSTRUCTORS ******
+
+  /** Default Constructor */
+  public ObsForPersonDataDefinition() {
+    super();
+  }
+
+  /** Name only Constructor */
+  public ObsForPersonDataDefinition(String name) {
+    super(name);
+  }
+
+  /** Constructor to populate all properties only */
+  public ObsForPersonDataDefinition(
+      String name, TimeQualifier which, Concept question, Date onOrBefore, Date onOrAfter) {
+    this(name);
+    this.which = which;
+    this.question = question;
+    this.onOrBefore = onOrBefore;
+    this.onOrAfter = onOrAfter;
+  }
+
+  // ***** INSTANCE METHODS *****
+
+  /**
+   * @see DataDefinition#getDataType()
+   */
+  public Class<?> getDataType() {
+    if (which == TimeQualifier.LAST || which == TimeQualifier.FIRST) {
+      return Obs.class;
     }
+    return List.class;
+  }
 
-	/**
-     * @param encounterTypeList the encounterTypeList to set
-     */
-    public void setEncounterTypeList(List<EncounterType> encounterTypeList) {
-    	this.encounterTypeList = encounterTypeList;
+  // ****** PROPERTY ACCESS ******
+
+  /**
+   * @return the which
+   */
+  public TimeQualifier getWhich() {
+    return which;
+  }
+
+  /**
+   * @param which the which to set
+   */
+  public void setWhich(TimeQualifier which) {
+    this.which = which;
+  }
+
+  /**
+   * @return the question
+   */
+  public Concept getQuestion() {
+    return question;
+  }
+
+  /**
+   * @param question the question to set
+   */
+  public void setQuestion(Concept question) {
+    this.question = question;
+  }
+
+  /**
+   * @return the encounterTypeList
+   */
+  public List<EncounterType> getEncounterTypeList() {
+    return encounterTypeList;
+  }
+
+  /**
+   * @param encounterTypeList the encounterTypeList to set
+   */
+  public void setEncounterTypeList(List<EncounterType> encounterTypeList) {
+    this.encounterTypeList = encounterTypeList;
+  }
+
+  /**
+   * @param encounterType the encounter type to add to the list
+   */
+  public void addEncounterType(EncounterType encounterType) {
+    if (encounterTypeList == null) {
+      encounterTypeList = new ArrayList<EncounterType>();
     }
-	
-    /**
-     * @param encounterType the encounter type to add to the list
-     */
-    public void addEncounterType(EncounterType encounterType) {
-    	if (encounterTypeList == null) {
-    		encounterTypeList = new ArrayList<EncounterType>();
-    	}
-    	encounterTypeList.add(encounterType);
+    encounterTypeList.add(encounterType);
+  }
+
+  /**
+   * @return the locationList
+   */
+  public List<Location> getLocationList() {
+    return locationList;
+  }
+
+  /**
+   * @param locationList the locationList to set
+   */
+  public void setLocationList(List<Location> locationList) {
+    this.locationList = locationList;
+  }
+
+  /**
+   * @param location the location to add to the list
+   */
+  public void addLocation(Location location) {
+    if (locationList == null) {
+      locationList = new ArrayList<Location>();
     }
+    locationList.add(location);
+  }
 
-	/**
-	 * @return the locationList
-	 */
-	public List<Location> getLocationList() {
-		return locationList;
-	}
+  /**
+   * @return the formList
+   */
+  public List<Form> getFormList() {
+    return formList;
+  }
 
-	/**
-	 * @param locationList the locationList to set
-	 */
-	public void setLocationList(List<Location> locationList) {
-		this.locationList = locationList;
-	}
+  /**
+   * @param formList the formList to set
+   */
+  public void setFormList(List<Form> formList) {
+    this.formList = formList;
+  }
 
-	/**
-	 * @param location the location to add to the list
-	 */
-	public void addLocation(Location location) {
-		if (locationList == null) {
-			locationList = new ArrayList<Location>();
-		}
-		locationList.add(location);
-	}
-    
-	/**
-     * @return the formList
-     */
-    public List<Form> getFormList() {
-    	return formList;
+  /**
+   * @param Form the form to add to the list
+   */
+  public void addForm(Form Form) {
+    if (formList == null) {
+      formList = new ArrayList<Form>();
     }
-	
-    /**
-     * @param formList the formList to set
-     */
-    public void setFormList(List<Form> formList) {
-    	this.formList = formList;
+    formList.add(Form);
+  }
+
+  /**
+   * @return the onOrAfter
+   */
+  public Date getOnOrAfter() {
+    return onOrAfter;
+  }
+
+  /**
+   * @param onOrAfter the onOrAfter to set
+   */
+  public void setOnOrAfter(Date onOrAfter) {
+    this.onOrAfter = onOrAfter;
+  }
+
+  /**
+   * @return the onOrBefore
+   */
+  public Date getOnOrBefore() {
+    return onOrBefore;
+  }
+
+  public List<Concept> getValueCodedList() {
+    return valueCodedList;
+  }
+
+  public void setValueCodedList(List<Concept> valueCodedList) {
+    this.valueCodedList = valueCodedList;
+  }
+
+  public void addValueCoded(Concept valueCoded) {
+    if (valueCodedList == null) {
+      valueCodedList = new ArrayList<Concept>();
     }
-    
-    /**
-     * @param Form the form to add to the list
-     */
-    public void addForm(Form Form) {
-    	if (formList == null) {
-    		formList = new ArrayList<Form>();
-    	}
-    	formList.add(Form);
-    }
+    valueCodedList.add(valueCoded);
+  }
 
-	/**
-	 * @return the onOrAfter
-	 */
-	public Date getOnOrAfter() {
-		return onOrAfter;
-	}
+  public Double getValueNumericGreaterThan() {
+    return valueNumericGreaterThan;
+  }
 
-	/**
-	 * @param onOrAfter the onOrAfter to set
-	 */
-	public void setOnOrAfter(Date onOrAfter) {
-		this.onOrAfter = onOrAfter;
-	}
+  public void setValueNumericGreaterThan(Double valueNumericGreaterThan) {
+    this.valueNumericGreaterThan = valueNumericGreaterThan;
+  }
 
-	/**
-	 * @return the onOrBefore
-	 */
-	public Date getOnOrBefore() {
-		return onOrBefore;
-	}
+  public Double getValueNumericGreaterThanOrEqual() {
+    return valueNumericGreaterThanOrEqual;
+  }
 
-    public List<Concept> getValueCodedList() {
-        return valueCodedList;
-    }
+  public void setValueNumericGreaterThanOrEqual(Double valueNumericGreaterThanOrEqual) {
+    this.valueNumericGreaterThanOrEqual = valueNumericGreaterThanOrEqual;
+  }
 
-    public void setValueCodedList(List<Concept> valueCodedList) {
-        this.valueCodedList = valueCodedList;
-    }
+  public Double getValueNumericLessThan() {
+    return valueNumericLessThan;
+  }
 
-    public void addValueCoded(Concept valueCoded) {
-        if (valueCodedList == null) {
-            valueCodedList = new ArrayList<Concept>();
-        }
-        valueCodedList.add(valueCoded);
-    }
+  public void setValueNumericLessThan(Double valueNumericLessThan) {
+    this.valueNumericLessThan = valueNumericLessThan;
+  }
 
-    public Double getValueNumericGreaterThan() {
-        return valueNumericGreaterThan;
-    }
+  public Double getValueNumericLessThanOrEqual() {
+    return valueNumericLessThanOrEqual;
+  }
 
-    public void setValueNumericGreaterThan(Double valueNumericGreaterThan) {
-        this.valueNumericGreaterThan = valueNumericGreaterThan;
-    }
+  public void setValueNumericLessThanOrEqual(Double valueNumericLessThanOrEqual) {
+    this.valueNumericLessThanOrEqual = valueNumericLessThanOrEqual;
+  }
 
-    public Double getValueNumericGreaterThanOrEqual() {
-        return valueNumericGreaterThanOrEqual;
-    }
+  /**
+   * @param onOrBefore the onOrBefore to set
+   */
+  public void setOnOrBefore(Date onOrBefore) {
+    this.onOrBefore = onOrBefore;
+  }
 
-    public void setValueNumericGreaterThanOrEqual(Double valueNumericGreaterThanOrEqual) {
-        this.valueNumericGreaterThanOrEqual = valueNumericGreaterThanOrEqual;
-    }
+  public Date getValueDatetimeOrAfter() {
+    return valueDatetimeOrAfter;
+  }
 
-    public Double getValueNumericLessThan() {
-        return valueNumericLessThan;
-    }
+  public void setValueDatetimeOrAfter(Date valueDatetimeOrAfter) {
+    this.valueDatetimeOrAfter = valueDatetimeOrAfter;
+  }
 
-    public void setValueNumericLessThan(Double valueNumericLessThan) {
-        this.valueNumericLessThan = valueNumericLessThan;
-    }
+  public Date getValueDatetimeOnOrBefore() {
+    return valueDatetimeOnOrBefore;
+  }
 
-    public Double getValueNumericLessThanOrEqual() {
-        return valueNumericLessThanOrEqual;
-    }
+  public void setValueDatetimeOnOrBefore(Date valueDatetimeOnOrBefore) {
+    this.valueDatetimeOnOrBefore = valueDatetimeOnOrBefore;
+  }
 
-    public void setValueNumericLessThanOrEqual(Double valueNumericLessThanOrEqual) {
-        this.valueNumericLessThanOrEqual = valueNumericLessThanOrEqual;
-    }
+  public Date getCreatedOnOrAfter() {
+    return createdOnOrAfter;
+  }
 
-    /**
-	 * @param onOrBefore the onOrBefore to set
-	 */
-	public void setOnOrBefore(Date onOrBefore) {
-		this.onOrBefore = onOrBefore;
-	}
+  public void setCreatedOnOrAfter(Date createdOnOrAfter) {
+    this.createdOnOrAfter = createdOnOrAfter;
+  }
 
-    public Date getValueDatetimeOrAfter() {
-        return valueDatetimeOrAfter;
-    }
+  public Date getCreatedOnOrBefore() {
+    return createdOnOrBefore;
+  }
 
-    public void setValueDatetimeOrAfter(Date valueDatetimeOrAfter) {
-        this.valueDatetimeOrAfter = valueDatetimeOrAfter;
-    }
-
-    public Date getValueDatetimeOnOrBefore() {
-        return valueDatetimeOnOrBefore;
-    }
-
-    public void setValueDatetimeOnOrBefore(Date valueDatetimeOnOrBefore) {
-        this.valueDatetimeOnOrBefore = valueDatetimeOnOrBefore;
-    }
-
-    public Date getCreatedOnOrAfter() {
-        return createdOnOrAfter;
-    }
-
-    public void setCreatedOnOrAfter(Date createdOnOrAfter) {
-        this.createdOnOrAfter = createdOnOrAfter;
-    }
-
-    public Date getCreatedOnOrBefore() {
-        return createdOnOrBefore;
-    }
-
-    public void setCreatedOnOrBefore(Date createdOnOrBefore) {
-        this.createdOnOrBefore = createdOnOrBefore;
-    }
+  public void setCreatedOnOrBefore(Date createdOnOrBefore) {
+    this.createdOnOrBefore = createdOnOrBefore;
+  }
 }

@@ -4,41 +4,40 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties
 public class AppointmentServiceSearchParams {
-    private String locationUuid;
-    private String specialityUuid;
-    private Boolean includeVoided = false;
-    private Integer limit = 100;
+  private String locationUuid;
+  private String specialityUuid;
+  private Boolean includeVoided = false;
+  private Integer limit = 100;
 
-    public String getLocationUuid() {
-        return locationUuid;
-    }
+  public String getLocationUuid() {
+    return locationUuid;
+  }
 
-    public void setLocationUuid(String locationUuid) {
-        this.locationUuid = locationUuid;
-    }
+  public void setLocationUuid(String locationUuid) {
+    this.locationUuid = locationUuid;
+  }
 
-    public String getSpecialityUuid() {
-        return specialityUuid;
-    }
+  public String getSpecialityUuid() {
+    return specialityUuid;
+  }
 
-    public void setSpecialityUuid(String specialityUuid) {
-        this.specialityUuid = specialityUuid;
-    }
+  public void setSpecialityUuid(String specialityUuid) {
+    this.specialityUuid = specialityUuid;
+  }
 
-    public Boolean getIncludeVoided() {
-        return includeVoided;
-    }
+  public Boolean getIncludeVoided() {
+    return includeVoided;
+  }
 
-    public void setIncludeVoided(Boolean includeVoided) {
-        this.includeVoided = includeVoided;
-    }
+  public void setIncludeVoided(Boolean includeVoided) {
+    this.includeVoided = includeVoided;
+  }
 
+  public Integer getLimit() {
+    return limit;
+  }
 
-    public Integer getLimit() {
-        return limit;
-    }
-
-    public void setLimit(Integer limit) {
-        this.limit = limit;
-    }
+  public void setLimit(Integer limit) {
+    this.limit = limit;
+  }
 }

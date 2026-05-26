@@ -1,13 +1,11 @@
 package org.openmrs.module.htmlwidgets.web.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.htmlwidgets.service.HtmlWidgetsService;
@@ -18,31 +16,33 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class UserSearchController {
-    
-    /**
-     * User Search
-     */
-    @RequestMapping("/module/htmlwidgets/userSearch.form")
-    public void userSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response, 
-    				@RequestParam(required=false, value="roles") String roles,
-		    		@RequestParam(required=true, value="q") String query) throws Exception {
-    	
-    	response.setContentType("text/plain");
-    	response.setCharacterEncoding("UTF-8");
-    	PrintWriter out = response.getWriter();
-    	
-		List<String> roleList = null;
-		if (StringUtils.isNotEmpty(roles)) {
-			roleList = new ArrayList<String>();
-			for (String roleName : roles.split(",")) {
-				roleList.add(roleName);
-			}
-			
-		}
-		StringBuilder ret = new StringBuilder();
-		for (Map.Entry<Integer, String> entry : Context.getService(HtmlWidgetsService.class).getUserNamesById(query, roleList).entrySet()) {
-			ret.append((ret.length() > 0 ? "\n" : "") + entry.getValue() + "|" + entry.getKey());
-		}
-		out.print(ret.toString());
+
+  /** User Search */
+  @RequestMapping("/module/htmlwidgets/userSearch.form")
+  public void userSearch(
+      ModelMap model,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      @RequestParam(required = false, value = "roles") String roles,
+      @RequestParam(required = true, value = "q") String query)
+      throws Exception {
+
+    response.setContentType("text/plain");
+    response.setCharacterEncoding("UTF-8");
+    PrintWriter out = response.getWriter();
+
+    List<String> roleList = null;
+    if (StringUtils.isNotEmpty(roles)) {
+      roleList = new ArrayList<String>();
+      for (String roleName : roles.split(",")) {
+        roleList.add(roleName);
+      }
     }
+    StringBuilder ret = new StringBuilder();
+    for (Map.Entry<Integer, String> entry :
+        Context.getService(HtmlWidgetsService.class).getUserNamesById(query, roleList).entrySet()) {
+      ret.append((ret.length() > 0 ? "\n" : "") + entry.getValue() + "|" + entry.getKey());
+    }
+    out.print(ret.toString());
+  }
 }

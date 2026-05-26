@@ -13,32 +13,23 @@
  */
 package org.openmrs.module.stockmanagement.api.model;
 
-import java.util.Date;
-
-/**
- * The allowable {@link StockOperation} statuses.
- */
+/** The allowable {@link StockOperation} statuses. */
 public enum BatchJobType {
-	/**
-	 * The batch job is for generating a report.
-	 */
-	Report(),
-	/**
-	 * Other batch job.
-	 */
-	Other();
-	
-	BatchJobType() {
-	}
-	
-	public static BatchJobType findByName(String name) {
-		BatchJobType result = null;
-		for (BatchJobType batchJobType : values()) {
-			if (batchJobType.name().equalsIgnoreCase(name)) {
-				result = batchJobType;
-				break;
-			}
-		}
-		return result;
-	}
+  /** The batch job is for generating a report. */
+  Report(),
+  /** Other batch job. */
+  Other();
+
+  BatchJobType() {}
+
+  public static BatchJobType findByName(String name) {
+    BatchJobType result = null;
+    for (BatchJobType batchJobType : values()) {
+      if (batchJobType.name().equalsIgnoreCase(name)) {
+        result = batchJobType;
+        break;
+      }
+    }
+    return result;
+  }
 }

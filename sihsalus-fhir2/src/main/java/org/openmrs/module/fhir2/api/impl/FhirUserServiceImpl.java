@@ -26,26 +26,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirUserServiceImpl extends BaseFhirService<Practitioner, User> implements FhirUserService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirUserDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PractitionerTranslator<User> translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<Practitioner> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>, SearchQueryInclude<Practitioner>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForUsers(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
-	}
+public class FhirUserServiceImpl extends BaseFhirService<Practitioner, User>
+    implements FhirUserService {
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirUserDao dao;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PractitionerTranslator<User> translator;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQueryInclude<Practitioner> searchQueryInclude;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQuery<
+          User,
+          Practitioner,
+          FhirUserDao,
+          PractitionerTranslator<User>,
+          SearchQueryInclude<Practitioner>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForUsers(SearchParameterMap theParams) {
+    return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+  }
 }

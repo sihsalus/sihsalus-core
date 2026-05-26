@@ -11,10 +11,6 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import static lombok.AccessLevel.PACKAGE;
 
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -35,6 +31,8 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.HashSet;
+import javax.annotation.Nonnull;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -56,78 +54,113 @@ import org.springframework.stereotype.Component;
 @Component("medicationDispenseFhirR3ResourceProvider")
 @R3Provider
 public class MedicationDispenseFhirResourceProvider implements IResourceProvider {
-	
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirMedicationDispenseService fhirMedicationDispenseService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return MedicationDispense.class;
-	}
-	
-	@Read
-	public MedicationDispense getMedicationDispenseByUuid(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.MedicationDispense r4Obj = fhirMedicationDispenseService.get(id.getIdPart());
-		if (r4Obj == null) {
-			throw new ResourceNotFoundException("Could not find medicationDispense with Id " + id.getIdPart());
-		}
-		return (MedicationDispense) VersionConvertorFactory_30_40.convertResource(r4Obj);
-	}
-	
-	@Create
-	public MethodOutcome createMedicationDispense(@ResourceParam MedicationDispense mDispense) {
-		org.hl7.fhir.r4.model.MedicationDispense r4Obj = fhirMedicationDispenseService
-		        .create((org.hl7.fhir.r4.model.MedicationDispense) VersionConvertorFactory_30_40.convertResource(mDispense));
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(r4Obj));
-	}
-	
-	@Update
-	public MethodOutcome updateMedicationDispense(@IdParam IdType id, @ResourceParam MedicationDispense mDispense) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update resource");
-		}
-		mDispense.setId(id.getIdPart());
-		org.hl7.fhir.r4.model.MedicationDispense r4Obj = fhirMedicationDispenseService.update(id.getIdPart(),
-		    (org.hl7.fhir.r4.model.MedicationDispense) VersionConvertorFactory_30_40.convertResource(mDispense));
-		return FhirProviderUtils.buildUpdate(r4Obj);
-	}
-	
-	@Delete
-	public OperationOutcome deleteMedicationDispense(@IdParam IdType id) {
-		fhirMedicationDispenseService.delete(id.getIdPart());
-		return FhirProviderUtils.buildDeleteR3();
-	}
-	
-	@Search
-	public IBundleProvider searchForMedicationDispenses(
-	        @OptionalParam(name = MedicationDispense.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = MedicationDispense.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
-	        @OptionalParam(name = MedicationDispense.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
-	        @OptionalParam(name = MedicationDispense.SP_CONTEXT, chainWhitelist = {
-	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
-	        @OptionalParam(name = MedicationDispense.SP_PRESCRIPTION, chainWhitelist = {
-	                "" }, targetTypes = MedicationRequest.class) ReferenceAndListParam medicationRequestReference,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
-	        @IncludeParam(allow = { "MedicationDispense:" + MedicationDispense.SP_PATIENT,
-	                "MedicationDispense:" + MedicationDispense.SP_CONTEXT,
-	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION,
-	                "MedicationDispense:" + MedicationDispense.SP_MEDICATION,
-	                "MedicationDispense:" + MedicationDispense.SP_PERFORMER }) HashSet<Include> includes,
-	        @Sort SortSpec sort) {
-		
-		MedicationDispenseSearchParams params = new MedicationDispenseSearchParams();
-		params.setId(id);
-		params.setPatient(patientReference == null ? subjectReference : patientReference);
-		params.setEncounter(encounterReference);
-		params.setMedicationRequest(medicationRequestReference);
-		params.setLastUpdated(lastUpdated);
-		params.setIncludes(CollectionUtils.isEmpty(includes) ? null : includes);
-		params.setSort(sort);
-		
-		return new SearchQueryBundleProviderR3Wrapper(fhirMedicationDispenseService.searchMedicationDispenses(params));
-	}
+
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirMedicationDispenseService fhirMedicationDispenseService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return MedicationDispense.class;
+  }
+
+  @Read
+  public MedicationDispense getMedicationDispenseByUuid(@IdParam @Nonnull IdType id) {
+    org.hl7.fhir.r4.model.MedicationDispense r4Obj =
+        fhirMedicationDispenseService.get(id.getIdPart());
+    if (r4Obj == null) {
+      throw new ResourceNotFoundException(
+          "Could not find medicationDispense with Id " + id.getIdPart());
+    }
+    return (MedicationDispense) VersionConvertorFactory_30_40.convertResource(r4Obj);
+  }
+
+  @Create
+  public MethodOutcome createMedicationDispense(@ResourceParam MedicationDispense mDispense) {
+    org.hl7.fhir.r4.model.MedicationDispense r4Obj =
+        fhirMedicationDispenseService.create(
+            (org.hl7.fhir.r4.model.MedicationDispense)
+                VersionConvertorFactory_30_40.convertResource(mDispense));
+    return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(r4Obj));
+  }
+
+  @Update
+  public MethodOutcome updateMedicationDispense(
+      @IdParam IdType id, @ResourceParam MedicationDispense mDispense) {
+    if (id == null || id.getIdPart() == null) {
+      throw new InvalidRequestException("id must be specified to update resource");
+    }
+    mDispense.setId(id.getIdPart());
+    org.hl7.fhir.r4.model.MedicationDispense r4Obj =
+        fhirMedicationDispenseService.update(
+            id.getIdPart(),
+            (org.hl7.fhir.r4.model.MedicationDispense)
+                VersionConvertorFactory_30_40.convertResource(mDispense));
+    return FhirProviderUtils.buildUpdate(r4Obj);
+  }
+
+  @Delete
+  public OperationOutcome deleteMedicationDispense(@IdParam IdType id) {
+    fhirMedicationDispenseService.delete(id.getIdPart());
+    return FhirProviderUtils.buildDeleteR3();
+  }
+
+  @Search
+  public IBundleProvider searchForMedicationDispenses(
+      @OptionalParam(name = MedicationDispense.SP_RES_ID) TokenAndListParam id,
+      @OptionalParam(
+              name = MedicationDispense.SP_PATIENT,
+              chainWhitelist = {
+                "",
+                Patient.SP_IDENTIFIER,
+                Patient.SP_GIVEN,
+                Patient.SP_FAMILY,
+                Patient.SP_NAME
+              },
+              targetTypes = Patient.class)
+          ReferenceAndListParam patientReference,
+      @OptionalParam(
+              name = MedicationDispense.SP_SUBJECT,
+              chainWhitelist = {
+                "",
+                Patient.SP_IDENTIFIER,
+                Patient.SP_GIVEN,
+                Patient.SP_FAMILY,
+                Patient.SP_NAME
+              },
+              targetTypes = Patient.class)
+          ReferenceAndListParam subjectReference,
+      @OptionalParam(
+              name = MedicationDispense.SP_CONTEXT,
+              chainWhitelist = {""},
+              targetTypes = Encounter.class)
+          ReferenceAndListParam encounterReference,
+      @OptionalParam(
+              name = MedicationDispense.SP_PRESCRIPTION,
+              chainWhitelist = {""},
+              targetTypes = MedicationRequest.class)
+          ReferenceAndListParam medicationRequestReference,
+      @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+      @IncludeParam(
+              allow = {
+                "MedicationDispense:" + MedicationDispense.SP_PATIENT,
+                "MedicationDispense:" + MedicationDispense.SP_CONTEXT,
+                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION,
+                "MedicationDispense:" + MedicationDispense.SP_MEDICATION,
+                "MedicationDispense:" + MedicationDispense.SP_PERFORMER
+              })
+          HashSet<Include> includes,
+      @Sort SortSpec sort) {
+
+    MedicationDispenseSearchParams params = new MedicationDispenseSearchParams();
+    params.setId(id);
+    params.setPatient(patientReference == null ? subjectReference : patientReference);
+    params.setEncounter(encounterReference);
+    params.setMedicationRequest(medicationRequestReference);
+    params.setLastUpdated(lastUpdated);
+    params.setIncludes(CollectionUtils.isEmpty(includes) ? null : includes);
+    params.setSort(sort);
+
+    return new SearchQueryBundleProviderR3Wrapper(
+        fhirMedicationDispenseService.searchMedicationDispenses(params));
+  }
 }

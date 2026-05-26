@@ -9,16 +9,16 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 
 public interface FhirMedicationRequestService extends FhirService<MedicationRequest> {
-	
-	@Override
-	MedicationRequest get(@Nonnull String uuid);
-	
-	IBundleProvider searchForMedicationRequests(MedicationRequestSearchParams medicationRequestSearchParams);
+
+  @Override
+  MedicationRequest get(@Nonnull String uuid);
+
+  IBundleProvider searchForMedicationRequests(
+      MedicationRequestSearchParams medicationRequestSearchParams);
 }

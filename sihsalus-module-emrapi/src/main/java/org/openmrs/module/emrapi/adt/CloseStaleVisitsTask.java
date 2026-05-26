@@ -16,10 +16,9 @@ import org.openmrs.scheduler.tasks.AbstractTask;
  * @see org.openmrs.module.emrapi.adt.AdtService#closeInactiveVisits()
  */
 public class CloseStaleVisitsTask extends AbstractTask {
-	
-	@Override
-	public void execute() {
-		Context.getService(AdtService.class).closeInactiveVisits();
-	}
-	
+
+  @Override
+  public void execute() {
+    Context.getService(AdtService.class).closeInactiveVisits();
+  }
 }

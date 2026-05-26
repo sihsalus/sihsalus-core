@@ -20,14 +20,12 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.SQLRestriction;
@@ -45,257 +43,267 @@ import org.openmrs.module.cohort.exceptions.ManualChangeNotSupportedException;
 @Slf4j
 @Entity
 @Table(name = "cohort")
-public class CohortM extends BaseCustomizableData<CohortAttribute> implements Auditable, Customizable<CohortAttribute> {
-	
-	private static final long serialVersionUID = 1L;
-	
-	public CohortM() {
-		this.definitionHandlerClassname = DefaultCohortDefinitionHandler.class.getName();
-		this.groupCohort = false;
-	}
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "cohort_id")
-	private Integer cohortId;
-	
-	private String name;
-	
-	private String description;
-	
-	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "location_id")
-	private Location location;
-	
-	private Date startDate;
-	
-	private Date endDate;
-	
-	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "cohort_type_id")
-	private CohortType cohortType;
-	
-	@OneToMany(mappedBy = "cohort", cascade = CascadeType.ALL)
-	private Set<CohortMember> cohortMembers;
-	
-	@OneToMany(mappedBy = "cohort", cascade = CascadeType.ALL)
-	@SQLRestriction("voided = 0 and (start_date is null or start_date <= current_timestamp()) and (end_date is null or end_date >= current_timestamp())")
-	private Set<CohortMember> activeCohortMembers;
-	
-	@Column(name = "is_group_cohort")
-	private Boolean groupCohort;
-	
-	@Column(name = "definition_handler", nullable = false)
-	private String definitionHandlerClassname;
-	
-	@Lob
-	@Column(name = "definition_handler_config")
-	private String definitionHandlerConfig;
-	
-	public Integer getCohortId() {
-		return cohortId;
-	}
-	
-	public void setCohortId(Integer cohortId) {
-		this.cohortId = cohortId;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public String getDescription() {
-		return description;
-	}
-	
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
-	public Location getLocation() {
-		return location;
-	}
-	
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-	
-	public Date getStartDate() {
-		return startDate;
-	}
-	
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-	
-	public Date getEndDate() {
-		return endDate;
-	}
-	
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
-	
-	public CohortType getCohortType() {
-		return cohortType;
-	}
-	
-	public void setCohortType(CohortType cohortType) {
-		this.cohortType = cohortType;
-	}
-	
-	public Set<CohortMember> getCohortMembers() {
-		if (cohortMembers == null) {
-			cohortMembers = new HashSet<>();
-		}
-		return cohortMembers;
-	}
-	
-	public Set<CohortMember> getActiveCohortMembers() {
-		if (activeCohortMembers == null) {
-			activeCohortMembers = new HashSet<>();
-		}
-		return activeCohortMembers;
-	}
-	
-	/**
-	 * Returns whether this cohort is a group
-	 *
-	 * @see {{@link #getGroupCohort()}}
-	 * @deprecated since 3.0.0
-	 */
-	@Deprecated
-	public Boolean isGroupCohort() {
-		return groupCohort != null && groupCohort;
-	}
-	
-	public void setGroupCohort(Boolean groupCohort) {
-		this.groupCohort = groupCohort;
-	}
-	
-	public Boolean getGroupCohort() {
-		return this.groupCohort;
-	}
-	
-	@Override
-	public Integer getId() {
-		return getCohortId();
-	}
-	
-	@Override
-	public void setId(Integer cohortId) {
-		setCohortId(cohortId);
-	}
-	
-	@Override
-	public String toString() {
-		return this.name;
-	}
-	
-	public String getDefinitionHandlerClassname() {
-		return definitionHandlerClassname;
-	}
-	
-	public void setDefinitionHandlerClassname(String definitionHandlerClassname) {
-		this.definitionHandlerClassname = definitionHandlerClassname;
-	}
-	
-	public String getDefinitionHandlerConfig() {
-		return definitionHandlerConfig;
-	}
-	
-	public void setDefinitionHandlerConfig(String definitionHandlerConfig) {
-		this.definitionHandlerConfig = definitionHandlerConfig;
-	}
-	
-	public void addMemberships(CohortMember... cohortMembers) {
-		CohortDefinitionHandler cohortDefinition = getDefinitionHandler();
-		if (cohortDefinition instanceof ManualCohortDefinitionHandler) {
-			((ManualCohortDefinitionHandler) cohortDefinition).addMembers(this, cohortMembers);
-		} else {
-			throw new ManualChangeNotSupportedException("Manual changes to this cohort aren't supported");
-		}
-	}
-	
-	public void removeMemberships(CohortMember... cohortMembers) {
-		CohortDefinitionHandler cohortDefinition = getDefinitionHandler();
-		if (cohortDefinition instanceof ManualCohortDefinitionHandler) {
-			((ManualCohortDefinitionHandler) cohortDefinition).removeMembers(this, cohortMembers);
-		} else {
-			throw new ManualChangeNotSupportedException("Manual changes to this cohort aren't supported");
-		}
-	}
-	
-	/**
-	 * Loads cohort definition handler class - If the cohortDefinitionHandlerClassname is null, use
-	 * defaultCohortDefinitionHandler
-	 *
-	 * @return CohortDefinitionHandler
-	 * @throws org.openmrs.api.APIException If fails to load cohortDefinitionHandlerClass
-	 */
-	public CohortDefinitionHandler getDefinitionHandler() {
-		String definitionHandlerClassname = getDefinitionHandlerClassname();
-		if (StringUtils.isBlank(definitionHandlerClassname)) {
-			definitionHandlerClassname = DefaultCohortDefinitionHandler.class.getName();
-		}
-		
-		Class<?> definitionHandlerClass;
-		try {
-			definitionHandlerClass = Context.loadClass(definitionHandlerClassname);
-		}
-		catch (ClassNotFoundException e) {
-			log.error("Failed to load class {}", getDefinitionHandlerClassname(), e);
-			throw new APIException("CohortM.failed.load.definitionHandlerClass",
-			        new Object[] { getDefinitionHandlerClassname() }, e);
-		}
-		
-		if (definitionHandlerClass == null) {
-			log.error("Failed to load class {}", getDefinitionHandlerClassname());
-			throw new APIException("CohortM.failed.load.definitionHandlerClass",
-			        new Object[] { getDefinitionHandlerClassname() });
-		}
-		
-		if (!CohortDefinitionHandler.class.isAssignableFrom(definitionHandlerClass)) {
-			log.error("Class {} is not a CohortDefinitionHandler", getDefinitionHandlerClassname());
-			throw new APIException("CohortM.failed.load.definitionHandlerClass",
-			        new Object[] { getDefinitionHandlerClassname() });
-		}
+public class CohortM extends BaseCustomizableData<CohortAttribute>
+    implements Auditable, Customizable<CohortAttribute> {
 
-		Class<? extends CohortDefinitionHandler> handlerClass = definitionHandlerClass.asSubclass(
-		    CohortDefinitionHandler.class);
-		List<? extends CohortDefinitionHandler> handlers;
-		
-		try {
-			handlers = Context.getRegisteredComponents(handlerClass);
-		}
-		catch (NullPointerException e) {
-			handlers = Collections.emptyList();
-		}
-		
-		if (!handlers.isEmpty()) {
-			if (log.isWarnEnabled()) {
-				if (handlers.size() > 1) {
-					log.warn("Found {} possible handlers for {}; using the first result", handlers.size(),
-					    getDefinitionHandlerClassname());
-				}
-			}
-			return handlers.get(0);
-		}
-		
-		try {
-			return handlerClass.getDeclaredConstructor().newInstance();
-		}
-		catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			throw new APIException("CohortM.failed.load.definitionHandlerClass",
-			        new Object[] { getDefinitionHandlerClassname() }, e);
-		}
-	}
-	
-	public int size() {
-		return getActiveCohortMembers().size();
-	}
+  private static final long serialVersionUID = 1L;
+
+  public CohortM() {
+    this.definitionHandlerClassname = DefaultCohortDefinitionHandler.class.getName();
+    this.groupCohort = false;
+  }
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "cohort_id")
+  private Integer cohortId;
+
+  private String name;
+
+  private String description;
+
+  @ManyToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "location_id")
+  private Location location;
+
+  private Date startDate;
+
+  private Date endDate;
+
+  @ManyToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "cohort_type_id")
+  private CohortType cohortType;
+
+  @OneToMany(mappedBy = "cohort", cascade = CascadeType.ALL)
+  private Set<CohortMember> cohortMembers;
+
+  @OneToMany(mappedBy = "cohort", cascade = CascadeType.ALL)
+  @SQLRestriction(
+      "voided = 0 and (start_date is null or start_date <= current_timestamp()) and (end_date is null or end_date >= current_timestamp())")
+  private Set<CohortMember> activeCohortMembers;
+
+  @Column(name = "is_group_cohort")
+  private Boolean groupCohort;
+
+  @Column(name = "definition_handler", nullable = false)
+  private String definitionHandlerClassname;
+
+  @Lob
+  @Column(name = "definition_handler_config")
+  private String definitionHandlerConfig;
+
+  public Integer getCohortId() {
+    return cohortId;
+  }
+
+  public void setCohortId(Integer cohortId) {
+    this.cohortId = cohortId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Location getLocation() {
+    return location;
+  }
+
+  public void setLocation(Location location) {
+    this.location = location;
+  }
+
+  public Date getStartDate() {
+    return startDate;
+  }
+
+  public void setStartDate(Date startDate) {
+    this.startDate = startDate;
+  }
+
+  public Date getEndDate() {
+    return endDate;
+  }
+
+  public void setEndDate(Date endDate) {
+    this.endDate = endDate;
+  }
+
+  public CohortType getCohortType() {
+    return cohortType;
+  }
+
+  public void setCohortType(CohortType cohortType) {
+    this.cohortType = cohortType;
+  }
+
+  public Set<CohortMember> getCohortMembers() {
+    if (cohortMembers == null) {
+      cohortMembers = new HashSet<>();
+    }
+    return cohortMembers;
+  }
+
+  public Set<CohortMember> getActiveCohortMembers() {
+    if (activeCohortMembers == null) {
+      activeCohortMembers = new HashSet<>();
+    }
+    return activeCohortMembers;
+  }
+
+  /**
+   * Returns whether this cohort is a group
+   *
+   * @see {{@link #getGroupCohort()}}
+   * @deprecated since 3.0.0
+   */
+  @Deprecated
+  public Boolean isGroupCohort() {
+    return groupCohort != null && groupCohort;
+  }
+
+  public void setGroupCohort(Boolean groupCohort) {
+    this.groupCohort = groupCohort;
+  }
+
+  public Boolean getGroupCohort() {
+    return this.groupCohort;
+  }
+
+  @Override
+  public Integer getId() {
+    return getCohortId();
+  }
+
+  @Override
+  public void setId(Integer cohortId) {
+    setCohortId(cohortId);
+  }
+
+  @Override
+  public String toString() {
+    return this.name;
+  }
+
+  public String getDefinitionHandlerClassname() {
+    return definitionHandlerClassname;
+  }
+
+  public void setDefinitionHandlerClassname(String definitionHandlerClassname) {
+    this.definitionHandlerClassname = definitionHandlerClassname;
+  }
+
+  public String getDefinitionHandlerConfig() {
+    return definitionHandlerConfig;
+  }
+
+  public void setDefinitionHandlerConfig(String definitionHandlerConfig) {
+    this.definitionHandlerConfig = definitionHandlerConfig;
+  }
+
+  public void addMemberships(CohortMember... cohortMembers) {
+    CohortDefinitionHandler cohortDefinition = getDefinitionHandler();
+    if (cohortDefinition instanceof ManualCohortDefinitionHandler) {
+      ((ManualCohortDefinitionHandler) cohortDefinition).addMembers(this, cohortMembers);
+    } else {
+      throw new ManualChangeNotSupportedException("Manual changes to this cohort aren't supported");
+    }
+  }
+
+  public void removeMemberships(CohortMember... cohortMembers) {
+    CohortDefinitionHandler cohortDefinition = getDefinitionHandler();
+    if (cohortDefinition instanceof ManualCohortDefinitionHandler) {
+      ((ManualCohortDefinitionHandler) cohortDefinition).removeMembers(this, cohortMembers);
+    } else {
+      throw new ManualChangeNotSupportedException("Manual changes to this cohort aren't supported");
+    }
+  }
+
+  /**
+   * Loads cohort definition handler class - If the cohortDefinitionHandlerClassname is null, use
+   * defaultCohortDefinitionHandler
+   *
+   * @return CohortDefinitionHandler
+   * @throws org.openmrs.api.APIException If fails to load cohortDefinitionHandlerClass
+   */
+  public CohortDefinitionHandler getDefinitionHandler() {
+    String definitionHandlerClassname = getDefinitionHandlerClassname();
+    if (StringUtils.isBlank(definitionHandlerClassname)) {
+      definitionHandlerClassname = DefaultCohortDefinitionHandler.class.getName();
+    }
+
+    Class<?> definitionHandlerClass;
+    try {
+      definitionHandlerClass = Context.loadClass(definitionHandlerClassname);
+    } catch (ClassNotFoundException e) {
+      log.error("Failed to load class {}", getDefinitionHandlerClassname(), e);
+      throw new APIException(
+          "CohortM.failed.load.definitionHandlerClass",
+          new Object[] {getDefinitionHandlerClassname()},
+          e);
+    }
+
+    if (definitionHandlerClass == null) {
+      log.error("Failed to load class {}", getDefinitionHandlerClassname());
+      throw new APIException(
+          "CohortM.failed.load.definitionHandlerClass",
+          new Object[] {getDefinitionHandlerClassname()});
+    }
+
+    if (!CohortDefinitionHandler.class.isAssignableFrom(definitionHandlerClass)) {
+      log.error("Class {} is not a CohortDefinitionHandler", getDefinitionHandlerClassname());
+      throw new APIException(
+          "CohortM.failed.load.definitionHandlerClass",
+          new Object[] {getDefinitionHandlerClassname()});
+    }
+
+    Class<? extends CohortDefinitionHandler> handlerClass =
+        definitionHandlerClass.asSubclass(CohortDefinitionHandler.class);
+    List<? extends CohortDefinitionHandler> handlers;
+
+    try {
+      handlers = Context.getRegisteredComponents(handlerClass);
+    } catch (NullPointerException e) {
+      handlers = Collections.emptyList();
+    }
+
+    if (!handlers.isEmpty()) {
+      if (log.isWarnEnabled()) {
+        if (handlers.size() > 1) {
+          log.warn(
+              "Found {} possible handlers for {}; using the first result",
+              handlers.size(),
+              getDefinitionHandlerClassname());
+        }
+      }
+      return handlers.get(0);
+    }
+
+    try {
+      return handlerClass.getDeclaredConstructor().newInstance();
+    } catch (InstantiationException
+        | IllegalAccessException
+        | InvocationTargetException
+        | NoSuchMethodException e) {
+      throw new APIException(
+          "CohortM.failed.load.definitionHandlerClass",
+          new Object[] {getDefinitionHandlerClassname()},
+          e);
+    }
+  }
+
+  public int size() {
+    return getActiveCohortMembers().size();
+  }
 }

@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -30,77 +29,76 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DosageTranslatorImpl implements DosageTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ConceptTranslator conceptTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private MedicationRequestTimingTranslator timingTranslator;
-	
-	@Override
-	public Dosage toFhirResource(@Nonnull DrugOrder drugOrder) {
-		if (drugOrder == null) {
-			return null;
-		}
-		
-		Dosage dosage = new Dosage();
-		dosage.setText(drugOrder.getDosingInstructions());
-		dosage.setAsNeeded(new BooleanType(drugOrder.getAsNeeded()));
-		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
-		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
-		
-		if (drugOrder.getInstructions() != null) {
-			dosage.addAdditionalInstruction().setText(drugOrder.getInstructions());
-		}
-		
-		if (drugOrder.getDose() != null) {
-			Dosage.DosageDoseAndRateComponent doseAndRate = new Dosage.DosageDoseAndRateComponent();
-			Quantity dose = new SimpleQuantity();
-			dose.setValue(drugOrder.getDose());
-			if (drugOrder.getDoseUnits() != null) {
-				Coding coding = quantityCodingTranslator.toFhirResource(drugOrder.getDoseUnits());
-				if (coding != null) {
-					dose.setSystem(coding.getSystem());
-					dose.setCode(coding.getCode());
-					dose.setUnit(drugOrder.getDoseUnits().getDisplayString());
-				}
-			}
-			doseAndRate.setDose(dose);
-			dosage.addDoseAndRate(doseAndRate);
-		}
-		
-		return dosage;
-	}
-	
-	@Override
-	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage) {
-		drugOrder.setDosingInstructions(dosage.getText());
-		
-		if (dosage.hasAdditionalInstruction()) {
-			drugOrder.setInstructions(dosage.getAdditionalInstructionFirstRep().getText());
-		}
-		
-		if (dosage.getAsNeededBooleanType() != null) {
-			drugOrder.setAsNeeded(dosage.getAsNeededBooleanType().getValue());
-		}
-		drugOrder.setRoute(conceptTranslator.toOpenmrsType(dosage.getRoute()));
-		timingTranslator.toOpenmrsType(drugOrder, dosage.getTiming());
-		Dosage.DosageDoseAndRateComponent doseAndRate = dosage.getDoseAndRateFirstRep();
-		Quantity dose = doseAndRate.getDoseQuantity();
-		if (dose != null) {
-			if (dose.getValue() != null) {
-				drugOrder.setDose(dose.getValue().doubleValue());
-			}
-			Concept doseUnitsConcept = quantityCodingTranslator.toOpenmrsType(dose);
-			drugOrder.setDoseUnits(doseUnitsConcept);
-		}
-		return drugOrder;
-	}
-	
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ConceptTranslator conceptTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private MedicationRequestTimingTranslator timingTranslator;
+
+  @Override
+  public Dosage toFhirResource(@Nonnull DrugOrder drugOrder) {
+    if (drugOrder == null) {
+      return null;
+    }
+
+    Dosage dosage = new Dosage();
+    dosage.setText(drugOrder.getDosingInstructions());
+    dosage.setAsNeeded(new BooleanType(drugOrder.getAsNeeded()));
+    dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
+    dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
+
+    if (drugOrder.getInstructions() != null) {
+      dosage.addAdditionalInstruction().setText(drugOrder.getInstructions());
+    }
+
+    if (drugOrder.getDose() != null) {
+      Dosage.DosageDoseAndRateComponent doseAndRate = new Dosage.DosageDoseAndRateComponent();
+      Quantity dose = new SimpleQuantity();
+      dose.setValue(drugOrder.getDose());
+      if (drugOrder.getDoseUnits() != null) {
+        Coding coding = quantityCodingTranslator.toFhirResource(drugOrder.getDoseUnits());
+        if (coding != null) {
+          dose.setSystem(coding.getSystem());
+          dose.setCode(coding.getCode());
+          dose.setUnit(drugOrder.getDoseUnits().getDisplayString());
+        }
+      }
+      doseAndRate.setDose(dose);
+      dosage.addDoseAndRate(doseAndRate);
+    }
+
+    return dosage;
+  }
+
+  @Override
+  public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage) {
+    drugOrder.setDosingInstructions(dosage.getText());
+
+    if (dosage.hasAdditionalInstruction()) {
+      drugOrder.setInstructions(dosage.getAdditionalInstructionFirstRep().getText());
+    }
+
+    if (dosage.getAsNeededBooleanType() != null) {
+      drugOrder.setAsNeeded(dosage.getAsNeededBooleanType().getValue());
+    }
+    drugOrder.setRoute(conceptTranslator.toOpenmrsType(dosage.getRoute()));
+    timingTranslator.toOpenmrsType(drugOrder, dosage.getTiming());
+    Dosage.DosageDoseAndRateComponent doseAndRate = dosage.getDoseAndRateFirstRep();
+    Quantity dose = doseAndRate.getDoseQuantity();
+    if (dose != null) {
+      if (dose.getValue() != null) {
+        drugOrder.setDose(dose.getValue().doubleValue());
+      }
+      Concept doseUnitsConcept = quantityCodingTranslator.toOpenmrsType(dose);
+      drugOrder.setDoseUnits(doseUnitsConcept);
+    }
+    return drugOrder;
+  }
 }

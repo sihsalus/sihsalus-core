@@ -9,12 +9,13 @@
  */
 package org.openmrs.module.emrapi.encounter;
 
+import java.util.List;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
-import java.util.List;
-
 /**
+ *
+ *
  * <pre>
  * Handy service to create/update an {@link org.openmrs.Encounter}. Use this to add {@link org.openmrs.Obs}, {@link org.openmrs.Order} to an Encounter.
  * The encounter is saved against the latest active visit of the {@link org.openmrs.Patient} if one exists, else a new visit is created.
@@ -24,12 +25,12 @@ import java.util.List;
  * </pre>
  */
 public interface EmrEncounterService extends OpenmrsService {
-	
-	EncounterTransaction save(EncounterTransaction encounterTransaction);
-	
-	List<EncounterTransaction> find(EncounterSearchParameters encounterSearchParameters);
-	
-	EncounterTransaction getActiveEncounter(ActiveEncounterParameters activeEncounterParameters);
-	
-	EncounterTransaction getEncounterTransaction(String uuid, Boolean includeAll);
+
+  EncounterTransaction save(EncounterTransaction encounterTransaction);
+
+  List<EncounterTransaction> find(EncounterSearchParameters encounterSearchParameters);
+
+  EncounterTransaction getActiveEncounter(ActiveEncounterParameters activeEncounterParameters);
+
+  EncounterTransaction getEncounterTransaction(String uuid, Boolean includeAll);
 }

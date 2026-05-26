@@ -7,15 +7,16 @@ import org.junit.jupiter.api.Test;
 
 class DateRangeTest {
 
-	@Test
-	void parseRejectsRangesWithoutStartAndEndParts() {
-		assertThrows(IllegalArgumentException.class, () -> DateRange.parse("[2026-01-01)", "yyyy-MM-dd", "*"));
-	}
+  @Test
+  void parseRejectsRangesWithoutStartAndEndParts() {
+    assertThrows(
+        IllegalArgumentException.class, () -> DateRange.parse("[2026-01-01)", "yyyy-MM-dd", "*"));
+  }
 
-	@Test
-	void parseAllowsEmptyEndWhenEmptyStringRepresentsNull() {
-		DateRange range = DateRange.parse("[2026-01-01,)", "yyyy-MM-dd", "");
+  @Test
+  void parseAllowsEmptyEndWhenEmptyStringRepresentsNull() {
+    DateRange range = DateRange.parse("[2026-01-01,)", "yyyy-MM-dd", "");
 
-		assertNull(range.getEndDate());
-	}
+    assertNull(range.getEndDate());
+  }
 }

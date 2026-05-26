@@ -1,183 +1,180 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.common;
 
+import java.util.Date;
 import org.openmrs.Auditable;
 import org.openmrs.Retireable;
 import org.openmrs.User;
 import org.openmrs.Voidable;
 
-import java.util.Date;
-
-/**
- * Convenience class that holds audit information for an OpenMRS data or metadata object
- */
+/** Convenience class that holds audit information for an OpenMRS data or metadata object */
 public class AuditInfo {
 
-    private Date dateCreated;
+  private Date dateCreated;
 
-    private User creator;
+  private User creator;
 
-    private Date dateChanged;
+  private Date dateChanged;
 
-    private User changedBy;
+  private User changedBy;
 
-    private Boolean voided;
+  private Boolean voided;
 
-    private Date dateVoided;
+  private Date dateVoided;
 
-    private User voidedBy;
+  private User voidedBy;
 
-    private String voidReason;
+  private String voidReason;
 
-    private Boolean retired;
+  private Boolean retired;
 
-    private Date dateRetired;
+  private Date dateRetired;
 
-    private User retiredBy;
+  private User retiredBy;
 
-    private String retireReason;
+  private String retireReason;
 
-    public AuditInfo() {
+  public AuditInfo() {}
+
+  /**
+   * Will copy appropriate fields from {@link Auditable}, {@link Voidable}, and {@link Retireable}
+   *
+   * @param dataOrMetadata
+   */
+  public AuditInfo(Object dataOrMetadata) {
+    if (dataOrMetadata instanceof Auditable) {
+      copyFieldsFrom((Auditable) dataOrMetadata);
     }
-
-    /**
-     * Will copy appropriate fields from {@link Auditable}, {@link Voidable}, and {@link Retireable}
-     * @param dataOrMetadata
-     */
-    public AuditInfo(Object dataOrMetadata) {
-        if (dataOrMetadata instanceof Auditable) {
-            copyFieldsFrom((Auditable) dataOrMetadata);
-        }
-        if (dataOrMetadata instanceof Voidable) {
-            copyFieldsFrom((Voidable) dataOrMetadata);
-        }
-        if (dataOrMetadata instanceof Retireable) {
-            copyFieldsFrom((Retireable) dataOrMetadata);
-        }
+    if (dataOrMetadata instanceof Voidable) {
+      copyFieldsFrom((Voidable) dataOrMetadata);
     }
-
-    private void copyFieldsFrom(Auditable auditable) {
-        this.creator = auditable.getCreator();
-        this.dateCreated = auditable.getDateCreated();
-        this.changedBy = auditable.getChangedBy();
-        this.dateChanged = auditable.getDateChanged();
+    if (dataOrMetadata instanceof Retireable) {
+      copyFieldsFrom((Retireable) dataOrMetadata);
     }
+  }
 
-    private void copyFieldsFrom(Voidable voidable) {
-        this.voided = voidable.isVoided();
-        this.voidedBy = voidable.getVoidedBy();
-        this.dateVoided = voidable.getDateVoided();
-        this.voidReason = voidable.getVoidReason();
-    }
+  private void copyFieldsFrom(Auditable auditable) {
+    this.creator = auditable.getCreator();
+    this.dateCreated = auditable.getDateCreated();
+    this.changedBy = auditable.getChangedBy();
+    this.dateChanged = auditable.getDateChanged();
+  }
 
-    private void copyFieldsFrom(Retireable retireable) {
-        this.retired = retireable.isRetired();
-        this.retiredBy = retireable.getRetiredBy();
-        this.dateRetired = retireable.getDateRetired();
-        this.retireReason = retireable.getRetireReason();
-    }
+  private void copyFieldsFrom(Voidable voidable) {
+    this.voided = voidable.isVoided();
+    this.voidedBy = voidable.getVoidedBy();
+    this.dateVoided = voidable.getDateVoided();
+    this.voidReason = voidable.getVoidReason();
+  }
 
-    public Date getDateCreated() {
-        return dateCreated;
-    }
+  private void copyFieldsFrom(Retireable retireable) {
+    this.retired = retireable.isRetired();
+    this.retiredBy = retireable.getRetiredBy();
+    this.dateRetired = retireable.getDateRetired();
+    this.retireReason = retireable.getRetireReason();
+  }
 
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
+  public Date getDateCreated() {
+    return dateCreated;
+  }
 
-    public User getCreator() {
-        return creator;
-    }
+  public void setDateCreated(Date dateCreated) {
+    this.dateCreated = dateCreated;
+  }
 
-    public void setCreator(User creator) {
-        this.creator = creator;
-    }
+  public User getCreator() {
+    return creator;
+  }
 
-    public Date getDateChanged() {
-        return dateChanged;
-    }
+  public void setCreator(User creator) {
+    this.creator = creator;
+  }
 
-    public void setDateChanged(Date dateChanged) {
-        this.dateChanged = dateChanged;
-    }
+  public Date getDateChanged() {
+    return dateChanged;
+  }
 
-    public User getChangedBy() {
-        return changedBy;
-    }
+  public void setDateChanged(Date dateChanged) {
+    this.dateChanged = dateChanged;
+  }
 
-    public void setChangedBy(User changedBy) {
-        this.changedBy = changedBy;
-    }
+  public User getChangedBy() {
+    return changedBy;
+  }
 
-    public Boolean getVoided() {
-        return voided;
-    }
+  public void setChangedBy(User changedBy) {
+    this.changedBy = changedBy;
+  }
 
-    public void setVoided(Boolean voided) {
-        this.voided = voided;
-    }
+  public Boolean getVoided() {
+    return voided;
+  }
 
-    public Date getDateVoided() {
-        return dateVoided;
-    }
+  public void setVoided(Boolean voided) {
+    this.voided = voided;
+  }
 
-    public void setDateVoided(Date dateVoided) {
-        this.dateVoided = dateVoided;
-    }
+  public Date getDateVoided() {
+    return dateVoided;
+  }
 
-    public User getVoidedBy() {
-        return voidedBy;
-    }
+  public void setDateVoided(Date dateVoided) {
+    this.dateVoided = dateVoided;
+  }
 
-    public void setVoidedBy(User voidedBy) {
-        this.voidedBy = voidedBy;
-    }
+  public User getVoidedBy() {
+    return voidedBy;
+  }
 
-    public String getVoidReason() {
-        return voidReason;
-    }
+  public void setVoidedBy(User voidedBy) {
+    this.voidedBy = voidedBy;
+  }
 
-    public void setVoidReason(String voidReason) {
-        this.voidReason = voidReason;
-    }
+  public String getVoidReason() {
+    return voidReason;
+  }
 
-    public Boolean getRetired() {
-        return retired;
-    }
+  public void setVoidReason(String voidReason) {
+    this.voidReason = voidReason;
+  }
 
-    public void setRetired(Boolean retired) {
-        this.retired = retired;
-    }
+  public Boolean getRetired() {
+    return retired;
+  }
 
-    public Date getDateRetired() {
-        return dateRetired;
-    }
+  public void setRetired(Boolean retired) {
+    this.retired = retired;
+  }
 
-    public void setDateRetired(Date dateRetired) {
-        this.dateRetired = dateRetired;
-    }
+  public Date getDateRetired() {
+    return dateRetired;
+  }
 
-    public User getRetiredBy() {
-        return retiredBy;
-    }
+  public void setDateRetired(Date dateRetired) {
+    this.dateRetired = dateRetired;
+  }
 
-    public void setRetiredBy(User retiredBy) {
-        this.retiredBy = retiredBy;
-    }
+  public User getRetiredBy() {
+    return retiredBy;
+  }
 
-    public String getRetireReason() {
-        return retireReason;
-    }
+  public void setRetiredBy(User retiredBy) {
+    this.retiredBy = retiredBy;
+  }
 
-    public void setRetireReason(String retireReason) {
-        this.retireReason = retireReason;
-    }
+  public String getRetireReason() {
+    return retireReason;
+  }
+
+  public void setRetireReason(String retireReason) {
+    this.retireReason = retireReason;
+  }
 }

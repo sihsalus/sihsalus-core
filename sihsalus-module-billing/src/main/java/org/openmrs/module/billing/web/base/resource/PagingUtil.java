@@ -12,16 +12,13 @@ package org.openmrs.module.billing.web.base.resource;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 
-/**
- * Utility class for extracting paging information from a request
- */
+/** Utility class for extracting paging information from a request */
 public class PagingUtil {
-	
-	private PagingUtil() {
-	}
-	
-	public static PagingInfo getPagingInfoFromContext(RequestContext context) {
-		int page = (context.getStartIndex() / context.getLimit()) + 1;
-		return new PagingInfo(page, context.getLimit());
-	}
+
+  private PagingUtil() {}
+
+  public static PagingInfo getPagingInfoFromContext(RequestContext context) {
+    int page = (context.getStartIndex() / context.getLimit()) + 1;
+    return new PagingInfo(page, context.getLimit());
+  }
 }

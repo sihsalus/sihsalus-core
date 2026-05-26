@@ -21,28 +21,28 @@ import org.openmrs.annotation.HasAddOnStartupPrivileges;
  */
 @HasAddOnStartupPrivileges
 public class PrivilegeConstants {
-	
-	@AddOnStartup(description = "Able to get/view queues")
-	public static final String GET_QUEUES = "Get Queues";
-	
-	@AddOnStartup(description = "Able to get/view queue entries")
-	public static final String GET_QUEUE_ENTRIES = "Get Queue Entries";
-	
-	@AddOnStartup(description = "Able to get/view queue rooms")
-	public static final String GET_QUEUE_ROOMS = "Get Queue Rooms";
-	
-	@AddOnStartup(description = "Able to add/edit/retire queues")
-	public static final String MANAGE_QUEUES = "Manage Queues";
-	
-	@AddOnStartup(description = "Able to add/edit/retire queue entries")
-	public static final String MANAGE_QUEUE_ENTRIES = "Manage Queue Entries";
-	
-	@AddOnStartup(description = "Able to add/edit/retire queue rooms")
-	public static final String MANAGE_QUEUE_ROOMS = "Manage Queue Rooms";
-	
-	public static final String PURGE_QUEUES = "Purge Queues";
-	
-	public static final String PURGE_QUEUE_ENTRIES = "Purge Queue Entries";
-	
-	public static final String PURGE_QUEUE_ROOMS = "Purge Queue Rooms";
+
+  @AddOnStartup(description = "Able to get/view queues")
+  public static final String GET_QUEUES = "Get Queues";
+
+  @AddOnStartup(description = "Able to get/view queue entries")
+  public static final String GET_QUEUE_ENTRIES = "Get Queue Entries";
+
+  @AddOnStartup(description = "Able to get/view queue rooms")
+  public static final String GET_QUEUE_ROOMS = "Get Queue Rooms";
+
+  @AddOnStartup(description = "Able to add/edit/retire queues")
+  public static final String MANAGE_QUEUES = "Manage Queues";
+
+  @AddOnStartup(description = "Able to add/edit/retire queue entries")
+  public static final String MANAGE_QUEUE_ENTRIES = "Manage Queue Entries";
+
+  @AddOnStartup(description = "Able to add/edit/retire queue rooms")
+  public static final String MANAGE_QUEUE_ROOMS = "Manage Queue Rooms";
+
+  public static final String PURGE_QUEUES = "Purge Queues";
+
+  public static final String PURGE_QUEUE_ENTRIES = "Purge Queue Entries";
+
+  public static final String PURGE_QUEUE_ROOMS = "Purge Queue Rooms";
 }

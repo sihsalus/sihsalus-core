@@ -20,49 +20,44 @@ import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.ProviderUtil;
 import org.openmrs.module.billing.api.model.Timesheet;
 
-/**
- * Utility class fo {@link Timesheet}
- */
+/** Utility class fo {@link Timesheet} */
 @Slf4j
 public class TimesheetUtil {
-	
-	protected TimesheetUtil() {
-	}
-	
-	public static Timesheet getCurrentTimesheet() {
-		Provider provider;
-		Timesheet timesheet;
-		ProviderService providerService = Context.getProviderService();
-		try {
-			provider = ProviderUtil.getCurrentProvider(providerService);
-		}
-		catch (Exception e) {
-			throw new APIException("Error retrieving provider for current user.", e);
-		}
-		
-		ITimesheetService tsService = Context.getService(ITimesheetService.class);
-		try {
-			timesheet = tsService.getCurrentTimesheet(provider);
-		}
-		catch (Exception e) {
-			log.error("Error occured while trying to get the current timesheet{}", String.valueOf(e));
-			return null;
-		}
-		
-		return timesheet;
-	}
-	
-	public static boolean isTimesheetRequired() {
-		AdministrationService adminService = Context.getAdministrationService();
-		boolean timesheetRequired;
-		try {
-			timesheetRequired = Boolean
-			        .parseBoolean(adminService.getGlobalProperty(ModuleSettings.TIMESHEET_REQUIRED_PROPERTY));
-		}
-		catch (Exception e) {
-			log.error("Error occured while trying to parse the boolean value{}", String.valueOf(e));
-			timesheetRequired = false;
-		}
-		return timesheetRequired;
-	}
+
+  protected TimesheetUtil() {}
+
+  public static Timesheet getCurrentTimesheet() {
+    Provider provider;
+    Timesheet timesheet;
+    ProviderService providerService = Context.getProviderService();
+    try {
+      provider = ProviderUtil.getCurrentProvider(providerService);
+    } catch (Exception e) {
+      throw new APIException("Error retrieving provider for current user.", e);
+    }
+
+    ITimesheetService tsService = Context.getService(ITimesheetService.class);
+    try {
+      timesheet = tsService.getCurrentTimesheet(provider);
+    } catch (Exception e) {
+      log.error("Error occured while trying to get the current timesheet{}", String.valueOf(e));
+      return null;
+    }
+
+    return timesheet;
+  }
+
+  public static boolean isTimesheetRequired() {
+    AdministrationService adminService = Context.getAdministrationService();
+    boolean timesheetRequired;
+    try {
+      timesheetRequired =
+          Boolean.parseBoolean(
+              adminService.getGlobalProperty(ModuleSettings.TIMESHEET_REQUIRED_PROPERTY));
+    } catch (Exception e) {
+      log.error("Error occured while trying to parse the boolean value{}", String.valueOf(e));
+      timesheetRequired = false;
+    }
+    return timesheetRequired;
+  }
 }

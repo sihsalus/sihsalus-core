@@ -20,25 +20,29 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @Component
-@Handler(supports = { CohortAttributeType.class }, order = 50)
+@Handler(
+    supports = {CohortAttributeType.class},
+    order = 50)
 @Qualifier("cohort.cohortAttributeTypeValidator")
-public class CohortAttributeTypeValidator extends BaseAttributeTypeValidator<CohortAttributeType> implements Validator {
-	
-	@Override
-	public boolean supports(Class<?> clazz) {
-		return clazz.equals(CohortAttributeType.class);
-	}
-	
-	@Override
-	public void validate(Object command, Errors errors) {
-		super.validate(command, errors);
-		
-		CohortAttributeType cohortAttributeType = (CohortAttributeType) command;
-		CohortAttributeType attributeType = Context.getService(CohortService.class)
-		        .getCohortAttributeTypeByName(cohortAttributeType.getName());
-		
-		if (attributeType != null) {
-			errors.rejectValue("name", " A cohort attribute type with the same name already exists");
-		}
-	}
+public class CohortAttributeTypeValidator extends BaseAttributeTypeValidator<CohortAttributeType>
+    implements Validator {
+
+  @Override
+  public boolean supports(Class<?> clazz) {
+    return clazz.equals(CohortAttributeType.class);
+  }
+
+  @Override
+  public void validate(Object command, Errors errors) {
+    super.validate(command, errors);
+
+    CohortAttributeType cohortAttributeType = (CohortAttributeType) command;
+    CohortAttributeType attributeType =
+        Context.getService(CohortService.class)
+            .getCohortAttributeTypeByName(cohortAttributeType.getName());
+
+    if (attributeType != null) {
+      errors.rejectValue("name", " A cohort attribute type with the same name already exists");
+    }
+  }
 }

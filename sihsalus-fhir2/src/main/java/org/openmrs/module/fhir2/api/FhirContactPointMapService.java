@@ -10,19 +10,19 @@
 package org.openmrs.module.fhir2.api;
 
 import java.util.Optional;
-
 import org.openmrs.PersonAttributeType;
 import org.openmrs.attribute.BaseAttributeType;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
 
 public interface FhirContactPointMapService extends FhirHelperService {
-	
-	Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid);
-	
-	Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(PersonAttributeType attributeType);
-	
-	Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(BaseAttributeType<?> attributeType);
-	
-	FhirContactPointMap saveFhirContactPointMap(FhirContactPointMap contactPointMap);
-	
+
+  Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid);
+
+  Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(
+      PersonAttributeType attributeType);
+
+  Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(
+      BaseAttributeType<?> attributeType);
+
+  FhirContactPointMap saveFhirContactPointMap(FhirContactPointMap contactPointMap);
 }

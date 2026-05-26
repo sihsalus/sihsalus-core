@@ -9,26 +9,25 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeableConcept;
 
-public interface EncounterTypeTranslator<T> extends OpenmrsFhirTranslator<T, List<CodeableConcept>> {
-	
-	/**
-	 * @param encounterType the OpenMRS encounter type or visit type to translate
-	 * @return a list consisting of an encoded version of the OpenMRS encounter type or visit type
-	 */
-	@Override
-	List<CodeableConcept> toFhirResource(@Nonnull T encounterType);
-	
-	/**
-	 * @param encounterTypes a list consisting of an encoded version of the OpenMRS encounter type or
-	 *            visit type
-	 * @return the OpenMRS encounter type or visit type
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull List<CodeableConcept> encounterTypes);
+public interface EncounterTypeTranslator<T>
+    extends OpenmrsFhirTranslator<T, List<CodeableConcept>> {
+
+  /**
+   * @param encounterType the OpenMRS encounter type or visit type to translate
+   * @return a list consisting of an encoded version of the OpenMRS encounter type or visit type
+   */
+  @Override
+  List<CodeableConcept> toFhirResource(@Nonnull T encounterType);
+
+  /**
+   * @param encounterTypes a list consisting of an encoded version of the OpenMRS encounter type or
+   *     visit type
+   * @return the OpenMRS encounter type or visit type
+   */
+  @Override
+  T toOpenmrsType(@Nonnull List<CodeableConcept> encounterTypes);
 }

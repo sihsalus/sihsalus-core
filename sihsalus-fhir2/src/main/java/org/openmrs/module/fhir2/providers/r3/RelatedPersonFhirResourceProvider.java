@@ -12,10 +12,6 @@ package org.openmrs.module.fhir2.providers.r3;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -30,6 +26,8 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.HashSet;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -48,44 +46,58 @@ import org.springframework.stereotype.Component;
 @R3Provider
 @Setter(PACKAGE)
 public class RelatedPersonFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirRelatedPersonService relatedPersonService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return RelatedPerson.class;
-	}
-	
-	@Read
-	@SuppressWarnings("unused")
-	public RelatedPerson getRelatedPersonById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.RelatedPerson relatedPerson = relatedPersonService.get(id.getIdPart());
-		if (relatedPerson == null) {
-			throw new ResourceNotFoundException("Could not find relatedPerson with Id " + id.getIdPart());
-		}
-		return (RelatedPerson) VersionConvertorFactory_30_40.convertResource(relatedPerson);
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public IBundleProvider searchRelatedPerson(@OptionalParam(name = RelatedPerson.SP_NAME) StringAndListParam name,
-	        @OptionalParam(name = RelatedPerson.SP_GENDER) TokenAndListParam gender,
-	        @OptionalParam(name = RelatedPerson.SP_BIRTHDATE) DateRangeParam birthDate,
-	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_CITY) StringAndListParam city,
-	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_STATE) StringAndListParam state,
-	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
-	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_COUNTRY) StringAndListParam country,
-	        @OptionalParam(name = RelatedPerson.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
-	        @IncludeParam(allow = { "RelatedPerson:" + RelatedPerson.SP_PATIENT }) HashSet<Include> includes) {
-		if (CollectionUtils.isEmpty(includes)) {
-			includes = null;
-		}
-		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        relatedPersonService.searchForRelatedPeople(new RelatedPersonSearchParams(name, gender, birthDate, city,
-		                state, postalCode, country, id, lastUpdated, sort, includes)));
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirRelatedPersonService relatedPersonService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return RelatedPerson.class;
+  }
+
+  @Read
+  @SuppressWarnings("unused")
+  public RelatedPerson getRelatedPersonById(@IdParam @Nonnull IdType id) {
+    org.hl7.fhir.r4.model.RelatedPerson relatedPerson = relatedPersonService.get(id.getIdPart());
+    if (relatedPerson == null) {
+      throw new ResourceNotFoundException("Could not find relatedPerson with Id " + id.getIdPart());
+    }
+    return (RelatedPerson) VersionConvertorFactory_30_40.convertResource(relatedPerson);
+  }
+
+  @Search
+  @SuppressWarnings("unused")
+  public IBundleProvider searchRelatedPerson(
+      @OptionalParam(name = RelatedPerson.SP_NAME) StringAndListParam name,
+      @OptionalParam(name = RelatedPerson.SP_GENDER) TokenAndListParam gender,
+      @OptionalParam(name = RelatedPerson.SP_BIRTHDATE) DateRangeParam birthDate,
+      @OptionalParam(name = RelatedPerson.SP_ADDRESS_CITY) StringAndListParam city,
+      @OptionalParam(name = RelatedPerson.SP_ADDRESS_STATE) StringAndListParam state,
+      @OptionalParam(name = RelatedPerson.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+      @OptionalParam(name = RelatedPerson.SP_ADDRESS_COUNTRY) StringAndListParam country,
+      @OptionalParam(name = RelatedPerson.SP_RES_ID) TokenAndListParam id,
+      @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+      @Sort SortSpec sort,
+      @IncludeParam(allow = {"RelatedPerson:" + RelatedPerson.SP_PATIENT})
+          HashSet<Include> includes) {
+    if (CollectionUtils.isEmpty(includes)) {
+      includes = null;
+    }
+
+    return new SearchQueryBundleProviderR3Wrapper(
+        relatedPersonService.searchForRelatedPeople(
+            new RelatedPersonSearchParams(
+                name,
+                gender,
+                birthDate,
+                city,
+                state,
+                postalCode,
+                country,
+                id,
+                lastUpdated,
+                sort,
+                includes)));
+  }
 }

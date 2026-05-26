@@ -10,29 +10,31 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 
-public interface MedicationRequestPriorityTranslator extends ToFhirTranslator<DrugOrder.Urgency, MedicationRequest.MedicationRequestPriority>, ToOpenmrsTranslator<DrugOrder.Urgency, MedicationRequest.MedicationRequestPriority> {
-	
-	/**
-	 * Maps {@link org.openmrs.DrugOrder.Urgency} to a
-	 * {@link org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestPriority}
-	 *
-	 * @param urgency the OpenMRS drugOrder urgency to translate
-	 * @return the corresponding FHIR medicationRequestPriority
-	 */
-	@Override
-	MedicationRequest.MedicationRequestPriority toFhirResource(@Nonnull DrugOrder.Urgency urgency);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestPriority} to an OpenMRS
-	 * {@link org.openmrs.DrugOrder.Urgency}
-	 *
-	 * @param medicationRequestPriority the FHIR medicationRequestPriority to translate
-	 * @return the corresponding OpenMRS drugOrder urgency
-	 */
-	@Override
-	DrugOrder.Urgency toOpenmrsType(@Nonnull MedicationRequest.MedicationRequestPriority medicationRequestPriority);
+public interface MedicationRequestPriorityTranslator
+    extends ToFhirTranslator<DrugOrder.Urgency, MedicationRequest.MedicationRequestPriority>,
+        ToOpenmrsTranslator<DrugOrder.Urgency, MedicationRequest.MedicationRequestPriority> {
+
+  /**
+   * Maps {@link org.openmrs.DrugOrder.Urgency} to a {@link
+   * org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestPriority}
+   *
+   * @param urgency the OpenMRS drugOrder urgency to translate
+   * @return the corresponding FHIR medicationRequestPriority
+   */
+  @Override
+  MedicationRequest.MedicationRequestPriority toFhirResource(@Nonnull DrugOrder.Urgency urgency);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestPriority} to an OpenMRS
+   * {@link org.openmrs.DrugOrder.Urgency}
+   *
+   * @param medicationRequestPriority the FHIR medicationRequestPriority to translate
+   * @return the corresponding OpenMRS drugOrder urgency
+   */
+  @Override
+  DrugOrder.Urgency toOpenmrsType(
+      @Nonnull MedicationRequest.MedicationRequestPriority medicationRequestPriority);
 }

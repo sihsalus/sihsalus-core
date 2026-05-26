@@ -22,13 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirEpisodeOfCareServiceImpl extends BaseFhirService<EpisodeOfCare, PatientProgram> implements FhirEpisodeOfCareService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirEpisodeOfCareDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private EpisodeOfCareTranslator translator;
+public class FhirEpisodeOfCareServiceImpl extends BaseFhirService<EpisodeOfCare, PatientProgram>
+    implements FhirEpisodeOfCareService {
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirEpisodeOfCareDao dao;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private EpisodeOfCareTranslator translator;
 }

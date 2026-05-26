@@ -73,257 +73,268 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = {
-    "org.openmrs.module.billing.web.rest",
-    "org.openmrs.module.billing.web.base.resource",
-    "org.openmrs.module.billing.api.db.hibernate"
-})
+@ComponentScan(
+    basePackages = {
+      "org.openmrs.module.billing.web.rest",
+      "org.openmrs.module.billing.web.base.resource",
+      "org.openmrs.module.billing.api.db.hibernate"
+    })
 public class SihsalusBillingConfiguration {
 
-    @Bean
-    static BeanFactoryPostProcessor billingWebBeansDependOnServices() {
-        return beanFactory -> {
-            for (String beanName : beanFactory.getBeanDefinitionNames()) {
-                BeanDefinition definition = beanFactory.getBeanDefinition(beanName);
-                String className = definition.getBeanClassName();
-                if (className != null
-                        && (className.startsWith("org.openmrs.module.billing.web.rest.")
-                                || className.startsWith("org.openmrs.module.billing.web.base.resource."))) {
-                    definition.setDependsOn("billingServicesRegistered");
-                }
-            }
-        };
-    }
+  @Bean
+  static BeanFactoryPostProcessor billingWebBeansDependOnServices() {
+    return beanFactory -> {
+      for (String beanName : beanFactory.getBeanDefinitionNames()) {
+        BeanDefinition definition = beanFactory.getBeanDefinition(beanName);
+        String className = definition.getBeanClassName();
+        if (className != null
+            && (className.startsWith("org.openmrs.module.billing.web.rest.")
+                || className.startsWith("org.openmrs.module.billing.web.base.resource."))) {
+          definition.setDependsOn("billingServicesRegistered");
+        }
+      }
+    };
+  }
 
-    @Bean
-    HibernateMappingContributor billingHibernateMappingContributor() {
-        return () -> List.of("Bill.hbm.xml", "Cashier.hbm.xml", "SequentialReceiptNumberGenerator.hbm.xml");
-    }
+  @Bean
+  HibernateMappingContributor billingHibernateMappingContributor() {
+    return () ->
+        List.of("Bill.hbm.xml", "Cashier.hbm.xml", "SequentialReceiptNumberGenerator.hbm.xml");
+  }
 
-    @Bean
-    BaseHibernateRepository genericRepositoryDao(DbSessionFactory dbSessionFactory) {
-        return new BaseHibernateRepositoryImpl(dbSessionFactory);
-    }
+  @Bean
+  BaseHibernateRepository genericRepositoryDao(DbSessionFactory dbSessionFactory) {
+    return new BaseHibernateRepositoryImpl(dbSessionFactory);
+  }
 
-    @Bean
-    BillLineItemDAO billLineItemDAO(SessionFactory sessionFactory) {
-        return new HibernateBillLineItemDAO(sessionFactory);
-    }
+  @Bean
+  BillLineItemDAO billLineItemDAO(SessionFactory sessionFactory) {
+    return new HibernateBillLineItemDAO(sessionFactory);
+  }
 
-    @Bean
-    BillDAO billDAO(SessionFactory sessionFactory) {
-        return new HibernateBillDAO(sessionFactory);
-    }
+  @Bean
+  BillDAO billDAO(SessionFactory sessionFactory) {
+    return new HibernateBillDAO(sessionFactory);
+  }
 
-    @Bean
-    BillExemptionDAO billExemptionDAO(SessionFactory sessionFactory) {
-        return new BillExemptionDAOImpl(sessionFactory);
-    }
+  @Bean
+  BillExemptionDAO billExemptionDAO(SessionFactory sessionFactory) {
+    return new BillExemptionDAOImpl(sessionFactory);
+  }
 
-    @Bean
-    BillDiscountDAO billDiscountDAO(SessionFactory sessionFactory) {
-        return new HibernateBillDiscountDAO(sessionFactory);
-    }
+  @Bean
+  BillDiscountDAO billDiscountDAO(SessionFactory sessionFactory) {
+    return new HibernateBillDiscountDAO(sessionFactory);
+  }
 
-    @Bean
-    BillRefundDAO billRefundDAO(SessionFactory sessionFactory) {
-        return new HibernateBillRefundDAO(sessionFactory);
-    }
+  @Bean
+  BillRefundDAO billRefundDAO(SessionFactory sessionFactory) {
+    return new HibernateBillRefundDAO(sessionFactory);
+  }
 
-    @Bean
-    BillableServiceDAO billableServiceDAO(SessionFactory sessionFactory) {
-        return new HibernateBillableServiceDAOImpl(sessionFactory);
-    }
+  @Bean
+  BillableServiceDAO billableServiceDAO(SessionFactory sessionFactory) {
+    return new HibernateBillableServiceDAOImpl(sessionFactory);
+  }
 
-    @Bean
-    PaymentModeDAO paymentModeDAO(SessionFactory sessionFactory) {
-        return new HibernatePaymentModeDAOImpl(sessionFactory);
-    }
+  @Bean
+  PaymentModeDAO paymentModeDAO(SessionFactory sessionFactory) {
+    return new HibernatePaymentModeDAOImpl(sessionFactory);
+  }
 
-    @Bean
-    CashPointDAO cashPointDAO(SessionFactory sessionFactory) {
-        return new HibernateCashPointDAOImpl(sessionFactory);
-    }
+  @Bean
+  CashPointDAO cashPointDAO(SessionFactory sessionFactory) {
+    return new HibernateCashPointDAOImpl(sessionFactory);
+  }
 
-    @Bean
-    CashierItemPriceDAO cashierItemPriceDAO(SessionFactory sessionFactory) {
-        return new HibernateCashierItemPriceDAOImpl(sessionFactory);
-    }
+  @Bean
+  CashierItemPriceDAO cashierItemPriceDAO(SessionFactory sessionFactory) {
+    return new HibernateCashierItemPriceDAOImpl(sessionFactory);
+  }
 
-    @Bean
-    ItemPriceService itemPriceService(BaseHibernateRepository genericRepositoryDao) {
-        ItemPriceServiceImpl service = new ItemPriceServiceImpl();
-        service.setRepository(genericRepositoryDao);
-        return service;
-    }
+  @Bean
+  ItemPriceService itemPriceService(BaseHibernateRepository genericRepositoryDao) {
+    ItemPriceServiceImpl service = new ItemPriceServiceImpl();
+    service.setRepository(genericRepositoryDao);
+    return service;
+  }
 
-    @Bean
-    PaymentModeService paymentModeService(PaymentModeDAO paymentModeDAO) {
-        PaymentModeServiceImpl service = new PaymentModeServiceImpl();
-        service.setPaymentModeDAO(paymentModeDAO);
-        return service;
-    }
+  @Bean
+  PaymentModeService paymentModeService(PaymentModeDAO paymentModeDAO) {
+    PaymentModeServiceImpl service = new PaymentModeServiceImpl();
+    service.setPaymentModeDAO(paymentModeDAO);
+    return service;
+  }
 
-    @Bean
-    IPaymentModeAttributeTypeService cashierPaymentModeAttributeTypeService(
-            BaseHibernateRepository genericRepositoryDao) {
-        PaymentModeAttributeTypeServiceImpl service = new PaymentModeAttributeTypeServiceImpl();
-        service.setRepository(genericRepositoryDao);
-        return service;
-    }
+  @Bean
+  IPaymentModeAttributeTypeService cashierPaymentModeAttributeTypeService(
+      BaseHibernateRepository genericRepositoryDao) {
+    PaymentModeAttributeTypeServiceImpl service = new PaymentModeAttributeTypeServiceImpl();
+    service.setRepository(genericRepositoryDao);
+    return service;
+  }
 
-    @Bean
-    CashPointService cashPointService(CashPointDAO cashPointDAO) {
-        CashPointServiceImpl service = new CashPointServiceImpl();
-        service.setCashPointDAO(cashPointDAO);
-        return service;
-    }
+  @Bean
+  CashPointService cashPointService(CashPointDAO cashPointDAO) {
+    CashPointServiceImpl service = new CashPointServiceImpl();
+    service.setCashPointDAO(cashPointDAO);
+    return service;
+  }
 
-    @Bean
-    ITimesheetService cashierTimesheetService(BaseHibernateRepository genericRepositoryDao) {
-        TimesheetServiceImpl service = new TimesheetServiceImpl();
-        service.setRepository(genericRepositoryDao);
-        return service;
-    }
+  @Bean
+  ITimesheetService cashierTimesheetService(BaseHibernateRepository genericRepositoryDao) {
+    TimesheetServiceImpl service = new TimesheetServiceImpl();
+    service.setRepository(genericRepositoryDao);
+    return service;
+  }
 
-    @Bean
-    ISequentialReceiptNumberGeneratorService seqReceiptNumberGeneratorService(
-            BaseHibernateRepository genericRepositoryDao) {
-        SequentialReceiptNumberGeneratorServiceImpl service = new SequentialReceiptNumberGeneratorServiceImpl();
-        service.setRepository(genericRepositoryDao);
-        return service;
-    }
+  @Bean
+  ISequentialReceiptNumberGeneratorService seqReceiptNumberGeneratorService(
+      BaseHibernateRepository genericRepositoryDao) {
+    SequentialReceiptNumberGeneratorServiceImpl service =
+        new SequentialReceiptNumberGeneratorServiceImpl();
+    service.setRepository(genericRepositoryDao);
+    return service;
+  }
 
-    @Bean
-    ICashierOptionsService cashierOptionsService() {
-        return new CashierOptionsServiceGpImpl();
-    }
+  @Bean
+  ICashierOptionsService cashierOptionsService() {
+    return new CashierOptionsServiceGpImpl();
+  }
 
-    @Bean
-    BillableServiceService billableServiceService(BillableServiceDAO billableServiceDAO) {
-        BillableServiceServiceImpl service = new BillableServiceServiceImpl();
-        service.setBillableServiceDAO(billableServiceDAO);
-        return service;
-    }
+  @Bean
+  BillableServiceService billableServiceService(BillableServiceDAO billableServiceDAO) {
+    BillableServiceServiceImpl service = new BillableServiceServiceImpl();
+    service.setBillableServiceDAO(billableServiceDAO);
+    return service;
+  }
 
-    @Bean
-    CashierItemPriceService cashierItemPriceService(CashierItemPriceDAO cashierItemPriceDAO) {
-        CashierItemPriceServiceImpl service = new CashierItemPriceServiceImpl();
-        service.setCashierItemPriceDAO(cashierItemPriceDAO);
-        return service;
-    }
+  @Bean
+  CashierItemPriceService cashierItemPriceService(CashierItemPriceDAO cashierItemPriceDAO) {
+    CashierItemPriceServiceImpl service = new CashierItemPriceServiceImpl();
+    service.setCashierItemPriceDAO(cashierItemPriceDAO);
+    return service;
+  }
 
-    @Bean
-    BillService billService(BillDAO billDAO) {
-        BillServiceImpl service = new BillServiceImpl();
-        service.setBillDAO(billDAO);
-        return service;
-    }
+  @Bean
+  BillService billService(BillDAO billDAO) {
+    BillServiceImpl service = new BillServiceImpl();
+    service.setBillDAO(billDAO);
+    return service;
+  }
 
-    @Bean
-    BillLineItemService billLineItemService(BillLineItemDAO billLineItemDAO) {
-        BillLineItemServiceImpl service = new BillLineItemServiceImpl();
-        service.setBillLineItemDAO(billLineItemDAO);
-        return service;
-    }
+  @Bean
+  BillLineItemService billLineItemService(BillLineItemDAO billLineItemDAO) {
+    BillLineItemServiceImpl service = new BillLineItemServiceImpl();
+    service.setBillLineItemDAO(billLineItemDAO);
+    return service;
+  }
 
-    @Bean
-    BillExemptionService billingExemptionService(BillExemptionDAO billExemptionDAO) {
-        return new BillExemptionServiceImpl(billExemptionDAO);
-    }
+  @Bean
+  BillExemptionService billingExemptionService(BillExemptionDAO billExemptionDAO) {
+    return new BillExemptionServiceImpl(billExemptionDAO);
+  }
 
-    @Bean
-    BillDiscountService billDiscountService(BillDiscountDAO billDiscountDAO) {
-        return new BillDiscountServiceImpl(billDiscountDAO);
-    }
+  @Bean
+  BillDiscountService billDiscountService(BillDiscountDAO billDiscountDAO) {
+    return new BillDiscountServiceImpl(billDiscountDAO);
+  }
 
-    @Bean
-    BillRefundService billRefundService(BillRefundDAO billRefundDAO) {
-        return new BillRefundServiceImpl(billRefundDAO);
-    }
+  @Bean
+  BillRefundService billRefundService(BillRefundDAO billRefundDAO) {
+    return new BillRefundServiceImpl(billRefundDAO);
+  }
 
-    @Bean
-    BillValidator billValidator() {
-        return new BillValidator();
-    }
+  @Bean
+  BillValidator billValidator() {
+    return new BillValidator();
+  }
 
-    @Bean
-    BillDiscountValidator billDiscountValidator() {
-        return new BillDiscountValidator();
-    }
+  @Bean
+  BillDiscountValidator billDiscountValidator() {
+    return new BillDiscountValidator();
+  }
 
-    @Bean
-    BillRefundValidator billRefundValidator() {
-        return new BillRefundValidator();
-    }
+  @Bean
+  BillRefundValidator billRefundValidator() {
+    return new BillRefundValidator();
+  }
 
-    @Bean
-    BillReceiptNumberHandler billReceiptNumberHandler() {
-        return new BillReceiptNumberHandler();
-    }
+  @Bean
+  BillReceiptNumberHandler billReceiptNumberHandler() {
+    return new BillReceiptNumberHandler();
+  }
 
-    @Bean
-    ExemptionEvaluator javascriptRuleEvaluator() {
-        return new JSExemptionEvaluator();
-    }
+  @Bean
+  ExemptionEvaluator javascriptRuleEvaluator() {
+    return new JSExemptionEvaluator();
+  }
 
-    @Bean
-    ExemptionRuleEngine ruleEngine(ExemptionEvaluator javascriptRuleEvaluator) {
-        return new ExemptionRuleEngine(List.of(javascriptRuleEvaluator));
-    }
+  @Bean
+  ExemptionRuleEngine ruleEngine(ExemptionEvaluator javascriptRuleEvaluator) {
+    return new ExemptionRuleEngine(List.of(javascriptRuleEvaluator));
+  }
 
-    @Bean
-    BillingEventListener orderBillingEventListener() {
-        return new OrderBillingEventListener();
-    }
+  @Bean
+  BillingEventListener orderBillingEventListener() {
+    return new OrderBillingEventListener();
+  }
 
-    @Bean
-    SmartInitializingSingleton billingEventListenerSubscriber(List<BillingEventListener> billingEventListeners) {
-        return () -> billingEventListeners.forEach(listener -> Event.subscribe(
-                listener.getSubscribedClass(), listener.getSubscribedAction().name(), listener));
-    }
+  @Bean
+  SmartInitializingSingleton billingEventListenerSubscriber(
+      List<BillingEventListener> billingEventListeners) {
+    return () ->
+        billingEventListeners.forEach(
+            listener ->
+                Event.subscribe(
+                    listener.getSubscribedClass(),
+                    listener.getSubscribedAction().name(),
+                    listener));
+  }
 
-    @Bean
-    DrugOrderBillingStrategy drugOrderBillingStrategy() {
-        return new DrugOrderBillingStrategy();
-    }
+  @Bean
+  DrugOrderBillingStrategy drugOrderBillingStrategy() {
+    return new DrugOrderBillingStrategy();
+  }
 
-    @Bean
-    TestOrderBillingStrategy testOrderBillingStrategy() {
-        return new TestOrderBillingStrategy();
-    }
+  @Bean
+  TestOrderBillingStrategy testOrderBillingStrategy() {
+    return new TestOrderBillingStrategy();
+  }
 
-    @Bean
-    Object billingServicesRegistered(
-            ServiceContext serviceContext,
-            ItemPriceService itemPriceService,
-            BillLineItemService billLineItemService,
-            PaymentModeService paymentModeService,
-            IPaymentModeAttributeTypeService cashierPaymentModeAttributeTypeService,
-            CashPointService cashPointService,
-            ITimesheetService cashierTimesheetService,
-            ISequentialReceiptNumberGeneratorService seqReceiptNumberGeneratorService,
-            ICashierOptionsService cashierOptionsService,
-            BillableServiceService billableServiceService,
-            CashierItemPriceService cashierItemPriceService,
-            BillService billService,
-            BillExemptionService billingExemptionService,
-            BillDiscountService billDiscountService,
-            BillRefundService billRefundService) {
-        serviceContext.setService(ItemPriceService.class, itemPriceService);
-        serviceContext.setService(BillLineItemService.class, billLineItemService);
-        serviceContext.setService(PaymentModeService.class, paymentModeService);
-        serviceContext.setService(IPaymentModeAttributeTypeService.class, cashierPaymentModeAttributeTypeService);
-        serviceContext.setService(CashPointService.class, cashPointService);
-        serviceContext.setService(ITimesheetService.class, cashierTimesheetService);
-        serviceContext.setService(ISequentialReceiptNumberGeneratorService.class, seqReceiptNumberGeneratorService);
-        serviceContext.setService(ICashierOptionsService.class, cashierOptionsService);
-        serviceContext.setService(BillableServiceService.class, billableServiceService);
-        serviceContext.setService(CashierItemPriceService.class, cashierItemPriceService);
-        serviceContext.setService(BillService.class, billService);
-        serviceContext.setService(BillExemptionService.class, billingExemptionService);
-        serviceContext.setService(BillDiscountService.class, billDiscountService);
-        serviceContext.setService(BillRefundService.class, billRefundService);
-        return new Object();
-    }
+  @Bean
+  Object billingServicesRegistered(
+      ServiceContext serviceContext,
+      ItemPriceService itemPriceService,
+      BillLineItemService billLineItemService,
+      PaymentModeService paymentModeService,
+      IPaymentModeAttributeTypeService cashierPaymentModeAttributeTypeService,
+      CashPointService cashPointService,
+      ITimesheetService cashierTimesheetService,
+      ISequentialReceiptNumberGeneratorService seqReceiptNumberGeneratorService,
+      ICashierOptionsService cashierOptionsService,
+      BillableServiceService billableServiceService,
+      CashierItemPriceService cashierItemPriceService,
+      BillService billService,
+      BillExemptionService billingExemptionService,
+      BillDiscountService billDiscountService,
+      BillRefundService billRefundService) {
+    serviceContext.setService(ItemPriceService.class, itemPriceService);
+    serviceContext.setService(BillLineItemService.class, billLineItemService);
+    serviceContext.setService(PaymentModeService.class, paymentModeService);
+    serviceContext.setService(
+        IPaymentModeAttributeTypeService.class, cashierPaymentModeAttributeTypeService);
+    serviceContext.setService(CashPointService.class, cashPointService);
+    serviceContext.setService(ITimesheetService.class, cashierTimesheetService);
+    serviceContext.setService(
+        ISequentialReceiptNumberGeneratorService.class, seqReceiptNumberGeneratorService);
+    serviceContext.setService(ICashierOptionsService.class, cashierOptionsService);
+    serviceContext.setService(BillableServiceService.class, billableServiceService);
+    serviceContext.setService(CashierItemPriceService.class, cashierItemPriceService);
+    serviceContext.setService(BillService.class, billService);
+    serviceContext.setService(BillExemptionService.class, billingExemptionService);
+    serviceContext.setService(BillDiscountService.class, billDiscountService);
+    serviceContext.setService(BillRefundService.class, billRefundService);
+    return new Object();
+  }
 }

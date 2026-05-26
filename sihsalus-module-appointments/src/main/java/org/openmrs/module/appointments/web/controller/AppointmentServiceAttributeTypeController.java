@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.controller;
 
+import java.util.List;
 import org.openmrs.module.appointments.model.AppointmentServiceAttributeType;
 import org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeService;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceAttributeTypeResponse;
@@ -16,34 +17,35 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
-
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointment-service-attribute-types")
 public class AppointmentServiceAttributeTypeController extends BaseRestController {
 
-    @Autowired
-    private AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService;
+  @Autowired private AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService;
 
-    @Autowired
-    private AppointmentServiceMapper appointmentServiceMapper;
+  @Autowired private AppointmentServiceMapper appointmentServiceMapper;
 
-    @RequestMapping(method = RequestMethod.GET)
-    @ResponseBody
-    public List<AppointmentServiceAttributeTypeResponse> getAllAttributeTypes(
-            @RequestParam(value = "includeRetired", required = false, defaultValue = "false") Boolean includeRetired) {
-        List<AppointmentServiceAttributeType> attributeTypes = appointmentServiceAttributeTypeService.getAllAttributeTypes(includeRetired);
-        return appointmentServiceMapper.constructAttributeTypeListResponse(attributeTypes);
+  @RequestMapping(method = RequestMethod.GET)
+  @ResponseBody
+  public List<AppointmentServiceAttributeTypeResponse> getAllAttributeTypes(
+      @RequestParam(value = "includeRetired", required = false, defaultValue = "false")
+          Boolean includeRetired) {
+    List<AppointmentServiceAttributeType> attributeTypes =
+        appointmentServiceAttributeTypeService.getAllAttributeTypes(includeRetired);
+    return appointmentServiceMapper.constructAttributeTypeListResponse(attributeTypes);
+  }
+
+  @RequestMapping(value = "/{uuid}", method = RequestMethod.GET)
+  @ResponseBody
+  public ResponseEntity<AppointmentServiceAttributeTypeResponse> getAttributeTypeByUuid(
+      @PathVariable("uuid") String uuid) {
+    AppointmentServiceAttributeType attributeType =
+        appointmentServiceAttributeTypeService.getAttributeTypeByUuid(uuid);
+    if (attributeType == null) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
-    @RequestMapping(value = "/{uuid}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<AppointmentServiceAttributeTypeResponse> getAttributeTypeByUuid(@PathVariable("uuid") String uuid) {
-        AppointmentServiceAttributeType attributeType = appointmentServiceAttributeTypeService.getAttributeTypeByUuid(uuid);
-        if (attributeType == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        AppointmentServiceAttributeTypeResponse response = appointmentServiceMapper.constructAttributeTypeResponse(attributeType);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    AppointmentServiceAttributeTypeResponse response =
+        appointmentServiceMapper.constructAttributeTypeResponse(attributeType);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
 }

@@ -9,11 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.annotation.Authorized;
@@ -21,28 +19,28 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirServiceRequestDao<T extends OpenmrsObject & Auditable> extends FhirDao<T> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ORDERS)
-	T get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ORDERS)
-	List<T> get(@Nonnull Collection<String> uuids);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ORDERS)
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ORDERS)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized({ PrivilegeConstants.ADD_ORDERS, PrivilegeConstants.EDIT_ORDERS })
-	T createOrUpdate(@Nonnull T newEntry);
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_ORDERS)
-	T delete(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ORDERS)
+  T get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ORDERS)
+  List<T> get(@Nonnull Collection<String> uuids);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ORDERS)
+  List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ORDERS)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized({PrivilegeConstants.ADD_ORDERS, PrivilegeConstants.EDIT_ORDERS})
+  T createOrUpdate(@Nonnull T newEntry);
+
+  @Override
+  @Authorized(PrivilegeConstants.DELETE_ORDERS)
+  T delete(@Nonnull String uuid);
 }

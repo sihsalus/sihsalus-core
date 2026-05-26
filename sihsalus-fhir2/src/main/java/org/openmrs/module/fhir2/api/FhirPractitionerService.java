@@ -14,6 +14,6 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
 
 public interface FhirPractitionerService extends FhirService<Practitioner> {
-	
-	IBundleProvider searchForPractitioners(PractitionerSearchParams practitionerSearchParams);
+
+  IBundleProvider searchForPractitioners(PractitionerSearchParams practitionerSearchParams);
 }

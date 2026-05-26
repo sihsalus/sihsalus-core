@@ -9,10 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.annotation.Nonnull;
-
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,28 +25,31 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirPatientIdentifierSystemServiceImpl implements FhirPatientIdentifierSystemService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private FhirPatientIdentifierSystemDao dao;
-	
-	@Override
-	@Cacheable("fhir2GetFhirUrlForIdentifier")
-	public String getUrlByPatientIdentifierType(@Nonnull PatientIdentifierType patientIdentifierType) {
-		return dao.getUrlByPatientIdentifierType(patientIdentifierType);
-	}
-	
-	@Override
-	@Cacheable("fhir2GetFhirPatientIdentifierSystem")
-	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
-	        @Nonnull PatientIdentifierType patientIdentifierType) {
-		return dao.getFhirPatientIdentifierSystem(patientIdentifierType);
-	}
-	
-	@Override
-	@CacheEvict(value = { "fhir2GetFhirUrlForIdentifier", "fhir2GetFhirPatientIdentifierSystem" }, allEntries = true)
-	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
-	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
-		return dao.saveFhirPatientIdentifierSystem(fhirPatientIdentifierSystem);
-	}
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+  private FhirPatientIdentifierSystemDao dao;
+
+  @Override
+  @Cacheable("fhir2GetFhirUrlForIdentifier")
+  public String getUrlByPatientIdentifierType(
+      @Nonnull PatientIdentifierType patientIdentifierType) {
+    return dao.getUrlByPatientIdentifierType(patientIdentifierType);
+  }
+
+  @Override
+  @Cacheable("fhir2GetFhirPatientIdentifierSystem")
+  public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
+      @Nonnull PatientIdentifierType patientIdentifierType) {
+    return dao.getFhirPatientIdentifierSystem(patientIdentifierType);
+  }
+
+  @Override
+  @CacheEvict(
+      value = {"fhir2GetFhirUrlForIdentifier", "fhir2GetFhirPatientIdentifierSystem"},
+      allEntries = true)
+  public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
+      @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
+    return dao.saveFhirPatientIdentifierSystem(fhirPatientIdentifierSystem);
+  }
 }

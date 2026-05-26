@@ -1,17 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.api.impl;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.MedicationDispense;
 import org.openmrs.api.APIException;
@@ -31,74 +30,76 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service("medicationDispenseService")
 @Transactional
-public class MedicationDispenseServiceImpl extends BaseOpenmrsService implements MedicationDispenseService, RefByUuid {
+public class MedicationDispenseServiceImpl extends BaseOpenmrsService
+    implements MedicationDispenseService, RefByUuid {
 
-	@Autowired
-	private MedicationDispenseDAO medicationDispenseDAO;
+  @Autowired private MedicationDispenseDAO medicationDispenseDAO;
 
-	public void setMedicationDispenseDAO(MedicationDispenseDAO conditionDAO) {
-		this.medicationDispenseDAO = conditionDAO;
-	}
+  public void setMedicationDispenseDAO(MedicationDispenseDAO conditionDAO) {
+    this.medicationDispenseDAO = conditionDAO;
+  }
 
-	public MedicationDispenseDAO getMedicationDispenseDAO() {
-		return medicationDispenseDAO;
-	}
+  public MedicationDispenseDAO getMedicationDispenseDAO() {
+    return medicationDispenseDAO;
+  }
 
-	@Override
-	@Transactional(readOnly = true)
-	public MedicationDispense getMedicationDispense(Integer medicationDispenseId) {
-		return medicationDispenseDAO.getMedicationDispense(medicationDispenseId);
-	}
+  @Override
+  @Transactional(readOnly = true)
+  public MedicationDispense getMedicationDispense(Integer medicationDispenseId) {
+    return medicationDispenseDAO.getMedicationDispense(medicationDispenseId);
+  }
 
-	@Override
-	@Transactional(readOnly = true)
-	public MedicationDispense getMedicationDispenseByUuid(String uuid) {
-		return medicationDispenseDAO.getMedicationDispenseByUuid(uuid);
-	}
+  @Override
+  @Transactional(readOnly = true)
+  public MedicationDispense getMedicationDispenseByUuid(String uuid) {
+    return medicationDispenseDAO.getMedicationDispenseByUuid(uuid);
+  }
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<MedicationDispense> getMedicationDispenseByCriteria(MedicationDispenseCriteria criteria) {
-		return medicationDispenseDAO.getMedicationDispenseByCriteria(criteria);
-	}
+  @Override
+  @Transactional(readOnly = true)
+  public List<MedicationDispense> getMedicationDispenseByCriteria(
+      MedicationDispenseCriteria criteria) {
+    return medicationDispenseDAO.getMedicationDispenseByCriteria(criteria);
+  }
 
-	@Override
-	public MedicationDispense saveMedicationDispense(MedicationDispense medicationDispense) {
-		return medicationDispenseDAO.saveMedicationDispense(medicationDispense);
-	}
+  @Override
+  public MedicationDispense saveMedicationDispense(MedicationDispense medicationDispense) {
+    return medicationDispenseDAO.saveMedicationDispense(medicationDispense);
+  }
 
-	@Override
-	public MedicationDispense voidMedicationDispense(MedicationDispense medicationDispense, String reason) {
-		if (StringUtils.isBlank(reason)) {
-			throw new IllegalArgumentException("voidReason cannot be null or empty");
-		}
-		// Actual voiding logic is done in the BaseVoidHandler
-		return saveMedicationDispense(medicationDispense);
-	}
+  @Override
+  public MedicationDispense voidMedicationDispense(
+      MedicationDispense medicationDispense, String reason) {
+    if (StringUtils.isBlank(reason)) {
+      throw new IllegalArgumentException("voidReason cannot be null or empty");
+    }
+    // Actual voiding logic is done in the BaseVoidHandler
+    return saveMedicationDispense(medicationDispense);
+  }
 
-	@Override
-	public MedicationDispense unvoidMedicationDispense(MedicationDispense medicationDispense) {
-		// Actual un-voiding logic is done in the BaseUnvoidHandler
-		return saveMedicationDispense(medicationDispense);
-	}
+  @Override
+  public MedicationDispense unvoidMedicationDispense(MedicationDispense medicationDispense) {
+    // Actual un-voiding logic is done in the BaseUnvoidHandler
+    return saveMedicationDispense(medicationDispense);
+  }
 
-	@Override
-	public void purgeMedicationDispense(MedicationDispense medicationDispense) throws APIException {
-		medicationDispenseDAO.deleteMedicationDispense(medicationDispense);
-	}
+  @Override
+  public void purgeMedicationDispense(MedicationDispense medicationDispense) throws APIException {
+    medicationDispenseDAO.deleteMedicationDispense(medicationDispense);
+  }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T getRefByUuid(Class<T> type, String uuid) {
-		if (MedicationDispense.class.equals(type)) {
-			return (T) getMedicationDispenseByUuid(uuid);
-		}
-		throw new APIException("Unsupported type for getRefByUuid: " + (type != null ? type.getName() : "null"));
-	}
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> T getRefByUuid(Class<T> type, String uuid) {
+    if (MedicationDispense.class.equals(type)) {
+      return (T) getMedicationDispenseByUuid(uuid);
+    }
+    throw new APIException(
+        "Unsupported type for getRefByUuid: " + (type != null ? type.getName() : "null"));
+  }
 
-	@Override
-	public List<Class<?>> getRefTypes() {
-		return Arrays.asList(MedicationDispense.class);
-	}
-
+  @Override
+  public List<Class<?>> getRefTypes() {
+    return Arrays.asList(MedicationDispense.class);
+  }
 }

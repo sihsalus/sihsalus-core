@@ -10,37 +10,39 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MedicationRequestPriorityTranslatorImpl implements MedicationRequestPriorityTranslator {
-	
-	@Override
-	public MedicationRequest.MedicationRequestPriority toFhirResource(@Nonnull DrugOrder.Urgency urgency) {
-		switch (urgency) {
-			case ROUTINE:
-			case ON_SCHEDULED_DATE:
-				return MedicationRequest.MedicationRequestPriority.ROUTINE;
-			case STAT:
-				return MedicationRequest.MedicationRequestPriority.STAT;
-			default:
-				return MedicationRequest.MedicationRequestPriority.NULL;
-		}
-	}
-	
-	@Override
-	public DrugOrder.Urgency toOpenmrsType(@Nonnull MedicationRequest.MedicationRequestPriority medicationRequestPriority) {
-		switch (medicationRequestPriority) {
-			case ROUTINE:
-				return DrugOrder.Urgency.ROUTINE;
-			case STAT:
-				return DrugOrder.Urgency.STAT;
-			default:
-				return null;
-		}
-	}
+public class MedicationRequestPriorityTranslatorImpl
+    implements MedicationRequestPriorityTranslator {
+
+  @Override
+  public MedicationRequest.MedicationRequestPriority toFhirResource(
+      @Nonnull DrugOrder.Urgency urgency) {
+    switch (urgency) {
+      case ROUTINE:
+      case ON_SCHEDULED_DATE:
+        return MedicationRequest.MedicationRequestPriority.ROUTINE;
+      case STAT:
+        return MedicationRequest.MedicationRequestPriority.STAT;
+      default:
+        return MedicationRequest.MedicationRequestPriority.NULL;
+    }
+  }
+
+  @Override
+  public DrugOrder.Urgency toOpenmrsType(
+      @Nonnull MedicationRequest.MedicationRequestPriority medicationRequestPriority) {
+    switch (medicationRequestPriority) {
+      case ROUTINE:
+        return DrugOrder.Urgency.ROUTINE;
+      case STAT:
+        return DrugOrder.Urgency.STAT;
+      default:
+        return null;
+    }
+  }
 }

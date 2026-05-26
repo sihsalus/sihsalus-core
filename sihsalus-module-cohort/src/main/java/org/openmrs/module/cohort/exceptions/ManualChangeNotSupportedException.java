@@ -12,25 +12,25 @@ package org.openmrs.module.cohort.exceptions;
 import org.openmrs.api.APIException;
 
 public class ManualChangeNotSupportedException extends APIException {
-	
-	/**
-	 * General constructor to give the end user a helpful message that relates to why this error
-	 * occurred.
-	 *
-	 * @param message helpful message string for the end user
-	 */
-	public ManualChangeNotSupportedException(String message) {
-		super(message);
-	}
-	
-	/**
-	 * General constructor to give the end user a helpful message and to also propagate the parent error
-	 * exception message.
-	 *
-	 * @param message helpful message string for the end user
-	 * @param cause the parent exception cause that this APIException is wrapping around
-	 */
-	public ManualChangeNotSupportedException(String message, Throwable cause) {
-		super(message, cause);
-	}
+
+  /**
+   * General constructor to give the end user a helpful message that relates to why this error
+   * occurred.
+   *
+   * @param message helpful message string for the end user
+   */
+  public ManualChangeNotSupportedException(String message) {
+    super(message);
+  }
+
+  /**
+   * General constructor to give the end user a helpful message and to also propagate the parent
+   * error exception message.
+   *
+   * @param message helpful message string for the end user
+   * @param cause the parent exception cause that this APIException is wrapping around
+   */
+  public ManualChangeNotSupportedException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

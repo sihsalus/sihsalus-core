@@ -11,24 +11,21 @@ package org.openmrs.module.fhir2.api.spi;
 
 import java.util.EventListener;
 
-/**
- * This is intended for internal module use only
- */
+/** This is intended for internal module use only */
 public interface ModuleLifecycleListener extends EventListener {
-	
-	default void started() {
-	};
-	
-	default void willRefresh() {
-	};
-	
-	default void refreshed() {
-	};
-	
-	default void willStop() {
-	};
-	
-	default void stopped() {
-	};
-	
+
+  default void started() {}
+  ;
+
+  default void willRefresh() {}
+  ;
+
+  default void refreshed() {}
+  ;
+
+  default void willStop() {}
+  ;
+
+  default void stopped() {}
+  ;
 }

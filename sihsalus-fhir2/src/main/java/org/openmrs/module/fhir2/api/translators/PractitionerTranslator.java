@@ -10,39 +10,38 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Practitioner;
 
 public interface PractitionerTranslator<T> extends OpenmrsFhirUpdatableTranslator<T, Practitioner> {
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to an existing generic type <T> it can be
-	 * {@link org.openmrs.Provider} or {@link org.openmrs.User}
-	 * 
-	 * @param existingUserOrProvider the existingUserOrProvider to update
-	 * @param practitioner the FHIR practitioner to map
-	 * @return an updated version of the OpenMrs existingUserOrProvider
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull T existingUserOrProvider, @Nonnull Practitioner practitioner);
-	
-	/**
-	 * Maps {@link org.openmrs.Provider} or {@link org.openmrs.User} to a
-	 * {@link org.hl7.fhir.r4.model.Practitioner} resource
-	 * 
-	 * @param userOrProvider the OpenMRS userOrProvider to translate
-	 * @return the corresponding FHIR practitioner resource
-	 */
-	@Override
-	Practitioner toFhirResource(@Nonnull T userOrProvider);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to {@link org.openmrs.Provider} or
-	 * {@link org.openmrs.User}
-	 * 
-	 * @param practitioner the FHIR practitioner to translate
-	 * @return the corresponding OpenMrs provider
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull Practitioner practitioner);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to an existing generic type <T> it can be
+   * {@link org.openmrs.Provider} or {@link org.openmrs.User}
+   *
+   * @param existingUserOrProvider the existingUserOrProvider to update
+   * @param practitioner the FHIR practitioner to map
+   * @return an updated version of the OpenMrs existingUserOrProvider
+   */
+  @Override
+  T toOpenmrsType(@Nonnull T existingUserOrProvider, @Nonnull Practitioner practitioner);
+
+  /**
+   * Maps {@link org.openmrs.Provider} or {@link org.openmrs.User} to a {@link
+   * org.hl7.fhir.r4.model.Practitioner} resource
+   *
+   * @param userOrProvider the OpenMRS userOrProvider to translate
+   * @return the corresponding FHIR practitioner resource
+   */
+  @Override
+  Practitioner toFhirResource(@Nonnull T userOrProvider);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to {@link org.openmrs.Provider} or {@link
+   * org.openmrs.User}
+   *
+   * @param practitioner the FHIR practitioner to translate
+   * @return the corresponding OpenMrs provider
+   */
+  @Override
+  T toOpenmrsType(@Nonnull Practitioner practitioner);
 }

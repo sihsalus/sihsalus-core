@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Type;
@@ -21,32 +20,33 @@ import org.openmrs.module.fhir2.api.translators.ObservationEffectiveDatetimeTran
 import org.springframework.stereotype.Component;
 
 @Component
-public class ObservationEffectiveDatetimeTranslatorImpl implements ObservationEffectiveDatetimeTranslator {
-	
-	@Override
-	public Type toFhirResource(@Nonnull Obs obs) {
-		if (obs == null) {
-			return null;
-		}
-		
-		if (obs.getObsDatetime() != null) {
-			return (new DateTimeType(obs.getObsDatetime()));
-		}
-		
-		return null;
-	}
-	
-	@Override
-	public Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Type resource) {
-		notNull(obs, "The existing Obs object should not be null");
-		notNull(resource, "The DateTime object should not be null");
-		
-		if (resource instanceof DateTimeType) {
-			obs.setObsDatetime(((DateTimeType) resource).getValue());
-		} else if (resource instanceof InstantType) {
-			obs.setObsDatetime(((InstantType) resource).getValue());
-		}
-		
-		return obs;
-	}
+public class ObservationEffectiveDatetimeTranslatorImpl
+    implements ObservationEffectiveDatetimeTranslator {
+
+  @Override
+  public Type toFhirResource(@Nonnull Obs obs) {
+    if (obs == null) {
+      return null;
+    }
+
+    if (obs.getObsDatetime() != null) {
+      return (new DateTimeType(obs.getObsDatetime()));
+    }
+
+    return null;
+  }
+
+  @Override
+  public Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Type resource) {
+    notNull(obs, "The existing Obs object should not be null");
+    notNull(resource, "The DateTime object should not be null");
+
+    if (resource instanceof DateTimeType) {
+      obs.setObsDatetime(((DateTimeType) resource).getValue());
+    } else if (resource instanceof InstantType) {
+      obs.setObsDatetime(((InstantType) resource).getValue());
+    }
+
+    return obs;
+  }
 }

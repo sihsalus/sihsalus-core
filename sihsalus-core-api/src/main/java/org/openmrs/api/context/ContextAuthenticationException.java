@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.api.context;
 
@@ -17,25 +17,24 @@ import org.openmrs.api.APIException;
  */
 public class ContextAuthenticationException extends APIException {
 
-	public static final long serialVersionUID = 22323L;
+  public static final long serialVersionUID = 22323L;
 
-	public ContextAuthenticationException() {
-		super();
-	}
+  public ContextAuthenticationException() {
+    super();
+  }
 
-	/**
-	 * @since 2.3.0
-	 */
-	public ContextAuthenticationException(String message, Throwable cause) {
-		super(message, cause);
-	}
+  /**
+   * @since 2.3.0
+   */
+  public ContextAuthenticationException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-	public ContextAuthenticationException(String message) {
-		super(message);
-	}
+  public ContextAuthenticationException(String message) {
+    super(message);
+  }
 
-	public ContextAuthenticationException(Throwable cause) {
-		super(cause);
-	}
-
+  public ContextAuthenticationException(Throwable cause) {
+    super(cause);
+  }
 }

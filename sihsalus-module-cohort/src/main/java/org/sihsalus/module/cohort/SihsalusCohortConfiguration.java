@@ -36,85 +36,90 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackageClasses = {CohortM.class, CohortMainRestController.class})
 public class SihsalusCohortConfiguration {
 
-    @Bean
-    HibernateMappingContributor cohortHibernateMappingContributor() {
-        return () -> List.of(
-                "CohortMemberAttribute.hbm.xml",
-                "CohortMemberAttributeType.hbm.xml",
-                "CohortAttribute.hbm.xml",
-                "CohortAttributeType.hbm.xml");
-    }
+  @Bean
+  HibernateMappingContributor cohortHibernateMappingContributor() {
+    return () ->
+        List.of(
+            "CohortMemberAttribute.hbm.xml",
+            "CohortMemberAttributeType.hbm.xml",
+            "CohortAttribute.hbm.xml",
+            "CohortAttributeType.hbm.xml");
+  }
 
-    @Bean
-    GenericDao<CohortM> cohortDao(SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
-        return new CohortDao(sessionFactory, searchQueryHandler);
-    }
+  @Bean
+  GenericDao<CohortM> cohortDao(
+      SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
+    return new CohortDao(sessionFactory, searchQueryHandler);
+  }
 
-    @Bean
-    GenericDao<CohortAttribute> cohortAttributeDao(
-            SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
-        return new CohortAttributeDao(sessionFactory, searchQueryHandler);
-    }
+  @Bean
+  GenericDao<CohortAttribute> cohortAttributeDao(
+      SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
+    return new CohortAttributeDao(sessionFactory, searchQueryHandler);
+  }
 
-    @Bean
-    GenericDao<CohortAttributeType> cohortAttributeTypeDao(
-            SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
-        return new CohortAttributeTypeDao(sessionFactory, searchQueryHandler);
-    }
+  @Bean
+  GenericDao<CohortAttributeType> cohortAttributeTypeDao(
+      SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
+    return new CohortAttributeTypeDao(sessionFactory, searchQueryHandler);
+  }
 
-    @Bean
-    GenericDao<CohortMember> cohortMemberDao(SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
-        return new CohortMemberDao(sessionFactory, searchQueryHandler);
-    }
+  @Bean
+  GenericDao<CohortMember> cohortMemberDao(
+      SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
+    return new CohortMemberDao(sessionFactory, searchQueryHandler);
+  }
 
-    @Bean
-    GenericDao<CohortMemberAttributeType> cohortMemberAttributeTypeDao(
-            SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
-        return new CohortMemberAttributeTypeDao(sessionFactory, searchQueryHandler);
-    }
+  @Bean
+  GenericDao<CohortMemberAttributeType> cohortMemberAttributeTypeDao(
+      SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
+    return new CohortMemberAttributeTypeDao(sessionFactory, searchQueryHandler);
+  }
 
-    @Bean
-    GenericDao<CohortMemberAttribute> cohortMemberAttributeDao(
-            SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
-        return new CohortMemberAttributeDao(sessionFactory, searchQueryHandler);
-    }
+  @Bean
+  GenericDao<CohortMemberAttribute> cohortMemberAttributeDao(
+      SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
+    return new CohortMemberAttributeDao(sessionFactory, searchQueryHandler);
+  }
 
-    @Bean
-    GenericDao<CohortType> cohortTypeDao(SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
-        return new CohortTypeDao(sessionFactory, searchQueryHandler);
-    }
+  @Bean
+  GenericDao<CohortType> cohortTypeDao(
+      SessionFactory sessionFactory, SearchQueryHandler searchQueryHandler) {
+    return new CohortTypeDao(sessionFactory, searchQueryHandler);
+  }
 
-    @Bean("cohort.cohortService")
-    CohortService cohortService(
-            GenericDao<CohortM> cohortDao,
-            GenericDao<CohortAttribute> cohortAttributeDao,
-            GenericDao<CohortAttributeType> cohortAttributeTypeDao) {
-        return new CohortServiceImpl(cohortDao, cohortAttributeDao, cohortAttributeTypeDao);
-    }
+  @Bean("cohort.cohortService")
+  CohortService cohortService(
+      GenericDao<CohortM> cohortDao,
+      GenericDao<CohortAttribute> cohortAttributeDao,
+      GenericDao<CohortAttributeType> cohortAttributeTypeDao) {
+    return new CohortServiceImpl(cohortDao, cohortAttributeDao, cohortAttributeTypeDao);
+  }
 
-    @Bean("cohort.cohortMemberService")
-    CohortMemberService cohortMemberService(
-            GenericDao<CohortMember> cohortMemberDao,
-            GenericDao<CohortMemberAttributeType> cohortMemberAttributeTypeDao,
-            GenericDao<CohortMemberAttribute> cohortMemberAttributeDao) {
-        return new CohortMemberServiceImpl(cohortMemberDao, cohortMemberAttributeTypeDao, cohortMemberAttributeDao);
-    }
+  @Bean("cohort.cohortMemberService")
+  CohortMemberService cohortMemberService(
+      GenericDao<CohortMember> cohortMemberDao,
+      GenericDao<CohortMemberAttributeType> cohortMemberAttributeTypeDao,
+      GenericDao<CohortMemberAttribute> cohortMemberAttributeDao) {
+    return new CohortMemberServiceImpl(
+        cohortMemberDao, cohortMemberAttributeTypeDao, cohortMemberAttributeDao);
+  }
 
-    @Bean("cohort.cohortTypeService")
-    CohortTypeService cohortTypeService(GenericDao<CohortType> cohortTypeDao) {
-        return new CohortTypeServiceImpl(cohortTypeDao);
-    }
+  @Bean("cohort.cohortTypeService")
+  CohortTypeService cohortTypeService(GenericDao<CohortType> cohortTypeDao) {
+    return new CohortTypeServiceImpl(cohortTypeDao);
+  }
 
-    @Bean
-    SmartInitializingSingleton cohortServiceRegistrar(
-            ServiceContext serviceContext,
-            CohortService cohortService,
-            CohortMemberService cohortMemberService,
-            CohortTypeService cohortTypeService) {
-        return () -> {
-            serviceContext.setService(CohortService.class, cohortService);
-            serviceContext.setService(CohortMemberService.class, cohortMemberService);
-            serviceContext.setService(CohortTypeService.class, cohortTypeService);
-        };
-    }
+  @Bean
+  SmartInitializingSingleton cohortServiceRegistrar(
+      ServiceContext serviceContext,
+      CohortService cohortService,
+      CohortMemberService cohortMemberService,
+      CohortTypeService cohortTypeService) {
+    return () -> {
+      serviceContext.setService(CohortService.class, cohortService);
+      serviceContext.setService(CohortMemberService.class, cohortMemberService);
+      serviceContext.setService(CohortTypeService.class, cohortTypeService);
+    };
+  }
 }

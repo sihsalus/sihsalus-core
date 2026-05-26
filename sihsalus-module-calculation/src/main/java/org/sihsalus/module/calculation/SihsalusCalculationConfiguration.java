@@ -18,43 +18,45 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SihsalusCalculationConfiguration {
 
-    @Bean
-    HibernateMappingContributor calculationHibernateMappingContributor() {
-        return () -> List.of("org/openmrs/calculation/CalculationRegistration.hbm.xml");
-    }
+  @Bean
+  HibernateMappingContributor calculationHibernateMappingContributor() {
+    return () -> List.of("org/openmrs/calculation/CalculationRegistration.hbm.xml");
+  }
 
-    @Bean
-    CalculationRegistrationDAO calculationRegistrationDao(DbSessionFactory dbSessionFactory) {
-        HibernateCalculationRegistrationDAO dao = new HibernateCalculationRegistrationDAO();
-        dao.setSessionFactory(dbSessionFactory);
-        return dao;
-    }
+  @Bean
+  CalculationRegistrationDAO calculationRegistrationDao(DbSessionFactory dbSessionFactory) {
+    HibernateCalculationRegistrationDAO dao = new HibernateCalculationRegistrationDAO();
+    dao.setSessionFactory(dbSessionFactory);
+    return dao;
+  }
 
-    @Bean
-    CalculationRegistrationService calculationRegistrationService(CalculationRegistrationDAO calculationRegistrationDao) {
-        CalculationRegistrationServiceImpl service = new CalculationRegistrationServiceImpl();
-        service.setDao(calculationRegistrationDao);
-        return service;
-    }
+  @Bean
+  CalculationRegistrationService calculationRegistrationService(
+      CalculationRegistrationDAO calculationRegistrationDao) {
+    CalculationRegistrationServiceImpl service = new CalculationRegistrationServiceImpl();
+    service.setDao(calculationRegistrationDao);
+    return service;
+  }
 
-    @Bean
-    PatientCalculationService patientCalculationService() {
-        return new PatientCalculationServiceImpl();
-    }
+  @Bean
+  PatientCalculationService patientCalculationService() {
+    return new PatientCalculationServiceImpl();
+  }
 
-    @Bean
-    ImplementationConfiguredCalculationProvider implementationConfiguredCalculationProvider() {
-        return new ImplementationConfiguredCalculationProvider();
-    }
+  @Bean
+  ImplementationConfiguredCalculationProvider implementationConfiguredCalculationProvider() {
+    return new ImplementationConfiguredCalculationProvider();
+  }
 
-    @Bean
-    SmartInitializingSingleton calculationServiceRegistrar(
-            ServiceContext serviceContext,
-            PatientCalculationService patientCalculationService,
-            CalculationRegistrationService calculationRegistrationService) {
-        return () -> {
-            serviceContext.setService(PatientCalculationService.class, patientCalculationService);
-            serviceContext.setService(CalculationRegistrationService.class, calculationRegistrationService);
-        };
-    }
+  @Bean
+  SmartInitializingSingleton calculationServiceRegistrar(
+      ServiceContext serviceContext,
+      PatientCalculationService patientCalculationService,
+      CalculationRegistrationService calculationRegistrationService) {
+    return () -> {
+      serviceContext.setService(PatientCalculationService.class, patientCalculationService);
+      serviceContext.setService(
+          CalculationRegistrationService.class, calculationRegistrationService);
+    };
+  }
 }

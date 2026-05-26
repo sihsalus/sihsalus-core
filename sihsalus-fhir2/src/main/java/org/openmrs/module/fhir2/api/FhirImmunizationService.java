@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.hl7.fhir.r4.model.Immunization;
 
 public interface FhirImmunizationService extends FhirService<Immunization> {
-	
-	IBundleProvider searchImmunizations(ReferenceAndListParam patientParam, SortSpec sort);
-	
+
+  IBundleProvider searchImmunizations(ReferenceAndListParam patientParam, SortSpec sort);
 }

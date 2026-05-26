@@ -15,276 +15,315 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.f.Action1;
 import org.openmrs.module.billing.api.model.CashierSettings;
 
-/**
- * Helper class to load and save the inventory module global settings.
- */
+/** Helper class to load and save the inventory module global settings. */
 public class ModuleSettings {
-	
-	public static final String RECEIPT_REPORT_ID_PROPERTY = "billing.defaultReceiptReportId";
-	
-	public static final String CASHIER_SHIFT_REPORT_ID_PROPERTY = "billing.defaultShiftReportId";
-	
-	public static final String TIMESHEET_REQUIRED_PROPERTY = "billing.timesheetRequired";
-	
-	public static final String ROUNDING_MODE_PROPERTY = "billing.roundingMode";
-	
-	public static final String ROUND_TO_NEAREST_PROPERTY = "billing.roundToNearest";
-	
-	public static final String ROUNDING_ITEM_ID = "billing.roundingItemId";
-	
-	public static final String ROUNDING_DEPT_ID = "billing.roundingDeptId";
-	
-	public static final String SYSTEM_RECEIPT_NUMBER_GENERATOR = "billing.systemReceiptNumberGenerator";
-	
-	public static final String ADJUSTMENT_REASON_FIELD = "billing.adjustmentReasonField";
-	
-	public static final String ALLOW_BILL_ADJUSTMENT = "billing.allowBillAdjustments";
-	
-	public static final String AUTOFILL_PAYMENT_AMOUNT = "billing.autofillPaymentAmount";
-	
-	public static final String DISCOUNT_ENABLED = "billing.discountEnabled";
-	
-	public static final String REFUND_ENABLED = "billing.refundEnabled";
-	
-	public static final String PATIENT_DASHBOARD_2_BILL_COUNT = "billing.patientDashboard2BillCount";
-	
-	private static final Integer DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT = 4;
-	
-	public static final String DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY = "billing.reports.departmentCollections";
-	
-	public static final String DEPARTMENT_REVENUE_REPORT_ID_PROPERTY = "billing.reports.departmentRevenue";
-	
-	public static final String SHIFT_SUMMARY_REPORT_ID_PROPERTY = "billing.reports.shiftSummary";
-	
-	public static final String DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY = "billing.reports.dailyShiftSummary";
-	
-	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "billing.reports.paymentsByPaymentMode";
-	
-	private static final AdministrationService administrationService;
-	
-	static {
-		administrationService = Context.getAdministrationService();
-	}
-	
-	protected ModuleSettings() {
-	}
-	
-	public static Integer getReceiptReportId() {
-		return getIntProperty(RECEIPT_REPORT_ID_PROPERTY);
-	}
-	
-	public static CashierSettings loadSettings() {
-		final CashierSettings cashierSettings = new CashierSettings();
-		
-		getBoolProperty(ADJUSTMENT_REASON_FIELD, Boolean.FALSE, new Action1<Boolean>() {
-			
-			@Override
-			public void apply(Boolean parameter) {
-				cashierSettings.setAdjustmentReasonField(parameter);
-			}
-		});
-		
-		getBoolProperty(ALLOW_BILL_ADJUSTMENT, Boolean.FALSE, new Action1<Boolean>() {
-			
-			@Override
-			public void apply(Boolean parameter) {
-				cashierSettings.setAllowBillAdjustment(parameter);
-			}
-		});
-		
-		getBoolProperty(AUTOFILL_PAYMENT_AMOUNT, Boolean.FALSE, new Action1<Boolean>() {
-			
-			@Override
-			public void apply(Boolean parameter) {
-				cashierSettings.setAutoFillPaymentAmount(parameter);
-			}
-		});
-		
-		getIntProperty(ROUND_TO_NEAREST_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setCashierRoundingToNearest(parameter);
-			}
-		});
-		
-		getIntProperty(CASHIER_SHIFT_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setDefaultShiftReportId(parameter);
-			}
-		});
-		
-		getIntProperty(RECEIPT_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setDefaultReceiptReportId(parameter);
-			}
-		});
-		
-		String property = administrationService.getGlobalProperty(ROUNDING_MODE_PROPERTY);
-		if (!StringUtils.isEmpty(property)) {
-			cashierSettings.setCashierRoundingMode(property);
-		}
-		
-		getBoolProperty(TIMESHEET_REQUIRED_PROPERTY, new Action1<Boolean>() {
-			
-			@Override
-			public void apply(Boolean parameter) {
-				cashierSettings.setCashierTimesheetRequired(parameter);
-			}
-		});
-		
-		getIntProperty(PATIENT_DASHBOARD_2_BILL_COUNT, DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setPatientDashboard2BillCount(parameter);
-			}
-		});
-		
-		getIntProperty(DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setDepartmentCollectionsReportId(parameter);
-			}
-		});
-		
-		getIntProperty(DEPARTMENT_REVENUE_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setDepartmentRevenueReportId(parameter);
-			}
-		});
-		
-		getIntProperty(SHIFT_SUMMARY_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setShiftSummaryReportId(parameter);
-			}
-		});
-		
-		getIntProperty(DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setDailyShiftSummaryReportId(parameter);
-			}
-		});
-		
-		getIntProperty(PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setPaymentsByPaymentModeReportId(parameter);
-			}
-		});
-		
-		return cashierSettings;
-	}
-	
-	public static void saveSettings(CashierSettings cashierSettings) {
-		if (cashierSettings == null) {
-			throw new IllegalArgumentException("The settings to save must be defined.");
-		}
-		
-		setBoolProperty(ADJUSTMENT_REASON_FIELD, cashierSettings.getAdjustmentReasonField());
-		setBoolProperty(ALLOW_BILL_ADJUSTMENT, cashierSettings.getAllowBillAdjustment());
-		setBoolProperty(AUTOFILL_PAYMENT_AMOUNT, cashierSettings.getAutoFillPaymentAmount());
-		setIntProperty(CASHIER_SHIFT_REPORT_ID_PROPERTY, cashierSettings.getDefaultShiftReportId());
-		setIntProperty(ROUND_TO_NEAREST_PROPERTY, cashierSettings.getCashierRoundingToNearest());
-		setIntProperty(RECEIPT_REPORT_ID_PROPERTY, cashierSettings.getDefaultReceiptReportId());
-		setStringProperty(ROUNDING_MODE_PROPERTY, cashierSettings.getCashierRoundingMode());
-		setBoolProperty(TIMESHEET_REQUIRED_PROPERTY, cashierSettings.getCashierTimesheetRequired());
-		setIntProperty(PATIENT_DASHBOARD_2_BILL_COUNT, cashierSettings.getPatientDashboard2BillCount());
-		setIntProperty(DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY, cashierSettings.getDepartmentCollectionsReportId());
-		setIntProperty(DEPARTMENT_REVENUE_REPORT_ID_PROPERTY, cashierSettings.getDepartmentRevenueReportId());
-		setIntProperty(SHIFT_SUMMARY_REPORT_ID_PROPERTY, cashierSettings.getShiftSummaryReportId());
-		setIntProperty(DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY, cashierSettings.getDailyShiftSummaryReportId());
-		setIntProperty(PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY, cashierSettings.getPaymentsByPaymentModeReportId());
-	}
-	
-	// TODO: These functions should be moved to a commons-level base class for module settings classes
-	private static Boolean getBoolProperty(String propertyName) {
-		Boolean result = null;
-		String property = administrationService.getGlobalProperty(propertyName);
-		if (!StringUtils.isEmpty(property)) {
-			result = Boolean.parseBoolean(property);
-		}
-		
-		return result;
-	}
-	
-	private static void getBoolProperty(String propertyName, Action1<Boolean> action) {
-		getBoolProperty(propertyName, null, action);
-	}
-	
-	private static void getBoolProperty(String propertyName, Boolean defaultValue, Action1<Boolean> action) {
-		String property = administrationService.getGlobalProperty(propertyName);
-		if (!StringUtils.isEmpty(property)) {
-			action.apply(Boolean.parseBoolean(property));
-		} else if (defaultValue != null) {
-			action.apply(defaultValue);
-		}
-	}
-	
-	private static void setBoolProperty(String propertyName, Boolean value) {
-		if (Boolean.TRUE.equals(value)) {
-			administrationService.setGlobalProperty(propertyName, Boolean.TRUE.toString());
-		} else {
-			administrationService.setGlobalProperty(propertyName, Boolean.FALSE.toString());
-		}
-	}
-	
-	private static Integer getIntProperty(String propertyName) {
-		String property = administrationService.getGlobalProperty(propertyName);
-		return parseIntegerProperty(property);
-	}
-	
-	private static void getIntProperty(String propertyName, Action1<Integer> action) {
-		getIntProperty(propertyName, null, action);
-	}
-	
-	private static void getIntProperty(String propertyName, Integer defaultValue, Action1<Integer> action) {
-		String property = administrationService.getGlobalProperty(propertyName);
-		Integer parsedValue = parseIntegerProperty(property);
-		if (parsedValue != null) {
-			action.apply(parsedValue);
-		} else if (defaultValue != null) {
-			action.apply(defaultValue);
-		}
-	}
 
-	private static Integer parseIntegerProperty(String property) {
-		if (StringUtils.isEmpty(property)) {
-			return null;
-		}
-		try {
-			return Integer.parseInt(property);
-		}
-		catch (NumberFormatException e) {
-			return null;
-		}
-	}
-	
-	private static void setIntProperty(String propertyName, Integer value) {
-		if (value != null) {
-			administrationService.setGlobalProperty(propertyName, value.toString());
-		} else {
-			administrationService.setGlobalProperty(propertyName, "");
-		}
-	}
-	
-	private static void setStringProperty(String propertyName, String value) {
-		if (value != null) {
-			administrationService.setGlobalProperty(propertyName, value);
-		} else {
-			administrationService.setGlobalProperty(propertyName, "");
-		}
-	}
+  public static final String RECEIPT_REPORT_ID_PROPERTY = "billing.defaultReceiptReportId";
+
+  public static final String CASHIER_SHIFT_REPORT_ID_PROPERTY = "billing.defaultShiftReportId";
+
+  public static final String TIMESHEET_REQUIRED_PROPERTY = "billing.timesheetRequired";
+
+  public static final String ROUNDING_MODE_PROPERTY = "billing.roundingMode";
+
+  public static final String ROUND_TO_NEAREST_PROPERTY = "billing.roundToNearest";
+
+  public static final String ROUNDING_ITEM_ID = "billing.roundingItemId";
+
+  public static final String ROUNDING_DEPT_ID = "billing.roundingDeptId";
+
+  public static final String SYSTEM_RECEIPT_NUMBER_GENERATOR =
+      "billing.systemReceiptNumberGenerator";
+
+  public static final String ADJUSTMENT_REASON_FIELD = "billing.adjustmentReasonField";
+
+  public static final String ALLOW_BILL_ADJUSTMENT = "billing.allowBillAdjustments";
+
+  public static final String AUTOFILL_PAYMENT_AMOUNT = "billing.autofillPaymentAmount";
+
+  public static final String DISCOUNT_ENABLED = "billing.discountEnabled";
+
+  public static final String REFUND_ENABLED = "billing.refundEnabled";
+
+  public static final String PATIENT_DASHBOARD_2_BILL_COUNT = "billing.patientDashboard2BillCount";
+
+  private static final Integer DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT = 4;
+
+  public static final String DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY =
+      "billing.reports.departmentCollections";
+
+  public static final String DEPARTMENT_REVENUE_REPORT_ID_PROPERTY =
+      "billing.reports.departmentRevenue";
+
+  public static final String SHIFT_SUMMARY_REPORT_ID_PROPERTY = "billing.reports.shiftSummary";
+
+  public static final String DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY =
+      "billing.reports.dailyShiftSummary";
+
+  public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY =
+      "billing.reports.paymentsByPaymentMode";
+
+  private static final AdministrationService administrationService;
+
+  static {
+    administrationService = Context.getAdministrationService();
+  }
+
+  protected ModuleSettings() {}
+
+  public static Integer getReceiptReportId() {
+    return getIntProperty(RECEIPT_REPORT_ID_PROPERTY);
+  }
+
+  public static CashierSettings loadSettings() {
+    final CashierSettings cashierSettings = new CashierSettings();
+
+    getBoolProperty(
+        ADJUSTMENT_REASON_FIELD,
+        Boolean.FALSE,
+        new Action1<Boolean>() {
+
+          @Override
+          public void apply(Boolean parameter) {
+            cashierSettings.setAdjustmentReasonField(parameter);
+          }
+        });
+
+    getBoolProperty(
+        ALLOW_BILL_ADJUSTMENT,
+        Boolean.FALSE,
+        new Action1<Boolean>() {
+
+          @Override
+          public void apply(Boolean parameter) {
+            cashierSettings.setAllowBillAdjustment(parameter);
+          }
+        });
+
+    getBoolProperty(
+        AUTOFILL_PAYMENT_AMOUNT,
+        Boolean.FALSE,
+        new Action1<Boolean>() {
+
+          @Override
+          public void apply(Boolean parameter) {
+            cashierSettings.setAutoFillPaymentAmount(parameter);
+          }
+        });
+
+    getIntProperty(
+        ROUND_TO_NEAREST_PROPERTY,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setCashierRoundingToNearest(parameter);
+          }
+        });
+
+    getIntProperty(
+        CASHIER_SHIFT_REPORT_ID_PROPERTY,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setDefaultShiftReportId(parameter);
+          }
+        });
+
+    getIntProperty(
+        RECEIPT_REPORT_ID_PROPERTY,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setDefaultReceiptReportId(parameter);
+          }
+        });
+
+    String property = administrationService.getGlobalProperty(ROUNDING_MODE_PROPERTY);
+    if (!StringUtils.isEmpty(property)) {
+      cashierSettings.setCashierRoundingMode(property);
+    }
+
+    getBoolProperty(
+        TIMESHEET_REQUIRED_PROPERTY,
+        new Action1<Boolean>() {
+
+          @Override
+          public void apply(Boolean parameter) {
+            cashierSettings.setCashierTimesheetRequired(parameter);
+          }
+        });
+
+    getIntProperty(
+        PATIENT_DASHBOARD_2_BILL_COUNT,
+        DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setPatientDashboard2BillCount(parameter);
+          }
+        });
+
+    getIntProperty(
+        DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setDepartmentCollectionsReportId(parameter);
+          }
+        });
+
+    getIntProperty(
+        DEPARTMENT_REVENUE_REPORT_ID_PROPERTY,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setDepartmentRevenueReportId(parameter);
+          }
+        });
+
+    getIntProperty(
+        SHIFT_SUMMARY_REPORT_ID_PROPERTY,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setShiftSummaryReportId(parameter);
+          }
+        });
+
+    getIntProperty(
+        DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setDailyShiftSummaryReportId(parameter);
+          }
+        });
+
+    getIntProperty(
+        PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY,
+        new Action1<Integer>() {
+
+          @Override
+          public void apply(Integer parameter) {
+            cashierSettings.setPaymentsByPaymentModeReportId(parameter);
+          }
+        });
+
+    return cashierSettings;
+  }
+
+  public static void saveSettings(CashierSettings cashierSettings) {
+    if (cashierSettings == null) {
+      throw new IllegalArgumentException("The settings to save must be defined.");
+    }
+
+    setBoolProperty(ADJUSTMENT_REASON_FIELD, cashierSettings.getAdjustmentReasonField());
+    setBoolProperty(ALLOW_BILL_ADJUSTMENT, cashierSettings.getAllowBillAdjustment());
+    setBoolProperty(AUTOFILL_PAYMENT_AMOUNT, cashierSettings.getAutoFillPaymentAmount());
+    setIntProperty(CASHIER_SHIFT_REPORT_ID_PROPERTY, cashierSettings.getDefaultShiftReportId());
+    setIntProperty(ROUND_TO_NEAREST_PROPERTY, cashierSettings.getCashierRoundingToNearest());
+    setIntProperty(RECEIPT_REPORT_ID_PROPERTY, cashierSettings.getDefaultReceiptReportId());
+    setStringProperty(ROUNDING_MODE_PROPERTY, cashierSettings.getCashierRoundingMode());
+    setBoolProperty(TIMESHEET_REQUIRED_PROPERTY, cashierSettings.getCashierTimesheetRequired());
+    setIntProperty(PATIENT_DASHBOARD_2_BILL_COUNT, cashierSettings.getPatientDashboard2BillCount());
+    setIntProperty(
+        DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY,
+        cashierSettings.getDepartmentCollectionsReportId());
+    setIntProperty(
+        DEPARTMENT_REVENUE_REPORT_ID_PROPERTY, cashierSettings.getDepartmentRevenueReportId());
+    setIntProperty(SHIFT_SUMMARY_REPORT_ID_PROPERTY, cashierSettings.getShiftSummaryReportId());
+    setIntProperty(
+        DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY, cashierSettings.getDailyShiftSummaryReportId());
+    setIntProperty(
+        PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY,
+        cashierSettings.getPaymentsByPaymentModeReportId());
+  }
+
+  // TODO: These functions should be moved to a commons-level base class for module settings classes
+  private static Boolean getBoolProperty(String propertyName) {
+    Boolean result = null;
+    String property = administrationService.getGlobalProperty(propertyName);
+    if (!StringUtils.isEmpty(property)) {
+      result = Boolean.parseBoolean(property);
+    }
+
+    return result;
+  }
+
+  private static void getBoolProperty(String propertyName, Action1<Boolean> action) {
+    getBoolProperty(propertyName, null, action);
+  }
+
+  private static void getBoolProperty(
+      String propertyName, Boolean defaultValue, Action1<Boolean> action) {
+    String property = administrationService.getGlobalProperty(propertyName);
+    if (!StringUtils.isEmpty(property)) {
+      action.apply(Boolean.parseBoolean(property));
+    } else if (defaultValue != null) {
+      action.apply(defaultValue);
+    }
+  }
+
+  private static void setBoolProperty(String propertyName, Boolean value) {
+    if (Boolean.TRUE.equals(value)) {
+      administrationService.setGlobalProperty(propertyName, Boolean.TRUE.toString());
+    } else {
+      administrationService.setGlobalProperty(propertyName, Boolean.FALSE.toString());
+    }
+  }
+
+  private static Integer getIntProperty(String propertyName) {
+    String property = administrationService.getGlobalProperty(propertyName);
+    return parseIntegerProperty(property);
+  }
+
+  private static void getIntProperty(String propertyName, Action1<Integer> action) {
+    getIntProperty(propertyName, null, action);
+  }
+
+  private static void getIntProperty(
+      String propertyName, Integer defaultValue, Action1<Integer> action) {
+    String property = administrationService.getGlobalProperty(propertyName);
+    Integer parsedValue = parseIntegerProperty(property);
+    if (parsedValue != null) {
+      action.apply(parsedValue);
+    } else if (defaultValue != null) {
+      action.apply(defaultValue);
+    }
+  }
+
+  private static Integer parseIntegerProperty(String property) {
+    if (StringUtils.isEmpty(property)) {
+      return null;
+    }
+    try {
+      return Integer.parseInt(property);
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
+
+  private static void setIntProperty(String propertyName, Integer value) {
+    if (value != null) {
+      administrationService.setGlobalProperty(propertyName, value.toString());
+    } else {
+      administrationService.setGlobalProperty(propertyName, "");
+    }
+  }
+
+  private static void setStringProperty(String propertyName, String value) {
+    if (value != null) {
+      administrationService.setGlobalProperty(propertyName, value);
+    } else {
+      administrationService.setGlobalProperty(propertyName, "");
+    }
+  }
 }

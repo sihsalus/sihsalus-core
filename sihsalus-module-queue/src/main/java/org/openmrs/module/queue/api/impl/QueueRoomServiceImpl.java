@@ -10,11 +10,9 @@
 package org.openmrs.module.queue.api.impl;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,53 +29,53 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.MODULE)
 public class QueueRoomServiceImpl extends BaseOpenmrsService implements QueueRoomService {
-	
-	private QueueRoomDao dao;
-	
-	public void setDao(QueueRoomDao dao) {
-		this.dao = dao;
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<QueueRoom> getQueueRoomByUuid(String uuid) {
-		return dao.get(uuid);
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<QueueRoom> getQueueRoomById(int id) {
-		return dao.get(id);
-	}
-	
-	@Override
-	public QueueRoom saveQueueRoom(QueueRoom queueRoom) {
-		return dao.createOrUpdate(queueRoom);
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public List<QueueRoom> getAllQueueRooms() {
-		return getQueueRooms(new QueueRoomSearchCriteria());
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public List<QueueRoom> getQueueRooms(QueueRoomSearchCriteria searchCriteria) {
-		return dao.getQueueRooms(searchCriteria);
-	}
-	
-	@Override
-	public void retireQueueRoom(@NotNull QueueRoom queueRoom, String retireReason) {
-		queueRoom.setRetired(true);
-		queueRoom.setDateRetired(new Date());
-		queueRoom.setRetireReason(retireReason);
-		queueRoom.setRetiredBy(Context.getAuthenticatedUser());
-		dao.createOrUpdate(queueRoom);
-	}
-	
-	@Override
-	public void purgeQueueRoom(QueueRoom queueRoom) throws APIException {
-		dao.delete(queueRoom);
-	}
+
+  private QueueRoomDao dao;
+
+  public void setDao(QueueRoomDao dao) {
+    this.dao = dao;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<QueueRoom> getQueueRoomByUuid(String uuid) {
+    return dao.get(uuid);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<QueueRoom> getQueueRoomById(int id) {
+    return dao.get(id);
+  }
+
+  @Override
+  public QueueRoom saveQueueRoom(QueueRoom queueRoom) {
+    return dao.createOrUpdate(queueRoom);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<QueueRoom> getAllQueueRooms() {
+    return getQueueRooms(new QueueRoomSearchCriteria());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<QueueRoom> getQueueRooms(QueueRoomSearchCriteria searchCriteria) {
+    return dao.getQueueRooms(searchCriteria);
+  }
+
+  @Override
+  public void retireQueueRoom(@NotNull QueueRoom queueRoom, String retireReason) {
+    queueRoom.setRetired(true);
+    queueRoom.setDateRetired(new Date());
+    queueRoom.setRetireReason(retireReason);
+    queueRoom.setRetiredBy(Context.getAuthenticatedUser());
+    dao.createOrUpdate(queueRoom);
+  }
+
+  @Override
+  public void purgeQueueRoom(QueueRoom queueRoom) throws APIException {
+    dao.delete(queueRoom);
+  }
 }

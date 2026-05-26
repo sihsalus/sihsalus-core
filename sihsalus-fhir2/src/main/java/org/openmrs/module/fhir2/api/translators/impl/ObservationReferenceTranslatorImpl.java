@@ -15,7 +15,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTra
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -28,31 +27,33 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ObservationReferenceTranslatorImpl implements ObservationReferenceTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirObservationDao observationDao;
-	
-	@Override
-	public Reference toFhirResource(@Nonnull Obs obs) {
-		if (obs == null || obs.getVoided()) {
-			return null;
-		}
-		
-		return createObservationReference(obs);
-	}
-	
-	@Override
-	public Obs toOpenmrsType(@Nonnull Reference obsReference) {
-		if (obsReference == null || !obsReference.hasReference()) {
-			return null;
-		}
-		
-		if (getReferenceType(obsReference).map(ref -> !ref.equals(FhirConstants.OBSERVATION)).orElse(true)) {
-			throw new IllegalArgumentException(
-			        "Reference must be to an Observation not a " + getReferenceType(obsReference).orElse(""));
-		}
-		
-		return getReferenceId(obsReference).map(uuid -> observationDao.get(uuid)).orElse(null);
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirObservationDao observationDao;
+
+  @Override
+  public Reference toFhirResource(@Nonnull Obs obs) {
+    if (obs == null || obs.getVoided()) {
+      return null;
+    }
+
+    return createObservationReference(obs);
+  }
+
+  @Override
+  public Obs toOpenmrsType(@Nonnull Reference obsReference) {
+    if (obsReference == null || !obsReference.hasReference()) {
+      return null;
+    }
+
+    if (getReferenceType(obsReference)
+        .map(ref -> !ref.equals(FhirConstants.OBSERVATION))
+        .orElse(true)) {
+      throw new IllegalArgumentException(
+          "Reference must be to an Observation not a " + getReferenceType(obsReference).orElse(""));
+    }
+
+    return getReferenceId(obsReference).map(uuid -> observationDao.get(uuid)).orElse(null);
+  }
 }

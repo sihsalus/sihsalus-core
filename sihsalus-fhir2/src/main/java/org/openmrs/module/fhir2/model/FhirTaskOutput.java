@@ -15,26 +15,23 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * FHIR Task.output - https://www.hl7.org/fhir/task-definitions.html#Task.output
- */
+/** FHIR Task.output - https://www.hl7.org/fhir/task-definitions.html#Task.output */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @NoArgsConstructor
 @Entity
 @Table(name = "fhir_task_output")
 public class FhirTaskOutput extends FhirTaskParam {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@EqualsAndHashCode.Include
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "task_output_id")
-	private Integer id;
+
+  private static final long serialVersionUID = 1L;
+
+  @EqualsAndHashCode.Include
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "task_output_id")
+  private Integer id;
 }

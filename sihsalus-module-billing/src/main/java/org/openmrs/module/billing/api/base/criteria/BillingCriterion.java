@@ -16,5 +16,5 @@ import jakarta.persistence.criteria.Root;
 @FunctionalInterface
 public interface BillingCriterion {
 
-	Predicate toPredicate(CriteriaBuilder builder, Root<?> root);
+  Predicate toPredicate(CriteriaBuilder builder, Root<?> root);
 }

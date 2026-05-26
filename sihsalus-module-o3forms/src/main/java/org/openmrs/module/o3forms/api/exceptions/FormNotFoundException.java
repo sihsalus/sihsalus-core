@@ -12,28 +12,28 @@ package org.openmrs.module.o3forms.api.exceptions;
 import org.openmrs.api.APIException;
 
 public class FormNotFoundException extends APIException {
-	
-	public FormNotFoundException() {
-		super();
-	}
-	
-	public FormNotFoundException(String message) {
-		super(message);
-	}
-	
-	public FormNotFoundException(String message, Throwable cause) {
-		super(message, cause);
-	}
-	
-	public FormNotFoundException(Throwable cause) {
-		super(cause);
-	}
-	
-	public FormNotFoundException(String messageKey, Object[] parameters) {
-		super(messageKey, parameters);
-	}
-	
-	public FormNotFoundException(String messageKey, Object[] parameters, Throwable cause) {
-		super(messageKey, parameters, cause);
-	}
+
+  public FormNotFoundException() {
+    super();
+  }
+
+  public FormNotFoundException(String message) {
+    super(message);
+  }
+
+  public FormNotFoundException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public FormNotFoundException(Throwable cause) {
+    super(cause);
+  }
+
+  public FormNotFoundException(String messageKey, Object[] parameters) {
+    super(messageKey, parameters);
+  }
+
+  public FormNotFoundException(String messageKey, Object[] parameters, Throwable cause) {
+    super(messageKey, parameters, cause);
+  }
 }

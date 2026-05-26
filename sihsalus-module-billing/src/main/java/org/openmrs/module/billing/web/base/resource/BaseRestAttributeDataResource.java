@@ -21,43 +21,44 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 
 // @formatter:off
 /**
- * REST resource for {@link org.openmrs.OpenmrsData}
- * {@link org.openmrs.module.openhmis.commons.api.entity.model.IAttribute}s.
+ * REST resource for {@link org.openmrs.OpenmrsData} {@link
+ * org.openmrs.module.openhmis.commons.api.entity.model.IAttribute}s.
+ *
  * @param <E> The customizable instance attribute class
  */
 public abstract class BaseRestAttributeDataResource<
-			E extends IAttribute<?, TAttributeType> & OpenmrsData,
-			TAttributeType extends IAttributeType>
-        extends BaseRestDataResource<E> {
-// @formatter:on
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-		if (!(rep instanceof RefRepresentation)) {
-			description.addProperty("value");
-			description.addProperty("attributeType", Representation.REF);
-			description.addProperty("order", findMethod("getAttributeOrder"));
-		}
-		
-		return description;
-	}
-	
-	protected Object baseGetPropertyValue(E instance) {
-		if (instance.getAttributeType().getFormat().contains("Concept")) {
-			ConceptService service = Context.getService(ConceptService.class);
-			Concept concept = service.getConcept(instance.getValue());
-			
-			return concept == null ? "" : concept.getDisplayString();
-		} else {
-			return instance.getHydratedValue();
-		}
-	}
-	
-	protected void baseSetAttributeType(E instance, TAttributeType attributeType) {
-		instance.setAttributeType(attributeType);
-	}
-	
-	public Integer getAttributeOrder(E instance) {
-		return instance.getAttributeType().getAttributeOrder();
-	}
+        E extends IAttribute<?, TAttributeType> & OpenmrsData,
+        TAttributeType extends IAttributeType>
+    extends BaseRestDataResource<E> {
+  // @formatter:on
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+    if (!(rep instanceof RefRepresentation)) {
+      description.addProperty("value");
+      description.addProperty("attributeType", Representation.REF);
+      description.addProperty("order", findMethod("getAttributeOrder"));
+    }
+
+    return description;
+  }
+
+  protected Object baseGetPropertyValue(E instance) {
+    if (instance.getAttributeType().getFormat().contains("Concept")) {
+      ConceptService service = Context.getService(ConceptService.class);
+      Concept concept = service.getConcept(instance.getValue());
+
+      return concept == null ? "" : concept.getDisplayString();
+    } else {
+      return instance.getHydratedValue();
+    }
+  }
+
+  protected void baseSetAttributeType(E instance, TAttributeType attributeType) {
+    instance.setAttributeType(attributeType);
+  }
+
+  public Integer getAttributeOrder(E instance) {
+    return instance.getAttributeType().getAttributeOrder();
+  }
 }

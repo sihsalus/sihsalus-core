@@ -10,29 +10,30 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Allergy;
 
-public interface AllergyIntoleranceTranslator extends ToFhirTranslator<Allergy, AllergyIntolerance>, OpenmrsFhirUpdatableTranslator<Allergy, AllergyIntolerance> {
-	
-	/**
-	 * Maps {@link org.openmrs.Allergy} to {@link org.hl7.fhir.r4.model.AllergyIntolerance}
-	 * 
-	 * @param allergy the OpenMRS data element to translate
-	 * @return the corresponding FHIR AllergyIntolerance resource
-	 */
-	@Override
-	AllergyIntolerance toFhirResource(@Nonnull Allergy allergy);
-	
-	/**
-	 * Maps {@link org.hl7.fhir.r4.model.AllergyIntolerance} to {@link org.openmrs.Allergy}
-	 *
-	 * @param allergy the existing OpenMRS allergy to update
-	 * @param allergyIntolerance the FHIR AllergyIntolerance resource to update the existing Allergy
-	 *            with
-	 * @return the updated OpenMrs Allergy object
-	 */
-	@Override
-	Allergy toOpenmrsType(@Nonnull Allergy allergy, @Nonnull AllergyIntolerance allergyIntolerance);
+public interface AllergyIntoleranceTranslator
+    extends ToFhirTranslator<Allergy, AllergyIntolerance>,
+        OpenmrsFhirUpdatableTranslator<Allergy, AllergyIntolerance> {
+
+  /**
+   * Maps {@link org.openmrs.Allergy} to {@link org.hl7.fhir.r4.model.AllergyIntolerance}
+   *
+   * @param allergy the OpenMRS data element to translate
+   * @return the corresponding FHIR AllergyIntolerance resource
+   */
+  @Override
+  AllergyIntolerance toFhirResource(@Nonnull Allergy allergy);
+
+  /**
+   * Maps {@link org.hl7.fhir.r4.model.AllergyIntolerance} to {@link org.openmrs.Allergy}
+   *
+   * @param allergy the existing OpenMRS allergy to update
+   * @param allergyIntolerance the FHIR AllergyIntolerance resource to update the existing Allergy
+   *     with
+   * @return the updated OpenMrs Allergy object
+   */
+  @Override
+  Allergy toOpenmrsType(@Nonnull Allergy allergy, @Nonnull AllergyIntolerance allergyIntolerance);
 }

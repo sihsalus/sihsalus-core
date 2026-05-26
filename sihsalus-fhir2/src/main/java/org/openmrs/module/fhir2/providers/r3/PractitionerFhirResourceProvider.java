@@ -12,10 +12,6 @@ package org.openmrs.module.fhir2.providers.r3;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -34,6 +30,8 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.HashSet;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -57,76 +55,99 @@ import org.springframework.stereotype.Component;
 @Component("practitionerFhirR3ResourceProvider")
 @R3Provider
 public class PractitionerFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirPractitionerService practitionerService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return Practitioner.class;
-	}
-	
-	@Read
-	@SuppressWarnings("unused")
-	public Practitioner getPractitionerById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Practitioner practitioner = practitionerService.get(id.getIdPart());
-		if (practitioner == null) {
-			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
-		}
-		
-		return (Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner);
-	}
-	
-	@Create
-	public MethodOutcome createPractitioner(@ResourceParam Practitioner practitioner) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(practitionerService
-		        .create((org.hl7.fhir.r4.model.Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner))));
-	}
-	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updatePractitioner(@IdParam IdType id, @ResourceParam Practitioner practitioner) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update");
-		}
-		
-		practitioner.setId(id.getIdPart());
-		
-		return FhirProviderUtils
-		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(practitionerService.update(id.getIdPart(),
-		            (org.hl7.fhir.r4.model.Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner))));
-	}
-	
-	@Delete
-	@SuppressWarnings("unused")
-	public OperationOutcome deletePractitioner(@IdParam @Nonnull IdType id) {
-		practitionerService.delete(id.getIdPart());
-		return FhirProviderUtils.buildDeleteR3();
-	}
-	
-	@Search
-	public IBundleProvider searchForPractitioners(@OptionalParam(name = Practitioner.SP_NAME) StringAndListParam name,
-	        @OptionalParam(name = Practitioner.SP_IDENTIFIER) TokenAndListParam identifier,
-	        @OptionalParam(name = Practitioner.SP_GIVEN) StringAndListParam given,
-	        @OptionalParam(name = Practitioner.SP_FAMILY) StringAndListParam family,
-	        @OptionalParam(name = Practitioner.SP_ADDRESS_CITY) StringAndListParam city,
-	        @OptionalParam(name = Practitioner.SP_ADDRESS_STATE) StringAndListParam state,
-	        @OptionalParam(name = Practitioner.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
-	        @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country,
-	        @OptionalParam(name = Practitioner.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
-	        @IncludeParam(reverse = true, allow = { "Encounter:" + Encounter.SP_PARTICIPANT,
-	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
-	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
-	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
-		if (CollectionUtils.isEmpty(revIncludes)) {
-			revIncludes = null;
-		}
-		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        practitionerService.searchForPractitioners(new PractitionerSearchParams(identifier, name, given, family,
-		                city, state, postalCode, country, id, lastUpdated, revIncludes)));
-	}
-	
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirPractitionerService practitionerService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return Practitioner.class;
+  }
+
+  @Read
+  @SuppressWarnings("unused")
+  public Practitioner getPractitionerById(@IdParam @Nonnull IdType id) {
+    org.hl7.fhir.r4.model.Practitioner practitioner = practitionerService.get(id.getIdPart());
+    if (practitioner == null) {
+      throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
+    }
+
+    return (Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner);
+  }
+
+  @Create
+  public MethodOutcome createPractitioner(@ResourceParam Practitioner practitioner) {
+    return FhirProviderUtils.buildCreate(
+        VersionConvertorFactory_30_40.convertResource(
+            practitionerService.create(
+                (org.hl7.fhir.r4.model.Practitioner)
+                    VersionConvertorFactory_30_40.convertResource(practitioner))));
+  }
+
+  @Update
+  @SuppressWarnings("unused")
+  public MethodOutcome updatePractitioner(
+      @IdParam IdType id, @ResourceParam Practitioner practitioner) {
+    if (id == null || id.getIdPart() == null) {
+      throw new InvalidRequestException("id must be specified to update");
+    }
+
+    practitioner.setId(id.getIdPart());
+
+    return FhirProviderUtils.buildUpdate(
+        VersionConvertorFactory_30_40.convertResource(
+            practitionerService.update(
+                id.getIdPart(),
+                (org.hl7.fhir.r4.model.Practitioner)
+                    VersionConvertorFactory_30_40.convertResource(practitioner))));
+  }
+
+  @Delete
+  @SuppressWarnings("unused")
+  public OperationOutcome deletePractitioner(@IdParam @Nonnull IdType id) {
+    practitionerService.delete(id.getIdPart());
+    return FhirProviderUtils.buildDeleteR3();
+  }
+
+  @Search
+  public IBundleProvider searchForPractitioners(
+      @OptionalParam(name = Practitioner.SP_NAME) StringAndListParam name,
+      @OptionalParam(name = Practitioner.SP_IDENTIFIER) TokenAndListParam identifier,
+      @OptionalParam(name = Practitioner.SP_GIVEN) StringAndListParam given,
+      @OptionalParam(name = Practitioner.SP_FAMILY) StringAndListParam family,
+      @OptionalParam(name = Practitioner.SP_ADDRESS_CITY) StringAndListParam city,
+      @OptionalParam(name = Practitioner.SP_ADDRESS_STATE) StringAndListParam state,
+      @OptionalParam(name = Practitioner.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+      @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country,
+      @OptionalParam(name = Practitioner.SP_RES_ID) TokenAndListParam id,
+      @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+      @IncludeParam(
+              reverse = true,
+              allow = {
+                "Encounter:" + Encounter.SP_PARTICIPANT,
+                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
+                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
+                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION
+              })
+          HashSet<Include> revIncludes) {
+    if (CollectionUtils.isEmpty(revIncludes)) {
+      revIncludes = null;
+    }
+
+    return new SearchQueryBundleProviderR3Wrapper(
+        practitionerService.searchForPractitioners(
+            new PractitionerSearchParams(
+                identifier,
+                name,
+                given,
+                family,
+                city,
+                state,
+                postalCode,
+                country,
+                id,
+                lastUpdated,
+                revIncludes)));
+  }
 }

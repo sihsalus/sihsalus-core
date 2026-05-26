@@ -23,9 +23,7 @@ import org.openmrs.module.queue.model.QueueEntry;
  * on sort weight descending, so higher priorities should result in a higher returned sort weight
  */
 public interface SortWeightGenerator {
-	
-	/**
-	 * Generates a sort weight that will be set on the given QueueEntry when it is saved
-	 */
-	Double generateSortWeight(QueueEntry queueEntry);
+
+  /** Generates a sort weight that will be set on the given QueueEntry when it is saved */
+  Double generateSortWeight(QueueEntry queueEntry);
 }

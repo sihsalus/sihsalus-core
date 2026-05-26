@@ -27,28 +27,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> implements FhirGroupService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private FhirGroupDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private GroupTranslator translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<Group> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<org.openmrs.Cohort, Group, FhirGroupDao, GroupTranslator, SearchQueryInclude<Group>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForGroups(ReferenceAndListParam participant) {
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
-	}
+public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort>
+    implements FhirGroupService {
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+  private FhirGroupDao dao;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+  private GroupTranslator translator;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+  private SearchQueryInclude<Group> searchQueryInclude;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+  private SearchQuery<
+          org.openmrs.Cohort, Group, FhirGroupDao, GroupTranslator, SearchQueryInclude<Group>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForGroups(ReferenceAndListParam participant) {
+    SearchParameterMap theParams =
+        new SearchParameterMap()
+            .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
+    return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+  }
 }

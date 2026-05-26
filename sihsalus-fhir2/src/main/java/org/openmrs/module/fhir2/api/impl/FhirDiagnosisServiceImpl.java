@@ -27,27 +27,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirDiagnosisServiceImpl extends BaseFhirService<Condition, Diagnosis> implements FhirDiagnosisService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirDiagnosisDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private DiagnosisTranslator translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<Condition> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<Diagnosis, Condition, FhirDiagnosisDao, DiagnosisTranslator, SearchQueryInclude<Condition>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchDiagnoses(DiagnosisSearchParams diagnosisSearchParams) {
-		SearchParameterMap theParams = diagnosisSearchParams.toSearchParameterMap();
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
-	}
+public class FhirDiagnosisServiceImpl extends BaseFhirService<Condition, Diagnosis>
+    implements FhirDiagnosisService {
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirDiagnosisDao dao;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private DiagnosisTranslator translator;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQueryInclude<Condition> searchQueryInclude;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQuery<
+          Diagnosis,
+          Condition,
+          FhirDiagnosisDao,
+          DiagnosisTranslator,
+          SearchQueryInclude<Condition>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchDiagnoses(DiagnosisSearchParams diagnosisSearchParams) {
+    SearchParameterMap theParams = diagnosisSearchParams.toSearchParameterMap();
+    return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+  }
 }

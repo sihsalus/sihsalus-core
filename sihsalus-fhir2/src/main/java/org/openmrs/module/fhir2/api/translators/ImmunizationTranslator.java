@@ -10,27 +10,26 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Immunization;
 import org.openmrs.Obs;
 
 public interface ImmunizationTranslator extends OpenmrsFhirUpdatableTranslator<Obs, Immunization> {
-	
-	/**
-	 * Maps an OpenMRS immunization obs construct to a {@link Immunization}
-	 *
-	 * @param openmrsImmunization the OpenMRS immunization to translate
-	 * @return the corresponding FHIR immunization resource
-	 */
-	@Override
-	org.hl7.fhir.r4.model.Immunization toFhirResource(@Nonnull Obs openmrsImmunization);
-	
-	/**
-	 * Maps a {@link Immunization} to an OpenMRS immunization obs construct
-	 *
-	 * @param fhirImmunization the FHIR immunization to translate
-	 * @return the corresponding OpenMRS immunization obs construct
-	 */
-	@Override
-	Obs toOpenmrsType(@Nonnull Immunization fhirImmunization);
+
+  /**
+   * Maps an OpenMRS immunization obs construct to a {@link Immunization}
+   *
+   * @param openmrsImmunization the OpenMRS immunization to translate
+   * @return the corresponding FHIR immunization resource
+   */
+  @Override
+  org.hl7.fhir.r4.model.Immunization toFhirResource(@Nonnull Obs openmrsImmunization);
+
+  /**
+   * Maps a {@link Immunization} to an OpenMRS immunization obs construct
+   *
+   * @param fhirImmunization the FHIR immunization to translate
+   * @return the corresponding OpenMRS immunization obs construct
+   */
+  @Override
+  Obs toOpenmrsType(@Nonnull Immunization fhirImmunization);
 }

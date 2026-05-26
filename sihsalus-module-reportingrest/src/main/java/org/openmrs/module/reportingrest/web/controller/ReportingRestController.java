@@ -1,14 +1,20 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reportingrest.web.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -47,252 +53,274 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
-/**
- * Controller for {@link CohortDefinition}s
- */
+/** Controller for {@link CohortDefinition}s */
 @Controller
-@RequestMapping("/rest/" + RestConstants.VERSION_1 + ReportingRestController.REPORTING_REST_NAMESPACE)
+@RequestMapping(
+    "/rest/" + RestConstants.VERSION_1 + ReportingRestController.REPORTING_REST_NAMESPACE)
 public class ReportingRestController extends MainResourceController {
 
-    public static final String REPORTING_REST_NAMESPACE = "/reportingrest";
+  public static final String REPORTING_REST_NAMESPACE = "/reportingrest";
 
-    private static final int MAX_REPORT_DOWNLOADS = 50;
+  private static final int MAX_REPORT_DOWNLOADS = 50;
 
-    /**
-     * @see org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController#getNamespace()
-     */
-    @Override
-    public String getNamespace() {
-        return RestConstants.VERSION_1 + REPORTING_REST_NAMESPACE;
+  /**
+   * @see org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController#getNamespace()
+   */
+  @Override
+  public String getNamespace() {
+    return RestConstants.VERSION_1 + REPORTING_REST_NAMESPACE;
+  }
+
+  @RequestMapping(value = "/saveReport", method = RequestMethod.POST)
+  @ResponseStatus(HttpStatus.OK)
+  public ResponseEntity<String> saveReport(
+      @RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
+    ReportingRestPrivileges.requireAddReports();
+    if (StringUtils.isBlank(reportRequestUuid)) {
+      return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
+    }
+    ReportService reportService = getReportService();
+    ReportRequest reportRequest = reportService.getReportRequestByUuid(reportRequestUuid);
+    if (reportRequest == null) {
+      return new ResponseEntity<String>("Report request not found", HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = "/saveReport", method = RequestMethod.POST)
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> saveReport(@RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
-        ReportingRestPrivileges.requireAddReports();
-        if (StringUtils.isBlank(reportRequestUuid)) {
-            return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
-        }
-        ReportService reportService = getReportService();
-        ReportRequest reportRequest = reportService.getReportRequestByUuid(reportRequestUuid);
-        if (reportRequest == null) {
-            return new ResponseEntity<String>("Report request not found", HttpStatus.NOT_FOUND);
-        }
-
-        if (!ReportRequest.Status.COMPLETED.equals(reportRequest.getStatus())) {
-            return new ResponseEntity<String>("Cannot save report because status is different than completed",
-                HttpStatus.BAD_REQUEST);
-        }
-
-        Report report = reportService.loadReport(reportRequest);
-        reportService.saveReport(report, StringUtils.EMPTY);
-
-        return new ResponseEntity<String>("Report saved successfully", HttpStatus.OK);
+    if (!ReportRequest.Status.COMPLETED.equals(reportRequest.getStatus())) {
+      return new ResponseEntity<String>(
+          "Cannot save report because status is different than completed", HttpStatus.BAD_REQUEST);
     }
 
-    @RequestMapping(value = "/downloadReport", method = RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> downloadReport(@RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
-        ReportingRestPrivileges.requireViewReports();
-        if (StringUtils.isBlank(reportRequestUuid)) {
-            return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
+    Report report = reportService.loadReport(reportRequest);
+    reportService.saveReport(report, StringUtils.EMPTY);
+
+    return new ResponseEntity<String>("Report saved successfully", HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/downloadReport", method = RequestMethod.GET)
+  @ResponseStatus(HttpStatus.OK)
+  public ResponseEntity<?> downloadReport(
+      @RequestParam(value = "reportRequestUuid", required = false) String reportRequestUuid) {
+    ReportingRestPrivileges.requireViewReports();
+    if (StringUtils.isBlank(reportRequestUuid)) {
+      return new ResponseEntity<String>("reportRequestUuid is required", HttpStatus.BAD_REQUEST);
+    }
+    try {
+      return new ResponseEntity<ReportFile>(
+          processAndDownloadReport(reportRequestUuid, getReportService()), HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+    } catch (IllegalStateException e) {
+      return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @RequestMapping(value = "/downloadMultipleReports", method = RequestMethod.GET)
+  @ResponseStatus(HttpStatus.OK)
+  public ResponseEntity<?> downloadMultipleReports(
+      @RequestParam(value = "reportRequestUuids", required = false) String reportRequestUuids) {
+    ReportingRestPrivileges.requireViewReports();
+    if (StringUtils.isBlank(reportRequestUuids)) {
+      return new ResponseEntity<String>("reportRequestUuids is required", HttpStatus.BAD_REQUEST);
+    }
+    String[] uuids = reportRequestUuids.split(",");
+    if (uuids.length > MAX_REPORT_DOWNLOADS) {
+      return new ResponseEntity<String>(
+          "Too many report requests. Maximum allowed: " + MAX_REPORT_DOWNLOADS,
+          HttpStatus.BAD_REQUEST);
+    }
+    List<ReportFile> fileDownloadList = new ArrayList<ReportFile>();
+    ReportService reportService = getReportService();
+    try {
+      for (String reportRequestUuid : uuids) {
+        String trimmedUuid = StringUtils.trimToNull(reportRequestUuid);
+        if (trimmedUuid == null) {
+          return new ResponseEntity<String>(
+              "reportRequestUuids contains an empty UUID", HttpStatus.BAD_REQUEST);
         }
-        try {
-            return new ResponseEntity<ReportFile>(processAndDownloadReport(reportRequestUuid, getReportService()), HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (IllegalStateException e) {
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        fileDownloadList.add(processAndDownloadReport(trimmedUuid, reportService));
+      }
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+    } catch (IllegalStateException e) {
+      return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @RequestMapping(value = "/downloadMultipleReports", method = RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> downloadMultipleReports(@RequestParam(value = "reportRequestUuids", required = false) String reportRequestUuids) {
-        ReportingRestPrivileges.requireViewReports();
-        if (StringUtils.isBlank(reportRequestUuids)) {
-            return new ResponseEntity<String>("reportRequestUuids is required", HttpStatus.BAD_REQUEST);
-        }
-        String[] uuids = reportRequestUuids.split(",");
-        if (uuids.length > MAX_REPORT_DOWNLOADS) {
-            return new ResponseEntity<String>("Too many report requests. Maximum allowed: " + MAX_REPORT_DOWNLOADS,
-                HttpStatus.BAD_REQUEST);
-        }
-        List<ReportFile> fileDownloadList = new ArrayList<ReportFile>();
-        ReportService reportService = getReportService();
-        try {
-            for (String reportRequestUuid : uuids) {
-                String trimmedUuid = StringUtils.trimToNull(reportRequestUuid);
-                if (trimmedUuid == null) {
-                    return new ResponseEntity<String>("reportRequestUuids contains an empty UUID", HttpStatus.BAD_REQUEST);
-                }
-                fileDownloadList.add(processAndDownloadReport(trimmedUuid, reportService));
-            }
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (IllegalStateException e) {
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    return new ResponseEntity<List<ReportFile>>(fileDownloadList, HttpStatus.OK);
+  }
 
-        return new ResponseEntity<List<ReportFile>>(fileDownloadList, HttpStatus.OK);
+  @RequestMapping(
+      value = "/reportDataSet/{reportDefinitionUuid}/{dataSetKey}",
+      method = RequestMethod.GET)
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public SimpleObject evaluateReportDataSet(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      @PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
+      @PathVariable("dataSetKey") String dataSetKey) {
+    ReportingRestPrivileges.requireViewReports();
+    ReportDefinition reportDefinition =
+        DefinitionContext.getReportDefinitionService().getDefinitionByUuid(reportDefinitionUuid);
+    if (reportDefinition == null) {
+      throw new ObjectNotFoundException("Report definition not found: " + reportDefinitionUuid);
+    }
+    Mapped<? extends DataSetDefinition> dataSetDefinition = null;
+    for (String key : reportDefinition.getDataSetDefinitions().keySet()) {
+      if (key.equals(dataSetKey)) {
+        dataSetDefinition = reportDefinition.getDataSetDefinitions().get(key);
+      }
+    }
+    if (dataSetDefinition == null) {
+      throw new ObjectNotFoundException("Data set definition not found: " + dataSetKey);
+    }
+    EvaluationContext context = new EvaluationContext();
+    for (Parameter parameter : reportDefinition.getParameters()) {
+      String value = request.getParameter(parameter.getName());
+      if (StringUtils.isEmpty(value)) {
+        if (parameter.isRequired()) {
+          throw new GenericRestException("Parameter " + parameter.getName() + " is required");
+        }
+      } else {
+        Object convertedValue = ConversionUtil.convert(value, parameter.getType());
+        context.addParameterValue(parameter.getName(), convertedValue);
+      }
+    }
+    try {
+      DataSet dataSet =
+          DefinitionContext.getDataSetDefinitionService().evaluate(dataSetDefinition, context);
+      RequestContext requestContext =
+          RestUtil.getRequestContext(request, response, Representation.DEFAULT);
+      return (SimpleObject)
+          ConversionUtil.convertToRepresentation(dataSet, requestContext.getRepresentation());
+    } catch (Exception e) {
+      throw new GenericRestException(e);
+    }
+  }
+
+  @RequestMapping(value = "/runReport/{reportDefinitionUuid}", method = RequestMethod.POST)
+  @ResponseBody
+  public SimpleObject runReportAsJson(
+      @PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
+      HttpServletRequest request,
+      HttpServletResponse response)
+      throws Exception {
+    ReportingRestPrivileges.requireViewReports();
+    ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
+    EvaluationContext evalContext = buildEvaluationContext(definition, request);
+    ReportData reportData = evaluateReport(definition, evalContext);
+    RequestContext requestContext =
+        RestUtil.getRequestContext(request, response, Representation.DEFAULT);
+    return (SimpleObject)
+        ConversionUtil.convertToRepresentation(reportData, requestContext.getRepresentation());
+  }
+
+  @RequestMapping(
+      value = "/runReport/{reportDefinitionUuid}/{reportDesignUuid}",
+      method = RequestMethod.POST)
+  public void runReportWithDesign(
+      @PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
+      @PathVariable("reportDesignUuid") String reportDesignUuid,
+      HttpServletRequest request,
+      HttpServletResponse response)
+      throws Exception {
+    ReportingRestPrivileges.requireViewReports();
+    ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
+    EvaluationContext evalContext = buildEvaluationContext(definition, request);
+
+    RenderingMode renderingMode = null;
+    for (RenderingMode mode : getReportService().getRenderingModes(definition)) {
+      if (StringUtils.equals(mode.getArgument(), reportDesignUuid)) {
+        renderingMode = mode;
+        break;
+      }
+    }
+    if (renderingMode == null) {
+      throw new IllegalArgumentException(
+          "No rendering mode found for report design: " + reportDesignUuid);
     }
 
-    @RequestMapping(value = "/reportDataSet/{reportDefinitionUuid}/{dataSetKey}", method = RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public SimpleObject evaluateReportDataSet(HttpServletRequest request,
-                                              HttpServletResponse response,
-                                              @PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
-                                              @PathVariable("dataSetKey") String dataSetKey) {
-        ReportingRestPrivileges.requireViewReports();
-        ReportDefinition reportDefinition = DefinitionContext.getReportDefinitionService().getDefinitionByUuid(reportDefinitionUuid);
-        if (reportDefinition == null) {
-            throw new ObjectNotFoundException("Report definition not found: " +  reportDefinitionUuid);
-        }
-        Mapped<? extends DataSetDefinition> dataSetDefinition = null;
-        for (String key : reportDefinition.getDataSetDefinitions().keySet()) {
-            if (key.equals(dataSetKey)) {
-                dataSetDefinition = reportDefinition.getDataSetDefinitions().get(key);
-            }
-        }
-        if (dataSetDefinition == null) {
-            throw new ObjectNotFoundException("Data set definition not found: " +  dataSetKey);
-        }
-        EvaluationContext context = new EvaluationContext();
-        for (Parameter parameter : reportDefinition.getParameters()) {
-            String value = request.getParameter(parameter.getName());
-            if (StringUtils.isEmpty(value)) {
-                if (parameter.isRequired()) {
-                    throw new GenericRestException("Parameter " + parameter.getName() + " is required");
-                }
-            }
-            else {
-                Object convertedValue = ConversionUtil.convert(value, parameter.getType());
-                context.addParameterValue(parameter.getName(), convertedValue);
-            }
-        }
-        try {
-            DataSet dataSet = DefinitionContext.getDataSetDefinitionService().evaluate(dataSetDefinition, context);
-            RequestContext requestContext = RestUtil.getRequestContext(request, response, Representation.DEFAULT);
-            return (SimpleObject) ConversionUtil.convertToRepresentation(dataSet, requestContext.getRepresentation());
-        }
-        catch (Exception e) {
-            throw new GenericRestException(e);
-        }
+    ReportData reportData = evaluateReport(definition, evalContext);
+
+    ReportRequest reportRequest = new ReportRequest();
+    reportRequest.setReportDefinition(
+        new Mapped<ReportDefinition>(definition, Collections.<String, Object>emptyMap()));
+    reportRequest.setRenderingMode(renderingMode);
+    reportRequest.setEvaluateStartDatetime(new Date());
+
+    response.setContentType(renderingMode.getRenderer().getRenderedContentType(reportRequest));
+    response.setHeader(
+        "Content-Disposition",
+        "attachment; filename=\""
+            + sanitizeHeaderFilename(renderingMode.getRenderer().getFilename(reportRequest))
+            + "\"");
+
+    renderingMode.getRenderer().render(reportData, reportDesignUuid, response.getOutputStream());
+  }
+
+  private ReportDefinition getDefinitionByUuid(String uuid) {
+    ReportDefinition definition =
+        Context.getService(ReportDefinitionService.class).getDefinitionByUuid(uuid);
+    if (definition == null) {
+      throw new ObjectNotFoundException("ReportDefinition not found: " + uuid);
+    }
+    return definition;
+  }
+
+  private EvaluationContext buildEvaluationContext(
+      ReportDefinition definition, HttpServletRequest request) {
+    EvaluationContext evalContext = new EvaluationContext();
+    for (Parameter param : definition.getParameters()) {
+      String value = request.getParameter(param.getName());
+      if (value != null) {
+        evalContext.addParameterValue(
+            param.getName(), ConversionUtil.convert(value, param.getType()));
+      } else if (param.isRequired()) {
+        throw new IllegalArgumentException("Missing required parameter: " + param.getName());
+      }
+    }
+    return evalContext;
+  }
+
+  private ReportData evaluateReport(ReportDefinition definition, EvaluationContext evalContext) {
+    try {
+      return Context.getService(ReportDefinitionService.class).evaluate(definition, evalContext);
+    } catch (EvaluationException e) {
+      throw new GenericRestException("Failed to evaluate report: " + e.getMessage(), e);
+    }
+  }
+
+  private ReportFile processAndDownloadReport(
+      String reportRequestUuid, ReportService reportService) {
+    ReportRequest reportRequest = reportService.getReportRequestByUuid(reportRequestUuid);
+    if (reportRequest == null) {
+      throw new IllegalArgumentException("Report request not found for UUID: " + reportRequestUuid);
+    }
+    if (!ReportRequest.Status.COMPLETED.equals(reportRequest.getStatus())) {
+      throw new IllegalStateException("Report request is not completed: " + reportRequestUuid);
     }
 
-    @RequestMapping(value = "/runReport/{reportDefinitionUuid}", method = RequestMethod.POST)
-    @ResponseBody
-    public SimpleObject runReportAsJson(@PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response) throws Exception {
-        ReportingRestPrivileges.requireViewReports();
-        ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
-        EvaluationContext evalContext = buildEvaluationContext(definition, request);
-        ReportData reportData = evaluateReport(definition, evalContext);
-        RequestContext requestContext = RestUtil.getRequestContext(request, response, Representation.DEFAULT);
-        return (SimpleObject) ConversionUtil.convertToRepresentation(reportData, requestContext.getRepresentation());
+    RenderingMode renderingMode = reportRequest.getRenderingMode();
+    String fileName =
+        sanitizeHeaderFilename(
+            renderingMode.getRenderer().getFilename(reportRequest).replace(" ", "_"));
+    String contentType = renderingMode.getRenderer().getRenderedContentType(reportRequest);
+    byte[] fileContent = reportService.loadRenderedOutput(reportRequest);
+
+    if (fileContent == null) {
+      throw new IllegalStateException("Error during loading rendered output");
+    } else {
+      return new ReportFile(fileName, contentType, fileContent);
     }
+  }
 
-    @RequestMapping(value = "/runReport/{reportDefinitionUuid}/{reportDesignUuid}", method = RequestMethod.POST)
-    public void runReportWithDesign(@PathVariable("reportDefinitionUuid") String reportDefinitionUuid,
-                                    @PathVariable("reportDesignUuid") String reportDesignUuid,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response) throws Exception {
-        ReportingRestPrivileges.requireViewReports();
-        ReportDefinition definition = getDefinitionByUuid(reportDefinitionUuid);
-        EvaluationContext evalContext = buildEvaluationContext(definition, request);
-
-        RenderingMode renderingMode = null;
-        for (RenderingMode mode : getReportService().getRenderingModes(definition)) {
-            if (StringUtils.equals(mode.getArgument(), reportDesignUuid)) {
-                renderingMode = mode;
-                break;
-            }
-        }
-        if (renderingMode == null) {
-            throw new IllegalArgumentException("No rendering mode found for report design: " + reportDesignUuid);
-        }
-
-        ReportData reportData = evaluateReport(definition, evalContext);
-
-        ReportRequest reportRequest = new ReportRequest();
-        reportRequest.setReportDefinition(new Mapped<ReportDefinition>(definition, Collections.<String, Object>emptyMap()));
-        reportRequest.setRenderingMode(renderingMode);
-        reportRequest.setEvaluateStartDatetime(new Date());
-
-        response.setContentType(renderingMode.getRenderer().getRenderedContentType(reportRequest));
-        response.setHeader("Content-Disposition",
-                "attachment; filename=\"" + sanitizeHeaderFilename(renderingMode.getRenderer().getFilename(reportRequest)) + "\"");
-
-        renderingMode.getRenderer().render(reportData, reportDesignUuid, response.getOutputStream());
+  private String sanitizeHeaderFilename(String fileName) {
+    if (StringUtils.isBlank(fileName)) {
+      return "report";
     }
+    return fileName.replaceAll("[\\r\\n\"\\\\/]", "_");
+  }
 
-    private ReportDefinition getDefinitionByUuid(String uuid) {
-        ReportDefinition definition = Context.getService(ReportDefinitionService.class).getDefinitionByUuid(uuid);
-        if (definition == null) {
-            throw new ObjectNotFoundException("ReportDefinition not found: " + uuid);
-        }
-        return definition;
-    }
-
-    private EvaluationContext buildEvaluationContext(ReportDefinition definition, HttpServletRequest request) {
-        EvaluationContext evalContext = new EvaluationContext();
-        for (Parameter param : definition.getParameters()) {
-            String value = request.getParameter(param.getName());
-            if (value != null) {
-                evalContext.addParameterValue(param.getName(), ConversionUtil.convert(value, param.getType()));
-            } else if (param.isRequired()) {
-                throw new IllegalArgumentException("Missing required parameter: " + param.getName());
-            }
-        }
-        return evalContext;
-    }
-
-    private ReportData evaluateReport(ReportDefinition definition, EvaluationContext evalContext) {
-        try {
-            return Context.getService(ReportDefinitionService.class).evaluate(definition, evalContext);
-        } catch (EvaluationException e) {
-            throw new GenericRestException("Failed to evaluate report: " + e.getMessage(), e);
-        }
-    }
-
-    private ReportFile processAndDownloadReport(String reportRequestUuid, ReportService reportService) {
-        ReportRequest reportRequest = reportService.getReportRequestByUuid(reportRequestUuid);
-        if (reportRequest == null) {
-            throw new IllegalArgumentException("Report request not found for UUID: " + reportRequestUuid);
-        }
-        if (!ReportRequest.Status.COMPLETED.equals(reportRequest.getStatus())) {
-            throw new IllegalStateException("Report request is not completed: " + reportRequestUuid);
-        }
-
-        RenderingMode renderingMode = reportRequest.getRenderingMode();
-        String fileName = sanitizeHeaderFilename(renderingMode.getRenderer().getFilename(reportRequest).replace(" ", "_"));
-        String contentType = renderingMode.getRenderer().getRenderedContentType(reportRequest);
-        byte[] fileContent = reportService.loadRenderedOutput(reportRequest);
-
-        if (fileContent == null) {
-            throw new IllegalStateException("Error during loading rendered output");
-        } else {
-            return new ReportFile(fileName, contentType, fileContent);
-        }
-    }
-
-    private String sanitizeHeaderFilename(String fileName) {
-        if (StringUtils.isBlank(fileName)) {
-            return "report";
-        }
-        return fileName.replaceAll("[\\r\\n\"\\\\/]", "_");
-    }
-
-    private ReportService getReportService() {
-        return Context.getService(ReportService.class);
-    }
+  private ReportService getReportService() {
+    return Context.getService(ReportService.class);
+  }
 }

@@ -11,32 +11,30 @@ package org.openmrs.module.billing.api.base.entity.model;
 
 import org.openmrs.Role;
 
-/**
- * An {@link org.openmrs.Role} which can be configured to be lazy-loaded from the database.
- */
+/** An {@link org.openmrs.Role} which can be configured to be lazy-loaded from the database. */
 public class LazyRole extends Role {
-	
-	private static final long serialVersionUID = 0L;
-	
-	public LazyRole() {
-		super();
-	}
-	
-	public LazyRole(Role role) {
-		setName(role.getName());
-		setChangedBy(role.getChangedBy());
-		setChildRoles(role.getChildRoles());
-		setCreator(role.getCreator());
-		setDateChanged(role.getDateChanged());
-		setDateCreated(role.getDateCreated());
-		setDateRetired(role.getDateRetired());
-		setDescription(role.getDescription());
-		setInheritedRoles(role.getInheritedRoles());
-		setPrivileges(role.getPrivileges());
-		setRetired(role.getRetired());
-		setRetiredBy(role.getRetiredBy());
-		setRetireReason(role.getRetireReason());
-		setRole(role.getRole());
-		setUuid(role.getUuid());
-	}
+
+  private static final long serialVersionUID = 0L;
+
+  public LazyRole() {
+    super();
+  }
+
+  public LazyRole(Role role) {
+    setName(role.getName());
+    setChangedBy(role.getChangedBy());
+    setChildRoles(role.getChildRoles());
+    setCreator(role.getCreator());
+    setDateChanged(role.getDateChanged());
+    setDateCreated(role.getDateCreated());
+    setDateRetired(role.getDateRetired());
+    setDescription(role.getDescription());
+    setInheritedRoles(role.getInheritedRoles());
+    setPrivileges(role.getPrivileges());
+    setRetired(role.getRetired());
+    setRetiredBy(role.getRetiredBy());
+    setRetireReason(role.getRetireReason());
+    setRole(role.getRole());
+    setUuid(role.getUuid());
+  }
 }

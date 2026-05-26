@@ -12,16 +12,17 @@ package org.openmrs.module.billing.api.base.entity.model;
 // @formatter:off
 /**
  * Represents classes that define instance attribute data.
+ *
  * @param <TOwner> The parent {@link IInstanceCustomizable} class.
  * @param <TAttributeType> The {@link IInstanceAttributeType} class.
  */
 public interface IInstanceAttribute<
-			TOwner extends IInstanceCustomizable<TInstanceType, ?>,
-			TInstanceType extends IInstanceType<TAttributeType>,
-			TAttributeType extends IInstanceAttributeType<TInstanceType>>
-		extends IAttribute<TOwner, TAttributeType> {
-// @formatter:on
-	TOwner getOwner();
-	
-	void setOwner(TOwner owner);
+        TOwner extends IInstanceCustomizable<TInstanceType, ?>,
+        TInstanceType extends IInstanceType<TAttributeType>,
+        TAttributeType extends IInstanceAttributeType<TInstanceType>>
+    extends IAttribute<TOwner, TAttributeType> {
+  // @formatter:on
+  TOwner getOwner();
+
+  void setOwner(TOwner owner);
 }

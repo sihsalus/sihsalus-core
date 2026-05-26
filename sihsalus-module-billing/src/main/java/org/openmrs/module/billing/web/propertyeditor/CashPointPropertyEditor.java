@@ -10,47 +10,44 @@
 package org.openmrs.module.billing.web.propertyeditor;
 
 import java.beans.PropertyEditorSupport;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.model.CashPoint;
 
-/**
- * Property editor for {@link CashPoint}s
- */
+/** Property editor for {@link CashPoint}s */
 public class CashPointPropertyEditor extends PropertyEditorSupport {
-	
-	@Override
-	public String getAsText() {
-		CashPoint cashPoint = (CashPoint) getValue();
-		
-		if (cashPoint == null) {
-			return "";
-		} else {
-			return cashPoint.getId().toString();
-		}
-	}
-	
-	@Override
-	public void setAsText(String text) {
-		CashPointService service = Context.getService(CashPointService.class);
-		
-		if (StringUtils.isEmpty(text)) {
-			setValue(null);
-		} else {
-			CashPoint cashPoint;
-			if (NumberUtils.isNumber(text)) {
-				cashPoint = service.getCashPoint(Integer.valueOf(text));
-			} else {
-				cashPoint = service.getCashPointByUuid(text);
-			}
-			
-			setValue(cashPoint);
-			if (cashPoint == null) {
-				throw new IllegalArgumentException("CashPoint not found: " + text);
-			}
-		}
-	}
+
+  @Override
+  public String getAsText() {
+    CashPoint cashPoint = (CashPoint) getValue();
+
+    if (cashPoint == null) {
+      return "";
+    } else {
+      return cashPoint.getId().toString();
+    }
+  }
+
+  @Override
+  public void setAsText(String text) {
+    CashPointService service = Context.getService(CashPointService.class);
+
+    if (StringUtils.isEmpty(text)) {
+      setValue(null);
+    } else {
+      CashPoint cashPoint;
+      if (NumberUtils.isNumber(text)) {
+        cashPoint = service.getCashPoint(Integer.valueOf(text));
+      } else {
+        cashPoint = service.getCashPointByUuid(text);
+      }
+
+      setValue(cashPoint);
+      if (cashPoint == null) {
+        throw new IllegalArgumentException("CashPoint not found: " + text);
+      }
+    }
+  }
 }

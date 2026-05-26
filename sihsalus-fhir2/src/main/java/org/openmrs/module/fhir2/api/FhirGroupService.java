@@ -14,6 +14,6 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.hl7.fhir.r4.model.Group;
 
 public interface FhirGroupService extends FhirService<Group> {
-	
-	IBundleProvider searchForGroups(ReferenceAndListParam participant);
+
+  IBundleProvider searchForGroups(ReferenceAndListParam participant);
 }

@@ -13,7 +13,6 @@ import org.openmrs.Drug;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
 public interface DrugMapper {
-	
-	public EncounterTransaction.Drug map(Drug drug);
-	
+
+  public EncounterTransaction.Drug map(Drug drug);
 }

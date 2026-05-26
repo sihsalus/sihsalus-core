@@ -11,28 +11,31 @@ package org.openmrs.module.emrapi.disposition.actions;
 
 import java.util.Map;
 
-/**
- *
- */
+/** */
 public class DispositionActionUtils {
-	
-	public static String getSingleRequiredParameter(Map<String, String[]> requestParameters, String parameterName) {
-		String value = getSingleOptionalParameter(requestParameters, parameterName);
-		if (value == null) {
-			throw new IllegalArgumentException("Missing required request parameter: " + parameterName);
-		}
-		return value;
-	}
-	
-	public static String getSingleOptionalParameter(Map<String, String[]> requestParameters, String parameterName) {
-		String[] values = requestParameters.get(parameterName);
-		if (values == null || values.length == 0) {
-			return null;
-		} else if (values.length > 1) {
-			throw new IllegalArgumentException(
-			        "Expected just one request parameter named " + parameterName + " but got " + values.length);
-		} else {
-			return values[0];
-		}
-	}
+
+  public static String getSingleRequiredParameter(
+      Map<String, String[]> requestParameters, String parameterName) {
+    String value = getSingleOptionalParameter(requestParameters, parameterName);
+    if (value == null) {
+      throw new IllegalArgumentException("Missing required request parameter: " + parameterName);
+    }
+    return value;
+  }
+
+  public static String getSingleOptionalParameter(
+      Map<String, String[]> requestParameters, String parameterName) {
+    String[] values = requestParameters.get(parameterName);
+    if (values == null || values.length == 0) {
+      return null;
+    } else if (values.length > 1) {
+      throw new IllegalArgumentException(
+          "Expected just one request parameter named "
+              + parameterName
+              + " but got "
+              + values.length);
+    } else {
+      return values[0];
+    }
+  }
 }

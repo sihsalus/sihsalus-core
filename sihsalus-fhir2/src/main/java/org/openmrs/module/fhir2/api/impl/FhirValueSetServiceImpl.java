@@ -28,31 +28,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirValueSetServiceImpl extends BaseFhirService<ValueSet, Concept> implements FhirValueSetService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirConceptDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ValueSetTranslator translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<ValueSet> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<Concept, ValueSet, FhirConceptDao, ValueSetTranslator, SearchQueryInclude<ValueSet>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForValueSets(StringAndListParam title) {
-		SearchParameterMap theParams = new SearchParameterMap();
-		if (title != null && title.size() > 0) {
-			theParams.addParameter(TITLE_SEARCH_HANDLER, title);
-		}
-		
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
-	}
+public class FhirValueSetServiceImpl extends BaseFhirService<ValueSet, Concept>
+    implements FhirValueSetService {
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirConceptDao dao;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ValueSetTranslator translator;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQueryInclude<ValueSet> searchQueryInclude;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQuery<
+          Concept, ValueSet, FhirConceptDao, ValueSetTranslator, SearchQueryInclude<ValueSet>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForValueSets(StringAndListParam title) {
+    SearchParameterMap theParams = new SearchParameterMap();
+    if (title != null && title.size() > 0) {
+      theParams.addParameter(TITLE_SEARCH_HANDLER, title);
+    }
+
+    return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+  }
 }

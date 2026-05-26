@@ -9,42 +9,40 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.openmrs.User;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirUserDao extends FhirDao<User> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_USERS)
-	User get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_USERS)
-	List<User> get(@Nonnull Collection<String> uuids);
-	
-	@Authorized(PrivilegeConstants.GET_USERS)
-	User getUserByUserName(String clientName);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_USERS)
-	List<User> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_USERS)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized({ PrivilegeConstants.ADD_USERS, PrivilegeConstants.EDIT_USERS })
-	User createOrUpdate(@Nonnull User newEntry);
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_USERS)
-	User delete(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_USERS)
+  User get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_USERS)
+  List<User> get(@Nonnull Collection<String> uuids);
+
+  @Authorized(PrivilegeConstants.GET_USERS)
+  User getUserByUserName(String clientName);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_USERS)
+  List<User> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_USERS)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized({PrivilegeConstants.ADD_USERS, PrivilegeConstants.EDIT_USERS})
+  User createOrUpdate(@Nonnull User newEntry);
+
+  @Override
+  @Authorized(PrivilegeConstants.DELETE_USERS)
+  User delete(@Nonnull String uuid);
 }

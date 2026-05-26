@@ -10,26 +10,28 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.CodeableConcept;
 
-public interface ConditionVerificationStatusTranslator<T> extends ToFhirTranslator<T, CodeableConcept>, ToOpenmrsTranslator<T, CodeableConcept> {
-	
-	/**
-	 * Maps an OpenMRS generic <T> verificationStatus to a {@link org.hl7.fhir.r4.model.CodeableConcept}
-	 *
-	 * @param verificationStatus the OpenMRS verificationStatus to translate
-	 * @return the corresponding FHIR CodeableConcept
-	 */
-	@Override
-	CodeableConcept toFhirResource(@Nonnull T verificationStatus);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.CodeableConcept} to an OpenMRS generic <T> verificationStatus
-	 *
-	 * @param codeableConcept the FHIR codeableConcept to translate
-	 * @return the corresponding OpenMRS generic <T> verificationStatus
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull CodeableConcept codeableConcept);
+public interface ConditionVerificationStatusTranslator<T>
+    extends ToFhirTranslator<T, CodeableConcept>, ToOpenmrsTranslator<T, CodeableConcept> {
+
+  /**
+   * Maps an OpenMRS generic <T> verificationStatus to a {@link
+   * org.hl7.fhir.r4.model.CodeableConcept}
+   *
+   * @param verificationStatus the OpenMRS verificationStatus to translate
+   * @return the corresponding FHIR CodeableConcept
+   */
+  @Override
+  CodeableConcept toFhirResource(@Nonnull T verificationStatus);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.CodeableConcept} to an OpenMRS generic <T>
+   * verificationStatus
+   *
+   * @param codeableConcept the FHIR codeableConcept to translate
+   * @return the corresponding OpenMRS generic <T> verificationStatus
+   */
+  @Override
+  T toOpenmrsType(@Nonnull CodeableConcept codeableConcept);
 }

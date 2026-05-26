@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -25,36 +24,37 @@ import org.openmrs.util.OpenmrsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseCodingTranslator implements CodingTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ConceptTranslator conceptTranslator;
-	
-	/**
-	 * Base implementation of conversion between a FHIR Coding interface and OpenMRS Concept
-	 * representation.
-	 */
-	@Override
-	public Concept toOpenmrsType(@Nonnull ICoding coding) {
-		if (coding.getCode() != null) {
-			CodeableConcept codeableConcept = new CodeableConcept();
-			codeableConcept.addCoding(new Coding(coding.getSystem(), coding.getCode(), coding.getDisplay()));
-			return conceptTranslator.toOpenmrsType(codeableConcept);
-		}
-		return null;
-	}
-	
-	/**
-	 * @return the coding on the CodeableConcept with the given system, or null if none found.
-	 */
-	public static Coding getCodingForSystem(CodeableConcept codeableConcept, String system) {
-		if (codeableConcept != null && codeableConcept.getCoding() != null) {
-			for (Coding coding : codeableConcept.getCoding()) {
-				if (OpenmrsUtil.nullSafeEqualsIgnoreCase(system, coding.getSystem())) {
-					return coding;
-				}
-			}
-		}
-		return null;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ConceptTranslator conceptTranslator;
+
+  /**
+   * Base implementation of conversion between a FHIR Coding interface and OpenMRS Concept
+   * representation.
+   */
+  @Override
+  public Concept toOpenmrsType(@Nonnull ICoding coding) {
+    if (coding.getCode() != null) {
+      CodeableConcept codeableConcept = new CodeableConcept();
+      codeableConcept.addCoding(
+          new Coding(coding.getSystem(), coding.getCode(), coding.getDisplay()));
+      return conceptTranslator.toOpenmrsType(codeableConcept);
+    }
+    return null;
+  }
+
+  /**
+   * @return the coding on the CodeableConcept with the given system, or null if none found.
+   */
+  public static Coding getCodingForSystem(CodeableConcept codeableConcept, String system) {
+    if (codeableConcept != null && codeableConcept.getCoding() != null) {
+      for (Coding coding : codeableConcept.getCoding()) {
+        if (OpenmrsUtil.nullSafeEqualsIgnoreCase(system, coding.getSystem())) {
+          return coding;
+        }
+      }
+    }
+    return null;
+  }
 }

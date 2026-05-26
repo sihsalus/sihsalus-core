@@ -9,12 +9,10 @@
  */
 package org.openmrs.module.billing.api.base.web;
 
-/**
- * Constants for the module web assets.
- */
+/** Constants for the module web assets. */
 public class ModuleWebConstants extends WebConstants {
-	
-	public static final String MODULE_RESOURCES_ROOT = MODULE_RESOURCE_BASE + "commons/";
-	
-	public static final String OPENHMIS_STYLE_URL = MODULE_RESOURCES_ROOT + "styles/openhmis.css";
+
+  public static final String MODULE_RESOURCES_ROOT = MODULE_RESOURCE_BASE + "commons/";
+
+  public static final String OPENHMIS_STYLE_URL = MODULE_RESOURCES_ROOT + "styles/openhmis.css";
 }

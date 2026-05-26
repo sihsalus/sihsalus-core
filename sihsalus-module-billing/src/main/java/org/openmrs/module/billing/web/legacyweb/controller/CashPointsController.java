@@ -14,15 +14,13 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-/**
- * Controller to manage the Cashpoints page.
- */
+/** Controller to manage the Cashpoints page. */
 @Controller
 @RequestMapping("/module/billing/cashPoints")
 public class CashPointsController {
-	
-	@RequestMapping(method = RequestMethod.GET)
-	public void cashPoints(ModelMap model) {
-		model.addAttribute("modelBase", "openhmis.cashier.cashPoint");
-	}
+
+  @RequestMapping(method = RequestMethod.GET)
+  public void cashPoints(ModelMap model) {
+    model.addAttribute("modelBase", "openhmis.cashier.cashPoint");
+  }
 }

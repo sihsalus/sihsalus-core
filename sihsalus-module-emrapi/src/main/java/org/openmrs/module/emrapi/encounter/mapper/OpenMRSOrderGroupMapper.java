@@ -17,27 +17,28 @@ import org.openmrs.api.OrderSetService;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
 public class OpenMRSOrderGroupMapper {
-	
-	private OrderSetService orderSetService;
-	
-	private OrderService orderService;
-	
-	public OpenMRSOrderGroupMapper(OrderSetService orderSetService, OrderService orderService) {
-		this.orderSetService = orderSetService;
-		this.orderService = orderService;
-	}
-	
-	public OrderGroup map(EncounterTransaction.OrderGroup encounterOrderGroup, Encounter encounter) {
-		if (StringUtils.isNotEmpty(encounterOrderGroup.getUuid())) {
-			OrderGroup orderGroup = orderService.getOrderGroupByUuid(encounterOrderGroup.getUuid());
-			if (orderGroup.getEncounter().getUuid().equals(encounter.getUuid())) {
-				return orderGroup;
-			}
-		}
-		OrderGroup omrsOrderGroup = new OrderGroup();
-		omrsOrderGroup.setPatient(encounter.getPatient());
-		omrsOrderGroup.setOrderSet(orderSetService.getOrderSetByUuid(encounterOrderGroup.getOrderSet().getUuid()));
-		omrsOrderGroup.setEncounter(encounter);
-		return omrsOrderGroup;
-	}
+
+  private OrderSetService orderSetService;
+
+  private OrderService orderService;
+
+  public OpenMRSOrderGroupMapper(OrderSetService orderSetService, OrderService orderService) {
+    this.orderSetService = orderSetService;
+    this.orderService = orderService;
+  }
+
+  public OrderGroup map(EncounterTransaction.OrderGroup encounterOrderGroup, Encounter encounter) {
+    if (StringUtils.isNotEmpty(encounterOrderGroup.getUuid())) {
+      OrderGroup orderGroup = orderService.getOrderGroupByUuid(encounterOrderGroup.getUuid());
+      if (orderGroup.getEncounter().getUuid().equals(encounter.getUuid())) {
+        return orderGroup;
+      }
+    }
+    OrderGroup omrsOrderGroup = new OrderGroup();
+    omrsOrderGroup.setPatient(encounter.getPatient());
+    omrsOrderGroup.setOrderSet(
+        orderSetService.getOrderSetByUuid(encounterOrderGroup.getOrderSet().getUuid()));
+    omrsOrderGroup.setEncounter(encounter);
+    return omrsOrderGroup;
+  }
 }

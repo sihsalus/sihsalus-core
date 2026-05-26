@@ -3,6 +3,9 @@ package org.openmrs.module.reportingrest.web.resource;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.StringProperty;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
@@ -30,164 +33,179 @@ import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOp
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.util.StringUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- *
- */
-@Resource(name = RestConstants.VERSION_1 + "/reportingrest/reportdata",
-        supportedClass = ReportData.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+/** */
+@Resource(
+    name = RestConstants.VERSION_1 + "/reportingrest/reportdata",
+    supportedClass = ReportData.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
 public class EvaluatedReportDefinitionResource extends EvaluatedResource<ReportData> {
 
-    private Log log = LogFactory.getLog(getClass());
+  private Log log = LogFactory.getLog(getClass());
 
-    @Override
-    public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        DelegatingResourceDescription description = null;
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = null;
 
-        if (rep instanceof DefaultRepresentation) {
-            description = new DelegatingResourceDescription();
-            description.addProperty("uuid"); // has @PropertyGetter so it gets definition.uuid
-            description.addProperty("dataSets");
-            description.addProperty("context");
-            description.addProperty("definition");
-            description.addSelfLink();
-        }
-
-        return description;
+    if (rep instanceof DefaultRepresentation) {
+      description = new DelegatingResourceDescription();
+      description.addProperty("uuid"); // has @PropertyGetter so it gets definition.uuid
+      description.addProperty("dataSets");
+      description.addProperty("context");
+      description.addProperty("definition");
+      description.addSelfLink();
     }
 
-    @Override
-    public Model getGETModel(Representation rep) {
-        ModelImpl modelImpl = ((ModelImpl) super.getGETModel(rep));
-        if (rep instanceof DefaultRepresentation) {
-            modelImpl.property("uuid", new StringProperty())
-                    .property("dataSets", new StringProperty())
-                    .property("context", new StringProperty())
-                    .property("definition", new StringProperty());
-        }
-        return modelImpl;
+    return description;
+  }
+
+  @Override
+  public Model getGETModel(Representation rep) {
+    ModelImpl modelImpl = ((ModelImpl) super.getGETModel(rep));
+    if (rep instanceof DefaultRepresentation) {
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("dataSets", new StringProperty())
+          .property("context", new StringProperty())
+          .property("definition", new StringProperty());
+    }
+    return modelImpl;
+  }
+
+  @Override
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
+    DelegatingResourceDescription delegatingResourceDescription =
+        new DelegatingResourceDescription();
+    delegatingResourceDescription.addProperty("uuid");
+    delegatingResourceDescription.addProperty("dataSets");
+    delegatingResourceDescription.addProperty("context");
+    delegatingResourceDescription.addProperty("definition");
+    return delegatingResourceDescription;
+  }
+
+  @Override
+  public Model getCREATEModel(Representation rep) {
+    ModelImpl modelImpl = ((ModelImpl) super.getGETModel(rep));
+    modelImpl
+        .property("uuid", new StringProperty())
+        .property("dataSets", new StringProperty())
+        .property("context", new StringProperty())
+        .property("definition", new StringProperty());
+    return modelImpl;
+  }
+
+  @PropertyGetter("dataSets")
+  public List<DataSet> getDataSets(ReportData delegate) {
+    return new ArrayList<DataSet>(delegate.getDataSets().values());
+  }
+
+  /**
+   * @should throw ObjectNotFoundException if resource does not exist
+   */
+  @Override
+  public Object retrieve(String uuid, RequestContext requestContext) throws ResponseException {
+    ReportingRestPrivileges.requireViewReports();
+
+    ReportDefinitionService reportDefinitionService =
+        DefinitionContext.getReportDefinitionService();
+    ReportDefinition definition =
+        getDefinitionByUniqueId(reportDefinitionService, ReportDefinition.class, uuid);
+    if (definition == null) {
+      throw new ObjectNotFoundException();
     }
 
-    @Override
-    public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
-        DelegatingResourceDescription delegatingResourceDescription = new DelegatingResourceDescription();
-        delegatingResourceDescription.addProperty("uuid");
-        delegatingResourceDescription.addProperty("dataSets");
-        delegatingResourceDescription.addProperty("context");
-        delegatingResourceDescription.addProperty("definition");
-        return delegatingResourceDescription;
+    EvaluationContext evalContext =
+        getEvaluationContextWithParameters(definition, requestContext, null, null);
+    evaluateAndSetBaseCohort(requestContext, evalContext);
+
+    try {
+      ReportData reportData =
+          (ReportData) evaluate(definition, reportDefinitionService, evalContext);
+      return asRepresentation(reportData, requestContext.getRepresentation());
+    } catch (EvaluationException e) {
+      throw new RuntimeException("Failed to evaluate report definition", e);
+    }
+  }
+
+  @Override
+  public Object update(String uniqueId, SimpleObject postBody, RequestContext requestContext)
+      throws ResponseException {
+    ReportingRestPrivileges.requireViewReports();
+    ReportDefinitionService reportDefinitionService =
+        DefinitionContext.getReportDefinitionService();
+    ReportDefinition definition =
+        getDefinitionByUniqueId(reportDefinitionService, ReportDefinition.class, uniqueId);
+    if (definition == null) {
+      throw new ObjectNotFoundException();
     }
 
-    @Override
-    public Model getCREATEModel(Representation rep) {
-        ModelImpl modelImpl = ((ModelImpl) super.getGETModel(rep));
-        modelImpl.property("uuid", new StringProperty())
-                .property("dataSets", new StringProperty())
-                .property("context", new StringProperty())
-                .property("definition", new StringProperty());
-        return modelImpl;
-    }
+    EvaluationContext evalContext =
+        getEvaluationContextWithParameters(definition, requestContext, null, postBody);
+    evaluateAndSetBaseCohort(requestContext, evalContext);
 
-    @PropertyGetter("dataSets")
-    public List<DataSet> getDataSets(ReportData delegate) {
-        return new ArrayList<DataSet>(delegate.getDataSets().values());
+    try {
+      ReportData reportData =
+          (ReportData) evaluate(definition, reportDefinitionService, evalContext);
+      return asRepresentation(reportData, requestContext.getRepresentation());
+    } catch (EvaluationException e) {
+      throw new RuntimeException("Failed to evaluate report definition", e);
     }
+  }
 
-	/**
-	 * @should throw ObjectNotFoundException if resource does not exist
-	 */
-	@Override
-    public Object retrieve(String uuid, RequestContext requestContext)
-            throws ResponseException {
-        ReportingRestPrivileges.requireViewReports();
+  private void evaluateAndSetBaseCohort(
+      RequestContext requestContext, EvaluationContext evalContext) {
+    HttpServletRequest httpRequest = requestContext.getRequest();
 
-        ReportDefinitionService reportDefinitionService = DefinitionContext.getReportDefinitionService();
-        ReportDefinition definition = getDefinitionByUniqueId(reportDefinitionService, ReportDefinition.class, uuid);
-	    if (definition == null) {
-		    throw new ObjectNotFoundException();
-	    }
-
-        EvaluationContext evalContext = getEvaluationContextWithParameters(definition, requestContext, null, null);
-        evaluateAndSetBaseCohort(requestContext, evalContext);
-
-        try {
-            ReportData reportData = (ReportData) evaluate(definition, reportDefinitionService, evalContext);
-            return asRepresentation(reportData, requestContext.getRepresentation());
-        } catch (EvaluationException e) {
-            throw new RuntimeException("Failed to evaluate report definition", e);
-        }
+    // if there is a "cohort" parameter, use that to look for a CohortDefinition to run against,
+    // otherwise all patients
+    String cohortUuid = httpRequest.getParameter("cohort");
+    if (StringUtils.hasLength(cohortUuid)) {
+      try {
+        EvaluatedCohort cohort =
+            new EvaluatedCohortResource().getEvaluatedCohort(cohortUuid, requestContext, "cohort.");
+        evalContext.setBaseCohort(cohort);
+      } catch (EvaluationException ex) {
+        throw new IllegalStateException("Failed to evaluated cohort", ex);
+      }
     }
-    
-    @Override
-    public Object update(String uniqueId, SimpleObject postBody, RequestContext requestContext) throws ResponseException {
-        ReportingRestPrivileges.requireViewReports();
-        ReportDefinitionService reportDefinitionService = DefinitionContext.getReportDefinitionService();
-        ReportDefinition definition = getDefinitionByUniqueId(reportDefinitionService, ReportDefinition.class, uniqueId);
-        if (definition == null) {
-            throw new ObjectNotFoundException();
-        }
-    
-        EvaluationContext evalContext = getEvaluationContextWithParameters(definition, requestContext, null, postBody);
-        evaluateAndSetBaseCohort(requestContext, evalContext);
-    
-        try {
-            ReportData reportData = (ReportData) evaluate(definition, reportDefinitionService, evalContext);
-            return asRepresentation(reportData, requestContext.getRepresentation());
-        } catch (EvaluationException e) {
-            throw new RuntimeException("Failed to evaluate report definition", e);
-        }
-    }
-    
-    private void evaluateAndSetBaseCohort(RequestContext requestContext, EvaluationContext evalContext) {
-        HttpServletRequest httpRequest = requestContext.getRequest();
-        
-        // if there is a "cohort" parameter, use that to look for a CohortDefinition to run against, otherwise all patients
-        String cohortUuid = httpRequest.getParameter("cohort");
-        if (StringUtils.hasLength(cohortUuid)) {
-            try {
-                EvaluatedCohort cohort = new EvaluatedCohortResource().getEvaluatedCohort(cohortUuid, requestContext, "cohort.");
-                evalContext.setBaseCohort(cohort);
-            } catch (EvaluationException ex) {
-                throw new IllegalStateException("Failed to evaluated cohort", ex);
-            }
-        }
-    }
-    
-    /**
-     * We let the user POST the serialized XML version of a Definition to this resource in order to evaluate a non-saved
-     * definition on the fly.
-     *
-     * @param postBody
-     * @param context
-     * @return
-     * @throws ResponseException
-     */
-    @Override
-    public Object create(SimpleObject postBody, RequestContext context) throws ResponseException {
-        ReportingRestPrivileges.requireViewReports();
-        Object serializedXml = postBody.get("serializedXml");
-        ReportDefinition definition;
-        try {
-            String xml = (String) serializedXml;
-            definition = Context.getSerializationService().getSerializer(ReportingSerializer.class).deserialize(xml, ReportDefinition.class);
-        } catch (Exception ex) {
-            throw new IllegalArgumentException("Invalid submitted data set definition", ex);
-        }
-        EvaluationContext evalContext = getEvaluationContextWithParameters(definition, context, null, postBody);
-        try {
-            Evaluated<ReportDefinition> evaluated = evaluate(definition, DefinitionContext.getReportDefinitionService(), evalContext);
-            return asRepresentation((ReportData) evaluated, context.getRepresentation());
-        } catch (Exception ex) {
-            throw new IllegalArgumentException("Error evaluating report definition", ex);
-        }
-    }
+  }
 
-    @Override
-    public ReportData newDelegate() {
-        return new ReportData();
+  /**
+   * We let the user POST the serialized XML version of a Definition to this resource in order to
+   * evaluate a non-saved definition on the fly.
+   *
+   * @param postBody
+   * @param context
+   * @return
+   * @throws ResponseException
+   */
+  @Override
+  public Object create(SimpleObject postBody, RequestContext context) throws ResponseException {
+    ReportingRestPrivileges.requireViewReports();
+    Object serializedXml = postBody.get("serializedXml");
+    ReportDefinition definition;
+    try {
+      String xml = (String) serializedXml;
+      definition =
+          Context.getSerializationService()
+              .getSerializer(ReportingSerializer.class)
+              .deserialize(xml, ReportDefinition.class);
+    } catch (Exception ex) {
+      throw new IllegalArgumentException("Invalid submitted data set definition", ex);
     }
+    EvaluationContext evalContext =
+        getEvaluationContextWithParameters(definition, context, null, postBody);
+    try {
+      Evaluated<ReportDefinition> evaluated =
+          evaluate(definition, DefinitionContext.getReportDefinitionService(), evalContext);
+      return asRepresentation((ReportData) evaluated, context.getRepresentation());
+    } catch (Exception ex) {
+      throw new IllegalArgumentException("Error evaluating report definition", ex);
+    }
+  }
 
+  @Override
+  public ReportData newDelegate() {
+    return new ReportData();
+  }
 }

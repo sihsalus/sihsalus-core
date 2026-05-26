@@ -10,31 +10,33 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
 
-public interface EncounterParticipantTranslator extends ToFhirTranslator<EncounterProvider, Encounter.EncounterParticipantComponent>, UpdatableOpenmrsTranslator<EncounterProvider, Encounter.EncounterParticipantComponent> {
-	
-	/**
-	 * Maps an {@link org.openmrs.EncounterProvider} to an
-	 * {@link org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent}
-	 * 
-	 * @param encounter the OpenMRS encounter to translate
-	 * @return the corresponding FHIR Encounter.EncounterParticipantComponent resource
-	 */
-	@Override
-	Encounter.EncounterParticipantComponent toFhirResource(@Nonnull EncounterProvider encounter);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent} to an existing
-	 * {@link org.openmrs.EncounterProvider}
-	 * 
-	 * @param encounterProvider the encounterProvider to update
-	 * @param encounterParticipantComponent the encounterParticipantComponent to map
-	 * @return an updated version of the encounterProvider
-	 */
-	@Override
-	EncounterProvider toOpenmrsType(@Nonnull EncounterProvider encounterProvider,
-	        @Nonnull Encounter.EncounterParticipantComponent encounterParticipantComponent);
+public interface EncounterParticipantTranslator
+    extends ToFhirTranslator<EncounterProvider, Encounter.EncounterParticipantComponent>,
+        UpdatableOpenmrsTranslator<EncounterProvider, Encounter.EncounterParticipantComponent> {
+
+  /**
+   * Maps an {@link org.openmrs.EncounterProvider} to an {@link
+   * org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent}
+   *
+   * @param encounter the OpenMRS encounter to translate
+   * @return the corresponding FHIR Encounter.EncounterParticipantComponent resource
+   */
+  @Override
+  Encounter.EncounterParticipantComponent toFhirResource(@Nonnull EncounterProvider encounter);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent} to an existing
+   * {@link org.openmrs.EncounterProvider}
+   *
+   * @param encounterProvider the encounterProvider to update
+   * @param encounterParticipantComponent the encounterParticipantComponent to map
+   * @return an updated version of the encounterProvider
+   */
+  @Override
+  EncounterProvider toOpenmrsType(
+      @Nonnull EncounterProvider encounterProvider,
+      @Nonnull Encounter.EncounterParticipantComponent encounterParticipantComponent);
 }

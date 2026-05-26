@@ -16,12 +16,12 @@ package org.openmrs.module.billing.api.base.f;
  * @param <TParm2> The second parameter class
  */
 public interface Action2<TParm1, TParm2> {
-	
-	/**
-	 * Executes the action.
-	 *
-	 * @param parameter1 The first parameter.
-	 * @param parameter2 The second parameter.
-	 */
-	void apply(TParm1 parameter1, TParm2 parameter2);
+
+  /**
+   * Executes the action.
+   *
+   * @param parameter1 The first parameter.
+   * @param parameter2 The second parameter.
+   */
+  void apply(TParm1 parameter1, TParm2 parameter2);
 }

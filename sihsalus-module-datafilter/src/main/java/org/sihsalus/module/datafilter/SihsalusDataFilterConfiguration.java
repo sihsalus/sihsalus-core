@@ -13,23 +13,23 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SihsalusDataFilterConfiguration {
 
-    @Bean
-    DataFilterDAO dataFilterDAO(SessionFactory sessionFactory) {
-        HibernateDataFilterDAO dao = new HibernateDataFilterDAO();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
+  @Bean
+  DataFilterDAO dataFilterDAO(SessionFactory sessionFactory) {
+    HibernateDataFilterDAO dao = new HibernateDataFilterDAO();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
 
-    @Bean
-    DataFilterService dataFilterService(DataFilterDAO dataFilterDAO) {
-        DataFilterServiceImpl service = new DataFilterServiceImpl();
-        service.setDao(dataFilterDAO);
-        return service;
-    }
+  @Bean
+  DataFilterService dataFilterService(DataFilterDAO dataFilterDAO) {
+    DataFilterServiceImpl service = new DataFilterServiceImpl();
+    service.setDao(dataFilterDAO);
+    return service;
+  }
 
-    @Bean
-    SmartInitializingSingleton dataFilterServiceRegistrar(
-            ServiceContext serviceContext, DataFilterService dataFilterService) {
-        return () -> serviceContext.setService(DataFilterService.class, dataFilterService);
-    }
+  @Bean
+  SmartInitializingSingleton dataFilterServiceRegistrar(
+      ServiceContext serviceContext, DataFilterService dataFilterService) {
+    return () -> serviceContext.setService(DataFilterService.class, dataFilterService);
+  }
 }

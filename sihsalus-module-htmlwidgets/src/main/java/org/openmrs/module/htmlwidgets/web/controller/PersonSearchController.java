@@ -1,12 +1,10 @@
 package org.openmrs.module.htmlwidgets.web.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Person;
 import org.openmrs.Role;
@@ -18,33 +16,47 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class PersonSearchController {
-    
-    /**
-     * User Search
-     */
-    @RequestMapping("/module/htmlwidgets/personSearch.form")
-    public void personSearch(HttpServletResponse response, @RequestParam(required=false, value="roles") String roles,
-		    		@RequestParam(required=true, value="q") String query) throws Exception {
-    	
-    	response.setContentType("text/plain");
-    	response.setCharacterEncoding("UTF-8");
-    	PrintWriter out = response.getWriter();
-    	
-		if (StringUtils.isNotEmpty(roles)) {
-			List<Role> roleList = new ArrayList<Role>();
-			for (String roleName : roles.split(",")) {
-				roleList.add(Context.getUserService().getRole(roleName));
-			}
-			for (Iterator<User> i = Context.getUserService().getUsers(query, roleList, false).iterator(); i.hasNext();) {
-				User u = i.next();
-				out.print(u.getFamilyName() + ", " + u.getGivenName() + "|" + u.getPerson().getPersonId() + (i.hasNext() ? "\n" : ""));
-			}
-		}
-		else {
-			for (Iterator<Person> i = Context.getPersonService().getPeople(query, null).iterator(); i.hasNext();) {
-				Person p = i.next();
-				out.print(p.getFamilyName() + ", " + p.getGivenName() + "|" + p.getPersonId() + (i.hasNext() ? "\n" : ""));
-			}			
-		}
+
+  /** User Search */
+  @RequestMapping("/module/htmlwidgets/personSearch.form")
+  public void personSearch(
+      HttpServletResponse response,
+      @RequestParam(required = false, value = "roles") String roles,
+      @RequestParam(required = true, value = "q") String query)
+      throws Exception {
+
+    response.setContentType("text/plain");
+    response.setCharacterEncoding("UTF-8");
+    PrintWriter out = response.getWriter();
+
+    if (StringUtils.isNotEmpty(roles)) {
+      List<Role> roleList = new ArrayList<Role>();
+      for (String roleName : roles.split(",")) {
+        roleList.add(Context.getUserService().getRole(roleName));
+      }
+      for (Iterator<User> i = Context.getUserService().getUsers(query, roleList, false).iterator();
+          i.hasNext(); ) {
+        User u = i.next();
+        out.print(
+            u.getFamilyName()
+                + ", "
+                + u.getGivenName()
+                + "|"
+                + u.getPerson().getPersonId()
+                + (i.hasNext() ? "\n" : ""));
+      }
+    } else {
+      for (Iterator<Person> i = Context.getPersonService().getPeople(query, null).iterator();
+          i.hasNext(); ) {
+        Person p = i.next();
+        out.print(
+            p.getFamilyName()
+                + ", "
+                + p.getGivenName()
+                + "|"
+                + p.getPersonId()
+                + (i.hasNext() ? "\n" : ""));
+      }
     }
+  }
 }

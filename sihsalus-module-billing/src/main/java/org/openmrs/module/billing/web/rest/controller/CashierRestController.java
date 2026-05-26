@@ -25,21 +25,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/api")
+@RequestMapping(
+    value =
+        "/rest/" + RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/api")
 public class CashierRestController extends BaseRestController {
-	
-	@RequestMapping(method = RequestMethod.POST, path = "/billable-service")
-	@ResponseBody
-	public Object get(@RequestBody BillableServiceMapper request) {
-		Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
-		if (request == null) {
-			throw new ConversionException("Request body is required");
-		}
-		BillableService billableService = request.billableServiceMapper(request);
-		BillableServiceService service = Context.getService(BillableServiceService.class);
-		
-		service.saveBillableService(billableService);
-		
-		return true;
-	}
+
+  @RequestMapping(method = RequestMethod.POST, path = "/billable-service")
+  @ResponseBody
+  public Object get(@RequestBody BillableServiceMapper request) {
+    Context.requirePrivilege(PrivilegeConstants.MANAGE_METADATA);
+    if (request == null) {
+      throw new ConversionException("Request body is required");
+    }
+    BillableService billableService = request.billableServiceMapper(request);
+    BillableServiceService service = Context.getService(BillableServiceService.class);
+
+    service.saveBillableService(billableService);
+
+    return true;
+  }
 }

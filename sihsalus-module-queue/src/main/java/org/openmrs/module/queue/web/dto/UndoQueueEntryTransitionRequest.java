@@ -13,6 +13,6 @@ import lombok.Getter;
 
 @Getter
 public class UndoQueueEntryTransitionRequest {
-	
-	private String queueEntry;
+
+  private String queueEntry;
 }

@@ -1,17 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.api.db.hibernate;
 
 import java.util.EnumSet;
 import java.util.Properties;
-
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -35,38 +34,41 @@ import org.hibernate.type.Type;
  *
  * @author paul.shemansky@gmail.com
  */
-public class NativeIfNotAssignedIdentityGenerator extends IdentityGenerator implements IdentifierGenerator, Configurable {
+public class NativeIfNotAssignedIdentityGenerator extends IdentityGenerator
+    implements IdentifierGenerator, Configurable {
 
-	private String entityName;
+  private String entityName;
 
-	@Override
-	public Object generate(SharedSessionContractImplementor session, Object entity) throws HibernateException {
-		EntityPersister persister = session.getEntityPersister(entityName, entity);
-		// Determine if an ID has been assigned.
-		return persister.getIdentifier(entity, session);
-	}
+  @Override
+  public Object generate(SharedSessionContractImplementor session, Object entity)
+      throws HibernateException {
+    EntityPersister persister = session.getEntityPersister(entityName, entity);
+    // Determine if an ID has been assigned.
+    return persister.getIdentifier(entity, session);
+  }
 
-	@Override
-	public void configure(Type type, Properties params, ServiceRegistry serviceRegistry) throws MappingException {
-		this.entityName = params.getProperty(ENTITY_NAME);
-		if (entityName == null) {
-			throw new MappingException("no entity name");
-		}
-	}
+  @Override
+  public void configure(Type type, Properties params, ServiceRegistry serviceRegistry)
+      throws MappingException {
+    this.entityName = params.getProperty(ENTITY_NAME);
+    if (entityName == null) {
+      throw new MappingException("no entity name");
+    }
+  }
 
-	@Override
-	public EnumSet<EventType> getEventTypes() {
-		return super.getEventTypes();
-	}
+  @Override
+  public EnumSet<EventType> getEventTypes() {
+    return super.getEventTypes();
+  }
 
-	@Override
-	public boolean generatedOnExecution() {
-		return super.generatedOnExecution();
-	}
+  @Override
+  public boolean generatedOnExecution() {
+    return super.generatedOnExecution();
+  }
 
-	@Override
-	public boolean generatedOnExecution(Object entity, SharedSessionContractImplementor session) {
-		EntityPersister persister = session.getEntityPersister(entityName, entity);
-		return persister.getIdentifier(entity, session) == null;
-	}
+  @Override
+  public boolean generatedOnExecution(Object entity, SharedSessionContractImplementor session) {
+    EntityPersister persister = session.getEntityPersister(entityName, entity);
+    return persister.getIdentifier(entity, session) == null;
+  }
 }

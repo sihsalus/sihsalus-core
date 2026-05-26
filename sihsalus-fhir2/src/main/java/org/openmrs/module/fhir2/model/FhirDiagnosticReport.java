@@ -21,11 +21,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -43,66 +41,77 @@ import org.openmrs.Provider;
 @Entity
 @Table(name = "fhir_diagnostic_report")
 public class FhirDiagnosticReport extends BaseOpenmrsData {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@EqualsAndHashCode.Include
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "diagnostic_report_id")
-	private Integer id;
-	
-	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private DiagnosticReportStatus status;
-	
-	@OneToOne
-	@JoinColumn(name = "concept_id", referencedColumnName = "concept_id", nullable = false)
-	private Concept code;
-	
-	@OneToOne
-	@JoinColumn(name = "subject_id", referencedColumnName = "patient_id")
-	private Patient subject;
-	
-	@OneToOne
-	@JoinColumn(name = "encounter_id", referencedColumnName = "encounter_id")
-	private Encounter encounter;
-	
-	@Column(name = "issued")
-	private Date issued;
-	
-	@OneToMany
-	@JoinTable(name = "fhir_diagnostic_report_performers", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "provider_id"))
-	private Set<Provider> performers = new HashSet<>();
-	
-	@OneToMany
-	@JoinTable(name = "fhir_diagnostic_report_results", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "obs_id"))
-	private Set<Obs> results = new HashSet<>();
-	
-	/**
-	 * @Since 2.8.1
-	 * @param conclusion of results
-	 * @return conclusion of results
-	 */
-	@Column(name = "conclusion", length = 1024)
-	private String conclusion;
-	
-	/**
-	 * @Since 2.8.1
-	 * @param orders references to service requests the report is based on
-	 * @return orders the report is based on
-	 */
-	@OneToMany
-	@JoinTable(name = "fhir_diagnostic_report_service_request", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "order_id"))
-	private Set<Order> orders = new HashSet<>();
-	
-	public enum DiagnosticReportStatus {
-		REGISTERED,
-		PARTIAL,
-		PRELIMINARY,
-		AMENDED,
-		CANCELLED,
-		FINAL,
-		UNKNOWN
-	}
+
+  private static final long serialVersionUID = 1L;
+
+  @EqualsAndHashCode.Include
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "diagnostic_report_id")
+  private Integer id;
+
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private DiagnosticReportStatus status;
+
+  @OneToOne
+  @JoinColumn(name = "concept_id", referencedColumnName = "concept_id", nullable = false)
+  private Concept code;
+
+  @OneToOne
+  @JoinColumn(name = "subject_id", referencedColumnName = "patient_id")
+  private Patient subject;
+
+  @OneToOne
+  @JoinColumn(name = "encounter_id", referencedColumnName = "encounter_id")
+  private Encounter encounter;
+
+  @Column(name = "issued")
+  private Date issued;
+
+  @OneToMany
+  @JoinTable(
+      name = "fhir_diagnostic_report_performers",
+      joinColumns = @JoinColumn(name = "diagnostic_report_id"),
+      inverseJoinColumns = @JoinColumn(name = "provider_id"))
+  private Set<Provider> performers = new HashSet<>();
+
+  @OneToMany
+  @JoinTable(
+      name = "fhir_diagnostic_report_results",
+      joinColumns = @JoinColumn(name = "diagnostic_report_id"),
+      inverseJoinColumns = @JoinColumn(name = "obs_id"))
+  private Set<Obs> results = new HashSet<>();
+
+  /**
+   * @Since 2.8.1
+   *
+   * @param conclusion of results
+   * @return conclusion of results
+   */
+  @Column(name = "conclusion", length = 1024)
+  private String conclusion;
+
+  /**
+   * @Since 2.8.1
+   *
+   * @param orders references to service requests the report is based on
+   * @return orders the report is based on
+   */
+  @OneToMany
+  @JoinTable(
+      name = "fhir_diagnostic_report_service_request",
+      joinColumns = @JoinColumn(name = "diagnostic_report_id"),
+      inverseJoinColumns = @JoinColumn(name = "order_id"))
+  private Set<Order> orders = new HashSet<>();
+
+  public enum DiagnosticReportStatus {
+    REGISTERED,
+    PARTIAL,
+    PRELIMINARY,
+    AMENDED,
+    CANCELLED,
+    FINAL,
+    UNKNOWN
+  }
 }

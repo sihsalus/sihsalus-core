@@ -10,21 +10,18 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
 
-/**
- * A one-way translator from {@link Concept#getConceptClass()} to a {@link CodeableConcept}
- */
+/** A one-way translator from {@link Concept#getConceptClass()} to a {@link CodeableConcept} */
 public interface ObservationCategoryTranslator extends ToFhirTranslator<Concept, CodeableConcept> {
-	
-	/**
-	 * Translates a concept into a {@link CodeableConcept} valid for the Observation.category field
-	 *
-	 * @param concept the OpenMRS concept to translate
-	 * @return a codeable concept appropriate to be added to the Observation.category field
-	 */
-	@Override
-	CodeableConcept toFhirResource(@Nonnull Concept concept);
+
+  /**
+   * Translates a concept into a {@link CodeableConcept} valid for the Observation.category field
+   *
+   * @param concept the OpenMRS concept to translate
+   * @return a codeable concept appropriate to be added to the Observation.category field
+   */
+  @Override
+  CodeableConcept toFhirResource(@Nonnull Concept concept);
 }

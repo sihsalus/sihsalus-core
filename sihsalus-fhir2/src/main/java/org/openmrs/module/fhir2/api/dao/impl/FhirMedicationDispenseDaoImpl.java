@@ -9,15 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.annotation.Nonnull;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
-
 import java.util.Optional;
-
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import javax.annotation.Nonnull;
 import org.openmrs.MedicationDispense;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
@@ -26,42 +24,67 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirMedicationDispenseDaoImpl extends BaseFhirDao<MedicationDispense> implements FhirMedicationDispenseDao<MedicationDispense> {
-	
-	@Override
-	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<MedicationDispense, U> criteriaContext,
-	        @Nonnull SearchParameterMap theParams) {
-		theParams.getParameters().forEach(entry -> {
-			switch (entry.getKey()) {
-				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> getSearchQueryHelper().handlePatientReference(criteriaContext,
-					    (ReferenceAndListParam) param.getParam()));
-					break;
-				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(e -> getSearchQueryHelper().handleEncounterReference(criteriaContext,
-					    (ReferenceAndListParam) e.getParam(), "e"));
-					break;
-				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
-					From<?, ?> drugOrder = criteriaContext.addJoin("drugOrder", "drugOrder");
-					entry.getValue().forEach(e -> getSearchQueryHelper().handleMedicationRequestReference(criteriaContext,
-					    drugOrder, (ReferenceAndListParam) e.getParam()).ifPresent(criteriaContext::addPredicate));
-					break;
-				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
-					break;
-			}
-		});
-	}
-	
-	@Override
-	protected <T, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(criteriaContext, param);
-	}
-	
-	@Override
-	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
-		return super.paramToProp(criteriaContext, param);
-	}
+public class FhirMedicationDispenseDaoImpl extends BaseFhirDao<MedicationDispense>
+    implements FhirMedicationDispenseDao<MedicationDispense> {
+
+  @Override
+  protected <U> void setupSearchParams(
+      @Nonnull OpenmrsFhirCriteriaContext<MedicationDispense, U> criteriaContext,
+      @Nonnull SearchParameterMap theParams) {
+    theParams
+        .getParameters()
+        .forEach(
+            entry -> {
+              switch (entry.getKey()) {
+                case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
+                  entry
+                      .getValue()
+                      .forEach(
+                          param ->
+                              getSearchQueryHelper()
+                                  .handlePatientReference(
+                                      criteriaContext, (ReferenceAndListParam) param.getParam()));
+                  break;
+                case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
+                  entry
+                      .getValue()
+                      .forEach(
+                          e ->
+                              getSearchQueryHelper()
+                                  .handleEncounterReference(
+                                      criteriaContext, (ReferenceAndListParam) e.getParam(), "e"));
+                  break;
+                case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
+                  From<?, ?> drugOrder = criteriaContext.addJoin("drugOrder", "drugOrder");
+                  entry
+                      .getValue()
+                      .forEach(
+                          e ->
+                              getSearchQueryHelper()
+                                  .handleMedicationRequestReference(
+                                      criteriaContext,
+                                      drugOrder,
+                                      (ReferenceAndListParam) e.getParam())
+                                  .ifPresent(criteriaContext::addPredicate));
+                  break;
+                case FhirConstants.COMMON_SEARCH_HANDLER:
+                  handleCommonSearchParameters(criteriaContext, entry.getValue())
+                      .ifPresent(criteriaContext::addPredicate);
+                  criteriaContext.finalizeQuery();
+                  break;
+              }
+            });
+  }
+
+  @Override
+  protected <T, U> Optional<Predicate> handleLastUpdated(
+      @Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, DateRangeParam param) {
+    return super.handleLastUpdatedImmutable(criteriaContext, param);
+  }
+
+  @Override
+  protected <V, U> Path<?> paramToProp(
+      @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
+    return super.paramToProp(criteriaContext, param);
+  }
 }

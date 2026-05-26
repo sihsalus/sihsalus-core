@@ -25,28 +25,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirMedicationServiceImpl extends BaseFhirService<Medication, Drug> implements FhirMedicationService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirMedicationDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private MedicationTranslator translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<Medication> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator, SearchQueryInclude<Medication>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForMedications(MedicationSearchParams medicationSearchParams) {
-		return searchQuery.getQueryResults(medicationSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
-	}
-	
+public class FhirMedicationServiceImpl extends BaseFhirService<Medication, Drug>
+    implements FhirMedicationService {
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private FhirMedicationDao dao;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private MedicationTranslator translator;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQueryInclude<Medication> searchQueryInclude;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQuery<
+          Drug, Medication, FhirMedicationDao, MedicationTranslator, SearchQueryInclude<Medication>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForMedications(MedicationSearchParams medicationSearchParams) {
+    return searchQuery.getQueryResults(
+        medicationSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+  }
 }

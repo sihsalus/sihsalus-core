@@ -23,61 +23,60 @@ import org.springframework.stereotype.Component;
 
 @Component("domainWrapperFactory")
 public class DomainWrapperFactory implements ApplicationContextAware {
-	
-	private ApplicationContext applicationContext;
-	
-	public PatientDomainWrapper newPatientDomainWrapper() {
-		PatientDomainWrapper patientDomainWrapper = new PatientDomainWrapper();
-		return (PatientDomainWrapper) autowire(patientDomainWrapper);
-	}
-	
-	public PatientDomainWrapper newPatientDomainWrapper(Patient patient) {
-		PatientDomainWrapper patientDomainWrapper = newPatientDomainWrapper();
-		patientDomainWrapper.setPatient(patient);
-		return patientDomainWrapper;
-	}
-	
-	public VisitDomainWrapper newVisitDomainWrapper() {
-		VisitDomainWrapper visitDomainWrapper = new VisitDomainWrapper();
-		return (VisitDomainWrapper) autowire(visitDomainWrapper);
-	}
-	
-	public VisitDomainWrapper newVisitDomainWrapper(Visit visit) {
-		VisitDomainWrapper visitDomainWrapper = newVisitDomainWrapper();
-		visitDomainWrapper.setVisit(visit);
-		return visitDomainWrapper;
-	}
-	
-	public AccountDomainWrapper newAccountDomainWrapper() {
-		AccountDomainWrapper accountDomainWrapper = new AccountDomainWrapper();
-		return (AccountDomainWrapper) autowire(accountDomainWrapper);
-	}
-	
-	public AccountDomainWrapper newAccountDomainWrapper(Person person) {
-		AccountDomainWrapper accountDomainWrapper = newAccountDomainWrapper();
-		accountDomainWrapper.initializeWithPerson(person);
-		return accountDomainWrapper;
-	}
-	
-	public EncounterDomainWrapper newEncounterDomainWrapper() {
-		EncounterDomainWrapper encounterDomainWrapper = new EncounterDomainWrapper();
-		return (EncounterDomainWrapper) autowire(encounterDomainWrapper);
-	}
-	
-	public EncounterDomainWrapper newEncounterDomainWrapper(Encounter encounter) {
-		EncounterDomainWrapper encounterDomainWrapper = newEncounterDomainWrapper();
-		encounterDomainWrapper.setEncounter(encounter);
-		return encounterDomainWrapper;
-	}
-	
-	private DomainWrapper autowire(DomainWrapper domainWrapper) {
-		applicationContext.getAutowireCapableBeanFactory().autowireBean(domainWrapper);
-		return domainWrapper;
-	}
-	
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-	
+
+  private ApplicationContext applicationContext;
+
+  public PatientDomainWrapper newPatientDomainWrapper() {
+    PatientDomainWrapper patientDomainWrapper = new PatientDomainWrapper();
+    return (PatientDomainWrapper) autowire(patientDomainWrapper);
+  }
+
+  public PatientDomainWrapper newPatientDomainWrapper(Patient patient) {
+    PatientDomainWrapper patientDomainWrapper = newPatientDomainWrapper();
+    patientDomainWrapper.setPatient(patient);
+    return patientDomainWrapper;
+  }
+
+  public VisitDomainWrapper newVisitDomainWrapper() {
+    VisitDomainWrapper visitDomainWrapper = new VisitDomainWrapper();
+    return (VisitDomainWrapper) autowire(visitDomainWrapper);
+  }
+
+  public VisitDomainWrapper newVisitDomainWrapper(Visit visit) {
+    VisitDomainWrapper visitDomainWrapper = newVisitDomainWrapper();
+    visitDomainWrapper.setVisit(visit);
+    return visitDomainWrapper;
+  }
+
+  public AccountDomainWrapper newAccountDomainWrapper() {
+    AccountDomainWrapper accountDomainWrapper = new AccountDomainWrapper();
+    return (AccountDomainWrapper) autowire(accountDomainWrapper);
+  }
+
+  public AccountDomainWrapper newAccountDomainWrapper(Person person) {
+    AccountDomainWrapper accountDomainWrapper = newAccountDomainWrapper();
+    accountDomainWrapper.initializeWithPerson(person);
+    return accountDomainWrapper;
+  }
+
+  public EncounterDomainWrapper newEncounterDomainWrapper() {
+    EncounterDomainWrapper encounterDomainWrapper = new EncounterDomainWrapper();
+    return (EncounterDomainWrapper) autowire(encounterDomainWrapper);
+  }
+
+  public EncounterDomainWrapper newEncounterDomainWrapper(Encounter encounter) {
+    EncounterDomainWrapper encounterDomainWrapper = newEncounterDomainWrapper();
+    encounterDomainWrapper.setEncounter(encounter);
+    return encounterDomainWrapper;
+  }
+
+  private DomainWrapper autowire(DomainWrapper domainWrapper) {
+    applicationContext.getAutowireCapableBeanFactory().autowireBean(domainWrapper);
+    return domainWrapper;
+  }
+
+  @Override
+  public void setApplicationContext(ApplicationContext applicationContext) {
+    this.applicationContext = applicationContext;
+  }
 }

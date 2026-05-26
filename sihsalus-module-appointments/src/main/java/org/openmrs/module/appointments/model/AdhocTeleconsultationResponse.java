@@ -1,38 +1,36 @@
 package org.openmrs.module.appointments.model;
 
+import java.util.List;
 import org.openmrs.module.appointments.notification.NotificationResult;
 
-import java.util.List;
-
 public class AdhocTeleconsultationResponse {
-    private String uuid;
-    private String link;
-    private List<NotificationResult> notificationResults;
+  private String uuid;
+  private String link;
+  private List<NotificationResult> notificationResults;
 
-    public AdhocTeleconsultationResponse() {
-    }
+  public AdhocTeleconsultationResponse() {}
 
-    public String getUuid() {
-        return uuid;
-    }
+  public String getUuid() {
+    return uuid;
+  }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
-    public String getLink() {
-        return link;
-    }
+  public String getLink() {
+    return link;
+  }
 
-    public void setLink(String link) {
-        this.link = link;
-    }
+  public void setLink(String link) {
+    this.link = link;
+  }
 
-    public List<NotificationResult> getNotificationResults() {
-        return notificationResults;
-    }
+  public List<NotificationResult> getNotificationResults() {
+    return notificationResults;
+  }
 
-    public void setNotificationResults(List<NotificationResult> notificationResults) {
-        this.notificationResults = notificationResults;
-    }
+  public void setNotificationResults(List<NotificationResult> notificationResults) {
+    this.notificationResults = notificationResults;
+  }
 }

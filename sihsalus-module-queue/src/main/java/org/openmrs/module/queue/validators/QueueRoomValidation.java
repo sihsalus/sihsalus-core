@@ -17,25 +17,28 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 @Slf4j
-@Handler(supports = { QueueRoom.class }, order = 50)
+@Handler(
+    supports = {QueueRoom.class},
+    order = 50)
 public class QueueRoomValidation implements Validator {
-	
-	@Override
-	public boolean supports(Class<?> aClass) {
-		return QueueRoom.class.isAssignableFrom(aClass);
-	}
-	
-	@Override
-	public void validate(Object obj, Errors errors) {
-		log.debug("{}.validate", this.getClass().getName());
-		//instanceof checks for null
-		if (!(obj instanceof QueueRoom)) {
-			throw new IllegalArgumentException(
-			        "The parameter target should not be null & must be of type" + QueueRoom.class);
-		}
-		QueueRoom queueRoom = (QueueRoom) obj;
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "queueRoom.name.null", "QueueRoom name can't be null");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "queue", "queueRoom.queue.null",
-		    "Queue in QueueRoom can't be null");
-	}
+
+  @Override
+  public boolean supports(Class<?> aClass) {
+    return QueueRoom.class.isAssignableFrom(aClass);
+  }
+
+  @Override
+  public void validate(Object obj, Errors errors) {
+    log.debug("{}.validate", this.getClass().getName());
+    // instanceof checks for null
+    if (!(obj instanceof QueueRoom)) {
+      throw new IllegalArgumentException(
+          "The parameter target should not be null & must be of type" + QueueRoom.class);
+    }
+    QueueRoom queueRoom = (QueueRoom) obj;
+    ValidationUtils.rejectIfEmptyOrWhitespace(
+        errors, "name", "queueRoom.name.null", "QueueRoom name can't be null");
+    ValidationUtils.rejectIfEmptyOrWhitespace(
+        errors, "queue", "queueRoom.queue.null", "Queue in QueueRoom can't be null");
+  }
 }

@@ -9,38 +9,44 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.annotation.Nonnull;
-
-import java.util.Collection;
-import java.util.List;
-
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface FhirService<T extends IAnyResource> {
-	
-	T get(@Nonnull String uuid);
-	
-	List<T> get(@Nonnull Collection<String> uuids);
-	
-	T create(@Nonnull T newResource);
-	
-	T update(@Nonnull String uuid, @Nonnull T updatedResource);
-	
-	/**
-	 * Updates the specified resource if it exists otherwise creates a new one of the resource provider
-	 * supports the operation and createIfNotExists is set to true.
-	 * 
-	 * @param uuid the unique identifier of the resource
-	 * @param updatedResource the resource to update
-	 * @param requestDetails {@link RequestDetails} object
-	 * @param createIfNotExists specifies whether to create the resource if it does not exist.
-	 * @return the updated or created resource
-	 */
-	T update(@Nonnull String uuid, @Nonnull T updatedResource, RequestDetails requestDetails, boolean createIfNotExists);
-	
-	T patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body, RequestDetails requestDetails);
-	
-	void delete(@Nonnull String uuid);
+
+  T get(@Nonnull String uuid);
+
+  List<T> get(@Nonnull Collection<String> uuids);
+
+  T create(@Nonnull T newResource);
+
+  T update(@Nonnull String uuid, @Nonnull T updatedResource);
+
+  /**
+   * Updates the specified resource if it exists otherwise creates a new one of the resource
+   * provider supports the operation and createIfNotExists is set to true.
+   *
+   * @param uuid the unique identifier of the resource
+   * @param updatedResource the resource to update
+   * @param requestDetails {@link RequestDetails} object
+   * @param createIfNotExists specifies whether to create the resource if it does not exist.
+   * @return the updated or created resource
+   */
+  T update(
+      @Nonnull String uuid,
+      @Nonnull T updatedResource,
+      RequestDetails requestDetails,
+      boolean createIfNotExists);
+
+  T patch(
+      @Nonnull String uuid,
+      @Nonnull PatchTypeEnum patchType,
+      @Nonnull String body,
+      RequestDetails requestDetails);
+
+  void delete(@Nonnull String uuid);
 }

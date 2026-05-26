@@ -12,10 +12,6 @@ package org.openmrs.module.fhir2.providers.r4;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -39,6 +35,8 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.HashSet;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -56,80 +54,97 @@ import org.springframework.stereotype.Component;
 @Component("personFhirR4ResourceProvider")
 @R4Provider
 public class PersonFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	private FhirPersonService fhirPersonService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return Person.class;
-	}
-	
-	@Read
-	@SuppressWarnings("unused")
-	public Person getPersonById(@IdParam IdType id) {
-		Person person = fhirPersonService.get(id.getIdPart());
-		if (person == null) {
-			throw new ResourceNotFoundException("Could not find Person with Id " + id.getIdPart());
-		}
-		return person;
-	}
-	
-	@Create
-	public MethodOutcome createPerson(@ResourceParam Person person) {
-		return FhirProviderUtils.buildCreate(fhirPersonService.create(person));
-	}
-	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updatePerson(@IdParam IdType id, @ResourceParam Person person) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update");
-		}
-		
-		person.setId(id.getIdPart());
-		
-		return FhirProviderUtils.buildUpdate(fhirPersonService.update(id.getIdPart(), person));
-	}
-	
-	@Patch
-	public MethodOutcome patchPerson(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
-	        RequestDetails requestDetails) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to patch Person");
-		}
-		
-		Person person = fhirPersonService.patch(id.getIdPart(), patchType, body, requestDetails);
-		
-		return FhirProviderUtils.buildPatch(person);
-	}
-	
-	@Delete
-	@SuppressWarnings("unused")
-	public OperationOutcome deletePerson(@IdParam @Nonnull IdType id) {
-		fhirPersonService.delete(id.getIdPart());
-		return FhirProviderUtils.buildDeleteR4();
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public IBundleProvider searchPeople(@OptionalParam(name = Person.SP_NAME) StringAndListParam name,
-	        @OptionalParam(name = Person.SP_GENDER) TokenAndListParam gender,
-	        @OptionalParam(name = Person.SP_BIRTHDATE) DateRangeParam birthDate,
-	        @OptionalParam(name = Person.SP_ADDRESS_CITY) StringAndListParam city,
-	        @OptionalParam(name = Person.SP_ADDRESS_STATE) StringAndListParam state,
-	        @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
-	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringAndListParam country,
-	        @OptionalParam(name = Person.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort, @IncludeParam(allow = {
-	                "Person:" + Person.SP_LINK + ":Patient", "Person:" + Person.SP_PATIENT }) HashSet<Include> includes) {
-		if (CollectionUtils.isEmpty(includes)) {
-			includes = null;
-		}
-		
-		return fhirPersonService.searchForPeople(new PersonSearchParams(name, gender, birthDate, city, state, postalCode,
-		        country, id, lastUpdated, sort, includes));
-	}
-	
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  private FhirPersonService fhirPersonService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return Person.class;
+  }
+
+  @Read
+  @SuppressWarnings("unused")
+  public Person getPersonById(@IdParam IdType id) {
+    Person person = fhirPersonService.get(id.getIdPart());
+    if (person == null) {
+      throw new ResourceNotFoundException("Could not find Person with Id " + id.getIdPart());
+    }
+    return person;
+  }
+
+  @Create
+  public MethodOutcome createPerson(@ResourceParam Person person) {
+    return FhirProviderUtils.buildCreate(fhirPersonService.create(person));
+  }
+
+  @Update
+  @SuppressWarnings("unused")
+  public MethodOutcome updatePerson(@IdParam IdType id, @ResourceParam Person person) {
+    if (id == null || id.getIdPart() == null) {
+      throw new InvalidRequestException("id must be specified to update");
+    }
+
+    person.setId(id.getIdPart());
+
+    return FhirProviderUtils.buildUpdate(fhirPersonService.update(id.getIdPart(), person));
+  }
+
+  @Patch
+  public MethodOutcome patchPerson(
+      @IdParam IdType id,
+      PatchTypeEnum patchType,
+      @ResourceParam String body,
+      RequestDetails requestDetails) {
+    if (id == null || id.getIdPart() == null) {
+      throw new InvalidRequestException("id must be specified to patch Person");
+    }
+
+    Person person = fhirPersonService.patch(id.getIdPart(), patchType, body, requestDetails);
+
+    return FhirProviderUtils.buildPatch(person);
+  }
+
+  @Delete
+  @SuppressWarnings("unused")
+  public OperationOutcome deletePerson(@IdParam @Nonnull IdType id) {
+    fhirPersonService.delete(id.getIdPart());
+    return FhirProviderUtils.buildDeleteR4();
+  }
+
+  @Search
+  @SuppressWarnings("unused")
+  public IBundleProvider searchPeople(
+      @OptionalParam(name = Person.SP_NAME) StringAndListParam name,
+      @OptionalParam(name = Person.SP_GENDER) TokenAndListParam gender,
+      @OptionalParam(name = Person.SP_BIRTHDATE) DateRangeParam birthDate,
+      @OptionalParam(name = Person.SP_ADDRESS_CITY) StringAndListParam city,
+      @OptionalParam(name = Person.SP_ADDRESS_STATE) StringAndListParam state,
+      @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+      @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringAndListParam country,
+      @OptionalParam(name = Person.SP_RES_ID) TokenAndListParam id,
+      @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+      @Sort SortSpec sort,
+      @IncludeParam(
+              allow = {"Person:" + Person.SP_LINK + ":Patient", "Person:" + Person.SP_PATIENT})
+          HashSet<Include> includes) {
+    if (CollectionUtils.isEmpty(includes)) {
+      includes = null;
+    }
+
+    return fhirPersonService.searchForPeople(
+        new PersonSearchParams(
+            name,
+            gender,
+            birthDate,
+            city,
+            state,
+            postalCode,
+            country,
+            id,
+            lastUpdated,
+            sort,
+            includes));
+  }
 }

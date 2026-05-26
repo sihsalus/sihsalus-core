@@ -12,8 +12,8 @@ package org.openmrs.module.emrapi.encounter.exception;
 import org.openmrs.api.APIException;
 
 public class VisitNotFoundException extends APIException {
-	
-	public VisitNotFoundException(String message) {
-		super(message);
-	}
+
+  public VisitNotFoundException(String message) {
+    super(message);
+  }
 }

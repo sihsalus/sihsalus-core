@@ -9,62 +9,64 @@
  */
 package org.openmrs.module.emrapi.encounter;
 
+import java.util.Set;
 import org.openmrs.Obs;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.diagnosis.DiagnosisMetadata;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 import org.openmrs.module.emrapi.encounter.matcher.ObservationTypeMatcher;
 
-import java.util.Set;
-
 public class EncounterObservationsMapper {
-	
-	private ObservationMapper observationMapper;
-	
-	private DiagnosisMapper diagnosisMapper;
-	
-	private DispositionMapper dispositionMapper;
-	
-	private ObservationTypeMatcher observationTypeMatcher;
-	
-	private DiagnosisMetadata diagnosisMetadata;
-	
-	private EmrApiProperties emrApiProperties;
-	
-	public EncounterObservationsMapper(ObservationMapper observationMapper, DiagnosisMapper diagnosisMapper,
-	    DispositionMapper dispositionMapper, EmrApiProperties emrApiProperties,
-	    ObservationTypeMatcher observationTypeMatcher) {
-		this.observationMapper = observationMapper;
-		this.diagnosisMapper = diagnosisMapper;
-		this.dispositionMapper = dispositionMapper;
-		this.emrApiProperties = emrApiProperties;
-		this.observationTypeMatcher = observationTypeMatcher;
-	}
-	
-	public void update(EncounterTransaction encounterTransaction, Set<Obs> allObs) {
-		for (Obs obs : allObs) {
-			ObservationTypeMatcher.ObservationType observationType = observationTypeMatcher.getObservationType(obs);
-			switch (observationType) {
-				case DIAGNOSIS:
-					if (!obs.isVoided()) {
-						encounterTransaction.addDiagnosis(diagnosisMapper.map(obs, getDiagnosisMetadata()));
-					}
-					break;
-				case DISPOSITION:
-					encounterTransaction.setDisposition(dispositionMapper.getDisposition(obs));
-					break;
-				default:
-					encounterTransaction.addObservation(observationMapper.map(obs));
-					break;
-			}
-		}
-	}
-	
-	private DiagnosisMetadata getDiagnosisMetadata() {
-		if (this.diagnosisMetadata == null) {
-			this.diagnosisMetadata = emrApiProperties.getDiagnosisMetadata();
-		}
-		return this.diagnosisMetadata;
-	}
-	
+
+  private ObservationMapper observationMapper;
+
+  private DiagnosisMapper diagnosisMapper;
+
+  private DispositionMapper dispositionMapper;
+
+  private ObservationTypeMatcher observationTypeMatcher;
+
+  private DiagnosisMetadata diagnosisMetadata;
+
+  private EmrApiProperties emrApiProperties;
+
+  public EncounterObservationsMapper(
+      ObservationMapper observationMapper,
+      DiagnosisMapper diagnosisMapper,
+      DispositionMapper dispositionMapper,
+      EmrApiProperties emrApiProperties,
+      ObservationTypeMatcher observationTypeMatcher) {
+    this.observationMapper = observationMapper;
+    this.diagnosisMapper = diagnosisMapper;
+    this.dispositionMapper = dispositionMapper;
+    this.emrApiProperties = emrApiProperties;
+    this.observationTypeMatcher = observationTypeMatcher;
+  }
+
+  public void update(EncounterTransaction encounterTransaction, Set<Obs> allObs) {
+    for (Obs obs : allObs) {
+      ObservationTypeMatcher.ObservationType observationType =
+          observationTypeMatcher.getObservationType(obs);
+      switch (observationType) {
+        case DIAGNOSIS:
+          if (!obs.isVoided()) {
+            encounterTransaction.addDiagnosis(diagnosisMapper.map(obs, getDiagnosisMetadata()));
+          }
+          break;
+        case DISPOSITION:
+          encounterTransaction.setDisposition(dispositionMapper.getDisposition(obs));
+          break;
+        default:
+          encounterTransaction.addObservation(observationMapper.map(obs));
+          break;
+      }
+    }
+  }
+
+  private DiagnosisMetadata getDiagnosisMetadata() {
+    if (this.diagnosisMetadata == null) {
+      this.diagnosisMetadata = emrApiProperties.getDiagnosisMetadata();
+    }
+    return this.diagnosisMetadata;
+  }
 }

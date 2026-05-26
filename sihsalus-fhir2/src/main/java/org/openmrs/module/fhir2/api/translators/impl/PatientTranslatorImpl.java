@@ -15,14 +15,12 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.trimToNull;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -57,186 +55,205 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class PatientTranslatorImpl implements PatientTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PatientIdentifierTranslator identifierTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PersonNameTranslator nameTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private GenderTranslator genderTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private BirthDateTranslator birthDateTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PersonAddressTranslator addressTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirPersonDao fhirPersonDao;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PersonAttributeTranslator personAttributeTranslator;
-	
-	@Override
-	public Patient toFhirResource(@Nonnull org.openmrs.Patient openmrsPatient) {
-		notNull(openmrsPatient, "The Openmrs Patient object should not be null");
-		
-		Patient patient = new Patient();
-		patient.setId(trimToNull(openmrsPatient.getUuid()));
-		patient.setActive(!openmrsPatient.getVoided());
-		
-		for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {
-			patient.addIdentifier(identifierTranslator.toFhirResource(identifier));
-		}
-		
-		for (PersonName name : openmrsPatient.getNames()) {
-			patient.addName(nameTranslator.toFhirResource(name));
-		}
-		
-		if (openmrsPatient.getGender() != null) {
-			patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender()));
-		}
-		
-		patient.setBirthDateElement(birthDateTranslator.toFhirResource(openmrsPatient));
-		
-		if (openmrsPatient.getDead()) {
-			if (openmrsPatient.getDeathDate() != null) {
-				patient.setDeceased(new DateTimeType(openmrsPatient.getDeathDate()));
-			} else {
-				patient.setDeceased(new BooleanType(true));
-			}
-		} else {
-			patient.setDeceased(new BooleanType(false));
-		}
-		
-		for (PersonAddress address : openmrsPatient.getAddresses()) {
-			patient.addAddress(addressTranslator.toFhirResource(address));
-		}
-		
-		Set<PersonAttribute> attributeSet = openmrsPatient.getAttributes();
-		
-		for (PersonAttribute personAttribute : attributeSet) {
-			Extension personAttributeExtension = personAttributeTranslator.toFhirResource(personAttribute);
-			if (personAttributeExtension != null) {
-				patient.addExtension(personAttributeExtension);
-			}
-		}
-		
-		patient.setTelecom(getPatientContactDetails(openmrsPatient));
-		patient.getMeta().setLastUpdated(getLastUpdated(openmrsPatient));
-		patient.getMeta().setVersionId(getVersionId(openmrsPatient));
-		
-		return patient;
-	}
-	
-	public List<ContactPoint> getPatientContactDetails(@Nonnull org.openmrs.Patient patient) {
-		String personContactAttributeType = globalPropertyService
-		        .getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE);
-		
-		if (personContactAttributeType == null || personContactAttributeType.isEmpty()) {
-			return Collections.emptyList();
-		}
-		
-		return fhirPersonDao.getActiveAttributesByPersonAndAttributeTypeUuid(patient, personContactAttributeType).stream()
-		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
-	}
-	
-	@Override
-	public org.openmrs.Patient toOpenmrsType(@Nonnull Patient fhirPatient) {
-		notNull(fhirPatient, "The Patient object should not be null");
-		return toOpenmrsType(new org.openmrs.Patient(), fhirPatient);
-	}
-	
-	@Override
-	public org.openmrs.Patient toOpenmrsType(@Nonnull org.openmrs.Patient currentPatient, @Nonnull Patient patient) {
-		notNull(currentPatient, "The existing Openmrs Patient object should not be null");
-		notNull(patient, "The Patient object should not be null");
-		
-		if (patient.hasId()) {
-			currentPatient.setUuid(patient.getIdElement().getIdPart());
-		}
-		
-		for (Identifier identifier : patient.getIdentifier()) {
-			PatientIdentifier omrsIdentifier = identifierTranslator.toOpenmrsType(identifier);
-			if (omrsIdentifier != null) {
-				currentPatient.addIdentifier(omrsIdentifier);
-			}
-		}
-		
-		for (HumanName name : patient.getName()) {
-			PersonName existingName = null;
-			if (name.hasId()) {
-				existingName = currentPatient.getNames().stream().filter(n -> n.getUuid().equals(name.getId())).findFirst()
-				        .orElse(null);
-			}
-			
-			PersonName pn = nameTranslator.toOpenmrsType(existingName != null ? existingName : new PersonName(), name);
-			currentPatient.addName(pn);
-		}
-		
-		if (patient.hasGender()) {
-			currentPatient.setGender(genderTranslator.toOpenmrsType(patient.getGender()));
-		}
-		
-		if (patient.hasBirthDateElement()) {
-			birthDateTranslator.toOpenmrsType(currentPatient, patient.getBirthDateElement());
-		}
-		
-		if (patient.hasDeceased()) {
-			try {
-				patient.getDeceasedBooleanType();
-				
-				currentPatient.setDead(patient.getDeceasedBooleanType().booleanValue());
-			}
-			catch (FHIRException ignored) {}
-			
-			try {
-				patient.getDeceasedDateTimeType();
-				
-				currentPatient.setDead(true);
-				currentPatient.setDeathDate(patient.getDeceasedDateTimeType().getValue());
-			}
-			catch (FHIRException ignored) {}
-		}
-		
-		for (Address address : patient.getAddress()) {
-			currentPatient.addAddress(addressTranslator.toOpenmrsType(address));
-		}
-		
-		patient.getTelecom().stream()
-		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
-		        .distinct().filter(Objects::nonNull).forEach(currentPatient::addAttribute);
-		
-		List<Extension> patientAttributeExtensions = patient.getExtension().stream()
-		        .filter(extension -> extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
-		        .collect(Collectors.toList());
-		
-		for (Extension patientAttributeExtension : patientAttributeExtensions) {
-			PersonAttribute personAttribute = personAttributeTranslator.toOpenmrsType(patientAttributeExtension);
-			if (personAttribute == null) {
-				log.warn("The patient has invalid PersonAttribute extension");
-			} else {
-				currentPatient.addAttribute(personAttribute);
-			}
-		}
-		
-		return currentPatient;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PatientIdentifierTranslator identifierTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PersonNameTranslator nameTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private GenderTranslator genderTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private BirthDateTranslator birthDateTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PersonAddressTranslator addressTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirGlobalPropertyService globalPropertyService;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirPersonDao fhirPersonDao;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PersonAttributeTranslator personAttributeTranslator;
+
+  @Override
+  public Patient toFhirResource(@Nonnull org.openmrs.Patient openmrsPatient) {
+    notNull(openmrsPatient, "The Openmrs Patient object should not be null");
+
+    Patient patient = new Patient();
+    patient.setId(trimToNull(openmrsPatient.getUuid()));
+    patient.setActive(!openmrsPatient.getVoided());
+
+    for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {
+      patient.addIdentifier(identifierTranslator.toFhirResource(identifier));
+    }
+
+    for (PersonName name : openmrsPatient.getNames()) {
+      patient.addName(nameTranslator.toFhirResource(name));
+    }
+
+    if (openmrsPatient.getGender() != null) {
+      patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender()));
+    }
+
+    patient.setBirthDateElement(birthDateTranslator.toFhirResource(openmrsPatient));
+
+    if (openmrsPatient.getDead()) {
+      if (openmrsPatient.getDeathDate() != null) {
+        patient.setDeceased(new DateTimeType(openmrsPatient.getDeathDate()));
+      } else {
+        patient.setDeceased(new BooleanType(true));
+      }
+    } else {
+      patient.setDeceased(new BooleanType(false));
+    }
+
+    for (PersonAddress address : openmrsPatient.getAddresses()) {
+      patient.addAddress(addressTranslator.toFhirResource(address));
+    }
+
+    Set<PersonAttribute> attributeSet = openmrsPatient.getAttributes();
+
+    for (PersonAttribute personAttribute : attributeSet) {
+      Extension personAttributeExtension =
+          personAttributeTranslator.toFhirResource(personAttribute);
+      if (personAttributeExtension != null) {
+        patient.addExtension(personAttributeExtension);
+      }
+    }
+
+    patient.setTelecom(getPatientContactDetails(openmrsPatient));
+    patient.getMeta().setLastUpdated(getLastUpdated(openmrsPatient));
+    patient.getMeta().setVersionId(getVersionId(openmrsPatient));
+
+    return patient;
+  }
+
+  public List<ContactPoint> getPatientContactDetails(@Nonnull org.openmrs.Patient patient) {
+    String personContactAttributeType =
+        globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE);
+
+    if (personContactAttributeType == null || personContactAttributeType.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    return fhirPersonDao
+        .getActiveAttributesByPersonAndAttributeTypeUuid(patient, personContactAttributeType)
+        .stream()
+        .map(telecomTranslator::toFhirResource)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public org.openmrs.Patient toOpenmrsType(@Nonnull Patient fhirPatient) {
+    notNull(fhirPatient, "The Patient object should not be null");
+    return toOpenmrsType(new org.openmrs.Patient(), fhirPatient);
+  }
+
+  @Override
+  public org.openmrs.Patient toOpenmrsType(
+      @Nonnull org.openmrs.Patient currentPatient, @Nonnull Patient patient) {
+    notNull(currentPatient, "The existing Openmrs Patient object should not be null");
+    notNull(patient, "The Patient object should not be null");
+
+    if (patient.hasId()) {
+      currentPatient.setUuid(patient.getIdElement().getIdPart());
+    }
+
+    for (Identifier identifier : patient.getIdentifier()) {
+      PatientIdentifier omrsIdentifier = identifierTranslator.toOpenmrsType(identifier);
+      if (omrsIdentifier != null) {
+        currentPatient.addIdentifier(omrsIdentifier);
+      }
+    }
+
+    for (HumanName name : patient.getName()) {
+      PersonName existingName = null;
+      if (name.hasId()) {
+        existingName =
+            currentPatient.getNames().stream()
+                .filter(n -> n.getUuid().equals(name.getId()))
+                .findFirst()
+                .orElse(null);
+      }
+
+      PersonName pn =
+          nameTranslator.toOpenmrsType(
+              existingName != null ? existingName : new PersonName(), name);
+      currentPatient.addName(pn);
+    }
+
+    if (patient.hasGender()) {
+      currentPatient.setGender(genderTranslator.toOpenmrsType(patient.getGender()));
+    }
+
+    if (patient.hasBirthDateElement()) {
+      birthDateTranslator.toOpenmrsType(currentPatient, patient.getBirthDateElement());
+    }
+
+    if (patient.hasDeceased()) {
+      try {
+        patient.getDeceasedBooleanType();
+
+        currentPatient.setDead(patient.getDeceasedBooleanType().booleanValue());
+      } catch (FHIRException ignored) {
+      }
+
+      try {
+        patient.getDeceasedDateTimeType();
+
+        currentPatient.setDead(true);
+        currentPatient.setDeathDate(patient.getDeceasedDateTimeType().getValue());
+      } catch (FHIRException ignored) {
+      }
+    }
+
+    for (Address address : patient.getAddress()) {
+      currentPatient.addAddress(addressTranslator.toOpenmrsType(address));
+    }
+
+    patient.getTelecom().stream()
+        .map(
+            contactPoint ->
+                (PersonAttribute)
+                    telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
+        .distinct()
+        .filter(Objects::nonNull)
+        .forEach(currentPatient::addAttribute);
+
+    List<Extension> patientAttributeExtensions =
+        patient.getExtension().stream()
+            .filter(
+                extension ->
+                    extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+            .collect(Collectors.toList());
+
+    for (Extension patientAttributeExtension : patientAttributeExtensions) {
+      PersonAttribute personAttribute =
+          personAttributeTranslator.toOpenmrsType(patientAttributeExtension);
+      if (personAttribute == null) {
+        log.warn("The patient has invalid PersonAttribute extension");
+      } else {
+        currentPatient.addAttribute(personAttribute);
+      }
+    }
+
+    return currentPatient;
+  }
 }

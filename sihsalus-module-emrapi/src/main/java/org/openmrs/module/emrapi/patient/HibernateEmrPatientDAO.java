@@ -9,17 +9,6 @@
  */
 package org.openmrs.module.emrapi.patient;
 
-import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.openmrs.Location;
-import org.openmrs.Obs;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PersonName;
-import org.openmrs.Visit;
-import org.openmrs.api.db.hibernate.DbSessionFactory;
-import org.openmrs.module.emrapi.EmrApiProperties;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -32,80 +21,98 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Location;
+import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PersonName;
+import org.openmrs.Visit;
+import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.module.emrapi.EmrApiProperties;
 
 @Setter
 public class HibernateEmrPatientDAO implements EmrPatientDAO {
-	
-	private DbSessionFactory sessionFactory;
-	
-	private EmrApiProperties emrApiProperties;
-	
-	@Override
-	public List<Patient> findPatients(String query, Location checkedInAt, Integer start, Integer maxResults) {
-		EntityManager em = sessionFactory.getHibernateSessionFactory().unwrap(EntityManager.class);
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Patient> cq = cb.createQuery(Patient.class);
-		Root<Patient> patient = cq.from(Patient.class);
-		
-		List<Predicate> preds = new ArrayList<>();
-		
-		if (checkedInAt != null) {
-			Join<Patient, Visit> visit = patient.join("visits");
-			preds.add(cb.equal(visit.get("location"), checkedInAt));
-			preds.add(cb.isNull(visit.get("stopDatetime")));
-		}
-		
-		if (StringUtils.isNotBlank(query)) {
-			if (query.matches(".*\\d.*")) {
-				Join<Patient, PatientIdentifier> ids = patient.join("identifiers", JoinType.LEFT);
-				preds.add(cb.like(cb.lower(ids.get("identifier")), "%" + query.toLowerCase() + "%"));
-			} else {
-				Join<Patient, PersonName> names = patient.join("names");
-				String like = "%" + query.toLowerCase() + "%";
-				preds.add(cb.or(cb.like(cb.lower(names.get("givenName")), like),
-				    cb.like(cb.lower(names.get("familyName")), like)));
-			}
-		}
-		
-		cq.select(patient).where(cb.and(preds.toArray(new Predicate[0]))).distinct(true);
-		
-		TypedQuery<Patient> typed = em.createQuery(cq);
-		if (start != null) {
-			typed.setFirstResult(start);
-		}
-		if (maxResults != null) {
-			typed.setMaxResults(maxResults);
-		}
-		
-		return typed.getResultList();
-		
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<Visit> getVisitsForPatient(Patient patient, Integer startIndex, Integer limit) {
-		jakarta.persistence.Query query = sessionFactory.getCurrentSession()
-		        .createQuery("from Visit visit where visit.patient = :patient and visit.voided = false order by visit.startDatetime desc");
-		query.setParameter("patient", patient);
-		if (startIndex != null) {
-			query.setFirstResult(startIndex);
-		}
-		if (limit != null) {
-			query.setMaxResults(limit);
-		}
-		return query.getResultList();
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<Obs> getVisitNoteObservations(Collection<Visit> visits) {
-		if (visits == null || visits.isEmpty()) {
-			return Collections.emptyList();
-		}
-		jakarta.persistence.Query query = sessionFactory.getCurrentSession().createQuery(
-		        "from Obs obs where obs.encounter.visit in :visits and obs.encounter.encounterType = :encounterType and obs.voided = false");
-		query.setParameter("visits", visits);
-		query.setParameter("encounterType", emrApiProperties.getVisitNoteEncounterType());
-		return query.getResultList();
-	}
+
+  private DbSessionFactory sessionFactory;
+
+  private EmrApiProperties emrApiProperties;
+
+  @Override
+  public List<Patient> findPatients(
+      String query, Location checkedInAt, Integer start, Integer maxResults) {
+    EntityManager em = sessionFactory.getHibernateSessionFactory().unwrap(EntityManager.class);
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<Patient> cq = cb.createQuery(Patient.class);
+    Root<Patient> patient = cq.from(Patient.class);
+
+    List<Predicate> preds = new ArrayList<>();
+
+    if (checkedInAt != null) {
+      Join<Patient, Visit> visit = patient.join("visits");
+      preds.add(cb.equal(visit.get("location"), checkedInAt));
+      preds.add(cb.isNull(visit.get("stopDatetime")));
+    }
+
+    if (StringUtils.isNotBlank(query)) {
+      if (query.matches(".*\\d.*")) {
+        Join<Patient, PatientIdentifier> ids = patient.join("identifiers", JoinType.LEFT);
+        preds.add(cb.like(cb.lower(ids.get("identifier")), "%" + query.toLowerCase() + "%"));
+      } else {
+        Join<Patient, PersonName> names = patient.join("names");
+        String like = "%" + query.toLowerCase() + "%";
+        preds.add(
+            cb.or(
+                cb.like(cb.lower(names.get("givenName")), like),
+                cb.like(cb.lower(names.get("familyName")), like)));
+      }
+    }
+
+    cq.select(patient).where(cb.and(preds.toArray(new Predicate[0]))).distinct(true);
+
+    TypedQuery<Patient> typed = em.createQuery(cq);
+    if (start != null) {
+      typed.setFirstResult(start);
+    }
+    if (maxResults != null) {
+      typed.setMaxResults(maxResults);
+    }
+
+    return typed.getResultList();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<Visit> getVisitsForPatient(Patient patient, Integer startIndex, Integer limit) {
+    jakarta.persistence.Query query =
+        sessionFactory
+            .getCurrentSession()
+            .createQuery(
+                "from Visit visit where visit.patient = :patient and visit.voided = false order by visit.startDatetime desc");
+    query.setParameter("patient", patient);
+    if (startIndex != null) {
+      query.setFirstResult(startIndex);
+    }
+    if (limit != null) {
+      query.setMaxResults(limit);
+    }
+    return query.getResultList();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<Obs> getVisitNoteObservations(Collection<Visit> visits) {
+    if (visits == null || visits.isEmpty()) {
+      return Collections.emptyList();
+    }
+    jakarta.persistence.Query query =
+        sessionFactory
+            .getCurrentSession()
+            .createQuery(
+                "from Obs obs where obs.encounter.visit in :visits and obs.encounter.encounterType = :encounterType and obs.voided = false");
+    query.setParameter("visits", visits);
+    query.setParameter("encounterType", emrApiProperties.getVisitNoteEncounterType());
+    return query.getResultList();
+  }
 }

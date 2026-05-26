@@ -10,28 +10,28 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.DateType;
 import org.openmrs.Person;
 
-public interface BirthDateTranslator extends ToFhirTranslator<Person, DateType>, UpdatableOpenmrsTranslator<Person, DateType> {
-	
-	/**
-	 * Maps an OpenMRS person to a FHIR date representing the birthdate
-	 *
-	 * @param person the OpenMRS person to translate
-	 * @return the corresponding FHIR date
-	 */
-	@Override
-	DateType toFhirResource(@Nonnull Person person);
-	
-	/**
-	 * Maps a FHIR date to the supplied OpenMRS person's birthdate
-	 *
-	 * @param person the person object to add the birthdate to
-	 * @param date the FHIR date to translate
-	 * @return the corresponding OpenMRS data element
-	 */
-	@Override
-	Person toOpenmrsType(@Nonnull Person person, @Nonnull DateType date);
+public interface BirthDateTranslator
+    extends ToFhirTranslator<Person, DateType>, UpdatableOpenmrsTranslator<Person, DateType> {
+
+  /**
+   * Maps an OpenMRS person to a FHIR date representing the birthdate
+   *
+   * @param person the OpenMRS person to translate
+   * @return the corresponding FHIR date
+   */
+  @Override
+  DateType toFhirResource(@Nonnull Person person);
+
+  /**
+   * Maps a FHIR date to the supplied OpenMRS person's birthdate
+   *
+   * @param person the person object to add the birthdate to
+   * @param date the FHIR date to translate
+   * @return the corresponding OpenMRS data element
+   */
+  @Override
+  Person toOpenmrsType(@Nonnull Person person, @Nonnull DateType date);
 }

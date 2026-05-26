@@ -10,29 +10,30 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.Location;
 
-public interface EncounterLocationTranslator extends ToFhirTranslator<Location, Encounter.EncounterLocationComponent>, ToOpenmrsTranslator<Location, Encounter.EncounterLocationComponent> {
-	
-	/**
-	 * Maps an {@link org.openmrs.Location} to an
-	 * {@link org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent}
-	 * 
-	 * @param location the OpenMRS location to translate
-	 * @return the corresponding FHIR Encounter.EncounterLocationComponent resource
-	 */
-	@Override
-	Encounter.EncounterLocationComponent toFhirResource(@Nonnull Location location);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent} to an existing
-	 * {@link org.openmrs.Location}
-	 * 
-	 * @param encounterLocationComponent the encounterLocationComponent to map
-	 * @return an updated version of the location
-	 */
-	@Override
-	Location toOpenmrsType(@Nonnull Encounter.EncounterLocationComponent encounterLocationComponent);
+public interface EncounterLocationTranslator
+    extends ToFhirTranslator<Location, Encounter.EncounterLocationComponent>,
+        ToOpenmrsTranslator<Location, Encounter.EncounterLocationComponent> {
+
+  /**
+   * Maps an {@link org.openmrs.Location} to an {@link
+   * org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent}
+   *
+   * @param location the OpenMRS location to translate
+   * @return the corresponding FHIR Encounter.EncounterLocationComponent resource
+   */
+  @Override
+  Encounter.EncounterLocationComponent toFhirResource(@Nonnull Location location);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent} to an existing
+   * {@link org.openmrs.Location}
+   *
+   * @param encounterLocationComponent the encounterLocationComponent to map
+   * @return an updated version of the location
+   */
+  @Override
+  Location toOpenmrsType(@Nonnull Encounter.EncounterLocationComponent encounterLocationComponent);
 }

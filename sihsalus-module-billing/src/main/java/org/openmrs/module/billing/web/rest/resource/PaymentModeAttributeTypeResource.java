@@ -9,33 +9,39 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
-import org.openmrs.module.billing.web.base.resource.BaseRestAttributeTypeResource;
-import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.IPaymentModeAttributeTypeService;
 import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
+import org.openmrs.module.billing.web.base.resource.BaseRestAttributeTypeResource;
+import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 
-/**
- * REST resource representing a {@link PaymentModeAttributeType}.
- */
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/paymentModeAttributeType", supportedClass = PaymentModeAttributeType.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
-public class PaymentModeAttributeTypeResource extends BaseRestAttributeTypeResource<PaymentModeAttributeType> {
+/** REST resource representing a {@link PaymentModeAttributeType}. */
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + CashierResourceController.BILLING_NAMESPACE
+            + "/paymentModeAttributeType",
+    supportedClass = PaymentModeAttributeType.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
+public class PaymentModeAttributeTypeResource
+    extends BaseRestAttributeTypeResource<PaymentModeAttributeType> {
 
-	
-	protected org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<PaymentModeAttributeType> doGetAll(org.openmrs.module.webservices.rest.web.RequestContext context) {
-		return new org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<>(java.util.Collections.emptyList(), context);
-	}
-	
-	@Override
-	public PaymentModeAttributeType newDelegate() {
-		return new PaymentModeAttributeType();
-	}
-	
-	@Override
-	public Class<? extends IMetadataDataService<PaymentModeAttributeType>> getServiceClass() {
-		return IPaymentModeAttributeTypeService.class;
-	}
+  protected org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<
+          PaymentModeAttributeType>
+      doGetAll(org.openmrs.module.webservices.rest.web.RequestContext context) {
+    return new org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging<>(
+        java.util.Collections.emptyList(), context);
+  }
+
+  @Override
+  public PaymentModeAttributeType newDelegate() {
+    return new PaymentModeAttributeType();
+  }
+
+  @Override
+  public Class<? extends IMetadataDataService<PaymentModeAttributeType>> getServiceClass() {
+    return IPaymentModeAttributeTypeService.class;
+  }
 }

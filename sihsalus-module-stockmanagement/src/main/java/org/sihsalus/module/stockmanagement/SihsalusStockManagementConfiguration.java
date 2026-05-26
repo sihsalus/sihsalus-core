@@ -20,59 +20,60 @@ import org.springframework.transaction.TransactionManager;
 @Configuration
 public class SihsalusStockManagementConfiguration {
 
-    @Bean
-    StockManagementConfig stockManagementConfig() {
-        return new StockManagementConfig();
-    }
+  @Bean
+  StockManagementConfig stockManagementConfig() {
+    return new StockManagementConfig();
+  }
 
-    @Bean
-    StockManagementService stockManagementService(
-            SessionFactory sessionFactory, TransactionManager transactionManager) {
-        ClassLoader classLoader = StockManagementService.class.getClassLoader();
-        return (StockManagementService) Proxy.newProxyInstance(
-                classLoader,
-                new Class<?>[] {StockManagementService.class},
-                new PartialStockManagementService(sessionFactory, transactionManager));
-    }
+  @Bean
+  StockManagementService stockManagementService(
+      SessionFactory sessionFactory, TransactionManager transactionManager) {
+    ClassLoader classLoader = StockManagementService.class.getClassLoader();
+    return (StockManagementService)
+        Proxy.newProxyInstance(
+            classLoader,
+            new Class<?>[] {StockManagementService.class},
+            new PartialStockManagementService(sessionFactory, transactionManager));
+  }
 
-    @Bean
-    SmartInitializingSingleton stockManagementServiceRegistrar(
-            ServiceContext serviceContext, StockManagementService stockManagementService) {
-        return () -> serviceContext.setService(StockManagementService.class, stockManagementService);
-    }
+  @Bean
+  SmartInitializingSingleton stockManagementServiceRegistrar(
+      ServiceContext serviceContext, StockManagementService stockManagementService) {
+    return () -> serviceContext.setService(StockManagementService.class, stockManagementService);
+  }
 
-    @Bean
-    StockItemPackagingUOMValidator stockItemPackagingUOMValidator() {
-        return new StockItemPackagingUOMValidator();
-    }
+  @Bean
+  StockItemPackagingUOMValidator stockItemPackagingUOMValidator() {
+    return new StockItemPackagingUOMValidator();
+  }
 
-    @Bean
-    StockOperationDTOValidator stockOperationDTOValidator() {
-        return new StockOperationDTOValidator();
-    }
+  @Bean
+  StockOperationDTOValidator stockOperationDTOValidator() {
+    return new StockOperationDTOValidator();
+  }
 
-    @Bean
-    StockRuleValidator stockRuleValidator() {
-        return new StockRuleValidator();
-    }
+  @Bean
+  StockRuleValidator stockRuleValidator() {
+    return new StockRuleValidator();
+  }
 
-    @Bean
-    UserRoleScopeDTOValidator userRoleScopeDTOValidator() {
-        return new UserRoleScopeDTOValidator();
-    }
+  @Bean
+  UserRoleScopeDTOValidator userRoleScopeDTOValidator() {
+    return new UserRoleScopeDTOValidator();
+  }
 
-    @Bean
-    StockItemDTOValidator stockItemDTOValidator() {
-        return new StockItemDTOValidator();
-    }
+  @Bean
+  StockItemDTOValidator stockItemDTOValidator() {
+    return new StockItemDTOValidator();
+  }
 
-    @Bean
-    BatchJobValidator batchJobValidator() {
-        return new BatchJobValidator();
-    }
+  @Bean
+  BatchJobValidator batchJobValidator() {
+    return new BatchJobValidator();
+  }
 
-    @Bean
-    StockOperationActionValidator stockOperationActionValidator() {
-        return new StockOperationActionValidator();
-    }
+  @Bean
+  StockOperationActionValidator stockOperationActionValidator() {
+    return new StockOperationActionValidator();
+  }
 }

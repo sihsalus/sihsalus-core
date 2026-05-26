@@ -8,12 +8,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SystemStatusController {
 
-    @GetMapping("/api/system/info")
-    Map<String, Object> info() {
-        return Map.of(
-                "name", "SIH Salus Core",
-                "moduleModel", "static-maven-reactor",
-                "dynamicOmodLoading", false,
-                "internalModules", StaticModuleCatalog.staticInternalModules().size());
-    }
+  @GetMapping("/api/system/info")
+  Map<String, Object> info() {
+    return Map.of(
+        "name",
+        "SIH Salus Core",
+        "moduleModel",
+        "static-maven-reactor",
+        "dynamicOmodLoading",
+        false,
+        "internalModules",
+        StaticModuleCatalog.staticInternalModules().size());
+  }
 }

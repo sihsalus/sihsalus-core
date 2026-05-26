@@ -12,7 +12,6 @@ package org.openmrs.module.billing.api.impl;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ITimesheetService;
@@ -22,114 +21,118 @@ import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Data service implementation class for {@link Timesheet}s.
- */
+/** Data service implementation class for {@link Timesheet}s. */
 @Transactional
-public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet> implements ITimesheetService, IEntityAuthorizationPrivileges {
-	
-	private static final String CLOCK_IN = "clockIn";
-	
-	private static final String CLOCK_OUT = "clockOut";
-	
-	private static final Integer BATCH_SIZE = 50;
-	
-	private static final Integer END_DATE_HOUR_OF_DAY = 23;
-	
-	private static final Integer END_DATE_MINUTE = 59;
-	
-	private static final Integer END_DATE_SECOND = 59;
-	
-	@Override
-	protected IEntityAuthorizationPrivileges getPrivileges() {
-		return this;
-	}
-	
-	@Override
-	protected void validate(Timesheet entity) {
-	}
-	
-	@Override
-	public String getVoidPrivilege() {
-		return PrivilegeConstants.MANAGE_TIMESHEETS;
-	}
-	
-	@Override
-	public String getSavePrivilege() {
-		return PrivilegeConstants.MANAGE_TIMESHEETS;
-	}
-	
-	@Override
-	public String getPurgePrivilege() {
-		return PrivilegeConstants.PURGE_TIMESHEETS;
-	}
-	
-	@Override
-	public String getGetPrivilege() {
-		return PrivilegeConstants.VIEW_TIMESHEETS;
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public Timesheet getCurrentTimesheet(Provider cashier) {
-		Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
-		return (Timesheet) getRepository()
-		        .createQuery("FROM Timesheet WHERE cashier = :cashier AND clockOut IS NULL ORDER BY clockIn DESC")
-		        .setParameter("cashier", cashier)
-		        .setMaxResults(1)
-		        .uniqueResult();
-	}
+public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet>
+    implements ITimesheetService, IEntityAuthorizationPrivileges {
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public void closeOpenTimesheets() {
-		Context.requirePrivilege(PrivilegeConstants.MANAGE_TIMESHEETS);
-		List<Timesheet> timesheets = (List<Timesheet>) getRepository()
-		        .createQuery("FROM Timesheet WHERE clockOut IS NULL ORDER BY clockIn DESC")
-		        .list();
+  private static final String CLOCK_IN = "clockIn";
 
-		Date clockOutDate = new Date();
-		int counter = 0;
-		for (Timesheet timesheet : timesheets) {
-			timesheet.setClockOut(clockOutDate);
+  private static final String CLOCK_OUT = "clockOut";
 
-			if (counter++ > BATCH_SIZE) {
-				Context.flushSession();
-				Context.clearSession();
-				counter = 0;
-			}
-		}
-	}
+  private static final Integer BATCH_SIZE = 50;
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<Timesheet> getTimesheetsByDate(Provider cashier, Date date) {
-		Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
-		if (date == null) {
-			throw new IllegalArgumentException("The date must be defined.");
-		}
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		Date startDate = calendar.getTime();
+  private static final Integer END_DATE_HOUR_OF_DAY = 23;
 
-		calendar.set(Calendar.HOUR_OF_DAY, END_DATE_HOUR_OF_DAY);
-		calendar.set(Calendar.MINUTE, END_DATE_MINUTE);
-		calendar.set(Calendar.SECOND, END_DATE_SECOND);
-		Date endDate = calendar.getTime();
+  private static final Integer END_DATE_MINUTE = 59;
 
-		return (List<Timesheet>) getRepository()
-		        .createQuery("FROM Timesheet t WHERE t.cashier = :cashier AND ("
-		                + "(t.clockIn BETWEEN :startDate AND :endDate) "
-		                + "OR (t.clockOut BETWEEN :startDate AND :endDate) "
-		                + "OR (t.clockIn <= :endDate AND t.clockOut IS NULL) "
-		                + "OR (t.clockIn <= :startDate AND t.clockOut >= :endDate)"
-		                + ") ORDER BY t.clockIn DESC")
-		        .setParameter("cashier", cashier)
-		        .setParameter("startDate", startDate)
-		        .setParameter("endDate", endDate)
-		        .list();
-	}
+  private static final Integer END_DATE_SECOND = 59;
+
+  @Override
+  protected IEntityAuthorizationPrivileges getPrivileges() {
+    return this;
+  }
+
+  @Override
+  protected void validate(Timesheet entity) {}
+
+  @Override
+  public String getVoidPrivilege() {
+    return PrivilegeConstants.MANAGE_TIMESHEETS;
+  }
+
+  @Override
+  public String getSavePrivilege() {
+    return PrivilegeConstants.MANAGE_TIMESHEETS;
+  }
+
+  @Override
+  public String getPurgePrivilege() {
+    return PrivilegeConstants.PURGE_TIMESHEETS;
+  }
+
+  @Override
+  public String getGetPrivilege() {
+    return PrivilegeConstants.VIEW_TIMESHEETS;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Timesheet getCurrentTimesheet(Provider cashier) {
+    Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
+    return (Timesheet)
+        getRepository()
+            .createQuery(
+                "FROM Timesheet WHERE cashier = :cashier AND clockOut IS NULL ORDER BY clockIn DESC")
+            .setParameter("cashier", cashier)
+            .setMaxResults(1)
+            .uniqueResult();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void closeOpenTimesheets() {
+    Context.requirePrivilege(PrivilegeConstants.MANAGE_TIMESHEETS);
+    List<Timesheet> timesheets =
+        (List<Timesheet>)
+            getRepository()
+                .createQuery("FROM Timesheet WHERE clockOut IS NULL ORDER BY clockIn DESC")
+                .list();
+
+    Date clockOutDate = new Date();
+    int counter = 0;
+    for (Timesheet timesheet : timesheets) {
+      timesheet.setClockOut(clockOutDate);
+
+      if (counter++ > BATCH_SIZE) {
+        Context.flushSession();
+        Context.clearSession();
+        counter = 0;
+      }
+    }
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<Timesheet> getTimesheetsByDate(Provider cashier, Date date) {
+    Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
+    if (date == null) {
+      throw new IllegalArgumentException("The date must be defined.");
+    }
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(date);
+    calendar.set(Calendar.HOUR_OF_DAY, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    calendar.set(Calendar.SECOND, 0);
+    Date startDate = calendar.getTime();
+
+    calendar.set(Calendar.HOUR_OF_DAY, END_DATE_HOUR_OF_DAY);
+    calendar.set(Calendar.MINUTE, END_DATE_MINUTE);
+    calendar.set(Calendar.SECOND, END_DATE_SECOND);
+    Date endDate = calendar.getTime();
+
+    return (List<Timesheet>)
+        getRepository()
+            .createQuery(
+                "FROM Timesheet t WHERE t.cashier = :cashier AND ("
+                    + "(t.clockIn BETWEEN :startDate AND :endDate) "
+                    + "OR (t.clockOut BETWEEN :startDate AND :endDate) "
+                    + "OR (t.clockIn <= :endDate AND t.clockOut IS NULL) "
+                    + "OR (t.clockIn <= :startDate AND t.clockOut >= :endDate)"
+                    + ") ORDER BY t.clockIn DESC")
+            .setParameter("cashier", cashier)
+            .setParameter("startDate", startDate)
+            .setParameter("endDate", endDate)
+            .list();
+  }
 }

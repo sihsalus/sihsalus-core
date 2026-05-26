@@ -11,6 +11,4 @@ package org.openmrs.module.fhir2.api.dao;
 
 import org.openmrs.module.fhir2.model.FhirTask;
 
-public interface FhirTaskDao extends FhirDao<FhirTask> {
-	
-}
+public interface FhirTaskDao extends FhirDao<FhirTask> {}

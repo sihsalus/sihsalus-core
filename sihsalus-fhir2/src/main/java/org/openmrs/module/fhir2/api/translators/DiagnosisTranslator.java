@@ -10,37 +10,37 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.Diagnosis;
 
 public interface DiagnosisTranslator extends OpenmrsFhirUpdatableTranslator<Diagnosis, Condition> {
-	
-	/**
-	 * Maps <T> an OpenMRS {@link Diagnosis} to a {@link org.hl7.fhir.r4.model.Condition}
-	 *
-	 * @param diagnosis the OpenMRS Diagnosis to translate
-	 * @return the corresponding FHIR condition resource
-	 */
-	@Override
-	org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Diagnosis diagnosis);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Condition} to an <T> an OpenMRS {@link Diagnosis}
-	 *
-	 * @param condition the FHIR condition to translate
-	 * @return the corresponding OpenMRS Diagnosis
-	 */
-	@Override
-	Diagnosis toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Condition condition);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Condition} to an existing OpenMRS Diagnosis
-	 *
-	 * @param existingDiagnosis the existing diagnosis to update
-	 * @param condition the condition to map
-	 * @return an updated version of the existingDiagnosis
-	 */
-	@Override
-	Diagnosis toOpenmrsType(@Nonnull Diagnosis existingDiagnosis, @Nonnull org.hl7.fhir.r4.model.Condition condition);
+
+  /**
+   * Maps <T> an OpenMRS {@link Diagnosis} to a {@link org.hl7.fhir.r4.model.Condition}
+   *
+   * @param diagnosis the OpenMRS Diagnosis to translate
+   * @return the corresponding FHIR condition resource
+   */
+  @Override
+  org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Diagnosis diagnosis);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Condition} to an <T> an OpenMRS {@link Diagnosis}
+   *
+   * @param condition the FHIR condition to translate
+   * @return the corresponding OpenMRS Diagnosis
+   */
+  @Override
+  Diagnosis toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Condition condition);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Condition} to an existing OpenMRS Diagnosis
+   *
+   * @param existingDiagnosis the existing diagnosis to update
+   * @param condition the condition to map
+   * @return an updated version of the existingDiagnosis
+   */
+  @Override
+  Diagnosis toOpenmrsType(
+      @Nonnull Diagnosis existingDiagnosis, @Nonnull org.hl7.fhir.r4.model.Condition condition);
 }

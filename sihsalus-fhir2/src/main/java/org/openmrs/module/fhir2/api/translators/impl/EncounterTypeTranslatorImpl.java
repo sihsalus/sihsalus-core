@@ -12,12 +12,10 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -31,38 +29,49 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EncounterTypeTranslatorImpl implements EncounterTypeTranslator<EncounterType> {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private EncounterService encounterService;
-	
-	@Override
-	public List<CodeableConcept> toFhirResource(@Nonnull EncounterType encounterType) {
-		if (encounterType == null) {
-			return null;
-		}
-		
-		CodeableConcept code = new CodeableConcept();
-		code.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode(encounterType.getUuid())
-		        .setDisplay(getMetadataTranslation(encounterType));
-		return Collections.singletonList(code);
-	}
-	
-	@Override
-	public EncounterType toOpenmrsType(@Nonnull List<CodeableConcept> encounterTypes) {
-		if (encounterTypes == null || encounterTypes.isEmpty()) {
-			return null;
-		}
-		
-		Coding encounterType = encounterTypes.stream().filter(CodeableConcept::hasCoding)
-		        .map(cc -> cc.getCoding().stream().filter(Coding::hasSystem)
-		                .filter(c -> FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI.equals(c.getSystem())).findFirst().orElse(null))
-		        .filter(Objects::nonNull).findFirst().orElse(null);
-		
-		if (encounterType == null) {
-			return null;
-		}
-		
-		return encounterService.getEncounterTypeByUuid(encounterType.getCode());
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private EncounterService encounterService;
+
+  @Override
+  public List<CodeableConcept> toFhirResource(@Nonnull EncounterType encounterType) {
+    if (encounterType == null) {
+      return null;
+    }
+
+    CodeableConcept code = new CodeableConcept();
+    code.addCoding()
+        .setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI)
+        .setCode(encounterType.getUuid())
+        .setDisplay(getMetadataTranslation(encounterType));
+    return Collections.singletonList(code);
+  }
+
+  @Override
+  public EncounterType toOpenmrsType(@Nonnull List<CodeableConcept> encounterTypes) {
+    if (encounterTypes == null || encounterTypes.isEmpty()) {
+      return null;
+    }
+
+    Coding encounterType =
+        encounterTypes.stream()
+            .filter(CodeableConcept::hasCoding)
+            .map(
+                cc ->
+                    cc.getCoding().stream()
+                        .filter(Coding::hasSystem)
+                        .filter(c -> FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI.equals(c.getSystem()))
+                        .findFirst()
+                        .orElse(null))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+
+    if (encounterType == null) {
+      return null;
+    }
+
+    return encounterService.getEncounterTypeByUuid(encounterType.getCode());
+  }
 }

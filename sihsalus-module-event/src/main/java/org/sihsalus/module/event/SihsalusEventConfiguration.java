@@ -14,21 +14,21 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackageClasses = {HibernateEventInterceptor.class, JmsEventPublisher.class})
 public class SihsalusEventConfiguration {
 
-    @Bean
-    EventActivator eventActivator() {
-        return new EventActivator();
-    }
+  @Bean
+  EventActivator eventActivator() {
+    return new EventActivator();
+  }
 
-    @Bean
-    SmartInitializingSingleton eventActivatorStarter(EventActivator eventActivator) {
-        return () -> {
-            TransactionEventListener.setDaemonToken(null);
-            eventActivator.started();
-        };
-    }
+  @Bean
+  SmartInitializingSingleton eventActivatorStarter(EventActivator eventActivator) {
+    return () -> {
+      TransactionEventListener.setDaemonToken(null);
+      eventActivator.started();
+    };
+  }
 
-    @Bean
-    DisposableBean eventActivatorStopper(EventActivator eventActivator) {
-        return eventActivator::stopped;
-    }
+  @Bean
+  DisposableBean eventActivatorStopper(EventActivator eventActivator) {
+    return eventActivator::stopped;
+  }
 }

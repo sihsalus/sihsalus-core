@@ -9,12 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.annotation.Nonnull;
-
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
 import java.util.Optional;
-
-import com.google.common.annotations.VisibleForTesting;
+import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,61 +29,66 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @VisibleForTesting })
-	private FhirConceptSourceDao dao;
-	
-	@Override
-	@Cacheable(value = "fhir2GetFhirConceptSources")
-	public Collection<FhirConceptSource> getFhirConceptSources() {
-		return dao.getFhirConceptSources();
-	}
-	
-	@Override
-	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
-		return dao.getFhirConceptSourceByUrl(url);
-	}
-	
-	@Override
-	public Optional<FhirConceptSource> getFhirConceptSource(@Nonnull ConceptSource conceptSource) {
-		return dao.getFhirConceptSourceByConceptSource(conceptSource);
-	}
-	
-	@Override
-	public String getUrlForConceptSource(@Nonnull ConceptSource conceptSource) {
-		return getFhirConceptSource(conceptSource).map(FhirConceptSource::getUrl)
-		        .orElseGet(() -> Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
-		                ? FhirConstants.SNOMED_SYSTEM_URI
-		                : null);
-	}
-	
-	@Override
-	public Optional<ConceptSource> getConceptSourceByUrl(@Nonnull String url) {
-		if (url == null) {
-			return Optional.empty();
-		}
-		
-		Optional<FhirConceptSource> fhirConceptSource = getFhirConceptSourceByUrl(url);
-		if (fhirConceptSource.isPresent()) {
-			return Optional.ofNullable(fhirConceptSource.get().getConceptSource());
-		}
-		
-		if (url.equals(FhirConstants.SNOMED_SYSTEM_URI)) {
-			return dao.getConceptSourceByHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
-		}
-		
-		return Optional.empty();
-	}
-	
-	@Override
-	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
-		return dao.getConceptSourceByHl7Code(hl7Code);
-	}
-	
-	@Override
-	@CacheEvict(value = "fhir2GetFhirConceptSources", allEntries = true)
-	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
-		return dao.saveFhirConceptSource(fhirConceptSource);
-	}
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(
+      value = AccessLevel.PROTECTED,
+      onMethod_ = {@Autowired, @VisibleForTesting})
+  private FhirConceptSourceDao dao;
+
+  @Override
+  @Cacheable(value = "fhir2GetFhirConceptSources")
+  public Collection<FhirConceptSource> getFhirConceptSources() {
+    return dao.getFhirConceptSources();
+  }
+
+  @Override
+  public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
+    return dao.getFhirConceptSourceByUrl(url);
+  }
+
+  @Override
+  public Optional<FhirConceptSource> getFhirConceptSource(@Nonnull ConceptSource conceptSource) {
+    return dao.getFhirConceptSourceByConceptSource(conceptSource);
+  }
+
+  @Override
+  public String getUrlForConceptSource(@Nonnull ConceptSource conceptSource) {
+    return getFhirConceptSource(conceptSource)
+        .map(FhirConceptSource::getUrl)
+        .orElseGet(
+            () ->
+                Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
+                    ? FhirConstants.SNOMED_SYSTEM_URI
+                    : null);
+  }
+
+  @Override
+  public Optional<ConceptSource> getConceptSourceByUrl(@Nonnull String url) {
+    if (url == null) {
+      return Optional.empty();
+    }
+
+    Optional<FhirConceptSource> fhirConceptSource = getFhirConceptSourceByUrl(url);
+    if (fhirConceptSource.isPresent()) {
+      return Optional.ofNullable(fhirConceptSource.get().getConceptSource());
+    }
+
+    if (url.equals(FhirConstants.SNOMED_SYSTEM_URI)) {
+      return dao.getConceptSourceByHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+    }
+
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
+    return dao.getConceptSourceByHl7Code(hl7Code);
+  }
+
+  @Override
+  @CacheEvict(value = "fhir2GetFhirConceptSources", allEntries = true)
+  public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
+    return dao.saveFhirConceptSource(fhirConceptSource);
+  }
 }

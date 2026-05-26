@@ -10,15 +10,15 @@
 package org.openmrs.module.billing.api.base.entity.security;
 
 /**
- * Represents types that define the privileges for the core
- * {@link org.openmrs.module.openhmis.commons.api.entity .IEntityDataService} operations.
+ * Represents types that define the privileges for the core {@link
+ * org.openmrs.module.openhmis.commons.api.entity .IEntityDataService} operations.
  */
 public interface IEntityAuthorizationPrivileges extends IObjectAuthorizationPrivileges {
-	
-	/**
-	 * The privilege required to void or unvoid an entity or {@code null} for no authorization.
-	 *
-	 * @return The privilege name.
-	 */
-	String getVoidPrivilege();
+
+  /**
+   * The privilege required to void or unvoid an entity or {@code null} for no authorization.
+   *
+   * @return The privilege name.
+   */
+  String getVoidPrivilege();
 }

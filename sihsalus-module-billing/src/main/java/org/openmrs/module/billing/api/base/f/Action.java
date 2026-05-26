@@ -9,13 +9,9 @@
  */
 package org.openmrs.module.billing.api.base.f;
 
-/**
- * Represents a function with no parameters and no return value.
- */
+/** Represents a function with no parameters and no return value. */
 public interface Action {
-	
-	/**
-	 * Executes the action.
-	 */
-	void apply();
+
+  /** Executes the action. */
+  void apply();
 }

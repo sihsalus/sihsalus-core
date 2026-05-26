@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class StaticModuleController {
 
-    @GetMapping("/api/admin/static-modules")
-    List<SihsalusModuleDescriptor> modules() {
-        return StaticModuleCatalog.staticInternalModules();
-    }
+  @GetMapping("/api/admin/static-modules")
+  List<SihsalusModuleDescriptor> modules() {
+    return StaticModuleCatalog.staticInternalModules();
+  }
 }

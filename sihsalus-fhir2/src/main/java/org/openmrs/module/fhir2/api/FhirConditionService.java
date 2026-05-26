@@ -14,6 +14,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 
 public interface FhirConditionService extends FhirService<Condition> {
-	
-	IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams);
+
+  IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams);
 }

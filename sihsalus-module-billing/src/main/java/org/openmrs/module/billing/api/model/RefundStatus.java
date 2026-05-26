@@ -10,8 +10,8 @@
 package org.openmrs.module.billing.api.model;
 
 public enum RefundStatus {
-	REQUESTED,
-	APPROVED,
-	REJECTED,
-	COMPLETED
+  REQUESTED,
+  APPROVED,
+  REJECTED,
+  COMPLETED
 }

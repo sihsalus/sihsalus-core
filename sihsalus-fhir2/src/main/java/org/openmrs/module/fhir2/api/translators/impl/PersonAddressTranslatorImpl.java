@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.PersonAddress;
@@ -18,68 +17,78 @@ import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PersonAddressTranslatorImpl extends BaseAddressTranslator implements PersonAddressTranslator {
-	
-	@Override
-	public Address toFhirResource(@Nonnull PersonAddress address) {
-		if (address == null || address.getVoided()) {
-			return null;
-		}
-		
-		Address fhirAddress = new Address();
-		fhirAddress.setId(address.getUuid());
-		fhirAddress.setCity(address.getCityVillage());
-		fhirAddress.setState(address.getStateProvince());
-		fhirAddress.setCountry(address.getCountry());
-		fhirAddress.setDistrict(address.getCountyDistrict());
-		fhirAddress.setPostalCode(address.getPostalCode());
-		
-		// TODO is this the right mapping?
-		if (address.getPreferred() != null) {
-			if (address.getPreferred()) {
-				fhirAddress.setUse(Address.AddressUse.HOME);
-			} else {
-				fhirAddress.setUse(Address.AddressUse.OLD);
-			}
-		}
-		
-		addAddressExtensions(fhirAddress, address);
-		
-		return fhirAddress;
-	}
-	
-	@Override
-	public PersonAddress toOpenmrsType(@Nonnull Address address) {
-		if (address == null) {
-			return null;
-		}
-		
-		return toOpenmrsType(new PersonAddress(), address);
-	}
-	
-	@Override
-	public PersonAddress toOpenmrsType(@Nonnull PersonAddress personAddress, @Nonnull Address address) {
-		if (personAddress == null || address == null) {
-			return personAddress;
-		}
-		
-		if (address.hasId()) {
-			personAddress.setUuid(address.getId());
-		}
-		
-		personAddress.setCityVillage(address.getCity());
-		personAddress.setCountyDistrict(address.getDistrict());
-		personAddress.setStateProvince(address.getState());
-		personAddress.setCountry(address.getCountry());
-		personAddress.setPostalCode(address.getPostalCode());
-		
-		if (Address.AddressUse.HOME.equals(address.getUse())) {
-			personAddress.setPreferred(true);
-		}
-		
-		getOpenmrsAddressExtension(address).ifPresent(ext -> ext.getExtension()
-		        .forEach(e -> addAddressComponent(personAddress, e.getUrl(), ((StringType) e.getValue()).getValue())));
-		
-		return personAddress;
-	}
+public class PersonAddressTranslatorImpl extends BaseAddressTranslator
+    implements PersonAddressTranslator {
+
+  @Override
+  public Address toFhirResource(@Nonnull PersonAddress address) {
+    if (address == null || address.getVoided()) {
+      return null;
+    }
+
+    Address fhirAddress = new Address();
+    fhirAddress.setId(address.getUuid());
+    fhirAddress.setCity(address.getCityVillage());
+    fhirAddress.setState(address.getStateProvince());
+    fhirAddress.setCountry(address.getCountry());
+    fhirAddress.setDistrict(address.getCountyDistrict());
+    fhirAddress.setPostalCode(address.getPostalCode());
+
+    // TODO is this the right mapping?
+    if (address.getPreferred() != null) {
+      if (address.getPreferred()) {
+        fhirAddress.setUse(Address.AddressUse.HOME);
+      } else {
+        fhirAddress.setUse(Address.AddressUse.OLD);
+      }
+    }
+
+    addAddressExtensions(fhirAddress, address);
+
+    return fhirAddress;
+  }
+
+  @Override
+  public PersonAddress toOpenmrsType(@Nonnull Address address) {
+    if (address == null) {
+      return null;
+    }
+
+    return toOpenmrsType(new PersonAddress(), address);
+  }
+
+  @Override
+  public PersonAddress toOpenmrsType(
+      @Nonnull PersonAddress personAddress, @Nonnull Address address) {
+    if (personAddress == null || address == null) {
+      return personAddress;
+    }
+
+    if (address.hasId()) {
+      personAddress.setUuid(address.getId());
+    }
+
+    personAddress.setCityVillage(address.getCity());
+    personAddress.setCountyDistrict(address.getDistrict());
+    personAddress.setStateProvince(address.getState());
+    personAddress.setCountry(address.getCountry());
+    personAddress.setPostalCode(address.getPostalCode());
+
+    if (Address.AddressUse.HOME.equals(address.getUse())) {
+      personAddress.setPreferred(true);
+    }
+
+    getOpenmrsAddressExtension(address)
+        .ifPresent(
+            ext ->
+                ext.getExtension()
+                    .forEach(
+                        e ->
+                            addAddressComponent(
+                                personAddress,
+                                e.getUrl(),
+                                ((StringType) e.getValue()).getValue())));
+
+    return personAddress;
+  }
 }

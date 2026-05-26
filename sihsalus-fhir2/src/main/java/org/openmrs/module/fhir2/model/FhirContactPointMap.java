@@ -17,7 +17,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,28 +32,28 @@ import org.openmrs.BaseOpenmrsData;
 @Table(name = "fhir_contact_point_map")
 @NoArgsConstructor
 public class FhirContactPointMap extends BaseOpenmrsData {
-	
-	private static final long serialVersionUID = 1742113L;
-	
-	@EqualsAndHashCode.Include
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "fhir_contact_point_map_id")
-	private Integer id;
-	
-	@Column(name = "attribute_type_domain", nullable = false)
-	private String attributeTypeDomain;
-	
-	@Column(name = "attribute_type_id", nullable = false)
-	private Integer attributeTypeId;
-	
-	@Enumerated(EnumType.STRING)
-	@Column(length = 50)
-	private ContactPointSystem system;
-	
-	@Enumerated(EnumType.STRING)
-	@Column(length = 50)
-	private ContactPointUse use;
-	
-	private Integer rank;
+
+  private static final long serialVersionUID = 1742113L;
+
+  @EqualsAndHashCode.Include
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "fhir_contact_point_map_id")
+  private Integer id;
+
+  @Column(name = "attribute_type_domain", nullable = false)
+  private String attributeTypeDomain;
+
+  @Column(name = "attribute_type_id", nullable = false)
+  private Integer attributeTypeId;
+
+  @Enumerated(EnumType.STRING)
+  @Column(length = 50)
+  private ContactPointSystem system;
+
+  @Enumerated(EnumType.STRING)
+  @Column(length = 50)
+  private ContactPointUse use;
+
+  private Integer rank;
 }

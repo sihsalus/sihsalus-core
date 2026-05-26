@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
@@ -29,54 +28,54 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MedicationRequestTimingTranslatorImpl implements MedicationRequestTimingTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private MedicationRequestTimingRepeatComponentTranslator timingRepeatComponentTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ConceptTranslator conceptTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private OrderService orderService;
-	
-	@Override
-	public Timing toFhirResource(@Nonnull DrugOrder drugOrder) {
-		if (drugOrder == null) {
-			return null;
-		}
-		Timing timing = new Timing();
-		timing.addEvent(drugOrder.getScheduledDate());
-		if (drugOrder.getFrequency() != null) {
-			timing.setCode(conceptTranslator.toFhirResource(drugOrder.getFrequency().getConcept()));
-		}
-		timing.setRepeat(timingRepeatComponentTranslator.toFhirResource(drugOrder));
-		return timing;
-	}
-	
-	@Override
-	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing timing) {
-		if (timing.getEvent() != null && !timing.getEvent().isEmpty()) {
-			drugOrder.setScheduledDate(timing.getEvent().get(0).getValue());
-		}
-		if (timing.hasCode()) {
-			OrderFrequency frequency = null;
-			for (Coding coding : timing.getCode().getCoding()) {
-				if (coding.getCode() != null && frequency == null) {
-					frequency = orderService.getOrderFrequencyByUuid(coding.getCode());
-				}
-			}
-			if (frequency == null) {
-				Concept frequencyConcept = conceptTranslator.toOpenmrsType(timing.getCode());
-				if (frequencyConcept != null) {
-					frequency = orderService.getOrderFrequencyByConcept(frequencyConcept);
-				}
-			}
-			drugOrder.setFrequency(frequency);
-		}
-		timingRepeatComponentTranslator.toOpenmrsType(drugOrder, timing.getRepeat());
-		return drugOrder;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private MedicationRequestTimingRepeatComponentTranslator timingRepeatComponentTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ConceptTranslator conceptTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private OrderService orderService;
+
+  @Override
+  public Timing toFhirResource(@Nonnull DrugOrder drugOrder) {
+    if (drugOrder == null) {
+      return null;
+    }
+    Timing timing = new Timing();
+    timing.addEvent(drugOrder.getScheduledDate());
+    if (drugOrder.getFrequency() != null) {
+      timing.setCode(conceptTranslator.toFhirResource(drugOrder.getFrequency().getConcept()));
+    }
+    timing.setRepeat(timingRepeatComponentTranslator.toFhirResource(drugOrder));
+    return timing;
+  }
+
+  @Override
+  public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing timing) {
+    if (timing.getEvent() != null && !timing.getEvent().isEmpty()) {
+      drugOrder.setScheduledDate(timing.getEvent().get(0).getValue());
+    }
+    if (timing.hasCode()) {
+      OrderFrequency frequency = null;
+      for (Coding coding : timing.getCode().getCoding()) {
+        if (coding.getCode() != null && frequency == null) {
+          frequency = orderService.getOrderFrequencyByUuid(coding.getCode());
+        }
+      }
+      if (frequency == null) {
+        Concept frequencyConcept = conceptTranslator.toOpenmrsType(timing.getCode());
+        if (frequencyConcept != null) {
+          frequency = orderService.getOrderFrequencyByConcept(frequencyConcept);
+        }
+      }
+      drugOrder.setFrequency(frequency);
+    }
+    timingRepeatComponentTranslator.toOpenmrsType(drugOrder, timing.getRepeat());
+    return drugOrder;
+  }
 }

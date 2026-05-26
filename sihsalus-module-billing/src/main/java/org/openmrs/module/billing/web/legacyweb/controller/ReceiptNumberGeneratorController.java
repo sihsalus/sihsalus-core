@@ -13,18 +13,16 @@ import org.openmrs.module.billing.web.CashierWebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * Controller to manage the Receipt Number Generation
- */
+/** Controller to manage the Receipt Number Generation */
 @Controller
 @RequestMapping(value = ReceiptNumberGeneratorController.RECEIPT_NUMBER_GENERATOR_URL)
 public class ReceiptNumberGeneratorController extends AbstractReceiptNumberGenerator {
-	
-	public static final String RECEIPT_NUMBER_GENERATOR_URL = CashierWebConstants.RECEIPT_NUMBER_GENERATOR_ROOT;
-	
-	@Override
-	public String getReceiptNumberGeneratorUrl() {
-		return RECEIPT_NUMBER_GENERATOR_URL;
-	}
-	
+
+  public static final String RECEIPT_NUMBER_GENERATOR_URL =
+      CashierWebConstants.RECEIPT_NUMBER_GENERATOR_ROOT;
+
+  @Override
+  public String getReceiptNumberGeneratorUrl() {
+    return RECEIPT_NUMBER_GENERATOR_URL;
+  }
 }

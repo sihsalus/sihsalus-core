@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import java.util.Optional;
-
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import java.util.Optional;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
@@ -20,23 +19,39 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUserDao {
-	
-	@Override
-	@Transactional(readOnly = true)
-	public User getUserByUserName(String username) {
-		OpenmrsFhirCriteriaContext<User, User> criteriaContext = createCriteriaContext(User.class);
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())
-		        .where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), username));
-		
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream()
-		        .findFirst().orElse(null);
-	}
-	
-	@Override
-	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<User, U> criteriaContext, TokenAndListParam identifier) {
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier,
-		    param -> Optional.of(
-		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), param.getValue())))
-		        .ifPresent(criteriaContext::addPredicate);
-	}
+
+  @Override
+  @Transactional(readOnly = true)
+  public User getUserByUserName(String username) {
+    OpenmrsFhirCriteriaContext<User, User> criteriaContext = createCriteriaContext(User.class);
+    criteriaContext
+        .getCriteriaQuery()
+        .select(criteriaContext.getRoot())
+        .where(
+            criteriaContext
+                .getCriteriaBuilder()
+                .equal(criteriaContext.getRoot().get("username"), username));
+
+    return criteriaContext
+        .getEntityManager()
+        .createQuery(criteriaContext.getCriteriaQuery())
+        .getResultList()
+        .stream()
+        .findFirst()
+        .orElse(null);
+  }
+
+  @Override
+  protected <U> void handleIdentifier(
+      OpenmrsFhirCriteriaContext<User, U> criteriaContext, TokenAndListParam identifier) {
+    handleAndListParam(
+            criteriaContext.getCriteriaBuilder(),
+            identifier,
+            param ->
+                Optional.of(
+                    criteriaContext
+                        .getCriteriaBuilder()
+                        .equal(criteriaContext.getRoot().get("username"), param.getValue())))
+        .ifPresent(criteriaContext::addPredicate);
+  }
 }

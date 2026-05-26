@@ -10,7 +10,6 @@
 package org.openmrs.module.billing.web.base.resource;
 
 import java.util.List;
-
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.resource.api.Converter;
@@ -22,18 +21,19 @@ import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
  * @param <T> The model class.
  */
 public class AlreadyPagedWithLength<T> extends AlreadyPaged<T> {
-	
-	private final long length;
-	
-	public AlreadyPagedWithLength(RequestContext context, List<T> results, boolean hasMoreResults, long length) {
-		super(context, results, hasMoreResults);
-		this.length = length;
-	}
-	
-	@Override
-	public SimpleObject toSimpleObject(Converter converter) {
-		SimpleObject obj = super.toSimpleObject(converter);
-		obj.add("length", this.length);
-		return obj;
-	}
+
+  private final long length;
+
+  public AlreadyPagedWithLength(
+      RequestContext context, List<T> results, boolean hasMoreResults, long length) {
+    super(context, results, hasMoreResults);
+    this.length = length;
+  }
+
+  @Override
+  public SimpleObject toSimpleObject(Converter converter) {
+    SimpleObject obj = super.toSimpleObject(converter);
+    obj.add("length", this.length);
+    return obj;
+  }
 }

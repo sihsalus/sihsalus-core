@@ -11,15 +11,13 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
@@ -34,74 +32,87 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifierSystemDao {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("sessionFactory") }))
-	private SessionFactory sessionFactory;
-	
-	@Override
-	@Transactional(readOnly = true)
-	public String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<String> cq = cb.createQuery(String.class);
-		Root<FhirPatientIdentifierSystem> root = cq.from(FhirPatientIdentifierSystem.class);
-		
-		cq.where(cb.equal(root.join("patientIdentifierType").get("patientIdentifierTypeId"), patientIdentifierType.getId()));
-		cq.select(root.get("url"));
-		
-		try {
-			return em.createQuery(cq).getSingleResult();
-		}
-		catch (NoResultException e) {
-			return null;
-		}
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public PatientIdentifierType getPatientIdentifierTypeByUrl(String url) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<PatientIdentifierType> cq = cb.createQuery(PatientIdentifierType.class);
-		Root<FhirPatientIdentifierSystem> root = cq.from(FhirPatientIdentifierSystem.class);
-		
-		cq.where(cb.equal(root.get("url"), url));
-		cq.select(root.get("patientIdentifierType"));
-		
-		try {
-			return em.createQuery(cq).getSingleResult();
-		}
-		catch (NoResultException e) {
-			return null;
-		}
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
-	        @Nonnull PatientIdentifierType patientIdentifierType) {
-		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
-		
-		criteriaContext.getCriteriaQuery().where(criteriaContext.getCriteriaBuilder()
-		        .equal(criteriaContext.getRoot().get("patientIdentifierType"), patientIdentifierType));
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream()
-		        .findFirst();
-	}
-	
-	@Override
-	@Transactional
-	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
-	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
-		return sessionFactory.getCurrentSession().merge(fhirPatientIdentifierSystem);
-	}
-	
-	private OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem> openmrsFhirCriteriaContext() {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<FhirPatientIdentifierSystem> cq = cb.createQuery(FhirPatientIdentifierSystem.class);
-		Root<FhirPatientIdentifierSystem> root = cq.from(FhirPatientIdentifierSystem.class);
-		
-		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @__({@Autowired, @Qualifier("sessionFactory")}))
+  private SessionFactory sessionFactory;
+
+  @Override
+  @Transactional(readOnly = true)
+  public String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType) {
+    EntityManager em = sessionFactory.getCurrentSession();
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<String> cq = cb.createQuery(String.class);
+    Root<FhirPatientIdentifierSystem> root = cq.from(FhirPatientIdentifierSystem.class);
+
+    cq.where(
+        cb.equal(
+            root.join("patientIdentifierType").get("patientIdentifierTypeId"),
+            patientIdentifierType.getId()));
+    cq.select(root.get("url"));
+
+    try {
+      return em.createQuery(cq).getSingleResult();
+    } catch (NoResultException e) {
+      return null;
+    }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public PatientIdentifierType getPatientIdentifierTypeByUrl(String url) {
+    EntityManager em = sessionFactory.getCurrentSession();
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<PatientIdentifierType> cq = cb.createQuery(PatientIdentifierType.class);
+    Root<FhirPatientIdentifierSystem> root = cq.from(FhirPatientIdentifierSystem.class);
+
+    cq.where(cb.equal(root.get("url"), url));
+    cq.select(root.get("patientIdentifierType"));
+
+    try {
+      return em.createQuery(cq).getSingleResult();
+    } catch (NoResultException e) {
+      return null;
+    }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
+      @Nonnull PatientIdentifierType patientIdentifierType) {
+    OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem>
+        criteriaContext = openmrsFhirCriteriaContext();
+
+    criteriaContext
+        .getCriteriaQuery()
+        .where(
+            criteriaContext
+                .getCriteriaBuilder()
+                .equal(
+                    criteriaContext.getRoot().get("patientIdentifierType"), patientIdentifierType));
+    return criteriaContext
+        .getEntityManager()
+        .createQuery(criteriaContext.getCriteriaQuery())
+        .getResultList()
+        .stream()
+        .findFirst();
+  }
+
+  @Override
+  @Transactional
+  public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
+      @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
+    return sessionFactory.getCurrentSession().merge(fhirPatientIdentifierSystem);
+  }
+
+  private OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem>
+      openmrsFhirCriteriaContext() {
+    EntityManager em = sessionFactory.getCurrentSession();
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<FhirPatientIdentifierSystem> cq =
+        cb.createQuery(FhirPatientIdentifierSystem.class);
+    Root<FhirPatientIdentifierSystem> root = cq.from(FhirPatientIdentifierSystem.class);
+
+    return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+  }
 }

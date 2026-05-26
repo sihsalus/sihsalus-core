@@ -13,72 +13,71 @@
  */
 package org.openmrs.module.stockmanagement.api.impl;
 
+import java.math.BigDecimal;
 import org.openmrs.module.stockmanagement.api.model.StockOperation;
 import org.openmrs.module.stockmanagement.api.model.StockOperationType;
-
-import java.math.BigDecimal;
 
 /**
  * Model class that processes a transfer stock operation type. Transfers move item stock from one
  * location to another.
  */
 public class RequistionOperationTypeProcessor extends StockOperationTypeProcessorBase {
-	
-	public RequistionOperationTypeProcessor(StockOperationType stockOperationType) {
-		super(stockOperationType);
-	}
-	
-	@Override
-	public boolean isNegativeItemQuantityAllowed() {
-		return false;
-	}
-	
-	@Override
-	public boolean requiresActualBatchInformation() {
-		return false;
-	}
-	
-	@Override
-	public boolean requiresBatchUuid() {
-		return false;
-	}
-	
-	@Override
-	public boolean isQuantityOptional() {
-		return true;
-	}
-	
-	@Override
-	public boolean shouldVerifyNegativeStockAmountsAtSource() {
-		return false;
-	}
-	
-	@Override
-	public BigDecimal getQuantityToApplyAtSource(BigDecimal quantity) {
-		return BigDecimal.valueOf(0);
-	}
-	
-	@Override
-	public void onPending(final StockOperation operation) {
-		// Remove the item stock from the source stockroom
-		if (operation.getReservedTransactions() != null) {
-			clearReservedTransactions(operation);
-		}
-	}
-	
-	@Override
-	public void onCancelled(final StockOperation operation) {
-		// Re-add the previously removed item stock back into the source
-		// stockroom
-		if (operation.getReservedTransactions() != null) {
-			clearReservedTransactions(operation);
-		}
-	}
-	
-	@Override
-	public void onCompleted(final StockOperation operation) {
-		if (operation.getReservedTransactions() != null) {
-			clearReservedTransactions(operation);
-		}
-	}
+
+  public RequistionOperationTypeProcessor(StockOperationType stockOperationType) {
+    super(stockOperationType);
+  }
+
+  @Override
+  public boolean isNegativeItemQuantityAllowed() {
+    return false;
+  }
+
+  @Override
+  public boolean requiresActualBatchInformation() {
+    return false;
+  }
+
+  @Override
+  public boolean requiresBatchUuid() {
+    return false;
+  }
+
+  @Override
+  public boolean isQuantityOptional() {
+    return true;
+  }
+
+  @Override
+  public boolean shouldVerifyNegativeStockAmountsAtSource() {
+    return false;
+  }
+
+  @Override
+  public BigDecimal getQuantityToApplyAtSource(BigDecimal quantity) {
+    return BigDecimal.valueOf(0);
+  }
+
+  @Override
+  public void onPending(final StockOperation operation) {
+    // Remove the item stock from the source stockroom
+    if (operation.getReservedTransactions() != null) {
+      clearReservedTransactions(operation);
+    }
+  }
+
+  @Override
+  public void onCancelled(final StockOperation operation) {
+    // Re-add the previously removed item stock back into the source
+    // stockroom
+    if (operation.getReservedTransactions() != null) {
+      clearReservedTransactions(operation);
+    }
+  }
+
+  @Override
+  public void onCompleted(final StockOperation operation) {
+    if (operation.getReservedTransactions() != null) {
+      clearReservedTransactions(operation);
+    }
+  }
 }

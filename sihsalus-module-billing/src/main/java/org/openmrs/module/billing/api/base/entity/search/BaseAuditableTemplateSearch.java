@@ -20,52 +20,56 @@ import org.openmrs.module.billing.api.base.criteria.BillingRestrictions;
  */
 public class BaseAuditableTemplateSearch<T extends Auditable> extends BaseObjectTemplateSearch<T> {
 
-	public static final long serialVersionUID = 0L;
+  public static final long serialVersionUID = 0L;
 
-	private DateComparisonType dateCreatedComparisonType;
+  private DateComparisonType dateCreatedComparisonType;
 
-	private DateComparisonType dateChangedComparisonType;
+  private DateComparisonType dateChangedComparisonType;
 
-	public BaseAuditableTemplateSearch(T template) {
-		super(template);
-		this.dateCreatedComparisonType = DateComparisonType.EQUAL;
-		this.dateChangedComparisonType = DateComparisonType.EQUAL;
-	}
+  public BaseAuditableTemplateSearch(T template) {
+    super(template);
+    this.dateCreatedComparisonType = DateComparisonType.EQUAL;
+    this.dateChangedComparisonType = DateComparisonType.EQUAL;
+  }
 
-	public DateComparisonType getDateCreatedComparisonType() {
-		return dateCreatedComparisonType;
-	}
+  public DateComparisonType getDateCreatedComparisonType() {
+    return dateCreatedComparisonType;
+  }
 
-	public void setDateCreatedComparisonType(DateComparisonType dateCreatedComparisonType) {
-		this.dateCreatedComparisonType = dateCreatedComparisonType;
-	}
+  public void setDateCreatedComparisonType(DateComparisonType dateCreatedComparisonType) {
+    this.dateCreatedComparisonType = dateCreatedComparisonType;
+  }
 
-	public DateComparisonType getDateChangedComparisonType() {
-		return dateChangedComparisonType;
-	}
+  public DateComparisonType getDateChangedComparisonType() {
+    return dateChangedComparisonType;
+  }
 
-	public void setDateChangedComparisonType(DateComparisonType dateChangedComparisonType) {
-		this.dateChangedComparisonType = dateChangedComparisonType;
-	}
+  public void setDateChangedComparisonType(DateComparisonType dateChangedComparisonType) {
+    this.dateChangedComparisonType = dateChangedComparisonType;
+  }
 
-	@Override
-	public void updateCriteria(BillingCriteria criteria) {
-		super.updateCriteria(criteria);
+  @Override
+  public void updateCriteria(BillingCriteria criteria) {
+    super.updateCriteria(criteria);
 
-		T t = getTemplate();
-		if (t.getCreator() != null) {
-			criteria.add(BillingRestrictions.eq("creator", t.getCreator()));
-		}
-		if (t.getDateCreated() != null) {
-			criteria.add((cb, root) -> createPredicate(cb, root, "dateCreated", t.getDateCreated(),
-			    dateCreatedComparisonType));
-		}
-		if (t.getChangedBy() != null) {
-			criteria.add(BillingRestrictions.eq("changedBy", t.getChangedBy()));
-		}
-		if (t.getDateChanged() != null) {
-			criteria.add((cb, root) -> createPredicate(cb, root, "dateChanged", t.getDateChanged(),
-			    dateChangedComparisonType));
-		}
-	}
+    T t = getTemplate();
+    if (t.getCreator() != null) {
+      criteria.add(BillingRestrictions.eq("creator", t.getCreator()));
+    }
+    if (t.getDateCreated() != null) {
+      criteria.add(
+          (cb, root) ->
+              createPredicate(
+                  cb, root, "dateCreated", t.getDateCreated(), dateCreatedComparisonType));
+    }
+    if (t.getChangedBy() != null) {
+      criteria.add(BillingRestrictions.eq("changedBy", t.getChangedBy()));
+    }
+    if (t.getDateChanged() != null) {
+      criteria.add(
+          (cb, root) ->
+              createPredicate(
+                  cb, root, "dateChanged", t.getDateChanged(), dateChangedComparisonType));
+    }
+  }
 }

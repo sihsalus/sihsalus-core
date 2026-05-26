@@ -10,10 +10,8 @@
 package org.openmrs.module.billing.api.model;
 
 public enum BillableServiceStatus {
-	
-	ENABLED(),
-	DISABLED();
-	
-	BillableServiceStatus() {
-	}
+  ENABLED(),
+  DISABLED();
+
+  BillableServiceStatus() {}
 }

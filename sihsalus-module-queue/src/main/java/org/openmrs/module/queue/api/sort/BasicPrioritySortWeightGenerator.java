@@ -10,7 +10,6 @@
 package org.openmrs.module.queue.api.sort;
 
 import java.util.List;
-
 import org.openmrs.Concept;
 import org.openmrs.module.queue.api.QueueServicesWrapper;
 import org.openmrs.module.queue.model.QueueEntry;
@@ -25,23 +24,23 @@ import org.springframework.stereotype.Component;
  */
 @Component("basicPrioritySortWeightGenerator")
 public class BasicPrioritySortWeightGenerator implements SortWeightGenerator {
-	
-	private final QueueServicesWrapper services;
-	
-	@Autowired
-	public BasicPrioritySortWeightGenerator(QueueServicesWrapper services) {
-		this.services = services;
-	}
-	
-	/**
-	 * Generates a sort weight based on the order of the priority within the configured concept set
-	 */
-	public Double generateSortWeight(QueueEntry queueEntry) {
-		List<Concept> allowedPriorities = services.getAllowedPriorities(queueEntry.getQueue());
-		int ret = 0; // Default to the lowest sort weight
-		if (queueEntry.getPriority() != null && allowedPriorities.contains(queueEntry.getPriority())) {
-			ret = allowedPriorities.indexOf(queueEntry.getPriority());
-		}
-		return (double) ret;
-	}
+
+  private final QueueServicesWrapper services;
+
+  @Autowired
+  public BasicPrioritySortWeightGenerator(QueueServicesWrapper services) {
+    this.services = services;
+  }
+
+  /**
+   * Generates a sort weight based on the order of the priority within the configured concept set
+   */
+  public Double generateSortWeight(QueueEntry queueEntry) {
+    List<Concept> allowedPriorities = services.getAllowedPriorities(queueEntry.getQueue());
+    int ret = 0; // Default to the lowest sort weight
+    if (queueEntry.getPriority() != null && allowedPriorities.contains(queueEntry.getPriority())) {
+      ret = allowedPriorities.indexOf(queueEntry.getPriority());
+    }
+    return (double) ret;
+  }
 }

@@ -20,25 +20,28 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 @Component
-@Handler(supports = { CohortType.class }, order = 50)
+@Handler(
+    supports = {CohortType.class},
+    order = 50)
 @Qualifier("cohort.cohortTypeValidator")
 public class CohortTypeValidator implements Validator {
-	
-	@Override
-	public boolean supports(Class<?> clazz) {
-		return clazz.equals(CohortType.class);
-	}
-	
-	@Override
-	public void validate(Object command, Errors errors) {
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "required");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "description", "required");
-		
-		CohortType currentType = (CohortType) command;
-		CohortType type = Context.getService(CohortTypeService.class).getCohortTypeByName(currentType.getName());
-		
-		if (type != null) {
-			errors.rejectValue("name", "A cohort type with the same name already exists");
-		}
-	}
+
+  @Override
+  public boolean supports(Class<?> clazz) {
+    return clazz.equals(CohortType.class);
+  }
+
+  @Override
+  public void validate(Object command, Errors errors) {
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "required");
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "description", "required");
+
+    CohortType currentType = (CohortType) command;
+    CohortType type =
+        Context.getService(CohortTypeService.class).getCohortTypeByName(currentType.getName());
+
+    if (type != null) {
+      errors.rejectValue("name", "A cohort type with the same name already exists");
+    }
+  }
 }

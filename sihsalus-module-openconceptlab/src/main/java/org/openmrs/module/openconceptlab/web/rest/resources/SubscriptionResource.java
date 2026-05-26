@@ -1,9 +1,15 @@
 package org.openmrs.module.openconceptlab.web.rest.resources;
 
+import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
+
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.StringProperty;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.Locale;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openconceptlab.ImportService;
 import org.openmrs.module.openconceptlab.Subscription;
@@ -29,187 +35,192 @@ import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.Locale;
-
-import static org.openmrs.module.openconceptlab.web.rest.OpenConceptLabRestPrivileges.requireManageConcepts;
-
 @Resource(
-        name = RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE + "/subscription",
-        supportedClass = Subscription.class,
-        supportedOpenmrsVersions = { "1.8.* - 9.*" }
-)
+    name =
+        RestConstants.VERSION_1
+            + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE
+            + "/subscription",
+    supportedClass = Subscription.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.*"})
 public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
 
-    @Override
-    public Subscription getByUniqueId(String uniqueId) {
-        requireManageConcepts();
-        Subscription subscription = getImportService().getSubscription();
-        if(subscription.getUuid().equals(uniqueId)){
-            return subscription;
-        } else {
-            throw new ObjectNotFoundException();
-        }
+  @Override
+  public Subscription getByUniqueId(String uniqueId) {
+    requireManageConcepts();
+    Subscription subscription = getImportService().getSubscription();
+    if (subscription.getUuid().equals(uniqueId)) {
+      return subscription;
+    } else {
+      throw new ObjectNotFoundException();
     }
+  }
 
-    @Override
-    protected void delete(Subscription subscription, String reason, RequestContext context) throws ResponseException {
-        requireManageConcepts();
-        getImportService().unsubscribe();
-    }
+  @Override
+  protected void delete(Subscription subscription, String reason, RequestContext context)
+      throws ResponseException {
+    requireManageConcepts();
+    getImportService().unsubscribe();
+  }
 
-    @Override
-    public Subscription newDelegate() {
-        return new Subscription();
-    }
+  @Override
+  public Subscription newDelegate() {
+    return new Subscription();
+  }
 
-    @Override
-    public Subscription save(Subscription subscription) {
-        requireManageConcepts();
-        if (!"url".equals(subscription.getUrl())) {
-            validateSubscriptionUrl(subscription.getUrl());
-            UpdateScheduler updateScheduler = getUpdateScheduler();
-            updateScheduler.schedule(subscription);
-        }
-        return getImportService().getSubscription();
+  @Override
+  public Subscription save(Subscription subscription) {
+    requireManageConcepts();
+    if (!"url".equals(subscription.getUrl())) {
+      validateSubscriptionUrl(subscription.getUrl());
+      UpdateScheduler updateScheduler = getUpdateScheduler();
+      updateScheduler.schedule(subscription);
     }
+    return getImportService().getSubscription();
+  }
 
-    @Override
-    public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
-        DelegatingResourceDescription delegatingResourceDescription = new DelegatingResourceDescription();
-        delegatingResourceDescription.addRequiredProperty("url");
-        delegatingResourceDescription.addRequiredProperty("token");
-        delegatingResourceDescription.addProperty("subscribedToSnapshot");
-        delegatingResourceDescription.addProperty("validationType");
-        return delegatingResourceDescription;
-    }
+  @Override
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
+    DelegatingResourceDescription delegatingResourceDescription =
+        new DelegatingResourceDescription();
+    delegatingResourceDescription.addRequiredProperty("url");
+    delegatingResourceDescription.addRequiredProperty("token");
+    delegatingResourceDescription.addProperty("subscribedToSnapshot");
+    delegatingResourceDescription.addProperty("validationType");
+    return delegatingResourceDescription;
+  }
 
-    @Override
-    public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
-        DelegatingResourceDescription delegatingResourceDescription = new DelegatingResourceDescription();
-        delegatingResourceDescription.addProperty("url");
-        delegatingResourceDescription.addProperty("token");
-        delegatingResourceDescription.addProperty("subscribedToSnapshot");
-        delegatingResourceDescription.addProperty("validationType");
-        return delegatingResourceDescription;
-    }
+  @Override
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
+    DelegatingResourceDescription delegatingResourceDescription =
+        new DelegatingResourceDescription();
+    delegatingResourceDescription.addProperty("url");
+    delegatingResourceDescription.addProperty("token");
+    delegatingResourceDescription.addProperty("subscribedToSnapshot");
+    delegatingResourceDescription.addProperty("validationType");
+    return delegatingResourceDescription;
+  }
 
-    @Override
-    public Model getCREATEModel(Representation rep) {
-        ModelImpl model = new ModelImpl();
-        model.property("url", new StringProperty(StringProperty.Format.URL));
-        model.property("token", new StringProperty());
-        model.property("subscribedToSnapshot", new BooleanProperty());
-        model.property("validationType", new EnumProperty(ValidationType.class)).required("url").required("token");
-        return model;
-    }
+  @Override
+  public Model getCREATEModel(Representation rep) {
+    ModelImpl model = new ModelImpl();
+    model.property("url", new StringProperty(StringProperty.Format.URL));
+    model.property("token", new StringProperty());
+    model.property("subscribedToSnapshot", new BooleanProperty());
+    model
+        .property("validationType", new EnumProperty(ValidationType.class))
+        .required("url")
+        .required("token");
+    return model;
+  }
 
-    @Override
-    public Model getUPDATEModel(Representation rep) {
-        ModelImpl model = (ModelImpl) super.getUPDATEModel(rep);
-        model.property("url", new StringProperty(StringProperty.Format.URL));
-        model.property("token", new StringProperty());
-        model.property("subscribedToSnapshot", new BooleanProperty());
-        model.property("validationType", new EnumProperty(ValidationType.class));
-        return model;
-    }
+  @Override
+  public Model getUPDATEModel(Representation rep) {
+    ModelImpl model = (ModelImpl) super.getUPDATEModel(rep);
+    model.property("url", new StringProperty(StringProperty.Format.URL));
+    model.property("token", new StringProperty());
+    model.property("subscribedToSnapshot", new BooleanProperty());
+    model.property("validationType", new EnumProperty(ValidationType.class));
+    return model;
+  }
 
-    @Override
-    public void purge(Subscription delegate, RequestContext context) throws ResponseException {
-        throw new ResourceDoesNotSupportOperationException();
-    }
+  @Override
+  public void purge(Subscription delegate, RequestContext context) throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException();
+  }
 
-    @Override
-    public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        if (rep instanceof FullRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("url");
-            description.addProperty("subscribedToSnapshot");
-            description.addProperty("validationType");
-            description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
-            description.addSelfLink();
-            return description;
-        } else if (rep instanceof DefaultRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("url");
-            description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
-            description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
-            description.addSelfLink();
-            return description;
-        } else if (rep instanceof RefRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("url");
-            description.addSelfLink();
-            return description;
-        }
-        return null;
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    if (rep instanceof FullRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("url");
+      description.addProperty("subscribedToSnapshot");
+      description.addProperty("validationType");
+      description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
+      description.addSelfLink();
+      return description;
+    } else if (rep instanceof DefaultRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("url");
+      description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
+      description.addLink("ref", ".?v=" + RestConstants.REPRESENTATION_REF);
+      description.addSelfLink();
+      return description;
+    } else if (rep instanceof RefRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("url");
+      description.addSelfLink();
+      return description;
     }
+    return null;
+  }
 
-    @Override
-    public Model getGETModel(Representation rep) {
-        ModelImpl model = (ModelImpl) super.getGETModel(rep);
-        if (rep instanceof FullRepresentation) {
-            model.property("uuid", new StringProperty().example("uuid"));
-            model.property("url", new StringProperty(StringProperty.Format.URL));
-            model.property("subscribedToSnapshot", new BooleanProperty());
-            model.property("validationType", new EnumProperty(ValidationType.class));
-            return model;
-        } else if (rep instanceof DefaultRepresentation) {
-            model.property("uuid", new StringProperty().example("uuid"));
-            model.property("url", new StringProperty(StringProperty.Format.URL));
-            return model;
-        } else if (rep instanceof RefRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            model.property("uuid", new StringProperty().example("uuid"));
-            model.property("url", new StringProperty(StringProperty.Format.URL));
-            return model;
-        }
-        return null;
+  @Override
+  public Model getGETModel(Representation rep) {
+    ModelImpl model = (ModelImpl) super.getGETModel(rep);
+    if (rep instanceof FullRepresentation) {
+      model.property("uuid", new StringProperty().example("uuid"));
+      model.property("url", new StringProperty(StringProperty.Format.URL));
+      model.property("subscribedToSnapshot", new BooleanProperty());
+      model.property("validationType", new EnumProperty(ValidationType.class));
+      return model;
+    } else if (rep instanceof DefaultRepresentation) {
+      model.property("uuid", new StringProperty().example("uuid"));
+      model.property("url", new StringProperty(StringProperty.Format.URL));
+      return model;
+    } else if (rep instanceof RefRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      model.property("uuid", new StringProperty().example("uuid"));
+      model.property("url", new StringProperty(StringProperty.Format.URL));
+      return model;
     }
+    return null;
+  }
 
-    @Override
-    protected PageableResult doGetAll(RequestContext context) throws ResponseException {
-        requireManageConcepts();
-        return new NeedsPaging<Subscription>(Collections.singletonList(getImportService().getSubscription()), context);
-    }
+  @Override
+  protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+    requireManageConcepts();
+    return new NeedsPaging<Subscription>(
+        Collections.singletonList(getImportService().getSubscription()), context);
+  }
 
-    @PropertyGetter("subscribedToSnapshot")
-    public boolean getSubscribedToSnapshot(Subscription subscription){
-        return subscription.isSubscribedToSnapshot();
-    }
+  @PropertyGetter("subscribedToSnapshot")
+  public boolean getSubscribedToSnapshot(Subscription subscription) {
+    return subscription.isSubscribedToSnapshot();
+  }
 
-    @PropertySetter("subscribedToSnapshot")
-    public void setSubscribedToSnapshot(Subscription subscription, Object value){
-        subscription.setSubscribedToSnapshot(Boolean.valueOf(value.toString()));
-    }
+  @PropertySetter("subscribedToSnapshot")
+  public void setSubscribedToSnapshot(Subscription subscription, Object value) {
+    subscription.setSubscribedToSnapshot(Boolean.valueOf(value.toString()));
+  }
 
-    private UpdateScheduler getUpdateScheduler() {
-        return Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
-    }
+  private UpdateScheduler getUpdateScheduler() {
+    return Context.getRegisteredComponent("openconceptlab.updateScheduler", UpdateScheduler.class);
+  }
 
-    private static ImportService getImportService() {
-        return Context.getService(ImportService.class);
-    }
+  private static ImportService getImportService() {
+    return Context.getService(ImportService.class);
+  }
 
-    private void validateSubscriptionUrl(String url) {
-        if (url == null || url.trim().isEmpty()) {
-            throw new IllegalRequestException("Subscription URL is required");
-        }
-        try {
-            URI uri = new URI(url.trim());
-            String scheme = uri.getScheme();
-            if (scheme == null || uri.getHost() == null ||
-                    !("http".equals(scheme.toLowerCase(Locale.ROOT)) ||
-                            "https".equals(scheme.toLowerCase(Locale.ROOT)))) {
-                throw new IllegalRequestException("Subscription URL must be a valid HTTP(S) URL");
-            }
-        } catch (URISyntaxException e) {
-            throw new IllegalRequestException("Subscription URL must be a valid HTTP(S) URL");
-        }
+  private void validateSubscriptionUrl(String url) {
+    if (url == null || url.trim().isEmpty()) {
+      throw new IllegalRequestException("Subscription URL is required");
     }
+    try {
+      URI uri = new URI(url.trim());
+      String scheme = uri.getScheme();
+      if (scheme == null
+          || uri.getHost() == null
+          || !("http".equals(scheme.toLowerCase(Locale.ROOT))
+              || "https".equals(scheme.toLowerCase(Locale.ROOT)))) {
+        throw new IllegalRequestException("Subscription URL must be a valid HTTP(S) URL");
+      }
+    } catch (URISyntaxException e) {
+      throw new IllegalRequestException("Subscription URL must be a valid HTTP(S) URL");
+    }
+  }
 }

@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.api.db.hibernate;
 
@@ -26,52 +26,53 @@ import org.springframework.stereotype.Repository;
 @Repository("datatypeDAO")
 public class HibernateDatatypeDAO implements DatatypeDAO {
 
-	private final SessionFactory sessionFactory;
+  private final SessionFactory sessionFactory;
 
-	@Autowired
-	public HibernateDatatypeDAO(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
-	}
+  @Autowired
+  public HibernateDatatypeDAO(SessionFactory sessionFactory) {
+    this.sessionFactory = sessionFactory;
+  }
 
-	/**
-	 * get current Hibernate session
-	 *
-	 * @return current Hibernate session
-	 */
-	private Session session() {
-		return sessionFactory.getCurrentSession();
-	}
+  /**
+   * get current Hibernate session
+   *
+   * @return current Hibernate session
+   */
+  private Session session() {
+    return sessionFactory.getCurrentSession();
+  }
 
-	/**
-	 * @see org.openmrs.api.db.DatatypeDAO#getClobDatatypeStorage(java.lang.Integer)
-	 */
-	@Override
-	public ClobDatatypeStorage getClobDatatypeStorage(Integer id) {
-		return session().get(ClobDatatypeStorage.class, id);
-	}
+  /**
+   * @see org.openmrs.api.db.DatatypeDAO#getClobDatatypeStorage(java.lang.Integer)
+   */
+  @Override
+  public ClobDatatypeStorage getClobDatatypeStorage(Integer id) {
+    return session().get(ClobDatatypeStorage.class, id);
+  }
 
-	/**
-	 * @see org.openmrs.api.db.DatatypeDAO#getClobDatatypeStorageByUuid(java.lang.String)
-	 */
-	@Override
-	public ClobDatatypeStorage getClobDatatypeStorageByUuid(String uuid) {
-		return HibernateUtil.getUniqueEntityByUUID(sessionFactory, ClobDatatypeStorage.class, uuid);
-	}
+  /**
+   * @see org.openmrs.api.db.DatatypeDAO#getClobDatatypeStorageByUuid(java.lang.String)
+   */
+  @Override
+  public ClobDatatypeStorage getClobDatatypeStorageByUuid(String uuid) {
+    return HibernateUtil.getUniqueEntityByUUID(sessionFactory, ClobDatatypeStorage.class, uuid);
+  }
 
-	/**
-	 * @see org.openmrs.api.db.DatatypeDAO#saveClobDatatypeStorage(org.openmrs.api.db.ClobDatatypeStorage)
-	 */
-	@Override
-	public ClobDatatypeStorage saveClobDatatypeStorage(ClobDatatypeStorage storage) {
-		return HibernateUtil.saveOrUpdate(session(), storage);
-	}
+  /**
+   * @see
+   *     org.openmrs.api.db.DatatypeDAO#saveClobDatatypeStorage(org.openmrs.api.db.ClobDatatypeStorage)
+   */
+  @Override
+  public ClobDatatypeStorage saveClobDatatypeStorage(ClobDatatypeStorage storage) {
+    return HibernateUtil.saveOrUpdate(session(), storage);
+  }
 
-	/**
-	 * @see org.openmrs.api.db.DatatypeDAO#deleteClobDatatypeStorage(org.openmrs.api.db.ClobDatatypeStorage)
-	 */
-	@Override
-	public void deleteClobDatatypeStorage(ClobDatatypeStorage storage) {
-		session().remove(storage);
-	}
-
+  /**
+   * @see
+   *     org.openmrs.api.db.DatatypeDAO#deleteClobDatatypeStorage(org.openmrs.api.db.ClobDatatypeStorage)
+   */
+  @Override
+  public void deleteClobDatatypeStorage(ClobDatatypeStorage storage) {
+    session().remove(storage);
+  }
 }

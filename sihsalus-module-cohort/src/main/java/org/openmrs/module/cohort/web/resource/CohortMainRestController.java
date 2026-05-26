@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/rest/" + RestConstants.VERSION_1 + CohortMainRestController.COHORT_NAMESPACE)
 public class CohortMainRestController extends MainResourceController {
-	
-	public static final String COHORT_NAMESPACE = "/cohortm";
-	
-	@Override
-	public String getNamespace() {
-		return RestConstants.VERSION_1 + COHORT_NAMESPACE;
-	}
+
+  public static final String COHORT_NAMESPACE = "/cohortm";
+
+  @Override
+  public String getNamespace() {
+    return RestConstants.VERSION_1 + COHORT_NAMESPACE;
+  }
 }

@@ -14,6 +14,5 @@ import org.openmrs.module.fhir2.api.dao.FhirEpisodeOfCareDao;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirEpisodeOfCareDaoImpl extends BaseFhirDao<PatientProgram> implements FhirEpisodeOfCareDao {
-	
-}
+public class FhirEpisodeOfCareDaoImpl extends BaseFhirDao<PatientProgram>
+    implements FhirEpisodeOfCareDao {}

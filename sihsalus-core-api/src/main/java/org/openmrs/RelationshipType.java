@@ -1,14 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.AttributeOverride;
@@ -18,10 +19,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import org.hibernate.envers.Audited;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Defines a type of relationship between two people in the database. <br>
@@ -50,153 +48,150 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @AttributeOverride(name = "name", column = @Column(name = "name", nullable = true, length = 255))
 public class RelationshipType extends BaseChangeableOpenmrsMetadata {
 
-	public static final long serialVersionUID = 4223L;
+  public static final long serialVersionUID = 4223L;
 
-	// Fields
-	@Id
-	@Column(name = "relationship_type_id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer relationshipTypeId;
+  // Fields
+  @Id
+  @Column(name = "relationship_type_id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer relationshipTypeId;
 
-	@Column(name = "a_is_to_b", nullable = false, length = 50)
-	@Access(AccessType.FIELD)
-	private String aIsToB;
+  @Column(name = "a_is_to_b", nullable = false, length = 50)
+  @Access(AccessType.FIELD)
+  private String aIsToB;
 
-	@Column(name = "b_is_to_a", nullable = false, length = 50)
-	@Access(AccessType.FIELD)
-	private String bIsToA;
+  @Column(name = "b_is_to_a", nullable = false, length = 50)
+  @Access(AccessType.FIELD)
+  private String bIsToA;
 
-	@Column(nullable = false)
-	private Integer weight = 0;
+  @Column(nullable = false)
+  private Integer weight = 0;
 
-	@Column(nullable = false)
-	private Boolean preferred = false;
+  @Column(nullable = false)
+  private Boolean preferred = false;
 
-	// Constructors
+  // Constructors
 
-	/** default constructor */
-	public RelationshipType() {
-	}
+  /** default constructor */
+  public RelationshipType() {}
 
-	/** constructor with id */
-	public RelationshipType(Integer relationshipTypeId) {
-		this.relationshipTypeId = relationshipTypeId;
-	}
+  /** constructor with id */
+  public RelationshipType(Integer relationshipTypeId) {
+    this.relationshipTypeId = relationshipTypeId;
+  }
 
-	// Property accessors
+  // Property accessors
 
-	/**
-	 * @return Returns the relationshipTypeId.
-	 */
-	public Integer getRelationshipTypeId() {
-		return relationshipTypeId;
-	}
+  /**
+   * @return Returns the relationshipTypeId.
+   */
+  public Integer getRelationshipTypeId() {
+    return relationshipTypeId;
+  }
 
-	/**
-	 * @param relationshipTypeId The relationshipTypeId to set.
-	 */
-	public void setRelationshipTypeId(Integer relationshipTypeId) {
-		this.relationshipTypeId = relationshipTypeId;
-	}
+  /**
+   * @param relationshipTypeId The relationshipTypeId to set.
+   */
+  public void setRelationshipTypeId(Integer relationshipTypeId) {
+    this.relationshipTypeId = relationshipTypeId;
+  }
 
-	/**
-	 * @return the weight
-	 */
-	public Integer getWeight() {
-		return weight;
-	}
+  /**
+   * @return the weight
+   */
+  public Integer getWeight() {
+    return weight;
+  }
 
-	/**
-	 * @param weight the weight to set
-	 */
-	public void setWeight(Integer weight) {
-		this.weight = weight;
-	}
+  /**
+   * @param weight the weight to set
+   */
+  public void setWeight(Integer weight) {
+    this.weight = weight;
+  }
 
-	/**
-	 * The java bean specifications says that if an attribute has the second letter capitalized (as the
-	 * "I" is), the initial "a" is not to be capitalized. Both Spring and Hibernate use this "getter"
-	 * definition
-	 *
-	 * @return the aIsToB
-	 */
-	public String getaIsToB() {
-		return aIsToB;
-	}
+  /**
+   * The java bean specifications says that if an attribute has the second letter capitalized (as
+   * the "I" is), the initial "a" is not to be capitalized. Both Spring and Hibernate use this
+   * "getter" definition
+   *
+   * @return the aIsToB
+   */
+  public String getaIsToB() {
+    return aIsToB;
+  }
 
-	/**
-	 * @param aisToB the aIsToB to set
-	 */
-	public void setaIsToB(String aisToB) {
-		aIsToB = aisToB;
-	}
+  /**
+   * @param aisToB the aIsToB to set
+   */
+  public void setaIsToB(String aisToB) {
+    aIsToB = aisToB;
+  }
 
-	/**
-	 * @return the bIsToA
-	 */
-	public String getbIsToA() {
-		return bIsToA;
-	}
+  /**
+   * @return the bIsToA
+   */
+  public String getbIsToA() {
+    return bIsToA;
+  }
 
-	/**
-	 * "Preferred" relationship types are those that should be shown as default types when
-	 * adding/editing a person's relationships
-	 *
-	 * @return the preferred status
-	 * @deprecated as of 2.0, use {@link #getPreferred()}
-	 */
-	@Deprecated
-	@JsonIgnore
-	public Boolean isPreferred() {
-		return getPreferred();
-	}
+  /**
+   * "Preferred" relationship types are those that should be shown as default types when
+   * adding/editing a person's relationships
+   *
+   * @return the preferred status
+   * @deprecated as of 2.0, use {@link #getPreferred()}
+   */
+  @Deprecated
+  @JsonIgnore
+  public Boolean isPreferred() {
+    return getPreferred();
+  }
 
-	public Boolean getPreferred() {
-		return preferred;
-	}
+  public Boolean getPreferred() {
+    return preferred;
+  }
 
-	/**
-	 * "Preferred" relationship types are those that should be shown as default types when
-	 * adding/editing a person's relationships
-	 *
-	 * @param preferred sets the preferred status of this relationship type
-	 */
-	public void setPreferred(Boolean preferred) {
-		this.preferred = preferred;
-	}
+  /**
+   * "Preferred" relationship types are those that should be shown as default types when
+   * adding/editing a person's relationships
+   *
+   * @param preferred sets the preferred status of this relationship type
+   */
+  public void setPreferred(Boolean preferred) {
+    this.preferred = preferred;
+  }
 
-	/**
-	 * @param bisToA the bIsToA to set
-	 */
-	public void setbIsToA(String bisToA) {
-		bIsToA = bisToA;
-	}
+  /**
+   * @param bisToA the bIsToA to set
+   */
+  public void setbIsToA(String bisToA) {
+    bIsToA = bisToA;
+  }
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return getaIsToB() + "/" + getbIsToA();
-	}
+  /**
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return getaIsToB() + "/" + getbIsToA();
+  }
 
-	/**
-	 * @since 1.5
-	 * @see org.openmrs.OpenmrsObject#getId()
-	 */
-	@Override
-	public Integer getId() {
-		return getRelationshipTypeId();
-	}
+  /**
+   * @since 1.5
+   * @see org.openmrs.OpenmrsObject#getId()
+   */
+  @Override
+  public Integer getId() {
+    return getRelationshipTypeId();
+  }
 
-	/**
-	 * @since 1.5
-	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
-	 */
-	@Override
-	public void setId(Integer id) {
-		setRelationshipTypeId(id);
-
-	}
-
+  /**
+   * @since 1.5
+   * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+   */
+  @Override
+  public void setId(Integer id) {
+    setRelationshipTypeId(id);
+  }
 }

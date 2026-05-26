@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 
 public interface FhirDiagnosticReportService extends FhirService<DiagnosticReport> {
-	
-	IBundleProvider searchForDiagnosticReports(DiagnosticReportSearchParams diagnosticReportSearchParams);
+
+  IBundleProvider searchForDiagnosticReports(
+      DiagnosticReportSearchParams diagnosticReportSearchParams);
 }

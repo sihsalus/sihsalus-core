@@ -1,14 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.query.person.evaluator;
 
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
@@ -25,53 +26,49 @@ import org.openmrs.module.reporting.query.person.definition.PersonQuery;
 import org.openmrs.module.reporting.query.person.definition.SqlPersonQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-
-/**
- * The logic that evaluates a {@link SqlPersonQuery} and produces an {@link Query}
- */
-@Handler(supports=SqlPersonQuery.class)
+/** The logic that evaluates a {@link SqlPersonQuery} and produces an {@link Query} */
+@Handler(supports = SqlPersonQuery.class)
 public class SqlPersonQueryEvaluator implements PersonQueryEvaluator {
-	
-	protected Log log = LogFactory.getLog(this.getClass());
-	
-	@Autowired
-	private EvaluationService evaluationService;
-	
-	/**
-	 * @see PersonQueryEvaluator#evaluate(PersonQuery, EvaluationContext)
-	 * @should evaluate a SQL query into an PersonQuery
-	 * @should filter results given a base Person Query Result in an EvaluationContext
-	 * @should filter results given a base cohort in an EvaluationContext
-	 */
-	public PersonQueryResult evaluate(PersonQuery definition, EvaluationContext context) throws EvaluationException {
-		
-		context = ObjectUtil.nvl(context, new EvaluationContext());
-		SqlPersonQuery sqlPersonQuery = (SqlPersonQuery) definition;
-		PersonQueryResult queryResult = new PersonQueryResult(sqlPersonQuery, context);
 
-		PersonIdSet personIds = new PersonIdSet(PersonDataUtil.getPersonIdsForContext(context, false));
+  protected Log log = LogFactory.getLog(this.getClass());
 
-		if (personIds.getSize() == 0) {
-			return queryResult;
-		}
+  @Autowired private EvaluationService evaluationService;
 
-		SqlQueryBuilder qb = new SqlQueryBuilder();
-		qb.append(sqlPersonQuery.getQuery());
-		qb.setParameters(context.getParameterValues());
+  /**
+   * @see PersonQueryEvaluator#evaluate(PersonQuery, EvaluationContext)
+   * @should evaluate a SQL query into an PersonQuery
+   * @should filter results given a base Person Query Result in an EvaluationContext
+   * @should filter results given a base cohort in an EvaluationContext
+   */
+  public PersonQueryResult evaluate(PersonQuery definition, EvaluationContext context)
+      throws EvaluationException {
 
-		if (sqlPersonQuery.getQuery().contains(":personIds")) {
-			qb.addParameter("personIds", personIds);
-		}
+    context = ObjectUtil.nvl(context, new EvaluationContext());
+    SqlPersonQuery sqlPersonQuery = (SqlPersonQuery) definition;
+    PersonQueryResult queryResult = new PersonQueryResult(sqlPersonQuery, context);
 
-		if (sqlPersonQuery.getQuery().contains(":patientIds")) {
-			qb.addParameter("patientIds", personIds);
-		}
+    PersonIdSet personIds = new PersonIdSet(PersonDataUtil.getPersonIdsForContext(context, false));
 
-		List<Integer> l = evaluationService.evaluateToList(qb, Integer.class, context);
-		l.retainAll(personIds.getMemberIds());
-		queryResult.addAll(l);
+    if (personIds.getSize() == 0) {
+      return queryResult;
+    }
 
-		return queryResult;
-	}
+    SqlQueryBuilder qb = new SqlQueryBuilder();
+    qb.append(sqlPersonQuery.getQuery());
+    qb.setParameters(context.getParameterValues());
+
+    if (sqlPersonQuery.getQuery().contains(":personIds")) {
+      qb.addParameter("personIds", personIds);
+    }
+
+    if (sqlPersonQuery.getQuery().contains(":patientIds")) {
+      qb.addParameter("patientIds", personIds);
+    }
+
+    List<Integer> l = evaluationService.evaluateToList(qb, Integer.class, context);
+    l.retainAll(personIds.getMemberIds());
+    queryResult.addAll(l);
+
+    return queryResult;
+  }
 }

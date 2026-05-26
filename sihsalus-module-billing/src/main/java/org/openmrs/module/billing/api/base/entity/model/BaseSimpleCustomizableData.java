@@ -11,12 +11,13 @@ package org.openmrs.module.billing.api.base.entity.model;
 
 // @formatter:off
 /**
- * Base class for {@link org.openmrs.OpenmrsMetadata} models that can be customized with simple attributes.
+ * Base class for {@link org.openmrs.OpenmrsMetadata} models that can be customized with simple
+ * attributes.
+ *
  * @param <TAttribute> The model attribute class.
  */
 public abstract class BaseSimpleCustomizableData<TAttribute extends ISimpleAttribute<?, ?>>
-		extends BaseCustomizableData<TAttribute>
-		implements ISimpleCustomizable<TAttribute> {
-// @formatter:on
-	private static final long serialVersionUID = 0L;
+    extends BaseCustomizableData<TAttribute> implements ISimpleCustomizable<TAttribute> {
+  // @formatter:on
+  private static final long serialVersionUID = 0L;
 }

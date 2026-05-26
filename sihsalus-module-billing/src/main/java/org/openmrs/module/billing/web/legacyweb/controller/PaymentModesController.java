@@ -14,15 +14,13 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-/**
- * The controller that manages the Payment Modes page.
- */
+/** The controller that manages the Payment Modes page. */
 @Controller
 @RequestMapping("/module/billing/paymentModes")
 public class PaymentModesController {
-	
-	@RequestMapping(method = RequestMethod.GET)
-	public void paymentModes(ModelMap model) {
-		model.addAttribute("modelBase", "openhmis.cashier.paymentMode");
-	}
+
+  @RequestMapping(method = RequestMethod.GET)
+  public void paymentModes(ModelMap model) {
+    model.addAttribute("modelBase", "openhmis.cashier.paymentMode");
+  }
 }

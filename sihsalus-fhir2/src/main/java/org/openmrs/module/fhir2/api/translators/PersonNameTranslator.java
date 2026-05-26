@@ -10,37 +10,38 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.HumanName;
 import org.openmrs.PersonName;
 
-public interface PersonNameTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.PersonName, org.hl7.fhir.r4.model.HumanName> {
-	
-	/**
-	 * Maps a {@link PersonName} to a {@link HumanName}
-	 * 
-	 * @param name the name to translate
-	 * @return the corresponding FHIR name
-	 */
-	@Override
-	HumanName toFhirResource(@Nonnull PersonName name);
-	
-	/**
-	 * Maps a {@link HumanName} to a {@link PersonName}
-	 * 
-	 * @param name the name to translate
-	 * @return the corresponding OpenMRS name
-	 */
-	@Override
-	PersonName toOpenmrsType(@Nonnull HumanName name);
-	
-	/**
-	 * Maps a {@link HumanName} to an existing {@link PersonName}
-	 * 
-	 * @param personName the person name to update
-	 * @param name the name to translate
-	 * @return the updated person name
-	 */
-	@Override
-	PersonName toOpenmrsType(@Nonnull PersonName personName, @Nonnull HumanName name);
+public interface PersonNameTranslator
+    extends OpenmrsFhirUpdatableTranslator<
+        org.openmrs.PersonName, org.hl7.fhir.r4.model.HumanName> {
+
+  /**
+   * Maps a {@link PersonName} to a {@link HumanName}
+   *
+   * @param name the name to translate
+   * @return the corresponding FHIR name
+   */
+  @Override
+  HumanName toFhirResource(@Nonnull PersonName name);
+
+  /**
+   * Maps a {@link HumanName} to a {@link PersonName}
+   *
+   * @param name the name to translate
+   * @return the corresponding OpenMRS name
+   */
+  @Override
+  PersonName toOpenmrsType(@Nonnull HumanName name);
+
+  /**
+   * Maps a {@link HumanName} to an existing {@link PersonName}
+   *
+   * @param personName the person name to update
+   * @param name the name to translate
+   * @return the updated person name
+   */
+  @Override
+  PersonName toOpenmrsType(@Nonnull PersonName personName, @Nonnull HumanName name);
 }

@@ -75,6 +75,24 @@ docker compose up -d backend
 mvn --batch-mode --no-transfer-progress verify
 ```
 
+Explicit quality checks (without wrappers):
+
+```bash
+mvn spotless:check
+mvn spotbugs:check
+mvn -DskipITs -DskipTests compile
+mvn -DskipITs test
+```
+
+Module-scoped checks:
+
+```bash
+mvn -pl sihsalus-core-api -am spotless:check spotbugs:check -DskipITs -DskipTests compile
+mvn -pl sihsalus-core-api -am -DskipITs test
+```
+
+This branch does not include `./mvnw`, so use `mvn` directly.
+
 The default boot configuration targets PostgreSQL:
 
 ```text

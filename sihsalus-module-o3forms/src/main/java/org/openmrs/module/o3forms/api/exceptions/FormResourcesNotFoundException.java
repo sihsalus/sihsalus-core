@@ -11,6 +11,4 @@ package org.openmrs.module.o3forms.api.exceptions;
 
 import org.openmrs.api.APIException;
 
-public class FormResourcesNotFoundException extends APIException {
-	
-}
+public class FormResourcesNotFoundException extends APIException {}

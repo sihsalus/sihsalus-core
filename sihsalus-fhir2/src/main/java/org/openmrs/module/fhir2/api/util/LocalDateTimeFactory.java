@@ -10,14 +10,12 @@
 package org.openmrs.module.fhir2.api.util;
 
 import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Component;
 
 @Component
 public class LocalDateTimeFactory {
-	
-	public LocalDateTime now() {
-		return LocalDateTime.now();
-	}
-	
+
+  public LocalDateTime now() {
+    return LocalDateTime.now();
+  }
 }

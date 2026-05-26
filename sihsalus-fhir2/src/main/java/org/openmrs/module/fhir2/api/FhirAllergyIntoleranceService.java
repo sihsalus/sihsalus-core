@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 
 public interface FhirAllergyIntoleranceService extends FhirService<AllergyIntolerance> {
-	
-	IBundleProvider searchForAllergies(FhirAllergyIntoleranceSearchParams allergyIntoleranceSearchParams);
+
+  IBundleProvider searchForAllergies(
+      FhirAllergyIntoleranceSearchParams allergyIntoleranceSearchParams);
 }

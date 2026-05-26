@@ -6,210 +6,211 @@ import java.util.List;
 import java.util.Map;
 
 public class AppointmentDefaultResponse {
-	private String uuid;
-	private String appointmentNumber;
-	private Date dateCreated;
-	private Date dateAppointmentScheduled;
-	private Map patient;
-	private AppointmentServiceDefaultResponse service;
-	private Map serviceType;
-	private Map provider;
-	private Map location;
-	private Date startDateTime;
-	private Date endDateTime;
-	private String appointmentKind;
-	private String status;
-	private String comments;
-	private Map additionalInfo;
-	private Boolean teleconsultation;
-	private List<AppointmentProviderDetail> providers;
-	private Boolean isRecurring;
-	private Boolean voided;
-	private HashMap extensions;
-	private String teleconsultationLink;
-	private String priority;
-	private List<AppointmentReasonResponse> reasons;
+  private String uuid;
+  private String appointmentNumber;
+  private Date dateCreated;
+  private Date dateAppointmentScheduled;
+  private Map patient;
+  private AppointmentServiceDefaultResponse service;
+  private Map serviceType;
+  private Map provider;
+  private Map location;
+  private Date startDateTime;
+  private Date endDateTime;
+  private String appointmentKind;
+  private String status;
+  private String comments;
+  private Map additionalInfo;
+  private Boolean teleconsultation;
+  private List<AppointmentProviderDetail> providers;
+  private Boolean isRecurring;
+  private Boolean voided;
+  private HashMap extensions;
+  private String teleconsultationLink;
+  private String priority;
+  private List<AppointmentReasonResponse> reasons;
 
-	public String getUuid() {
-		return uuid;
-	}
+  public String getUuid() {
+    return uuid;
+  }
 
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
-	public String getAppointmentNumber() {
-		return appointmentNumber;
-	}
+  public String getAppointmentNumber() {
+    return appointmentNumber;
+  }
 
-	public void setAppointmentNumber(String appointmentNumber) {
-		this.appointmentNumber = appointmentNumber;
-	}
+  public void setAppointmentNumber(String appointmentNumber) {
+    this.appointmentNumber = appointmentNumber;
+  }
 
-	public Map getPatient() {
-		return patient;
-	}
+  public Map getPatient() {
+    return patient;
+  }
 
-	public void setPatient(Map patient) {
-		this.patient = patient;
-	}
+  public void setPatient(Map patient) {
+    this.patient = patient;
+  }
 
-	public AppointmentServiceDefaultResponse getService() {
-		return service;
-	}
+  public AppointmentServiceDefaultResponse getService() {
+    return service;
+  }
 
-	public void setService(AppointmentServiceDefaultResponse service) {
-		this.service = service;
-	}
+  public void setService(AppointmentServiceDefaultResponse service) {
+    this.service = service;
+  }
 
-	public Map getServiceType() {
-		return serviceType;
-	}
-	
-	public void setServiceType(Map serviceType) {
-		this.serviceType = serviceType;
-	}
+  public Map getServiceType() {
+    return serviceType;
+  }
 
-	public Map getProvider() {
-		return provider;
-	}
+  public void setServiceType(Map serviceType) {
+    this.serviceType = serviceType;
+  }
 
-	public void setProvider(Map provider) {
-		this.provider = provider;
-	}
+  public Map getProvider() {
+    return provider;
+  }
 
-	public Map getLocation() {
-		return location;
-	}
+  public void setProvider(Map provider) {
+    this.provider = provider;
+  }
 
-	public void setLocation(Map location) {
-		this.location = location;
-	}
+  public Map getLocation() {
+    return location;
+  }
 
-	public Date getStartDateTime() {
-		return startDateTime;
-	}
+  public void setLocation(Map location) {
+    this.location = location;
+  }
 
-	public void setStartDateTime(Date startDateTime) {
-		this.startDateTime = startDateTime;
-	}
-	
-	public Date getEndDateTime() {
-		return endDateTime;
-	}
-	
-	public void setEndDateTime(Date endDateTime) {
-		this.endDateTime = endDateTime;
-	}
-	
-	public String getAppointmentKind() {
-		return appointmentKind;
-	}
-	
-	public void setAppointmentKind(String appointmentKind) {
-		this.appointmentKind = appointmentKind;
-	}
+  public Date getStartDateTime() {
+    return startDateTime;
+  }
 
-	public Boolean isTeleconsultation() {return teleconsultation; }
+  public void setStartDateTime(Date startDateTime) {
+    this.startDateTime = startDateTime;
+  }
 
-	public void setTeleconsultation(Boolean teleconsultation)
-	{
-		this.teleconsultation = teleconsultation;
-	}
-	
-	public String getStatus() {
-		return status;
-	}
-	
-	public void setStatus(String status) {
-		this.status = status;
-	}
-	
-	public String getComments() {
-		return comments;
-	}
-	
-	public void setComments(String comments) {
-		this.comments = comments;
-	}
+  public Date getEndDateTime() {
+    return endDateTime;
+  }
 
-	public Map getAdditionalInfo() {
-		return additionalInfo;
-	}
+  public void setEndDateTime(Date endDateTime) {
+    this.endDateTime = endDateTime;
+  }
 
-	public void setAdditionalInfo(Map additionalInfo) {
-		this.additionalInfo = additionalInfo;
-	}
+  public String getAppointmentKind() {
+    return appointmentKind;
+  }
 
-	public void setProviders(List<AppointmentProviderDetail> providers) {
-		this.providers = providers;
-	}
+  public void setAppointmentKind(String appointmentKind) {
+    this.appointmentKind = appointmentKind;
+  }
 
-	public List<AppointmentProviderDetail> getProviders() {
-		return providers;
-	}
+  public Boolean isTeleconsultation() {
+    return teleconsultation;
+  }
 
-    public Boolean getRecurring() {
-        return isRecurring;
-    }
+  public void setTeleconsultation(Boolean teleconsultation) {
+    this.teleconsultation = teleconsultation;
+  }
 
-    public void setRecurring(Boolean recurring) {
-        isRecurring = recurring;
-    }
+  public String getStatus() {
+    return status;
+  }
 
-	public Boolean getVoided() {
-		return voided;
-	}
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
-	public void setVoided(Boolean voided) {
-		this.voided = voided;
-	}
+  public String getComments() {
+    return comments;
+  }
 
-	public void setExtensions(HashMap extensions) {
-		this.extensions = extensions;
-	}
+  public void setComments(String comments) {
+    this.comments = comments;
+  }
 
-	public HashMap getExtensions() {
-		return extensions;
-	}
+  public Map getAdditionalInfo() {
+    return additionalInfo;
+  }
 
-	public void setTeleconsultationLink(String teleconsultationLink) {
-		this.teleconsultationLink = teleconsultationLink;
-	}
+  public void setAdditionalInfo(Map additionalInfo) {
+    this.additionalInfo = additionalInfo;
+  }
 
-	public String getTeleconsultationLink() {
-		return teleconsultationLink;
-	}
+  public void setProviders(List<AppointmentProviderDetail> providers) {
+    this.providers = providers;
+  }
 
-	public void setPriority(String priority) {
-		this.priority = priority;
-	}
+  public List<AppointmentProviderDetail> getProviders() {
+    return providers;
+  }
 
-	public String getPriority() {
-		return priority;
-	}
+  public Boolean getRecurring() {
+    return isRecurring;
+  }
 
-	public Date getDateCreated() {
-		return dateCreated;
-	}
+  public void setRecurring(Boolean recurring) {
+    isRecurring = recurring;
+  }
 
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
+  public Boolean getVoided() {
+    return voided;
+  }
 
-	public Date getDateAppointmentScheduled() {
-		return dateAppointmentScheduled;
-	}
+  public void setVoided(Boolean voided) {
+    this.voided = voided;
+  }
 
-	public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
-		this.dateAppointmentScheduled = dateAppointmentScheduled;
-	}
+  public void setExtensions(HashMap extensions) {
+    this.extensions = extensions;
+  }
 
-	public List<AppointmentReasonResponse> getReasons() {
-		return reasons;
-	}
+  public HashMap getExtensions() {
+    return extensions;
+  }
 
-	public void setReasons(List<AppointmentReasonResponse> reasons) {
-		this.reasons = reasons;
-	}
+  public void setTeleconsultationLink(String teleconsultationLink) {
+    this.teleconsultationLink = teleconsultationLink;
+  }
+
+  public String getTeleconsultationLink() {
+    return teleconsultationLink;
+  }
+
+  public void setPriority(String priority) {
+    this.priority = priority;
+  }
+
+  public String getPriority() {
+    return priority;
+  }
+
+  public Date getDateCreated() {
+    return dateCreated;
+  }
+
+  public void setDateCreated(Date dateCreated) {
+    this.dateCreated = dateCreated;
+  }
+
+  public Date getDateAppointmentScheduled() {
+    return dateAppointmentScheduled;
+  }
+
+  public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
+    this.dateAppointmentScheduled = dateAppointmentScheduled;
+  }
+
+  public List<AppointmentReasonResponse> getReasons() {
+    return reasons;
+  }
+
+  public void setReasons(List<AppointmentReasonResponse> reasons) {
+    this.reasons = reasons;
+  }
 }

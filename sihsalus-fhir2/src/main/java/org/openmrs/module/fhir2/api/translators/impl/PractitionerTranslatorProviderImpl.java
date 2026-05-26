@@ -13,13 +13,11 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
@@ -47,134 +45,145 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PractitionerTranslatorProviderImpl implements PractitionerTranslator<Provider> {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PersonNameTranslator nameTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PersonAddressTranslator addressTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private GenderTranslator genderTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private BirthDateTranslator birthDateTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirPractitionerDao fhirPractitionerDao;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Override
-	public Provider toOpenmrsType(@Nonnull Provider existingProvider, @Nonnull Practitioner practitioner) {
-		if (existingProvider == null) {
-			return null;
-		}
-		
-		if (practitioner == null) {
-			return null;
-		}
-		
-		if (practitioner.hasId()) {
-			existingProvider.setUuid(practitioner.getIdElement().getIdPart());
-		}
-		
-		existingProvider.setIdentifier(practitioner.getIdentifierFirstRep().getValue());
-		
-		if (existingProvider.getPerson() == null) {
-			existingProvider.setPerson(new Person());
-		}
-		
-		if (practitioner.hasBirthDateElement()) {
-			birthDateTranslator.toOpenmrsType(existingProvider.getPerson(), practitioner.getBirthDateElement());
-		}
-		
-		for (HumanName name : practitioner.getName()) {
-			existingProvider.getPerson().addName(nameTranslator.toOpenmrsType(name));
-		}
-		
-		if (practitioner.hasGender()) {
-			existingProvider.getPerson().setGender(genderTranslator.toOpenmrsType(practitioner.getGender()));
-		}
-		
-		for (Address address : practitioner.getAddress()) {
-			existingProvider.getPerson().addAddress(addressTranslator.toOpenmrsType(address));
-		}
-		
-		practitioner.getTelecom().stream().map(
-		    contactPoint -> (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
-		        .filter(Objects::nonNull).forEach(existingProvider::addAttribute);
-		
-		return existingProvider;
-	}
-	
-	@Override
-	public Practitioner toFhirResource(@Nonnull Provider provider) {
-		if (provider == null) {
-			return null;
-		}
-		
-		Practitioner practitioner = new Practitioner();
-		Identifier identifier = new Identifier();
-		identifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER);
-		identifier.setValue(provider.getIdentifier());
-		practitioner.addIdentifier(identifier);
-		
-		practitioner.setId(provider.getUuid());
-		practitioner.setActive(!provider.getRetired());
-		practitioner.setTelecom(getProviderContactDetails(provider));
-		
-		if (provider.getPerson() != null) {
-			practitioner.setBirthDateElement(birthDateTranslator.toFhirResource(provider.getPerson()));
-			
-			practitioner.setGender(genderTranslator.toFhirResource(provider.getPerson().getGender()));
-			
-			for (PersonName name : provider.getPerson().getNames()) {
-				practitioner.addName(nameTranslator.toFhirResource(name));
-			}
-			
-			for (PersonAddress address : provider.getPerson().getAddresses()) {
-				practitioner.addAddress(addressTranslator.toFhirResource(address));
-			}
-		}
-		
-		practitioner.getMeta().setLastUpdated(getLastUpdated(provider));
-		practitioner.getMeta().setVersionId(getVersionId(provider));
-		
-		return practitioner;
-	}
-	
-	public List<ContactPoint> getProviderContactDetails(@Nonnull Provider provider) {
-		String providerContactPointAttributeType = globalPropertyService
-		        .getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE);
-		
-		if (providerContactPointAttributeType == null || providerContactPointAttributeType.isEmpty()) {
-			return Collections.emptyList();
-		}
-		
-		return fhirPractitionerDao
-		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider, providerContactPointAttributeType).stream()
-		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
-	}
-	
-	@Override
-	public Provider toOpenmrsType(@Nonnull Practitioner practitioner) {
-		if (practitioner == null) {
-			return null;
-		}
-		
-		return toOpenmrsType(new org.openmrs.Provider(), practitioner);
-	}
-	
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PersonNameTranslator nameTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PersonAddressTranslator addressTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private GenderTranslator genderTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private BirthDateTranslator birthDateTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirPractitionerDao fhirPractitionerDao;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirGlobalPropertyService globalPropertyService;
+
+  @Override
+  public Provider toOpenmrsType(
+      @Nonnull Provider existingProvider, @Nonnull Practitioner practitioner) {
+    if (existingProvider == null) {
+      return null;
+    }
+
+    if (practitioner == null) {
+      return null;
+    }
+
+    if (practitioner.hasId()) {
+      existingProvider.setUuid(practitioner.getIdElement().getIdPart());
+    }
+
+    existingProvider.setIdentifier(practitioner.getIdentifierFirstRep().getValue());
+
+    if (existingProvider.getPerson() == null) {
+      existingProvider.setPerson(new Person());
+    }
+
+    if (practitioner.hasBirthDateElement()) {
+      birthDateTranslator.toOpenmrsType(
+          existingProvider.getPerson(), practitioner.getBirthDateElement());
+    }
+
+    for (HumanName name : practitioner.getName()) {
+      existingProvider.getPerson().addName(nameTranslator.toOpenmrsType(name));
+    }
+
+    if (practitioner.hasGender()) {
+      existingProvider
+          .getPerson()
+          .setGender(genderTranslator.toOpenmrsType(practitioner.getGender()));
+    }
+
+    for (Address address : practitioner.getAddress()) {
+      existingProvider.getPerson().addAddress(addressTranslator.toOpenmrsType(address));
+    }
+
+    practitioner.getTelecom().stream()
+        .map(
+            contactPoint ->
+                (ProviderAttribute)
+                    telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
+        .filter(Objects::nonNull)
+        .forEach(existingProvider::addAttribute);
+
+    return existingProvider;
+  }
+
+  @Override
+  public Practitioner toFhirResource(@Nonnull Provider provider) {
+    if (provider == null) {
+      return null;
+    }
+
+    Practitioner practitioner = new Practitioner();
+    Identifier identifier = new Identifier();
+    identifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER);
+    identifier.setValue(provider.getIdentifier());
+    practitioner.addIdentifier(identifier);
+
+    practitioner.setId(provider.getUuid());
+    practitioner.setActive(!provider.getRetired());
+    practitioner.setTelecom(getProviderContactDetails(provider));
+
+    if (provider.getPerson() != null) {
+      practitioner.setBirthDateElement(birthDateTranslator.toFhirResource(provider.getPerson()));
+
+      practitioner.setGender(genderTranslator.toFhirResource(provider.getPerson().getGender()));
+
+      for (PersonName name : provider.getPerson().getNames()) {
+        practitioner.addName(nameTranslator.toFhirResource(name));
+      }
+
+      for (PersonAddress address : provider.getPerson().getAddresses()) {
+        practitioner.addAddress(addressTranslator.toFhirResource(address));
+      }
+    }
+
+    practitioner.getMeta().setLastUpdated(getLastUpdated(provider));
+    practitioner.getMeta().setVersionId(getVersionId(provider));
+
+    return practitioner;
+  }
+
+  public List<ContactPoint> getProviderContactDetails(@Nonnull Provider provider) {
+    String providerContactPointAttributeType =
+        globalPropertyService.getGlobalProperty(
+            FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE);
+
+    if (providerContactPointAttributeType == null || providerContactPointAttributeType.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    return fhirPractitionerDao
+        .getActiveAttributesByPractitionerAndAttributeTypeUuid(
+            provider, providerContactPointAttributeType)
+        .stream()
+        .map(telecomTranslator::toFhirResource)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public Provider toOpenmrsType(@Nonnull Practitioner practitioner) {
+    if (practitioner == null) {
+      return null;
+    }
+
+    return toOpenmrsType(new org.openmrs.Provider(), practitioner);
+  }
 }

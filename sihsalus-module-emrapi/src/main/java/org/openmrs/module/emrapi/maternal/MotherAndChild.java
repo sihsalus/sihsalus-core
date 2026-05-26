@@ -15,12 +15,12 @@ import org.openmrs.module.emrapi.adt.InpatientAdmission;
 
 @Data
 public class MotherAndChild {
-	
-	private Patient mother;
-	
-	private Patient child;
-	
-	private InpatientAdmission motherAdmission;
-	
-	private InpatientAdmission childAdmission;
+
+  private Patient mother;
+
+  private Patient child;
+
+  private InpatientAdmission motherAdmission;
+
+  private InpatientAdmission childAdmission;
 }

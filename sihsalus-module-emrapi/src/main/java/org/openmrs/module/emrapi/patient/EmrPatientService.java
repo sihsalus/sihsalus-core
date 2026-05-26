@@ -9,33 +9,30 @@
  */
 package org.openmrs.module.emrapi.patient;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Visit;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-/**
- * Public API for patient EMR-related functionality.
- */
+/** Public API for patient EMR-related functionality. */
 public interface EmrPatientService {
-	
-	List<Patient> findPatients(String query, Location checkedInAt, Integer start, Integer length);
-	
-	Patient findPatientByPrimaryId(String primaryId);
-	
-	/**
-	 * @return a List of Visits for the given patient, ordered by startDatetime descending, optionally
-	 *         paged
-	 */
-	List<Visit> getVisitsForPatient(Patient patient, Integer startIndex, Integer limit);
-	
-	/**
-	 * @return a Map from Visit to a List of observations contained in all Visit Note encounters within
-	 *         the given Visit
-	 */
-	Map<Visit, List<Obs>> getVisitNoteObservations(Collection<Visit> visits);
+
+  List<Patient> findPatients(String query, Location checkedInAt, Integer start, Integer length);
+
+  Patient findPatientByPrimaryId(String primaryId);
+
+  /**
+   * @return a List of Visits for the given patient, ordered by startDatetime descending, optionally
+   *     paged
+   */
+  List<Visit> getVisitsForPatient(Patient patient, Integer startIndex, Integer limit);
+
+  /**
+   * @return a Map from Visit to a List of observations contained in all Visit Note encounters
+   *     within the given Visit
+   */
+  Map<Visit, List<Obs>> getVisitNoteObservations(Collection<Visit> visits);
 }

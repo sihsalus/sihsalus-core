@@ -15,19 +15,20 @@ import java.util.stream.Collectors;
 
 /**
  * Generic interface for a translator between OpenMRS data and FHIR resources
- * 
+ *
  * @param <T> OpenMRS data type
  * @param <U> FHIR resource type
  */
-public interface OpenmrsFhirTranslator<T, U> extends ToFhirTranslator<T, U>, ToOpenmrsTranslator<T, U> {
-	
-	/**
-	 * Maps OpenMRS data elements to FHIR resources.
-	 *
-	 * @param data the collection of OpenMRS data elements to translate
-	 * @return the mapping of OpenMRS data element to corresponding FHIR resource
-	 */
-	default List<U> toFhirResources(Collection<T> data) {
-		return data.stream().distinct().map(this::toFhirResource).collect(Collectors.toList());
-	}
+public interface OpenmrsFhirTranslator<T, U>
+    extends ToFhirTranslator<T, U>, ToOpenmrsTranslator<T, U> {
+
+  /**
+   * Maps OpenMRS data elements to FHIR resources.
+   *
+   * @param data the collection of OpenMRS data elements to translate
+   * @return the mapping of OpenMRS data element to corresponding FHIR resource
+   */
+  default List<U> toFhirResources(Collection<T> data) {
+    return data.stream().distinct().map(this::toFhirResource).collect(Collectors.toList());
+  }
 }

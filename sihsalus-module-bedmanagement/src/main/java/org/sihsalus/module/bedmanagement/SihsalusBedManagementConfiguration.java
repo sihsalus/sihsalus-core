@@ -30,95 +30,100 @@ import org.springframework.context.annotation.FilterType;
 
 @Configuration
 @ComponentScan(
-        basePackageClasses = BedManagementActivator.class,
-        includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Handler.class))
+    basePackageClasses = BedManagementActivator.class,
+    includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Handler.class))
 public class SihsalusBedManagementConfiguration {
 
-    private static final String ADMIN_LIST_EXTENSION_POINT = "org.openmrs.admin.list";
+  private static final String ADMIN_LIST_EXTENSION_POINT = "org.openmrs.admin.list";
 
-    @Bean
-    HibernateMappingContributor bedManagementHibernateMappingContributor() {
-        return () -> List.of(
-                "Bed.hbm.xml",
-                "BedLocationMapping.hbm.xml",
-                "BedPatientAssignment.hbm.xml",
-                "BedTag.hbm.xml",
-                "BedTagMap.hbm.xml",
-                "BedType.hbm.xml");
+  @Bean
+  HibernateMappingContributor bedManagementHibernateMappingContributor() {
+    return () ->
+        List.of(
+            "Bed.hbm.xml",
+            "BedLocationMapping.hbm.xml",
+            "BedPatientAssignment.hbm.xml",
+            "BedTag.hbm.xml",
+            "BedTagMap.hbm.xml",
+            "BedType.hbm.xml");
+  }
+
+  @Bean
+  BedManagementDao bedManagementDao(SessionFactory sessionFactory) {
+    BedManagementDaoImpl dao = new BedManagementDaoImpl();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
+
+  @Bean
+  BedTagMapDao bedTagMapDao(SessionFactory sessionFactory) {
+    BedTagMapDaoImpl dao = new BedTagMapDaoImpl();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
+
+  @Bean
+  BedManagementService bedManagementService(
+      BedManagementDao bedManagementDao, LocationService locationService) {
+    BedManagementServiceImpl service = new BedManagementServiceImpl();
+    service.setDao(bedManagementDao);
+    service.setLocationService(locationService);
+    return service;
+  }
+
+  @Bean
+  BedTagMapService bedTagMapService(BedTagMapDao bedTagMapDao) {
+    BedTagMapServiceImpl service = new BedTagMapServiceImpl();
+    service.setDao(bedTagMapDao);
+    return service;
+  }
+
+  @Bean
+  SmartInitializingSingleton bedManagementServiceRegistrar(
+      ServiceContext serviceContext,
+      BedManagementService bedManagementService,
+      BedTagMapService bedTagMapService) {
+    return () -> {
+      serviceContext.setService(BedManagementService.class, bedManagementService);
+      serviceContext.setService(BedTagMapService.class, bedTagMapService);
+    };
+  }
+
+  @Bean
+  SmartInitializingSingleton bedManagementStaticInitializer() {
+    return () -> {
+      initializeBedManagementProperties();
+      registerAdminListExtension();
+    };
+  }
+
+  private static void initializeBedManagementProperties() {
+    boolean openedSession = !Context.isSessionOpen();
+    if (openedSession) {
+      Context.openSession();
     }
 
-    @Bean
-    BedManagementDao bedManagementDao(SessionFactory sessionFactory) {
-        BedManagementDaoImpl dao = new BedManagementDaoImpl();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
+    Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+    try {
+      BedManagementProperties.initalize();
+    } finally {
+      Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+      if (openedSession) {
+        Context.closeSession();
+      }
     }
+  }
 
-    @Bean
-    BedTagMapDao bedTagMapDao(SessionFactory sessionFactory) {
-        BedTagMapDaoImpl dao = new BedTagMapDaoImpl();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
+  private static void registerAdminListExtension() {
+    AdminList adminList = new AdminList();
+    adminList.setPointId(ADMIN_LIST_EXTENSION_POINT);
+    List<Extension> extensions =
+        ModuleFactory.getExtensionMap()
+            .computeIfAbsent(
+                ADMIN_LIST_EXTENSION_POINT + Extension.EXTENSION_ID_SEPARATOR + "html",
+                key -> new ArrayList<>());
+    if (extensions.stream().noneMatch(AdminList.class::isInstance)) {
+      extensions.add(adminList);
     }
-
-    @Bean
-    BedManagementService bedManagementService(BedManagementDao bedManagementDao, LocationService locationService) {
-        BedManagementServiceImpl service = new BedManagementServiceImpl();
-        service.setDao(bedManagementDao);
-        service.setLocationService(locationService);
-        return service;
-    }
-
-    @Bean
-    BedTagMapService bedTagMapService(BedTagMapDao bedTagMapDao) {
-        BedTagMapServiceImpl service = new BedTagMapServiceImpl();
-        service.setDao(bedTagMapDao);
-        return service;
-    }
-
-    @Bean
-    SmartInitializingSingleton bedManagementServiceRegistrar(
-            ServiceContext serviceContext,
-            BedManagementService bedManagementService,
-            BedTagMapService bedTagMapService) {
-        return () -> {
-            serviceContext.setService(BedManagementService.class, bedManagementService);
-            serviceContext.setService(BedTagMapService.class, bedTagMapService);
-        };
-    }
-
-    @Bean
-    SmartInitializingSingleton bedManagementStaticInitializer() {
-        return () -> {
-            initializeBedManagementProperties();
-            registerAdminListExtension();
-        };
-    }
-
-    private static void initializeBedManagementProperties() {
-        boolean openedSession = !Context.isSessionOpen();
-        if (openedSession) {
-            Context.openSession();
-        }
-
-        Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-        try {
-            BedManagementProperties.initalize();
-        } finally {
-            Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-            if (openedSession) {
-                Context.closeSession();
-            }
-        }
-    }
-
-    private static void registerAdminListExtension() {
-        AdminList adminList = new AdminList();
-        adminList.setPointId(ADMIN_LIST_EXTENSION_POINT);
-        List<Extension> extensions = ModuleFactory.getExtensionMap()
-                .computeIfAbsent(ADMIN_LIST_EXTENSION_POINT + Extension.EXTENSION_ID_SEPARATOR + "html", key -> new ArrayList<>());
-        if (extensions.stream().noneMatch(AdminList.class::isInstance)) {
-            extensions.add(adminList);
-        }
-    }
+  }
 }

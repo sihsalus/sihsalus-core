@@ -10,27 +10,26 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
 
 public interface ConceptTranslator extends OpenmrsFhirTranslator<Concept, CodeableConcept> {
-	
-	/**
-	 * Maps a {@link Concept} to a {@link CodeableConcept}
-	 * 
-	 * @param concept the concept to translate
-	 * @return the corresponding codeable concept
-	 */
-	@Override
-	CodeableConcept toFhirResource(@Nonnull Concept concept);
-	
-	/**
-	 * Maps a FHIR resource to an OpenMRS data element
-	 * 
-	 * @param concept the codeable concept to translate
-	 * @return the corresponding concept
-	 */
-	@Override
-	Concept toOpenmrsType(@Nonnull CodeableConcept concept);
+
+  /**
+   * Maps a {@link Concept} to a {@link CodeableConcept}
+   *
+   * @param concept the concept to translate
+   * @return the corresponding codeable concept
+   */
+  @Override
+  CodeableConcept toFhirResource(@Nonnull Concept concept);
+
+  /**
+   * Maps a FHIR resource to an OpenMRS data element
+   *
+   * @param concept the codeable concept to translate
+   * @return the corresponding concept
+   */
+  @Override
+  Concept toOpenmrsType(@Nonnull CodeableConcept concept);
 }

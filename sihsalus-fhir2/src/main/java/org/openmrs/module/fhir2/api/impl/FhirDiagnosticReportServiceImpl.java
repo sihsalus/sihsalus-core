@@ -25,27 +25,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticReport, FhirDiagnosticReport> implements FhirDiagnosticReportService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirDiagnosticReportDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private DiagnosticReportTranslator translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<DiagnosticReport> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<FhirDiagnosticReport, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator, SearchQueryInclude<DiagnosticReport>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForDiagnosticReports(DiagnosticReportSearchParams diagnosticReportSearchParams) {
-		return searchQuery.getQueryResults(diagnosticReportSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
-	}
+public class FhirDiagnosticReportServiceImpl
+    extends BaseFhirService<DiagnosticReport, FhirDiagnosticReport>
+    implements FhirDiagnosticReportService {
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private FhirDiagnosticReportDao dao;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private DiagnosticReportTranslator translator;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQueryInclude<DiagnosticReport> searchQueryInclude;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQuery<
+          FhirDiagnosticReport,
+          DiagnosticReport,
+          FhirDiagnosticReportDao,
+          DiagnosticReportTranslator,
+          SearchQueryInclude<DiagnosticReport>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForDiagnosticReports(
+      DiagnosticReportSearchParams diagnosticReportSearchParams) {
+    return searchQuery.getQueryResults(
+        diagnosticReportSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+  }
 }

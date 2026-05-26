@@ -14,36 +14,36 @@ package org.openmrs.module.emrapi.descriptor;
  * optional.
  */
 public class ConceptSetDescriptorField {
-	
-	private final String name;
-	
-	private final String conceptCode;
-	
-	private final boolean required;
-	
-	private ConceptSetDescriptorField(String name, String conceptCode, boolean required) {
-		this.name = name;
-		this.conceptCode = conceptCode;
-		this.required = required;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public String getConceptCode() {
-		return conceptCode;
-	}
-	
-	public boolean isRequired() {
-		return required;
-	}
-	
-	public static ConceptSetDescriptorField required(String fieldName, String conceptCode) {
-		return new ConceptSetDescriptorField(fieldName, conceptCode, true);
-	}
-	
-	public static ConceptSetDescriptorField optional(String fieldName, String conceptCode) {
-		return new ConceptSetDescriptorField(fieldName, conceptCode, false);
-	}
+
+  private final String name;
+
+  private final String conceptCode;
+
+  private final boolean required;
+
+  private ConceptSetDescriptorField(String name, String conceptCode, boolean required) {
+    this.name = name;
+    this.conceptCode = conceptCode;
+    this.required = required;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getConceptCode() {
+    return conceptCode;
+  }
+
+  public boolean isRequired() {
+    return required;
+  }
+
+  public static ConceptSetDescriptorField required(String fieldName, String conceptCode) {
+    return new ConceptSetDescriptorField(fieldName, conceptCode, true);
+  }
+
+  public static ConceptSetDescriptorField optional(String fieldName, String conceptCode) {
+    return new ConceptSetDescriptorField(fieldName, conceptCode, false);
+  }
 }

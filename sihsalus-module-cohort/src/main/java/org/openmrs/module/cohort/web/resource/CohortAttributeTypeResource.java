@@ -10,7 +10,6 @@
 package org.openmrs.module.cohort.web.resource;
 
 import java.util.ArrayList;
-
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cohort.CohortAttributeType;
 import org.openmrs.module.cohort.api.CohortService;
@@ -23,33 +22,41 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9.BaseAttributeTypeCrudResource1_9;
 
 @SuppressWarnings("unused")
-@Resource(name = RestConstants.VERSION_1 + CohortMainRestController.COHORT_NAMESPACE
-        + "/cohortattributetype", supportedClass = CohortAttributeType.class, supportedOpenmrsVersions = { "1.9 - 9.*" })
-public class CohortAttributeTypeResource extends BaseAttributeTypeCrudResource1_9<CohortAttributeType> {
-	
-	@Override
-	public CohortAttributeType save(CohortAttributeType cohortAttributeType) {
-		return Context.getService(CohortService.class).saveCohortAttributeType(cohortAttributeType);
-	}
-	
-	@Override
-	public void purge(CohortAttributeType cohortAttributeType, RequestContext context) throws ResponseException {
-		Context.getService(CohortService.class).purgeCohortAttributeType(cohortAttributeType);
-	}
-	
-	@Override
-	public CohortAttributeType newDelegate() {
-		return new CohortAttributeType();
-	}
-	
-	@Override
-	public CohortAttributeType getByUniqueId(String uuid) {
-		return Context.getService(CohortService.class).getCohortAttributeTypeByUuid(uuid);
-	}
-	
-	@Override
-	protected PageableResult doGetAll(RequestContext context) throws ResponseException {
-		return new NeedsPaging<>(new ArrayList<>(Context.getService(CohortService.class).findAllCohortAttributeTypes()),
-		        context);
-	}
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + CohortMainRestController.COHORT_NAMESPACE
+            + "/cohortattributetype",
+    supportedClass = CohortAttributeType.class,
+    supportedOpenmrsVersions = {"1.9 - 9.*"})
+public class CohortAttributeTypeResource
+    extends BaseAttributeTypeCrudResource1_9<CohortAttributeType> {
+
+  @Override
+  public CohortAttributeType save(CohortAttributeType cohortAttributeType) {
+    return Context.getService(CohortService.class).saveCohortAttributeType(cohortAttributeType);
+  }
+
+  @Override
+  public void purge(CohortAttributeType cohortAttributeType, RequestContext context)
+      throws ResponseException {
+    Context.getService(CohortService.class).purgeCohortAttributeType(cohortAttributeType);
+  }
+
+  @Override
+  public CohortAttributeType newDelegate() {
+    return new CohortAttributeType();
+  }
+
+  @Override
+  public CohortAttributeType getByUniqueId(String uuid) {
+    return Context.getService(CohortService.class).getCohortAttributeTypeByUuid(uuid);
+  }
+
+  @Override
+  protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+    return new NeedsPaging<>(
+        new ArrayList<>(Context.getService(CohortService.class).findAllCohortAttributeTypes()),
+        context);
+  }
 }

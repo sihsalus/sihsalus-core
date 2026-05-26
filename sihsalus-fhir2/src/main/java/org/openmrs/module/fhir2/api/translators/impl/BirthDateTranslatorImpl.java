@@ -9,14 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.annotation.Nonnull;
-
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.DateType;
 import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
@@ -24,56 +22,59 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BirthDateTranslatorImpl implements BirthDateTranslator {
-	
-	@Override
-	public DateType toFhirResource(@Nonnull Person person) {
-		if (person.getBirthdate() == null) {
-			return null;
-		}
-		
-		if (person.getBirthdateEstimated() != null && person.getBirthdateEstimated()) {
-			DateType dateType = new DateType();
-			LocalDate now = LocalDate.now();
-			
-			LocalDate birthDate = Instant.ofEpochMilli(person.getBirthdate().getTime()).atZone(ZoneId.systemDefault())
-			        .toLocalDate();
-			
-			// 5 years is the cut-off for WHO and CDC infant growth charts, so it seems like a convenient break between
-			// "infant" and "child"
-			if (Period.between(birthDate, now).getYears() > 5) {
-				dateType.setValue(person.getBirthdate(), TemporalPrecisionEnum.YEAR);
-			} else {
-				dateType.setValue(person.getBirthdate(), TemporalPrecisionEnum.MONTH);
-			}
-			
-			return dateType;
-		}
-		
-		return new DateType(person.getBirthdate());
-	}
-	
-	@Override
-	public Person toOpenmrsType(@Nonnull Person person, @Nonnull DateType date) {
-		if (person == null) {
-			return null;
-		}
-		
-		if (date == null) {
-			return null;
-		}
-		
-		person.setBirthdate(date.getValue());
-		
-		switch (date.getPrecision()) {
-			case DAY:
-				person.setBirthdateEstimated(false);
-				break;
-			case MONTH:
-			case YEAR:
-				person.setBirthdateEstimated(true);
-				break;
-		}
-		
-		return person;
-	}
+
+  @Override
+  public DateType toFhirResource(@Nonnull Person person) {
+    if (person.getBirthdate() == null) {
+      return null;
+    }
+
+    if (person.getBirthdateEstimated() != null && person.getBirthdateEstimated()) {
+      DateType dateType = new DateType();
+      LocalDate now = LocalDate.now();
+
+      LocalDate birthDate =
+          Instant.ofEpochMilli(person.getBirthdate().getTime())
+              .atZone(ZoneId.systemDefault())
+              .toLocalDate();
+
+      // 5 years is the cut-off for WHO and CDC infant growth charts, so it seems like a convenient
+      // break between
+      // "infant" and "child"
+      if (Period.between(birthDate, now).getYears() > 5) {
+        dateType.setValue(person.getBirthdate(), TemporalPrecisionEnum.YEAR);
+      } else {
+        dateType.setValue(person.getBirthdate(), TemporalPrecisionEnum.MONTH);
+      }
+
+      return dateType;
+    }
+
+    return new DateType(person.getBirthdate());
+  }
+
+  @Override
+  public Person toOpenmrsType(@Nonnull Person person, @Nonnull DateType date) {
+    if (person == null) {
+      return null;
+    }
+
+    if (date == null) {
+      return null;
+    }
+
+    person.setBirthdate(date.getValue());
+
+    switch (date.getPrecision()) {
+      case DAY:
+        person.setBirthdateEstimated(false);
+        break;
+      case MONTH:
+      case YEAR:
+        person.setBirthdateEstimated(true);
+        break;
+    }
+
+    return person;
+  }
 }

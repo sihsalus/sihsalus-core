@@ -12,30 +12,21 @@ package org.openmrs.module.billing.api.search;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Search criteria for querying {@link org.openmrs.module.billing.api.model.CashPoint} entities.
- */
+/** Search criteria for querying {@link org.openmrs.module.billing.api.model.CashPoint} entities. */
 @Data
 @Builder
 public class CashPointSearch {
-	
-	/**
-	 * The UUID of the location to filter cash points by.
-	 */
-	private String locationUuid;
-	
-	/**
-	 * The name pattern to search for (partial match).
-	 */
-	private String name;
-	
-	/**
-	 * Whether to include retired cash points in the results.
-	 */
-	private boolean includeRetired;
 
-	public boolean getIncludeRetired() {
-		return includeRetired;
-	}
-	
+  /** The UUID of the location to filter cash points by. */
+  private String locationUuid;
+
+  /** The name pattern to search for (partial match). */
+  private String name;
+
+  /** Whether to include retired cash points in the results. */
+  private boolean includeRetired;
+
+  public boolean getIncludeRetired() {
+    return includeRetired;
+  }
 }

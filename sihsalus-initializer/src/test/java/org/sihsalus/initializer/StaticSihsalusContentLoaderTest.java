@@ -135,7 +135,8 @@ class StaticSihsalusContentLoaderTest {
 
   private void createDataFilterSchema() {
     jdbcTemplate.execute("create table users (user_id int primary key, uuid varchar(38) not null)");
-    jdbcTemplate.execute("insert into users (user_id, uuid) values (1, '00000000-0000-0000-0000-000000000001')");
+    jdbcTemplate.execute(
+        "insert into users (user_id, uuid) values (1, '00000000-0000-0000-0000-000000000001')");
     jdbcTemplate.execute(
         "create table role (role varchar(50) primary key, description varchar(255), uuid varchar(38) not null unique)");
     jdbcTemplate.execute(
@@ -168,20 +169,27 @@ class StaticSihsalusContentLoaderTest {
 
   private int mapCount() {
     Integer count =
-        jdbcTemplate.queryForObject("select count(*) from datafilter_entity_basis_map", Integer.class);
+        jdbcTemplate.queryForObject(
+            "select count(*) from datafilter_entity_basis_map", Integer.class);
     return count == null ? 0 : count;
   }
 
   private void writeDataFilterMappings(String content) throws Exception {
     Path directory =
-        tempDir.resolve("configuration").resolve("backend_configuration").resolve("datafiltermappings");
+        tempDir
+            .resolve("configuration")
+            .resolve("backend_configuration")
+            .resolve("datafiltermappings");
     Files.createDirectories(directory);
     Files.writeString(directory.resolve("mappings.csv"), content);
   }
 
   private void writeGlobalProperties(String content) throws Exception {
     Path directory =
-        tempDir.resolve("configuration").resolve("backend_configuration").resolve("globalproperties");
+        tempDir
+            .resolve("configuration")
+            .resolve("backend_configuration")
+            .resolve("globalproperties");
     Files.createDirectories(directory);
     Files.writeString(directory.resolve("globalproperties.xml"), content);
   }

@@ -13,70 +13,69 @@
  */
 package org.openmrs.module.stockmanagement.api.impl;
 
-import org.openmrs.module.stockmanagement.api.utils.Action2;
-import org.openmrs.module.stockmanagement.api.model.*;
-
 import java.math.BigDecimal;
+import org.openmrs.module.stockmanagement.api.model.*;
+import org.openmrs.module.stockmanagement.api.utils.Action2;
 
 /**
  * Model class that represents a receipt stock operation type. Receipt operations bring new item
  * stock into the system.
  */
-
 public class ReceiptOperationTypeProcessor extends StockOperationTypeProcessorBase {
-	
-	public ReceiptOperationTypeProcessor(StockOperationType stockOperationType) {
-		super(stockOperationType);
-	}
-	
-	@Override
-	public boolean isNegativeItemQuantityAllowed() {
-		return false;
-	}
-	
-	@Override
-	public boolean requiresActualBatchInformation() {
-		return true;
-	}
-	
-	@Override
-	public boolean requiresBatchUuid() {
-		return false;
-	}
-	
-	@Override
-	public boolean canCapturePurchasePrice() {
-		return true;
-	}
-	
-	@Override
-	public boolean shouldVerifyNegativeStockAmountsAtSource() {
-		return false;
-	}
-	
-	@Override
-	public BigDecimal getQuantityToApplyAtSource(BigDecimal quantity) {
-		return BigDecimal.valueOf(0);
-	}
-	
-	@Override
-	public void onPending(StockOperation operation) {
-	}
-	
-	@Override
-	public void onCancelled(StockOperation operation) {
-		// Clear out the transactions for the operation
-		clearReservedTransactions(operation);
-	}
-	
-	@Override
-	public void onCompleted(final StockOperation operation) {
-		executeCopyReservedAndClear(operation, new Action2<ReservedTransaction, StockItemTransaction>() {
-			
-			@Override
-			public void apply(ReservedTransaction reserved, StockItemTransaction tx) {
-				tx.setParty(operation.getDestination());
-			}
-		});
-	}
+
+  public ReceiptOperationTypeProcessor(StockOperationType stockOperationType) {
+    super(stockOperationType);
+  }
+
+  @Override
+  public boolean isNegativeItemQuantityAllowed() {
+    return false;
+  }
+
+  @Override
+  public boolean requiresActualBatchInformation() {
+    return true;
+  }
+
+  @Override
+  public boolean requiresBatchUuid() {
+    return false;
+  }
+
+  @Override
+  public boolean canCapturePurchasePrice() {
+    return true;
+  }
+
+  @Override
+  public boolean shouldVerifyNegativeStockAmountsAtSource() {
+    return false;
+  }
+
+  @Override
+  public BigDecimal getQuantityToApplyAtSource(BigDecimal quantity) {
+    return BigDecimal.valueOf(0);
+  }
+
+  @Override
+  public void onPending(StockOperation operation) {}
+
+  @Override
+  public void onCancelled(StockOperation operation) {
+    // Clear out the transactions for the operation
+    clearReservedTransactions(operation);
+  }
+
+  @Override
+  public void onCompleted(final StockOperation operation) {
+    executeCopyReservedAndClear(
+        operation,
+        new Action2<ReservedTransaction, StockItemTransaction>() {
+
+          @Override
+          public void apply(ReservedTransaction reserved, StockItemTransaction tx) {
+            tx.setParty(operation.getDestination());
+          }
+        });
+  }
 }

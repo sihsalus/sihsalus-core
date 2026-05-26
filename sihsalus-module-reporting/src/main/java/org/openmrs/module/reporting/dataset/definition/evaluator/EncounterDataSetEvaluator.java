@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.dataset.definition.evaluator;
 
@@ -37,76 +37,86 @@ import org.openmrs.module.reporting.query.encounter.definition.AllEncounterQuery
 import org.openmrs.module.reporting.query.encounter.definition.EncounterQuery;
 import org.openmrs.module.reporting.query.encounter.service.EncounterQueryService;
 
-/**
- * The logic that evaluates a {@link EncounterDataSetDefinition} and produces an {@link DataSet}
- */
-@Handler(supports=EncounterDataSetDefinition.class)
+/** The logic that evaluates a {@link EncounterDataSetDefinition} and produces an {@link DataSet} */
+@Handler(supports = EncounterDataSetDefinition.class)
 public class EncounterDataSetEvaluator implements DataSetEvaluator {
 
-	protected Log log = LogFactory.getLog(this.getClass());
+  protected Log log = LogFactory.getLog(this.getClass());
 
-	/**
-	 * Public constructor
-	 */
-	public EncounterDataSetEvaluator() { }
-	
-	/**
-	 * @see DataSetEvaluator#evaluate(DataSetDefinition, EvaluationContext)
-	 */
-	@SuppressWarnings("unchecked")
-	public DataSet evaluate(DataSetDefinition dataSetDefinition, EvaluationContext context) throws EvaluationException {
-		
-		EncounterDataSetDefinition dsd = (EncounterDataSetDefinition) dataSetDefinition;
-		context = ObjectUtil.nvl(context, new EvaluationContext());
+  /** Public constructor */
+  public EncounterDataSetEvaluator() {}
 
-		SimpleDataSet dataSet = new SimpleDataSet(dsd, context);
-		dataSet.setSortCriteria(dsd.getSortCriteria());
-		
-		// Construct an EncounterEvaluationContext based on the encounter filter
-		EncounterIdSet r = null;
-		if (dsd.getRowFilters() != null) {
-			for (Mapped<? extends EncounterQuery> q : dsd.getRowFilters()) {
-				EncounterIdSet s = Context.getService(EncounterQueryService.class).evaluate(q, context);
-				r = QueryUtil.intersectNonNull(r, s);
-			}
-		}
-		if (r == null) {
-			r = Context.getService(EncounterQueryService.class).evaluate(new AllEncounterQuery(), context);
-		}
-		EncounterEvaluationContext eec = new EncounterEvaluationContext(context, r);
-		eec.setBaseCohort(null); // We can do this because the encounterIdSet is already limited by these
+  /**
+   * @see DataSetEvaluator#evaluate(DataSetDefinition, EvaluationContext)
+   */
+  @SuppressWarnings("unchecked")
+  public DataSet evaluate(DataSetDefinition dataSetDefinition, EvaluationContext context)
+      throws EvaluationException {
 
-		// Evaluate each specified ColumnDefinition for all of the included rows and add these to the dataset
-		for (RowPerObjectColumnDefinition cd : dsd.getColumnDefinitions()) {
+    EncounterDataSetDefinition dsd = (EncounterDataSetDefinition) dataSetDefinition;
+    context = ObjectUtil.nvl(context, new EvaluationContext());
 
-			if (log.isDebugEnabled()) {
-				log.debug("Evaluating column: " + cd.getName());
-				log.debug("With Data Definition: " + DefinitionUtil.format(cd.getDataDefinition().getParameterizable()));
-				log.debug("With Mappings: " + cd.getDataDefinition().getParameterMappings());
-				log.debug("With Parameters: " + eec.getParameterValues());
-			}
+    SimpleDataSet dataSet = new SimpleDataSet(dsd, context);
+    dataSet.setSortCriteria(dsd.getSortCriteria());
 
-			StopWatch sw = new StopWatch();
-			sw.start();
+    // Construct an EncounterEvaluationContext based on the encounter filter
+    EncounterIdSet r = null;
+    if (dsd.getRowFilters() != null) {
+      for (Mapped<? extends EncounterQuery> q : dsd.getRowFilters()) {
+        EncounterIdSet s = Context.getService(EncounterQueryService.class).evaluate(q, context);
+        r = QueryUtil.intersectNonNull(r, s);
+      }
+    }
+    if (r == null) {
+      r =
+          Context.getService(EncounterQueryService.class)
+              .evaluate(new AllEncounterQuery(), context);
+    }
+    EncounterEvaluationContext eec = new EncounterEvaluationContext(context, r);
+    eec.setBaseCohort(
+        null); // We can do this because the encounterIdSet is already limited by these
 
-			MappedData<? extends EncounterDataDefinition> dataDef = (MappedData<? extends EncounterDataDefinition>) cd.getDataDefinition();
-			EvaluatedEncounterData data = Context.getService(EncounterDataService.class).evaluate(dataDef, eec);
+    // Evaluate each specified ColumnDefinition for all of the included rows and add these to the
+    // dataset
+    for (RowPerObjectColumnDefinition cd : dsd.getColumnDefinitions()) {
 
-			DataSetColumn column = new DataSetColumn(cd.getName(), cd.getName(), dataDef.getParameterizable().getDataType()); // TODO: Support One-Many column definition to column
+      if (log.isDebugEnabled()) {
+        log.debug("Evaluating column: " + cd.getName());
+        log.debug(
+            "With Data Definition: "
+                + DefinitionUtil.format(cd.getDataDefinition().getParameterizable()));
+        log.debug("With Mappings: " + cd.getDataDefinition().getParameterMappings());
+        log.debug("With Parameters: " + eec.getParameterValues());
+      }
 
-			for (Integer id : r.getMemberIds()) {
-				Object val = data.getData().get(id);
-				val = DataUtil.convertData(val, dataDef.getConverters());
-				dataSet.addColumnValue(id, column, val);
-			}
-			
-			sw.stop();
-			if (log.isDebugEnabled()) {
-				log.debug("Added encounter column: " + sw.toString());
-			}
+      StopWatch sw = new StopWatch();
+      sw.start();
 
-		}
+      MappedData<? extends EncounterDataDefinition> dataDef =
+          (MappedData<? extends EncounterDataDefinition>) cd.getDataDefinition();
+      EvaluatedEncounterData data =
+          Context.getService(EncounterDataService.class).evaluate(dataDef, eec);
 
-		return dataSet;
-	}
+      DataSetColumn column =
+          new DataSetColumn(
+              cd.getName(),
+              cd.getName(),
+              dataDef
+                  .getParameterizable()
+                  .getDataType()); // TODO: Support One-Many column definition to column
+
+      for (Integer id : r.getMemberIds()) {
+        Object val = data.getData().get(id);
+        val = DataUtil.convertData(val, dataDef.getConverters());
+        dataSet.addColumnValue(id, column, val);
+      }
+
+      sw.stop();
+      if (log.isDebugEnabled()) {
+        log.debug("Added encounter column: " + sw.toString());
+      }
+    }
+
+    return dataSet;
+  }
 }

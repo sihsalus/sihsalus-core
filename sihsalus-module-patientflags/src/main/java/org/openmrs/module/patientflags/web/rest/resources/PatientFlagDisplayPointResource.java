@@ -1,12 +1,11 @@
 package org.openmrs.module.patientflags.web.rest.resources;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.StringProperty;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientflags.DisplayPoint;
@@ -25,90 +24,94 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + PatientFlagsRestController.PATIENT_FLAGS_REST_NAMESPACE + "/displaypoint", supportedClass = DisplayPoint.class, supportedOpenmrsVersions = {
-		"1.*", "2.*", "3.*" })
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + PatientFlagsRestController.PATIENT_FLAGS_REST_NAMESPACE
+            + "/displaypoint",
+    supportedClass = DisplayPoint.class,
+    supportedOpenmrsVersions = {"1.*", "2.*", "3.*"})
 public class PatientFlagDisplayPointResource extends MetadataDelegatingCrudResource<DisplayPoint> {
-	
-	public DisplayPoint newDelegate() {
-		return new DisplayPoint();
-	}
-	
-	public DisplayPoint save(DisplayPoint displayPoint) {
-		throw new ResourceDoesNotSupportOperationException("save of display point not supported");
-	}
-	
-	@Override
-	public DisplayPoint getByUniqueId(String displayPointId) {
-		DisplayPoint displayPoint = getService().getDisplayPointByUuid(displayPointId);
-		if (displayPoint == null)
-			displayPoint = getService().getDisplayPoint(displayPointId);
-		return displayPoint;
-	}
-	
-	@Override
-	public void purge(DisplayPoint displayPoint, RequestContext arg1) throws ResponseException {
-		throw new ResourceDoesNotSupportOperationException("purge of display point not supported");
-	}
-	
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = null;
-		
-		// NOTE: description for ref representation is provided by MetaDataDelegatingCrudResource
-		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-			description = new DelegatingResourceDescription();
-			
-			// metadata
-			description.addProperty("uuid");
-			description.addProperty("displayPointId");
-			description.addProperty("name");
-			
-			// links
-			description.addSelfLink();
-			if (rep instanceof DefaultRepresentation) {
-				description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
-			} else {
-				// Relies on a getter method annotated with @PropertyGetter
-				description.addProperty("auditInfo");
-			}
-		}
-		
-		return description;
-	}
 
-	@Override
-	public Model getGETModel(Representation rep) {
-		ModelImpl model = (ModelImpl) super.getGETModel(rep);
-		return model
-				.property("uuid", new StringProperty())
-				.property("displayPointId", new IntegerProperty())
-				.property("name", new StringProperty())
-				.property("auditInfo", new StringProperty());
+  public DisplayPoint newDelegate() {
+    return new DisplayPoint();
+  }
+
+  public DisplayPoint save(DisplayPoint displayPoint) {
+    throw new ResourceDoesNotSupportOperationException("save of display point not supported");
+  }
+
+  @Override
+  public DisplayPoint getByUniqueId(String displayPointId) {
+    DisplayPoint displayPoint = getService().getDisplayPointByUuid(displayPointId);
+    if (displayPoint == null) displayPoint = getService().getDisplayPoint(displayPointId);
+    return displayPoint;
+  }
+
+  @Override
+  public void purge(DisplayPoint displayPoint, RequestContext arg1) throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException("purge of display point not supported");
+  }
+
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = null;
+
+    // NOTE: description for ref representation is provided by MetaDataDelegatingCrudResource
+    if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+      description = new DelegatingResourceDescription();
+
+      // metadata
+      description.addProperty("uuid");
+      description.addProperty("displayPointId");
+      description.addProperty("name");
+
+      // links
+      description.addSelfLink();
+      if (rep instanceof DefaultRepresentation) {
+        description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
+      } else {
+        // Relies on a getter method annotated with @PropertyGetter
+        description.addProperty("auditInfo");
+      }
     }
 
-	@Override
-	protected PageableResult doGetAll(RequestContext context) throws ResponseException {
-		return new NeedsPaging<DisplayPoint>(getService().getAllDisplayPoints(), context);
-	}
-	
-	@Override
-	protected PageableResult doSearch(RequestContext context) {
-		String q = getStringFilter("q", context);
-		
-		List<DisplayPoint> displayPoints = new ArrayList<DisplayPoint>();
-		
-		DisplayPoint displayPoint = getService().getDisplayPoint(q);
-		if (displayPoint != null) {
-			displayPoints.add(displayPoint);
-		}
-		return new NeedsPaging<DisplayPoint>(displayPoints, context);
-	}
-	
-	private FlagService getService() {
-		return Context.getService(FlagService.class);
-	}
-	
-	private static String getStringFilter(String param, RequestContext req) {
-		return StringUtils.isEmpty(req.getParameter(param)) ? null : req.getParameter(param);
-	}
+    return description;
+  }
+
+  @Override
+  public Model getGETModel(Representation rep) {
+    ModelImpl model = (ModelImpl) super.getGETModel(rep);
+    return model
+        .property("uuid", new StringProperty())
+        .property("displayPointId", new IntegerProperty())
+        .property("name", new StringProperty())
+        .property("auditInfo", new StringProperty());
+  }
+
+  @Override
+  protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+    return new NeedsPaging<DisplayPoint>(getService().getAllDisplayPoints(), context);
+  }
+
+  @Override
+  protected PageableResult doSearch(RequestContext context) {
+    String q = getStringFilter("q", context);
+
+    List<DisplayPoint> displayPoints = new ArrayList<DisplayPoint>();
+
+    DisplayPoint displayPoint = getService().getDisplayPoint(q);
+    if (displayPoint != null) {
+      displayPoints.add(displayPoint);
+    }
+    return new NeedsPaging<DisplayPoint>(displayPoints, context);
+  }
+
+  private FlagService getService() {
+    return Context.getService(FlagService.class);
+  }
+
+  private static String getStringFilter(String param, RequestContext req) {
+    return StringUtils.isEmpty(req.getParameter(param)) ? null : req.getParameter(param);
+  }
 }

@@ -9,12 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,76 +36,89 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, Provider> implements FhirPractitionerService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirPractitionerDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private PractitionerTranslator<Provider> translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<Practitioner> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>, SearchQueryInclude<Practitioner>> searchQuery;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>, SearchQueryInclude<Practitioner>> userSearchQuery;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirUserService userService;
-	
-	@Override
-	public Practitioner get(@Nonnull String uuid) {
-		if (uuid == null) {
-			throw new InvalidRequestException("Uuid cannot be null.");
-		}
-		
-		Practitioner result;
-		try {
-			result = super.get(uuid);
-		}
-		catch (ResourceNotFoundException e) {
-			result = userService.get(uuid);
-		}
-		
-		return result;
-	}
-	
-	@Override
-	public Practitioner create(@Nonnull Practitioner newResource) {
-		if (!newResource.hasIdentifier()) {
-			throw new UnprocessableEntityException("New providers must have at least one identifier");
-		}
-		
-		return super.create(newResource);
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public IBundleProvider searchForPractitioners(PractitionerSearchParams practitionerSearchParams) {
-		IBundleProvider providerBundle = searchQuery.getQueryResults(practitionerSearchParams.toSearchParameterMap(), dao,
-		    translator, searchQueryInclude);
-		SearchParameterMap theParams = new SearchParameterMap();
-		IBundleProvider userBundle = userService.searchForUsers(theParams);
-		
-		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
-			return new TwoSearchQueryBundleProvider(providerBundle, userBundle, globalPropertyService);
-		} else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
-			return userBundle;
-		}
-		
-		return providerBundle;
-	}
+public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, Provider>
+    implements FhirPractitionerService {
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private FhirPractitionerDao dao;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private PractitionerTranslator<Provider> translator;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQueryInclude<Practitioner> searchQueryInclude;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private FhirGlobalPropertyService globalPropertyService;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQuery<
+          Provider,
+          Practitioner,
+          FhirPractitionerDao,
+          PractitionerTranslator<Provider>,
+          SearchQueryInclude<Practitioner>>
+      searchQuery;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private SearchQuery<
+          User,
+          Practitioner,
+          FhirUserDao,
+          PractitionerTranslator<User>,
+          SearchQueryInclude<Practitioner>>
+      userSearchQuery;
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+  private FhirUserService userService;
+
+  @Override
+  public Practitioner get(@Nonnull String uuid) {
+    if (uuid == null) {
+      throw new InvalidRequestException("Uuid cannot be null.");
+    }
+
+    Practitioner result;
+    try {
+      result = super.get(uuid);
+    } catch (ResourceNotFoundException e) {
+      result = userService.get(uuid);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Practitioner create(@Nonnull Practitioner newResource) {
+    if (!newResource.hasIdentifier()) {
+      throw new UnprocessableEntityException("New providers must have at least one identifier");
+    }
+
+    return super.create(newResource);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public IBundleProvider searchForPractitioners(PractitionerSearchParams practitionerSearchParams) {
+    IBundleProvider providerBundle =
+        searchQuery.getQueryResults(
+            practitionerSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+    SearchParameterMap theParams = new SearchParameterMap();
+    IBundleProvider userBundle = userService.searchForUsers(theParams);
+
+    if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
+      return new TwoSearchQueryBundleProvider(providerBundle, userBundle, globalPropertyService);
+    } else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
+      return userBundle;
+    }
+
+    return providerBundle;
+  }
 }

@@ -9,19 +9,18 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.annotation.Nonnull;
-
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 
 public interface FhirPatientIdentifierSystemService extends FhirHelperService {
-	
-	String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
-	
-	Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(@Nonnull PatientIdentifierType identifierType);
-	
-	FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
-	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem);
+
+  String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
+
+  Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
+      @Nonnull PatientIdentifierType identifierType);
+
+  FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
+      @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem);
 }

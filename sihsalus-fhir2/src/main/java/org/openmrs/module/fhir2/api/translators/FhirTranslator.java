@@ -13,6 +13,4 @@ package org.openmrs.module.fhir2.api.translators;
  * A marker interface for all translators supported by the FHIR2 project. This is used for loading
  * translators from other modules.
  */
-public interface FhirTranslator {
-	
-}
+public interface FhirTranslator {}

@@ -12,12 +12,12 @@ package org.openmrs.module.billing.api.base.entity.model;
 // @formatter:off
 /**
  * Represents classes that define simple attribute data.
+ *
  * @param <TAttributeType> The {@link ISimpleAttributeType} class.
  */
 public interface ISimpleAttribute<
-			TOwner extends ICustomizable<?>,
-			TAttributeType extends ISimpleAttributeType>
-		extends IAttribute<TOwner, TAttributeType> {
-// @formatter:on
-	
+        TOwner extends ICustomizable<?>, TAttributeType extends ISimpleAttributeType>
+    extends IAttribute<TOwner, TAttributeType> {
+  // @formatter:on
+
 }

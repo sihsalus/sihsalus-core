@@ -26,28 +26,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson, Relationship> implements FhirRelatedPersonService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirRelatedPersonDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private RelatedPersonTranslator translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<RelatedPerson> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<Relationship, RelatedPerson, FhirRelatedPersonDao, RelatedPersonTranslator, SearchQueryInclude<RelatedPerson>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForRelatedPeople(RelatedPersonSearchParams relatedPersonSearchParams) {
-		return searchQuery.getQueryResults(relatedPersonSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
-	}
-	
+public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson, Relationship>
+    implements FhirRelatedPersonService {
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirRelatedPersonDao dao;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private RelatedPersonTranslator translator;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQueryInclude<RelatedPerson> searchQueryInclude;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQuery<
+          Relationship,
+          RelatedPerson,
+          FhirRelatedPersonDao,
+          RelatedPersonTranslator,
+          SearchQueryInclude<RelatedPerson>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForRelatedPeople(
+      RelatedPersonSearchParams relatedPersonSearchParams) {
+    return searchQuery.getQueryResults(
+        relatedPersonSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+  }
 }

@@ -16,28 +16,29 @@ import org.openmrs.Visit;
 import org.openmrs.module.emrapi.encounter.EncounterParameters;
 
 /**
- * Find {@link org.openmrs.Encounter} from a {@link org.openmrs.Visit} by matching
- * {@link org.openmrs.EncounterType}.
+ * Find {@link org.openmrs.Encounter} from a {@link org.openmrs.Visit} by matching {@link
+ * org.openmrs.EncounterType}.
  */
 public class DefaultEncounterMatcher implements BaseEncounterMatcher {
-	
-	@Override
-	public Encounter findEncounter(Visit visit, EncounterParameters encounterParameters) {
-		EncounterType encounterType = encounterParameters.getEncounterType();
-		String encounterUuid = encounterParameters.getEncounterUuid();
-		
-		if (encounterType == null && StringUtils.isBlank(encounterUuid)) {
-			throw new IllegalArgumentException("Encounter Type or Encounter Uuid must be specified");
-		}
-		
-		if (visit.getEncounters() != null) {
-			for (Encounter encounter : visit.getEncounters()) {
-				if (!encounter.isVoided() && (encounter.getUuid().equals(encounterUuid)
-				        || encounter.getEncounterType().equals(encounterType))) {
-					return encounter;
-				}
-			}
-		}
-		return null;
-	}
+
+  @Override
+  public Encounter findEncounter(Visit visit, EncounterParameters encounterParameters) {
+    EncounterType encounterType = encounterParameters.getEncounterType();
+    String encounterUuid = encounterParameters.getEncounterUuid();
+
+    if (encounterType == null && StringUtils.isBlank(encounterUuid)) {
+      throw new IllegalArgumentException("Encounter Type or Encounter Uuid must be specified");
+    }
+
+    if (visit.getEncounters() != null) {
+      for (Encounter encounter : visit.getEncounters()) {
+        if (!encounter.isVoided()
+            && (encounter.getUuid().equals(encounterUuid)
+                || encounter.getEncounterType().equals(encounterType))) {
+          return encounter;
+        }
+      }
+    }
+    return null;
+  }
 }

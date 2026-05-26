@@ -13,11 +13,7 @@ import org.openmrs.module.billing.web.CashierWebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * Controller to manage the Cashier 2.x Settings page..
- */
+/** Controller to manage the Cashier 2.x Settings page.. */
 @Controller
 @RequestMapping(value = CashierWebConstants.CASHIER_SETTINGS_2X_ROOT)
-public class CashierSettings2xController extends CashierSettingsControllerBase {
-	
-}
+public class CashierSettings2xController extends CashierSettingsControllerBase {}

@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
 
 @Component("userMapper")
 public class UserMapper {
-	
-	public EncounterTransaction.User map(User openmrsUser) {
-		EncounterTransaction.User user = new EncounterTransaction.User();
-		user.setUuid(openmrsUser.getUuid());
-		user.setPersonName(openmrsUser.getPersonName().toString());
-		return user;
-	}
+
+  public EncounterTransaction.User map(User openmrsUser) {
+    EncounterTransaction.User user = new EncounterTransaction.User();
+    user.setUuid(openmrsUser.getUuid());
+    user.setPersonName(openmrsUser.getPersonName().toString());
+    return user;
+  }
 }

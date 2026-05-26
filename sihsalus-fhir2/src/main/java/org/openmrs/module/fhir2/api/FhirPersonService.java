@@ -14,6 +14,6 @@ import org.hl7.fhir.r4.model.Person;
 import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
 
 public interface FhirPersonService extends FhirService<Person> {
-	
-	IBundleProvider searchForPeople(PersonSearchParams personSearchParams);
+
+  IBundleProvider searchForPeople(PersonSearchParams personSearchParams);
 }

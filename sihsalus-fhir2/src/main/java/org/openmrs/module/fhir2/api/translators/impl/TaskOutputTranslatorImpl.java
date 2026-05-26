@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -34,54 +33,54 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TaskOutputTranslatorImpl implements TaskOutputTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ConceptTranslator conceptTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ReferenceTranslator referenceTranslator;
-	
-	@Override
-	public TaskOutputComponent toFhirResource(@Nonnull FhirTaskOutput openmrsTaskOutput) {
-		CodeableConcept type = conceptTranslator.toFhirResource(openmrsTaskOutput.getType());
-		Task.TaskOutputComponent output = new Task.TaskOutputComponent().setType(type);
-		if (openmrsTaskOutput.getValueReference() != null) {
-			Reference ref = referenceTranslator.toFhirResource(openmrsTaskOutput.getValueReference());
-			return output.setValue(ref);
-		} else if (openmrsTaskOutput.getValueText() != null) {
-			return output.setValue(new StringType().setValue(openmrsTaskOutput.getValueText()));
-		} else if (openmrsTaskOutput.getValueNumeric() != null) {
-			DecimalType decimal = new DecimalType();
-			decimal.setValue(openmrsTaskOutput.getValueNumeric());
-			return output.setValue(decimal);
-		} else if (openmrsTaskOutput.getValueDatetime() != null) {
-			return output.setValue(new DateTimeType().setValue(openmrsTaskOutput.getValueDatetime()));
-		} else {
-			return null;
-		}
-	}
-	
-	@Override
-	public FhirTaskOutput toOpenmrsType(@Nonnull TaskOutputComponent taskOutputComponent) {
-		FhirTaskOutput output = new FhirTaskOutput();
-		Concept type = conceptTranslator.toOpenmrsType(taskOutputComponent.getType());
-		output.setType(type);
-		Type value = taskOutputComponent.getValue();
-		if (value instanceof Reference) {
-			FhirReference ref = referenceTranslator.toOpenmrsType((Reference) value);
-			output.setValueReference(ref);
-		} else if (value instanceof StringType) {
-			output.setValueText(value.toString());
-		} else if (value instanceof DecimalType) {
-			output.setValueNumeric(((DecimalType) value).getValueAsNumber().doubleValue());
-		} else if (value instanceof DateTimeType) {
-			output.setValueDatetime(((DateTimeType) value).getValue());
-		} else {
-			return null;
-		}
-		output.setName("TaskOutputComponent/" + output.getUuid());
-		return output;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ConceptTranslator conceptTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ReferenceTranslator referenceTranslator;
+
+  @Override
+  public TaskOutputComponent toFhirResource(@Nonnull FhirTaskOutput openmrsTaskOutput) {
+    CodeableConcept type = conceptTranslator.toFhirResource(openmrsTaskOutput.getType());
+    Task.TaskOutputComponent output = new Task.TaskOutputComponent().setType(type);
+    if (openmrsTaskOutput.getValueReference() != null) {
+      Reference ref = referenceTranslator.toFhirResource(openmrsTaskOutput.getValueReference());
+      return output.setValue(ref);
+    } else if (openmrsTaskOutput.getValueText() != null) {
+      return output.setValue(new StringType().setValue(openmrsTaskOutput.getValueText()));
+    } else if (openmrsTaskOutput.getValueNumeric() != null) {
+      DecimalType decimal = new DecimalType();
+      decimal.setValue(openmrsTaskOutput.getValueNumeric());
+      return output.setValue(decimal);
+    } else if (openmrsTaskOutput.getValueDatetime() != null) {
+      return output.setValue(new DateTimeType().setValue(openmrsTaskOutput.getValueDatetime()));
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public FhirTaskOutput toOpenmrsType(@Nonnull TaskOutputComponent taskOutputComponent) {
+    FhirTaskOutput output = new FhirTaskOutput();
+    Concept type = conceptTranslator.toOpenmrsType(taskOutputComponent.getType());
+    output.setType(type);
+    Type value = taskOutputComponent.getValue();
+    if (value instanceof Reference) {
+      FhirReference ref = referenceTranslator.toOpenmrsType((Reference) value);
+      output.setValueReference(ref);
+    } else if (value instanceof StringType) {
+      output.setValueText(value.toString());
+    } else if (value instanceof DecimalType) {
+      output.setValueNumeric(((DecimalType) value).getValueAsNumber().doubleValue());
+    } else if (value instanceof DateTimeType) {
+      output.setValueDatetime(((DateTimeType) value).getValue());
+    } else {
+      return null;
+    }
+    output.setName("TaskOutputComponent/" + output.getUuid());
+    return output;
+  }
 }

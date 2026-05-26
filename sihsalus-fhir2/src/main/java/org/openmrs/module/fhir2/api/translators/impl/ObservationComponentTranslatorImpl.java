@@ -13,7 +13,6 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
@@ -26,38 +25,40 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ObservationComponentTranslatorImpl implements ObservationComponentTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationValueTranslator observationValueTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ConceptTranslator conceptTranslator;
-	
-	@Override
-	public Observation.ObservationComponentComponent toFhirResource(@Nonnull Obs obs) {
-		if (obs == null) {
-			return null;
-		}
-		
-		Observation.ObservationComponentComponent component = new Observation.ObservationComponentComponent();
-		component.setId(obs.getUuid());
-		component.setCode(conceptTranslator.toFhirResource(obs.getConcept()));
-		component.setValue(observationValueTranslator.toFhirResource(obs));
-		
-		return component;
-	}
-	
-	@Override
-	public Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Observation.ObservationComponentComponent observationComponent) {
-		notNull(obs, "The existing Obs object should not be null");
-		notNull(observationComponent, "The ObservationComponentComponent object should not be null");
-		
-		obs.setUuid(observationComponent.getId());
-		obs.setConcept(conceptTranslator.toOpenmrsType(observationComponent.getCode()));
-		observationValueTranslator.toOpenmrsType(obs, observationComponent.getValue());
-		
-		return obs;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ObservationValueTranslator observationValueTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private ConceptTranslator conceptTranslator;
+
+  @Override
+  public Observation.ObservationComponentComponent toFhirResource(@Nonnull Obs obs) {
+    if (obs == null) {
+      return null;
+    }
+
+    Observation.ObservationComponentComponent component =
+        new Observation.ObservationComponentComponent();
+    component.setId(obs.getUuid());
+    component.setCode(conceptTranslator.toFhirResource(obs.getConcept()));
+    component.setValue(observationValueTranslator.toFhirResource(obs));
+
+    return component;
+  }
+
+  @Override
+  public Obs toOpenmrsType(
+      @Nonnull Obs obs, @Nonnull Observation.ObservationComponentComponent observationComponent) {
+    notNull(obs, "The existing Obs object should not be null");
+    notNull(observationComponent, "The ObservationComponentComponent object should not be null");
+
+    obs.setUuid(observationComponent.getId());
+    obs.setConcept(conceptTranslator.toOpenmrsType(observationComponent.getCode()));
+    observationValueTranslator.toOpenmrsType(obs, observationComponent.getValue());
+
+    return obs;
+  }
 }

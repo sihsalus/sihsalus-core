@@ -71,341 +71,349 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SihsalusEmrApiConfiguration {
 
-    private static final String DEFAULT_CONTENT_SOURCE_ROOT = "reference-sources/sihsalus-content";
+  private static final String DEFAULT_CONTENT_SOURCE_ROOT = "reference-sources/sihsalus-content";
 
-    private static final String BACKEND_CONFIGURATION_ROOT = "configuration/backend_configuration";
+  private static final String BACKEND_CONFIGURATION_ROOT = "configuration/backend_configuration";
 
-    private static final String DISPOSITIONS_DOMAIN = "dispositions";
+  private static final String DISPOSITIONS_DOMAIN = "dispositions";
 
-    @Bean
-    EmrApiProperties emrApiProperties(
-            MetadataMappingService metadataMappingService,
-            ConceptService conceptService,
-            AdministrationService adminService,
-            LocationService locationService,
-            UserService userService,
-            PersonService personService,
-            ProviderService providerService) {
-        EmrApiProperties properties = new EmrApiProperties();
-        properties.setMetadataMappingService(metadataMappingService);
-        properties.setConceptService(conceptService);
-        properties.setAdministrationService(adminService);
-        properties.setLocationService(locationService);
-        properties.setUserService(userService);
-        properties.setPersonService(personService);
-        properties.setProviderService(providerService);
-        return properties;
+  @Bean
+  EmrApiProperties emrApiProperties(
+      MetadataMappingService metadataMappingService,
+      ConceptService conceptService,
+      AdministrationService adminService,
+      LocationService locationService,
+      UserService userService,
+      PersonService personService,
+      ProviderService providerService) {
+    EmrApiProperties properties = new EmrApiProperties();
+    properties.setMetadataMappingService(metadataMappingService);
+    properties.setConceptService(conceptService);
+    properties.setAdministrationService(adminService);
+    properties.setLocationService(locationService);
+    properties.setUserService(userService);
+    properties.setPersonService(personService);
+    properties.setProviderService(providerService);
+    return properties;
+  }
+
+  @Bean
+  EmrApiDAO emrApiDAO(DbSessionFactory dbSessionFactory) {
+    EmrApiDAOImpl dao = new EmrApiDAOImpl();
+    dao.setSessionFactory(dbSessionFactory);
+    return dao;
+  }
+
+  @Bean
+  EmrConceptDAO emrConceptDAO(DbSessionFactory dbSessionFactory) {
+    HibernateEmrConceptDAO dao = new HibernateEmrConceptDAO();
+    dao.setSessionFactory(dbSessionFactory);
+    return dao;
+  }
+
+  @Bean
+  EmrConceptService emrConceptService(
+      EmrConceptDAO emrConceptDAO,
+      EmrApiProperties emrApiProperties,
+      ConceptService conceptService) {
+    EmrConceptServiceImpl service = new EmrConceptServiceImpl();
+    service.setDao(emrConceptDAO);
+    service.setEmrApiProperties(emrApiProperties);
+    service.setConceptService(conceptService);
+    return service;
+  }
+
+  @Bean
+  DispositionService dispositionService(
+      ConceptService conceptService,
+      EmrConceptService emrConceptService,
+      EmrApiProperties emrApiProperties) {
+    DispositionServiceImpl service = new DispositionServiceImpl(conceptService, emrConceptService);
+    service.setEmrApiProperties(emrApiProperties);
+    return service;
+  }
+
+  @Bean
+  SmartInitializingSingleton emrApiPropertiesDispositionBinder(
+      EmrApiProperties emrApiProperties, DispositionService dispositionService) {
+    return () -> emrApiProperties.setDispositionService(dispositionService);
+  }
+
+  @Bean
+  SmartInitializingSingleton sihsalusDispositionConfigBinder(
+      DispositionService dispositionService) {
+    return () -> {
+      Path dispositionConfig = resolveDispositionConfig();
+      if (dispositionConfig != null) {
+        dispositionService.setDispositionConfig("file:" + dispositionConfig);
+      }
+    };
+  }
+
+  @Bean
+  DomainWrapperFactory domainWrapperFactory() {
+    return new DomainWrapperFactory();
+  }
+
+  @Bean
+  AdtService adtService(
+      EmrApiProperties emrApiProperties,
+      EncounterService encounterService,
+      VisitService visitService,
+      LocationService locationService,
+      DispositionService dispositionService,
+      EmrApiDAO emrApiDAO,
+      EmrConceptService emrConceptService,
+      ProviderService providerService,
+      PatientService patientService,
+      DomainWrapperFactory domainWrapperFactory) {
+    AdtServiceImpl service = new AdtServiceImpl();
+    service.setEmrApiProperties(emrApiProperties);
+    service.setEncounterService(encounterService);
+    service.setVisitService(visitService);
+    service.setLocationService(locationService);
+    service.setDispositionService(dispositionService);
+    service.setEmrApiDAO(emrApiDAO);
+    service.setEmrConceptService(emrConceptService);
+    service.setProviderService(providerService);
+    service.setPatientService(patientService);
+    service.setDomainWrapperFactory(domainWrapperFactory);
+    service.setPatientMergeActions(List.of());
+    return service;
+  }
+
+  @Bean
+  EmrPatientDAO emrPatientDAO(
+      DbSessionFactory dbSessionFactory, EmrApiProperties emrApiProperties) {
+    HibernateEmrPatientDAO dao = new HibernateEmrPatientDAO();
+    dao.setSessionFactory(dbSessionFactory);
+    dao.setEmrApiProperties(emrApiProperties);
+    return dao;
+  }
+
+  @Bean
+  EmrPatientService emrPatientService(
+      EmrPatientDAO emrPatientDAO,
+      EmrApiProperties emrApiProperties,
+      PatientService patientService,
+      AdtService adtService) {
+    EmrPatientServiceImpl service = new EmrPatientServiceImpl();
+    service.setDao(emrPatientDAO);
+    service.setEmrApiProperties(emrApiProperties);
+    service.setPatientService(patientService);
+    service.setAdtService(adtService);
+    return service;
+  }
+
+  @Bean
+  AccountService accountService(
+      UserService userService,
+      PersonService personService,
+      ProviderService providerService,
+      DomainWrapperFactory domainWrapperFactory,
+      EmrApiProperties emrApiProperties,
+      EmrApiDAO emrApiDAO) {
+    AccountServiceImpl service = new AccountServiceImpl();
+    service.setUserService(userService);
+    service.setPersonService(personService);
+    service.setProviderService(providerService);
+    service.setDomainWrapperFactory(domainWrapperFactory);
+    service.setEmrApiProperties(emrApiProperties);
+    service.setEmrApiDAO(emrApiDAO);
+    return service;
+  }
+
+  @Bean
+  MaternalService maternalService(
+      AdtService adtService, EmrApiProperties emrApiProperties, EmrApiDAO emrApiDAO) {
+    MaternalServiceImpl service = new MaternalServiceImpl();
+    service.setAdtService(adtService);
+    service.setEmrApiProperties(emrApiProperties);
+    service.setEmrApiDAO(emrApiDAO);
+    return service;
+  }
+
+  @Bean
+  ExitFromCareService exitFromCareService(
+      EmrApiProperties emrApiProperties,
+      VisitService visitService,
+      PatientService patientService,
+      ProgramWorkflowService programWorkflowService,
+      AdtService adtService) {
+    ExitFromCareServiceImpl service = new ExitFromCareServiceImpl();
+    service.setEmrApiProperties(emrApiProperties);
+    service.setVisitService(visitService);
+    service.setPatientService(patientService);
+    service.setProgramWorkflowService(programWorkflowService);
+    service.setAdtService(adtService);
+    return service;
+  }
+
+  @Bean
+  EmrPersonImageService emrPersonImageService(EmrApiProperties emrApiProperties) {
+    EmrPersonImageServiceImpl service = new EmrPersonImageServiceImpl();
+    service.setEmrApiProperties(emrApiProperties);
+    return service;
+  }
+
+  @Bean
+  EmrPatientProfileService emrPatientProfileService(
+      PatientService patientService,
+      PersonService personService,
+      EmrPersonImageService emrPersonImageService) {
+    EmrPatientProfileServiceImpl service = new EmrPatientProfileServiceImpl();
+    service.setPatientService(patientService);
+    service.setPersonService(personService);
+    service.setEmrPersonImageService(emrPersonImageService);
+    return service;
+  }
+
+  @Bean
+  EmrDiagnosisDAO emrDiagnosisDAO(DbSessionFactory dbSessionFactory) {
+    EmrDiagnosisDAOImpl dao = new EmrDiagnosisDAOImpl();
+    dao.setSessionFactory(dbSessionFactory);
+    return dao;
+  }
+
+  @Bean
+  CoreDiagnosisService coreDiagnosisService(EmrDiagnosisDAO emrDiagnosisDAO, EmrApiDAO emrApiDAO) {
+    CoreDiagnosisService service = new CoreDiagnosisService();
+    service.setEmrDiagnosisDAO(emrDiagnosisDAO);
+    service.setEmrApiDAO(emrApiDAO);
+    return service;
+  }
+
+  @Bean
+  ObsGroupDiagnosisService obsGroupDiagnosisService(
+      EmrApiProperties emrApiProperties,
+      ObsService obsService,
+      EncounterService encounterService,
+      EmrApiDAO emrApiDAO) {
+    ObsGroupDiagnosisService service = new ObsGroupDiagnosisService();
+    service.setEmrApiProperties(emrApiProperties);
+    service.setObsService(obsService);
+    service.setEncounterService(encounterService);
+    service.setEmrApiDAO(emrApiDAO);
+    return service;
+  }
+
+  @Bean
+  DiagnosisService emrDiagnosisService(
+      CoreDiagnosisService coreDiagnosisService,
+      ObsGroupDiagnosisService obsGroupDiagnosisService,
+      AdministrationService adminService) {
+    DiagnosisServiceImpl service = new DiagnosisServiceImpl();
+    service.setCoreDiagnosisService(coreDiagnosisService);
+    service.setObsGroupDiagnosisService(obsGroupDiagnosisService);
+    service.setAdminService(adminService);
+    return service;
+  }
+
+  @Bean
+  ProcedureDAO procedureDAO(SessionFactory sessionFactory) {
+    return new HibernateProcedureDAO(sessionFactory);
+  }
+
+  @Bean
+  ProcedureService procedureService(ProcedureDAO procedureDAO) {
+    ProcedureServiceImpl service = new ProcedureServiceImpl();
+    service.setProcedureDAO(procedureDAO);
+    return service;
+  }
+
+  @Bean
+  EmrEncounterDAO emrEncounterDAO(DbSessionFactory dbSessionFactory) {
+    HibernateEmrEncounterDAO dao = new HibernateEmrEncounterDAO();
+    dao.setSessionFactory(dbSessionFactory);
+    return dao;
+  }
+
+  @Bean
+  DbSessionDAO emrApiDbSessionDAO(DbSessionFactory dbSessionFactory) {
+    DbSessionDAOImpl dao = new DbSessionDAOImpl();
+    dao.setSessionFactory(dbSessionFactory);
+    return dao;
+  }
+
+  @Bean
+  DbSessionUtil dbSessionUtil(DbSessionDAO emrApiDbSessionDAO) {
+    DbSessionUtil util = new DbSessionUtil();
+    util.setDbSessionDAO(emrApiDbSessionDAO);
+    return util;
+  }
+
+  @Bean
+  SmartInitializingSingleton emrApiServiceRegistrar(
+      ServiceContext serviceContext,
+      AccountService accountService,
+      AdtService adtService,
+      MaternalService maternalService,
+      ExitFromCareService exitFromCareService,
+      EmrConceptService emrConceptService,
+      EmrPatientService emrPatientService,
+      EmrPersonImageService emrPersonImageService,
+      EmrPatientProfileService emrPatientProfileService,
+      DispositionService dispositionService,
+      DiagnosisService emrDiagnosisService,
+      ProcedureService procedureService) {
+    return () -> {
+      serviceContext.setService(AccountService.class, accountService);
+      serviceContext.setService(AdtService.class, adtService);
+      serviceContext.setService(MaternalService.class, maternalService);
+      serviceContext.setService(ExitFromCareService.class, exitFromCareService);
+      serviceContext.setService(EmrConceptService.class, emrConceptService);
+      serviceContext.setService(EmrPatientService.class, emrPatientService);
+      serviceContext.setService(EmrPersonImageService.class, emrPersonImageService);
+      serviceContext.setService(EmrPatientProfileService.class, emrPatientProfileService);
+      serviceContext.setService(DispositionService.class, dispositionService);
+      serviceContext.setService(DiagnosisService.class, emrDiagnosisService);
+      serviceContext.setService(ProcedureService.class, procedureService);
+    };
+  }
+
+  private static Path resolveDispositionConfig() {
+    try {
+      Path dispositionsDirectory =
+          resolveContentSourceRoot()
+              .resolve(BACKEND_CONFIGURATION_ROOT)
+              .resolve(DISPOSITIONS_DOMAIN)
+              .normalize();
+      if (!Files.isDirectory(dispositionsDirectory)) {
+        return null;
+      }
+
+      List<Path> jsonFiles;
+      try (Stream<Path> stream = Files.list(dispositionsDirectory)) {
+        jsonFiles =
+            stream
+                .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                .filter(
+                    path ->
+                        path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".json"))
+                .sorted()
+                .toList();
+      }
+      if (jsonFiles.isEmpty()) {
+        return null;
+      }
+      if (jsonFiles.size() > 1) {
+        throw new IllegalStateException(
+            "Multiple SIH Salus disposition JSON files found in " + dispositionsDirectory + ".");
+      }
+      return jsonFiles.get(0).toRealPath();
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed to resolve SIH Salus disposition configuration.", e);
     }
+  }
 
-    @Bean
-    EmrApiDAO emrApiDAO(DbSessionFactory dbSessionFactory) {
-        EmrApiDAOImpl dao = new EmrApiDAOImpl();
-        dao.setSessionFactory(dbSessionFactory);
-        return dao;
+  private static Path resolveContentSourceRoot() {
+    String sourceRoot = System.getProperty("sihsalus.initializer.sourceRoot");
+    if (sourceRoot == null || sourceRoot.isBlank()) {
+      sourceRoot = System.getenv("SIHSALUS_INITIALIZER_SOURCE_ROOT");
     }
-
-    @Bean
-    EmrConceptDAO emrConceptDAO(DbSessionFactory dbSessionFactory) {
-        HibernateEmrConceptDAO dao = new HibernateEmrConceptDAO();
-        dao.setSessionFactory(dbSessionFactory);
-        return dao;
+    if (sourceRoot == null || sourceRoot.isBlank()) {
+      sourceRoot = DEFAULT_CONTENT_SOURCE_ROOT;
     }
-
-    @Bean
-    EmrConceptService emrConceptService(
-            EmrConceptDAO emrConceptDAO, EmrApiProperties emrApiProperties, ConceptService conceptService) {
-        EmrConceptServiceImpl service = new EmrConceptServiceImpl();
-        service.setDao(emrConceptDAO);
-        service.setEmrApiProperties(emrApiProperties);
-        service.setConceptService(conceptService);
-        return service;
-    }
-
-	@Bean
-	DispositionService dispositionService(ConceptService conceptService, EmrConceptService emrConceptService,
-	        EmrApiProperties emrApiProperties) {
-		DispositionServiceImpl service = new DispositionServiceImpl(conceptService, emrConceptService);
-		service.setEmrApiProperties(emrApiProperties);
-		return service;
-	}
-
-    @Bean
-    SmartInitializingSingleton emrApiPropertiesDispositionBinder(
-            EmrApiProperties emrApiProperties, DispositionService dispositionService) {
-        return () -> emrApiProperties.setDispositionService(dispositionService);
-    }
-
-    @Bean
-    SmartInitializingSingleton sihsalusDispositionConfigBinder(DispositionService dispositionService) {
-        return () -> {
-            Path dispositionConfig = resolveDispositionConfig();
-            if (dispositionConfig != null) {
-                dispositionService.setDispositionConfig("file:" + dispositionConfig);
-            }
-        };
-    }
-
-    @Bean
-    DomainWrapperFactory domainWrapperFactory() {
-        return new DomainWrapperFactory();
-    }
-
-    @Bean
-    AdtService adtService(
-            EmrApiProperties emrApiProperties,
-            EncounterService encounterService,
-            VisitService visitService,
-            LocationService locationService,
-            DispositionService dispositionService,
-            EmrApiDAO emrApiDAO,
-            EmrConceptService emrConceptService,
-            ProviderService providerService,
-            PatientService patientService,
-            DomainWrapperFactory domainWrapperFactory) {
-        AdtServiceImpl service = new AdtServiceImpl();
-        service.setEmrApiProperties(emrApiProperties);
-        service.setEncounterService(encounterService);
-        service.setVisitService(visitService);
-        service.setLocationService(locationService);
-        service.setDispositionService(dispositionService);
-        service.setEmrApiDAO(emrApiDAO);
-        service.setEmrConceptService(emrConceptService);
-        service.setProviderService(providerService);
-        service.setPatientService(patientService);
-        service.setDomainWrapperFactory(domainWrapperFactory);
-        service.setPatientMergeActions(List.of());
-        return service;
-    }
-
-    @Bean
-    EmrPatientDAO emrPatientDAO(DbSessionFactory dbSessionFactory, EmrApiProperties emrApiProperties) {
-        HibernateEmrPatientDAO dao = new HibernateEmrPatientDAO();
-        dao.setSessionFactory(dbSessionFactory);
-        dao.setEmrApiProperties(emrApiProperties);
-        return dao;
-    }
-
-    @Bean
-    EmrPatientService emrPatientService(
-            EmrPatientDAO emrPatientDAO,
-            EmrApiProperties emrApiProperties,
-            PatientService patientService,
-            AdtService adtService) {
-        EmrPatientServiceImpl service = new EmrPatientServiceImpl();
-        service.setDao(emrPatientDAO);
-        service.setEmrApiProperties(emrApiProperties);
-        service.setPatientService(patientService);
-        service.setAdtService(adtService);
-        return service;
-    }
-
-    @Bean
-    AccountService accountService(
-            UserService userService,
-            PersonService personService,
-            ProviderService providerService,
-            DomainWrapperFactory domainWrapperFactory,
-            EmrApiProperties emrApiProperties,
-            EmrApiDAO emrApiDAO) {
-        AccountServiceImpl service = new AccountServiceImpl();
-        service.setUserService(userService);
-        service.setPersonService(personService);
-        service.setProviderService(providerService);
-        service.setDomainWrapperFactory(domainWrapperFactory);
-        service.setEmrApiProperties(emrApiProperties);
-        service.setEmrApiDAO(emrApiDAO);
-        return service;
-    }
-
-    @Bean
-    MaternalService maternalService(AdtService adtService, EmrApiProperties emrApiProperties, EmrApiDAO emrApiDAO) {
-        MaternalServiceImpl service = new MaternalServiceImpl();
-        service.setAdtService(adtService);
-        service.setEmrApiProperties(emrApiProperties);
-        service.setEmrApiDAO(emrApiDAO);
-        return service;
-    }
-
-    @Bean
-    ExitFromCareService exitFromCareService(
-            EmrApiProperties emrApiProperties,
-            VisitService visitService,
-            PatientService patientService,
-            ProgramWorkflowService programWorkflowService,
-            AdtService adtService) {
-        ExitFromCareServiceImpl service = new ExitFromCareServiceImpl();
-        service.setEmrApiProperties(emrApiProperties);
-        service.setVisitService(visitService);
-        service.setPatientService(patientService);
-        service.setProgramWorkflowService(programWorkflowService);
-        service.setAdtService(adtService);
-        return service;
-    }
-
-    @Bean
-    EmrPersonImageService emrPersonImageService(EmrApiProperties emrApiProperties) {
-        EmrPersonImageServiceImpl service = new EmrPersonImageServiceImpl();
-        service.setEmrApiProperties(emrApiProperties);
-        return service;
-    }
-
-    @Bean
-    EmrPatientProfileService emrPatientProfileService(
-            PatientService patientService, PersonService personService, EmrPersonImageService emrPersonImageService) {
-        EmrPatientProfileServiceImpl service = new EmrPatientProfileServiceImpl();
-        service.setPatientService(patientService);
-        service.setPersonService(personService);
-        service.setEmrPersonImageService(emrPersonImageService);
-        return service;
-    }
-
-    @Bean
-    EmrDiagnosisDAO emrDiagnosisDAO(DbSessionFactory dbSessionFactory) {
-        EmrDiagnosisDAOImpl dao = new EmrDiagnosisDAOImpl();
-        dao.setSessionFactory(dbSessionFactory);
-        return dao;
-    }
-
-    @Bean
-    CoreDiagnosisService coreDiagnosisService(EmrDiagnosisDAO emrDiagnosisDAO, EmrApiDAO emrApiDAO) {
-        CoreDiagnosisService service = new CoreDiagnosisService();
-        service.setEmrDiagnosisDAO(emrDiagnosisDAO);
-        service.setEmrApiDAO(emrApiDAO);
-        return service;
-    }
-
-    @Bean
-    ObsGroupDiagnosisService obsGroupDiagnosisService(
-            EmrApiProperties emrApiProperties,
-            ObsService obsService,
-            EncounterService encounterService,
-            EmrApiDAO emrApiDAO) {
-        ObsGroupDiagnosisService service = new ObsGroupDiagnosisService();
-        service.setEmrApiProperties(emrApiProperties);
-        service.setObsService(obsService);
-        service.setEncounterService(encounterService);
-        service.setEmrApiDAO(emrApiDAO);
-        return service;
-    }
-
-    @Bean
-    DiagnosisService emrDiagnosisService(
-            CoreDiagnosisService coreDiagnosisService,
-            ObsGroupDiagnosisService obsGroupDiagnosisService,
-            AdministrationService adminService) {
-        DiagnosisServiceImpl service = new DiagnosisServiceImpl();
-        service.setCoreDiagnosisService(coreDiagnosisService);
-        service.setObsGroupDiagnosisService(obsGroupDiagnosisService);
-        service.setAdminService(adminService);
-        return service;
-    }
-
-    @Bean
-    ProcedureDAO procedureDAO(SessionFactory sessionFactory) {
-        return new HibernateProcedureDAO(sessionFactory);
-    }
-
-    @Bean
-    ProcedureService procedureService(ProcedureDAO procedureDAO) {
-        ProcedureServiceImpl service = new ProcedureServiceImpl();
-        service.setProcedureDAO(procedureDAO);
-        return service;
-    }
-
-    @Bean
-    EmrEncounterDAO emrEncounterDAO(DbSessionFactory dbSessionFactory) {
-        HibernateEmrEncounterDAO dao = new HibernateEmrEncounterDAO();
-        dao.setSessionFactory(dbSessionFactory);
-        return dao;
-    }
-
-    @Bean
-    DbSessionDAO emrApiDbSessionDAO(DbSessionFactory dbSessionFactory) {
-        DbSessionDAOImpl dao = new DbSessionDAOImpl();
-        dao.setSessionFactory(dbSessionFactory);
-        return dao;
-    }
-
-    @Bean
-    DbSessionUtil dbSessionUtil(DbSessionDAO emrApiDbSessionDAO) {
-        DbSessionUtil util = new DbSessionUtil();
-        util.setDbSessionDAO(emrApiDbSessionDAO);
-        return util;
-    }
-
-    @Bean
-    SmartInitializingSingleton emrApiServiceRegistrar(
-            ServiceContext serviceContext,
-            AccountService accountService,
-            AdtService adtService,
-            MaternalService maternalService,
-            ExitFromCareService exitFromCareService,
-            EmrConceptService emrConceptService,
-            EmrPatientService emrPatientService,
-            EmrPersonImageService emrPersonImageService,
-            EmrPatientProfileService emrPatientProfileService,
-            DispositionService dispositionService,
-            DiagnosisService emrDiagnosisService,
-            ProcedureService procedureService) {
-        return () -> {
-            serviceContext.setService(AccountService.class, accountService);
-            serviceContext.setService(AdtService.class, adtService);
-            serviceContext.setService(MaternalService.class, maternalService);
-            serviceContext.setService(ExitFromCareService.class, exitFromCareService);
-            serviceContext.setService(EmrConceptService.class, emrConceptService);
-            serviceContext.setService(EmrPatientService.class, emrPatientService);
-            serviceContext.setService(EmrPersonImageService.class, emrPersonImageService);
-            serviceContext.setService(EmrPatientProfileService.class, emrPatientProfileService);
-            serviceContext.setService(DispositionService.class, dispositionService);
-            serviceContext.setService(DiagnosisService.class, emrDiagnosisService);
-            serviceContext.setService(ProcedureService.class, procedureService);
-        };
-    }
-
-    private static Path resolveDispositionConfig() {
-        try {
-            Path dispositionsDirectory =
-                    resolveContentSourceRoot()
-                            .resolve(BACKEND_CONFIGURATION_ROOT)
-                            .resolve(DISPOSITIONS_DOMAIN)
-                            .normalize();
-            if (!Files.isDirectory(dispositionsDirectory)) {
-                return null;
-            }
-
-            List<Path> jsonFiles;
-            try (Stream<Path> stream = Files.list(dispositionsDirectory)) {
-                jsonFiles =
-                        stream
-                                .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                                .filter(path -> path.getFileName()
-                                        .toString()
-                                        .toLowerCase(Locale.ROOT)
-                                        .endsWith(".json"))
-                                .sorted()
-                                .toList();
-            }
-            if (jsonFiles.isEmpty()) {
-                return null;
-            }
-            if (jsonFiles.size() > 1) {
-                throw new IllegalStateException(
-                        "Multiple SIH Salus disposition JSON files found in " + dispositionsDirectory + ".");
-            }
-            return jsonFiles.get(0).toRealPath();
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to resolve SIH Salus disposition configuration.", e);
-        }
-    }
-
-    private static Path resolveContentSourceRoot() {
-        String sourceRoot = System.getProperty("sihsalus.initializer.sourceRoot");
-        if (sourceRoot == null || sourceRoot.isBlank()) {
-            sourceRoot = System.getenv("SIHSALUS_INITIALIZER_SOURCE_ROOT");
-        }
-        if (sourceRoot == null || sourceRoot.isBlank()) {
-            sourceRoot = DEFAULT_CONTENT_SOURCE_ROOT;
-        }
-        return Paths.get(sourceRoot).toAbsolutePath().normalize();
-    }
+    return Paths.get(sourceRoot).toAbsolutePath().normalize();
+  }
 }

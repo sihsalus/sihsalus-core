@@ -10,9 +10,7 @@
 package org.openmrs.module.cohort.web.resource;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.ArrayList;
-
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cohort.CohortAttribute;
@@ -29,88 +27,96 @@ import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9.BaseAttr
 
 @Slf4j
 @SuppressWarnings("unused")
-@SubResource(parent = CohortResource.class, path = "attribute", supportedClass = CohortAttribute.class, supportedOpenmrsVersions = {
-        "1.8 - 9.*" })
-public class CohortAttributeResource extends BaseAttributeCrudResource1_9<CohortAttribute, CohortM, CohortResource> {
-	
-	private final CohortService cohortService;
-	
-	public CohortAttributeResource() {
-		this.cohortService = Context.getRegisteredComponent("cohort.cohortService", CohortService.class);
-	}
-	
-	/**
-	 * Sets cohortAttributeType of a given cohortAttribute.
-	 *
-	 * @param cohortAttribute cohort attribute
-	 * @param attributeType cohort attribute type to set
-	 */
-	@PropertySetter("attributeType")
-	public static void setAttributeType(CohortAttribute cohortAttribute, CohortAttributeType attributeType) {
-		cohortAttribute.setAttributeType(attributeType);
-	}
-	
-	/**
-	 * @param cohortAttribute attribute
-	 * @return the parent of the given instance of this subresource
-	 */
-	@Override
-	public CohortM getParent(CohortAttribute cohortAttribute) {
-		return cohortAttribute.getCohort();
-	}
-	
-	/**
-	 * Sets the parent property on the given instance of this subresource
-	 *
-	 * @param cohortAttribute cohort attribute
-	 * @param cohort parent cohort
-	 */
-	@Override
-	public void setParent(CohortAttribute cohortAttribute, CohortM cohort) {
-		cohortAttribute.setCohort(cohort);
-	}
-	
-	/**
-	 * Implementations should override this method to return a list of all instances that belong to the
-	 * given parent
-	 *
-	 * @param cohort parent cohort
-	 * @param context request context
-	 * @throws org.openmrs.module.webservices.rest.web.response.ResponseException e
-	 */
-	@Override
-	public PageableResult doGetAll(CohortM cohort, RequestContext context) throws ResponseException {
-		return new NeedsPaging<>(new ArrayList<>(cohort.getActiveAttributes()), context);
-	}
-	
-	@Override
-	public CohortAttribute save(CohortAttribute cohortAttribute) {
-		return cohortService.saveCohortAttribute(cohortAttribute);
-	}
-	
-	@Override
-	protected void delete(CohortAttribute cohortAttribute, String reason, RequestContext request) throws ResponseException {
-		cohortService.voidCohortAttribute(cohortAttribute, reason);
-	}
-	
-	@Override
-	public void purge(CohortAttribute cohortAttribute, RequestContext request) throws ResponseException {
-		cohortService.purgeCohortAttribute(cohortAttribute);
-	}
-	
-	@Override
-	public CohortAttribute newDelegate() {
-		return new CohortAttribute();
-	}
-	
-	@Override
-	public CohortAttribute getByUniqueId(@NotNull String uuid) {
-		return cohortService.getCohortAttributeByUuid(uuid);
-	}
-	
-	@Override
-	public String getUri(Object instance) {
-		log.debug("URI: {}", super.getUri(instance));
-		return super.getUri(instance);
-	}
+@SubResource(
+    parent = CohortResource.class,
+    path = "attribute",
+    supportedClass = CohortAttribute.class,
+    supportedOpenmrsVersions = {"1.8 - 9.*"})
+public class CohortAttributeResource
+    extends BaseAttributeCrudResource1_9<CohortAttribute, CohortM, CohortResource> {
+
+  private final CohortService cohortService;
+
+  public CohortAttributeResource() {
+    this.cohortService =
+        Context.getRegisteredComponent("cohort.cohortService", CohortService.class);
+  }
+
+  /**
+   * Sets cohortAttributeType of a given cohortAttribute.
+   *
+   * @param cohortAttribute cohort attribute
+   * @param attributeType cohort attribute type to set
+   */
+  @PropertySetter("attributeType")
+  public static void setAttributeType(
+      CohortAttribute cohortAttribute, CohortAttributeType attributeType) {
+    cohortAttribute.setAttributeType(attributeType);
+  }
+
+  /**
+   * @param cohortAttribute attribute
+   * @return the parent of the given instance of this subresource
+   */
+  @Override
+  public CohortM getParent(CohortAttribute cohortAttribute) {
+    return cohortAttribute.getCohort();
+  }
+
+  /**
+   * Sets the parent property on the given instance of this subresource
+   *
+   * @param cohortAttribute cohort attribute
+   * @param cohort parent cohort
+   */
+  @Override
+  public void setParent(CohortAttribute cohortAttribute, CohortM cohort) {
+    cohortAttribute.setCohort(cohort);
+  }
+
+  /**
+   * Implementations should override this method to return a list of all instances that belong to
+   * the given parent
+   *
+   * @param cohort parent cohort
+   * @param context request context
+   * @throws org.openmrs.module.webservices.rest.web.response.ResponseException e
+   */
+  @Override
+  public PageableResult doGetAll(CohortM cohort, RequestContext context) throws ResponseException {
+    return new NeedsPaging<>(new ArrayList<>(cohort.getActiveAttributes()), context);
+  }
+
+  @Override
+  public CohortAttribute save(CohortAttribute cohortAttribute) {
+    return cohortService.saveCohortAttribute(cohortAttribute);
+  }
+
+  @Override
+  protected void delete(CohortAttribute cohortAttribute, String reason, RequestContext request)
+      throws ResponseException {
+    cohortService.voidCohortAttribute(cohortAttribute, reason);
+  }
+
+  @Override
+  public void purge(CohortAttribute cohortAttribute, RequestContext request)
+      throws ResponseException {
+    cohortService.purgeCohortAttribute(cohortAttribute);
+  }
+
+  @Override
+  public CohortAttribute newDelegate() {
+    return new CohortAttribute();
+  }
+
+  @Override
+  public CohortAttribute getByUniqueId(@NotNull String uuid) {
+    return cohortService.getCohortAttributeByUuid(uuid);
+  }
+
+  @Override
+  public String getUri(Object instance) {
+    log.debug("URI: {}", super.getUri(instance));
+    return super.getUri(instance);
+  }
 }

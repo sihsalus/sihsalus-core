@@ -14,28 +14,28 @@ import java.util.Collections;
 import java.util.List;
 
 public class AccountSearchResult {
-	
-	private Long totalCount;
-	
-	private List<AccountDomainWrapper> accounts = new ArrayList<>();
 
-	public Long getTotalCount() {
-		return totalCount;
-	}
+  private Long totalCount;
 
-	public void setTotalCount(Long totalCount) {
-		this.totalCount = totalCount;
-	}
+  private List<AccountDomainWrapper> accounts = new ArrayList<>();
 
-	public List<AccountDomainWrapper> getAccounts() {
-		return Collections.unmodifiableList(accounts);
-	}
+  public Long getTotalCount() {
+    return totalCount;
+  }
 
-	public void setAccounts(List<AccountDomainWrapper> accounts) {
-		this.accounts = accounts == null ? null : new ArrayList<>(accounts);
-	}
+  public void setTotalCount(Long totalCount) {
+    this.totalCount = totalCount;
+  }
 
-	public void addAccount(AccountDomainWrapper account) {
-		accounts.add(account);
-	}
+  public List<AccountDomainWrapper> getAccounts() {
+    return Collections.unmodifiableList(accounts);
+  }
+
+  public void setAccounts(List<AccountDomainWrapper> accounts) {
+    this.accounts = accounts == null ? null : new ArrayList<>(accounts);
+  }
+
+  public void addAccount(AccountDomainWrapper account) {
+    accounts.add(account);
+  }
 }

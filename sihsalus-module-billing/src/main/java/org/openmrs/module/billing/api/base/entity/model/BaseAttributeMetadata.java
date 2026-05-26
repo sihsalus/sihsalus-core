@@ -14,60 +14,59 @@ import org.openmrs.module.billing.api.base.util.AttributeUtil;
 // @formatter:off
 /**
  * Base class for {@link org.openmrs.OpenmrsMetadata} attribute models.
+ *
  * @param <TOwner> The class of the attribute owner.
  * @param <TAttributeType> The class of the attribute type.
  */
 public abstract class BaseAttributeMetadata<
-			TOwner extends ICustomizable<?>,
-			TAttributeType extends IAttributeType>
-		extends BaseSerializableOpenmrsMetadata
-		implements IAttribute<TOwner, TAttributeType> {
-// @formatter:on
-	private static final long serialVersionUID = 0L;
-	
-	private Integer attributeId;
-	
-	private TOwner owner;
-	
-	private TAttributeType attributeType;
-	
-	private String value;
-	
-	@Override
-	public Integer getId() {
-		return attributeId;
-	}
-	
-	@Override
-	public void setId(Integer id) {
-		attributeId = id;
-	}
-	
-	public TOwner getOwner() {
-		return owner;
-	}
-	
-	public void setOwner(TOwner owner) {
-		this.owner = owner;
-	}
-	
-	public TAttributeType getAttributeType() {
-		return attributeType;
-	}
-	
-	public void setAttributeType(TAttributeType attributeType) {
-		this.attributeType = attributeType;
-	}
-	
-	public String getValue() {
-		return value;
-	}
-	
-	public void setValue(String value) {
-		this.value = value;
-	}
-	
-	public Object getHydratedValue() {
-		return AttributeUtil.tryToHydrateObject(getAttributeType().getFormat(), value);
-	}
+        TOwner extends ICustomizable<?>, TAttributeType extends IAttributeType>
+    extends BaseSerializableOpenmrsMetadata implements IAttribute<TOwner, TAttributeType> {
+  // @formatter:on
+  private static final long serialVersionUID = 0L;
+
+  private Integer attributeId;
+
+  private TOwner owner;
+
+  private TAttributeType attributeType;
+
+  private String value;
+
+  @Override
+  public Integer getId() {
+    return attributeId;
+  }
+
+  @Override
+  public void setId(Integer id) {
+    attributeId = id;
+  }
+
+  public TOwner getOwner() {
+    return owner;
+  }
+
+  public void setOwner(TOwner owner) {
+    this.owner = owner;
+  }
+
+  public TAttributeType getAttributeType() {
+    return attributeType;
+  }
+
+  public void setAttributeType(TAttributeType attributeType) {
+    this.attributeType = attributeType;
+  }
+
+  public String getValue() {
+    return value;
+  }
+
+  public void setValue(String value) {
+    this.value = value;
+  }
+
+  public Object getHydratedValue() {
+    return AttributeUtil.tryToHydrateObject(getAttributeType().getFormat(), value);
+  }
 }

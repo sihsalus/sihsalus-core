@@ -13,13 +13,14 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackageClasses = O3FormsResourceController.class)
 public class SihsalusO3FormsConfiguration {
 
-    @Bean
-    O3FormsService o3FormsService() {
-        return new O3FormsServiceImpl();
-    }
+  @Bean
+  O3FormsService o3FormsService() {
+    return new O3FormsServiceImpl();
+  }
 
-    @Bean
-    SmartInitializingSingleton o3FormsServiceRegistrar(ServiceContext serviceContext, O3FormsService o3FormsService) {
-        return () -> serviceContext.setService(O3FormsService.class, o3FormsService);
-    }
+  @Bean
+  SmartInitializingSingleton o3FormsServiceRegistrar(
+      ServiceContext serviceContext, O3FormsService o3FormsService) {
+    return () -> serviceContext.setService(O3FormsService.class, o3FormsService);
+  }
 }

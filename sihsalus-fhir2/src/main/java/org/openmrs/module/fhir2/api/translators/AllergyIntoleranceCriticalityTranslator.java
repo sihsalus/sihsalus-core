@@ -10,20 +10,22 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 
-public interface AllergyIntoleranceCriticalityTranslator extends ToFhirTranslator<AllergyIntolerance.AllergyIntoleranceSeverity, AllergyIntolerance.AllergyIntoleranceCriticality> {
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity} element to an
-	 * {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCriticality}
-	 *
-	 * @param allergyIntoleranceSeverity allergyIntoleranceSeverity element to translate
-	 * @return the corresponding
-	 *         {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCriticality}
-	 */
-	@Override
-	AllergyIntolerance.AllergyIntoleranceCriticality toFhirResource(
-	        @Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity);
+public interface AllergyIntoleranceCriticalityTranslator
+    extends ToFhirTranslator<
+        AllergyIntolerance.AllergyIntoleranceSeverity,
+        AllergyIntolerance.AllergyIntoleranceCriticality> {
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity} element to
+   * an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCriticality}
+   *
+   * @param allergyIntoleranceSeverity allergyIntoleranceSeverity element to translate
+   * @return the corresponding {@link
+   *     org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCriticality}
+   */
+  @Override
+  AllergyIntolerance.AllergyIntoleranceCriticality toFhirResource(
+      @Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity);
 }

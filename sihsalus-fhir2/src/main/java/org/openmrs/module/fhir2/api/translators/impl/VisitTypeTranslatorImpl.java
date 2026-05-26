@@ -12,12 +12,10 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -31,38 +29,49 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class VisitTypeTranslatorImpl implements VisitTypeTranslator<VisitType> {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private VisitService visitService;
-	
-	@Override
-	public List<CodeableConcept> toFhirResource(@Nonnull VisitType visitType) {
-		if (visitType == null) {
-			return null;
-		}
-		
-		CodeableConcept code = new CodeableConcept();
-		code.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode(visitType.getUuid())
-		        .setDisplay(getMetadataTranslation(visitType));
-		return Collections.singletonList(code);
-	}
-	
-	@Override
-	public VisitType toOpenmrsType(@Nonnull List<CodeableConcept> visitTypes) {
-		if (visitTypes == null || visitTypes.isEmpty()) {
-			return null;
-		}
-		
-		Coding visitType = visitTypes.stream().filter(CodeableConcept::hasCoding)
-		        .map(cc -> cc.getCoding().stream().filter(Coding::hasSystem)
-		                .filter(c -> FhirConstants.VISIT_TYPE_SYSTEM_URI.equals(c.getSystem())).findFirst().orElse(null))
-		        .filter(Objects::nonNull).findFirst().orElse(null);
-		
-		if (visitType == null) {
-			return null;
-		}
-		
-		return visitService.getVisitTypeByUuid(visitType.getCode());
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private VisitService visitService;
+
+  @Override
+  public List<CodeableConcept> toFhirResource(@Nonnull VisitType visitType) {
+    if (visitType == null) {
+      return null;
+    }
+
+    CodeableConcept code = new CodeableConcept();
+    code.addCoding()
+        .setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI)
+        .setCode(visitType.getUuid())
+        .setDisplay(getMetadataTranslation(visitType));
+    return Collections.singletonList(code);
+  }
+
+  @Override
+  public VisitType toOpenmrsType(@Nonnull List<CodeableConcept> visitTypes) {
+    if (visitTypes == null || visitTypes.isEmpty()) {
+      return null;
+    }
+
+    Coding visitType =
+        visitTypes.stream()
+            .filter(CodeableConcept::hasCoding)
+            .map(
+                cc ->
+                    cc.getCoding().stream()
+                        .filter(Coding::hasSystem)
+                        .filter(c -> FhirConstants.VISIT_TYPE_SYSTEM_URI.equals(c.getSystem()))
+                        .findFirst()
+                        .orElse(null))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+
+    if (visitType == null) {
+      return null;
+    }
+
+    return visitService.getVisitTypeByUuid(visitType.getCode());
+  }
 }

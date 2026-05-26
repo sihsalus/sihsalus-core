@@ -9,10 +9,8 @@
  */
 package org.openmrs.module.billing.api.base.entity.model;
 
-/**
- * Base class for simple attribute type models.
- */
+/** Base class for simple attribute type models. */
 public class BaseSimpleAttributeType extends BaseAttributeType implements ISimpleAttributeType {
-	
-	private static final long serialVersionUID = 0L;
+
+  private static final long serialVersionUID = 0L;
 }

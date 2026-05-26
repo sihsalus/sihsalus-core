@@ -9,15 +9,14 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.ValueSet;
 
 public interface FhirValueSetService extends FhirService<ValueSet> {
-	
-	ValueSet get(@Nonnull String uuid);
-	
-	IBundleProvider searchForValueSets(StringAndListParam title);
+
+  ValueSet get(@Nonnull String uuid);
+
+  IBundleProvider searchForValueSets(StringAndListParam title);
 }

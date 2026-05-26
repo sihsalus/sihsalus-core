@@ -10,30 +10,32 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Concept;
 
-public interface AllergyIntoleranceSeverityTranslator extends ToFhirTranslator<Concept, AllergyIntolerance.AllergyIntoleranceSeverity>, ToOpenmrsTranslator<Concept, AllergyIntolerance.AllergyIntoleranceSeverity> {
-	
-	/**
-	 * Maps {@link org.openmrs.Concept} element to a
-	 * {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity}
-	 *
-	 * @param concept the OpenMRS concept to translate
-	 * @return the corresponding
-	 *         {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity}
-	 */
-	@Override
-	AllergyIntolerance.AllergyIntoleranceSeverity toFhirResource(@Nonnull Concept concept);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity} to a
-	 * {@link org.openmrs.Concept}
-	 *
-	 * @param allergyIntoleranceSeverity the FHIR allergyIntoleranceSeverity to translate
-	 * @return the corresponding {@link org.openmrs.Concept}
-	 */
-	@Override
-	Concept toOpenmrsType(@Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity);
+public interface AllergyIntoleranceSeverityTranslator
+    extends ToFhirTranslator<Concept, AllergyIntolerance.AllergyIntoleranceSeverity>,
+        ToOpenmrsTranslator<Concept, AllergyIntolerance.AllergyIntoleranceSeverity> {
+
+  /**
+   * Maps {@link org.openmrs.Concept} element to a {@link
+   * org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity}
+   *
+   * @param concept the OpenMRS concept to translate
+   * @return the corresponding {@link
+   *     org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity}
+   */
+  @Override
+  AllergyIntolerance.AllergyIntoleranceSeverity toFhirResource(@Nonnull Concept concept);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity} to a {@link
+   * org.openmrs.Concept}
+   *
+   * @param allergyIntoleranceSeverity the FHIR allergyIntoleranceSeverity to translate
+   * @return the corresponding {@link org.openmrs.Concept}
+   */
+  @Override
+  Concept toOpenmrsType(
+      @Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity);
 }

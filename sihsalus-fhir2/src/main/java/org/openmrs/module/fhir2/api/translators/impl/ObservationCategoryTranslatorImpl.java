@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -27,27 +26,30 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ObservationCategoryTranslatorImpl implements ObservationCategoryTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirObservationCategoryMapDaoImpl categoryMap;
-	
-	@Override
-	@Cacheable(value = "fhir2ObservationCategoryToCodeableConcept")
-	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
-		if (concept == null || concept.getConceptClass() == null) {
-			return null;
-		}
-		
-		String category = categoryMap.getCategory(concept.getConceptClass().getUuid());
-		
-		if (category == null) {
-			return null;
-		}
-		
-		CodeableConcept result = new CodeableConcept();
-		result.addCoding().setSystem(FhirConstants.OBSERVATION_CATEGORY_VALUE_SET_URI).setCode(category)
-		        .setDisplay(StringUtils.capitalize(category.replace('-', ' ')));
-		return result;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirObservationCategoryMapDaoImpl categoryMap;
+
+  @Override
+  @Cacheable(value = "fhir2ObservationCategoryToCodeableConcept")
+  public CodeableConcept toFhirResource(@Nonnull Concept concept) {
+    if (concept == null || concept.getConceptClass() == null) {
+      return null;
+    }
+
+    String category = categoryMap.getCategory(concept.getConceptClass().getUuid());
+
+    if (category == null) {
+      return null;
+    }
+
+    CodeableConcept result = new CodeableConcept();
+    result
+        .addCoding()
+        .setSystem(FhirConstants.OBSERVATION_CATEGORY_VALUE_SET_URI)
+        .setCode(category)
+        .setDisplay(StringUtils.capitalize(category.replace('-', ' ')));
+    return result;
+  }
 }

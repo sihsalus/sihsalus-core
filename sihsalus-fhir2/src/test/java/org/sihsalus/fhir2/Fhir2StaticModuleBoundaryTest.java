@@ -13,22 +13,25 @@ import org.junit.jupiter.api.Test;
 
 class Fhir2StaticModuleBoundaryTest {
 
-    @Test
-    void importedFhirSourcesDoNotUseOmodRuntimeLoading() throws IOException {
-        Path sourceRoot = Path.of("src/main/java/org/openmrs/module/fhir2");
-        assertTrue(Files.isDirectory(sourceRoot), "FHIR2 upstream sources must remain local");
+  @Test
+  void importedFhirSourcesDoNotUseOmodRuntimeLoading() throws IOException {
+    Path sourceRoot = Path.of("src/main/java/org/openmrs/module/fhir2");
+    assertTrue(Files.isDirectory(sourceRoot), "FHIR2 upstream sources must remain local");
 
-        List<Path> javaSources;
-        try (Stream<Path> stream = Files.walk(sourceRoot)) {
-            javaSources = stream.filter(path -> path.toString().endsWith(".java")).toList();
-        }
-
-        assertFalse(javaSources.isEmpty(), "FHIR2 upstream source import should not be empty");
-        for (Path source : javaSources) {
-            String content = Files.readString(source, StandardCharsets.UTF_8);
-            assertFalse(content.contains("ModuleFactory"), source + " must not use dynamic module loading");
-            assertFalse(content.contains("BaseModuleActivator"), source + " must not declare an OMOD activator");
-            assertFalse(content.contains("ModuleActivator"), source + " must not declare an OMOD activator");
-        }
+    List<Path> javaSources;
+    try (Stream<Path> stream = Files.walk(sourceRoot)) {
+      javaSources = stream.filter(path -> path.toString().endsWith(".java")).toList();
     }
+
+    assertFalse(javaSources.isEmpty(), "FHIR2 upstream source import should not be empty");
+    for (Path source : javaSources) {
+      String content = Files.readString(source, StandardCharsets.UTF_8);
+      assertFalse(
+          content.contains("ModuleFactory"), source + " must not use dynamic module loading");
+      assertFalse(
+          content.contains("BaseModuleActivator"), source + " must not declare an OMOD activator");
+      assertFalse(
+          content.contains("ModuleActivator"), source + " must not declare an OMOD activator");
+    }
+  }
 }

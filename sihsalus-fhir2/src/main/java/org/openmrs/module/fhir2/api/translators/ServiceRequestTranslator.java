@@ -10,18 +10,17 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
 
 public interface ServiceRequestTranslator<T> extends OpenmrsFhirTranslator<T, ServiceRequest> {
-	
-	/**
-	 * Maps a {@link TestOrder} to a {@link ServiceRequest}
-	 * 
-	 * @param order the OpenMRS Order to translate
-	 * @return the corresponding FHIR ServiceRequest
-	 */
-	@Override
-	ServiceRequest toFhirResource(@Nonnull T order);
+
+  /**
+   * Maps a {@link TestOrder} to a {@link ServiceRequest}
+   *
+   * @param order the OpenMRS Order to translate
+   * @return the corresponding FHIR ServiceRequest
+   */
+  @Override
+  ServiceRequest toFhirResource(@Nonnull T order);
 }

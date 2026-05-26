@@ -14,6 +14,6 @@ import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
 
 public interface FhirRelatedPersonService extends FhirService<RelatedPerson> {
-	
-	IBundleProvider searchForRelatedPeople(RelatedPersonSearchParams relatedPersonSearchParams);
+
+  IBundleProvider searchForRelatedPeople(RelatedPersonSearchParams relatedPersonSearchParams);
 }

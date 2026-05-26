@@ -9,10 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.annotation.Nonnull;
-
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.ConditionVerificationStatus;
@@ -21,47 +19,52 @@ import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTrans
 import org.springframework.stereotype.Component;
 
 @Component
-public class ConditionVerificationStatusTranslatorImpl implements ConditionVerificationStatusTranslator<ConditionVerificationStatus> {
-	
-	@Override
-	public CodeableConcept toFhirResource(@Nonnull ConditionVerificationStatus verificationStatus) {
-		if (verificationStatus == null) {
-			return null;
-		}
-		
-		return new CodeableConcept().addCoding(addVerificationStatusCoding(verificationStatus.toString()));
-	}
-	
-	@Override
-	public ConditionVerificationStatus toOpenmrsType(@Nonnull CodeableConcept codeableConcept) {
-		if (codeableConcept == null || codeableConcept.getCoding().isEmpty()) {
-			return null;
-		}
-		
-		Optional<Coding> verificationStatus = codeableConcept.getCoding().stream()
-		        .filter(c -> c.getSystem().equals(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI)).findFirst();
-		
-		Coding verificationStatusCode = verificationStatus.orElse(null);
-		
-		if (verificationStatusCode == null) {
-			return null;
-		}
-		
-		switch (verificationStatusCode.getCode()) {
-			case "confirmed":
-				return ConditionVerificationStatus.CONFIRMED;
-			case "provisional":
-				return ConditionVerificationStatus.PROVISIONAL;
-			default:
-				return null;
-		}
-	}
-	
-	private Coding addVerificationStatusCoding(String verificationStatus) {
-		Coding coding = new Coding();
-		coding.setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI);
-		coding.setCode(verificationStatus.toLowerCase());
-		coding.setDisplay(verificationStatus.replace("_", "-").toUpperCase());
-		return coding;
-	}
+public class ConditionVerificationStatusTranslatorImpl
+    implements ConditionVerificationStatusTranslator<ConditionVerificationStatus> {
+
+  @Override
+  public CodeableConcept toFhirResource(@Nonnull ConditionVerificationStatus verificationStatus) {
+    if (verificationStatus == null) {
+      return null;
+    }
+
+    return new CodeableConcept()
+        .addCoding(addVerificationStatusCoding(verificationStatus.toString()));
+  }
+
+  @Override
+  public ConditionVerificationStatus toOpenmrsType(@Nonnull CodeableConcept codeableConcept) {
+    if (codeableConcept == null || codeableConcept.getCoding().isEmpty()) {
+      return null;
+    }
+
+    Optional<Coding> verificationStatus =
+        codeableConcept.getCoding().stream()
+            .filter(
+                c -> c.getSystem().equals(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI))
+            .findFirst();
+
+    Coding verificationStatusCode = verificationStatus.orElse(null);
+
+    if (verificationStatusCode == null) {
+      return null;
+    }
+
+    switch (verificationStatusCode.getCode()) {
+      case "confirmed":
+        return ConditionVerificationStatus.CONFIRMED;
+      case "provisional":
+        return ConditionVerificationStatus.PROVISIONAL;
+      default:
+        return null;
+    }
+  }
+
+  private Coding addVerificationStatusCoding(String verificationStatus) {
+    Coding coding = new Coding();
+    coding.setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI);
+    coding.setCode(verificationStatus.toLowerCase());
+    coding.setDisplay(verificationStatus.replace("_", "-").toUpperCase());
+    return coding;
+  }
 }

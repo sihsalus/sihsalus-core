@@ -17,23 +17,23 @@ import org.openmrs.Visit;
  * respective visits.
  */
 public interface VisitMergeAction {
-	
-	/**
-	 * This method will be called before calling the visit service to save / void either of the given
-	 * visits, but in the same transaction. Any thrown exception will cancel the merge
-	 *
-	 * @param preferred the Visit to keep
-	 * @param notPreferred the Visit to merge into the preferred visit
-	 */
-	void beforeSavingVisits(Visit preferred, Visit notPreferred);
-	
-	/**
-	 * This method will be called after calling the visit service to save / void either of the given
-	 * visits, but in the same transaction. Any thrown exception will cancel the merge same transaction.
-	 *
-	 * @param preferred the Visit to keep
-	 * @param notPreferred the Visit to merge into the preferred visit
-	 */
-	void afterSavingVisits(Visit preferred, Visit notPreferred);
-	
+
+  /**
+   * This method will be called before calling the visit service to save / void either of the given
+   * visits, but in the same transaction. Any thrown exception will cancel the merge
+   *
+   * @param preferred the Visit to keep
+   * @param notPreferred the Visit to merge into the preferred visit
+   */
+  void beforeSavingVisits(Visit preferred, Visit notPreferred);
+
+  /**
+   * This method will be called after calling the visit service to save / void either of the given
+   * visits, but in the same transaction. Any thrown exception will cancel the merge same
+   * transaction.
+   *
+   * @param preferred the Visit to keep
+   * @param notPreferred the Visit to merge into the preferred visit
+   */
+  void afterSavingVisits(Visit preferred, Visit notPreferred);
 }

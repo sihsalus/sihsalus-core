@@ -1,24 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import org.hibernate.envers.Audited;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * ConceptMapType are used to define relationships between concepts and concept reference terms e.g
@@ -31,92 +29,91 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Audited
 public class ConceptMapType extends BaseChangeableOpenmrsMetadata {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	@Id
-	@Column(name = "concept_map_type_id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer conceptMapTypeId;
+  @Id
+  @Column(name = "concept_map_type_id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer conceptMapTypeId;
 
-	@Column(name = "is_hidden", nullable = false, length = 1)
-	private Boolean isHidden = Boolean.FALSE;
+  @Column(name = "is_hidden", nullable = false, length = 1)
+  private Boolean isHidden = Boolean.FALSE;
 
-	public static final String SAME_AS_MAP_TYPE_UUID = "35543629-7d8c-11e1-909d-c80aa9edcf4e";
+  public static final String SAME_AS_MAP_TYPE_UUID = "35543629-7d8c-11e1-909d-c80aa9edcf4e";
 
-	/** default constructor */
-	public ConceptMapType() {
-	}
+  /** default constructor */
+  public ConceptMapType() {}
 
-	/** constructor with id */
-	public ConceptMapType(Integer conceptMapTypeId) {
-		this.conceptMapTypeId = conceptMapTypeId;
-	}
+  /** constructor with id */
+  public ConceptMapType(Integer conceptMapTypeId) {
+    this.conceptMapTypeId = conceptMapTypeId;
+  }
 
-	/**
-	 * @return the conceptMapTypeId
-	 */
-	public Integer getConceptMapTypeId() {
-		return conceptMapTypeId;
-	}
+  /**
+   * @return the conceptMapTypeId
+   */
+  public Integer getConceptMapTypeId() {
+    return conceptMapTypeId;
+  }
 
-	/**
-	 * @param conceptMapTypeId the conceptMapTypeId to set
-	 */
-	public void setConceptMapTypeId(Integer conceptMapTypeId) {
-		this.conceptMapTypeId = conceptMapTypeId;
-	}
+  /**
+   * @param conceptMapTypeId the conceptMapTypeId to set
+   */
+  public void setConceptMapTypeId(Integer conceptMapTypeId) {
+    this.conceptMapTypeId = conceptMapTypeId;
+  }
 
-	/**
-	 * @return the isHidden
-	 */
-	public Boolean getIsHidden() {
-		return isHidden;
-	}
+  /**
+   * @return the isHidden
+   */
+  public Boolean getIsHidden() {
+    return isHidden;
+  }
 
-	/**
-	 * @param isHidden the isHidden to set
-	 */
-	public void setIsHidden(Boolean isHidden) {
-		this.isHidden = isHidden;
-	}
+  /**
+   * @param isHidden the isHidden to set
+   */
+  public void setIsHidden(Boolean isHidden) {
+    this.isHidden = isHidden;
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsObject#getId()
-	 */
-	@Override
-	public Integer getId() {
-		return getConceptMapTypeId();
-	}
+  /**
+   * @see org.openmrs.OpenmrsObject#getId()
+   */
+  @Override
+  public Integer getId() {
+    return getConceptMapTypeId();
+  }
 
-	/**
-	 * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
-	 */
-	@Override
-	public void setId(Integer id) {
-		setConceptMapTypeId(id);
-	}
+  /**
+   * @see org.openmrs.OpenmrsObject#setId(java.lang.Integer)
+   */
+  @Override
+  public void setId(Integer id) {
+    setConceptMapTypeId(id);
+  }
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		if (getName() == null) {
-			return "";
-		}
+  /**
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    if (getName() == null) {
+      return "";
+    }
 
-		return getName();
-	}
+    return getName();
+  }
 
-	/**
-	 * Returns true if this concept map type is hidden otherwise false
-	 *
-	 * @return true if this concept map type is hidden otherwise false
-	 * @deprecated as of 2.0, use {@link #getIsHidden()}
-	 */
-	@Deprecated
-	@JsonIgnore
-	public boolean isHidden() {
-		return getIsHidden();
-	}
+  /**
+   * Returns true if this concept map type is hidden otherwise false
+   *
+   * @return true if this concept map type is hidden otherwise false
+   * @deprecated as of 2.0, use {@link #getIsHidden()}
+   */
+  @Deprecated
+  @JsonIgnore
+  public boolean isHidden() {
+    return getIsHidden();
+  }
 }

@@ -11,29 +11,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class SingleAppointmentRecurringPatternUpdateService {
 
-    @Autowired
-    private AppointmentsService appointmentsService;
+  @Autowired private AppointmentsService appointmentsService;
 
-    @Autowired
-    private AppointmentMapper appointmentMapper;
+  @Autowired private AppointmentMapper appointmentMapper;
 
-    public Appointment getUpdatedAppointment(RecurringAppointmentRequest recurringAppointmentRequest) {
-        String uuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
-        Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
-        Appointment newAppointment;
-        final AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
-        if (appointment.getRelatedAppointment() != null) {
-            newAppointment = appointment;
-            appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), newAppointment);
-        } else {
-            newAppointment = new Appointment();
-            newAppointment.setPatient(appointment.getPatient());
-            appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), newAppointment);
-            appointment.setVoided(true);
-            newAppointment.setRelatedAppointment(appointment);
-            newAppointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
-            appointmentRecurringPattern.getAppointments().add(newAppointment);
-        }
-        return newAppointment;
+  public Appointment getUpdatedAppointment(
+      RecurringAppointmentRequest recurringAppointmentRequest) {
+    String uuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
+    Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
+    Appointment newAppointment;
+    final AppointmentRecurringPattern appointmentRecurringPattern =
+        appointment.getAppointmentRecurringPattern();
+    if (appointment.getRelatedAppointment() != null) {
+      newAppointment = appointment;
+      appointmentMapper.mapAppointmentRequestToAppointment(
+          recurringAppointmentRequest.getAppointmentRequest(), newAppointment);
+    } else {
+      newAppointment = new Appointment();
+      newAppointment.setPatient(appointment.getPatient());
+      appointmentMapper.mapAppointmentRequestToAppointment(
+          recurringAppointmentRequest.getAppointmentRequest(), newAppointment);
+      appointment.setVoided(true);
+      newAppointment.setRelatedAppointment(appointment);
+      newAppointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
+      appointmentRecurringPattern.getAppointments().add(newAppointment);
     }
+    return newAppointment;
+  }
 }

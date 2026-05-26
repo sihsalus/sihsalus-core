@@ -10,14 +10,15 @@
 package org.openmrs.module.queue;
 
 public class QueueModuleConstants {
-	
-	public final static String QUEUE_STATUS = "queue.statusConceptSetName";
-	
-	public final static String QUEUE_PRIORITY = "queue.priorityConceptSetName";
-	
-	public final static String QUEUE_SERVICE = "queue.serviceConceptSetName";
-	
-	public final static String QUEUE_SORT_WEIGHT_GENERATOR = "queue.sortWeightGenerator";
-	
-	public final static String EXISTING_VALUE_SORT_WEIGHT_GENERATOR = "existingValueSortWeightGenerator";
+
+  public static final String QUEUE_STATUS = "queue.statusConceptSetName";
+
+  public static final String QUEUE_PRIORITY = "queue.priorityConceptSetName";
+
+  public static final String QUEUE_SERVICE = "queue.serviceConceptSetName";
+
+  public static final String QUEUE_SORT_WEIGHT_GENERATOR = "queue.sortWeightGenerator";
+
+  public static final String EXISTING_VALUE_SORT_WEIGHT_GENERATOR =
+      "existingValueSortWeightGenerator";
 }

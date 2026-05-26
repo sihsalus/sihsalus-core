@@ -12,8 +12,8 @@ package org.openmrs.module.emrapi.encounter.exception;
 import org.openmrs.api.APIException;
 
 public class EncounterMatcherNotFoundException extends APIException {
-	
-	public EncounterMatcherNotFoundException() {
-		super("Encounter matcher not found.");
-	}
+
+  public EncounterMatcherNotFoundException() {
+    super("Encounter matcher not found.");
+  }
 }

@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/" + MODULE_ARTIFACT_ID)
 public class BasePatientIdStickerModuleController extends MainResourceController {
-    /**
-	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController#getNamespace()
-	 */
-	@Override
-	public String getNamespace() {
-	    return RestConstants.VERSION_1 + "/" + MODULE_ARTIFACT_ID;
-	}
+  /**
+   * @see org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController#getNamespace()
+   */
+  @Override
+  public String getNamespace() {
+    return RestConstants.VERSION_1 + "/" + MODULE_ARTIFACT_ID;
+  }
 }

@@ -1,14 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.patient.evaluator;
 
+import java.util.Map;
 import org.openmrs.annotation.Handler;
 import org.openmrs.module.reporting.data.patient.EvaluatedPatientData;
 import org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition;
@@ -20,40 +21,38 @@ import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
 import org.openmrs.module.reporting.evaluation.service.EvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Map;
-
 /**
- * Expects that the SQL query returns two columns:
- *   the first should be an Integer representing patientId
- *   the second should be the data you wish to retrieve for each patient
- * Expects that you use "patientIds" within your query to limit by the base cohort in the evaluation context:
- *   eg. "select date_created from patient where patient_id in (:patientIds)"
+ * Expects that the SQL query returns two columns: the first should be an Integer representing
+ * patientId the second should be the data you wish to retrieve for each patient Expects that you
+ * use "patientIds" within your query to limit by the base cohort in the evaluation context: eg.
+ * "select date_created from patient where patient_id in (:patientIds)"
  */
-@Handler(supports= SqlPatientDataDefinition.class)
+@Handler(supports = SqlPatientDataDefinition.class)
 public class SqlPatientDataEvaluator implements PatientDataEvaluator {
 
-	@Autowired
-	EvaluationService evaluationService;
+  @Autowired EvaluationService evaluationService;
 
-    @Override
-    public EvaluatedPatientData evaluate(PatientDataDefinition definition, EvaluationContext context) throws EvaluationException {
-        SqlPatientDataDefinition def = (SqlPatientDataDefinition) definition;
-        EvaluatedPatientData data = new EvaluatedPatientData(def, context);
+  @Override
+  public EvaluatedPatientData evaluate(PatientDataDefinition definition, EvaluationContext context)
+      throws EvaluationException {
+    SqlPatientDataDefinition def = (SqlPatientDataDefinition) definition;
+    EvaluatedPatientData data = new EvaluatedPatientData(def, context);
 
-		if (context.getBaseCohort() == null || context.getBaseCohort().size() == 0) {
-			return data;
-		}
-
-		SqlQueryBuilder q = new SqlQueryBuilder();
-		q.append(def.getSql());
-		for (Parameter p : definition.getParameters()) {
-			q.addParameter(p.getName(), context.getParameterValue(p.getName()));
-		}
-		q.addParameter("patientIds", context.getBaseCohort());
-
-		Map<Integer, Object> results = evaluationService.evaluateToMap(q, Integer.class, Object.class, context);
-		data.setData(results);
-
-		return data;
+    if (context.getBaseCohort() == null || context.getBaseCohort().size() == 0) {
+      return data;
     }
+
+    SqlQueryBuilder q = new SqlQueryBuilder();
+    q.append(def.getSql());
+    for (Parameter p : definition.getParameters()) {
+      q.addParameter(p.getName(), context.getParameterValue(p.getName()));
+    }
+    q.addParameter("patientIds", context.getBaseCohort());
+
+    Map<Integer, Object> results =
+        evaluationService.evaluateToMap(q, Integer.class, Object.class, context);
+    data.setData(results);
+
+    return data;
+  }
 }

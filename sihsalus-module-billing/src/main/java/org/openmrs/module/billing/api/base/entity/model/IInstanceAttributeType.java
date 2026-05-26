@@ -12,12 +12,12 @@ package org.openmrs.module.billing.api.base.entity.model;
 // @formatter:off
 /**
  * Represents classes that define the attribute type information tied to a specific instance type.
+ *
  * @param <TOwner> The parent {@link IInstanceType} class.
  */
-public interface 	IInstanceAttributeType<TOwner extends IInstanceType<?>>
-		extends IAttributeType {
-// @formatter:on
-	TOwner getOwner();
-	
-	void setOwner(TOwner owner);
+public interface IInstanceAttributeType<TOwner extends IInstanceType<?>> extends IAttributeType {
+  // @formatter:on
+  TOwner getOwner();
+
+  void setOwner(TOwner owner);
 }

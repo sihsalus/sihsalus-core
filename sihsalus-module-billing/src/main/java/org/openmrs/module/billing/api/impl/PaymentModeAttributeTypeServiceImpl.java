@@ -15,17 +15,16 @@ import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizatio
 import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
 import org.openmrs.module.billing.api.security.BasicMetadataAuthorizationPrivileges;
 
-/**
- * Data service implementation class for {@link PaymentModeAttributeType}s.
- */
-public class PaymentModeAttributeTypeServiceImpl extends BaseMetadataDataServiceImpl<PaymentModeAttributeType> implements IPaymentModeAttributeTypeService {
-	
-	@Override
-	protected IMetadataAuthorizationPrivileges getPrivileges() {
-		return new BasicMetadataAuthorizationPrivileges();
-	}
-	
-	@Override
-	protected void validate(PaymentModeAttributeType entity) {
-	}
+/** Data service implementation class for {@link PaymentModeAttributeType}s. */
+public class PaymentModeAttributeTypeServiceImpl
+    extends BaseMetadataDataServiceImpl<PaymentModeAttributeType>
+    implements IPaymentModeAttributeTypeService {
+
+  @Override
+  protected IMetadataAuthorizationPrivileges getPrivileges() {
+    return new BasicMetadataAuthorizationPrivileges();
+  }
+
+  @Override
+  protected void validate(PaymentModeAttributeType entity) {}
 }

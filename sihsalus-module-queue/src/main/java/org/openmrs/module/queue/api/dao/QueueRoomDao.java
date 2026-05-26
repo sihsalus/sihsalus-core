@@ -10,11 +10,10 @@
 package org.openmrs.module.queue.api.dao;
 
 import java.util.List;
-
 import org.openmrs.module.queue.api.search.QueueRoomSearchCriteria;
 import org.openmrs.module.queue.model.QueueRoom;
 
 public interface QueueRoomDao extends BaseQueueDao<QueueRoom> {
-	
-	List<QueueRoom> getQueueRooms(QueueRoomSearchCriteria searchCriteria);
+
+  List<QueueRoom> getQueueRooms(QueueRoomSearchCriteria searchCriteria);
 }

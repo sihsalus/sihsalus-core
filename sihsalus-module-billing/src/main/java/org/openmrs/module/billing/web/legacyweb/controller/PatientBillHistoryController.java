@@ -10,7 +10,6 @@
 package org.openmrs.module.billing.web.legacyweb.controller;
 
 import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
@@ -21,19 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Controller to manage the page to display patient's bills history.
- */
+/** Controller to manage the page to display patient's bills history. */
 @Controller
 @RequestMapping(value = "/module/billing/portlets/patientBillHistory")
 public class PatientBillHistoryController {
-	
-	private static final Logger LOG = Logger.getLogger(PatientBillHistoryController.class);
-	
-	@RequestMapping(method = RequestMethod.GET)
-	public void billHistory(ModelMap model, @RequestParam(value = "patientUuid") String patientUuid) {
-		LOG.warn("In bill history controller");
-		List<Bill> bills = Context.getService(BillService.class).getBillsByPatientUuid(patientUuid, null);
-		model.addAttribute("bills", bills);
-	}
+
+  private static final Logger LOG = Logger.getLogger(PatientBillHistoryController.class);
+
+  @RequestMapping(method = RequestMethod.GET)
+  public void billHistory(ModelMap model, @RequestParam(value = "patientUuid") String patientUuid) {
+    LOG.warn("In bill history controller");
+    List<Bill> bills =
+        Context.getService(BillService.class).getBillsByPatientUuid(patientUuid, null);
+    model.addAttribute("bills", bills);
+  }
 }

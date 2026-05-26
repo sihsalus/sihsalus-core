@@ -17,32 +17,29 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-/**
- * Model class that represents individual item stock actions while an operation is pending.
- */
+/** Model class that represents individual item stock actions while an operation is pending. */
 @Entity(name = "stockmanagement.ReservedTransaction")
 @Table(name = "stockmgmt_reservation_transaction")
 public class ReservedTransaction extends TransactionBase {
-	
-	@Column(name = "is_available")
-	private Boolean isAvailable;
-	
-	public ReservedTransaction() {
-	}
-	
-	public ReservedTransaction(TransactionBase tx) {
-		super(tx);
-	}
-	
-	public ReservedTransaction(StockOperation stockOperation, StockOperationItem item) {
-		super(stockOperation, item);
-	}
-	
-	public Boolean getIsAvailable() {
-		return isAvailable;
-	}
-	
-	public void setIsAvailable(Boolean isAvailable) {
-		this.isAvailable = isAvailable;
-	}
+
+  @Column(name = "is_available")
+  private Boolean isAvailable;
+
+  public ReservedTransaction() {}
+
+  public ReservedTransaction(TransactionBase tx) {
+    super(tx);
+  }
+
+  public ReservedTransaction(StockOperation stockOperation, StockOperationItem item) {
+    super(stockOperation, item);
+  }
+
+  public Boolean getIsAvailable() {
+    return isAvailable;
+  }
+
+  public void setIsAvailable(Boolean isAvailable) {
+    this.isAvailable = isAvailable;
+  }
 }

@@ -17,29 +17,27 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-/**
- * Converts String to ProviderRole. Ideally this would be in core.
- */
+/** Converts String to ProviderRole. Ideally this would be in core. */
 @Component
 public class StringToProviderRoleConverter implements Converter<String, ProviderRole> {
-	
-	@Autowired
-	@Qualifier("providerService")
-	public ProviderService providerService;
-	
-	/**
-	 * Retrieves a given provider role from a string representing either the id or uuid of the
-	 * ProviderRole
-	 */
-	@Override
-	public ProviderRole convert(String id) {
-		if (StringUtils.isBlank(id)) {
-			return null;
-		}
-		ProviderRole role = providerService.getProviderRoleByUuid(id);
-		if (role == null) {
-			role = providerService.getProviderRole(Integer.valueOf(id));
-		}
-		return role;
-	}
+
+  @Autowired
+  @Qualifier("providerService")
+  public ProviderService providerService;
+
+  /**
+   * Retrieves a given provider role from a string representing either the id or uuid of the
+   * ProviderRole
+   */
+  @Override
+  public ProviderRole convert(String id) {
+    if (StringUtils.isBlank(id)) {
+      return null;
+    }
+    ProviderRole role = providerService.getProviderRoleByUuid(id);
+    if (role == null) {
+      role = providerService.getProviderRole(Integer.valueOf(id));
+    }
+    return role;
+  }
 }

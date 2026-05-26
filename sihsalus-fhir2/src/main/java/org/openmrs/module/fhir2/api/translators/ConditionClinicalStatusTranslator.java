@@ -10,27 +10,27 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.CodeableConcept;
 
-public interface ConditionClinicalStatusTranslator<T> extends ToFhirTranslator<T, CodeableConcept>, ToOpenmrsTranslator<T, CodeableConcept> {
-	
-	/**
-	 * Maps <T> an OpenMRS Generic clinicalStatus element to a
-	 * {@link org.hl7.fhir.r4.model.CodeableConcept}
-	 *
-	 * @param clinicalStatus the OpenMRS generic <T> clinicalStatus to translate
-	 * @return the corresponding CodeableConcept FHIR resource
-	 */
-	@Override
-	CodeableConcept toFhirResource(@Nonnull T clinicalStatus);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.CodeableConcept} to an OpenMRS <T> generic type
-	 *
-	 * @param codeableConcept the FHIR codeableConcept to translate
-	 * @return the corresponding OpenMRS <T> generic type
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull CodeableConcept codeableConcept);
+public interface ConditionClinicalStatusTranslator<T>
+    extends ToFhirTranslator<T, CodeableConcept>, ToOpenmrsTranslator<T, CodeableConcept> {
+
+  /**
+   * Maps <T> an OpenMRS Generic clinicalStatus element to a {@link
+   * org.hl7.fhir.r4.model.CodeableConcept}
+   *
+   * @param clinicalStatus the OpenMRS generic <T> clinicalStatus to translate
+   * @return the corresponding CodeableConcept FHIR resource
+   */
+  @Override
+  CodeableConcept toFhirResource(@Nonnull T clinicalStatus);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.CodeableConcept} to an OpenMRS <T> generic type
+   *
+   * @param codeableConcept the FHIR codeableConcept to translate
+   * @return the corresponding OpenMRS <T> generic type
+   */
+  @Override
+  T toOpenmrsType(@Nonnull CodeableConcept codeableConcept);
 }

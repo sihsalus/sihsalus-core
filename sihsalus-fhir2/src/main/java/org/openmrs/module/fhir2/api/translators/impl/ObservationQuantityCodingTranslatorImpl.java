@@ -12,10 +12,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
 
-import javax.annotation.Nonnull;
-
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.fhir.ucum.UcumEssenceService;
@@ -27,46 +25,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Coding Translator implementation mapping an Observation NumericConcept to/from a FHIR
- * {@link Coding}. We prioritize a UCUM coding system and use the FHIR UCUM parsing library to
- * determine whether the NumericConcept conforms to the UCUM standard. If UCUM validation fails we
- * fall back to the concept UUID and a null system.
+ * Coding Translator implementation mapping an Observation NumericConcept to/from a FHIR {@link
+ * Coding}. We prioritize a UCUM coding system and use the FHIR UCUM parsing library to determine
+ * whether the NumericConcept conforms to the UCUM standard. If UCUM validation fails we fall back
+ * to the concept UUID and a null system.
  */
 @Component
 public class ObservationQuantityCodingTranslatorImpl extends BaseCodingTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private List<UcumEssenceService> ucumServices;
-	
-	/**
-	 * @param concept the openMRS {@link Concept} to translate
-	 * @return UCUM Coding object if Concept provides valid UCUM unit, null if no ucum or uuid system
-	 *         found
-	 */
-	@Override
-	public Coding toFhirResource(@Nonnull Concept concept) {
-		if (concept == null || !(concept instanceof ConceptNumeric)) {
-			return null;
-		}
-		
-		ConceptNumeric conceptNumeric = (ConceptNumeric) concept;
-		Coding coding = null;
-		
-		for (UcumService ucumService : ucumServices) {
-			String code = conceptNumeric.getUnits();
-			if (code != null && ucumService.validate(code) == null) {
-				coding = new Coding(UCUM_SYSTEM_URI, code, ucumService.getCommonDisplay(code));
-				break;
-			}
-		}
-		
-		// attempt to fall back to the concept uuid with a null coding concept
-		if (coding == null) {
-			coding = getCodingForSystem(getConceptTranslator().toFhirResource(concept), null);
-		}
-		
-		return coding;
-		
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private List<UcumEssenceService> ucumServices;
+
+  /**
+   * @param concept the openMRS {@link Concept} to translate
+   * @return UCUM Coding object if Concept provides valid UCUM unit, null if no ucum or uuid system
+   *     found
+   */
+  @Override
+  public Coding toFhirResource(@Nonnull Concept concept) {
+    if (concept == null || !(concept instanceof ConceptNumeric)) {
+      return null;
+    }
+
+    ConceptNumeric conceptNumeric = (ConceptNumeric) concept;
+    Coding coding = null;
+
+    for (UcumService ucumService : ucumServices) {
+      String code = conceptNumeric.getUnits();
+      if (code != null && ucumService.validate(code) == null) {
+        coding = new Coding(UCUM_SYSTEM_URI, code, ucumService.getCommonDisplay(code));
+        break;
+      }
+    }
+
+    // attempt to fall back to the concept uuid with a null coding concept
+    if (coding == null) {
+      coding = getCodingForSystem(getConceptTranslator().toFhirResource(concept), null);
+    }
+
+    return coding;
+  }
 }

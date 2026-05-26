@@ -16,59 +16,77 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FhirProviderUtils {
-	
-	private final static org.hl7.fhir.r4.model.CodeableConcept MSG_DELETED_R4 = new org.hl7.fhir.r4.model.CodeableConcept();
-	static {
-		MSG_DELETED_R4.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
-		        .setCode("MSG_DELETED").setDisplay("This resource has been deleted");
-		MSG_DELETED_R4.setText("This resource has been deleted");
-	}
-	
-	private final static org.hl7.fhir.dstu3.model.CodeableConcept MSG_DELETED_R3 = new org.hl7.fhir.dstu3.model.CodeableConcept();
-	static {
-		MSG_DELETED_R3.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
-		        .setCode("MSG_DELETED").setDisplay("This resource has been deleted");
-		MSG_DELETED_R3.setText("This resource has been deleted");
-	}
-	
-	public static MethodOutcome buildCreate(IAnyResource resource) {
-		MethodOutcome methodOutcome = new MethodOutcome();
-		methodOutcome.setCreated(true);
-		return buildWithResource(methodOutcome, resource);
-	}
-	
-	public static MethodOutcome buildUpdate(IAnyResource resource) {
-		MethodOutcome methodOutcome = new MethodOutcome();
-		methodOutcome.setCreated(false);
-		return buildWithResource(methodOutcome, resource);
-	}
-	
-	public static MethodOutcome buildPatch(IAnyResource resource) {
-		MethodOutcome methodOutcome = new MethodOutcome();
-		methodOutcome.setCreated(false);
-		return buildWithResource(methodOutcome, resource);
-	}
-	
-	public static org.hl7.fhir.r4.model.OperationOutcome buildDeleteR4() {
-		org.hl7.fhir.r4.model.OperationOutcome outcome = new org.hl7.fhir.r4.model.OperationOutcome();
-		outcome.addIssue().setSeverity(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.INFORMATION)
-		        .setCode(org.hl7.fhir.r4.model.OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED_R4);
-		return outcome;
-	}
-	
-	public static org.hl7.fhir.dstu3.model.OperationOutcome buildDeleteR3() {
-		org.hl7.fhir.dstu3.model.OperationOutcome outcome = new org.hl7.fhir.dstu3.model.OperationOutcome();
-		outcome.addIssue().setSeverity(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION)
-		        .setCode(org.hl7.fhir.dstu3.model.OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED_R3);
-		return outcome;
-	}
-	
-	private static MethodOutcome buildWithResource(MethodOutcome methodOutcome, IAnyResource resource) {
-		if (resource != null) {
-			methodOutcome.setId(resource.getIdElement());
-			methodOutcome.setResource(resource);
-		}
-		
-		return methodOutcome;
-	}
+
+  private static final org.hl7.fhir.r4.model.CodeableConcept MSG_DELETED_R4 =
+      new org.hl7.fhir.r4.model.CodeableConcept();
+
+  static {
+    MSG_DELETED_R4
+        .addCoding()
+        .setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
+        .setCode("MSG_DELETED")
+        .setDisplay("This resource has been deleted");
+    MSG_DELETED_R4.setText("This resource has been deleted");
+  }
+
+  private static final org.hl7.fhir.dstu3.model.CodeableConcept MSG_DELETED_R3 =
+      new org.hl7.fhir.dstu3.model.CodeableConcept();
+
+  static {
+    MSG_DELETED_R3
+        .addCoding()
+        .setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
+        .setCode("MSG_DELETED")
+        .setDisplay("This resource has been deleted");
+    MSG_DELETED_R3.setText("This resource has been deleted");
+  }
+
+  public static MethodOutcome buildCreate(IAnyResource resource) {
+    MethodOutcome methodOutcome = new MethodOutcome();
+    methodOutcome.setCreated(true);
+    return buildWithResource(methodOutcome, resource);
+  }
+
+  public static MethodOutcome buildUpdate(IAnyResource resource) {
+    MethodOutcome methodOutcome = new MethodOutcome();
+    methodOutcome.setCreated(false);
+    return buildWithResource(methodOutcome, resource);
+  }
+
+  public static MethodOutcome buildPatch(IAnyResource resource) {
+    MethodOutcome methodOutcome = new MethodOutcome();
+    methodOutcome.setCreated(false);
+    return buildWithResource(methodOutcome, resource);
+  }
+
+  public static org.hl7.fhir.r4.model.OperationOutcome buildDeleteR4() {
+    org.hl7.fhir.r4.model.OperationOutcome outcome = new org.hl7.fhir.r4.model.OperationOutcome();
+    outcome
+        .addIssue()
+        .setSeverity(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.INFORMATION)
+        .setCode(org.hl7.fhir.r4.model.OperationOutcome.IssueType.INFORMATIONAL)
+        .setDetails(MSG_DELETED_R4);
+    return outcome;
+  }
+
+  public static org.hl7.fhir.dstu3.model.OperationOutcome buildDeleteR3() {
+    org.hl7.fhir.dstu3.model.OperationOutcome outcome =
+        new org.hl7.fhir.dstu3.model.OperationOutcome();
+    outcome
+        .addIssue()
+        .setSeverity(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION)
+        .setCode(org.hl7.fhir.dstu3.model.OperationOutcome.IssueType.INFORMATIONAL)
+        .setDetails(MSG_DELETED_R3);
+    return outcome;
+  }
+
+  private static MethodOutcome buildWithResource(
+      MethodOutcome methodOutcome, IAnyResource resource) {
+    if (resource != null) {
+      methodOutcome.setId(resource.getIdElement());
+      methodOutcome.setResource(resource);
+    }
+
+    return methodOutcome;
+  }
 }

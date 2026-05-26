@@ -9,54 +9,52 @@
  */
 package org.openmrs.module.billing.api;
 
+import jakarta.annotation.Nullable;
+import java.util.List;
 import org.openmrs.Order;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
-import jakarta.annotation.Nullable;
-import java.util.List;
-
 public interface BillLineItemService extends OpenmrsService {
-	
-	/**
-	 * Retrieves the IDs of line items currently persisted in the database for a bill.
-	 *
-	 * @param billId the ID of the bill
-	 * @return a list of line item IDs, or an empty list if the bill has no line items
-	 */
-	@Authorized({ PrivilegeConstants.VIEW_BILLS, PrivilegeConstants.MANAGE_BILLS })
-	List<Integer> getPersistedLineItemIds(Integer billId);
-	
-	/**
-	 * Retrieves a bill line item by its UUID.
-	 *
-	 * @param uuid the UUID of the bill line item
-	 * @return the bill line item with the specified UUID, or null if not found
-	 */
-	@Nullable
-	@Authorized(PrivilegeConstants.VIEW_BILLS)
-	BillLineItem getBillLineItemByUuid(String uuid);
-	
-	/**
-	 * Retrieves the active (non-voided) bill line item linked to the given order.
-	 *
-	 * @param order the order to look up
-	 * @return the bill line item for that order, or null if none exists
-	 */
-	@Nullable
-	@Authorized(PrivilegeConstants.VIEW_BILLS)
-	BillLineItem getBillLineItemByOrder(Order order);
-	
-	/**
-	 * Voids a bill line item. The OpenMRS {@code BaseVoidHandler} AOP handles setting the void metadata
-	 * (voided, voidReason, dateVoided, voidedBy) automatically.
-	 *
-	 * @param lineItem the line item to void
-	 * @param reason the void reason
-	 */
-	@Authorized(PrivilegeConstants.DELETE_BILLS)
-	void voidBillLineItem(BillLineItem lineItem, String reason);
-	
+
+  /**
+   * Retrieves the IDs of line items currently persisted in the database for a bill.
+   *
+   * @param billId the ID of the bill
+   * @return a list of line item IDs, or an empty list if the bill has no line items
+   */
+  @Authorized({PrivilegeConstants.VIEW_BILLS, PrivilegeConstants.MANAGE_BILLS})
+  List<Integer> getPersistedLineItemIds(Integer billId);
+
+  /**
+   * Retrieves a bill line item by its UUID.
+   *
+   * @param uuid the UUID of the bill line item
+   * @return the bill line item with the specified UUID, or null if not found
+   */
+  @Nullable
+  @Authorized(PrivilegeConstants.VIEW_BILLS)
+  BillLineItem getBillLineItemByUuid(String uuid);
+
+  /**
+   * Retrieves the active (non-voided) bill line item linked to the given order.
+   *
+   * @param order the order to look up
+   * @return the bill line item for that order, or null if none exists
+   */
+  @Nullable
+  @Authorized(PrivilegeConstants.VIEW_BILLS)
+  BillLineItem getBillLineItemByOrder(Order order);
+
+  /**
+   * Voids a bill line item. The OpenMRS {@code BaseVoidHandler} AOP handles setting the void
+   * metadata (voided, voidReason, dateVoided, voidedBy) automatically.
+   *
+   * @param lineItem the line item to void
+   * @param reason the void reason
+   */
+  @Authorized(PrivilegeConstants.DELETE_BILLS)
+  void voidBillLineItem(BillLineItem lineItem, String reason);
 }

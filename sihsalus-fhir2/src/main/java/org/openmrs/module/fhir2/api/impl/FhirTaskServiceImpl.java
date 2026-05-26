@@ -26,31 +26,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> implements FhirTaskService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirTaskDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private TaskTranslator translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<Task> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator, SearchQueryInclude<Task>> searchQuery;
-	
-	/**
-	 * Get collection of tasks corresponding to the provided search parameters
-	 * 
-	 * @return the collection of Tasks that match the search parameters
-	 */
-	@Override
-	public IBundleProvider searchForTasks(TaskSearchParams taskSearchParams) {
-		return searchQuery.getQueryResults(taskSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
-	}
+public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask>
+    implements FhirTaskService {
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirTaskDao dao;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private TaskTranslator translator;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQueryInclude<Task> searchQueryInclude;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator, SearchQueryInclude<Task>>
+      searchQuery;
+
+  /**
+   * Get collection of tasks corresponding to the provided search parameters
+   *
+   * @return the collection of Tasks that match the search parameters
+   */
+  @Override
+  public IBundleProvider searchForTasks(TaskSearchParams taskSearchParams) {
+    return searchQuery.getQueryResults(
+        taskSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+  }
 }

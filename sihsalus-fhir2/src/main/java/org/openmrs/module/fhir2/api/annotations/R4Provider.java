@@ -14,13 +14,16 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 
-@Target({ ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE })
+@Target({
+  ElementType.CONSTRUCTOR,
+  ElementType.FIELD,
+  ElementType.METHOD,
+  ElementType.PARAMETER,
+  ElementType.TYPE
+})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Qualifier
-public @interface R4Provider {
-	
-}
+public @interface R4Provider {}

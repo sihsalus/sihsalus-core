@@ -20,73 +20,75 @@ import org.openmrs.module.billing.api.base.criteria.BillingRestrictions;
  */
 public class BaseDataTemplateSearch<T extends OpenmrsData> extends BaseAuditableTemplateSearch<T> {
 
-	public static final long serialVersionUID = 0L;
+  public static final long serialVersionUID = 0L;
 
-	private DateComparisonType dateVoidedComparisonType;
+  private DateComparisonType dateVoidedComparisonType;
 
-	private StringComparisonType voidReasonComparisonType;
+  private StringComparisonType voidReasonComparisonType;
 
-	private Boolean includeVoided;
+  private Boolean includeVoided;
 
-	public BaseDataTemplateSearch(T template) {
-		this(template, null);
-	}
+  public BaseDataTemplateSearch(T template) {
+    this(template, null);
+  }
 
-	public BaseDataTemplateSearch(T template, Boolean includeVoided) {
-		super(template);
-		this.includeVoided = includeVoided;
-		this.dateVoidedComparisonType = DateComparisonType.EQUAL;
-		this.voidReasonComparisonType = StringComparisonType.EQUAL;
-	}
+  public BaseDataTemplateSearch(T template, Boolean includeVoided) {
+    super(template);
+    this.includeVoided = includeVoided;
+    this.dateVoidedComparisonType = DateComparisonType.EQUAL;
+    this.voidReasonComparisonType = StringComparisonType.EQUAL;
+  }
 
-	public DateComparisonType getDateVoidedComparisonType() {
-		return dateVoidedComparisonType;
-	}
+  public DateComparisonType getDateVoidedComparisonType() {
+    return dateVoidedComparisonType;
+  }
 
-	public void setDateVoidedComparisonType(DateComparisonType dateVoidedComparisonType) {
-		this.dateVoidedComparisonType = dateVoidedComparisonType;
-	}
+  public void setDateVoidedComparisonType(DateComparisonType dateVoidedComparisonType) {
+    this.dateVoidedComparisonType = dateVoidedComparisonType;
+  }
 
-	public StringComparisonType getVoidReasonComparisonType() {
-		return voidReasonComparisonType;
-	}
+  public StringComparisonType getVoidReasonComparisonType() {
+    return voidReasonComparisonType;
+  }
 
-	public void setVoidReasonComparisonType(StringComparisonType voidReasonComparisonType) {
-		this.voidReasonComparisonType = voidReasonComparisonType;
-	}
+  public void setVoidReasonComparisonType(StringComparisonType voidReasonComparisonType) {
+    this.voidReasonComparisonType = voidReasonComparisonType;
+  }
 
-	public boolean getIncludeVoided() {
-		return includeVoided;
-	}
+  public boolean getIncludeVoided() {
+    return includeVoided;
+  }
 
-	public void setIncludeVoided(boolean includeVoided) {
-		this.includeVoided = includeVoided;
-	}
+  public void setIncludeVoided(boolean includeVoided) {
+    this.includeVoided = includeVoided;
+  }
 
-	@Override
-	public void updateCriteria(BillingCriteria criteria) {
-		super.updateCriteria(criteria);
+  @Override
+  public void updateCriteria(BillingCriteria criteria) {
+    super.updateCriteria(criteria);
 
-		T t = getTemplate();
+    T t = getTemplate();
 
-		if (includeVoided != null) {
-			if (!includeVoided) {
-				criteria.add(BillingRestrictions.eq("voided", false));
-			}
-		} else if (t.isVoided() != null) {
-			criteria.add(BillingRestrictions.eq("voided", t.getVoided()));
-		}
+    if (includeVoided != null) {
+      if (!includeVoided) {
+        criteria.add(BillingRestrictions.eq("voided", false));
+      }
+    } else if (t.isVoided() != null) {
+      criteria.add(BillingRestrictions.eq("voided", t.getVoided()));
+    }
 
-		if (t.getVoidedBy() != null) {
-			criteria.add(BillingRestrictions.eq("voidedBy", t.getVoidedBy()));
-		}
-		if (t.getDateVoided() != null) {
-			criteria.add((cb, root) -> createPredicate(cb, root, "dateVoided", t.getDateVoided(),
-			    dateVoidedComparisonType));
-		}
-		if (t.getVoidReason() != null) {
-			criteria.add((cb, root) -> createPredicate(cb, root, "voidReason", t.getVoidReason(),
-			    voidReasonComparisonType));
-		}
-	}
+    if (t.getVoidedBy() != null) {
+      criteria.add(BillingRestrictions.eq("voidedBy", t.getVoidedBy()));
+    }
+    if (t.getDateVoided() != null) {
+      criteria.add(
+          (cb, root) ->
+              createPredicate(cb, root, "dateVoided", t.getDateVoided(), dateVoidedComparisonType));
+    }
+    if (t.getVoidReason() != null) {
+      criteria.add(
+          (cb, root) ->
+              createPredicate(cb, root, "voidReason", t.getVoidReason(), voidReasonComparisonType));
+    }
+  }
 }

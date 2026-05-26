@@ -18,9 +18,10 @@ import org.openmrs.module.billing.api.base.entity.IObjectDataService;
  * @param <TEntity> The model class
  * @param <TService> The data service class
  */
-public interface IObjectDataServiceResource<TEntity extends OpenmrsObject, TService extends IObjectDataService<TEntity>> {
-	
-	Class<? extends TService> getServiceClass();
-	
-	Class<TEntity> getEntityClass();
+public interface IObjectDataServiceResource<
+    TEntity extends OpenmrsObject, TService extends IObjectDataService<TEntity>> {
+
+  Class<? extends TService> getServiceClass();
+
+  Class<TEntity> getEntityClass();
 }

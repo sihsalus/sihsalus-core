@@ -13,18 +13,18 @@ import javax.annotation.Nonnull;
 
 /**
  * Generic interface for a translator between OpenMRS data and FHIR resources
- * 
+ *
  * @param <T> OpenMRS data type
  * @param <U> FHIR resource type
  */
 public interface UpdatableOpenmrsTranslator<T, U> extends FhirTranslator {
-	
-	/**
-	 * Maps a FHIR resource to an existing OpenMRS data element
-	 * 
-	 * @param existingObject the existingObject to update
-	 * @param resource the resource to map
-	 * @return an updated version of the existingObject
-	 */
-	T toOpenmrsType(@Nonnull T existingObject, @Nonnull U resource);
+
+  /**
+   * Maps a FHIR resource to an existing OpenMRS data element
+   *
+   * @param existingObject the existingObject to update
+   * @param resource the resource to map
+   * @return an updated version of the existingObject
+   */
+  T toOpenmrsType(@Nonnull T existingObject, @Nonnull U resource);
 }

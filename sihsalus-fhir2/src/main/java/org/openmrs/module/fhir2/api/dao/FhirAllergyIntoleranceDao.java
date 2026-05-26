@@ -9,39 +9,37 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import org.openmrs.Allergy;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirAllergyIntoleranceDao extends FhirDao<Allergy> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ALLERGIES)
-	Allergy get(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ALLERGIES)
-	List<Allergy> get(@Nonnull Collection<String> uuids);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ALLERGIES)
-	List<Allergy> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ALLERGIES)
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized({ PrivilegeConstants.ADD_ALLERGIES, PrivilegeConstants.EDIT_ALLERGIES })
-	Allergy createOrUpdate(@Nonnull Allergy newEntry);
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_ALLERGIES)
-	Allergy delete(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ALLERGIES)
+  Allergy get(@Nonnull String uuid);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ALLERGIES)
+  List<Allergy> get(@Nonnull Collection<String> uuids);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ALLERGIES)
+  List<Allergy> getSearchResults(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized(PrivilegeConstants.GET_ALLERGIES)
+  int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+
+  @Override
+  @Authorized({PrivilegeConstants.ADD_ALLERGIES, PrivilegeConstants.EDIT_ALLERGIES})
+  Allergy createOrUpdate(@Nonnull Allergy newEntry);
+
+  @Override
+  @Authorized(PrivilegeConstants.DELETE_ALLERGIES)
+  Allergy delete(@Nonnull String uuid);
 }

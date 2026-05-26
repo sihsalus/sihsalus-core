@@ -1,16 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.propertyeditor;
 
 import java.beans.PropertyEditorSupport;
-
 import org.openmrs.Concept;
 import org.openmrs.Program;
 import org.openmrs.api.context.Context;
@@ -30,58 +29,56 @@ import org.springframework.util.StringUtils;
  */
 public class ProgramEditor extends PropertyEditorSupport {
 
-	private static final Logger log = LoggerFactory.getLogger(ProgramEditor.class);
+  private static final Logger log = LoggerFactory.getLogger(ProgramEditor.class);
 
-	public ProgramEditor() {
-	}
+  public ProgramEditor() {}
 
-	/**
-	 * <p>
-	 * <strong>Should</strong> set using concept id<br/>
-	 * <strong>Should</strong> set using concept uuid<br/>
-	 * <strong>Should</strong> set using program id<br/>
-	 * <strong>Should</strong> set using program uuid
-	 */
-	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		if (StringUtils.hasText(text)) {
-			try {
-				if (text.startsWith("concept.")) {
-					Integer conceptId = Integer.valueOf(text.substring(text.indexOf('.') + 1));
-					Concept c = Context.getConceptService().getConcept(conceptId);
-					setValue(Context.getProgramWorkflowService().getProgramByName(c.getName().getName()));
-				} else {
-					Integer programId = Integer.valueOf(text);
-					setValue(Context.getProgramWorkflowService().getProgram(programId));
-				}
-			} catch (Exception ex) {
-				Program p;
-				if (text.startsWith("concept.")) {
-					Concept c = Context.getConceptService().getConceptByUuid(text.substring(text.indexOf('.') + 1));
-					p = Context.getProgramWorkflowService().getProgramByName(c.getName().getName());
-				} else {
-					p = Context.getProgramWorkflowService().getProgramByUuid(text);
-				}
+  /**
+   * <strong>Should</strong> set using concept id<br>
+   * <strong>Should</strong> set using concept uuid<br>
+   * <strong>Should</strong> set using program id<br>
+   * <strong>Should</strong> set using program uuid
+   */
+  @Override
+  public void setAsText(String text) throws IllegalArgumentException {
+    if (StringUtils.hasText(text)) {
+      try {
+        if (text.startsWith("concept.")) {
+          Integer conceptId = Integer.valueOf(text.substring(text.indexOf('.') + 1));
+          Concept c = Context.getConceptService().getConcept(conceptId);
+          setValue(Context.getProgramWorkflowService().getProgramByName(c.getName().getName()));
+        } else {
+          Integer programId = Integer.valueOf(text);
+          setValue(Context.getProgramWorkflowService().getProgram(programId));
+        }
+      } catch (Exception ex) {
+        Program p;
+        if (text.startsWith("concept.")) {
+          Concept c =
+              Context.getConceptService().getConceptByUuid(text.substring(text.indexOf('.') + 1));
+          p = Context.getProgramWorkflowService().getProgramByName(c.getName().getName());
+        } else {
+          p = Context.getProgramWorkflowService().getProgramByUuid(text);
+        }
 
-				setValue(p);
-				if (p == null) {
-					log.error("Error setting text: " + text, ex);
-					throw new IllegalArgumentException("Program not found: " + text, ex);
-				}
-			}
-		} else {
-			setValue(null);
-		}
-	}
+        setValue(p);
+        if (p == null) {
+          log.error("Error setting text: " + text, ex);
+          throw new IllegalArgumentException("Program not found: " + text, ex);
+        }
+      }
+    } else {
+      setValue(null);
+    }
+  }
 
-	@Override
-	public String getAsText() {
-		Program p = (Program) getValue();
-		if (p == null) {
-			return "";
-		} else {
-			return p.getProgramId().toString();
-		}
-	}
-
+  @Override
+  public String getAsText() {
+    Program p = (Program) getValue();
+    if (p == null) {
+      return "";
+    } else {
+      return p.getProgramId().toString();
+    }
+  }
 }

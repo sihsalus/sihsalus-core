@@ -14,55 +14,59 @@ import java.util.List;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
-import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 
 public class HibernateEmrEncounterDAO implements EmrEncounterDAO {
-	
-	private DbSessionFactory sessionFactory;
-	
-	public void setSessionFactory(DbSessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<Encounter> getEncountersByObsValueText(Patient patient, Concept obsConcept, String valueText,
-	        EncounterType encounterType, boolean includeAll) {
 
-		StringBuilder hql = new StringBuilder("select distinct obs.encounter from Obs obs where obs.valueText = :valueText");
-		if (!includeAll) {
-			hql.append(" and obs.voided = false");
-		}
-		if (obsConcept != null) {
-			hql.append(" and obs.concept = :obsConcept");
-		}
-		if (encounterType != null) {
-			hql.append(" and obs.encounter.encounterType = :encounterType");
-		}
-		if (patient != null) {
-			hql.append(" and obs.person = :patient");
-		}
+  private DbSessionFactory sessionFactory;
 
-		Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
-		query.setParameter("valueText", valueText);
-		if (obsConcept != null) {
-			query.setParameter("obsConcept", obsConcept);
-		}
-		if (encounterType != null) {
-			query.setParameter("encounterType", encounterType);
-		}
-		if (patient != null) {
-			query.setParameter("patient", patient);
-		}
-		return query.getResultList();
-	}
-	
-	@Override
-	public List<Encounter> getEncountersByObsValueText(Concept obsConcept, String valueText, EncounterType encounterType,
-	        boolean includeAll) {
-		return getEncountersByObsValueText(null, obsConcept, valueText, encounterType, includeAll);
-	}
-	
+  public void setSessionFactory(DbSessionFactory sessionFactory) {
+    this.sessionFactory = sessionFactory;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<Encounter> getEncountersByObsValueText(
+      Patient patient,
+      Concept obsConcept,
+      String valueText,
+      EncounterType encounterType,
+      boolean includeAll) {
+
+    StringBuilder hql =
+        new StringBuilder(
+            "select distinct obs.encounter from Obs obs where obs.valueText = :valueText");
+    if (!includeAll) {
+      hql.append(" and obs.voided = false");
+    }
+    if (obsConcept != null) {
+      hql.append(" and obs.concept = :obsConcept");
+    }
+    if (encounterType != null) {
+      hql.append(" and obs.encounter.encounterType = :encounterType");
+    }
+    if (patient != null) {
+      hql.append(" and obs.person = :patient");
+    }
+
+    Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
+    query.setParameter("valueText", valueText);
+    if (obsConcept != null) {
+      query.setParameter("obsConcept", obsConcept);
+    }
+    if (encounterType != null) {
+      query.setParameter("encounterType", encounterType);
+    }
+    if (patient != null) {
+      query.setParameter("patient", patient);
+    }
+    return query.getResultList();
+  }
+
+  @Override
+  public List<Encounter> getEncountersByObsValueText(
+      Concept obsConcept, String valueText, EncounterType encounterType, boolean includeAll) {
+    return getEncountersByObsValueText(null, obsConcept, valueText, encounterType, includeAll);
+  }
 }

@@ -9,113 +9,114 @@
  */
 package org.openmrs.module.emrapi.procedure;
 
-import org.openmrs.Patient;
-
 import java.util.List;
+import org.openmrs.Patient;
 
 /**
  * Data Access Object interface for Procedure entity.
- * 
+ *
  * @since 3.4.0
  */
 public interface ProcedureDAO {
-	
-	/**
-	 * Gets a procedure by its internal ID.
-	 *
-	 * @param id the procedure ID
-	 * @return the procedure, or null if not found
-	 */
-	Procedure getProcedure(Integer id);
-	
-	/**
-	 * Gets a procedure by its UUID.
-	 *
-	 * @param uuid the procedure UUID
-	 * @return the procedure, or null if not found
-	 */
-	Procedure getProcedureByUuid(String uuid);
-	
-	/**
-	 * Saves or updates a procedure.
-	 *
-	 * @param procedure the procedure to save
-	 * @return the saved procedure
-	 */
-	Procedure saveProcedure(Procedure procedure);
-	
-	/**
-	 * Gets all procedures for a patient.
-	 *
-	 * @param patient the patient
-	 * @param includeAll whether to include voided procedures
-	 * @param firstResult the index of the first result to return (for pagination), or null to return
-	 *            all
-	 * @param maxResults the maximum number of results to return (for pagination), or null to return all
-	 * @return list of procedures sorted by startDateTime descending
-	 */
-	List<Procedure> getProceduresByPatient(Patient patient, boolean includeAll, Integer firstResult, Integer maxResults);
-	
-	/**
-	 * Gets count of procedures for a patient.
-	 *
-	 * @param patient the patient
-	 * @param includeAll whether to include voided procedures
-	 * @return count of procedures for the patient
-	 */
-	Long getProcedureCountByPatient(Patient patient, boolean includeAll);
-	
-	/**
-	 * Deletes a procedure from the database. This is a hard delete - use voiding for soft delete.
-	 *
-	 * @param procedure the procedure to delete
-	 */
-	void deleteProcedure(Procedure procedure);
-	
-	/**
-	 * Retrieves a {@link ProcedureType} by its internal ID.
-	 *
-	 * @param id the internal ID of the procedure type
-	 * @return the matching {@link ProcedureType}, or {@code null} if not found
-	 */
-	ProcedureType getProcedureType(Integer id);
-	
-	/**
-	 * Retrieves a {@link ProcedureType} by its UUID.
-	 *
-	 * @param uuid the UUID of the procedure type
-	 * @return the matching {@link ProcedureType}, or {@code null} if not found
-	 */
-	ProcedureType getProcedureTypeByUuid(String uuid);
-	
-	/**
-	 * Retrieves a list of {@link ProcedureType} by its name.
-	 *
-	 * @param name the name of the procedure type
-	 * @return the matching {@link ProcedureType} records; never {@code null}
-	 */
-	List<ProcedureType> getProcedureTypesByName(String name);
-	
-	/**
-	 * Retrieves all {@link ProcedureType} records.
-	 *
-	 * @param includeAll if {@code true}, retired procedure types are included in the results
-	 * @return a list of {@link ProcedureType} records; never {@code null}
-	 */
-	List<ProcedureType> getAllProcedureTypes(boolean includeAll);
-	
-	/**
-	 * Persists a new {@link ProcedureType} or updates an existing one.
-	 *
-	 * @param procedureType the procedure type to save or update
-	 * @return the saved or updated {@link ProcedureType}
-	 */
-	ProcedureType saveProcedureType(ProcedureType procedureType);
-	
-	/**
-	 * Permanently deletes a {@link ProcedureType} from the database.
-	 *
-	 * @param procedureType the procedure type to delete
-	 */
-	void deleteProcedureType(ProcedureType procedureType);
+
+  /**
+   * Gets a procedure by its internal ID.
+   *
+   * @param id the procedure ID
+   * @return the procedure, or null if not found
+   */
+  Procedure getProcedure(Integer id);
+
+  /**
+   * Gets a procedure by its UUID.
+   *
+   * @param uuid the procedure UUID
+   * @return the procedure, or null if not found
+   */
+  Procedure getProcedureByUuid(String uuid);
+
+  /**
+   * Saves or updates a procedure.
+   *
+   * @param procedure the procedure to save
+   * @return the saved procedure
+   */
+  Procedure saveProcedure(Procedure procedure);
+
+  /**
+   * Gets all procedures for a patient.
+   *
+   * @param patient the patient
+   * @param includeAll whether to include voided procedures
+   * @param firstResult the index of the first result to return (for pagination), or null to return
+   *     all
+   * @param maxResults the maximum number of results to return (for pagination), or null to return
+   *     all
+   * @return list of procedures sorted by startDateTime descending
+   */
+  List<Procedure> getProceduresByPatient(
+      Patient patient, boolean includeAll, Integer firstResult, Integer maxResults);
+
+  /**
+   * Gets count of procedures for a patient.
+   *
+   * @param patient the patient
+   * @param includeAll whether to include voided procedures
+   * @return count of procedures for the patient
+   */
+  Long getProcedureCountByPatient(Patient patient, boolean includeAll);
+
+  /**
+   * Deletes a procedure from the database. This is a hard delete - use voiding for soft delete.
+   *
+   * @param procedure the procedure to delete
+   */
+  void deleteProcedure(Procedure procedure);
+
+  /**
+   * Retrieves a {@link ProcedureType} by its internal ID.
+   *
+   * @param id the internal ID of the procedure type
+   * @return the matching {@link ProcedureType}, or {@code null} if not found
+   */
+  ProcedureType getProcedureType(Integer id);
+
+  /**
+   * Retrieves a {@link ProcedureType} by its UUID.
+   *
+   * @param uuid the UUID of the procedure type
+   * @return the matching {@link ProcedureType}, or {@code null} if not found
+   */
+  ProcedureType getProcedureTypeByUuid(String uuid);
+
+  /**
+   * Retrieves a list of {@link ProcedureType} by its name.
+   *
+   * @param name the name of the procedure type
+   * @return the matching {@link ProcedureType} records; never {@code null}
+   */
+  List<ProcedureType> getProcedureTypesByName(String name);
+
+  /**
+   * Retrieves all {@link ProcedureType} records.
+   *
+   * @param includeAll if {@code true}, retired procedure types are included in the results
+   * @return a list of {@link ProcedureType} records; never {@code null}
+   */
+  List<ProcedureType> getAllProcedureTypes(boolean includeAll);
+
+  /**
+   * Persists a new {@link ProcedureType} or updates an existing one.
+   *
+   * @param procedureType the procedure type to save or update
+   * @return the saved or updated {@link ProcedureType}
+   */
+  ProcedureType saveProcedureType(ProcedureType procedureType);
+
+  /**
+   * Permanently deletes a {@link ProcedureType} from the database.
+   *
+   * @param procedureType the procedure type to delete
+   */
+  void deleteProcedureType(ProcedureType procedureType);
 }

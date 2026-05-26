@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module;
 
@@ -14,72 +14,71 @@ import org.slf4j.LoggerFactory;
 
 public class AdvicePoint {
 
-	private static final Logger log = LoggerFactory.getLogger(AdvicePoint.class);
+  private static final Logger log = LoggerFactory.getLogger(AdvicePoint.class);
 
-	private String point;
+  private String point;
 
-	private Object classInstance;
+  private Object classInstance;
 
-	private Module module;
+  private Module module;
 
-	private String className;
+  private String className;
 
-	public AdvicePoint() {
-	}
+  public AdvicePoint() {}
 
-	public AdvicePoint(String point, Class<?> clazz) {
-		this.point = point;
-		try {
-			this.classInstance = clazz.newInstance();
-		} catch (Exception e) {
-			log.error("Unable to get instance of: [{}]", clazz.getName(), e);
-		}
-	}
+  public AdvicePoint(String point, Class<?> clazz) {
+    this.point = point;
+    try {
+      this.classInstance = clazz.newInstance();
+    } catch (Exception e) {
+      log.error("Unable to get instance of: [{}]", clazz.getName(), e);
+    }
+  }
 
-	public AdvicePoint(Module mod, String point, String className) {
-		this.point = point;
-		this.module = mod;
-		this.className = className;
-	}
+  public AdvicePoint(Module mod, String point, String className) {
+    this.point = point;
+    this.module = mod;
+    this.className = className;
+  }
 
-	public String getPoint() {
-		return point;
-	}
+  public String getPoint() {
+    return point;
+  }
 
-	/**
-	 * @return the classInstance
-	 */
-	public Object getClassInstance() {
-		if (classInstance != null) {
-			return classInstance;
-		}
+  /**
+   * @return the classInstance
+   */
+  public Object getClassInstance() {
+    if (classInstance != null) {
+      return classInstance;
+    }
 
-		Object o = null;
-		try {
-			Class<?> c = ModuleFactory.getModuleClassLoader(getModule()).loadClass(getClassName());
-			o = c.newInstance();
-		} catch (Exception | LinkageError e) {
-			log.warn("Could not get instance for advice point [{}]", point, e);
-		}
-		classInstance = o;
-		return o;
-	}
+    Object o = null;
+    try {
+      Class<?> c = ModuleFactory.getModuleClassLoader(getModule()).loadClass(getClassName());
+      o = c.newInstance();
+    } catch (Exception | LinkageError e) {
+      log.warn("Could not get instance for advice point [{}]", point, e);
+    }
+    classInstance = o;
+    return o;
+  }
 
-	/**
-	 * @return the className
-	 */
-	public String getClassName() {
-		return className;
-	}
+  /**
+   * @return the className
+   */
+  public String getClassName() {
+    return className;
+  }
 
-	/**
-	 * @return the module
-	 */
-	public Module getModule() {
-		return module;
-	}
+  /**
+   * @return the module
+   */
+  public Module getModule() {
+    return module;
+  }
 
-	public void disposeClassInstance() {
-		classInstance = null;
-	}
+  public void disposeClassInstance() {
+    classInstance = null;
+  }
 }

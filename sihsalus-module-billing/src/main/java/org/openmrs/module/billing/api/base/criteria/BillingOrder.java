@@ -14,30 +14,30 @@ import jakarta.persistence.criteria.Root;
 
 public class BillingOrder {
 
-	private final String propertyName;
+  private final String propertyName;
 
-	private final boolean ascending;
+  private final boolean ascending;
 
-	protected BillingOrder(String propertyName, boolean ascending) {
-		this.propertyName = propertyName;
-		this.ascending = ascending;
-	}
+  protected BillingOrder(String propertyName, boolean ascending) {
+    this.propertyName = propertyName;
+    this.ascending = ascending;
+  }
 
-	public static BillingOrder asc(String propertyName) {
-		return new BillingOrder(propertyName, true);
-	}
+  public static BillingOrder asc(String propertyName) {
+    return new BillingOrder(propertyName, true);
+  }
 
-	public static BillingOrder desc(String propertyName) {
-		return new BillingOrder(propertyName, false);
-	}
+  public static BillingOrder desc(String propertyName) {
+    return new BillingOrder(propertyName, false);
+  }
 
-	public jakarta.persistence.criteria.Order toJpaOrder(CriteriaBuilder builder, Root<?> root) {
-		var path = BillingRestrictions.path(root, propertyName);
-		return ascending ? builder.asc(path) : builder.desc(path);
-	}
+  public jakarta.persistence.criteria.Order toJpaOrder(CriteriaBuilder builder, Root<?> root) {
+    var path = BillingRestrictions.path(root, propertyName);
+    return ascending ? builder.asc(path) : builder.desc(path);
+  }
 
-	@Override
-	public String toString() {
-		return propertyName + (ascending ? " asc" : " desc");
-	}
+  @Override
+  public String toString() {
+    return propertyName + (ascending ? " asc" : " desc");
+  }
 }

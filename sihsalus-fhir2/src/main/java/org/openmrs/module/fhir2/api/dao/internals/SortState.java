@@ -16,17 +16,17 @@ import lombok.EqualsAndHashCode;
 
 /**
  * This object is used internally during sorting to track information about the current sort
- * operation, including the parameter, the order (whether ascending or descending) and the
- * {@link BaseFhirCriteriaHolder<T>} for the query being sorted.
+ * operation, including the parameter, the order (whether ascending or descending) and the {@link
+ * BaseFhirCriteriaHolder<T>} for the query being sorted.
  */
 @Data
 @Builder
 @EqualsAndHashCode
 public final class SortState<T> {
-	
-	private final BaseFhirCriteriaHolder<T> context;
-	
-	private final SortOrderEnum sortOrder;
-	
-	private final String parameter;
+
+  private final BaseFhirCriteriaHolder<T> context;
+
+  private final SortOrderEnum sortOrder;
+
+  private final String parameter;
 }

@@ -17,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,29 +31,29 @@ import org.openmrs.Provider;
 @Entity
 @Table(name = "room_provider_map")
 public class RoomProviderMap extends BaseOpenmrsData {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "room_provider_map_id")
-	private Integer roomProviderMapId;
-	
-	@ManyToOne
-	@JoinColumn(name = "queue_room_id", nullable = false)
-	private QueueRoom queueRoom;
-	
-	@ManyToOne
-	@JoinColumn(name = "provider_id", nullable = false)
-	private Provider provider;
-	
-	@Override
-	public Integer getId() {
-		return getRoomProviderMapId();
-	}
-	
-	@Override
-	public void setId(Integer integer) {
-		setRoomProviderMapId(integer);
-	}
+
+  private static final long serialVersionUID = 1L;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "room_provider_map_id")
+  private Integer roomProviderMapId;
+
+  @ManyToOne
+  @JoinColumn(name = "queue_room_id", nullable = false)
+  private QueueRoom queueRoom;
+
+  @ManyToOne
+  @JoinColumn(name = "provider_id", nullable = false)
+  private Provider provider;
+
+  @Override
+  public Integer getId() {
+    return getRoomProviderMapId();
+  }
+
+  @Override
+  public void setId(Integer integer) {
+    setRoomProviderMapId(integer);
+  }
 }

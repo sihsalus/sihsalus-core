@@ -1,44 +1,49 @@
 package org.openmrs.module.appointments.dao;
 
 import java.util.Date;
-
-
+import java.util.List;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 public interface AppointmentDao {
-    List<Appointment> getAllAppointments(Date forDate);
-    List<Appointment> getAllAppointmentsReminder(String afterTime);
+  List<Appointment> getAllAppointments(Date forDate);
 
-    @Transactional
-    void save(Appointment appointment);
+  List<Appointment> getAllAppointmentsReminder(String afterTime);
 
-    List<Appointment> search(Appointment appointment);
+  @Transactional
+  void save(Appointment appointment);
 
-    List<Appointment> search(AppointmentSearchRequestModel searchQuery);
+  List<Appointment> search(Appointment appointment);
 
-    List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition);
+  List<Appointment> search(AppointmentSearchRequestModel searchQuery);
 
-    List<Appointment> getAllFutureAppointmentsForServiceType(AppointmentServiceType appointmentServiceType);
+  List<Appointment> getAllFutureAppointmentsForService(
+      AppointmentServiceDefinition appointmentServiceDefinition);
 
-    List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList);
+  List<Appointment> getAllFutureAppointmentsForServiceType(
+      AppointmentServiceType appointmentServiceType);
 
-	Appointment getAppointmentByUuid(String uuid);
+  List<Appointment> getAppointmentsForService(
+      AppointmentServiceDefinition appointmentServiceDefinition,
+      Date startDate,
+      Date endDate,
+      List<AppointmentStatus> appointmentStatusFilterList);
 
-    List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
+  Appointment getAppointmentByUuid(String uuid);
 
-    List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);
+  List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
 
-    List<Appointment> getAppointmentsForPatient(Integer patientId);
+  List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);
 
-    List<Appointment> getAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery, Integer limit);
+  List<Appointment> getAppointmentsForPatient(Integer patientId);
 
-    List<Appointment> getAppointmentsByUuids(List<String> uuids);
+  List<Appointment> getAppointmentsWithoutDates(
+      AppointmentSearchRequestModel searchQuery, Integer limit);
+
+  List<Appointment> getAppointmentsByUuids(List<String> uuids);
 }

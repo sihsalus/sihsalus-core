@@ -13,7 +13,6 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Extension;
@@ -26,60 +25,63 @@ import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseGroupTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
-	
-	public Group toFhirResource(@Nonnull Cohort cohort) {
-		notNull(cohort, "Cohort object should not be null");
-		Group group = new Group();
-		group.setId(cohort.getUuid());
-		group.setActive(!cohort.getVoided());
-		
-		/*
-		 * Apparently, cohort.description is a required field
-		 */
-		group.addExtension(new Extension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_GROUP_DESCRIPTION)
-		        .setValue(new StringType(cohort.getDescription())));
-		
-		// Not sure about this, It's either actual or descriptive
-		// I will set actual - true temporarily as it required - valid resource.
-		group.setActual(true);
-		
-		// Set to always person for now
-		group.setType(Group.GroupType.PERSON);
-		group.setName(cohort.getName());
-		group.setManagingEntity(practitionerReferenceTranslator.toFhirResource(cohort.getCreator()));
-		
-		return group;
-	}
-	
-	public Cohort toOpenmrsType(@Nonnull Cohort existingCohort, @Nonnull Group group) {
-		notNull(group, "group resource object should not be null");
-		notNull(existingCohort, "ExistingCohort object should not be null");
-		
-		if (group.hasId()) {
-			existingCohort.setUuid(group.getIdElement().getIdPart());
-		}
-		
-		if (group.hasName()) {
-			existingCohort.setName(group.getName());
-		}
-		
-		if (group.hasActive()) {
-			existingCohort.setVoided(!group.getActive());
-		}
-		
-		if (group.hasManagingEntity()) {
-			existingCohort.setCreator(practitionerReferenceTranslator.toOpenmrsType(group.getManagingEntity()));
-		}
-		
-		Extension extension = group.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_GROUP_DESCRIPTION);
-		if (extension != null && extension.hasValue()) {
-			existingCohort.setDescription(extension.getValue().toString());
-		}
-		
-		return existingCohort;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
+
+  public Group toFhirResource(@Nonnull Cohort cohort) {
+    notNull(cohort, "Cohort object should not be null");
+    Group group = new Group();
+    group.setId(cohort.getUuid());
+    group.setActive(!cohort.getVoided());
+
+    /*
+     * Apparently, cohort.description is a required field
+     */
+    group.addExtension(
+        new Extension()
+            .setUrl(FhirConstants.OPENMRS_FHIR_EXT_GROUP_DESCRIPTION)
+            .setValue(new StringType(cohort.getDescription())));
+
+    // Not sure about this, It's either actual or descriptive
+    // I will set actual - true temporarily as it required - valid resource.
+    group.setActual(true);
+
+    // Set to always person for now
+    group.setType(Group.GroupType.PERSON);
+    group.setName(cohort.getName());
+    group.setManagingEntity(practitionerReferenceTranslator.toFhirResource(cohort.getCreator()));
+
+    return group;
+  }
+
+  public Cohort toOpenmrsType(@Nonnull Cohort existingCohort, @Nonnull Group group) {
+    notNull(group, "group resource object should not be null");
+    notNull(existingCohort, "ExistingCohort object should not be null");
+
+    if (group.hasId()) {
+      existingCohort.setUuid(group.getIdElement().getIdPart());
+    }
+
+    if (group.hasName()) {
+      existingCohort.setName(group.getName());
+    }
+
+    if (group.hasActive()) {
+      existingCohort.setVoided(!group.getActive());
+    }
+
+    if (group.hasManagingEntity()) {
+      existingCohort.setCreator(
+          practitionerReferenceTranslator.toOpenmrsType(group.getManagingEntity()));
+    }
+
+    Extension extension = group.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_GROUP_DESCRIPTION);
+    if (extension != null && extension.hasValue()) {
+      existingCohort.setDescription(extension.getValue().toString());
+    }
+
+    return existingCohort;
+  }
 }

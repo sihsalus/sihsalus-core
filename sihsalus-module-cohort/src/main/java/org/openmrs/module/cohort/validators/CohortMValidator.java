@@ -21,37 +21,39 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 @Component
-@Handler(supports = { CohortM.class, Cohort.class }, order = 50)
+@Handler(
+    supports = {CohortM.class, Cohort.class},
+    order = 50)
 @Qualifier("cohort.cohortMValidator")
 public class CohortMValidator implements Validator {
-	
-	@Override
-	public boolean supports(Class<?> clazz) {
-		return clazz.equals(CohortM.class) || clazz.equals(Cohort.class);
-	}
-	
-	@Override
-	public void validate(Object command, Errors errors) {
-		if (command instanceof Cohort) {
-			errors.reject("A standard cohort should not be created while the cohort module is active");
-			return;
-		}
-		
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "Cohort Name Required");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "definitionHandlerClassname",
-		    "Cohort definitionHandlerClassname is required");
-		
-		CohortM cohort = (CohortM) command;
-		
-		// Cohort should have a unique name
-		CohortM cohortByName = Context.getService(CohortService.class).getCohortM(cohort.getName());
-		if (cohortByName != null && !java.util.Objects.equals(cohortByName.getId(), cohort.getId())) {
-			errors.rejectValue("name", "A cohort with this name already exists");
-		}
-		
-		// EndDate should less than startDate
-		if (cohort.getEndDate() != null && cohort.getEndDate().before(cohort.getStartDate())) {
-			errors.rejectValue("startDate", "Start date should be before the end date");
-		}
-	}
+
+  @Override
+  public boolean supports(Class<?> clazz) {
+    return clazz.equals(CohortM.class) || clazz.equals(Cohort.class);
+  }
+
+  @Override
+  public void validate(Object command, Errors errors) {
+    if (command instanceof Cohort) {
+      errors.reject("A standard cohort should not be created while the cohort module is active");
+      return;
+    }
+
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "Cohort Name Required");
+    ValidationUtils.rejectIfEmptyOrWhitespace(
+        errors, "definitionHandlerClassname", "Cohort definitionHandlerClassname is required");
+
+    CohortM cohort = (CohortM) command;
+
+    // Cohort should have a unique name
+    CohortM cohortByName = Context.getService(CohortService.class).getCohortM(cohort.getName());
+    if (cohortByName != null && !java.util.Objects.equals(cohortByName.getId(), cohort.getId())) {
+      errors.rejectValue("name", "A cohort with this name already exists");
+    }
+
+    // EndDate should less than startDate
+    if (cohort.getEndDate() != null && cohort.getEndDate().before(cohort.getStartDate())) {
+      errors.rejectValue("startDate", "Start date should be before the end date");
+    }
+  }
 }

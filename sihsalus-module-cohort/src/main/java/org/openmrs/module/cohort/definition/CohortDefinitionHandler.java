@@ -12,7 +12,6 @@ package org.openmrs.module.cohort.definition;
 import org.openmrs.module.cohort.CohortM;
 
 public interface CohortDefinitionHandler {
-	
-	void update(CohortM cohort);
-	
+
+  void update(CohortM cohort);
 }

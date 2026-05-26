@@ -18,125 +18,127 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 @Resource(
-        name = RestConstants.VERSION_1 + "/patient",
-        supportedClass = Patient.class,
-        supportedOpenmrsVersions = {"1.9.* - 9.*"})
+    name = RestConstants.VERSION_1 + "/patient",
+    supportedClass = Patient.class,
+    supportedOpenmrsVersions = {"1.9.* - 9.*"})
 public class PatientResource extends DataDelegatingCrudResource<Patient> {
 
-    @Override
-    public DelegatingResourceDescription getRepresentationDescription(Representation representation) {
-        if (representation instanceof RefRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("display");
-            description.addSelfLink();
-            return description;
-        }
-
-        if (representation instanceof DefaultRepresentation || representation instanceof FullRepresentation) {
-            DelegatingResourceDescription description = new DelegatingResourceDescription();
-            description.addProperty("uuid");
-            description.addProperty("display");
-            description.addProperty("identifier");
-            description.addProperty("givenName");
-            description.addProperty("familyName");
-            description.addProperty("gender");
-            description.addProperty("birthdate");
-            description.addProperty("voided");
-            description.addSelfLink();
-            if (representation instanceof DefaultRepresentation) {
-                description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
-            } else {
-                description.addProperty("auditInfo");
-            }
-            return description;
-        }
-
-        return null;
+  @Override
+  public DelegatingResourceDescription getRepresentationDescription(Representation representation) {
+    if (representation instanceof RefRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("display");
+      description.addSelfLink();
+      return description;
     }
 
-    @Override
-    public Patient newDelegate() {
-        return new Patient();
+    if (representation instanceof DefaultRepresentation
+        || representation instanceof FullRepresentation) {
+      DelegatingResourceDescription description = new DelegatingResourceDescription();
+      description.addProperty("uuid");
+      description.addProperty("display");
+      description.addProperty("identifier");
+      description.addProperty("givenName");
+      description.addProperty("familyName");
+      description.addProperty("gender");
+      description.addProperty("birthdate");
+      description.addProperty("voided");
+      description.addSelfLink();
+      if (representation instanceof DefaultRepresentation) {
+        description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
+      } else {
+        description.addProperty("auditInfo");
+      }
+      return description;
     }
 
-    @Override
-    public Patient save(Patient patient) {
-        return Context.getPatientService().savePatient(patient);
-    }
+    return null;
+  }
 
-    @Override
-    public Patient getByUniqueId(String uuid) {
-        return Context.getPatientService().getPatientByUuid(trimUuid(uuid));
-    }
+  @Override
+  public Patient newDelegate() {
+    return new Patient();
+  }
 
-    @Override
-    protected String getUniqueId(Patient patient) {
-        return trimUuid(patient.getUuid());
-    }
+  @Override
+  public Patient save(Patient patient) {
+    return Context.getPatientService().savePatient(patient);
+  }
 
-    @Override
-    protected void delete(Patient patient, String reason, RequestContext context) throws ResponseException {
-        if (!patient.isVoided()) {
-            Context.getPatientService().voidPatient(patient, reason);
-        }
-    }
+  @Override
+  public Patient getByUniqueId(String uuid) {
+    return Context.getPatientService().getPatientByUuid(trimUuid(uuid));
+  }
 
-    @Override
-    protected Patient undelete(Patient patient, RequestContext context) throws ResponseException {
-        if (patient.isVoided()) {
-            return Context.getPatientService().unvoidPatient(patient);
-        }
-        return patient;
-    }
+  @Override
+  protected String getUniqueId(Patient patient) {
+    return trimUuid(patient.getUuid());
+  }
 
-    @Override
-    public void purge(Patient patient, RequestContext context) throws ResponseException {
-        Context.getPatientService().purgePatient(patient);
+  @Override
+  protected void delete(Patient patient, String reason, RequestContext context)
+      throws ResponseException {
+    if (!patient.isVoided()) {
+      Context.getPatientService().voidPatient(patient, reason);
     }
+  }
 
-    @PropertyGetter("display")
-    public String getDisplayString(Patient patient) {
-        PatientIdentifier identifier = patient.getPatientIdentifier();
-        PersonName name = patient.getPersonName();
-        if (identifier != null && name != null) {
-            return identifier.getIdentifier() + " - " + name.getFullName();
-        }
-        if (name != null) {
-            return name.getFullName();
-        }
-        return trimUuid(patient.getUuid());
+  @Override
+  protected Patient undelete(Patient patient, RequestContext context) throws ResponseException {
+    if (patient.isVoided()) {
+      return Context.getPatientService().unvoidPatient(patient);
     }
+    return patient;
+  }
 
-    @PropertyGetter("uuid")
-    public String getUuid(Patient patient) {
-        return trimUuid(patient.getUuid());
-    }
+  @Override
+  public void purge(Patient patient, RequestContext context) throws ResponseException {
+    Context.getPatientService().purgePatient(patient);
+  }
 
-    @PropertyGetter("identifier")
-    public String getIdentifier(Patient patient) {
-        PatientIdentifier identifier = patient.getPatientIdentifier();
-        return identifier == null ? null : identifier.getIdentifier();
+  @PropertyGetter("display")
+  public String getDisplayString(Patient patient) {
+    PatientIdentifier identifier = patient.getPatientIdentifier();
+    PersonName name = patient.getPersonName();
+    if (identifier != null && name != null) {
+      return identifier.getIdentifier() + " - " + name.getFullName();
     }
+    if (name != null) {
+      return name.getFullName();
+    }
+    return trimUuid(patient.getUuid());
+  }
 
-    @PropertyGetter("givenName")
-    public String getGivenName(Patient patient) {
-        PersonName name = patient.getPersonName();
-        return name == null ? null : name.getGivenName();
-    }
+  @PropertyGetter("uuid")
+  public String getUuid(Patient patient) {
+    return trimUuid(patient.getUuid());
+  }
 
-    @PropertyGetter("familyName")
-    public String getFamilyName(Patient patient) {
-        PersonName name = patient.getPersonName();
-        return name == null ? null : name.getFamilyName();
-    }
+  @PropertyGetter("identifier")
+  public String getIdentifier(Patient patient) {
+    PatientIdentifier identifier = patient.getPatientIdentifier();
+    return identifier == null ? null : identifier.getIdentifier();
+  }
 
-    @PropertyGetter("birthdate")
-    public Date getBirthdate(Patient patient) {
-        return patient.getBirthdate();
-    }
+  @PropertyGetter("givenName")
+  public String getGivenName(Patient patient) {
+    PersonName name = patient.getPersonName();
+    return name == null ? null : name.getGivenName();
+  }
 
-    private String trimUuid(String uuid) {
-        return uuid == null ? null : uuid.trim();
-    }
+  @PropertyGetter("familyName")
+  public String getFamilyName(Patient patient) {
+    PersonName name = patient.getPersonName();
+    return name == null ? null : name.getFamilyName();
+  }
+
+  @PropertyGetter("birthdate")
+  public Date getBirthdate(Patient patient) {
+    return patient.getBirthdate();
+  }
+
+  private String trimUuid(String uuid) {
+    return uuid == null ? null : uuid.trim();
+  }
 }

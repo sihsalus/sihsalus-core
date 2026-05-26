@@ -19,76 +19,77 @@ import org.springframework.http.ResponseEntity;
 
 class FhirR4ReadControllerTest {
 
-    @Test
-    void readsResourceFromR4Provider() {
-        FhirR4ReadController controller =
-                new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
+  @Test
+  void readsResourceFromR4Provider() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
 
-        ResponseEntity<String> response = controller.read("Patient", "patient-uuid");
+    ResponseEntity<String> response = controller.read("Patient", "patient-uuid");
 
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("\"resourceType\":\"Patient\""));
-        assertTrue(response.getBody().contains("\"id\":\"patient-uuid\""));
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"Patient\""));
+    assertTrue(response.getBody().contains("\"id\":\"patient-uuid\""));
+  }
+
+  @Test
+  void convertsProviderExceptionToOperationOutcome() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new MissingPatientProvider()));
+
+    ResponseEntity<String> response = controller.read("Patient", "missing");
+
+    assertEquals(404, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("Could not find patient with Id missing"));
+  }
+
+  @Test
+  void convertsAuthorizationExceptionToOperationOutcome() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(
+            FhirContext.forR4Cached(), List.of(new UnauthorizedPatientProvider()));
+
+    ResponseEntity<String> response = controller.read("Patient", "secured");
+
+    assertEquals(403, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("FHIR read requires privileges"));
+  }
+
+  private static class PatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return Patient.class;
     }
 
-    @Test
-    void convertsProviderExceptionToOperationOutcome() {
-        FhirR4ReadController controller =
-                new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new MissingPatientProvider()));
-
-        ResponseEntity<String> response = controller.read("Patient", "missing");
-
-        assertEquals(404, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
-        assertTrue(response.getBody().contains("Could not find patient with Id missing"));
+    @Read
+    @SuppressWarnings("unused")
+    public Patient read(@IdParam IdType id) {
+      Patient patient = new Patient();
+      patient.setId(id.getIdPart());
+      return patient;
     }
+  }
 
-    @Test
-    void convertsAuthorizationExceptionToOperationOutcome() {
-        FhirR4ReadController controller =
-                new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new UnauthorizedPatientProvider()));
+  private static final class MissingPatientProvider extends PatientProvider {
 
-        ResponseEntity<String> response = controller.read("Patient", "secured");
-
-        assertEquals(403, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
-        assertTrue(response.getBody().contains("FHIR read requires privileges"));
+    @Override
+    @Read
+    public Patient read(@IdParam IdType id) {
+      throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
     }
+  }
 
-    private static class PatientProvider implements IResourceProvider {
+  private static final class UnauthorizedPatientProvider extends PatientProvider {
 
-        @Override
-        public Class<? extends IBaseResource> getResourceType() {
-            return Patient.class;
-        }
-
-        @Read
-        @SuppressWarnings("unused")
-        public Patient read(@IdParam IdType id) {
-            Patient patient = new Patient();
-            patient.setId(id.getIdPart());
-            return patient;
-        }
+    @Override
+    @Read
+    public Patient read(@IdParam IdType id) {
+      throw new APIAuthenticationException("FHIR read requires privileges");
     }
-
-    private static final class MissingPatientProvider extends PatientProvider {
-
-        @Override
-        @Read
-        public Patient read(@IdParam IdType id) {
-            throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
-        }
-    }
-
-    private static final class UnauthorizedPatientProvider extends PatientProvider {
-
-        @Override
-        @Read
-        public Patient read(@IdParam IdType id) {
-            throw new APIAuthenticationException("FHIR read requires privileges");
-        }
-    }
+  }
 }

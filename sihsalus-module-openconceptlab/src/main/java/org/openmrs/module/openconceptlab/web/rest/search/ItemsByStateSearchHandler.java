@@ -1,5 +1,11 @@
 package org.openmrs.module.openconceptlab.web.rest.search;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.module.openconceptlab.Import;
 import org.openmrs.module.openconceptlab.ImportService;
@@ -18,60 +24,64 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
 @Component
 public class ItemsByStateSearchHandler implements SubResourceSearchHandler {
 
-    @Autowired
-    ImportService importService;
+  @Autowired ImportService importService;
 
-    private static final String ITEM_STATE = "state";
+  private static final String ITEM_STATE = "state";
 
-    private final SearchConfig searchConfig = new SearchConfig("default", RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE + "/import/item",
-            Collections.singletonList("1.8.* - 2.*"),
-            Arrays.asList(new SearchQuery.Builder("Allows you to get items by state")
-                    .withRequiredParameters(ITEM_STATE)
-                    .build()));
+  private final SearchConfig searchConfig =
+      new SearchConfig(
+          "default",
+          RestConstants.VERSION_1
+              + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE
+              + "/import/item",
+          Collections.singletonList("1.8.* - 2.*"),
+          Arrays.asList(
+              new SearchQuery.Builder("Allows you to get items by state")
+                  .withRequiredParameters(ITEM_STATE)
+                  .build()));
 
-    @Override
-    public SearchConfig getSearchConfig() {
-        return this.searchConfig;
+  @Override
+  public SearchConfig getSearchConfig() {
+    return this.searchConfig;
+  }
+
+  @Override
+  public PageableResult search(RequestContext requestContext) throws ResponseException {
+    throw new UnsupportedOperationException("Cannot search for item without parent import");
+  }
+
+  @Override
+  public PageableResult search(String parentUuid, RequestContext requestContext)
+      throws ResponseException {
+    String itemState = requestContext.getParameter(ITEM_STATE);
+    if (StringUtils.isBlank(itemState) || StringUtils.isBlank(parentUuid)) {
+      return new EmptySearchResult();
     }
-
-    @Override
-    public PageableResult search(RequestContext requestContext) throws ResponseException {
-        throw new UnsupportedOperationException("Cannot search for item without parent import");
+    Import anImport = importService.getImport(parentUuid);
+    if (anImport == null) {
+      return new EmptySearchResult();
     }
-
-    @Override
-    public PageableResult search(String parentUuid, RequestContext requestContext) throws ResponseException {
-        String itemState = requestContext.getParameter(ITEM_STATE);
-        if(StringUtils.isBlank(itemState) || StringUtils.isBlank(parentUuid)){
-            return new EmptySearchResult();
-        }
-        Import anImport = importService.getImport(parentUuid);
-        if (anImport == null) {
-            return new EmptySearchResult();
-        }
-        ItemState state;
-        try {
-            state = ItemState.valueOf(itemState.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            return new EmptySearchResult();
-        }
-        Set<ItemState> states = new HashSet<ItemState>(Collections.singletonList(state));
-        Integer importItemsCount = importService.getImportItemsCount(anImport, states);
-        if (requestContext.getStartIndex() >= importItemsCount) {
-            return new AlreadyPaged<Item>(requestContext, Collections.emptyList(), false, importItemsCount.longValue());
-        }
-        List<Item> importItems = importService.getImportItems(anImport, requestContext.getStartIndex(), requestContext.getLimit(), states);
-        boolean hasMoreResults = requestContext.getStartIndex() + requestContext.getLimit() < importItemsCount;
-        return new AlreadyPaged<Item>(requestContext, importItems, hasMoreResults, importItemsCount.longValue());
+    ItemState state;
+    try {
+      state = ItemState.valueOf(itemState.toUpperCase(Locale.ROOT));
+    } catch (IllegalArgumentException e) {
+      return new EmptySearchResult();
     }
+    Set<ItemState> states = new HashSet<ItemState>(Collections.singletonList(state));
+    Integer importItemsCount = importService.getImportItemsCount(anImport, states);
+    if (requestContext.getStartIndex() >= importItemsCount) {
+      return new AlreadyPaged<Item>(
+          requestContext, Collections.emptyList(), false, importItemsCount.longValue());
+    }
+    List<Item> importItems =
+        importService.getImportItems(
+            anImport, requestContext.getStartIndex(), requestContext.getLimit(), states);
+    boolean hasMoreResults =
+        requestContext.getStartIndex() + requestContext.getLimit() < importItemsCount;
+    return new AlreadyPaged<Item>(
+        requestContext, importItems, hasMoreResults, importItemsCount.longValue());
+  }
 }

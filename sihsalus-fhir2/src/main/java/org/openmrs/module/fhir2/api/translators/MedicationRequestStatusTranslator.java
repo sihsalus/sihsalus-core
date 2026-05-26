@@ -10,19 +10,19 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 
-public interface MedicationRequestStatusTranslator extends ToFhirTranslator<DrugOrder, MedicationRequest.MedicationRequestStatus> {
-	
-	/**
-	 * Maps an {@link org.openmrs.DrugOrder} to a {@link MedicationRequest.MedicationRequestStatus}
-	 * resource
-	 *
-	 * @param drugOrder the OpenMRS drugOrder to translate
-	 * @return the corresponding FHIR resource
-	 */
-	@Override
-	MedicationRequest.MedicationRequestStatus toFhirResource(@Nonnull DrugOrder drugOrder);
+public interface MedicationRequestStatusTranslator
+    extends ToFhirTranslator<DrugOrder, MedicationRequest.MedicationRequestStatus> {
+
+  /**
+   * Maps an {@link org.openmrs.DrugOrder} to a {@link MedicationRequest.MedicationRequestStatus}
+   * resource
+   *
+   * @param drugOrder the OpenMRS drugOrder to translate
+   * @return the corresponding FHIR resource
+   */
+  @Override
+  MedicationRequest.MedicationRequestStatus toFhirResource(@Nonnull DrugOrder drugOrder);
 }

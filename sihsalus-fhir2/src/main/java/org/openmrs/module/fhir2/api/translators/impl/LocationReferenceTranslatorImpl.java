@@ -15,7 +15,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTra
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -28,31 +27,34 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LocationReferenceTranslatorImpl implements LocationReferenceTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirLocationDao locationDao;
-	
-	@Override
-	public Reference toFhirResource(@Nonnull Location location) {
-		if (location == null || location.getRetired()) {
-			return null;
-		}
-		
-		return createLocationReference(location);
-	}
-	
-	@Override
-	public Location toOpenmrsType(@Nonnull Reference locationReference) {
-		if (locationReference == null || !locationReference.hasReference()) {
-			return null;
-		}
-		
-		if (getReferenceType(locationReference).map(ref -> !ref.equals(FhirConstants.LOCATION)).orElse(true)) {
-			throw new IllegalArgumentException(
-			        "Reference must be to a Location not a " + getReferenceType(locationReference).orElse(""));
-		}
-		
-		return getReferenceId(locationReference).map(uuid -> locationDao.get(uuid)).orElse(null);
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirLocationDao locationDao;
+
+  @Override
+  public Reference toFhirResource(@Nonnull Location location) {
+    if (location == null || location.getRetired()) {
+      return null;
+    }
+
+    return createLocationReference(location);
+  }
+
+  @Override
+  public Location toOpenmrsType(@Nonnull Reference locationReference) {
+    if (locationReference == null || !locationReference.hasReference()) {
+      return null;
+    }
+
+    if (getReferenceType(locationReference)
+        .map(ref -> !ref.equals(FhirConstants.LOCATION))
+        .orElse(true)) {
+      throw new IllegalArgumentException(
+          "Reference must be to a Location not a "
+              + getReferenceType(locationReference).orElse(""));
+    }
+
+    return getReferenceId(locationReference).map(uuid -> locationDao.get(uuid)).orElse(null);
+  }
 }

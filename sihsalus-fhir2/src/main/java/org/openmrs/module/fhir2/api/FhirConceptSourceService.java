@@ -9,27 +9,25 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 public interface FhirConceptSourceService extends FhirHelperService {
-	
-	Collection<FhirConceptSource> getFhirConceptSources();
-	
-	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
-	
-	Optional<FhirConceptSource> getFhirConceptSource(@Nonnull ConceptSource conceptSource);
-	
-	String getUrlForConceptSource(@Nonnull ConceptSource conceptSource);
-	
-	Optional<ConceptSource> getConceptSourceByUrl(@Nonnull String url);
-	
-	Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code);
-	
-	FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource);
+
+  Collection<FhirConceptSource> getFhirConceptSources();
+
+  Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
+
+  Optional<FhirConceptSource> getFhirConceptSource(@Nonnull ConceptSource conceptSource);
+
+  String getUrlForConceptSource(@Nonnull ConceptSource conceptSource);
+
+  Optional<ConceptSource> getConceptSourceByUrl(@Nonnull String url);
+
+  Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code);
+
+  FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource);
 }

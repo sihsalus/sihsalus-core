@@ -17,6 +17,6 @@ import java.util.EventListener;
  * @param <T> The event listener type.s
  */
 public interface EventRaiser<T extends EventListener> {
-	
-	void fire(T listener);
+
+  void fire(T listener);
 }

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.emrapi.encounter;
 
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterProvider;
@@ -17,49 +18,52 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
-import java.util.Set;
-
 public class EncounterProviderServiceHelper {
-	
-	private ProviderService providerService;
-	
-	private EncounterService encounterService;
-	
-	public EncounterProviderServiceHelper(ProviderService providerService, EncounterService encounterService) {
-		this.providerService = providerService;
-		this.encounterService = encounterService;
-	}
-	
-	public void update(Encounter encounter, Set<EncounterTransaction.Provider> providers) {
-		for (EncounterTransaction.Provider provider : providers) {
-			EncounterProvider encounterProvider = findProvider(encounter, provider.getUuid(),
-			    provider.getEncounterRoleUuid());
-			if (encounterProvider == null) {
-				
-				EncounterRole encounterRole = null;
-				
-				if (StringUtils.isNotEmpty(provider.getEncounterRoleUuid())) {
-					encounterRole = encounterService.getEncounterRoleByUuid(provider.getEncounterRoleUuid());
-				}
-				
-				if (encounterRole == null) {
-					encounterRole = encounterService.getEncounterRoleByUuid(EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID);
-				}
-				
-				encounter.addProvider(encounterRole, providerService.getProviderByUuid(provider.getUuid()));
-			}
-		}
-	}
-	
-	// returns first matching provider by providerUuid and encounterRoleUuid; if encounterRoleUuid is null, just match on provider
-	private EncounterProvider findProvider(Encounter encounter, String providerUuid, String encounterRoleUuid) {
-		for (EncounterProvider encounterProvider : encounter.getEncounterProviders()) {
-			if (StringUtils.equals(encounterProvider.getProvider().getUuid(), providerUuid)
-			        && (StringUtils.isEmpty(encounterRoleUuid)
-			                || (StringUtils.equals(encounterProvider.getEncounterRole().getUuid(), encounterRoleUuid)))) {
-				return encounterProvider;
-			}
-		}
-		return null;
-	}
+
+  private ProviderService providerService;
+
+  private EncounterService encounterService;
+
+  public EncounterProviderServiceHelper(
+      ProviderService providerService, EncounterService encounterService) {
+    this.providerService = providerService;
+    this.encounterService = encounterService;
+  }
+
+  public void update(Encounter encounter, Set<EncounterTransaction.Provider> providers) {
+    for (EncounterTransaction.Provider provider : providers) {
+      EncounterProvider encounterProvider =
+          findProvider(encounter, provider.getUuid(), provider.getEncounterRoleUuid());
+      if (encounterProvider == null) {
+
+        EncounterRole encounterRole = null;
+
+        if (StringUtils.isNotEmpty(provider.getEncounterRoleUuid())) {
+          encounterRole = encounterService.getEncounterRoleByUuid(provider.getEncounterRoleUuid());
+        }
+
+        if (encounterRole == null) {
+          encounterRole =
+              encounterService.getEncounterRoleByUuid(EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID);
+        }
+
+        encounter.addProvider(encounterRole, providerService.getProviderByUuid(provider.getUuid()));
+      }
+    }
+  }
+
+  // returns first matching provider by providerUuid and encounterRoleUuid; if encounterRoleUuid is
+  // null, just match on provider
+  private EncounterProvider findProvider(
+      Encounter encounter, String providerUuid, String encounterRoleUuid) {
+    for (EncounterProvider encounterProvider : encounter.getEncounterProviders()) {
+      if (StringUtils.equals(encounterProvider.getProvider().getUuid(), providerUuid)
+          && (StringUtils.isEmpty(encounterRoleUuid)
+              || (StringUtils.equals(
+                  encounterProvider.getEncounterRole().getUuid(), encounterRoleUuid)))) {
+        return encounterProvider;
+      }
+    }
+    return null;
+  }
 }

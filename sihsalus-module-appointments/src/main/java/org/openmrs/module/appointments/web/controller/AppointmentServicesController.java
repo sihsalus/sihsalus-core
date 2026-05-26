@@ -17,20 +17,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointment-services")
 public class AppointmentServicesController extends BaseRestController {
 
-    @Autowired
-    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+  @Autowired private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
-    @Autowired
-    private AppointmentServiceMapper appointmentServiceMapper;
+  @Autowired private AppointmentServiceMapper appointmentServiceMapper;
 
-    @RequestMapping(method = RequestMethod.GET, value="/{uuid}")
-    @ResponseBody
-    public AppointmentServiceFullResponse getAppointmentServiceByUuid(@PathVariable("uuid") String uuid)  {
-        AppointmentServiceDefinition appointmentServiceDef = appointmentServiceDefinitionService.getAppointmentServiceByUuid(uuid);
-        if (appointmentServiceDef == null) {
-            throw new RuntimeException("Appointment Service does not exist");
-        }
-        AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDef);
-        return appointmentServiceFullResponse;
+  @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
+  @ResponseBody
+  public AppointmentServiceFullResponse getAppointmentServiceByUuid(
+      @PathVariable("uuid") String uuid) {
+    AppointmentServiceDefinition appointmentServiceDef =
+        appointmentServiceDefinitionService.getAppointmentServiceByUuid(uuid);
+    if (appointmentServiceDef == null) {
+      throw new RuntimeException("Appointment Service does not exist");
     }
+    AppointmentServiceFullResponse appointmentServiceFullResponse =
+        appointmentServiceMapper.constructResponse(appointmentServiceDef);
+    return appointmentServiceFullResponse;
+  }
 }

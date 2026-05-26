@@ -1,14 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
- * <p>
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
+ *
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reportingrest.web.resource;
 
+import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.report.ReportDesign;
@@ -29,14 +31,14 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
-
-/**
- * {@link Resource} for {@link ReportDesign}s, supporting standard CRUD operations
- */
-@Resource(name = RestConstants.VERSION_1 + ReportingRestController.REPORTING_REST_NAMESPACE + "/reportDesign",
-    supportedClass = ReportDesign.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+/** {@link Resource} for {@link ReportDesign}s, supporting standard CRUD operations */
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + ReportingRestController.REPORTING_REST_NAMESPACE
+            + "/reportDesign",
+    supportedClass = ReportDesign.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
 public class ReportDesignResource extends DelegatingCrudResource<ReportDesign> {
 
   @Override
@@ -58,17 +60,21 @@ public class ReportDesignResource extends DelegatingCrudResource<ReportDesign> {
       throw new IllegalArgumentException("reportDefinitionUuid parameter is required");
     }
 
-    ReportDefinition reportDefinition = getReportDefinitionService().getDefinitionByUuid(reportDefinitionUuid);
+    ReportDefinition reportDefinition =
+        getReportDefinitionService().getDefinitionByUuid(reportDefinitionUuid);
     if (reportDefinition == null) {
-      throw new EntityNotFoundException("ReportDefinition not found with uuid: " + reportDefinitionUuid);
+      throw new EntityNotFoundException(
+          "ReportDefinition not found with uuid: " + reportDefinitionUuid);
     }
 
-    List<ReportDesign> reportDesigns = getReportService().getReportDesigns(reportDefinition, null, false);
+    List<ReportDesign> reportDesigns =
+        getReportService().getReportDesigns(reportDefinition, null, false);
     return new NeedsPaging<ReportDesign>(reportDesigns, context);
   }
 
   @Override
-  protected void delete(ReportDesign reportDesign, String reason, RequestContext requestContext) throws ResponseException {
+  protected void delete(ReportDesign reportDesign, String reason, RequestContext requestContext)
+      throws ResponseException {
     purge(reportDesign, requestContext);
   }
 
@@ -83,9 +89,10 @@ public class ReportDesignResource extends DelegatingCrudResource<ReportDesign> {
   }
 
   @Override
-  public void purge(ReportDesign reportDesign, RequestContext requestContext) throws ResponseException {
-      ReportingRestPrivileges.requireDeleteReportObjects();
-      getReportService().purgeReportDesign(reportDesign);
+  public void purge(ReportDesign reportDesign, RequestContext requestContext)
+      throws ResponseException {
+    ReportingRestPrivileges.requireDeleteReportObjects();
+    getReportService().purgeReportDesign(reportDesign);
   }
 
   @Override

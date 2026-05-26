@@ -11,16 +11,14 @@ package org.openmrs.module.billing.web.legacyweb;
 
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
-/**
- * Constants class for privileges required by web resources.
- */
+/** Constants class for privileges required by web resources. */
 public class PrivilegeWebConstants extends PrivilegeConstants {
-	
-	public static final String CASHPOINTS_PAGE_PRIVILEDGES = MANAGE_METADATA + "," + VIEW_METADATA;
-	
-	public static final String PAYMENTSMODES_PAGE_PRIVILEDGES = MANAGE_METADATA + "," + VIEW_METADATA;
-	
-	public static final String BILL_PAGE_PRIVILEDGES = MANAGE_METADATA + "," + VIEW_METADATA;
-	
-	public static final String SETTING_PAGE_PRIVILEGE = MANAGE_METADATA;
+
+  public static final String CASHPOINTS_PAGE_PRIVILEDGES = MANAGE_METADATA + "," + VIEW_METADATA;
+
+  public static final String PAYMENTSMODES_PAGE_PRIVILEDGES = MANAGE_METADATA + "," + VIEW_METADATA;
+
+  public static final String BILL_PAGE_PRIVILEDGES = MANAGE_METADATA + "," + VIEW_METADATA;
+
+  public static final String SETTING_PAGE_PRIVILEGE = MANAGE_METADATA;
 }

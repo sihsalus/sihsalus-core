@@ -10,15 +10,16 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.openmrs.Concept;
 
-public interface MedicationDispenseStatusTranslator extends ToFhirTranslator<Concept, MedicationDispense.MedicationDispenseStatus>, ToOpenmrsTranslator<Concept, MedicationDispense.MedicationDispenseStatus> {
-	
-	@Override
-	MedicationDispense.MedicationDispenseStatus toFhirResource(@Nonnull Concept concept);
-	
-	@Override
-	Concept toOpenmrsType(@Nonnull MedicationDispense.MedicationDispenseStatus resource);
+public interface MedicationDispenseStatusTranslator
+    extends ToFhirTranslator<Concept, MedicationDispense.MedicationDispenseStatus>,
+        ToOpenmrsTranslator<Concept, MedicationDispense.MedicationDispenseStatus> {
+
+  @Override
+  MedicationDispense.MedicationDispenseStatus toFhirResource(@Nonnull Concept concept);
+
+  @Override
+  Concept toOpenmrsType(@Nonnull MedicationDispense.MedicationDispenseStatus resource);
 }

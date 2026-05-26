@@ -9,13 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
+import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,33 +26,34 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private ConceptTranslator conceptTranslator;
-	
-	@Override
-	public List<CodeableConcept> toFhirResource(@Nonnull Location location) {
-		CodeableConcept type = null;
-		
-		if (location.getType() != null) {
-			type = conceptTranslator.toFhirResource(location.getType());
-		}
-		
-		if (type != null) {
-			return Collections.singletonList(type);
-		} else {
-			return Collections.emptyList();
-		}
-	}
-	
-	@Override
-	public Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> types) {
-		Optional<CodeableConcept> typeConcept = types.stream().filter(Objects::nonNull).filter(CodeableConcept::hasCoding)
-		        .findFirst();
-		
-		typeConcept.ifPresent(codeableConcept -> location.setType(conceptTranslator.toOpenmrsType(codeableConcept)));
-		
-		return location;
-	}
+
+  @Getter(value = AccessLevel.PROTECTED)
+  @Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+  private ConceptTranslator conceptTranslator;
+
+  @Override
+  public List<CodeableConcept> toFhirResource(@Nonnull Location location) {
+    CodeableConcept type = null;
+
+    if (location.getType() != null) {
+      type = conceptTranslator.toFhirResource(location.getType());
+    }
+
+    if (type != null) {
+      return Collections.singletonList(type);
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
+  @Override
+  public Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> types) {
+    Optional<CodeableConcept> typeConcept =
+        types.stream().filter(Objects::nonNull).filter(CodeableConcept::hasCoding).findFirst();
+
+    typeConcept.ifPresent(
+        codeableConcept -> location.setType(conceptTranslator.toOpenmrsType(codeableConcept)));
+
+    return location;
+  }
 }

@@ -10,47 +10,44 @@
 package org.openmrs.module.billing.web.propertyeditor;
 
 import java.beans.PropertyEditorSupport;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 
-/**
- * Property editor for {@link org.openmrs.Provider}s
- */
+/** Property editor for {@link org.openmrs.Provider}s */
 public class ProviderPropertyEditor extends PropertyEditorSupport {
-	
-	@Override
-	public String getAsText() {
-		Provider provider = (Provider) getValue();
-		
-		if (provider == null) {
-			return "";
-		} else {
-			return provider.getId().toString();
-		}
-	}
-	
-	@Override
-	public void setAsText(String text) {
-		ProviderService service = Context.getProviderService();
-		
-		if (StringUtils.isEmpty(text)) {
-			setValue(null);
-		} else {
-			Provider provider;
-			if (NumberUtils.isNumber(text)) {
-				provider = service.getProvider(Integer.valueOf(text));
-			} else {
-				provider = service.getProviderByUuid(text);
-			}
-			
-			setValue(provider);
-			if (provider == null) {
-				throw new IllegalArgumentException("Provider not found: " + text);
-			}
-		}
-	}
+
+  @Override
+  public String getAsText() {
+    Provider provider = (Provider) getValue();
+
+    if (provider == null) {
+      return "";
+    } else {
+      return provider.getId().toString();
+    }
+  }
+
+  @Override
+  public void setAsText(String text) {
+    ProviderService service = Context.getProviderService();
+
+    if (StringUtils.isEmpty(text)) {
+      setValue(null);
+    } else {
+      Provider provider;
+      if (NumberUtils.isNumber(text)) {
+        provider = service.getProvider(Integer.valueOf(text));
+      } else {
+        provider = service.getProviderByUuid(text);
+      }
+
+      setValue(provider);
+      if (provider == null) {
+        throw new IllegalArgumentException("Provider not found: " + text);
+      }
+    }
+  }
 }

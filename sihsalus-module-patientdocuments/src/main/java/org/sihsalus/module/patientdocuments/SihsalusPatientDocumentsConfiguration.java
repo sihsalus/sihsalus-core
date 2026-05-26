@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackageClasses = PatientDocumentsActivator.class)
 public class SihsalusPatientDocumentsConfiguration {
 
-    @Bean
-    PatientIdStickerDataSetEvaluator patientIdStickerDataSetEvaluator() {
-        return new PatientIdStickerDataSetEvaluator();
-    }
+  @Bean
+  PatientIdStickerDataSetEvaluator patientIdStickerDataSetEvaluator() {
+    return new PatientIdStickerDataSetEvaluator();
+  }
 }

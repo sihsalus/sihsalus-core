@@ -14,7 +14,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -37,98 +36,108 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PatientIdentifierTranslatorImpl implements PatientIdentifierTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private LocationReferenceTranslator locationReferenceTranslator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirPatientIdentifierSystemService patientIdentifierSystemService;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = { @Autowired, @Lazy })
-	private FhirPatientService patientService;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirLocationDao locationDao;
-	
-	@Override
-	public Identifier toFhirResource(@Nonnull PatientIdentifier identifier) {
-		if (identifier == null || identifier.getVoided()) {
-			return null;
-		}
-		
-		Identifier patientIdentifier = new Identifier();
-		
-		patientIdentifier.setValue(identifier.getIdentifier()).setId(trimToNull(identifier.getUuid()));
-		
-		if (identifier.getPreferred() != null) {
-			if (identifier.getPreferred()) {
-				patientIdentifier.setUse(Identifier.IdentifierUse.OFFICIAL);
-			} else {
-				patientIdentifier.setUse(Identifier.IdentifierUse.USUAL);
-			}
-		}
-		
-		if (identifier.getIdentifierType() != null) {
-			PatientIdentifierType identifierType = identifier.getIdentifierType();
-			patientIdentifier.setSystem(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifierType));
-			patientIdentifier.setType(new CodeableConcept(new Coding().setCode(trimToNull(identifierType.getUuid())))
-			        .setText(getMetadataTranslation(identifierType)));
-		}
-		
-		if (identifier.getLocation() != null) {
-			patientIdentifier.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)
-			        .setValue(locationReferenceTranslator.toFhirResource(identifier.getLocation()));
-		}
-		
-		return patientIdentifier;
-	}
-	
-	@Override
-	public PatientIdentifier toOpenmrsType(@Nonnull Identifier identifier) {
-		if (identifier == null) {
-			return null;
-		}
-		
-		return toOpenmrsType(new PatientIdentifier(), identifier);
-	}
-	
-	@Override
-	public PatientIdentifier toOpenmrsType(@Nonnull PatientIdentifier patientIdentifier, @Nonnull Identifier identifier) {
-		if (patientIdentifier == null || identifier == null) {
-			return null;
-		}
-		
-		PatientIdentifierType type = patientService.getPatientIdentifierTypeByIdentifier(identifier);
-		if (type == null && patientIdentifier.getIdentifierType() == null) {
-			return null;
-		}
-		
-		if (identifier.hasId()) {
-			patientIdentifier.setUuid(identifier.getId());
-		}
-		
-		patientIdentifier.setIdentifier(identifier.getValue());
-		
-		patientIdentifier.setPreferred(Identifier.IdentifierUse.OFFICIAL.equals(identifier.getUse()));
-		
-		patientIdentifier.setIdentifierType(type);
-		
-		if (identifier.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)) {
-			Type identifierLocationType = identifier
-			        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION).getValue();
-			
-			if (identifierLocationType instanceof Reference) {
-				Location location = locationReferenceTranslator.toOpenmrsType((Reference) identifierLocationType);
-				if (location != null) {
-					patientIdentifier.setLocation(location);
-				}
-			}
-		}
-		
-		return patientIdentifier;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private LocationReferenceTranslator locationReferenceTranslator;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirPatientIdentifierSystemService patientIdentifierSystemService;
+
+  @Getter(PROTECTED)
+  @Setter(
+      value = PROTECTED,
+      onMethod_ = {@Autowired, @Lazy})
+  private FhirPatientService patientService;
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirLocationDao locationDao;
+
+  @Override
+  public Identifier toFhirResource(@Nonnull PatientIdentifier identifier) {
+    if (identifier == null || identifier.getVoided()) {
+      return null;
+    }
+
+    Identifier patientIdentifier = new Identifier();
+
+    patientIdentifier.setValue(identifier.getIdentifier()).setId(trimToNull(identifier.getUuid()));
+
+    if (identifier.getPreferred() != null) {
+      if (identifier.getPreferred()) {
+        patientIdentifier.setUse(Identifier.IdentifierUse.OFFICIAL);
+      } else {
+        patientIdentifier.setUse(Identifier.IdentifierUse.USUAL);
+      }
+    }
+
+    if (identifier.getIdentifierType() != null) {
+      PatientIdentifierType identifierType = identifier.getIdentifierType();
+      patientIdentifier.setSystem(
+          patientIdentifierSystemService.getUrlByPatientIdentifierType(identifierType));
+      patientIdentifier.setType(
+          new CodeableConcept(new Coding().setCode(trimToNull(identifierType.getUuid())))
+              .setText(getMetadataTranslation(identifierType)));
+    }
+
+    if (identifier.getLocation() != null) {
+      patientIdentifier
+          .addExtension()
+          .setUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)
+          .setValue(locationReferenceTranslator.toFhirResource(identifier.getLocation()));
+    }
+
+    return patientIdentifier;
+  }
+
+  @Override
+  public PatientIdentifier toOpenmrsType(@Nonnull Identifier identifier) {
+    if (identifier == null) {
+      return null;
+    }
+
+    return toOpenmrsType(new PatientIdentifier(), identifier);
+  }
+
+  @Override
+  public PatientIdentifier toOpenmrsType(
+      @Nonnull PatientIdentifier patientIdentifier, @Nonnull Identifier identifier) {
+    if (patientIdentifier == null || identifier == null) {
+      return null;
+    }
+
+    PatientIdentifierType type = patientService.getPatientIdentifierTypeByIdentifier(identifier);
+    if (type == null && patientIdentifier.getIdentifierType() == null) {
+      return null;
+    }
+
+    if (identifier.hasId()) {
+      patientIdentifier.setUuid(identifier.getId());
+    }
+
+    patientIdentifier.setIdentifier(identifier.getValue());
+
+    patientIdentifier.setPreferred(Identifier.IdentifierUse.OFFICIAL.equals(identifier.getUse()));
+
+    patientIdentifier.setIdentifierType(type);
+
+    if (identifier.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)) {
+      Type identifierLocationType =
+          identifier
+              .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)
+              .getValue();
+
+      if (identifierLocationType instanceof Reference) {
+        Location location =
+            locationReferenceTranslator.toOpenmrsType((Reference) identifierLocationType);
+        if (location != null) {
+          patientIdentifier.setLocation(location);
+        }
+      }
+    }
+
+    return patientIdentifier;
+  }
 }

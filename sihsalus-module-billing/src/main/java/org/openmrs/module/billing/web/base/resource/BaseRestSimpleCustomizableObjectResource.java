@@ -15,14 +15,15 @@ import org.openmrs.module.billing.api.base.entity.model.ISimpleCustomizable;
 
 // @formatter:off
 /**
- * REST resource for {@link org.openmrs.OpenmrsObject}
- * {@link org.openmrs.module.openhmis.commons.api.entity.model.ISimpleCustomizable}s.
+ * REST resource for {@link org.openmrs.OpenmrsObject} {@link
+ * org.openmrs.module.openhmis.commons.api.entity.model.ISimpleCustomizable}s.
+ *
  * @param <E> The simple customizable model class
  * @param <TAttribute> The model attribute class
  */
 public abstract class BaseRestSimpleCustomizableObjectResource<
-			E extends ISimpleCustomizable<TAttribute> & OpenmrsObject,
-			TAttribute extends ISimpleAttribute<E, ?>>
-		extends BaseRestCustomizableObjectResource<E, TAttribute> {
-// @formatter:on
+        E extends ISimpleCustomizable<TAttribute> & OpenmrsObject,
+        TAttribute extends ISimpleAttribute<E, ?>>
+    extends BaseRestCustomizableObjectResource<E, TAttribute> {
+  // @formatter:on
 }

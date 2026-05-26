@@ -30,31 +30,40 @@ import org.springframework.stereotype.Component;
  * @param <T> FHIR generic translator Class
  */
 @Component
-public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends OpenmrsFhirTranslator<T, U>, W extends SearchQueryInclude<U>> {
-	
-	@Setter(onMethod_ = @Autowired)
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	/**
-	 * Gets query results
-	 *
-	 * @param theParams search params.
-	 * @param dao generic dao
-	 * @param translator generic translator In case of $everything operation, package the results in
-	 *            SimpleBundleProvider to include count of _include and _revinclude resources in the
-	 *            total resources count and prevent paging
-	 * @return IBundleProvider
-	 */
-	public IBundleProvider getQueryResults(SearchParameterMap theParams, O dao, V translator, W searchQueryInclude) {
-		if (!theParams.getParameters(FhirConstants.EVERYTHING_SEARCH_HANDLER).isEmpty()) {
-			SimpleBundleProvider result = new SimpleBundleProvider(
-			        new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude)
-			                .getAllResources());
-			
-			result.setPreferredPageSize(result.size());
-			return result;
-		}
-		
-		return new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude);
-	}
+public class SearchQuery<
+    T extends OpenmrsObject & Auditable,
+    U extends IBaseResource,
+    O extends FhirDao<T>,
+    V extends OpenmrsFhirTranslator<T, U>,
+    W extends SearchQueryInclude<U>> {
+
+  @Setter(onMethod_ = @Autowired)
+  private FhirGlobalPropertyService globalPropertyService;
+
+  /**
+   * Gets query results
+   *
+   * @param theParams search params.
+   * @param dao generic dao
+   * @param translator generic translator In case of $everything operation, package the results in
+   *     SimpleBundleProvider to include count of _include and _revinclude resources in the total
+   *     resources count and prevent paging
+   * @return IBundleProvider
+   */
+  public IBundleProvider getQueryResults(
+      SearchParameterMap theParams, O dao, V translator, W searchQueryInclude) {
+    if (!theParams.getParameters(FhirConstants.EVERYTHING_SEARCH_HANDLER).isEmpty()) {
+      SimpleBundleProvider result =
+          new SimpleBundleProvider(
+              new SearchQueryBundleProvider<>(
+                      theParams, dao, translator, globalPropertyService, searchQueryInclude)
+                  .getAllResources());
+
+      result.setPreferredPageSize(result.size());
+      return result;
+    }
+
+    return new SearchQueryBundleProvider<>(
+        theParams, dao, translator, globalPropertyService, searchQueryInclude);
+  }
 }

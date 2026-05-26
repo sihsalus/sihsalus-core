@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -19,82 +20,81 @@ import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Transactional
 @RequiredArgsConstructor
-public class CashierItemPriceServiceImpl extends BaseOpenmrsService implements CashierItemPriceService {
-	
-	@Setter(onMethod_ = { @Autowired })
-	private CashierItemPriceDAO cashierItemPriceDAO;
-	
-	/** {@inheritDoc} */
-	@Override
-	@Transactional(readOnly = true)
-	public CashierItemPrice getCashierItemPrice(Integer id) {
-		if (id == null) {
-			return null;
-		}
-		return cashierItemPriceDAO.getCashierItemPrice(id);
-	}
-	
-	/** {@inheritDoc} */
-	@Override
-	@Transactional(readOnly = true)
-	public CashierItemPrice getCashierItemPriceByUuid(String uuid) {
-		if (uuid == null) {
-			return null;
-		}
-		return cashierItemPriceDAO.getCashierItemPriceByUuid(uuid);
-	}
-	
-	/** {@inheritDoc} */
-	@Override
-	@Transactional(readOnly = true)
-	public List<CashierItemPrice> getCashierItemPrices(boolean includeRetired) {
-		return cashierItemPriceDAO.getCashierItemPrices(includeRetired);
-	}
-	
-	/** {@inheritDoc} */
-	@Override
-	@Transactional
-	public CashierItemPrice saveCashierItemPrice(CashierItemPrice cashierItemPrice) {
-		if (cashierItemPrice == null) {
-			throw new IllegalArgumentException("CashierItemPrice cannot be null");
-		}
-		return cashierItemPriceDAO.saveCashierItemPrice(cashierItemPrice);
-	}
-	
-	/** {@inheritDoc} */
-	@Override
-	@Transactional
-	public void retireCashierItemPrice(CashierItemPrice cashierItemPrice, String reason) {
-		if (cashierItemPrice == null) {
-			throw new IllegalArgumentException("CashierItemPrice cannot be null");
-		}
-		if (StringUtils.isEmpty(reason)) {
-			throw new IllegalArgumentException("Reason cannot be empty");
-		}
-		cashierItemPriceDAO.saveCashierItemPrice(cashierItemPrice);
-	}
-	
-	/** {@inheritDoc} */
-	@Override
-	@Transactional
-	public CashierItemPrice unretireCashierItemPrice(CashierItemPrice cashierItemPrice) {
-		if (cashierItemPrice == null) {
-			throw new IllegalArgumentException("CashierItemPrice cannot be null");
-		}
-		return cashierItemPriceDAO.saveCashierItemPrice(cashierItemPrice);
-	}
-	
-	/** {@inheritDoc} */
-	@Override
-	@Transactional
-	public void purgeCashierItemPrice(CashierItemPrice cashierItemPrice) {
-		if (cashierItemPrice == null) {
-			throw new IllegalArgumentException("CashierItemPrice cannot be null");
-		}
-		cashierItemPriceDAO.purgeCashierItemPrice(cashierItemPrice);
-	}
+public class CashierItemPriceServiceImpl extends BaseOpenmrsService
+    implements CashierItemPriceService {
+
+  @Setter(onMethod_ = {@Autowired})
+  private CashierItemPriceDAO cashierItemPriceDAO;
+
+  /** {@inheritDoc} */
+  @Override
+  @Transactional(readOnly = true)
+  public CashierItemPrice getCashierItemPrice(Integer id) {
+    if (id == null) {
+      return null;
+    }
+    return cashierItemPriceDAO.getCashierItemPrice(id);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Transactional(readOnly = true)
+  public CashierItemPrice getCashierItemPriceByUuid(String uuid) {
+    if (uuid == null) {
+      return null;
+    }
+    return cashierItemPriceDAO.getCashierItemPriceByUuid(uuid);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Transactional(readOnly = true)
+  public List<CashierItemPrice> getCashierItemPrices(boolean includeRetired) {
+    return cashierItemPriceDAO.getCashierItemPrices(includeRetired);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Transactional
+  public CashierItemPrice saveCashierItemPrice(CashierItemPrice cashierItemPrice) {
+    if (cashierItemPrice == null) {
+      throw new IllegalArgumentException("CashierItemPrice cannot be null");
+    }
+    return cashierItemPriceDAO.saveCashierItemPrice(cashierItemPrice);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Transactional
+  public void retireCashierItemPrice(CashierItemPrice cashierItemPrice, String reason) {
+    if (cashierItemPrice == null) {
+      throw new IllegalArgumentException("CashierItemPrice cannot be null");
+    }
+    if (StringUtils.isEmpty(reason)) {
+      throw new IllegalArgumentException("Reason cannot be empty");
+    }
+    cashierItemPriceDAO.saveCashierItemPrice(cashierItemPrice);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Transactional
+  public CashierItemPrice unretireCashierItemPrice(CashierItemPrice cashierItemPrice) {
+    if (cashierItemPrice == null) {
+      throw new IllegalArgumentException("CashierItemPrice cannot be null");
+    }
+    return cashierItemPriceDAO.saveCashierItemPrice(cashierItemPrice);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Transactional
+  public void purgeCashierItemPrice(CashierItemPrice cashierItemPrice) {
+    if (cashierItemPrice == null) {
+      throw new IllegalArgumentException("CashierItemPrice cannot be null");
+    }
+    cashierItemPriceDAO.purgeCashierItemPrice(cashierItemPrice);
+  }
 }

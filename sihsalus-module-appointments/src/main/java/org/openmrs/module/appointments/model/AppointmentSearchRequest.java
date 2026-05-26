@@ -4,62 +4,63 @@ import java.util.Date;
 
 public class AppointmentSearchRequest {
 
-    private Date startDate;
-    private Date endDate;
-    private String patientUuid;
-    private String providerUuid;
-    private int limit;
-    private AppointmentStatus status;
-    private String appointmentNumber;
+  private Date startDate;
+  private Date endDate;
+  private String patientUuid;
+  private String providerUuid;
+  private int limit;
+  private AppointmentStatus status;
+  private String appointmentNumber;
 
-    public Date getStartDate() {
-        return startDate;
-    }
+  public Date getStartDate() {
+    return startDate;
+  }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
+  public void setStartDate(Date startDate) {
+    this.startDate = startDate;
+  }
 
-    public Date getEndDate() {
-        return endDate;
-    }
+  public Date getEndDate() {
+    return endDate;
+  }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
+  public void setEndDate(Date endDate) {
+    this.endDate = endDate;
+  }
 
-    public String getPatientUuid() {
-        return patientUuid;
-    }
+  public String getPatientUuid() {
+    return patientUuid;
+  }
 
-    public void setPatientUuid(String patientUuid) {
-        this.patientUuid = patientUuid;
-    }
+  public void setPatientUuid(String patientUuid) {
+    this.patientUuid = patientUuid;
+  }
 
-    public int getLimit() {
-        return limit;
-    }
+  public int getLimit() {
+    return limit;
+  }
 
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
+  public void setLimit(int limit) {
+    this.limit = limit;
+  }
 
-    public String getProviderUuid() {
-        return providerUuid;
-    }
+  public String getProviderUuid() {
+    return providerUuid;
+  }
 
-    public void setProviderUuid(String providerUuid) {
-        this.providerUuid = providerUuid;
-    }
+  public void setProviderUuid(String providerUuid) {
+    this.providerUuid = providerUuid;
+  }
 
-    public AppointmentStatus getStatus() {
-        return status;
-    }
+  public AppointmentStatus getStatus() {
+    return status;
+  }
 
-    public void setStatus(AppointmentStatus status) {
-        this.status = status;
-    }
+  public void setStatus(AppointmentStatus status) {
+    this.status = status;
+  }
 
-    public String getAppointmentNumber() {return appointmentNumber; }
-
+  public String getAppointmentNumber() {
+    return appointmentNumber;
+  }
 }

@@ -11,18 +11,17 @@ package org.openmrs.module.fhir2.api.search;
 
 import java.util.List;
 import java.util.Set;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 public interface SearchQueryInclude<U extends IBaseResource> {
-	
-	/**
-	 * Fetches any resources meant to be included or revIncluded in the resulting query
-	 *
-	 * @param resourceList A list of resources that are the result of the FHIR Search query being run
-	 * @param theParams The {@link SearchParameterMap} for the FHIR Search query being run
-	 * @return A {@link Set} of resources to be included
-	 */
-	Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams);
+
+  /**
+   * Fetches any resources meant to be included or revIncluded in the resulting query
+   *
+   * @param resourceList A list of resources that are the result of the FHIR Search query being run
+   * @param theParams The {@link SearchParameterMap} for the FHIR Search query being run
+   * @return A {@link Set} of resources to be included
+   */
+  Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams);
 }

@@ -15,26 +15,25 @@ import org.openmrs.module.billing.web.CashierWebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * Contorller to manage the Sequential Receipt Number Generation
- */
+/** Contorller to manage the Sequential Receipt Number Generation */
 @Controller
-@RequestMapping(value = SequentialReceiptNumberGenerator2xController.SEQ_RECEIPT_NUMBER_GENERATOR_URL)
-public class SequentialReceiptNumberGenerator2xController extends AbstractSequentialReceiptNumberGenerator {
-	
-	public static final String SEQ_RECEIPT_NUMBER_GENERATOR_URL = CashierWebConstants.SEQ_RECEIPT_NUMBER_GENERATOR_PAGE_2X;
-	
-	public SequentialReceiptNumberGenerator2xController() {
-		
-	}
-	
-	@Override
-	public ISequentialReceiptNumberGeneratorService getService() {
-		return Context.getService(ISequentialReceiptNumberGeneratorService.class);
-	}
-	
-	@Override
-	public String getReceiptNumberGeneratorUrl() {
-		return SEQ_RECEIPT_NUMBER_GENERATOR_URL;
-	}
+@RequestMapping(
+    value = SequentialReceiptNumberGenerator2xController.SEQ_RECEIPT_NUMBER_GENERATOR_URL)
+public class SequentialReceiptNumberGenerator2xController
+    extends AbstractSequentialReceiptNumberGenerator {
+
+  public static final String SEQ_RECEIPT_NUMBER_GENERATOR_URL =
+      CashierWebConstants.SEQ_RECEIPT_NUMBER_GENERATOR_PAGE_2X;
+
+  public SequentialReceiptNumberGenerator2xController() {}
+
+  @Override
+  public ISequentialReceiptNumberGeneratorService getService() {
+    return Context.getService(ISequentialReceiptNumberGeneratorService.class);
+  }
+
+  @Override
+  public String getReceiptNumberGeneratorUrl() {
+    return SEQ_RECEIPT_NUMBER_GENERATOR_URL;
+  }
 }

@@ -9,11 +9,6 @@
  */
 package org.openmrs.module.billing.api.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.openmrs.BaseOpenmrsData;
-import org.openmrs.User;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,80 +22,84 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import lombok.Getter;
+import lombok.Setter;
+import org.openmrs.BaseOpenmrsData;
+import org.openmrs.User;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "bill_discount")
 public class BillDiscount extends BaseOpenmrsData {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "bill_discount_id")
-	private Integer billDiscountId;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "bill_id", nullable = false)
-	private Bill bill;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "bill_line_item_id")
-	private BillLineItem lineItem;
-	
-	@Enumerated(EnumType.STRING)
-	@Column(name = "discount_type", nullable = false)
-	private DiscountType discountType;
-	
-	@Enumerated(EnumType.STRING)
-	@Column(name = "discount_status", nullable = false, length = 20)
-	private DiscountStatus status = DiscountStatus.PENDING;
-	
-	@Column(name = "discount_value", nullable = false)
-	private BigDecimal discountValue;
-	
-	@Column(name = "justification", nullable = false, length = 1000)
-	private String justification;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "initiator_id", nullable = false)
-	private User initiator;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "approver_id")
-	private User approver;
-	
-	@Override
-	public Integer getId() {
-		return billDiscountId;
-	}
-	
-	@Override
-	public void setId(Integer id) {
-		this.billDiscountId = id;
-	}
-	
-	/**
-	 * Live discount amount derived from {@link #discountValue} against the current scope total. Always
-	 * call this; never cache the result.
-	 */
-	public BigDecimal getDiscountAmount() {
-		if (discountValue == null || discountType == null) {
-			return BigDecimal.ZERO;
-		}
-		if (discountType == DiscountType.FIXED_AMOUNT) {
-			return discountValue;
-		}
-		BigDecimal base = currentBase();
-		if (base == null) {
-			return BigDecimal.ZERO;
-		}
-		return base.multiply(discountValue).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-	}
-	
-	private BigDecimal currentBase() {
-		if (lineItem != null) {
-			return lineItem.getTotal();
-		}
-		return bill != null ? bill.getTotal() : null;
-	}
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "bill_discount_id")
+  private Integer billDiscountId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bill_id", nullable = false)
+  private Bill bill;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bill_line_item_id")
+  private BillLineItem lineItem;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "discount_type", nullable = false)
+  private DiscountType discountType;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "discount_status", nullable = false, length = 20)
+  private DiscountStatus status = DiscountStatus.PENDING;
+
+  @Column(name = "discount_value", nullable = false)
+  private BigDecimal discountValue;
+
+  @Column(name = "justification", nullable = false, length = 1000)
+  private String justification;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "initiator_id", nullable = false)
+  private User initiator;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "approver_id")
+  private User approver;
+
+  @Override
+  public Integer getId() {
+    return billDiscountId;
+  }
+
+  @Override
+  public void setId(Integer id) {
+    this.billDiscountId = id;
+  }
+
+  /**
+   * Live discount amount derived from {@link #discountValue} against the current scope total.
+   * Always call this; never cache the result.
+   */
+  public BigDecimal getDiscountAmount() {
+    if (discountValue == null || discountType == null) {
+      return BigDecimal.ZERO;
+    }
+    if (discountType == DiscountType.FIXED_AMOUNT) {
+      return discountValue;
+    }
+    BigDecimal base = currentBase();
+    if (base == null) {
+      return BigDecimal.ZERO;
+    }
+    return base.multiply(discountValue).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+  }
+
+  private BigDecimal currentBase() {
+    if (lineItem != null) {
+      return lineItem.getTotal();
+    }
+    return bill != null ? bill.getTotal() : null;
+  }
 }

@@ -9,21 +9,22 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.NumberParam;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 
 public interface FhirObservationService extends FhirService<Observation> {
-	
-	@Override
-	Observation get(@Nonnull String uuid);
-	
-	IBundleProvider searchForObservations(ObservationSearchParams observationSearchParams);
-	
-	IBundleProvider getLastnObservations(NumberParam max, ObservationSearchParams observationSearchParams);
-	
-	IBundleProvider getLastnEncountersObservations(NumberParam max, ObservationSearchParams observationSearchParams);
+
+  @Override
+  Observation get(@Nonnull String uuid);
+
+  IBundleProvider searchForObservations(ObservationSearchParams observationSearchParams);
+
+  IBundleProvider getLastnObservations(
+      NumberParam max, ObservationSearchParams observationSearchParams);
+
+  IBundleProvider getLastnEncountersObservations(
+      NumberParam max, ObservationSearchParams observationSearchParams);
 }

@@ -12,8 +12,6 @@ package org.openmrs.module.fhir2.providers.r4;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -22,6 +20,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,27 +34,28 @@ import org.springframework.stereotype.Component;
 @Component("valueSetFhirR4ResourceProvider")
 @R4Provider
 public class ValueSetFhirResourceProvider implements IResourceProvider {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
-	FhirValueSetService fhirValueSetService;
-	
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return ValueSet.class;
-	}
-	
-	@Read
-	public ValueSet getValueSetByUuid(@IdParam @Nonnull IdType id) {
-		ValueSet valueSet = fhirValueSetService.get(id.getIdPart());
-		if (valueSet == null) {
-			throw new ResourceNotFoundException("Could not find valueset with Id " + id.getIdPart());
-		}
-		return valueSet;
-	}
-	
-	@Search
-	public IBundleProvider searchValueSets(@OptionalParam(name = ValueSet.SP_TITLE) StringAndListParam title) {
-		return fhirValueSetService.searchForValueSets(title);
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PACKAGE, onMethod_ = @Autowired)
+  FhirValueSetService fhirValueSetService;
+
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return ValueSet.class;
+  }
+
+  @Read
+  public ValueSet getValueSetByUuid(@IdParam @Nonnull IdType id) {
+    ValueSet valueSet = fhirValueSetService.get(id.getIdPart());
+    if (valueSet == null) {
+      throw new ResourceNotFoundException("Could not find valueset with Id " + id.getIdPart());
+    }
+    return valueSet;
+  }
+
+  @Search
+  public IBundleProvider searchValueSets(
+      @OptionalParam(name = ValueSet.SP_TITLE) StringAndListParam title) {
+    return fhirValueSetService.searchForValueSets(title);
+  }
 }

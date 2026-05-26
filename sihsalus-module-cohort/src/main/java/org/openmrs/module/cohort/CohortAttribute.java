@@ -14,45 +14,44 @@ import lombok.Setter;
 import org.openmrs.attribute.Attribute;
 import org.openmrs.attribute.BaseAttribute;
 
-public class CohortAttribute extends BaseAttribute<CohortAttributeType, CohortM> implements Attribute<CohortAttributeType, CohortM> {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Getter
-	@Setter
-	private Integer cohortAttributeId;
+public class CohortAttribute extends BaseAttribute<CohortAttributeType, CohortM>
+    implements Attribute<CohortAttributeType, CohortM> {
 
-	@Override
-	public CohortM getOwner() {
-		return super.getOwner();
-	}
+  private static final long serialVersionUID = 1L;
 
-	@Override
-	public void setOwner(CohortM owner) {
-		super.setOwner(owner);
-	}
-	
-	/**
-	 * @return id - The unique Identifier for the object
-	 */
-	@Override
-	public Integer getId() {
-		return this.cohortAttributeId;
-	}
-	
-	/**
-	 * @param id - The unique Identifier for the object
-	 */
-	@Override
-	public void setId(Integer id) {
-		this.setCohortAttributeId(id);
-	}
-	
-	public void setCohort(CohortM cohort) {
-		this.setOwner(cohort);
-	}
-	
-	public CohortM getCohort() {
-		return this.getOwner();
-	}
+  @Getter @Setter private Integer cohortAttributeId;
+
+  @Override
+  public CohortM getOwner() {
+    return super.getOwner();
+  }
+
+  @Override
+  public void setOwner(CohortM owner) {
+    super.setOwner(owner);
+  }
+
+  /**
+   * @return id - The unique Identifier for the object
+   */
+  @Override
+  public Integer getId() {
+    return this.cohortAttributeId;
+  }
+
+  /**
+   * @param id - The unique Identifier for the object
+   */
+  @Override
+  public void setId(Integer id) {
+    this.setCohortAttributeId(id);
+  }
+
+  public void setCohort(CohortM cohort) {
+    this.setOwner(cohort);
+  }
+
+  public CohortM getCohort() {
+    return this.getOwner();
+  }
 }

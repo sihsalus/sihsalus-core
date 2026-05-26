@@ -14,27 +14,28 @@ package org.openmrs.module.billing.api.base.entity.model;
  *
  * @param <TOwner> The owning instance type.
  */
-public class BaseInstanceAttributeType<TOwner extends IInstanceType<?>> extends BaseAttributeType implements IInstanceAttributeType<TOwner> {
-	
-	private static final long serialVersionUID = 1L;
-	
-	private TOwner owner;
-	
-	/**
-	 * Gets the attribute type owner.
-	 *
-	 * @return The owner
-	 */
-	public TOwner getOwner() {
-		return owner;
-	}
-	
-	/**
-	 * Sets the attribute type owner.
-	 *
-	 * @param parent The owner
-	 */
-	public void setOwner(TOwner parent) {
-		this.owner = parent;
-	}
+public class BaseInstanceAttributeType<TOwner extends IInstanceType<?>> extends BaseAttributeType
+    implements IInstanceAttributeType<TOwner> {
+
+  private static final long serialVersionUID = 1L;
+
+  private TOwner owner;
+
+  /**
+   * Gets the attribute type owner.
+   *
+   * @return The owner
+   */
+  public TOwner getOwner() {
+    return owner;
+  }
+
+  /**
+   * Sets the attribute type owner.
+   *
+   * @param parent The owner
+   */
+  public void setOwner(TOwner parent) {
+    this.owner = parent;
+  }
 }

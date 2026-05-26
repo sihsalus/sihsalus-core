@@ -9,31 +9,30 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import java.util.Date;
-
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Period;
 import org.openmrs.OpenmrsData;
 
-public interface EncounterPeriodTranslator<T extends OpenmrsData> extends ToFhirTranslator<T, Period>, UpdatableOpenmrsTranslator<T, Period> {
-	
-	/**
-	 * Maps an {@link Date} to a corresponding {@link org.hl7.fhir.r4.model.Period}
-	 *
-	 * @param encounter the encounter to translate
-	 * @return the corresponding FHIR period
-	 */
-	@Override
-	Period toFhirResource(@Nonnull T encounter);
-	
-	/**
-	 * Maps an {@link org.hl7.fhir.r4.model} to a {@link Date}
-	 *
-	 * @param encounter the encounter to update
-	 * @param period the period to map
-	 * @return an updated version of the visit
-	 */
-	@Override
-	T toOpenmrsType(@Nonnull T encounter, @Nonnull Period period);
+public interface EncounterPeriodTranslator<T extends OpenmrsData>
+    extends ToFhirTranslator<T, Period>, UpdatableOpenmrsTranslator<T, Period> {
+
+  /**
+   * Maps an {@link Date} to a corresponding {@link org.hl7.fhir.r4.model.Period}
+   *
+   * @param encounter the encounter to translate
+   * @return the corresponding FHIR period
+   */
+  @Override
+  Period toFhirResource(@Nonnull T encounter);
+
+  /**
+   * Maps an {@link org.hl7.fhir.r4.model} to a {@link Date}
+   *
+   * @param encounter the encounter to update
+   * @param period the period to map
+   * @return an updated version of the visit
+   */
+  @Override
+  T toOpenmrsType(@Nonnull T encounter, @Nonnull Period period);
 }

@@ -10,34 +10,33 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.model.FhirTask;
 
 public interface TaskTranslator extends OpenmrsFhirUpdatableTranslator<FhirTask, Task> {
-	
-	/**
-	 * Maps a {@link FhirTask} to a {@link Task}
-	 * 
-	 * @param openmrsTask the Task to translate
-	 * @return the corresponding FHIR Task
-	 */
-	Task toFhirResource(@Nonnull FhirTask openmrsTask);
-	
-	/**
-	 * Maps a {@link Task} to a {@link FhirTask}
-	 * 
-	 * @param fhirTask the FHIR Task to map
-	 * @return the corresponding OpenMRS Task
-	 */
-	FhirTask toOpenmrsType(@Nonnull Task fhirTask);
-	
-	/**
-	 * Maps a {@link Task} to an existing {@link FhirTask}
-	 * 
-	 * @param currentTask the openMRS Task to update
-	 * @param fhirTask the FHIR patient to map
-	 * @return the updated OpenMRS Task
-	 */
-	FhirTask toOpenmrsType(@Nonnull FhirTask currentTask, @Nonnull Task fhirTask);
+
+  /**
+   * Maps a {@link FhirTask} to a {@link Task}
+   *
+   * @param openmrsTask the Task to translate
+   * @return the corresponding FHIR Task
+   */
+  Task toFhirResource(@Nonnull FhirTask openmrsTask);
+
+  /**
+   * Maps a {@link Task} to a {@link FhirTask}
+   *
+   * @param fhirTask the FHIR Task to map
+   * @return the corresponding OpenMRS Task
+   */
+  FhirTask toOpenmrsType(@Nonnull Task fhirTask);
+
+  /**
+   * Maps a {@link Task} to an existing {@link FhirTask}
+   *
+   * @param currentTask the openMRS Task to update
+   * @param fhirTask the FHIR patient to map
+   * @return the updated OpenMRS Task
+   */
+  FhirTask toOpenmrsType(@Nonnull FhirTask currentTask, @Nonnull Task fhirTask);
 }

@@ -1,139 +1,159 @@
 package org.openmrs.module.bedmanagement;
 
-import org.openmrs.Patient;
-import org.openmrs.module.bedmanagement.entity.BedPatientAssignment;
-import org.openmrs.module.bedmanagement.entity.BedTagMap;
-import org.openmrs.module.bedmanagement.entity.BedType;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.openmrs.Patient;
+import org.openmrs.module.bedmanagement.entity.BedPatientAssignment;
+import org.openmrs.module.bedmanagement.entity.BedTagMap;
+import org.openmrs.module.bedmanagement.entity.BedType;
 
 public class BedLayout {
 
-	private Integer rowNumber;
+  private Integer rowNumber;
 
-	private Integer columnNumber;
+  private Integer columnNumber;
 
-	private String bedNumber;
+  private String bedNumber;
 
-	private Integer bedId;
+  private Integer bedId;
 
-	private String bedUuid;
+  private String bedUuid;
 
-	private String status;
+  private String status;
 
-	private BedType bedType;
+  private BedType bedType;
 
-	private String location;
+  private String location;
 
-	private List<BedPatientAssignment> bedPatientAssignments;
+  private List<BedPatientAssignment> bedPatientAssignments;
 
-	private Set<BedTagMap> bedTagMaps;
+  private Set<BedTagMap> bedTagMaps;
 
-	public String getBedNumber() {
-		return bedNumber;
-	}
+  public String getBedNumber() {
+    return bedNumber;
+  }
 
-	public void setBedNumber(String bedNumber) {
-		this.bedNumber = bedNumber;
-	}
+  public void setBedNumber(String bedNumber) {
+    this.bedNumber = bedNumber;
+  }
 
-	public Integer getBedId() {
-		return bedId;
-	}
+  public Integer getBedId() {
+    return bedId;
+  }
 
-	public void setBedId(Integer bedId) {
-		this.bedId = bedId;
-	}
+  public void setBedId(Integer bedId) {
+    this.bedId = bedId;
+  }
 
-	public String getBedUuid() {
-		return bedUuid;
-	}
+  public String getBedUuid() {
+    return bedUuid;
+  }
 
-	public void setBedUuid(String bedUuid) {
-		this.bedUuid = bedUuid;
-	}
+  public void setBedUuid(String bedUuid) {
+    this.bedUuid = bedUuid;
+  }
 
-	public String getStatus() {
-		return status;
-	}
+  public String getStatus() {
+    return status;
+  }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
-	public Integer getRowNumber() {
-		return rowNumber;
-	}
+  public Integer getRowNumber() {
+    return rowNumber;
+  }
 
-	public void setRowNumber(Integer rowNumber) {
-		this.rowNumber = rowNumber;
-	}
+  public void setRowNumber(Integer rowNumber) {
+    this.rowNumber = rowNumber;
+  }
 
-	public Integer getColumnNumber() {
-		return columnNumber;
-	}
+  public Integer getColumnNumber() {
+    return columnNumber;
+  }
 
-	public void setColumnNumber(Integer columnNumber) {
-		this.columnNumber = columnNumber;
-	}
+  public void setColumnNumber(Integer columnNumber) {
+    this.columnNumber = columnNumber;
+  }
 
-	public BedType getBedType() {
-		return bedType;
-	}
+  public BedType getBedType() {
+    return bedType;
+  }
 
-	public void setBedType(BedType bedType) {
-		this.bedType = bedType;
-	}
+  public void setBedType(BedType bedType) {
+    this.bedType = bedType;
+  }
 
-	public String getLocation() {
-		return location;
-	}
+  public String getLocation() {
+    return location;
+  }
 
-	public void setLocation(String location) {
-		this.location = location;
-	}
+  public void setLocation(String location) {
+    this.location = location;
+  }
 
-	public List<BedPatientAssignment> getBedPatientAssignments() {
-		return bedPatientAssignments == null ? null : Collections.unmodifiableList(bedPatientAssignments);
-	}
+  public List<BedPatientAssignment> getBedPatientAssignments() {
+    return bedPatientAssignments == null
+        ? null
+        : Collections.unmodifiableList(bedPatientAssignments);
+  }
 
-	public void setBedPatientAssignments(List<BedPatientAssignment> bedPatientAssignments) {
-		this.bedPatientAssignments = bedPatientAssignments == null ? null : new ArrayList<>(bedPatientAssignments);
-	}
+  public void setBedPatientAssignments(List<BedPatientAssignment> bedPatientAssignments) {
+    this.bedPatientAssignments =
+        bedPatientAssignments == null ? null : new ArrayList<>(bedPatientAssignments);
+  }
 
-	public Set<Patient> getPatients() {
-		Set<Patient> patients = new HashSet<>();
-		if (bedPatientAssignments != null) {
-			for (BedPatientAssignment assignment : bedPatientAssignments) {
-				patients.add(assignment.getPatient());
-			}
-		}
-		return patients;
-	}
+  public Set<Patient> getPatients() {
+    Set<Patient> patients = new HashSet<>();
+    if (bedPatientAssignments != null) {
+      for (BedPatientAssignment assignment : bedPatientAssignments) {
+        patients.add(assignment.getPatient());
+      }
+    }
+    return patients;
+  }
 
-	@Override
-	public String toString() {
-		return "BedLayout{" + "rowNumber=" + rowNumber + ", columnNumber=" + columnNumber + ", bedNumber='" + bedNumber
-		        + '\'' + ", bedId=" + bedId + ", bedUuid=" + bedUuid + ", status='" + status + '\'' + ", bedType=" + bedType
-		        + ", location='" + location + '\'' + '}';
-	}
+  @Override
+  public String toString() {
+    return "BedLayout{"
+        + "rowNumber="
+        + rowNumber
+        + ", columnNumber="
+        + columnNumber
+        + ", bedNumber='"
+        + bedNumber
+        + '\''
+        + ", bedId="
+        + bedId
+        + ", bedUuid="
+        + bedUuid
+        + ", status='"
+        + status
+        + '\''
+        + ", bedType="
+        + bedType
+        + ", location='"
+        + location
+        + '\''
+        + '}';
+  }
 
-	public Set<BedTagMap> getBedTagMaps() {
-		return bedTagMaps == null ? null : Collections.unmodifiableSet(bedTagMaps);
-	}
+  public Set<BedTagMap> getBedTagMaps() {
+    return bedTagMaps == null ? null : Collections.unmodifiableSet(bedTagMaps);
+  }
 
-	public void setBedTagMaps(Set<BedTagMap> bedTagMaps) {
-		this.bedTagMaps = bedTagMaps == null ? null : new HashSet<>(bedTagMaps);
-	}
+  public void setBedTagMaps(Set<BedTagMap> bedTagMaps) {
+    this.bedTagMaps = bedTagMaps == null ? null : new HashSet<>(bedTagMaps);
+  }
 
-	public void addBedTagMap(BedTagMap bedTagMap) {
-		if (this.bedTagMaps == null) {
-			this.bedTagMaps = new HashSet<>();
-		}
-		this.bedTagMaps.add(bedTagMap);
-	}
+  public void addBedTagMap(BedTagMap bedTagMap) {
+    if (this.bedTagMaps == null) {
+      this.bedTagMaps = new HashSet<>();
+    }
+    this.bedTagMaps.add(bedTagMap);
+  }
 }

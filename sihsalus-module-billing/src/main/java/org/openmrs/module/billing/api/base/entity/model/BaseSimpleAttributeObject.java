@@ -12,13 +12,13 @@ package org.openmrs.module.billing.api.base.entity.model;
 // @formatter:off
 /**
  * Base class for {@link org.openmrs.OpenmrsObject} simple attribute models.
+ *
  * @param <TAttributeType> The class of the attribute type.
  */
 public abstract class BaseSimpleAttributeObject<
-			TOwner extends ICustomizable<?>,
-			TAttributeType extends ISimpleAttributeType>
-		extends BaseAttributeObject<TOwner, TAttributeType>
-		implements ISimpleAttribute<TOwner, TAttributeType> {
-// @formatter:on
-	private static final long serialVersionUID = 0L;
+        TOwner extends ICustomizable<?>, TAttributeType extends ISimpleAttributeType>
+    extends BaseAttributeObject<TOwner, TAttributeType>
+    implements ISimpleAttribute<TOwner, TAttributeType> {
+  // @formatter:on
+  private static final long serialVersionUID = 0L;
 }

@@ -6,13 +6,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/rest/" + RestConstants.VERSION_1 + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE)
-public class OpenConceptLabRestController extends MainResourceController{
+@RequestMapping(
+    "/rest/"
+        + RestConstants.VERSION_1
+        + OpenConceptLabRestController.OPEN_CONCEPT_LAB_REST_NAMESPACE)
+public class OpenConceptLabRestController extends MainResourceController {
 
-    public static final String OPEN_CONCEPT_LAB_REST_NAMESPACE = "/openconceptlab";
+  public static final String OPEN_CONCEPT_LAB_REST_NAMESPACE = "/openconceptlab";
 
-    @Override
-    public String getNamespace() {
-        return RestConstants.VERSION_1 + OPEN_CONCEPT_LAB_REST_NAMESPACE;
-    }
+  @Override
+  public String getNamespace() {
+    return RestConstants.VERSION_1 + OPEN_CONCEPT_LAB_REST_NAMESPACE;
+  }
 }

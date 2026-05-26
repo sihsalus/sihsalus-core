@@ -12,15 +12,16 @@ package org.openmrs.module.billing.api.base.entity.model;
 // @formatter:off
 /**
  * Base class for {@link org.openmrs.OpenmrsData} instance attribute models.
+ *
  * @param <TOwner> The class of the owning model.
  * @param <TAttributeType> The class of the attribute type.
  */
 public abstract class BaseInstanceAttributeData<
-			TOwner extends IInstanceCustomizable<TInstanceType, ?>,
-			TInstanceType extends IInstanceType<TAttributeType>,
-			TAttributeType extends IInstanceAttributeType<TInstanceType>>
-		extends BaseAttributeData<TOwner, TAttributeType>
-		implements IInstanceAttribute<TOwner, TInstanceType, TAttributeType> {
-// @formatter:on
-	private static final long serialVersionUID = 1L;
+        TOwner extends IInstanceCustomizable<TInstanceType, ?>,
+        TInstanceType extends IInstanceType<TAttributeType>,
+        TAttributeType extends IInstanceAttributeType<TInstanceType>>
+    extends BaseAttributeData<TOwner, TAttributeType>
+    implements IInstanceAttribute<TOwner, TInstanceType, TAttributeType> {
+  // @formatter:on
+  private static final long serialVersionUID = 1L;
 }

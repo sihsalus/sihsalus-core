@@ -1,14 +1,29 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.report.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
@@ -48,809 +63,862 @@ import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.OpenmrsUtil;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-/**
- * Base Implementation of the ReportService API
- */
+/** Base Implementation of the ReportService API */
 public class ReportServiceImpl extends BaseOpenmrsService implements ReportService {
 
-	public static final String GENERATED_BY = "generatedBy";
-	public static final String GENERATION_DATE = "generationDate";
-	public static final String REPORT_REQUEST_UUID = "reportRequestUuid";
-	
-	// Logger
-	private transient Log log = LogFactory.getLog(this.getClass());
+  public static final String GENERATED_BY = "generatedBy";
+  public static final String GENERATION_DATE = "generationDate";
+  public static final String REPORT_REQUEST_UUID = "reportRequestUuid";
 
-	// Private variables
-	private ReportDAO reportDAO;
-	private ReportingTimerTask runQueuedReportsTask;
-	private Map<String, CachedReportData> reportCache = Collections.synchronizedMap(new LinkedHashMap<String, CachedReportData>());
-		
-	/**
-	 * Default constructor
-	 */
-	public ReportServiceImpl() { }
-	
-	//****** REPORT RENDERERS AND DESIGNS *****
+  // Logger
+  private transient Log log = LogFactory.getLog(this.getClass());
 
-	/** 
-	 * @see ReportService#getReportDesignByUuid(String)
-	 */
-	public ReportDesign getReportDesignByUuid(String uuid) throws APIException {
-		return reportDAO.getReportDesignByUuid(uuid);
-	}
-	
-	/** 
-	 * @see ReportService#getReportDesign(Integer)
-	 */
-	public ReportDesign getReportDesign(Integer id) throws APIException {
-		return reportDAO.getReportDesign(id);
-	}
-	
-	/** 
-	 * @see ReportService#getAllReportDesigns(boolean)
-	 */
-	public List<ReportDesign> getAllReportDesigns(boolean includeRetired) {
-		return reportDAO.getReportDesigns(null, null, includeRetired);
-	}
+  // Private variables
+  private ReportDAO reportDAO;
+  private ReportingTimerTask runQueuedReportsTask;
+  private Map<String, CachedReportData> reportCache =
+      Collections.synchronizedMap(new LinkedHashMap<String, CachedReportData>());
 
-	/** 
-	 * @see ReportService#getReportDesigns(ReportDefinition, Class, boolean)
-	 */
-	public List<ReportDesign> getReportDesigns(ReportDefinition reportDefinition, Class<? extends ReportRenderer> rendererType, 
-											   boolean includeRetired) throws APIException {
-		return reportDAO.getReportDesigns(reportDefinition, rendererType, includeRetired);
-	}
+  /** Default constructor */
+  public ReportServiceImpl() {}
 
-	/** 
-	 * @see ReportService#saveReportDesign(ReportDesign)
-	 */
-	public ReportDesign saveReportDesign(ReportDesign reportDesign) throws APIException {
-		return reportDAO.saveReportDesign(reportDesign);
-	}
+  // ****** REPORT RENDERERS AND DESIGNS *****
 
-	/** 
-	 * @see ReportService#purgeReportDesign(ReportDesign)
-	 */
-	public void purgeReportDesign(ReportDesign reportDesign) {
-		reportDAO.purgeReportDesign(reportDesign);
-	}
-	
-	/**
-	 * @see ReportService#getReportRenderers()
-	 */
-	public Collection<ReportRenderer> getReportRenderers() {
-		return HandlerUtil.getHandlersForType(ReportRenderer.class, null);
-	}
-	
-	/**
-	 * @see ReportService#getReportRenderer(String)
-	 */
-	public ReportRenderer getReportRenderer(String className) {
-		try { 
-			return (ReportRenderer) Context.loadClass(className).newInstance();
-		} catch(ClassNotFoundException e) { 
-			/* ignore */
-		} catch (IllegalAccessException e) { 
-			/* ignore */
-		} catch (InstantiationException e) {
-			/* ignore */
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * @see ReportService#getPreferredReportRenderer(Class)
-	 */
-	public ReportRenderer getPreferredReportRenderer(Class<Object> supportedType) {
-		return HandlerUtil.getPreferredHandler(ReportRenderer.class, supportedType);
-	}
+  /**
+   * @see ReportService#getReportDesignByUuid(String)
+   */
+  public ReportDesign getReportDesignByUuid(String uuid) throws APIException {
+    return reportDAO.getReportDesignByUuid(uuid);
+  }
 
-	/**
-	 * @see ReportService#getRenderingModes(ReportDefinition)
-	 */
-	public List<RenderingMode> getRenderingModes(ReportDefinition reportDefinition) {
-		List<RenderingMode> renderingModes = new Vector<RenderingMode>();
-		if (reportDefinition != null) {
-			for (ReportRenderer renderer : getReportRenderers()) {
-				if (renderer.canRender(reportDefinition)) {
-					Collection<RenderingMode> modes = renderer.getRenderingModes(reportDefinition);
-					if (modes != null) {
-						renderingModes.addAll(modes);
-					}
-				}
-			}
-			Collections.sort(renderingModes);
-		}
-		return renderingModes;
-	}
-	
-	//****** REPORT REQUESTS *****
-	
-	/**
-	 * @see ReportService#saveReportRequest(ReportRequest)
-	 */
-	@Transactional
-	public ReportRequest saveReportRequest(ReportRequest request) {
-		return reportDAO.saveReportRequest(request);
-	}
+  /**
+   * @see ReportService#getReportDesign(Integer)
+   */
+  public ReportDesign getReportDesign(Integer id) throws APIException {
+    return reportDAO.getReportDesign(id);
+  }
 
-	/**
-	 * @see ReportService#getReportRequest(Integer)
-	 */
-	@Transactional(readOnly=true)
-	public ReportRequest getReportRequest(Integer id) {
-		return reportDAO.getReportRequest(id);
-	}
+  /**
+   * @see ReportService#getAllReportDesigns(boolean)
+   */
+  public List<ReportDesign> getAllReportDesigns(boolean includeRetired) {
+    return reportDAO.getReportDesigns(null, null, includeRetired);
+  }
 
-	/**
-	 * @see ReportService#getReportRequestByUuid(String)
-	 */
-	@Transactional(readOnly=true)
-	public ReportRequest getReportRequestByUuid(String uuid) {
-		return reportDAO.getReportRequestByUuid(uuid);
-	}
+  /**
+   * @see ReportService#getReportDesigns(ReportDefinition, Class, boolean)
+   */
+  public List<ReportDesign> getReportDesigns(
+      ReportDefinition reportDefinition,
+      Class<? extends ReportRenderer> rendererType,
+      boolean includeRetired)
+      throws APIException {
+    return reportDAO.getReportDesigns(reportDefinition, rendererType, includeRetired);
+  }
 
-	/**
-	 * @see ReportService#getReportRequests(ReportDefinition, Date, Date, Status[])
-	 */
-	@Transactional(readOnly=true)
-	public List<ReportRequest> getReportRequests(ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Status...statuses) {
-		return getReportRequests(reportDefinition, requestOnOrAfter, requestOnOrBefore, null, statuses);
-	}
+  /**
+   * @see ReportService#saveReportDesign(ReportDesign)
+   */
+  public ReportDesign saveReportDesign(ReportDesign reportDesign) throws APIException {
+    return reportDAO.saveReportDesign(reportDesign);
+  }
 
-	/**
-	 * @see ReportService#getReportRequests(ReportDefinition, Date, Date, Integer, Status[])
-	 */
-	@Transactional(readOnly=true)
-	public List<ReportRequest> getReportRequests(ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Integer mostRecentNum, Status...statuses) {
-		return getReportRequests(reportDefinition, requestOnOrAfter, requestOnOrBefore, 0, mostRecentNum, statuses);
-	}
+  /**
+   * @see ReportService#purgeReportDesign(ReportDesign)
+   */
+  public void purgeReportDesign(ReportDesign reportDesign) {
+    reportDAO.purgeReportDesign(reportDesign);
+  }
 
-	/**
-	 * @see ReportService#getReportRequests(ReportDefinition, Date, Date, Integer, Integer, Status...)
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public List<ReportRequest> getReportRequests(ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Integer firstResult, Integer maxResults, Status... statuses) {
-		return reportDAO.getReportRequests(reportDefinition, requestOnOrAfter, requestOnOrBefore, firstResult, maxResults, statuses);
-	}
+  /**
+   * @see ReportService#getReportRenderers()
+   */
+  public Collection<ReportRenderer> getReportRenderers() {
+    return HandlerUtil.getHandlersForType(ReportRenderer.class, null);
+  }
 
-	@Override
-	@Transactional(readOnly = true)
-	public long getReportRequestsCount(ReportDefinition reportDefinition, Date requestOnOrAfter, Date requestOnOrBefore, Status... statuses) {
-		return reportDAO.getReportRequestsCount(reportDefinition, requestOnOrAfter, requestOnOrBefore, statuses);
-	}
-
-	/**
-	 * @see ReportService#purgeReportRequest(ReportRequest)
-	 */
-	@Transactional
-	public void purgeReportRequest(ReportRequest request) {
-		RunQueuedReportsTask reportsTask = RunQueuedReportsTask.getCurrentlyRunningRequests().get(request.getUuid());
-		if (reportsTask != null) {
-			reportsTask.cancelTask();
-		}
-		reportDAO.purgeReportRequest(request);
-		reportCache.remove(request.getUuid());
-		FileUtils.deleteQuietly(getReportDataFile(request));
-		FileUtils.deleteQuietly(getReportErrorFile(request));
-		FileUtils.deleteQuietly(getReportOutputFile(request));
-		FileUtils.deleteQuietly(getReportLogFile(request));
-	}
-	
-	//****** REPORT PROCESSOR CONFIGURATIONS *****
-	
-	/**
-	 * @see ReportService#saveReportProcessorConfiguration(ReportProcessorConfiguration)
-	 */
-	public ReportProcessorConfiguration saveReportProcessorConfiguration(ReportProcessorConfiguration processorConfiguration) {
-		return reportDAO.saveReportProcessorConfiguration(processorConfiguration);
-	}
-
-	/**
-	 * @see ReportService#getReportProcessorConfiguration(Integer)
-	 */
-	public ReportProcessorConfiguration getReportProcessorConfiguration(Integer id) {
-		return reportDAO.getReportProcessorConfiguration(id);
-	}
-
-	/**
-	 * @see ReportService#getReportProcessorConfigurationByUuid(String)
-	 */
-	public ReportProcessorConfiguration getReportProcessorConfigurationByUuid(String uuid) {
-		return reportDAO.getReportProcessorConfigurationByUuid(uuid);
-	}
-
-	/**
-	 * @see ReportService#getAllReportProcessorConfigurations(boolean)
-	 */
-	public List<ReportProcessorConfiguration> getAllReportProcessorConfigurations(boolean includeRetired) {
-		return reportDAO.getAllReportProcessorConfigurations(includeRetired);
-	}
-	
-	/**
-	 * 
-	 * @see ReportService#getGlobalReportProcessorConfigurations()
-	 */
-	public List<ReportProcessorConfiguration> getGlobalReportProcessorConfigurations() {
-		return reportDAO.getGlobalReportProcessorConfigurations();
-	}
-
-	/**
-	 * @see ReportService#getReportProcessorConfigurations(Class)
-	 */
-	public List<ReportProcessorConfiguration> getReportProcessorConfigurations(Class<? extends ReportProcessor> processorType) {
-		List<ReportProcessorConfiguration> ret = new ArrayList<ReportProcessorConfiguration>();
-		for (ReportProcessorConfiguration p : getAllReportProcessorConfigurations(false)) {
-			try {
-				Class<?> clazz = Context.loadClass(p.getProcessorType());
-				if (processorType.isAssignableFrom(clazz)) {
-					ret.add(p);
-				}
-			}
-			catch (Exception e) {
-				log.warn("Error trying to load processor class " + p.getProcessorType(), e);
-			}
-		}
-		return ret;
-	}
-
-	/**
-	 * @see ReportService#purgeReportProcessorConfiguration(ReportProcessorConfiguration)
-	 */
-	public void purgeReportProcessorConfiguration(ReportProcessorConfiguration processorConfiguration) {
-		reportDAO.purgeReportProcessorConfiguration(processorConfiguration);
-	}
-	
-	//***** REPORTS *****
-	
-	/**
-	 * @see ReportService#getReportDataFile(ReportRequest)
-	 */
-	public File getReportDataFile(ReportRequest request) {
-		return getReportDataFile(request.getUuid());
-	}
-
-	public File getReportDataFile(String requestUuid) {
-		File dir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(ReportingConstants.REPORT_RESULTS_DIRECTORY_NAME);
-		return new File(dir, requestUuid + ".reportdata.gz");
-	}
-
-	/**
-	 * @see ReportService#getReportErrorFile(ReportRequest)
-	 */
-	public File getReportErrorFile(ReportRequest request) {
-		return getReportErrorFile(request.getUuid());
-	}
-
-	public File getReportErrorFile(String requestUuid) {
-		File dir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(ReportingConstants.REPORT_RESULTS_DIRECTORY_NAME);
-		return new File(dir, requestUuid + ".reporterror");
-	}
-	
-	/**
-	 * @see ReportService#getReportOutputFile(ReportRequest)
-	 */
-	public File getReportOutputFile(ReportRequest request) {
-		return getReportOutputFile(request.getUuid());
-	}
-
-	public File getReportOutputFile(String requestUuid) {
-		File dir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(ReportingConstants.REPORT_RESULTS_DIRECTORY_NAME);
-		return new File(dir, requestUuid + ".reportoutput");
-	}
-	
-	/**
-	 * @see ReportService#getReportLogFile(ReportRequest)
-	 */
-	public File getReportLogFile(ReportRequest request) {
-	    return getReportLogFile(request.getUuid());
-	}
-
-    /**
-     * @see ReportService#getReportLogFile(String)
-     */
-    public File getReportLogFile(String requestUuid) {
-        File dir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(ReportingConstants.REPORT_RESULTS_DIRECTORY_NAME);
-        return new File(dir, requestUuid + ".reportlog");
+  /**
+   * @see ReportService#getReportRenderer(String)
+   */
+  public ReportRenderer getReportRenderer(String className) {
+    try {
+      return (ReportRenderer) Context.loadClass(className).newInstance();
+    } catch (ClassNotFoundException e) {
+      /* ignore */
+    } catch (IllegalAccessException e) {
+      /* ignore */
+    } catch (InstantiationException e) {
+      /* ignore */
     }
-	
-	/**
-	 * @see ReportService#queueReport(ReportRequest)
-	 */
-	@Transactional
-	public ReportRequest queueReport(ReportRequest request) {
-		
-		if (request.getStatus() == null) {
-			if (ObjectUtil.notNull(request.getSchedule())) {
-				request.setStatus(Status.SCHEDULED);
-				request.setPriority(Priority.NORMAL);
-				logReportMessage(request, "Report Scheduled by " + ObjectUtil.getNameOfCurrentUser());
-			}
-			else {
-				request.setStatus(Status.REQUESTED);
-				request.setPriority(Priority.HIGHEST);
-				logReportMessage(request, "Report Requested by " + ObjectUtil.getNameOfCurrentUser());
-			}
-		}
-		
-		request =  Context.getService(ReportService.class).saveReportRequest(request);
-		
-		Integer position = getPositionInQueue(request);
-		if (position != null) {
-			logReportMessage(request, "Report in queue at position " + position);
-		}
-		
-		return request;
-	}
-	
-	/**
-	 * @see ReportService#getPositionInQueue(ReportRequest)
-	 */
-	@Transactional(readOnly=true)
-	public Integer getPositionInQueue(ReportRequest request) {
-		List<ReportRequest> l = getReportRequests(null, null, null, Status.REQUESTED);
-		Collections.sort(l, new PriorityComparator());
-		for (int i=0; i<l.size(); i++) {
-			ReportRequest rr = l.get(i);
-			if (rr.equals(request)) {
-				return (i+1);
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * @see ReportService#processNextQueuedReports()
-	 */
-	public void processNextQueuedReports() {
-		runQueuedReportsTask.createAndRunTask();
-	}
-	
-	/**
-	 * @see ReportService#saveReport(Report, String)
-	 */
-	public Report saveReport(Report report, String description) {
-		String reportRequestUuid = report.getRequest().getUuid();
-		CachedReportData cachedData = persistCachedReportDataToDisk(reportRequestUuid);
-		if (cachedData != null && !cachedData.isPersisted()) {
-			throw new ReportingException("Unable to save Report due to error saving Report Data to disk");
-		}
-		ReportRequest request = Context.getService(ReportService.class).getReportRequest(report.getRequest().getId());
-		request.setStatus(Status.SAVED);
-		request.setDescription(description);
-		Context.getService(ReportService.class).saveReportRequest(request);
-		logReportMessage(request, "Report Saved");
-		report.setRequest(request);
-		return report;
-	}
-	
-	/**
-	 * @see ReportService#runReport(ReportRequest)
-	 */
-	public Report runReport(ReportRequest request) {
-		
-		// Start up a timer to check performance
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-		
-		// Set the status to processing and save the request
-		request.setStatus(Status.PROCESSING);
-		request.setEvaluateStartDatetime(new Date());
-		logReportMessage(request, "Starting to process report...");
 
-		Context.flushSession(); // Ensure other threads can see updated request
-		
-		// Construct a new report object to return
-		Report report = new Report(request);
-		ReportDefinitionService rds = Context.getService(ReportDefinitionService.class);
-		try {
-			// Create a new Evaluation Context, setting the base cohort from the request
-			Date evaluationDate = request.getEvaluationDate() == null ? new Date() : request.getEvaluationDate();
-			EvaluationContext context = new EvaluationContext(evaluationDate);
-			context.addContextValue(GENERATED_BY, ObjectUtil.getNameOfUser(request.getRequestedBy()));
-			context.addContextValue(GENERATION_DATE, request.getRequestDate());
-			context.addContextValue(REPORT_REQUEST_UUID, request.getUuid());
-			
-			if (request.getBaseCohort() != null) {
-				logReportMessage(request, "Evaluating base Cohort....");
-				try {
-					Cohort baseCohort = Context.getService(CohortDefinitionService.class).evaluate(request.getBaseCohort(), context);
-					context.setBaseCohort(baseCohort);
-				} 
-				catch (Exception ex) {
-					throw new EvaluationException("baseCohort", ex);
-				}
-			}
-		
-			// Evaluate the Report Definition, any EvaluationException thrown by the next line can bubble up; wrapping it won't provide useful information
-			logReportMessage(request, "Evaluating Report Data....");
-			
-			ReportData reportData = rds.evaluate(request.getReportDefinition(), context);
-			request.setEvaluateCompleteDatetime(new Date());
-			Context.flushSession(); // Ensure other threads can see updated request
+    return null;
+  }
 
-			// Determine whether or not to render report data to bytes or to cache the raw data
-			boolean renderReportDataToBytes = false;
-			if (request.getRenderingMode() != null) {
-				ReportRenderer renderer = request.getRenderingMode().getRenderer();
-				renderReportDataToBytes = !(renderer instanceof InteractiveReportRenderer);
-			}
+  /**
+   * @see ReportService#getPreferredReportRenderer(Class)
+   */
+  public ReportRenderer getPreferredReportRenderer(Class<Object> supportedType) {
+    return HandlerUtil.getPreferredHandler(ReportRenderer.class, supportedType);
+  }
 
-			if (renderReportDataToBytes) {
-				logReportMessage(request, "Generating Rendered Report....");
-				ReportRenderer renderer = request.getRenderingMode().getRenderer();
-				String argument = request.getRenderingMode().getArgument();
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				renderer.render(reportData, argument, out);
-				report.setRenderedOutput(out.toByteArray());
-				request.setRenderCompleteDatetime(new Date());
-
-				logReportMessage(request, "Writing the report output to disk");
-				ReportUtil.writeByteArrayToFile(getReportOutputFile(report.getRequest()), report.getRenderedOutput());
-			}
-			else {
-				logReportMessage(request, "Caching Report Results....");
-				report.setReportData(reportData);
-				cacheReportData(request.getUuid(), reportData);
-			}
-			request.setStatus(Status.COMPLETED);
-		}
-		catch (Throwable t) {
-			request.setStatus(Status.FAILED);
-			logReportMessage(request, "Report Evaluation Failed");
-			try {
-				StringWriter sw = new StringWriter();
-				t.printStackTrace(new PrintWriter(sw));
-				report.setErrorMessage(sw.toString());
-
-				logReportMessage(request, "Writing the report error to disk");
-				ReportUtil.writeStringToFile(getReportErrorFile(report.getRequest()), report.getErrorMessage());
-			}
-			catch (Exception e) {
-				log.warn("Unable to log reporting error to file.", e);
-			}
-		}
-
-		Context.flushSession(); // Ensure other threads can see updated request
-
-		Context.getService(ReportService.class).saveReportRequest(request);
-		
-		// Find applicable global processors
-		if (request.isProcessAutomatically()) {
-			List<ReportProcessorConfiguration> processorsToRun = ReportUtil.getAvailableReportProcessorConfigurations(request, 
-					ReportProcessorConfiguration.ProcessorMode.AUTOMATIC, 
-					ReportProcessorConfiguration.ProcessorMode.ON_DEMAND_AND_AUTOMATIC);
-			
-			for (ReportProcessorConfiguration c : processorsToRun) {
-				try {
-					if ((request.getStatus() == Status.COMPLETED && c.getRunOnSuccess()) || (request.getStatus() == Status.FAILED && c.getRunOnError())) {
-						logReportMessage(request, "Processing Report with " + c.getName() + "...");
-						Class<?> processorType = Context.loadClass(c.getProcessorType());
-						ReportProcessor processor = (ReportProcessor)processorType.newInstance();
-						processor.process(report, c.getConfiguration());
-					}
-				}
-				catch (Exception e) {
-					log.warn("Report Processor Failed: " + c.getName(), e);
-					logReportMessage(request, "Report Processor Failed: " + c.getName());
-				}
-			}
-		}
-
-        stopWatch.stop();
-		logReportMessage(request, "Report Generation Completed in " + stopWatch.toString());
-		
-		return report;
-	}
-	
-	/**
-	 * Loads the ReportData previously generated Report for the given ReportRequest, first checking the cache
-	 */
-	public ReportData loadReportData(ReportRequest request) {
-		log.debug("Loading ReportData for ReportRequest");
-		CachedReportData cachedData = reportCache.get(request.getUuid());
-		if (cachedData != null) {
-			return cachedData.getReportData();
-		}
-		try {
-			long t1 = System.currentTimeMillis();
-			File reportDataFile = getReportDataFile(request);
-			if (reportDataFile.exists()) {
-				String s = ReportUtil.readStringFromFile(reportDataFile);
-				ReportData reportData = Context.getSerializationService().deserialize(s, ReportData.class, ReportingSerializer.class);
-				long t2 = System.currentTimeMillis();
-				log.info("Loaded and Deserialized ReportData from file in " + (int) ((t2 - t1) / 1000) + " seconds");
-				return reportData;
-			}
-		}
-		catch (Exception e) {
-			log.warn("Failed to load ReportData from disk for request " + request + " due to " + e.getMessage());
-		}
-		return null;
-	}
-	
-	/**
-	 * Loads the Rendered Output for a previously generated Report for the given ReportRequest
-	 */
-	public byte[] loadRenderedOutput(ReportRequest request) {
-		log.debug("Loading Rendered Output for ReportRequest");
-		try {
-			File outputFile = getReportOutputFile(request);
-			if (outputFile.exists()) {
-				return ReportUtil.readByteArrayFromFile(outputFile);
-			}
-		}
-		catch (Exception e) {
-			log.warn("Failed to load Rendered Output from disk for request " + request + " due to " + e.getMessage());
-		}
-		return null;
-	}
-	
-	/**
-	 * Loads the Error message for a previously generated Report for the given ReportRequest
-	 */
-	public String loadReportError(ReportRequest request) {
-		log.debug("Loading Report Error Output for ReportRequest");
-		try {
-			File errorFile = getReportErrorFile(request);
-			if (errorFile != null) {
-				return ReportUtil.readStringFromFile(errorFile);
-			}
-		}
-		catch (Exception e) {
-			log.warn("Failed to load Report Error from disk for request " + request + " due to " + e.getMessage());
-		}
-		return null;
-	}
-	
-	/**
-	 * Loads the logs for a Report for the given ReportRequest
-	 */
-	public List<String> loadReportLog(ReportRequest request) {
-		log.debug("Loading Report Log for ReportRequest");
-		try {
-			File logFile = getReportLogFile(request);
-			if (logFile != null) {
-				return ReportUtil.readLinesFromFile(logFile);
-			}
-		}
-		catch (Exception e) {
-			log.warn("Failed to load Report Log from disk for request " + request + " due to " + e.getMessage());
-		}
-		return null;
-	}
-	
-	/**
-	 * Loads a previously generated Report for the given ReportRequest, first checking the cache
-	 */
-	public Report loadReport(ReportRequest request) {
-		log.info("Loading Report for ReportRequest");
-		Report report = new Report(request);
-		report.setReportData(loadReportData(request));
-		report.setRenderedOutput(loadRenderedOutput(request));
-		report.setErrorMessage(loadReportError(request));
-		return report;
-	}
-	
-	/**
-	 * @see ReportService#deleteOldReportRequests()
-	 */
-	public void deleteOldReportRequests() {
-		int ageInHoursToDelete = 72;
-		try {
-			ageInHoursToDelete = Integer.parseInt(Context.getAdministrationService().getGlobalProperty(ReportingConstants.GLOBAL_PROPERTY_DELETE_REPORTS_AGE_IN_HOURS));
-		} 
-		catch (Exception ex) {
-			log.warn("Illegal value for " + ReportingConstants.GLOBAL_PROPERTY_DELETE_REPORTS_AGE_IN_HOURS + " global property. Using default value of 72.", ex);
-		}
-
-        log.debug("In Delete Old Report Requests");
-
-		if (ageInHoursToDelete <= 0) {
-            log.warn("Non-positive number configured (" + ageInHoursToDelete + ") for " + ReportingConstants.GLOBAL_PROPERTY_DELETE_REPORTS_AGE_IN_HOURS + ". Not deleting any.");
-			return;
-		}
-
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.HOUR, -1*ageInHoursToDelete);
-        Date now = new Date();
-
-        log.debug("Checking for reports older than " + ageInHoursToDelete + " hours. Request date before " + cal.getTime());
-
-        List<ReportRequest> oldRequests = getReportRequests(null, null, cal.getTime(), Status.COMPLETED, Status.FAILED);
-
-        log.debug("Found " + oldRequests.size() + " requests that qualify");
-
-		for (ReportRequest request : oldRequests) {
-            log.debug("Checking request" + request.getUuid());
-
-            int daysSinceRequest = DateUtil.getDaysBetween(request.getRequestDate(), now);
-            log.debug("Days since request = " + daysSinceRequest + " and minimum days to preserve configured to " + request.getMinimumDaysToPreserve());
-
-            if (request.getMinimumDaysToPreserve() == null || request.getMinimumDaysToPreserve() < daysSinceRequest) {
-                log.info("Request qualifies for deletion.  Deleting: " + request.getUuid());
-                try {
-                    purgeReportRequest(request);
-                }
-                catch (Exception e) {
-                    log.warn("Unable to delete old report request: " + request, e);
-                }
-            }
-		}
-    }
-	
-	/**
-	 * @see ReportService#persistCachedReports()
-	 */
-	public synchronized void persistCachedReports() {
-		Set<String> cachedRequests = reportCache.keySet();
-		for (String reportRequestUuid : cachedRequests) {
-			persistCachedReportDataToDisk(reportRequestUuid);
-		}
-		if (reportCache.size() > 0 && reportCache.size() >= ReportingConstants.GLOBAL_PROPERTY_MAX_CACHED_REPORTS()) {
-			Iterator<String> i = reportCache.keySet().iterator();
-			i.next();
-			i.remove();
-		}
-    }
-	
-	/**
-	 * @see ReportService#logReportMessage(ReportRequest, String)
-	 */
-	@Transactional(readOnly=true)
-	public void logReportMessage(ReportRequest request, String message) {
-	    logReportMessage(request.getUuid(), message);
-	}
-
-    /**
-     * @see ReportService#logReportMessage(String, String)
-     */
-    @Transactional(readOnly=true)
-    public void logReportMessage(String requestUuid, String message) {
-        if (ObjectUtil.notNull(message)) {
-            try {
-                File f = getReportLogFile(requestUuid);
-                String d = DateUtil.formatDate(new Date(), "EEE dd/MMM/yyyy HH:mm:ss z");
-                ReportUtil.appendStringToFile(f, d + " | " + message);
-            }
-            catch (Exception e) {
-                log.warn("Unable to log report message to disk: " + message, e);
-            }
+  /**
+   * @see ReportService#getRenderingModes(ReportDefinition)
+   */
+  public List<RenderingMode> getRenderingModes(ReportDefinition reportDefinition) {
+    List<RenderingMode> renderingModes = new Vector<RenderingMode>();
+    if (reportDefinition != null) {
+      for (ReportRenderer renderer : getReportRenderers()) {
+        if (renderer.canRender(reportDefinition)) {
+          Collection<RenderingMode> modes = renderer.getRenderingModes(reportDefinition);
+          if (modes != null) {
+            renderingModes.addAll(modes);
+          }
         }
+      }
+      Collections.sort(renderingModes);
+    }
+    return renderingModes;
+  }
+
+  // ****** REPORT REQUESTS *****
+
+  /**
+   * @see ReportService#saveReportRequest(ReportRequest)
+   */
+  @Transactional
+  public ReportRequest saveReportRequest(ReportRequest request) {
+    return reportDAO.saveReportRequest(request);
+  }
+
+  /**
+   * @see ReportService#getReportRequest(Integer)
+   */
+  @Transactional(readOnly = true)
+  public ReportRequest getReportRequest(Integer id) {
+    return reportDAO.getReportRequest(id);
+  }
+
+  /**
+   * @see ReportService#getReportRequestByUuid(String)
+   */
+  @Transactional(readOnly = true)
+  public ReportRequest getReportRequestByUuid(String uuid) {
+    return reportDAO.getReportRequestByUuid(uuid);
+  }
+
+  /**
+   * @see ReportService#getReportRequests(ReportDefinition, Date, Date, Status[])
+   */
+  @Transactional(readOnly = true)
+  public List<ReportRequest> getReportRequests(
+      ReportDefinition reportDefinition,
+      Date requestOnOrAfter,
+      Date requestOnOrBefore,
+      Status... statuses) {
+    return getReportRequests(reportDefinition, requestOnOrAfter, requestOnOrBefore, null, statuses);
+  }
+
+  /**
+   * @see ReportService#getReportRequests(ReportDefinition, Date, Date, Integer, Status[])
+   */
+  @Transactional(readOnly = true)
+  public List<ReportRequest> getReportRequests(
+      ReportDefinition reportDefinition,
+      Date requestOnOrAfter,
+      Date requestOnOrBefore,
+      Integer mostRecentNum,
+      Status... statuses) {
+    return getReportRequests(
+        reportDefinition, requestOnOrAfter, requestOnOrBefore, 0, mostRecentNum, statuses);
+  }
+
+  /**
+   * @see ReportService#getReportRequests(ReportDefinition, Date, Date, Integer, Integer, Status...)
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<ReportRequest> getReportRequests(
+      ReportDefinition reportDefinition,
+      Date requestOnOrAfter,
+      Date requestOnOrBefore,
+      Integer firstResult,
+      Integer maxResults,
+      Status... statuses) {
+    return reportDAO.getReportRequests(
+        reportDefinition, requestOnOrAfter, requestOnOrBefore, firstResult, maxResults, statuses);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public long getReportRequestsCount(
+      ReportDefinition reportDefinition,
+      Date requestOnOrAfter,
+      Date requestOnOrBefore,
+      Status... statuses) {
+    return reportDAO.getReportRequestsCount(
+        reportDefinition, requestOnOrAfter, requestOnOrBefore, statuses);
+  }
+
+  /**
+   * @see ReportService#purgeReportRequest(ReportRequest)
+   */
+  @Transactional
+  public void purgeReportRequest(ReportRequest request) {
+    RunQueuedReportsTask reportsTask =
+        RunQueuedReportsTask.getCurrentlyRunningRequests().get(request.getUuid());
+    if (reportsTask != null) {
+      reportsTask.cancelTask();
+    }
+    reportDAO.purgeReportRequest(request);
+    reportCache.remove(request.getUuid());
+    FileUtils.deleteQuietly(getReportDataFile(request));
+    FileUtils.deleteQuietly(getReportErrorFile(request));
+    FileUtils.deleteQuietly(getReportOutputFile(request));
+    FileUtils.deleteQuietly(getReportLogFile(request));
+  }
+
+  // ****** REPORT PROCESSOR CONFIGURATIONS *****
+
+  /**
+   * @see ReportService#saveReportProcessorConfiguration(ReportProcessorConfiguration)
+   */
+  public ReportProcessorConfiguration saveReportProcessorConfiguration(
+      ReportProcessorConfiguration processorConfiguration) {
+    return reportDAO.saveReportProcessorConfiguration(processorConfiguration);
+  }
+
+  /**
+   * @see ReportService#getReportProcessorConfiguration(Integer)
+   */
+  public ReportProcessorConfiguration getReportProcessorConfiguration(Integer id) {
+    return reportDAO.getReportProcessorConfiguration(id);
+  }
+
+  /**
+   * @see ReportService#getReportProcessorConfigurationByUuid(String)
+   */
+  public ReportProcessorConfiguration getReportProcessorConfigurationByUuid(String uuid) {
+    return reportDAO.getReportProcessorConfigurationByUuid(uuid);
+  }
+
+  /**
+   * @see ReportService#getAllReportProcessorConfigurations(boolean)
+   */
+  public List<ReportProcessorConfiguration> getAllReportProcessorConfigurations(
+      boolean includeRetired) {
+    return reportDAO.getAllReportProcessorConfigurations(includeRetired);
+  }
+
+  /**
+   * @see ReportService#getGlobalReportProcessorConfigurations()
+   */
+  public List<ReportProcessorConfiguration> getGlobalReportProcessorConfigurations() {
+    return reportDAO.getGlobalReportProcessorConfigurations();
+  }
+
+  /**
+   * @see ReportService#getReportProcessorConfigurations(Class)
+   */
+  public List<ReportProcessorConfiguration> getReportProcessorConfigurations(
+      Class<? extends ReportProcessor> processorType) {
+    List<ReportProcessorConfiguration> ret = new ArrayList<ReportProcessorConfiguration>();
+    for (ReportProcessorConfiguration p : getAllReportProcessorConfigurations(false)) {
+      try {
+        Class<?> clazz = Context.loadClass(p.getProcessorType());
+        if (processorType.isAssignableFrom(clazz)) {
+          ret.add(p);
+        }
+      } catch (Exception e) {
+        log.warn("Error trying to load processor class " + p.getProcessorType(), e);
+      }
+    }
+    return ret;
+  }
+
+  /**
+   * @see ReportService#purgeReportProcessorConfiguration(ReportProcessorConfiguration)
+   */
+  public void purgeReportProcessorConfiguration(
+      ReportProcessorConfiguration processorConfiguration) {
+    reportDAO.purgeReportProcessorConfiguration(processorConfiguration);
+  }
+
+  // ***** REPORTS *****
+
+  /**
+   * @see ReportService#getReportDataFile(ReportRequest)
+   */
+  public File getReportDataFile(ReportRequest request) {
+    return getReportDataFile(request.getUuid());
+  }
+
+  public File getReportDataFile(String requestUuid) {
+    File dir =
+        OpenmrsUtil.getDirectoryInApplicationDataDirectory(
+            ReportingConstants.REPORT_RESULTS_DIRECTORY_NAME);
+    return new File(dir, requestUuid + ".reportdata.gz");
+  }
+
+  /**
+   * @see ReportService#getReportErrorFile(ReportRequest)
+   */
+  public File getReportErrorFile(ReportRequest request) {
+    return getReportErrorFile(request.getUuid());
+  }
+
+  public File getReportErrorFile(String requestUuid) {
+    File dir =
+        OpenmrsUtil.getDirectoryInApplicationDataDirectory(
+            ReportingConstants.REPORT_RESULTS_DIRECTORY_NAME);
+    return new File(dir, requestUuid + ".reporterror");
+  }
+
+  /**
+   * @see ReportService#getReportOutputFile(ReportRequest)
+   */
+  public File getReportOutputFile(ReportRequest request) {
+    return getReportOutputFile(request.getUuid());
+  }
+
+  public File getReportOutputFile(String requestUuid) {
+    File dir =
+        OpenmrsUtil.getDirectoryInApplicationDataDirectory(
+            ReportingConstants.REPORT_RESULTS_DIRECTORY_NAME);
+    return new File(dir, requestUuid + ".reportoutput");
+  }
+
+  /**
+   * @see ReportService#getReportLogFile(ReportRequest)
+   */
+  public File getReportLogFile(ReportRequest request) {
+    return getReportLogFile(request.getUuid());
+  }
+
+  /**
+   * @see ReportService#getReportLogFile(String)
+   */
+  public File getReportLogFile(String requestUuid) {
+    File dir =
+        OpenmrsUtil.getDirectoryInApplicationDataDirectory(
+            ReportingConstants.REPORT_RESULTS_DIRECTORY_NAME);
+    return new File(dir, requestUuid + ".reportlog");
+  }
+
+  /**
+   * @see ReportService#queueReport(ReportRequest)
+   */
+  @Transactional
+  public ReportRequest queueReport(ReportRequest request) {
+
+    if (request.getStatus() == null) {
+      if (ObjectUtil.notNull(request.getSchedule())) {
+        request.setStatus(Status.SCHEDULED);
+        request.setPriority(Priority.NORMAL);
+        logReportMessage(request, "Report Scheduled by " + ObjectUtil.getNameOfCurrentUser());
+      } else {
+        request.setStatus(Status.REQUESTED);
+        request.setPriority(Priority.HIGHEST);
+        logReportMessage(request, "Report Requested by " + ObjectUtil.getNameOfCurrentUser());
+      }
     }
 
-	/**
-	 * @see ReportService#purgeReportRequestsForReportDefinition(String)
-	 */
-	@Override
-	@Transactional
-	public void purgeReportRequestsForReportDefinition(String reportDefinitionUuid) {
-		List<String> reportRequestUuids = reportDAO.getReportRequestUuids(reportDefinitionUuid);
-		for (String reportRequestUuid : reportRequestUuids) {
-			RunQueuedReportsTask reportsTask = RunQueuedReportsTask.getCurrentlyRunningRequests().get(reportRequestUuid);
-			if (reportsTask != null) {
-				reportsTask.cancelTask();
-			}
-			reportCache.remove(reportRequestUuid);
-			FileUtils.deleteQuietly(getReportDataFile(reportRequestUuid));
-			FileUtils.deleteQuietly(getReportErrorFile(reportRequestUuid));
-			FileUtils.deleteQuietly(getReportOutputFile(reportRequestUuid));
-			FileUtils.deleteQuietly(getReportLogFile(reportRequestUuid));
-		}
-		reportDAO.purgeReportRequestsForReportDefinition(reportDefinitionUuid);
-	}
+    request = Context.getService(ReportService.class).saveReportRequest(request);
 
-	/**
-	 * @see ReportService#purgeReportDesignsForReportDefinition(String)
-	 */
-	@Override
-	@Transactional
-	public void purgeReportDesignsForReportDefinition(String reportDefinitionUuid) {
-		reportDAO.purgeReportDesignsForReportDefinition(reportDefinitionUuid);
-	}
+    Integer position = getPositionInQueue(request);
+    if (position != null) {
+      logReportMessage(request, "Report in queue at position " + position);
+    }
 
-	//***** PRIVATE UTILITY METHODS *****
-	
-	/**
-	 * @param requestUuid the uuid of the ReportRequest that was evaluated
-	 * @param reportData the data to cache
-	 */
-	protected synchronized void cacheReportData(String requestUuid, ReportData reportData) {
-		CachedReportData cachedData = new CachedReportData(reportData);
-		reportCache.put(requestUuid, cachedData);
-	}
+    return request;
+  }
 
+  /**
+   * @see ReportService#getPositionInQueue(ReportRequest)
+   */
+  @Transactional(readOnly = true)
+  public Integer getPositionInQueue(ReportRequest request) {
+    List<ReportRequest> l = getReportRequests(null, null, null, Status.REQUESTED);
+    Collections.sort(l, new PriorityComparator());
+    for (int i = 0; i < l.size(); i++) {
+      ReportRequest rr = l.get(i);
+      if (rr.equals(request)) {
+        return (i + 1);
+      }
+    }
+    return null;
+  }
 
-	/**
-	 * Saves the CachedReportData to disk
-	 */
-	protected CachedReportData persistCachedReportDataToDisk(String reportRequestUuid) {
-		CachedReportData cachedData = reportCache.get(reportRequestUuid);
-		if (cachedData != null) {
-			if (cachedData.isPersisted()) {
-				log.debug("Cached Data is already persisted, returning");
-			} else {
-				ReportRequest request = getReportRequestByUuid(reportRequestUuid);
-				try {
-					Timer timer = Timer.start();
-					File reportDataFile = getReportDataFile(request);
-					log.info(timer.logInterval("About to serialize the ReportData"));
-					ReportingSerializer serializer = (ReportingSerializer) Context.getSerializationService().getSerializer(ReportingSerializer.class);
-                    String s = serializer.serialize(cachedData.getReportData());
-                    log.info(timer.logInterval("About to write the serialized ReportData to " + reportDataFile.getPath()));
-                    ReportUtil.writeStringToFile(reportDataFile, s);
-					log.info(timer.logInterval("Serialized the report data to disk"));
-					cachedData.setPersisted(true);
-				}
-                catch (Exception e) {
-					log.warn("An error occurred writing report data to disk", e);
-				}
-			}
-		}
-		return cachedData;
-	}
+  /**
+   * @see ReportService#processNextQueuedReports()
+   */
+  public void processNextQueuedReports() {
+    runQueuedReportsTask.createAndRunTask();
+  }
 
-	//***** PROPERTY ACCESS *****
+  /**
+   * @see ReportService#saveReport(Report, String)
+   */
+  public Report saveReport(Report report, String description) {
+    String reportRequestUuid = report.getRequest().getUuid();
+    CachedReportData cachedData = persistCachedReportDataToDisk(reportRequestUuid);
+    if (cachedData != null && !cachedData.isPersisted()) {
+      throw new ReportingException("Unable to save Report due to error saving Report Data to disk");
+    }
+    ReportRequest request =
+        Context.getService(ReportService.class).getReportRequest(report.getRequest().getId());
+    request.setStatus(Status.SAVED);
+    request.setDescription(description);
+    Context.getService(ReportService.class).saveReportRequest(request);
+    logReportMessage(request, "Report Saved");
+    report.setRequest(request);
+    return report;
+  }
 
-	public ReportDAO getReportDAO() {
-		return reportDAO;
-	}
+  /**
+   * @see ReportService#runReport(ReportRequest)
+   */
+  public Report runReport(ReportRequest request) {
 
-	public void setReportDAO(ReportDAO reportDAO) {
-		this.reportDAO = reportDAO;
-	}
+    // Start up a timer to check performance
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
 
-	public ReportingTimerTask getRunQueuedReportsTask() {
-		return runQueuedReportsTask;
-	}
+    // Set the status to processing and save the request
+    request.setStatus(Status.PROCESSING);
+    request.setEvaluateStartDatetime(new Date());
+    logReportMessage(request, "Starting to process report...");
 
-	public void setRunQueuedReportsTask(ReportingTimerTask runQueuedReportsTask) {
-		this.runQueuedReportsTask = runQueuedReportsTask;
-	}
+    Context.flushSession(); // Ensure other threads can see updated request
 
-	//***** INNER CLASS FOR CACHING *****
+    // Construct a new report object to return
+    Report report = new Report(request);
+    ReportDefinitionService rds = Context.getService(ReportDefinitionService.class);
+    try {
+      // Create a new Evaluation Context, setting the base cohort from the request
+      Date evaluationDate =
+          request.getEvaluationDate() == null ? new Date() : request.getEvaluationDate();
+      EvaluationContext context = new EvaluationContext(evaluationDate);
+      context.addContextValue(GENERATED_BY, ObjectUtil.getNameOfUser(request.getRequestedBy()));
+      context.addContextValue(GENERATION_DATE, request.getRequestDate());
+      context.addContextValue(REPORT_REQUEST_UUID, request.getUuid());
 
-	private class CachedReportData {
-		private boolean persisted = false;
-		private ReportData reportData;
+      if (request.getBaseCohort() != null) {
+        logReportMessage(request, "Evaluating base Cohort....");
+        try {
+          Cohort baseCohort =
+              Context.getService(CohortDefinitionService.class)
+                  .evaluate(request.getBaseCohort(), context);
+          context.setBaseCohort(baseCohort);
+        } catch (Exception ex) {
+          throw new EvaluationException("baseCohort", ex);
+        }
+      }
 
-		public CachedReportData(ReportData reportData) {
-			this.reportData = reportData;
-			this.setPersisted(false);
-		}
+      // Evaluate the Report Definition, any EvaluationException thrown by the next line can bubble
+      // up; wrapping it won't provide useful information
+      logReportMessage(request, "Evaluating Report Data....");
 
-		public boolean isPersisted() {
-			return persisted;
-		}
+      ReportData reportData = rds.evaluate(request.getReportDefinition(), context);
+      request.setEvaluateCompleteDatetime(new Date());
+      Context.flushSession(); // Ensure other threads can see updated request
 
-		public void setPersisted(boolean persisted) {
-			this.persisted = persisted;
-		}
+      // Determine whether or not to render report data to bytes or to cache the raw data
+      boolean renderReportDataToBytes = false;
+      if (request.getRenderingMode() != null) {
+        ReportRenderer renderer = request.getRenderingMode().getRenderer();
+        renderReportDataToBytes = !(renderer instanceof InteractiveReportRenderer);
+      }
 
-		public ReportData getReportData() {
-			return reportData;
-		}
+      if (renderReportDataToBytes) {
+        logReportMessage(request, "Generating Rendered Report....");
+        ReportRenderer renderer = request.getRenderingMode().getRenderer();
+        String argument = request.getRenderingMode().getArgument();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        renderer.render(reportData, argument, out);
+        report.setRenderedOutput(out.toByteArray());
+        request.setRenderCompleteDatetime(new Date());
 
-		public void setReportData(ReportData reportData) {
-			this.reportData = reportData;
-		}
-	}
+        logReportMessage(request, "Writing the report output to disk");
+        ReportUtil.writeByteArrayToFile(
+            getReportOutputFile(report.getRequest()), report.getRenderedOutput());
+      } else {
+        logReportMessage(request, "Caching Report Results....");
+        report.setReportData(reportData);
+        cacheReportData(request.getUuid(), reportData);
+      }
+      request.setStatus(Status.COMPLETED);
+    } catch (Throwable t) {
+      request.setStatus(Status.FAILED);
+      logReportMessage(request, "Report Evaluation Failed");
+      try {
+        StringWriter sw = new StringWriter();
+        t.printStackTrace(new PrintWriter(sw));
+        report.setErrorMessage(sw.toString());
+
+        logReportMessage(request, "Writing the report error to disk");
+        ReportUtil.writeStringToFile(
+            getReportErrorFile(report.getRequest()), report.getErrorMessage());
+      } catch (Exception e) {
+        log.warn("Unable to log reporting error to file.", e);
+      }
+    }
+
+    Context.flushSession(); // Ensure other threads can see updated request
+
+    Context.getService(ReportService.class).saveReportRequest(request);
+
+    // Find applicable global processors
+    if (request.isProcessAutomatically()) {
+      List<ReportProcessorConfiguration> processorsToRun =
+          ReportUtil.getAvailableReportProcessorConfigurations(
+              request,
+              ReportProcessorConfiguration.ProcessorMode.AUTOMATIC,
+              ReportProcessorConfiguration.ProcessorMode.ON_DEMAND_AND_AUTOMATIC);
+
+      for (ReportProcessorConfiguration c : processorsToRun) {
+        try {
+          if ((request.getStatus() == Status.COMPLETED && c.getRunOnSuccess())
+              || (request.getStatus() == Status.FAILED && c.getRunOnError())) {
+            logReportMessage(request, "Processing Report with " + c.getName() + "...");
+            Class<?> processorType = Context.loadClass(c.getProcessorType());
+            ReportProcessor processor = (ReportProcessor) processorType.newInstance();
+            processor.process(report, c.getConfiguration());
+          }
+        } catch (Exception e) {
+          log.warn("Report Processor Failed: " + c.getName(), e);
+          logReportMessage(request, "Report Processor Failed: " + c.getName());
+        }
+      }
+    }
+
+    stopWatch.stop();
+    logReportMessage(request, "Report Generation Completed in " + stopWatch.toString());
+
+    return report;
+  }
+
+  /**
+   * Loads the ReportData previously generated Report for the given ReportRequest, first checking
+   * the cache
+   */
+  public ReportData loadReportData(ReportRequest request) {
+    log.debug("Loading ReportData for ReportRequest");
+    CachedReportData cachedData = reportCache.get(request.getUuid());
+    if (cachedData != null) {
+      return cachedData.getReportData();
+    }
+    try {
+      long t1 = System.currentTimeMillis();
+      File reportDataFile = getReportDataFile(request);
+      if (reportDataFile.exists()) {
+        String s = ReportUtil.readStringFromFile(reportDataFile);
+        ReportData reportData =
+            Context.getSerializationService()
+                .deserialize(s, ReportData.class, ReportingSerializer.class);
+        long t2 = System.currentTimeMillis();
+        log.info(
+            "Loaded and Deserialized ReportData from file in "
+                + (int) ((t2 - t1) / 1000)
+                + " seconds");
+        return reportData;
+      }
+    } catch (Exception e) {
+      log.warn(
+          "Failed to load ReportData from disk for request "
+              + request
+              + " due to "
+              + e.getMessage());
+    }
+    return null;
+  }
+
+  /** Loads the Rendered Output for a previously generated Report for the given ReportRequest */
+  public byte[] loadRenderedOutput(ReportRequest request) {
+    log.debug("Loading Rendered Output for ReportRequest");
+    try {
+      File outputFile = getReportOutputFile(request);
+      if (outputFile.exists()) {
+        return ReportUtil.readByteArrayFromFile(outputFile);
+      }
+    } catch (Exception e) {
+      log.warn(
+          "Failed to load Rendered Output from disk for request "
+              + request
+              + " due to "
+              + e.getMessage());
+    }
+    return null;
+  }
+
+  /** Loads the Error message for a previously generated Report for the given ReportRequest */
+  public String loadReportError(ReportRequest request) {
+    log.debug("Loading Report Error Output for ReportRequest");
+    try {
+      File errorFile = getReportErrorFile(request);
+      if (errorFile != null) {
+        return ReportUtil.readStringFromFile(errorFile);
+      }
+    } catch (Exception e) {
+      log.warn(
+          "Failed to load Report Error from disk for request "
+              + request
+              + " due to "
+              + e.getMessage());
+    }
+    return null;
+  }
+
+  /** Loads the logs for a Report for the given ReportRequest */
+  public List<String> loadReportLog(ReportRequest request) {
+    log.debug("Loading Report Log for ReportRequest");
+    try {
+      File logFile = getReportLogFile(request);
+      if (logFile != null) {
+        return ReportUtil.readLinesFromFile(logFile);
+      }
+    } catch (Exception e) {
+      log.warn(
+          "Failed to load Report Log from disk for request "
+              + request
+              + " due to "
+              + e.getMessage());
+    }
+    return null;
+  }
+
+  /** Loads a previously generated Report for the given ReportRequest, first checking the cache */
+  public Report loadReport(ReportRequest request) {
+    log.info("Loading Report for ReportRequest");
+    Report report = new Report(request);
+    report.setReportData(loadReportData(request));
+    report.setRenderedOutput(loadRenderedOutput(request));
+    report.setErrorMessage(loadReportError(request));
+    return report;
+  }
+
+  /**
+   * @see ReportService#deleteOldReportRequests()
+   */
+  public void deleteOldReportRequests() {
+    int ageInHoursToDelete = 72;
+    try {
+      ageInHoursToDelete =
+          Integer.parseInt(
+              Context.getAdministrationService()
+                  .getGlobalProperty(
+                      ReportingConstants.GLOBAL_PROPERTY_DELETE_REPORTS_AGE_IN_HOURS));
+    } catch (Exception ex) {
+      log.warn(
+          "Illegal value for "
+              + ReportingConstants.GLOBAL_PROPERTY_DELETE_REPORTS_AGE_IN_HOURS
+              + " global property. Using default value of 72.",
+          ex);
+    }
+
+    log.debug("In Delete Old Report Requests");
+
+    if (ageInHoursToDelete <= 0) {
+      log.warn(
+          "Non-positive number configured ("
+              + ageInHoursToDelete
+              + ") for "
+              + ReportingConstants.GLOBAL_PROPERTY_DELETE_REPORTS_AGE_IN_HOURS
+              + ". Not deleting any.");
+      return;
+    }
+
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, -1 * ageInHoursToDelete);
+    Date now = new Date();
+
+    log.debug(
+        "Checking for reports older than "
+            + ageInHoursToDelete
+            + " hours. Request date before "
+            + cal.getTime());
+
+    List<ReportRequest> oldRequests =
+        getReportRequests(null, null, cal.getTime(), Status.COMPLETED, Status.FAILED);
+
+    log.debug("Found " + oldRequests.size() + " requests that qualify");
+
+    for (ReportRequest request : oldRequests) {
+      log.debug("Checking request" + request.getUuid());
+
+      int daysSinceRequest = DateUtil.getDaysBetween(request.getRequestDate(), now);
+      log.debug(
+          "Days since request = "
+              + daysSinceRequest
+              + " and minimum days to preserve configured to "
+              + request.getMinimumDaysToPreserve());
+
+      if (request.getMinimumDaysToPreserve() == null
+          || request.getMinimumDaysToPreserve() < daysSinceRequest) {
+        log.info("Request qualifies for deletion.  Deleting: " + request.getUuid());
+        try {
+          purgeReportRequest(request);
+        } catch (Exception e) {
+          log.warn("Unable to delete old report request: " + request, e);
+        }
+      }
+    }
+  }
+
+  /**
+   * @see ReportService#persistCachedReports()
+   */
+  public synchronized void persistCachedReports() {
+    Set<String> cachedRequests = reportCache.keySet();
+    for (String reportRequestUuid : cachedRequests) {
+      persistCachedReportDataToDisk(reportRequestUuid);
+    }
+    if (reportCache.size() > 0
+        && reportCache.size() >= ReportingConstants.GLOBAL_PROPERTY_MAX_CACHED_REPORTS()) {
+      Iterator<String> i = reportCache.keySet().iterator();
+      i.next();
+      i.remove();
+    }
+  }
+
+  /**
+   * @see ReportService#logReportMessage(ReportRequest, String)
+   */
+  @Transactional(readOnly = true)
+  public void logReportMessage(ReportRequest request, String message) {
+    logReportMessage(request.getUuid(), message);
+  }
+
+  /**
+   * @see ReportService#logReportMessage(String, String)
+   */
+  @Transactional(readOnly = true)
+  public void logReportMessage(String requestUuid, String message) {
+    if (ObjectUtil.notNull(message)) {
+      try {
+        File f = getReportLogFile(requestUuid);
+        String d = DateUtil.formatDate(new Date(), "EEE dd/MMM/yyyy HH:mm:ss z");
+        ReportUtil.appendStringToFile(f, d + " | " + message);
+      } catch (Exception e) {
+        log.warn("Unable to log report message to disk: " + message, e);
+      }
+    }
+  }
+
+  /**
+   * @see ReportService#purgeReportRequestsForReportDefinition(String)
+   */
+  @Override
+  @Transactional
+  public void purgeReportRequestsForReportDefinition(String reportDefinitionUuid) {
+    List<String> reportRequestUuids = reportDAO.getReportRequestUuids(reportDefinitionUuid);
+    for (String reportRequestUuid : reportRequestUuids) {
+      RunQueuedReportsTask reportsTask =
+          RunQueuedReportsTask.getCurrentlyRunningRequests().get(reportRequestUuid);
+      if (reportsTask != null) {
+        reportsTask.cancelTask();
+      }
+      reportCache.remove(reportRequestUuid);
+      FileUtils.deleteQuietly(getReportDataFile(reportRequestUuid));
+      FileUtils.deleteQuietly(getReportErrorFile(reportRequestUuid));
+      FileUtils.deleteQuietly(getReportOutputFile(reportRequestUuid));
+      FileUtils.deleteQuietly(getReportLogFile(reportRequestUuid));
+    }
+    reportDAO.purgeReportRequestsForReportDefinition(reportDefinitionUuid);
+  }
+
+  /**
+   * @see ReportService#purgeReportDesignsForReportDefinition(String)
+   */
+  @Override
+  @Transactional
+  public void purgeReportDesignsForReportDefinition(String reportDefinitionUuid) {
+    reportDAO.purgeReportDesignsForReportDefinition(reportDefinitionUuid);
+  }
+
+  // ***** PRIVATE UTILITY METHODS *****
+
+  /**
+   * @param requestUuid the uuid of the ReportRequest that was evaluated
+   * @param reportData the data to cache
+   */
+  protected synchronized void cacheReportData(String requestUuid, ReportData reportData) {
+    CachedReportData cachedData = new CachedReportData(reportData);
+    reportCache.put(requestUuid, cachedData);
+  }
+
+  /** Saves the CachedReportData to disk */
+  protected CachedReportData persistCachedReportDataToDisk(String reportRequestUuid) {
+    CachedReportData cachedData = reportCache.get(reportRequestUuid);
+    if (cachedData != null) {
+      if (cachedData.isPersisted()) {
+        log.debug("Cached Data is already persisted, returning");
+      } else {
+        ReportRequest request = getReportRequestByUuid(reportRequestUuid);
+        try {
+          Timer timer = Timer.start();
+          File reportDataFile = getReportDataFile(request);
+          log.info(timer.logInterval("About to serialize the ReportData"));
+          ReportingSerializer serializer =
+              (ReportingSerializer)
+                  Context.getSerializationService().getSerializer(ReportingSerializer.class);
+          String s = serializer.serialize(cachedData.getReportData());
+          log.info(
+              timer.logInterval(
+                  "About to write the serialized ReportData to " + reportDataFile.getPath()));
+          ReportUtil.writeStringToFile(reportDataFile, s);
+          log.info(timer.logInterval("Serialized the report data to disk"));
+          cachedData.setPersisted(true);
+        } catch (Exception e) {
+          log.warn("An error occurred writing report data to disk", e);
+        }
+      }
+    }
+    return cachedData;
+  }
+
+  // ***** PROPERTY ACCESS *****
+
+  public ReportDAO getReportDAO() {
+    return reportDAO;
+  }
+
+  public void setReportDAO(ReportDAO reportDAO) {
+    this.reportDAO = reportDAO;
+  }
+
+  public ReportingTimerTask getRunQueuedReportsTask() {
+    return runQueuedReportsTask;
+  }
+
+  public void setRunQueuedReportsTask(ReportingTimerTask runQueuedReportsTask) {
+    this.runQueuedReportsTask = runQueuedReportsTask;
+  }
+
+  // ***** INNER CLASS FOR CACHING *****
+
+  private class CachedReportData {
+    private boolean persisted = false;
+    private ReportData reportData;
+
+    public CachedReportData(ReportData reportData) {
+      this.reportData = reportData;
+      this.setPersisted(false);
+    }
+
+    public boolean isPersisted() {
+      return persisted;
+    }
+
+    public void setPersisted(boolean persisted) {
+      this.persisted = persisted;
+    }
+
+    public ReportData getReportData() {
+      return reportData;
+    }
+
+    public void setReportData(ReportData reportData) {
+      this.reportData = reportData;
+    }
+  }
 }

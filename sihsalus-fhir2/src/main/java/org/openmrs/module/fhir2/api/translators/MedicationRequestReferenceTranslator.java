@@ -10,27 +10,27 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.DrugOrder;
 
-public interface MedicationRequestReferenceTranslator extends OpenmrsFhirTranslator<DrugOrder, Reference> {
-	
-	/**
-	 * Maps an {@link DrugOrder} to a FHIR MedicationRequest reference
-	 *
-	 * @param drugOrder the encounter to translate
-	 * @return the corresponding FHIR reference
-	 */
-	@Override
-	Reference toFhirResource(@Nonnull DrugOrder drugOrder);
-	
-	/**
-	 * Maps a FHIR MedicationRequest reference to an {@link DrugOrder}
-	 *
-	 * @param medicationRequest the FHIR reference to translate
-	 * @return the corresponding OpenMRS {@link DrugOrder}
-	 */
-	@Override
-	DrugOrder toOpenmrsType(@Nonnull Reference medicationRequest);
+public interface MedicationRequestReferenceTranslator
+    extends OpenmrsFhirTranslator<DrugOrder, Reference> {
+
+  /**
+   * Maps an {@link DrugOrder} to a FHIR MedicationRequest reference
+   *
+   * @param drugOrder the encounter to translate
+   * @return the corresponding FHIR reference
+   */
+  @Override
+  Reference toFhirResource(@Nonnull DrugOrder drugOrder);
+
+  /**
+   * Maps a FHIR MedicationRequest reference to an {@link DrugOrder}
+   *
+   * @param medicationRequest the FHIR reference to translate
+   * @return the corresponding OpenMRS {@link DrugOrder}
+   */
+  @Override
+  DrugOrder toOpenmrsType(@Nonnull Reference medicationRequest);
 }

@@ -12,10 +12,8 @@ package org.openmrs.module.billing.api.base.compatibility;
 import org.openmrs.User;
 import org.openmrs.api.APIException;
 
-/**
- * Compatibility class for working with the user service save user
- */
+/** Compatibility class for working with the user service save user */
 public interface UserServiceCompatibility {
-	
-	User saveUser(User user, String password) throws APIException;
+
+  User saveUser(User user, String password) throws APIException;
 }

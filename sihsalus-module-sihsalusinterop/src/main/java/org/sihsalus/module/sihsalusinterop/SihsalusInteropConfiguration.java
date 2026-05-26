@@ -27,68 +27,66 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @ComponentScan(basePackageClasses = InteropQueueController.class)
 public class SihsalusInteropConfiguration {
 
-    private static final Log log = LogFactory.getLog(SihsalusInteropConfiguration.class);
+  private static final Log log = LogFactory.getLog(SihsalusInteropConfiguration.class);
 
-    private static final long QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS = 300_000L;
+  private static final long QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS = 300_000L;
 
-    @Bean
-    HibernateMappingContributor sihsalusInteropHibernateMappingContributor() {
-        return () -> List.of("SihSalusInterop.hbm.xml");
+  @Bean
+  HibernateMappingContributor sihsalusInteropHibernateMappingContributor() {
+    return () -> List.of("SihSalusInterop.hbm.xml");
+  }
+
+  @Bean("sihsalusinterop.InteropQueueDao")
+  InteropQueueDao sihsalusInteropQueueDao(SessionFactory sessionFactory) {
+    InteropQueueDao dao = new InteropQueueDao();
+    dao.setSessionFactory(sessionFactory);
+    return dao;
+  }
+
+  @Bean("sihsalusinterop.DyakuSenderService")
+  DyakuSenderService dyakuSenderService(InteropQueueDao sihsalusInteropQueueDao) {
+    DyakuSenderServiceImpl service = new DyakuSenderServiceImpl();
+    service.setDao(sihsalusInteropQueueDao);
+    return service;
+  }
+
+  @Bean("sihsalusinterop.BundleBuilderService")
+  BundleBuilderService bundleBuilderService() {
+    return new BundleBuilderService();
+  }
+
+  @Bean(name = "sihsalusinterop.taskScheduler", destroyMethod = "shutdown")
+  ThreadPoolTaskScheduler sihsalusInteropTaskScheduler() {
+    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+    scheduler.setPoolSize(1);
+    scheduler.setThreadNamePrefix("sihsalusinterop-");
+    return scheduler;
+  }
+
+  @Bean
+  InitializingBean registerSihsalusInteropServices(
+      ServiceContext serviceContext, DyakuSenderService dyakuSenderService) {
+    return () -> serviceContext.setService(DyakuSenderService.class, dyakuSenderService);
+  }
+
+  @Bean
+  SmartInitializingSingleton sihsalusInteropStaticInitializer(
+      ServiceContext serviceContext, ThreadPoolTaskScheduler sihsalusInteropTaskScheduler) {
+    return () -> {
+      serviceContext.addAdvice(EncounterService.class, new EncounterSavedAdvice());
+      sihsalusInteropTaskScheduler.scheduleAtFixedRate(
+          SihsalusInteropConfiguration::processInteropQueue,
+          new Date(System.currentTimeMillis() + QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS),
+          QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS);
+    };
+  }
+
+  private static void processInteropQueue() {
+    try {
+      StaticModuleTaskRunner.runAuthenticated(
+          () -> Context.getService(DyakuSenderService.class).processQueue());
+    } catch (Exception e) {
+      log.warn("No se pudo procesar la cola automatica de interop", e);
     }
-
-    @Bean("sihsalusinterop.InteropQueueDao")
-    InteropQueueDao sihsalusInteropQueueDao(SessionFactory sessionFactory) {
-        InteropQueueDao dao = new InteropQueueDao();
-        dao.setSessionFactory(sessionFactory);
-        return dao;
-    }
-
-    @Bean("sihsalusinterop.DyakuSenderService")
-    DyakuSenderService dyakuSenderService(InteropQueueDao sihsalusInteropQueueDao) {
-        DyakuSenderServiceImpl service = new DyakuSenderServiceImpl();
-        service.setDao(sihsalusInteropQueueDao);
-        return service;
-    }
-
-    @Bean("sihsalusinterop.BundleBuilderService")
-    BundleBuilderService bundleBuilderService() {
-        return new BundleBuilderService();
-    }
-
-    @Bean(name = "sihsalusinterop.taskScheduler", destroyMethod = "shutdown")
-    ThreadPoolTaskScheduler sihsalusInteropTaskScheduler() {
-        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
-        scheduler.setThreadNamePrefix("sihsalusinterop-");
-        return scheduler;
-    }
-
-    @Bean
-    InitializingBean registerSihsalusInteropServices(
-            ServiceContext serviceContext,
-            DyakuSenderService dyakuSenderService) {
-        return () -> serviceContext.setService(DyakuSenderService.class, dyakuSenderService);
-    }
-
-    @Bean
-    SmartInitializingSingleton sihsalusInteropStaticInitializer(
-            ServiceContext serviceContext,
-            ThreadPoolTaskScheduler sihsalusInteropTaskScheduler) {
-        return () -> {
-            serviceContext.addAdvice(EncounterService.class, new EncounterSavedAdvice());
-            sihsalusInteropTaskScheduler.scheduleAtFixedRate(
-                    SihsalusInteropConfiguration::processInteropQueue,
-                    new Date(System.currentTimeMillis() + QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS),
-                    QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS);
-        };
-    }
-
-    private static void processInteropQueue() {
-        try {
-            StaticModuleTaskRunner.runAuthenticated(() -> Context.getService(DyakuSenderService.class).processQueue());
-        }
-        catch (Exception e) {
-            log.warn("No se pudo procesar la cola automatica de interop", e);
-        }
-    }
+  }
 }

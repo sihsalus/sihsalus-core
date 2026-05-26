@@ -26,26 +26,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirVisitServiceImpl extends BaseFhirService<Encounter, Visit> implements FhirVisitService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirVisitDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private EncounterTranslator<Visit> translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<Encounter> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<Visit, Encounter, FhirVisitDao, EncounterTranslator<Visit>, SearchQueryInclude<Encounter>> searchQuery;
-	
-	@Override
-	public IBundleProvider searchForVisits(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
-	}
+public class FhirVisitServiceImpl extends BaseFhirService<Encounter, Visit>
+    implements FhirVisitService {
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirVisitDao dao;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private EncounterTranslator<Visit> translator;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQueryInclude<Encounter> searchQueryInclude;
+
+  @Getter(value = PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private SearchQuery<
+          Visit, Encounter, FhirVisitDao, EncounterTranslator<Visit>, SearchQueryInclude<Encounter>>
+      searchQuery;
+
+  @Override
+  public IBundleProvider searchForVisits(SearchParameterMap theParams) {
+    return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+  }
 }

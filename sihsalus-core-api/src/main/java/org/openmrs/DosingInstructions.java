@@ -1,17 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs;
 
 import java.util.Date;
 import java.util.Locale;
-
 import org.openmrs.api.APIException;
 import org.springframework.validation.Errors;
 
@@ -29,41 +28,41 @@ import org.springframework.validation.Errors;
  */
 public interface DosingInstructions {
 
-	/**
-	 * Get human-readable version of dosing instructions for a particular locale All dosing instructions
-	 * can be localized, so the result, especially any free text may remain in the original language. In
-	 * general, it's expect that most implementations will write orders in a single language and then
-	 * want to translate instructions to the patient's preferred language when printing orders for the
-	 * patient. In all other cases, it will want to call this method with the user's locale (i.e.,
-	 * <tt>context.getLocale()</tt>).
-	 *
-	 * @return localized drug instructions string
-	 */
-	public String getDosingInstructionsAsString(Locale locale);
+  /**
+   * Get human-readable version of dosing instructions for a particular locale All dosing
+   * instructions can be localized, so the result, especially any free text may remain in the
+   * original language. In general, it's expect that most implementations will write orders in a
+   * single language and then want to translate instructions to the patient's preferred language
+   * when printing orders for the patient. In all other cases, it will want to call this method with
+   * the user's locale (i.e., <tt>context.getLocale()</tt>).
+   *
+   * @return localized drug instructions string
+   */
+  public String getDosingInstructionsAsString(Locale locale);
 
-	/**
-	 * Serialize dosing instructions into order
-	 *
-	 * @param order DrugOrder to set dosing instructions
-	 */
-	public void setDosingInstructions(DrugOrder order);
+  /**
+   * Serialize dosing instructions into order
+   *
+   * @param order DrugOrder to set dosing instructions
+   */
+  public void setDosingInstructions(DrugOrder order);
 
-	/**
-	 * Get dosing instructions from order
-	 *
-	 * @param order DrugOrder to get dosing instructions
-	 * @return DosingInstructions created from DrugOrder
-	 * @throws APIException if dosing type of passing order is not matched with dosing type of
-	 *             implementing dosing instruction
-	 */
-	public DosingInstructions getDosingInstructions(DrugOrder order);
+  /**
+   * Get dosing instructions from order
+   *
+   * @param order DrugOrder to get dosing instructions
+   * @return DosingInstructions created from DrugOrder
+   * @throws APIException if dosing type of passing order is not matched with dosing type of
+   *     implementing dosing instruction
+   */
+  public DosingInstructions getDosingInstructions(DrugOrder order);
 
-	public void validate(DrugOrder order, Errors errors);
+  public void validate(DrugOrder order, Errors errors);
 
-	/**
-	 * Implementations of this interface may be able to infer the auto-expiration date from other fields
-	 * on the DrugOrder. If the expiration date cannot be determined, then this method may return null
-	 * (i.e., null means duration of order is unknown).
-	 */
-	public Date getAutoExpireDate(DrugOrder order);
+  /**
+   * Implementations of this interface may be able to infer the auto-expiration date from other
+   * fields on the DrugOrder. If the expiration date cannot be determined, then this method may
+   * return null (i.e., null means duration of order is unknown).
+   */
+  public Date getAutoExpireDate(DrugOrder order);
 }

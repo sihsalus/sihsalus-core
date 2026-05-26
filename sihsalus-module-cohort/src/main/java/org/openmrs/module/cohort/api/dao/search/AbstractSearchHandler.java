@@ -10,23 +10,22 @@
 package org.openmrs.module.cohort.api.dao.search;
 
 import jakarta.validation.constraints.NotNull;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public abstract class AbstractSearchHandler implements ISearchQuery {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	protected Session getCurrentSession() {
-		return sessionFactory.getCurrentSession();
-	}
 
-	protected String startsWith(@NotNull String name) {
-		return name.toLowerCase() + "%";
-	}
+  @Autowired
+  @Qualifier("sessionFactory")
+  private SessionFactory sessionFactory;
+
+  protected Session getCurrentSession() {
+    return sessionFactory.getCurrentSession();
+  }
+
+  protected String startsWith(@NotNull String name) {
+    return name.toLowerCase() + "%";
+  }
 }

@@ -10,36 +10,37 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Person;
 
-public interface PersonTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Person, Person> {
-	
-	/**
-	 * Maps an {@link org.openmrs.Person} to a {@link org.hl7.fhir.r4.model.Person}
-	 * 
-	 * @param person the person to translate
-	 * @return the corresponding FHIR person resource
-	 */
-	@Override
-	Person toFhirResource(@Nonnull org.openmrs.Person person);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Person} to an {@link org.openmrs.Person}
-	 * 
-	 * @param person the FHIR person to translate
-	 * @return the corresponding OpenMRS person
-	 */
-	@Override
-	org.openmrs.Person toOpenmrsType(@Nonnull Person person);
-	
-	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Person} to an existing {@link org.openmrs.Person}
-	 * 
-	 * @param currentPerson the existing OpenMRS person to update
-	 * @param person the FHIR person to translate
-	 * @return the updated OpenMRS person
-	 */
-	@Override
-	org.openmrs.Person toOpenmrsType(@Nonnull org.openmrs.Person currentPerson, @Nonnull Person person);
+public interface PersonTranslator
+    extends OpenmrsFhirUpdatableTranslator<org.openmrs.Person, Person> {
+
+  /**
+   * Maps an {@link org.openmrs.Person} to a {@link org.hl7.fhir.r4.model.Person}
+   *
+   * @param person the person to translate
+   * @return the corresponding FHIR person resource
+   */
+  @Override
+  Person toFhirResource(@Nonnull org.openmrs.Person person);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Person} to an {@link org.openmrs.Person}
+   *
+   * @param person the FHIR person to translate
+   * @return the corresponding OpenMRS person
+   */
+  @Override
+  org.openmrs.Person toOpenmrsType(@Nonnull Person person);
+
+  /**
+   * Maps a {@link org.hl7.fhir.r4.model.Person} to an existing {@link org.openmrs.Person}
+   *
+   * @param currentPerson the existing OpenMRS person to update
+   * @param person the FHIR person to translate
+   * @return the updated OpenMRS person
+   */
+  @Override
+  org.openmrs.Person toOpenmrsType(
+      @Nonnull org.openmrs.Person currentPerson, @Nonnull Person person);
 }

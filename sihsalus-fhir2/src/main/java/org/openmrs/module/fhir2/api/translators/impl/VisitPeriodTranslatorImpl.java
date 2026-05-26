@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Period;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
@@ -18,27 +17,27 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class VisitPeriodTranslatorImpl implements EncounterPeriodTranslator<Visit> {
-	
-	@Override
-	public Period toFhirResource(@Nonnull Visit visit) {
-		Period result = new Period();
-		result.setStart(visit.getStartDatetime());
-		result.setEnd(visit.getStopDatetime());
-		return result;
-	}
-	
-	@Override
-	public Visit toOpenmrsType(@Nonnull Visit visit, @Nonnull Period period) {
-		if (period.hasStart()) {
-			visit.setStartDatetime(period.getStart());
-		} else if (visit.getStartDatetime() == null) {
-			visit.setStartDatetime(visit.getDateCreated());
-		}
-		
-		if (period.hasEnd()) {
-			visit.setStopDatetime(period.getEnd());
-		}
-		
-		return visit;
-	}
+
+  @Override
+  public Period toFhirResource(@Nonnull Visit visit) {
+    Period result = new Period();
+    result.setStart(visit.getStartDatetime());
+    result.setEnd(visit.getStopDatetime());
+    return result;
+  }
+
+  @Override
+  public Visit toOpenmrsType(@Nonnull Visit visit, @Nonnull Period period) {
+    if (period.hasStart()) {
+      visit.setStartDatetime(period.getStart());
+    } else if (visit.getStartDatetime() == null) {
+      visit.setStartDatetime(visit.getDateCreated());
+    }
+
+    if (period.hasEnd()) {
+      visit.setStopDatetime(period.getEnd());
+    }
+
+    return visit;
+  }
 }

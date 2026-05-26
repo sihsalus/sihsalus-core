@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs;
 
@@ -15,7 +15,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 
@@ -31,74 +30,70 @@ import org.hibernate.envers.Audited;
 @Audited
 public class EncounterRole extends BaseChangeableOpenmrsMetadata {
 
-	public static final String UNKNOWN_ENCOUNTER_ROLE_UUID = "a0b03050-c99b-11e0-9572-0800200c9a66";
+  public static final String UNKNOWN_ENCOUNTER_ROLE_UUID = "a0b03050-c99b-11e0-9572-0800200c9a66";
 
-	// Fields
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "encounter_role_id", nullable = false)
-	private Integer encounterRoleId;
+  // Fields
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "encounter_role_id", nullable = false)
+  private Integer encounterRoleId;
 
-	// Constructors
+  // Constructors
 
-	/** default constructor */
-	public EncounterRole() {
-	}
+  /** default constructor */
+  public EncounterRole() {}
 
-	/**
-	 * <p>
-	 * <strong>Should</strong> set encounter role id
-	 *
-	 * @param encounterRoleId
-	 */
-	public EncounterRole(Integer encounterRoleId) {
-		this.encounterRoleId = encounterRoleId;
-	}
+  /**
+   * <strong>Should</strong> set encounter role id
+   *
+   * @param encounterRoleId
+   */
+  public EncounterRole(Integer encounterRoleId) {
+    this.encounterRoleId = encounterRoleId;
+  }
 
-	// Property accessors
+  // Property accessors
 
-	/**
-	 * <p>
-	 * <strong>Should</strong> not fail with empty object
-	 *
-	 * @see Object#toString()
-	 */
-	@Override
-	public String toString() {
-		String ret = "";
-		ret += encounterRoleId == null ? "(no ID) " : encounterRoleId.toString() + " ";
-		return "EncounterRole: [" + ret + "]";
-	}
+  /**
+   * <strong>Should</strong> not fail with empty object
+   *
+   * @see Object#toString()
+   */
+  @Override
+  public String toString() {
+    String ret = "";
+    ret += encounterRoleId == null ? "(no ID) " : encounterRoleId.toString() + " ";
+    return "EncounterRole: [" + ret + "]";
+  }
 
-	/**
-	 * @see OpenmrsObject#getId()
-	 */
-	@Override
-	public Integer getId() {
+  /**
+   * @see OpenmrsObject#getId()
+   */
+  @Override
+  public Integer getId() {
 
-		return getEncounterRoleId();
-	}
+    return getEncounterRoleId();
+  }
 
-	/**
-	 * @see OpenmrsObject#setId(Integer)
-	 */
-	@Override
-	public void setId(Integer id) {
-		setEncounterRoleId(id);
+  /**
+   * @see OpenmrsObject#setId(Integer)
+   */
+  @Override
+  public void setId(Integer id) {
+    setEncounterRoleId(id);
+  }
 
-	}
+  /**
+   * @param encounterRoleId The encounterId to set.
+   */
+  private void setEncounterRoleId(Integer encounterRoleId) {
+    this.encounterRoleId = encounterRoleId;
+  }
 
-	/**
-	 * @param encounterRoleId The encounterId to set.
-	 */
-	private void setEncounterRoleId(Integer encounterRoleId) {
-		this.encounterRoleId = encounterRoleId;
-	}
-
-	/**
-	 * @see org.openmrs.OpenmrsObject#getId()
-	 */
-	public Integer getEncounterRoleId() {
-		return encounterRoleId;
-	}
+  /**
+   * @see org.openmrs.OpenmrsObject#getId()
+   */
+  public Integer getEncounterRoleId() {
+    return encounterRoleId;
+  }
 }

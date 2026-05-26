@@ -9,7 +9,5 @@
  */
 package org.openmrs.module.billing.api.base.entity.model;
 
-/**
- * Represents classes that define simple attribute type information.
- */
+/** Represents classes that define simple attribute type information. */
 public interface ISimpleAttributeType extends IAttributeType {}

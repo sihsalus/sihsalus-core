@@ -14,29 +14,28 @@ import lombok.Setter;
 import org.openmrs.attribute.Attribute;
 import org.openmrs.attribute.BaseAttribute;
 
-public class CohortMemberAttribute extends BaseAttribute<CohortMemberAttributeType, CohortMember> implements Attribute<CohortMemberAttributeType, CohortMember> {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Getter
-	@Setter
-	private Integer id;
+public class CohortMemberAttribute extends BaseAttribute<CohortMemberAttributeType, CohortMember>
+    implements Attribute<CohortMemberAttributeType, CohortMember> {
 
-	@Override
-	public CohortMember getOwner() {
-		return super.getOwner();
-	}
+  private static final long serialVersionUID = 1L;
 
-	@Override
-	public void setOwner(CohortMember owner) {
-		super.setOwner(owner);
-	}
-	
-	public CohortMember getCohortMember() {
-		return this.getOwner();
-	}
-	
-	public void setCohortMember(CohortMember cohortMember) {
-		this.setOwner(cohortMember);
-	}
+  @Getter @Setter private Integer id;
+
+  @Override
+  public CohortMember getOwner() {
+    return super.getOwner();
+  }
+
+  @Override
+  public void setOwner(CohortMember owner) {
+    super.setOwner(owner);
+  }
+
+  public CohortMember getCohortMember() {
+    return this.getOwner();
+  }
+
+  public void setCohortMember(CohortMember cohortMember) {
+    this.setOwner(cohortMember);
+  }
 }

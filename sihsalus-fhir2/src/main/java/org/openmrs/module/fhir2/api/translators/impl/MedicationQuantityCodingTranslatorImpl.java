@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
@@ -33,47 +32,52 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirConceptSourceService conceptSourceService;
-	
-	@Override
-	public Coding toFhirResource(@Nonnull Concept concept) {
-		
-		Coding coding = null;
-		
-		if (concept.getConceptMappings() != null && !concept.getConceptMappings().isEmpty()) {
-			coding = getSameAsCodingForSystem(concept, FhirConstants.RX_NORM_SYSTEM_URI);
-			if (coding == null) {
-				coding = getSameAsCodingForSystem(concept, FhirConstants.SNOMED_SYSTEM_URI);
-			}
-		}
-		
-		if (coding == null) {
-			coding = createCoding(null, concept.getUuid(), concept);
-		}
-		
-		return coding;
-	}
-	
-	private Coding getSameAsCodingForSystem(Concept concept, String system) {
-		for (ConceptMap conceptMap : concept.getConceptMappings()) {
-			String conceptSourceUrl = conceptSourceService
-			        .getUrlForConceptSource(conceptMap.getConceptReferenceTerm().getConceptSource());
-			if (conceptSourceUrl != null && conceptSourceUrl.equals(system)
-			        && conceptMap.getConceptMapType().getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID)) {
-				return createCoding(system, conceptMap.getConceptReferenceTerm().getCode(), concept);
-			}
-		}
-		return null;
-	}
-	
-	private Coding createCoding(String system, String code, Concept concept) {
-		Coding coding = new Coding();
-		coding.setSystem(system);
-		coding.setCode(code);
-		coding.setDisplay(concept.getDisplayString());
-		return coding;
-	}
+
+  @Getter(PROTECTED)
+  @Setter(value = PROTECTED, onMethod_ = @Autowired)
+  private FhirConceptSourceService conceptSourceService;
+
+  @Override
+  public Coding toFhirResource(@Nonnull Concept concept) {
+
+    Coding coding = null;
+
+    if (concept.getConceptMappings() != null && !concept.getConceptMappings().isEmpty()) {
+      coding = getSameAsCodingForSystem(concept, FhirConstants.RX_NORM_SYSTEM_URI);
+      if (coding == null) {
+        coding = getSameAsCodingForSystem(concept, FhirConstants.SNOMED_SYSTEM_URI);
+      }
+    }
+
+    if (coding == null) {
+      coding = createCoding(null, concept.getUuid(), concept);
+    }
+
+    return coding;
+  }
+
+  private Coding getSameAsCodingForSystem(Concept concept, String system) {
+    for (ConceptMap conceptMap : concept.getConceptMappings()) {
+      String conceptSourceUrl =
+          conceptSourceService.getUrlForConceptSource(
+              conceptMap.getConceptReferenceTerm().getConceptSource());
+      if (conceptSourceUrl != null
+          && conceptSourceUrl.equals(system)
+          && conceptMap
+              .getConceptMapType()
+              .getUuid()
+              .equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID)) {
+        return createCoding(system, conceptMap.getConceptReferenceTerm().getCode(), concept);
+      }
+    }
+    return null;
+  }
+
+  private Coding createCoding(String system, String code, Concept concept) {
+    Coding coding = new Coding();
+    coding.setSystem(system);
+    coding.setCode(code);
+    coding.setDisplay(concept.getDisplayString());
+    return coding;
+  }
 }

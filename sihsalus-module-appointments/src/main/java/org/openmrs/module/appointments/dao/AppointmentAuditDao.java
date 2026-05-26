@@ -1,15 +1,14 @@
 package org.openmrs.module.appointments.dao;
 
+import java.util.List;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 
-import java.util.List;
-
 public interface AppointmentAuditDao {
 
-	void save(AppointmentAudit appointmentAuditEvent);
+  void save(AppointmentAudit appointmentAuditEvent);
 
-	List<AppointmentAudit> getAppointmentHistoryForAppointment(Appointment appointment);
+  List<AppointmentAudit> getAppointmentHistoryForAppointment(Appointment appointment);
 
-	AppointmentAudit getPriorStatusChangeEvent(Appointment appointment);
+  AppointmentAudit getPriorStatusChangeEvent(Appointment appointment);
 }

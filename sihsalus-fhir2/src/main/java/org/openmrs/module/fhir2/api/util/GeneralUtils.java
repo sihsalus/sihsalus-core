@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Objects;
-
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
@@ -22,32 +21,33 @@ import org.openmrs.Voidable;
 
 @Slf4j
 public final class GeneralUtils {
-	
-	private static final int DEFAULT_BUFFER_SIZE = 8192;
-	
-	public static String inputStreamToString(final InputStream is, final Charset charset) throws IOException {
-		// this may over-allocate, but we're only holding it in memory temporarily
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-		int length;
-		while ((length = is.read(buffer)) != -1) {
-			outputStream.write(buffer, 0, length);
-		}
-		return outputStream.toString(charset.name());
-	}
-	
-	public static String resourceToString(final String resource, final Charset charset, final ClassLoader cl)
-	        throws IOException {
-		return inputStreamToString(Objects.requireNonNull(cl.getResourceAsStream(resource)), charset);
-	}
-	
-	public static boolean isVoidedOrRetired(OpenmrsObject object) {
-		if (object instanceof Retireable) {
-			return ((Retireable) object).getRetired();
-		} else if (object instanceof Voidable) {
-			return ((Voidable) object).getVoided();
-		}
-		
-		return false;
-	}
+
+  private static final int DEFAULT_BUFFER_SIZE = 8192;
+
+  public static String inputStreamToString(final InputStream is, final Charset charset)
+      throws IOException {
+    // this may over-allocate, but we're only holding it in memory temporarily
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+    byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+    int length;
+    while ((length = is.read(buffer)) != -1) {
+      outputStream.write(buffer, 0, length);
+    }
+    return outputStream.toString(charset.name());
+  }
+
+  public static String resourceToString(
+      final String resource, final Charset charset, final ClassLoader cl) throws IOException {
+    return inputStreamToString(Objects.requireNonNull(cl.getResourceAsStream(resource)), charset);
+  }
+
+  public static boolean isVoidedOrRetired(OpenmrsObject object) {
+    if (object instanceof Retireable) {
+      return ((Retireable) object).getRetired();
+    } else if (object instanceof Voidable) {
+      return ((Voidable) object).getVoided();
+    }
+
+    return false;
+  }
 }
