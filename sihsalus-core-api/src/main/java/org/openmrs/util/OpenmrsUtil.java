@@ -1519,7 +1519,7 @@ public class OpenmrsUtil {
 		Random gen = new Random();
 		StringBuilder sb = new StringBuilder(size);
 		for (int i = 0; i < size; i++) {
-			int ch = gen.nextInt() * 62;
+			int ch = gen.nextInt(62);
 			if (ch < 10) {
 				// 0-9
 				sb.append(ch);
