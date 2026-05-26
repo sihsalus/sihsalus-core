@@ -88,11 +88,12 @@ public class UpgradeUtil {
         connection.prepareStatement("select uuid from concept where concept_id = ?")) {
       select.setInt(1, conceptId);
 
-      ResultSet resultSet = select.executeQuery();
-      if (resultSet.next()) {
-        return resultSet.getString(1);
-      } else {
-        throw new IllegalArgumentException("Concept not found " + conceptId);
+      try (ResultSet resultSet = select.executeQuery()) {
+        if (resultSet.next()) {
+          return resultSet.getString(1);
+        } else {
+          throw new IllegalArgumentException("Concept not found " + conceptId);
+        }
       }
     }
   }
@@ -104,11 +105,12 @@ public class UpgradeUtil {
             "select property_value from global_property where property = ?")) {
       select.setString(1, gp);
 
-      ResultSet resultSet = select.executeQuery();
-      if (resultSet.next()) {
-        return resultSet.getString(1);
-      } else {
-        throw new IllegalArgumentException("Global property not found " + gp);
+      try (ResultSet resultSet = select.executeQuery()) {
+        if (resultSet.next()) {
+          return resultSet.getString(1);
+        } else {
+          throw new IllegalArgumentException("Global property not found " + gp);
+        }
       }
     }
   }
@@ -121,11 +123,12 @@ public class UpgradeUtil {
         connection.prepareStatement("select concept_id from concept where uuid = ?")) {
       select.setString(1, conceptUuid);
 
-      ResultSet resultSet = select.executeQuery();
-      if (resultSet.next()) {
-        conceptSetId = resultSet.getInt(1);
-      } else {
-        throw new IllegalArgumentException("Concept not found " + conceptUuid);
+      try (ResultSet resultSet = select.executeQuery()) {
+        if (resultSet.next()) {
+          conceptSetId = resultSet.getInt(1);
+        } else {
+          throw new IllegalArgumentException("Concept not found " + conceptUuid);
+        }
       }
     }
 
@@ -135,9 +138,10 @@ public class UpgradeUtil {
         connection.prepareStatement("select concept_id from concept_set where concept_set = ?")) {
       selectConceptIds.setInt(1, conceptSetId);
 
-      ResultSet resultSet = selectConceptIds.executeQuery();
-      while (resultSet.next()) {
-        conceptIds.add(resultSet.getInt(1));
+      try (ResultSet resultSet = selectConceptIds.executeQuery()) {
+        while (resultSet.next()) {
+          conceptIds.add(resultSet.getInt(1));
+        }
       }
     }
 
@@ -146,14 +150,16 @@ public class UpgradeUtil {
 
   public static Integer getOrderFrequencyIdForConceptId(
       Connection connection, Integer conceptIdForFrequency) throws SQLException {
-    PreparedStatement orderFrequencyIdQuery =
+    try (PreparedStatement orderFrequencyIdQuery =
         connection.prepareStatement(
-            "select order_frequency_id from order_frequency where concept_id = ?");
-    orderFrequencyIdQuery.setInt(1, conceptIdForFrequency);
-    ResultSet orderFrequencyIdResultSet = orderFrequencyIdQuery.executeQuery();
-    if (!orderFrequencyIdResultSet.next()) {
-      return null;
+            "select order_frequency_id from order_frequency where concept_id = ?")) {
+      orderFrequencyIdQuery.setInt(1, conceptIdForFrequency);
+      try (ResultSet orderFrequencyIdResultSet = orderFrequencyIdQuery.executeQuery()) {
+        if (!orderFrequencyIdResultSet.next()) {
+          return null;
+        }
+        return orderFrequencyIdResultSet.getInt("order_frequency_id");
+      }
     }
-    return orderFrequencyIdResultSet.getInt("order_frequency_id");
   }
 }
