@@ -221,7 +221,7 @@ public class StockForecastReport extends ReportGenerator {
                   == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo
               || inventoryGroupBy
                   == StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItem;
-      boolean hasWritenRecords = false;
+      boolean hasWrittenRecords = false;
       while ((inventoryLine = bufferedStagingReader.readLine()) != null) {
         if (shouldStopExecution.apply(batchJob)) {
           return;
@@ -274,7 +274,7 @@ public class StockForecastReport extends ReportGenerator {
               includeBatchInfo,
               includeLocationInfo,
               shouldStopExecution);
-          hasWritenRecords = true;
+          hasWrittenRecords = true;
         }
       }
 
@@ -287,7 +287,7 @@ public class StockForecastReport extends ReportGenerator {
             includeLocationInfo,
             shouldStopExecution);
       } else {
-        if (!hasWritenRecords) {
+        if (!hasWrittenRecords) {
           writeBuffer(
               batchJob,
               inventorySearchFilter,
@@ -308,7 +308,6 @@ public class StockForecastReport extends ReportGenerator {
         }
       }
 
-      csvWriter.close();
       long fileSizeInBytes = Files.size(resultsFile.toPath());
       completeBatchJob(
           batchJob,
@@ -380,16 +379,15 @@ public class StockForecastReport extends ReportGenerator {
             forecast
                 .getConsumptionRate()
                 .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
-        for (int i = 0; i < forecast.getQuantityConsumed().size(); i++) {
-          forecast
-              .getQuantityConsumed()
-              .set(
-                  i,
-                  forecast
-                      .getQuantityConsumed()
-                      .get(i)
-                      .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+        List<BigDecimal> quantityConsumed = forecast.getQuantityConsumed();
+        for (int i = 0; i < quantityConsumed.size(); i++) {
+          quantityConsumed.set(
+              i,
+              quantityConsumed
+                  .get(i)
+                  .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
         }
+        forecast.setQuantityConsumed(quantityConsumed);
       }
     }
   }
