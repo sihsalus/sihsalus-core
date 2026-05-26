@@ -392,17 +392,15 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                     (sectionMap) -> {
                       Set<String> sectionExcludedQuestions = new HashSet<>(pageExcludedQuestions);
 
-                      // wrapped in a one-time do... while loop so that continue statements only
-                      // break out of the
-                      // while loop, so that we process all questions for all sections
-                      do {
+                      sectionReference:
+                      {
                         if (sectionMap.containsKey(SCHEMA_KEY_REFERENCE)) {
                           Map<?, ?> referenceMap =
                               getReferenceObjectFromItem(sectionMap).orElse(null);
                           sectionMap.clear();
 
                           if (referenceMap == null) {
-                            continue;
+                            break sectionReference;
                           }
 
                           Object referencePageObject = referenceMap.get(SCHEMA_KEY_PAGE);
@@ -410,7 +408,7 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                             log.error(
                                 "Form compilation - reference page is not a JSON string: {}",
                                 referencePageObject);
-                            continue;
+                            break sectionReference;
                           }
 
                           Object referenceSectionObject = referenceMap.get(SCHEMA_KEY_SECTION);
@@ -418,7 +416,7 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                             log.error(
                                 "Form compilation - reference section is not a JSON string: {}",
                                 referencePageObject);
-                            continue;
+                            break sectionReference;
                           }
 
                           Map<String, Object> referencedForm =
@@ -426,7 +424,7 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                                   .orElse(null);
 
                           if (referencedForm == null) {
-                            continue;
+                            break sectionReference;
                           }
 
                           sectionExcludedQuestions.addAll(getExclusions(referenceMap));
@@ -441,7 +439,7 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                                     return s;
                                   });
                         }
-                      } while (false);
+                      }
 
                       Object questionsObj = sectionMap.get(SCHEMA_KEY_QUESTIONS);
                       if (!(questionsObj instanceof List)) {
