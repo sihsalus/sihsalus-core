@@ -354,7 +354,7 @@ public class SearchQueryUnique<T, R> {
         totalHitCount += partialResults.size();
       }
 
-      if (currentLimit != null) {
+      if (currentLimit != null && limit != null) {
         currentLimit = limit - results.size();
       }
       if (currentOffset != null) {

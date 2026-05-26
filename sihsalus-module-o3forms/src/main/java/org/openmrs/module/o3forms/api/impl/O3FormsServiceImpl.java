@@ -392,53 +392,49 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                     (sectionMap) -> {
                       Set<String> sectionExcludedQuestions = new HashSet<>(pageExcludedQuestions);
 
-                      sectionReference:
-                      {
-                        if (sectionMap.containsKey(SCHEMA_KEY_REFERENCE)) {
-                          Map<?, ?> referenceMap =
-                              getReferenceObjectFromItem(sectionMap).orElse(null);
-                          sectionMap.clear();
+                      if (sectionMap.containsKey(SCHEMA_KEY_REFERENCE)) {
+                        Map<?, ?> referenceMap = getReferenceObjectFromItem(sectionMap).orElse(null);
+                        sectionMap.clear();
 
-                          if (referenceMap == null) {
-                            break sectionReference;
-                          }
-
-                          Object referencePageObject = referenceMap.get(SCHEMA_KEY_PAGE);
-                          if (!(referencePageObject instanceof String)) {
-                            log.error(
-                                "Form compilation - reference page is not a JSON string: {}",
-                                referencePageObject);
-                            break sectionReference;
-                          }
-
-                          Object referenceSectionObject = referenceMap.get(SCHEMA_KEY_SECTION);
-                          if (!(referenceSectionObject instanceof String)) {
-                            log.error(
-                                "Form compilation - reference section is not a JSON string: {}",
-                                referencePageObject);
-                            break sectionReference;
-                          }
-
-                          Map<String, Object> referencedForm =
-                              getReferencedFormForItem(finalReferencedForms, referenceMap)
-                                  .orElse(null);
-
-                          if (referencedForm == null) {
-                            break sectionReference;
-                          }
-
-                          sectionExcludedQuestions.addAll(getExclusions(referenceMap));
-
-                          getSectionByPageAndLabel(
-                                  referencedForm,
-                                  (String) referencePageObject,
-                                  (String) referenceSectionObject)
-                              .map(
-                                  s -> {
-                                    sectionMap.putAll(s);
-                                    return s;
-                                  });
+                        if (referenceMap == null) {
+                          return WalkState.CONTINUE;
                         }
+
+                        Object referencePageObject = referenceMap.get(SCHEMA_KEY_PAGE);
+                        if (!(referencePageObject instanceof String)) {
+                          log.error(
+                              "Form compilation - reference page is not a JSON string: {}",
+                              referencePageObject);
+                          return WalkState.CONTINUE;
+                        }
+
+                        Object referenceSectionObject = referenceMap.get(SCHEMA_KEY_SECTION);
+                        if (!(referenceSectionObject instanceof String)) {
+                          log.error(
+                              "Form compilation - reference section is not a JSON string: {}",
+                              referenceSectionObject);
+                          return WalkState.CONTINUE;
+                        }
+
+                        Map<String, Object> referencedForm =
+                            getReferencedFormForItem(finalReferencedForms, referenceMap)
+                                .orElse(null);
+
+                        if (referencedForm == null) {
+                          return WalkState.CONTINUE;
+                        }
+
+                        sectionExcludedQuestions.addAll(getExclusions(referenceMap));
+
+                        getSectionByPageAndLabel(
+                                referencedForm,
+                                (String) referencePageObject,
+                                (String) referenceSectionObject)
+                            .map(
+                                s -> {
+                                  sectionMap.putAll(s);
+                                  return s;
+                                });
                       }
 
                       Object questionsObj = sectionMap.get(SCHEMA_KEY_QUESTIONS);

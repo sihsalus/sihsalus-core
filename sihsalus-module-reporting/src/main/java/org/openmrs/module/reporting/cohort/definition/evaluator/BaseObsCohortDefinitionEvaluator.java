@@ -147,6 +147,9 @@ public abstract class BaseObsCohortDefinitionEvaluator implements CohortDefiniti
         valueClauses.add(valueSql + operator2.getSqlRepresentation() + " :value2 ");
       }
     } else if (valueList != null && valueList.size() > 0) {
+      if (setOperator == null) {
+        throw new IllegalArgumentException("setOperator is required when valueList is specified");
+      }
       valueClauses.add(valueSql + setOperator.getSqlRepresentation() + " (:valueList) ");
     }
 

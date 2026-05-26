@@ -345,7 +345,7 @@ public class MutableResourceBundleMessageSource extends ReloadableResourceBundle
             propertyDestination = possibleDestination;
           }
         }
-        if (!propExists || overwrite) {
+        if ((!propExists || overwrite) && propertyDestination != null) {
           propertyDestination.put(message.getCode(), message.getMessage());
         }
       }

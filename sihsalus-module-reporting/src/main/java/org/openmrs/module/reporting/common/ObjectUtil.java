@@ -577,7 +577,7 @@ public class ObjectUtil {
         return formatOpenmrsData((OpenmrsData) o, format, locale);
       }
     } catch (Exception e) {
-      log.warn("Unable to format " + o.getClass().getSimpleName());
+      log.warn("Unable to format " + (o == null ? "null" : o.getClass().getSimpleName()));
     }
     if (o instanceof OpenmrsObject) {
       return nullSafeToString((OpenmrsObject) o);

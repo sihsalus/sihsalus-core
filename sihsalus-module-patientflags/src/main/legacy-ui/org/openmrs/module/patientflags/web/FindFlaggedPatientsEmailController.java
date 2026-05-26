@@ -61,8 +61,7 @@ public class FindFlaggedPatientsEmailController {
 		FlagService flagService = Context.getService(FlagService.class);
 		flag = flagService.getFlag(flag.getFlagId());
 		Cohort flaggedPatients = flagService.getFlaggedPatients(flag, null);
-
-		Set<Integer> patientIds = flaggedPatients.getMemberships()
+		Set<Integer> patientIds = flaggedPatients == null ? null : flaggedPatients.getMemberships()
 				.stream()
 				.map(CohortMembership::getPatientId)
 				.collect(Collectors.toSet());

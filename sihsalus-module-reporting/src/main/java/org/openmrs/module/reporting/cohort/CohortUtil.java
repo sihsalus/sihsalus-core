@@ -100,9 +100,9 @@ public class CohortUtil {
 
     Random random = new Random();
 
-    // Convert patient IDs to a list
-    List<Integer> patientIds = Arrays.asList(tempCohort.getMemberIds().toArray(new Integer[0]));
     if (tempCohort != null && !tempCohort.isEmpty()) {
+      // Convert patient IDs to a list
+      List<Integer> patientIds = Arrays.asList(tempCohort.getMemberIds().toArray(new Integer[0]));
 
       // If the "all patients" cohort is less than or equal to the desired cohort size
       // then we just use the available "all patients" cohort.

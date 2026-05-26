@@ -16,6 +16,7 @@ import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.hibernate.Session;
@@ -96,7 +97,7 @@ public class DatabaseUtil {
             "Database driver '" + connectionDriver + "' is not an allowed driver.");
       }
       Class.forName(connectionDriver);
-      log.debug("set user defined Database driver class: " + connectionDriver);
+      log.debug("set user defined Database driver class: {}", connectionDriver);
     } else {
       if (connectionUrl.contains("jdbc:mysql")) {
         Class.forName(MYSQL_DRIVER);
@@ -124,7 +125,7 @@ public class DatabaseUtil {
         connectionDriver = H2_DRIVER;
       }
     }
-    log.info("Set database driver class as " + connectionDriver);
+    log.info("Set database driver class as {}", connectionDriver);
     return connectionDriver;
   }
 
@@ -154,6 +155,9 @@ public class DatabaseUtil {
   }
 
   private static SqlExecutionPlan validateSqlForExecution(String sql, boolean selectOnly) {
+    if (!StringUtils.hasText(sql)) {
+      throw new IllegalArgumentException("SQL statement must not be empty");
+    }
     String statement = sql.trim();
     boolean dataManipulation = checkQueryForManipulationCommands(statement, selectOnly);
     return new SqlExecutionPlan(statement, dataManipulation);
@@ -162,7 +166,7 @@ public class DatabaseUtil {
   private static boolean checkQueryForManipulationCommands(String sql, boolean selectOnly) {
     boolean dataManipulation = false;
 
-    String sqlLower = sql.toLowerCase();
+    String sqlLower = sql.toLowerCase(Locale.ROOT);
     if (sqlLower.startsWith("insert")
         || sqlLower.startsWith("update")
         || sqlLower.startsWith("delete")
@@ -207,7 +211,7 @@ public class DatabaseUtil {
         }
       }
     } catch (Exception e) {
-      log.debug("Error while running sql", e);
+      log.warn("Error while running SQL", e);
       throw new DAOException("Error while running sql. Message: " + e.getMessage(), e);
     }
   }

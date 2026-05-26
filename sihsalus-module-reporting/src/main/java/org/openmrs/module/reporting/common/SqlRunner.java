@@ -145,8 +145,8 @@ public class SqlRunner {
             }
           }
         } catch (Exception e) {
-          String message = "Error executing statement:  " + e.getMessage();
-          log.error(message);
+          String message = "Error executing SQL statement: " + e.getMessage();
+          log.error(message, e);
           result.addError(message);
           throw e;
         } finally {
@@ -155,6 +155,11 @@ public class SqlRunner {
       }
       rollback(); // Always rollback, as this is only intended to support querying
     } catch (Exception e) {
+      if (result.getErrors().isEmpty()) {
+        String message = "Error executing SQL: " + e.getMessage();
+        log.error(message, e);
+        result.addError(message);
+      }
       rollback();
     } finally {
       resetAutocommit(originalAutoCommit);
@@ -189,7 +194,7 @@ public class SqlRunner {
           if (sqlStatement.equals(sqlStatements.get(sqlStatements.size() - 1))) {
             statement.setFetchSize(10);
           }
-          log.debug("Executing: {} " + validatedStatement);
+          log.debug("Executing: " + validatedStatement);
           boolean hasResultSet = statement.execute();
           ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 
@@ -197,16 +202,18 @@ public class SqlRunner {
             iterator = new ResultSetIterator(resultSet);
             statementOwnedByIterator = true;
           }
-        } catch (Exception e) {
-          throw e;
         } finally {
           if (!statementOwnedByIterator) {
             closeStatement(statement);
           }
         }
       }
+      if (iterator == null) {
+        throw new IllegalStateException("SQL execution did not return a result set");
+      }
     } catch (Exception e) {
-      log.error("An error occurred while trying to execute the query.", e);
+      rollback();
+      throw new IllegalStateException("An error occurred while trying to execute the query.", e);
     } finally {
       resetAutocommit(originalAutoCommit);
     }
