@@ -11,6 +11,7 @@ package org.openmrs.module.openconceptlab.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -242,7 +243,6 @@ public class OclClient {
     throw new IOException("Cannot find date in path " + path);
   }
 
-  @SuppressWarnings("resource")
   public static OclResponse ungzipAndUntarResponse(InputStream response, Date date)
       throws IOException {
     GZIPInputStream gzipIn = new GZIPInputStream(response);
@@ -268,7 +268,6 @@ public class OclClient {
         "Unsupported format of response. Expected tar.gz archive with export.json.");
   }
 
-  @SuppressWarnings("resource")
   public static OclResponse unzipResponse(InputStream response, Date date) throws IOException {
     ZipInputStream zip = new ZipInputStream(response);
     boolean foundEntry = false;
@@ -338,7 +337,7 @@ public class OclClient {
     return totalBytesToDownload;
   }
 
-  public static class OclResponse {
+  public static class OclResponse implements Closeable {
 
     private final InputStream in;
 
@@ -348,7 +347,7 @@ public class OclClient {
 
     public OclResponse(InputStream in, long contentLength, Date updatedTo) {
       this.in = in;
-      this.updatedTo = updatedTo;
+      this.updatedTo = copyDate(updatedTo);
       this.contentLength = contentLength;
     }
 
@@ -357,11 +356,20 @@ public class OclClient {
     }
 
     public Date getUpdatedTo() {
-      return updatedTo;
+      return copyDate(updatedTo);
     }
 
     public long getContentLength() {
       return contentLength;
+    }
+
+    @Override
+    public void close() throws IOException {
+      in.close();
+    }
+
+    private static Date copyDate(Date date) {
+      return date == null ? null : new Date(date.getTime());
     }
   }
 
