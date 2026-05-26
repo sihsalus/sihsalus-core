@@ -139,7 +139,7 @@ public class AddConceptMapTypesChangeset implements CustomTaskChange {
         log.debug("Committing inserts...");
         connection.commit();
       } catch (BatchUpdateException be) {
-        log.warn("Error generated while processsing batch insert", be);
+        log.warn("Error generated while processing batch insert", be);
         int[] updateCounts = be.getUpdateCounts();
 
         for (int updateCount : updateCounts) {

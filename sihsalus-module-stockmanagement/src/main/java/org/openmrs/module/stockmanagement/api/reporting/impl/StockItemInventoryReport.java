@@ -370,10 +370,11 @@ public class StockItemInventoryReport<T extends StockItemInventory> extends Repo
     if (shouldStopExecution.apply(batchJob)) {
       return null;
     }
+    int bufferSize = stockInventoryResult.getData().size();
     writeRows(stockInventoryResult.getData(), includeBatchInfo, includeLocationInfo);
     stockInventoryResult.clearData();
     csvWriter.flush();
-    recordsProcessed += stockInventoryResult.getData().size();
+    recordsProcessed += bufferSize;
     updateExecutionState(
         batchJob,
         executionState,

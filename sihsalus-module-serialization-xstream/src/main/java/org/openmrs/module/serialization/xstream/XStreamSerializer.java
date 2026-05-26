@@ -147,12 +147,12 @@ public class XStreamSerializer implements OpenmrsSerializer {
     xstream.omitField(User.class, "log");
 
     /*
-     * alias className for all classses current need to serialize
+     * alias className for all classes current need to serialize
      */
     this.commonConfig();
 
     // CustomReflectionConverter to avoid the exception thrown when xstream deserialize a unknown
-    // elment
+    // element
     xstream.registerConverter(
         new CustomReflectionConverter(xstream.getMapper(), xstream.getReflectionProvider()),
         xstream.PRIORITY_LOW);
