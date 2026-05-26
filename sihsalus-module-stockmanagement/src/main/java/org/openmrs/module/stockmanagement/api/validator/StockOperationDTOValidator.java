@@ -64,7 +64,7 @@ public class StockOperationDTOValidator implements Validator {
     if (object.getOperationDate() == null) {
       errors.rejectValue(
           "operationDate",
-          messageSourceService.getMessage("stockmanagement.stockoperation.sourcerequired"));
+          messageSourceService.getMessage("stockmanagement.stockoperation.operationdaterequired"));
       return;
     }
 
@@ -135,11 +135,6 @@ public class StockOperationDTOValidator implements Validator {
           return;
         }
       }
-    } else if (object.getDestinationUuid() != null) {
-      errors.rejectValue(
-          "destinationUuid",
-          messageSourceService.getMessage("stockmanagement.stockoperation.destinationnotrequired"));
-      return;
     }
 
     if (stockOperationType.getHasDestination() != null && stockOperationType.getHasDestination()) {
@@ -209,14 +204,13 @@ public class StockOperationDTOValidator implements Validator {
 
     if (stockOperationType.requiresReason() && StringUtils.isBlank(object.getReasonUuid())) {
       errors.rejectValue(
-          "operationTypeUuid",
-          messageSourceService.getMessage("stockmanagement.stockoperation.noreason"));
+          "reasonUuid", messageSourceService.getMessage("stockmanagement.stockoperation.noreason"));
       return;
     }
 
     if (object.getStockOperationItems() == null || object.getStockOperationItems().isEmpty()) {
       errors.rejectValue(
-          "operationTypeUuid",
+          "stockOperationItems",
           messageSourceService.getMessage("stockmanagement.stockoperation.itemsrequired"));
       return;
     }
@@ -224,15 +218,15 @@ public class StockOperationDTOValidator implements Validator {
 
     if (permissionLocation == null) {
       errors.rejectValue(
-          "operationTypeUuid",
-          messageSourceService.getMessage("stockmanagement.stockoperation.nopermission"));
+          "atLocationUuid",
+          messageSourceService.getMessage("stockmanagement.stockoperation.locationrequired"));
       return;
     }
 
     object.setAtLocationUuid(permissionLocation.getUuid());
     if (!stockOperationType.userCanProcess(Context.getAuthenticatedUser(), permissionLocation)) {
       errors.rejectValue(
-          "operationTypeUuid",
+          "atLocationUuid",
           messageSourceService.getMessage("stockmanagement.stockoperation.nopermission"));
       return;
     }

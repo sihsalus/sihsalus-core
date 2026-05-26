@@ -16,7 +16,7 @@ public class PrescriptionLineFilter extends ReportFilter {
 
   private Integer drugId;
 
-  private List<Fullfillment> fullfillments;
+  private List<Fulfillment> fullfillments;
 
   public Integer getPrescriptionTransactionMin() {
     return prescriptionTransactionMin;
@@ -67,11 +67,11 @@ public class PrescriptionLineFilter extends ReportFilter {
     this.observationDrugConceptId = observationDrugConceptId;
   }
 
-  public List<Fullfillment> getFullfillments() {
+  public List<Fulfillment> getFullfillments() {
     return fullfillments;
   }
 
-  public void setFullfillments(List<Fullfillment> fullfillments) {
+  public void setFullfillments(List<Fulfillment> fullfillments) {
     this.fullfillments = fullfillments;
   }
 }

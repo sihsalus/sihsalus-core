@@ -60,7 +60,7 @@ public class StockItemImportJob {
 
   private int REORDER_LEVEL = 11;
 
-  private int REORDER_LVEL_PUOM = 12;
+  private int REORDER_LEVEL_PUOM = 12;
 
   private int PURCHASE_PRICE = 13;
 
@@ -280,11 +280,11 @@ public class StockItemImportJob {
       }
     }
 
-    if (line.length > REORDER_LVEL_PUOM && !isBlank(line[REORDER_LVEL_PUOM])) {
+    if (line.length > REORDER_LEVEL_PUOM && !isBlank(line[REORDER_LEVEL_PUOM])) {
       try {
-        int value = Integer.parseInt(line[REORDER_LVEL_PUOM]);
+        int value = Integer.parseInt(line[REORDER_LEVEL_PUOM]);
         if (value > 0) {
-          objects[REORDER_LVEL_PUOM] = value;
+          objects[REORDER_LEVEL_PUOM] = value;
         } else {
           errors.add(
               Context.getMessageSourceService()
@@ -297,8 +297,8 @@ public class StockItemImportJob {
       }
     }
 
-    if ((objects[REORDER_LEVEL] != null || objects[REORDER_LVEL_PUOM] != null)
-        && (objects[REORDER_LEVEL] == null || objects[REORDER_LVEL_PUOM] == null)) {
+    if ((objects[REORDER_LEVEL] != null || objects[REORDER_LEVEL_PUOM] != null)
+        && (objects[REORDER_LEVEL] == null || objects[REORDER_LEVEL_PUOM] == null)) {
       errors.add(
           Context.getMessageSourceService()
               .getMessage("stockmanagement.importoperation.reorderlevelanduomrequired"));
@@ -453,7 +453,7 @@ public class StockItemImportJob {
                         p.getValue()[CONCEPT_ID],
                         p.getValue()[DISPENSING_UNIT],
                         p.getValue()[DISPENSING_PUOM],
-                        p.getValue()[REORDER_LVEL_PUOM],
+                        p.getValue()[REORDER_LEVEL_PUOM],
                         p.getValue()[PURCHASE_PRICE_PUOM],
                         p.getValue()[CATEGORY]))
             .flatMap(Collection::stream)
@@ -498,11 +498,11 @@ public class StockItemImportJob {
                                 && updates[DISPENSING_PUOM] != null) {
                               conceptIdsForUom.add((Integer) updates[DISPENSING_PUOM]);
                             }
-                            if (REORDER_LVEL_PUOM < updates.length
-                                && updates[REORDER_LVEL_PUOM] != null) {
+                            if (REORDER_LEVEL_PUOM < updates.length
+                                && updates[REORDER_LEVEL_PUOM] != null) {
                               if (conceptIdsForUom.isEmpty()
-                                  || !conceptIdsForUom.get(0).equals(updates[REORDER_LVEL_PUOM])) {
-                                conceptIdsForUom.add((Integer) updates[REORDER_LVEL_PUOM]);
+                                  || !conceptIdsForUom.get(0).equals(updates[REORDER_LEVEL_PUOM])) {
+                                conceptIdsForUom.add((Integer) updates[REORDER_LEVEL_PUOM]);
                               }
                             }
 
@@ -836,14 +836,14 @@ public class StockItemImportJob {
           if (!stockSourcesInDb.isEmpty()) {
             stockSource = stockSourcesInDb.get(0);
             for (StockSource stockSourceInDb : stockSourcesInDb) {
-              String nameNomalized = normalizedCacheKey(stockSourceInDb.getName());
-              String acronymNomalized = normalizedCacheKey(stockSourceInDb.getAcronym());
+              String nameNormalized = normalizedCacheKey(stockSourceInDb.getName());
+              String acronymNormalized = normalizedCacheKey(stockSourceInDb.getAcronym());
               stockSource = stockSourceInDb;
-              if (nameNomalized.equals(acronymNomalized)) {
-                stockSources.put(nameNomalized, stockSource);
+              if (nameNormalized.equals(acronymNormalized)) {
+                stockSources.put(nameNormalized, stockSource);
               } else {
-                stockSources.put(nameNomalized, stockSource);
-                stockSources.put(acronymNomalized, stockSource);
+                stockSources.put(nameNormalized, stockSource);
+                stockSources.put(acronymNormalized, stockSource);
               }
             }
           }
@@ -889,8 +889,8 @@ public class StockItemImportJob {
         }
       }
 
-      if (REORDER_LVEL_PUOM < updates.length && updates[REORDER_LVEL_PUOM] != null) {
-        List<Concept> conceptCollection = concepts.get(updates[REORDER_LVEL_PUOM]);
+      if (REORDER_LEVEL_PUOM < updates.length && updates[REORDER_LEVEL_PUOM] != null) {
+        List<Concept> conceptCollection = concepts.get(updates[REORDER_LEVEL_PUOM]);
         if (conceptCollection == null || conceptCollection.isEmpty()) {
           result
               .getErrors()
@@ -901,7 +901,7 @@ public class StockItemImportJob {
                       String.format(
                           Context.getMessageSourceService()
                               .getMessage("stockmanagement.importoperation.conceptnofound"),
-                          updates[REORDER_LVEL_PUOM].toString())));
+                          updates[REORDER_LEVEL_PUOM].toString())));
           continue;
         }
 
@@ -912,7 +912,7 @@ public class StockItemImportJob {
                     p ->
                         p.getPackagingUom()
                             .getConceptId()
-                            .equals((Integer) updates[REORDER_LVEL_PUOM]))
+                            .equals((Integer) updates[REORDER_LEVEL_PUOM]))
                 .findFirst();
         if (uomOptional.isPresent()) {
           uom = uomOptional.get();
@@ -920,7 +920,7 @@ public class StockItemImportJob {
 
         if (uom == null) {
           if (updates[DISPENSING_PUOM] != null
-              && updates[DISPENSING_PUOM].equals(updates[REORDER_LVEL_PUOM])) {
+              && updates[DISPENSING_PUOM].equals(updates[REORDER_LEVEL_PUOM])) {
             uom = dispensingStockItemPackagingUOM;
           } else {
             result
@@ -933,7 +933,7 @@ public class StockItemImportJob {
                             Context.getMessageSourceService()
                                 .getMessage(
                                     "stockmanagement.importoperation.packagingunitwithconceptnoyfound"),
-                            updates[REORDER_LVEL_PUOM].toString())));
+                            updates[REORDER_LEVEL_PUOM].toString())));
             continue;
           }
         }
