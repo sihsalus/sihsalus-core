@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.emrapi.disposition;
 
-import java.io.IOException;
 import java.util.List;
 import org.openmrs.EncounterType;
 import org.openmrs.Obs;
@@ -44,7 +43,6 @@ public interface DispositionService {
    * Gets all the currently configured dispositions
    *
    * @return
-   * @throws IOException
    */
   List<Disposition> getDispositions();
 
@@ -70,7 +68,6 @@ public interface DispositionService {
    *
    * @param uniqueId
    * @return
-   * @throws IOException
    */
   Disposition getDispositionByUniqueId(String uniqueId);
 
@@ -87,7 +84,6 @@ public interface DispositionService {
    *
    * @param obs
    * @return
-   * @throws IOException
    */
   Disposition getDispositionFromObs(Obs obs);
 
@@ -96,7 +92,6 @@ public interface DispositionService {
    *
    * @param obsGroup
    * @return
-   * @throws IOException
    */
   Disposition getDispositionFromObsGroup(Obs obsGroup);
 }

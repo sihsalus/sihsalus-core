@@ -393,7 +393,8 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                       Set<String> sectionExcludedQuestions = new HashSet<>(pageExcludedQuestions);
 
                       if (sectionMap.containsKey(SCHEMA_KEY_REFERENCE)) {
-                        Map<?, ?> referenceMap = getReferenceObjectFromItem(sectionMap).orElse(null);
+                        Map<?, ?> referenceMap =
+                            getReferenceObjectFromItem(sectionMap).orElse(null);
                         sectionMap.clear();
 
                         if (referenceMap == null) {

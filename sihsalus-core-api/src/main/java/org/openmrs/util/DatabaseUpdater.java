@@ -404,7 +404,9 @@ public class DatabaseUpdater {
       }
     } finally {
       try {
-        propertyStream.close();
+        if (propertyStream != null) {
+          propertyStream.close();
+        }
       } catch (Exception e) {
         // pass
       }
@@ -453,6 +455,9 @@ public class DatabaseUpdater {
       throw new Exception(
           "Unable to get a connection to the database.  Please check your openmrs runtime properties file and make sure you have the correct connection.username and connection.password set",
           e);
+    }
+    if (connection == null) {
+      throw new Exception("Unable to get a connection to the database.");
     }
 
     if (cl == null) {
@@ -767,11 +772,7 @@ public class DatabaseUpdater {
               + e.getMessage(),
           e);
     } finally {
-      try {
-        database.getConnection().close();
-      } catch (Exception e) {
-        // pass
-      }
+      closeDatabaseConnection(database);
     }
   }
 
@@ -865,13 +866,7 @@ public class DatabaseUpdater {
     } catch (Exception e) {
       throw new LockException(e);
     } finally {
-      try {
-        if (database != null && database.getConnection() != null) {
-          database.getConnection().close();
-        }
-      } catch (Exception e) {
-        // pass
-      }
+      closeDatabaseConnection(database);
     }
   }
 
@@ -890,11 +885,17 @@ public class DatabaseUpdater {
     } catch (Exception e) {
       return false;
     } finally {
-      try {
+      closeDatabaseConnection(database);
+    }
+  }
+
+  private static void closeDatabaseConnection(Database database) {
+    try {
+      if (database != null && database.getConnection() != null) {
         database.getConnection().close();
-      } catch (Exception e) {
-        // pass
       }
+    } catch (Exception e) {
+      // pass
     }
   }
 

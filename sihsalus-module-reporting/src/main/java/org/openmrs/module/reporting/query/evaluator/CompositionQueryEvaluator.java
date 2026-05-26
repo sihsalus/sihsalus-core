@@ -206,7 +206,7 @@ public abstract class CompositionQueryEvaluator<Q extends Query<T>, T extends Op
       }
       while (st.nextToken() != StreamTokenizer.TT_EOF) {
         if (st.ttype == StreamTokenizer.TT_NUMBER) {
-          Integer thisInt = (int) st.nval;
+          int thisInt = (int) st.nval;
           if (thisInt < 1) {
             throw new IllegalArgumentException("Invalid number < 1 found");
           }

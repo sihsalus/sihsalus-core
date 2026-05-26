@@ -199,7 +199,7 @@ public class EvaluationUtil {
               if (op != '+' && op != '-') {
                 throw new IllegalArgumentException("Dates only support the + and - operators");
               }
-              Integer numAsInt;
+              int numAsInt;
               try {
                 numAsInt = Integer.parseInt(number);
               } catch (NumberFormatException ex) {
@@ -234,7 +234,7 @@ public class EvaluationUtil {
                 throw new IllegalArgumentException("Can't specify units in a non-date expression");
               }
               if (paramValueToFormat instanceof Integer && isWholeNumber(number)) {
-                Integer parsed = Integer.parseInt(number);
+                int parsed = Integer.parseInt(number);
                 if (op == '+') {
                   paramValueToFormat = ((Integer) paramValueToFormat) + parsed;
                 } else if (op == '-') {
@@ -248,7 +248,7 @@ public class EvaluationUtil {
                 }
               } else {
                 // since one or both are decimal values, do double arithmetic
-                Double parsed = Double.parseDouble(number);
+                double parsed = Double.parseDouble(number);
                 if (op == '+') {
                   paramValueToFormat = ((Number) paramValueToFormat).doubleValue() + parsed;
                 } else if (op == '-') {

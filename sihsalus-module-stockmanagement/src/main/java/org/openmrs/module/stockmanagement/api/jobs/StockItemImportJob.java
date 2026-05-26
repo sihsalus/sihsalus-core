@@ -102,7 +102,7 @@ public class StockItemImportJob {
     }
     if (!isBlank(line[DRUG_ID])) {
       try {
-        Integer value = Integer.parseInt(line[DRUG_ID]);
+        int value = Integer.parseInt(line[DRUG_ID]);
         if (value > 0) {
           objects[DRUG_ID] = value;
         } else {
@@ -119,7 +119,7 @@ public class StockItemImportJob {
 
     if (objects[DRUG_ID] == null && !isBlank(line[CONCEPT_ID])) {
       try {
-        Integer value = Integer.parseInt(line[CONCEPT_ID]);
+        int value = Integer.parseInt(line[CONCEPT_ID]);
         if (value > 0) {
           objects[CONCEPT_ID] = value;
         } else {
@@ -157,7 +157,7 @@ public class StockItemImportJob {
 
     if (!isBlank(line[EXPIRY_NOTICE])) {
       try {
-        Integer value = Integer.parseInt(line[EXPIRY_NOTICE]);
+        int value = Integer.parseInt(line[EXPIRY_NOTICE]);
         if (value > 0) {
           objects[EXPIRY_NOTICE] = value;
         } else {
@@ -174,7 +174,7 @@ public class StockItemImportJob {
 
     if (!isBlank(line[CATEGORY])) {
       try {
-        Integer value = Integer.parseInt(line[CATEGORY]);
+        int value = Integer.parseInt(line[CATEGORY]);
         if (value > 0) {
           objects[CATEGORY] = value;
         } else {
@@ -191,7 +191,7 @@ public class StockItemImportJob {
 
     if (line.length > DISPENSING_UNIT && !isBlank(line[DISPENSING_UNIT])) {
       try {
-        Integer value = Integer.parseInt(line[DISPENSING_UNIT]);
+        int value = Integer.parseInt(line[DISPENSING_UNIT]);
         if (value > 0) {
           objects[DISPENSING_UNIT] = value;
         } else {
@@ -208,7 +208,7 @@ public class StockItemImportJob {
 
     if (line.length > DISPENSING_PUOM && !isBlank(line[DISPENSING_PUOM])) {
       try {
-        Integer value = Integer.parseInt(line[DISPENSING_PUOM]);
+        int value = Integer.parseInt(line[DISPENSING_PUOM]);
         if (value > 0) {
           objects[DISPENSING_PUOM] = value;
         } else {
@@ -282,7 +282,7 @@ public class StockItemImportJob {
 
     if (line.length > REORDER_LVEL_PUOM && !isBlank(line[REORDER_LVEL_PUOM])) {
       try {
-        Integer value = Integer.parseInt(line[REORDER_LVEL_PUOM]);
+        int value = Integer.parseInt(line[REORDER_LVEL_PUOM]);
         if (value > 0) {
           objects[REORDER_LVEL_PUOM] = value;
         } else {
@@ -323,7 +323,7 @@ public class StockItemImportJob {
 
     if (line.length > PURCHASE_PRICE_PUOM && !isBlank(line[PURCHASE_PRICE_PUOM])) {
       try {
-        Integer value = Integer.parseInt(line[PURCHASE_PRICE_PUOM]);
+        int value = Integer.parseInt(line[PURCHASE_PRICE_PUOM]);
         if (value > 0) {
           objects[PURCHASE_PRICE_PUOM] = value;
         } else {
@@ -471,10 +471,10 @@ public class StockItemImportJob {
     Map<String, StockSource> stockSources = new HashMap<>();
     Concept unknownConcept = null;
 
-    Map<Integer, List<StockItem>> stockItemsToUpdate = null;
-    Map<Integer, List<StockItemPackagingUOM>> stockItemPackagingUoms = null;
-    Map<Integer, StockItem> prevStockItemDrugs = null;
-    Map<Integer, StockItem> prevStockItemConcepts = null;
+    Map<Integer, List<StockItem>> stockItemsToUpdate = Collections.emptyMap();
+    Map<Integer, List<StockItemPackagingUOM>> stockItemPackagingUoms = Collections.emptyMap();
+    Map<Integer, StockItem> prevStockItemDrugs = new HashMap<>();
+    Map<Integer, StockItem> prevStockItemConcepts = new HashMap<>();
 
     if (!rowsToUpdate.isEmpty()) {
       stockItemsToUpdate =
@@ -525,11 +525,6 @@ public class StockItemImportJob {
                       .collect(Collectors.toList()))
               .stream()
               .collect(Collectors.groupingBy(p -> p.getStockItem().getId()));
-    }
-
-    if (!rowsToCreate.isEmpty()) {
-      prevStockItemDrugs = new HashMap<>();
-      prevStockItemConcepts = new HashMap<>();
     }
 
     for (Map.Entry<Integer, Object[]> recordToProcess : stockItems.entrySet()) {
@@ -649,7 +644,7 @@ public class StockItemImportJob {
         }
         List<StockItem> stockItemCollection =
             stockItemsToUpdate.getOrDefault(stockItemDto.get().getId(), null);
-        if (stockItemCollection != null) {
+        if (stockItemCollection != null && !stockItemCollection.isEmpty()) {
           stockItem = stockItemCollection.get(0);
         }
       }

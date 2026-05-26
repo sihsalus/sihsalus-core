@@ -203,7 +203,7 @@ public class CohortExpressionParser {
       }
       while (st.nextToken() != StreamTokenizer.TT_EOF) {
         if (st.ttype == StreamTokenizer.TT_NUMBER) {
-          Integer thisInt = Integer.valueOf((int) st.nval);
+          int thisInt = (int) st.nval;
           if (thisInt < 1) {
             log.error("number < 1");
             return null;

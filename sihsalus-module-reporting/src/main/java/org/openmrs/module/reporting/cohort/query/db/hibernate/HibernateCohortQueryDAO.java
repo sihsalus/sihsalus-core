@@ -730,10 +730,10 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
       bindQueryParameters(query, paramMap);
 
     } catch (Exception e) {
-      log.error(
-          "Error while preparing sql query " + query.getQueryString() + ": " + e.getMessage());
+      String queryString = query == null ? sqlQuery : query.getQueryString();
+      log.error("Error while preparing sql query " + queryString + ": " + e.getMessage());
       throw new ReportingException(
-          "Error while preparing sql query " + query.getQueryString() + ": " + e.getMessage(), e);
+          "Error while preparing sql query " + queryString + ": " + e.getMessage(), e);
     }
     return query;
   }

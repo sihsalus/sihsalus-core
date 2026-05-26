@@ -16,7 +16,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -195,11 +194,7 @@ public class ReportUtil {
     }
   }
 
-  /**
-   * Looks up a resource on the class path, and returns a RenderingMode based on it
-   *
-   * @throws UnsupportedEncodingException
-   */
+  /** Looks up a resource on the class path, and returns a RenderingMode based on it */
   public static RenderingMode renderingModeFromResource(String label, String resourceName) {
     final ReportDesign design = new ReportDesign();
     ReportDesignResource resource = new ReportDesignResource();

@@ -598,7 +598,7 @@ public class ConceptServiceImpl extends BaseOpenmrsService implements ConceptSer
     List<Drug> drugs = new ArrayList<>();
     // trying to treat search phrase as drug id
     try {
-      Integer drugId = Integer.parseInt(phrase);
+      int drugId = Integer.parseInt(phrase);
       Drug targetDrug = Context.getConceptService().getDrug(drugId);
       // if drug was found add it to result
       if (targetDrug != null) {
@@ -610,7 +610,7 @@ public class ConceptServiceImpl extends BaseOpenmrsService implements ConceptSer
 
     // also try to treat search phrase as drug concept id
     try {
-      Integer conceptId = Integer.parseInt(phrase);
+      int conceptId = Integer.parseInt(phrase);
       Concept targetConcept = Context.getConceptService().getConcept(conceptId);
       if (targetConcept != null) {
         drugs.addAll(Context.getConceptService().getDrugsByConcept(targetConcept));

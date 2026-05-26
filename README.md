@@ -91,6 +91,15 @@ mvn -pl sihsalus-core-api -am spotless:check -Dspotbugs.failOnError=false com.gi
 mvn -pl sihsalus-core-api -am -DskipITs test
 ```
 
+Liquibase dry-run and migration review:
+
+```bash
+SIHSALUS_POSTGRES_PASSWORD='<set-a-long-local-db-secret>' ./scripts/liquibase-dry-run.sh --status
+SIHSALUS_POSTGRES_PASSWORD='<set-a-long-local-db-secret>' ./scripts/liquibase-dry-run.sh --sql
+```
+
+The dry-run procedure is documented in `docs/database-migrations.md`.
+
 This branch does not include `./mvnw`, so use `mvn` directly.
 
 Modernization and technical-debt cleanup priorities are documented in

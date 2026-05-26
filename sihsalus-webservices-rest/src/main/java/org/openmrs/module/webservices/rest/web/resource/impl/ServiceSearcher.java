@@ -48,7 +48,7 @@ public class ServiceSearcher<T> {
   public AlreadyPaged<T> search(String query, RequestContext context) {
     OpenmrsService service = Context.getService(serviceClass);
     List<T> results;
-    Integer count;
+    int count;
     results = doPagedSearch(service, query, context);
     count = doCount(service, query, context);
     boolean hasMore = count > context.getStartIndex() + context.getLimit();

@@ -183,7 +183,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
                     "Preferred name '"
                         + nameInLocale.getName()
                         + "' in locale '"
-                        + conceptNameLocale.getDisplayName()
+                        + getDisplayName(conceptNameLocale)
                         + "' has been dropped as the preferred name because it is a search term");
               } else if (nameInLocale.isShort()) {
                 nameInLocale.setLocalePreferred(false);
@@ -192,7 +192,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
                     "Preferred name '"
                         + nameInLocale.getName()
                         + "' in locale '"
-                        + conceptNameLocale.getDisplayName()
+                        + getDisplayName(conceptNameLocale)
                         + "' has been dropped as the preferred name because it is a short name");
               } else {
                 preferredNameForLocaleFound = true;
@@ -207,7 +207,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
                   "Preferred name '"
                       + nameInLocale.getName()
                       + "' in locale '"
-                      + conceptNameLocale.getDisplayName()
+                      + getDisplayName(conceptNameLocale)
                       + "' has been dropped as the preferred name because there is already another preferred name in the same locale");
             }
           } else {
@@ -218,7 +218,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
                 "The locale preferred property of name '"
                     + nameInLocale.getName()
                     + "' in locale '"
-                    + conceptNameLocale.getDisplayName()
+                    + getDisplayName(conceptNameLocale)
                     + "' has been updated to false from null");
           }
 
@@ -235,7 +235,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
                   "The name '"
                       + nameInLocale.getName()
                       + "' in locale '"
-                      + conceptNameLocale.getDisplayName()
+                      + getDisplayName(conceptNameLocale)
                       + "' has been converted from fully specified to a synonym");
             }
           }
@@ -252,7 +252,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
                   "The name '"
                       + nameInLocale.getName()
                       + "' in locale '"
-                      + conceptNameLocale.getDisplayName()
+                      + getDisplayName(conceptNameLocale)
                       + "' has been converted from a short name to a synonym");
             }
           }
@@ -290,7 +290,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
                   + "' was found multiple times for the concept with id '"
                   + conceptId
                   + "' in locale '"
-                  + conceptNameLocale.getDisplayName()
+                  + getDisplayName(conceptNameLocale)
                   + "'");
         }
 
@@ -865,6 +865,10 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
         log.warn("Failed to close {}", resourceName, e);
       }
     }
+  }
+
+  private String getDisplayName(Locale locale) {
+    return locale == null ? "null" : locale.getDisplayName();
   }
 
   /**

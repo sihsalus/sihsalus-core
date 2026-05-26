@@ -628,7 +628,7 @@ public class HL7ServiceImpl extends BaseOpenmrsService implements HL7Service, Re
               String idType = identifier.getIdentifierTypeCode().getValue();
               try {
                 if (idType.equals(HL7Constants.HL7_ID_PERSON)) {
-                  Integer pid = Integer.parseInt(hl7PersonId);
+                  int pid = Integer.parseInt(hl7PersonId);
                   // patient_id == person_id, so just look for
                   // the person
                   Person p = Context.getPersonService().getPerson(pid);
@@ -636,7 +636,7 @@ public class HL7ServiceImpl extends BaseOpenmrsService implements HL7Service, Re
                     return p;
                   }
                 } else if (idType.equals(HL7Constants.HL7_ID_PATIENT)) {
-                  Integer pid = Integer.parseInt(hl7PersonId);
+                  int pid = Integer.parseInt(hl7PersonId);
                   // patient_id == person_id, so just look for
                   // the person
                   Patient p = Context.getPatientService().getPatient(pid);

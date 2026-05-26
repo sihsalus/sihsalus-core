@@ -4570,18 +4570,30 @@ public final class StaticSihsalusContentLoader {
     if (isBlank(value)) {
       return null;
     }
-    return Integer.valueOf(value.trim());
+    try {
+      return Integer.valueOf(value.trim());
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException("Invalid integer value: " + value, e);
+    }
   }
 
   private Double toDouble(String value) {
     if (isBlank(value)) {
       return null;
     }
-    return Double.valueOf(value.trim());
+    try {
+      return Double.valueOf(value.trim());
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException("Invalid decimal value: " + value, e);
+    }
   }
 
   private Integer requiredInteger(CsvRecord record, String header) {
-    return Integer.valueOf(requiredValue(record, header));
+    try {
+      return Integer.valueOf(requiredValue(record, header));
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException(header + " must be an integer in " + record.source + ".", e);
+    }
   }
 
   private String requiredValue(CsvRecord record, String header) {

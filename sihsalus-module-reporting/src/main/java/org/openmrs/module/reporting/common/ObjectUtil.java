@@ -582,7 +582,7 @@ public class ObjectUtil {
     if (o instanceof OpenmrsObject) {
       return nullSafeToString((OpenmrsObject) o);
     }
-    return o.toString();
+    return o == null ? null : o.toString();
   }
 
   public static String getNameOfCurrentUser() {

@@ -62,7 +62,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
     log.debug("Fetching the rules");
     StockManagementService stockManagementService =
         Context.getService(StockManagementService.class);
-    Integer lastStockRuleId = 0;
+    int lastStockRuleId = 0;
     int batchSize = GlobalProperties.getStockRuleJobBatchSize().intValue();
     List<StockRuleNotificationUser> rules = new ArrayList<>();
     boolean hasMoreResults = false;

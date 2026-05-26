@@ -45,7 +45,7 @@ public class AddressHierarchyImportUtil {
     String line;
 
     // to let us know if we even need to query the database (to speed up performance)
-    Boolean hasExistingEntries = ahService.getAddressHierarchyEntryCount() > 0 ? true : false;
+    boolean hasExistingEntries = ahService.getAddressHierarchyEntryCount() > 0;
 
     // a cache we use to speed up performance
     Map<AddressHierarchyEntry, Map<String, AddressHierarchyEntry>> entryCache =

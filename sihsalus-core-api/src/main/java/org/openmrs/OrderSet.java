@@ -134,7 +134,7 @@ public class OrderSet extends BaseCustomizableMetadata<OrderSetAttribute> {
   }
 
   private Integer findListIndexForGivenPosition(Integer position) {
-    Integer size = getOrderSetMembers().size();
+    int size = getOrderSetMembers().size();
     if (position != null) {
       if (position < 0 && position >= (-1 - size)) {
         position = position + size + 1;

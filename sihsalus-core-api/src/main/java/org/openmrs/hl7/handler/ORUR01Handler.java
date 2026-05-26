@@ -423,7 +423,7 @@ public class ORUR01Handler implements Application {
     }
 
     // get the type ID
-    Integer relTypeId;
+    int relTypeId;
     try {
       relTypeId = Integer.parseInt(relIdentifier.substring(0, relIdentifier.length() - 1));
     } catch (NumberFormatException e) {
@@ -1208,7 +1208,7 @@ public class ORUR01Handler implements Application {
     if (id != null) {
 
       try {
-        Integer formId = Integer.parseInt(id);
+        int formId = Integer.parseInt(id);
         form = Context.getFormService().getForm(formId);
       } catch (NumberFormatException e) {
         throw new HL7Exception(
@@ -1307,7 +1307,7 @@ public class ORUR01Handler implements Application {
           break;
         }
       }
-      Integer newLocationId = Integer.parseInt(dischargeToLocation);
+      int newLocationId = Integer.parseInt(dischargeToLocation);
       // Hydrate a full patient object from patient object containing only
       // identifier
       patient = Context.getPatientService().getPatient(patient.getPatientId());
@@ -1327,9 +1327,9 @@ public class ORUR01Handler implements Application {
       PersonAttribute currentHealthCenter = patient.getAttribute("Health Center");
 
       if (currentHealthCenter == null
-          || !newLocationId.toString().equals(currentHealthCenter.getValue())) {
+          || !Integer.toString(newLocationId).equals(currentHealthCenter.getValue())) {
         PersonAttribute newHealthCenter =
-            new PersonAttribute(healthCenterAttrType, newLocationId.toString());
+            new PersonAttribute(healthCenterAttrType, Integer.toString(newLocationId));
 
         log.debug(
             "Updating patient's location from " + currentHealthCenter + " to " + newLocationId);

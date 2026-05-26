@@ -485,7 +485,7 @@ public class HibernateOrderDAO implements OrderDAO {
           new Object[] {OpenmrsConstants.GP_NEXT_ORDER_NUMBER_SEED});
     }
 
-    Long gpNumericValue;
+    long gpNumericValue;
     try {
       gpNumericValue = Long.parseLong(gpTextValue);
     } catch (NumberFormatException ex) {

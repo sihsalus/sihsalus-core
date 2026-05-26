@@ -387,7 +387,7 @@ public class ImportServiceImpl extends BaseOpenmrsService implements ImportServi
 
     String days = adminService.getGlobalProperty(OpenConceptLabConstants.GP_SCHEDULED_DAYS);
     if (!StringUtils.isBlank(days)) {
-      subscription.setDays(Integer.valueOf(days));
+      subscription.setDays(parseIntegerProperty(OpenConceptLabConstants.GP_SCHEDULED_DAYS, days));
     }
 
     String subscribedToSnapshot =
@@ -402,11 +402,20 @@ public class ImportServiceImpl extends BaseOpenmrsService implements ImportServi
             "Time in the wrong format. Expected 'HH:mm', given: " + time);
       }
 
-      subscription.setHours(Integer.valueOf(formattedTime[0]));
-      subscription.setMinutes(Integer.valueOf(formattedTime[1]));
+      subscription.setHours(parseIntegerProperty(OpenConceptLabConstants.GP_SCHEDULED_TIME, formattedTime[0]));
+      subscription.setMinutes(parseIntegerProperty(OpenConceptLabConstants.GP_SCHEDULED_TIME, formattedTime[1]));
     }
 
     return subscription;
+  }
+
+  private Integer parseIntegerProperty(String propertyName, String value) {
+    try {
+      return Integer.valueOf(value);
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException(
+          "Invalid integer value for global property " + propertyName + ": " + value, e);
+    }
   }
 
   private DbSession getSession() {

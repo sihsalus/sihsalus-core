@@ -34,7 +34,7 @@ import org.openmrs.module.reporting.report.util.ReportUtil;
 /** Executes a SQL script */
 public class SqlRunner {
 
-  private static Log log = LogFactory.getLog(SqlRunner.class);
+  private static final Log log = LogFactory.getLog(SqlRunner.class);
 
   // Regular expression to identify a change in the delimiter.  This ignores spaces, allows
   // delimiter in comment, allows an equals-sign
@@ -119,12 +119,13 @@ public class SqlRunner {
 
       for (String sqlStatement : sqlStatements) {
         PreparedStatement statement = null;
+        ResultSet resultSet = null;
         try {
           ValidatedSqlStatement validatedStatement = validateReadOnlyStatement(sqlStatement);
           statement = prepareStatement(validatedStatement);
           log.debug("Executing: " + validatedStatement);
           boolean hasResultSet = statement.execute();
-          ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
+          resultSet = hasResultSet ? statement.getResultSet() : null;
 
           if (resultSet != null) {
             ResultSetMetaData rsmd = resultSet.getMetaData();
@@ -150,6 +151,7 @@ public class SqlRunner {
           result.addError(message);
           throw e;
         } finally {
+          closeResultSet(resultSet);
           closeStatement(statement);
         }
       }
@@ -228,6 +230,16 @@ public class SqlRunner {
       }
     } catch (Exception e) {
       log.warn("An error occurred while trying to close a statement", e);
+    }
+  }
+
+  protected void closeResultSet(ResultSet resultSet) {
+    try {
+      if (resultSet != null) {
+        resultSet.close();
+      }
+    } catch (Exception e) {
+      log.warn("An error occurred while trying to close a result set", e);
     }
   }
 

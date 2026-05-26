@@ -136,7 +136,8 @@ public class DispositionDescriptor extends ConceptSetDescriptor {
   public Location getAdmissionLocation(Obs obsGroup, LocationService locationService) {
     Obs admissionLocationObs = getAdmissionLocationObs(obsGroup);
     if (admissionLocationObs != null) {
-      return locationService.getLocation(Integer.valueOf(admissionLocationObs.getValueText()));
+      Integer locationId = parseLocationId(admissionLocationObs.getValueText());
+      return locationId == null ? null : locationService.getLocation(locationId);
     } else {
       return null;
     }
@@ -145,8 +146,17 @@ public class DispositionDescriptor extends ConceptSetDescriptor {
   public Location getInternalTransferLocation(Obs obsGroup, LocationService locationService) {
     Obs transferLocationObs = getInternalTransferLocationObs(obsGroup);
     if (transferLocationObs != null) {
-      return locationService.getLocation(Integer.valueOf(transferLocationObs.getValueText()));
+      Integer locationId = parseLocationId(transferLocationObs.getValueText());
+      return locationId == null ? null : locationService.getLocation(locationId);
     } else {
+      return null;
+    }
+  }
+
+  private Integer parseLocationId(String valueText) {
+    try {
+      return valueText == null ? null : Integer.valueOf(valueText);
+    } catch (NumberFormatException e) {
       return null;
     }
   }

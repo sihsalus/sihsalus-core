@@ -315,7 +315,7 @@ public class BatchJobValidator implements Validator {
         return false;
       }
       try {
-        Integer uInt = Integer.parseInt(value);
+        int uInt = Integer.parseInt(value);
         if (uInt < 0) {
           return false;
         }

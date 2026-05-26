@@ -47,6 +47,9 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
    */
   @Override
   public void execute(Database database) throws CustomChangeException {
+    if (database == null || database.getConnection() == null) {
+      throw new CustomChangeException("A database connection is required");
+    }
     final JdbcConnection connection = (JdbcConnection) database.getConnection();
     Boolean prevAutoCommit = null;
 

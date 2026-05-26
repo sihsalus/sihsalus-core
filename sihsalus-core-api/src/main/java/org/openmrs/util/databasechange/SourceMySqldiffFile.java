@@ -208,7 +208,7 @@ public class SourceMySqldiffFile implements CustomTaskChange {
   private Integer execCmd(File wd, String[] cmdWithArguments, StringBuilder out) throws Exception {
     log.debug("executing command: " + Arrays.toString(cmdWithArguments));
 
-    Integer exitValue;
+    int exitValue;
 
     // Needed to add support for working directory because of a linux
     // file system permission issue.

@@ -128,7 +128,7 @@ public class AddressHierarchyServiceImpl implements AddressHierarchyService {
     address = getI18nPersonAddress(address);
 
     // split the levels into levels before and after the level associated with the field name
-    Boolean reachedFieldLevel = false;
+    boolean reachedFieldLevel = false;
     List<AddressHierarchyLevel> higherLevels = new ArrayList<AddressHierarchyLevel>();
     List<AddressHierarchyLevel> lowerLevels = new ArrayList<AddressHierarchyLevel>();
 

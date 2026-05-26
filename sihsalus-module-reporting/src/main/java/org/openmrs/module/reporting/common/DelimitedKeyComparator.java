@@ -70,9 +70,9 @@ public class DelimitedKeyComparator implements Comparator<String> {
       String sub2 = s2Split[i];
       int currentRes = 0;
       try {
-        Integer i1 = Integer.valueOf(sub1);
-        Integer i2 = Integer.valueOf(sub2);
-        currentRes = i1.compareTo(i2);
+        int i1 = Integer.parseInt(sub1);
+        int i2 = Integer.parseInt(sub2);
+        currentRes = Integer.compare(i1, i2);
       } catch (NumberFormatException nfe) {
         currentRes = sub1.compareTo(sub2);
       }
