@@ -206,7 +206,7 @@ public class DispensingLogsReport extends ReportGenerator {
 		    row.getExpiration() != null ? DATE_FORMATTER.format(row.getExpiration()) : "",
 		    row.getQuantity().multiply(negativeOne).toPlainString(), row.getStockItemPackagingUOMName(), row
 		            .getStockItemPackagingUOMFactor().toPlainString(), row.getOrderNumber() == null ? "" : row
-			            .getOrderNumber().toString(), row.getStockItemTransactionId(),
+			            .getOrderNumber().toString(), row.getStockItemTransactionId().toString(),
 		    row.getStockItemDrugId() == null ? "" : row.getStockItemDrugId().toString(),
 		    row.getStockItemConceptId() == null ? "" : row.getStockItemConceptId().toString());
 	}
