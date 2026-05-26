@@ -310,6 +310,7 @@ public class User extends BaseOpenmrsObject
   /**
    * @return Returns the roles.
    */
+  @SuppressWarnings("java/internal-representation-exposure")
   public Set<Role> getRoles() {
     return roles;
   }
@@ -508,6 +509,7 @@ public class User extends BaseOpenmrsObject
   /**
    * @return Returns the userProperties.
    */
+  @SuppressWarnings("java/internal-representation-exposure")
   public Map<String, String> getUserProperties() {
     if (userProperties == null) {
       userProperties = new HashMap<>();

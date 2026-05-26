@@ -125,6 +125,7 @@ public class DrugOrder extends Order {
   /**
    * @see org.openmrs.Order#copyHelper(Order)
    */
+  @SuppressWarnings("java/confusing-method-signature")
   protected DrugOrder copyHelper(DrugOrder target) {
     super.copyHelper(target);
     target.setDose(getDose());
@@ -490,6 +491,7 @@ public class DrugOrder extends Order {
   /**
    * @see Order#cloneForRevisionHelper(Order)
    */
+  @SuppressWarnings("java/confusing-method-signature")
   protected DrugOrder cloneForRevisionHelper(DrugOrder target) {
     super.cloneForRevisionHelper(target);
     target.setDose(getDose());

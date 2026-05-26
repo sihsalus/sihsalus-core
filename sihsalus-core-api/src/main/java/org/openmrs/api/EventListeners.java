@@ -22,6 +22,7 @@ public class EventListeners {
 
   public EventListeners() {}
 
+  @SuppressWarnings("java/internal-representation-exposure")
   public List<GlobalPropertyListener> getGlobalPropertyListeners() {
     return globalPropertyListeners;
   }

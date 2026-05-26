@@ -189,6 +189,7 @@ public class Allergies implements List<Allergy> {
    * @see java.util.List#remove(java.lang.Object)
    */
   @Override
+  @SuppressWarnings("java/confusing-method-signature")
   public boolean remove(Object o) {
     boolean removed = allergies.remove(o);
     if (allergies.isEmpty()) {

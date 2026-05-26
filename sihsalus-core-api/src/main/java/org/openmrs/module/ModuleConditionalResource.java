@@ -49,6 +49,7 @@ public class ModuleConditionalResource {
     this.openmrsPlatformVersion = openmrsPlatformVersion;
   }
 
+  @SuppressWarnings("java/internal-representation-exposure")
   public List<ModuleAndVersion> getModules() {
     return modules;
   }

@@ -100,7 +100,8 @@ public class AutoRetireUsersTask extends AbstractTask {
       try {
         lastLoginTime = Long.parseLong(lastLoginTimeString);
       } catch (NumberFormatException e) {
-        log.warn("Invalid last login time for user {}: {}", user.getUserId(), lastLoginTimeString, e);
+        log.warn(
+            "Invalid last login time for user {}: {}", user.getUserId(), lastLoginTimeString, e);
         return false;
       }
 

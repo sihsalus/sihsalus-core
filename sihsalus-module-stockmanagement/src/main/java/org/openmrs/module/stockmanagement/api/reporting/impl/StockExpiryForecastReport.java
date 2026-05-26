@@ -236,7 +236,8 @@ public class StockExpiryForecastReport extends ReportGenerator {
             stockItemInventory.setExpiration(new Date(Long.parseLong(lineParts[2])));
           }
         } catch (NumberFormatException e) {
-          log.warn("Skipping inventory forecast row with invalid numeric value: " + inventoryLine, e);
+          log.warn(
+              "Skipping inventory forecast row with invalid numeric value: " + inventoryLine, e);
           continue;
         }
         int maxLinePartIndex = lineParts.length - 1;

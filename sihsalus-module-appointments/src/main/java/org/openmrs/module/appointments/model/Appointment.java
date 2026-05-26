@@ -81,6 +81,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     this.appointmentRecurringPattern = appointmentRecurringPattern;
   }
 
+  @SuppressWarnings("java/internal-representation-exposure")
   public Set<AppointmentProvider> getProviders() {
     return providers;
   }

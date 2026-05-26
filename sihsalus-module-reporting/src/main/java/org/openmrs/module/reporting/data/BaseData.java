@@ -30,6 +30,7 @@ public abstract class BaseData implements Data {
   /**
    * @return the data
    */
+  @SuppressWarnings("java/internal-representation-exposure")
   public Map<Integer, Object> getData() {
     if (data == null) {
       data = new HashMap<Integer, Object>();

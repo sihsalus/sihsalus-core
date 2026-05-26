@@ -363,6 +363,7 @@ public class StockOperation extends BaseChangeableOpenmrsData implements Seriali
     this.stockOperationType = stockOperationType;
   }
 
+  @SuppressWarnings("java/internal-representation-exposure")
   public Set<StockOperationItem> getStockOperationItems() {
     return this.stockOperationItems;
   }

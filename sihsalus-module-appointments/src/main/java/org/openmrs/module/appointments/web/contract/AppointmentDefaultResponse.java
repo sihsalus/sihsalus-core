@@ -170,6 +170,7 @@ public class AppointmentDefaultResponse {
     this.extensions = extensions;
   }
 
+  @SuppressWarnings("java/internal-representation-exposure")
   public HashMap getExtensions() {
     return extensions;
   }

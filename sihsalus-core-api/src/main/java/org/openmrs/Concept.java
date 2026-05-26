@@ -1369,6 +1369,7 @@ public class Concept extends BaseOpenmrsObject
   /**
    * @return Returns the conceptSets.
    */
+  @SuppressWarnings("java/internal-representation-exposure")
   public Collection<ConceptSet> getConceptSets() {
     return conceptSets;
   }

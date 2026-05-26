@@ -49,6 +49,7 @@ public class SimpleDataSetMetaData implements DataSetMetaData {
   /**
    * @return the columns
    */
+  @SuppressWarnings("java/internal-representation-exposure")
   public List<DataSetColumn> getColumns() {
     if (columns == null) {
       columns = new ArrayList<DataSetColumn>();

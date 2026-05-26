@@ -46,6 +46,7 @@ public class Reflect {
    * @param fieldClass
    * @return true if, given fieldClass is Collection otherwise returns false
    */
+  @SuppressWarnings("java/confusing-method-signature")
   public static boolean isCollection(Class<?> fieldClass) {
     return Collection.class.isAssignableFrom(fieldClass);
   }

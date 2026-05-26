@@ -27,6 +27,7 @@ public class StockItemInventoryExpiryForecast extends StockItemInventoryForecast
     this.stockItemConsumptionRate = stockItemConsumptionRate;
   }
 
+  @SuppressWarnings("java/internal-representation-exposure")
   public List<BigDecimal> getForecastBalances() {
     return forecastBalances;
   }

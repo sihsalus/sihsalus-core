@@ -40,6 +40,7 @@ public class Format {
     }
   }
 
+  @SuppressWarnings("java/confusing-method-signature")
   public static String format(double d) {
     return "" + (d);
   }

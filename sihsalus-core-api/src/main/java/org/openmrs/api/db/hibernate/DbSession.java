@@ -425,6 +425,7 @@ public class DbSession {
    * @param id a valid identifier of an existing persistent instance of the class
    * @return the persistent instance or proxy
    */
+  @SuppressWarnings("java/confusing-method-signature")
   public Object load(Class theClass, Serializable id) {
     return getSession().getReference(theClass, id);
   }
@@ -453,6 +454,7 @@ public class DbSession {
    * @param object an "empty" instance of the persistent class
    * @param id a valid identifier of an existing persistent instance of the class
    */
+  @SuppressWarnings("java/confusing-method-signature")
   public void load(Object object, Serializable id) {
     getSession().load(object, id);
   }
@@ -708,6 +710,7 @@ public class DbSession {
    * @param object a persistent or detached instance
    * @param lockOptions contains the lock mode to use
    */
+  @SuppressWarnings("java/confusing-method-signature")
   public void refresh(Object object, LockOptions lockOptions) {
     getSession().refresh(object, lockOptions);
   }
