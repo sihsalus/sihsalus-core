@@ -72,7 +72,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
   public Subscription save(Subscription subscription) {
     requireManageConcepts();
     if (StringUtils.isBlank(subscription.getUrl())) {
-      throw new IllegalRequestException("Subscription URL must not be blank.");
+      throw new IllegalRequestException("Subscription URL is required");
     }
     validateSubscriptionUrl(subscription.getUrl());
     UpdateScheduler updateScheduler = getUpdateScheduler();
