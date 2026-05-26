@@ -201,10 +201,8 @@ public class MessageServiceImpl implements MessageService {
 	@Override
 	public void sendMessage(Message message, Collection<User> users) throws MessageException {
 		List<Integer> recipientIds = new ArrayList<>();
-		if (users != null) {
-			for (User user : users) {
-				recipientIds.add(user == null ? null : user.getUserId());
-			}
+		for (User user : users) {
+			recipientIds.add(user == null ? null : user.getUserId());
 		}
 		log.debug("Sending message to recipient user IDs {}", recipientIds);
 		for (User user : users) {
