@@ -33,7 +33,6 @@ import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.ConceptName;
@@ -384,8 +383,9 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
       }
     }
 
-    if (!MapUtils.isEmpty(localeDuplicateNamesMap)) {
-      for (Map.Entry<Locale, Set<String>> entry : localeDuplicateNamesMap.entrySet()) {
+    Map<Locale, Set<String>> duplicateNamesByLocale = localeDuplicateNamesMap;
+    if (duplicateNamesByLocale != null && !duplicateNamesByLocale.isEmpty()) {
+      for (Map.Entry<Locale, Set<String>> entry : duplicateNamesByLocale.entrySet()) {
         Set<String> duplicateNames = entry.getValue();
         // no duplicates found in the locale
         if (CollectionUtils.isEmpty(duplicateNames)) {
