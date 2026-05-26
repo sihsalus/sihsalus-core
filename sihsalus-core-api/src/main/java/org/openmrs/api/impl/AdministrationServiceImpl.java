@@ -9,7 +9,6 @@
  */
 package org.openmrs.api.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -577,7 +576,6 @@ public class AdministrationServiceImpl extends BaseOpenmrsService
    * @param passphrase
    * @return the stored description on the remote server
    * @throws APIException
-   * @throws UnsupportedEncodingException
    */
   private String checkImplementationIdValidity(
       String implementationId, String description, String passphrase) throws APIException {

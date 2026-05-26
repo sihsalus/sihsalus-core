@@ -111,9 +111,9 @@ public class ProgramWorkflowStateHandler extends OpenmrsMetadataHandler<ProgramW
   @SuppressWarnings("deprecation")
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
-      Integer id = Integer.parseInt(input);
+      int id = Integer.parseInt(input);
       for (ProgramWorkflowState s : getStates()) {
-        if (s.getProgramWorkflowStateId().equals(id)) {
+        if (s.getProgramWorkflowStateId() != null && s.getProgramWorkflowStateId() == id) {
           return s;
         }
       }

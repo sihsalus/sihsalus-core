@@ -1208,7 +1208,7 @@ public class ORUR01Handler implements Application {
     if (id != null) {
 
       try {
-        Integer formId = Integer.parseInt(id);
+        int formId = Integer.parseInt(id);
         form = Context.getFormService().getForm(formId);
       } catch (NumberFormatException e) {
         throw new HL7Exception(

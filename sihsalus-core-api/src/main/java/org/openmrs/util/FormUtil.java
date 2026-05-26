@@ -156,7 +156,7 @@ public class FormUtil {
    */
   public static Map<Integer, TreeSet<FormField>> getFormStructure(Form form) {
     Map<Integer, TreeSet<FormField>> formStructure = new TreeMap<>();
-    Integer base = 0;
+    int base = 0;
     formStructure.put(base, new TreeSet<>());
 
     for (FormField formField : form.getFormFields()) {

@@ -68,7 +68,7 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
           if (StringUtils.isNotEmpty(roundingItemId)) {
             StockItem roundingItem = new StockItem();
             try {
-              Integer itemId = Integer.parseInt(roundingItemId);
+              Integer.parseInt(roundingItemId);
               // TODO Rounding logic
               //							roundingItem = Context.getService(IItemDataService.class).getById(itemId);
             } catch (Exception e) {

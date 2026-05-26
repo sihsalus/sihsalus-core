@@ -49,9 +49,23 @@ class SqlRunnerTest {
   }
 
   @Test
+  void executeSqlRejectsMultipleStatementsBeforePreparingSql() {
+    RecordingConnection recordingConnection = new RecordingConnection();
+    SqlRunner sqlRunner = new SqlRunner(recordingConnection.proxy());
+
+    SqlResult result = sqlRunner.executeSql("select * from users; select * from roles", null);
+
+    assertFalse(result.getErrors().isEmpty());
+    assertFalse(recordingConnection.prepared);
+    assertTrue(recordingConnection.rolledBack);
+    assertTrue(recordingConnection.autoCommitReset);
+  }
+
+  @Test
   void executeSqlClosesResultSetAndStatement() {
     RecordingResultSet recordingResultSet = new RecordingResultSet();
-    RecordingPreparedStatement recordingStatement = new RecordingPreparedStatement(recordingResultSet);
+    RecordingPreparedStatement recordingStatement =
+        new RecordingPreparedStatement(recordingResultSet);
     RecordingConnection recordingConnection = new RecordingConnection(recordingStatement);
     SqlRunner sqlRunner = new SqlRunner(recordingConnection.proxy());
 
@@ -98,6 +112,9 @@ class SqlRunnerTest {
                 }
                 if ("prepareStatement".equals(method.getName())) {
                   prepared = true;
+                  if (statement == null) {
+                    throw new AssertionError("SQL should not have been prepared");
+                  }
                   return statement.proxy();
                 }
                 return defaultValue(method.getReturnType());

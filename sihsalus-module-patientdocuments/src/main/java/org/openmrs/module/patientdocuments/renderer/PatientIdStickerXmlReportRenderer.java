@@ -574,12 +574,24 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
       Document doc, Element templatePIDElement, Element rootElement) {
     String numOfIdStickersValue =
         getInitializerService().getValueFromKey("report.patientIdSticker.pages");
-    int numOfIdStickers =
-        Integer.parseInt(isNotBlank(numOfIdStickersValue) ? numOfIdStickersValue : "1");
+    int numOfIdStickers = parsePositiveInteger(numOfIdStickersValue, 1);
     for (int i = 1; i <= numOfIdStickers; i++) {
       Element clonedPidElement = (Element) templatePIDElement.cloneNode(true);
       clonedPidElement.setAttribute("page", "Page-" + i);
       rootElement.appendChild(clonedPidElement);
+    }
+  }
+
+  private int parsePositiveInteger(String value, int defaultValue) {
+    if (isBlank(value)) {
+      return defaultValue;
+    }
+    try {
+      int parsedValue = Integer.parseInt(value.trim());
+      return parsedValue > 0 ? parsedValue : defaultValue;
+    } catch (NumberFormatException e) {
+      log.warn("Invalid patient ID sticker page count '{}'; using {}", value, defaultValue);
+      return defaultValue;
     }
   }
 

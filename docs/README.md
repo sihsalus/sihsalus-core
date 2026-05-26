@@ -10,6 +10,7 @@ Active documentation lives at the top of this directory. Historical planning not
 - `technical-debt-modernization.md`: prioritized modernization targets and antipatterns to remove.
 - `security-baseline.md`: security rules required for production readiness.
 - `ci-baseline.md`: intended CI verification baseline.
+- `database-migrations.md`: Liquibase dry-run and migration review procedure.
 
 ## Archive
 

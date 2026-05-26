@@ -54,7 +54,7 @@ public class SequentialIdentifierGeneratorProcessor implements IdentifierSourceP
    * @return the next sequence value, after it is reset
    */
   protected Long resetToFirstSequenceValue(SequentialIdentifierGenerator seq) {
-    Long sequenceValue = 1L;
+    long sequenceValue = 1L;
     if (seq.getFirstIdentifierBase() != null) {
       sequenceValue =
           IdgenUtil.convertFromBase(

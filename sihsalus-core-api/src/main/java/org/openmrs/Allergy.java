@@ -20,7 +20,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -372,8 +371,6 @@ public class Allergy extends BaseFormRecordableOpenmrsData {
    * Copies all property values, apart from the id and uuid, from the given allergy into this object
    *
    * @param allergy the allergy whose property values to copy
-   * @throws InvocationTargetException
-   * @throws IllegalAccessException
    */
   public void copy(Allergy allergy) {
     setAllergyId(null);

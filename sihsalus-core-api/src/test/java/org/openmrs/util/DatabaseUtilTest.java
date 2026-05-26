@@ -7,6 +7,13 @@ import org.junit.jupiter.api.Test;
 class DatabaseUtilTest {
 
   @Test
+  void loadDatabaseDriverRejectsUnauthorizedDriverClass() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> DatabaseUtil.loadDatabaseDriver("jdbc:h2:mem:test", "java.lang.String"));
+  }
+
+  @Test
   void getUniqueNonNullColumnValuesRejectsUnsafeColumnIdentifiers() {
     assertThrows(
         IllegalArgumentException.class,

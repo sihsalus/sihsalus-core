@@ -22,7 +22,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import jakarta.annotation.PostConstruct;
 import java.io.File;
-import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -222,7 +221,6 @@ public class XStreamSerializer implements OpenmrsSerializer {
    * @param packageName the given package's name
    * @return a list of all classes in the given package
    * @throws SerializationException
-   * @throws IOException
    */
   private List<Class<?>> getAllClassesInPackage(String packageName) throws SerializationException {
     List<Class<?>> list = new ArrayList<Class<?>>();

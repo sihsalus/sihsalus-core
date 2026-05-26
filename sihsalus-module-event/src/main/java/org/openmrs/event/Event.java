@@ -12,7 +12,6 @@
 package org.openmrs.event;
 
 import jakarta.jms.Destination;
-import jakarta.jms.JMSException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -150,7 +149,6 @@ public class Event {
    *
    * @param dest
    * @param listener
-   * @throws JMSException
    * @should unsubscribe from the specified destination
    * @should maintain subscriptions to the same topic for other listeners
    */
