@@ -767,7 +767,14 @@ public class UserServiceImpl extends BaseOpenmrsService implements UserService, 
     LoginCredential loginCred = dao.getLoginCredentialByActivationKey(activationKey);
     if (loginCred != null) {
       String[] credTokens = loginCred.getActivationKey().split(":");
-      if (System.currentTimeMillis() <= Long.parseLong(credTokens[1])) {
+      long activationKeyExpiration;
+      try {
+        activationKeyExpiration = Long.parseLong(credTokens[1]);
+      } catch (NumberFormatException e) {
+        log.warn("Invalid activation key expiration for user {}", loginCred.getUserId(), e);
+        return null;
+      }
+      if (System.currentTimeMillis() <= activationKeyExpiration) {
         return getUser(loginCred.getUserId());
       }
     }

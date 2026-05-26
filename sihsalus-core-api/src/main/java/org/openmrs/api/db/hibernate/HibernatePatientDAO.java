@@ -842,7 +842,8 @@ public class HibernatePatientDAO implements PatientDAO {
     if (!StringUtils.isNumeric(minChars)) {
       minChars = "" + OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_MIN_SEARCH_CHARACTERS;
     }
-    if (query.length() < Integer.parseInt(minChars)) {
+    int minimumSearchCharacters = parseMinimumSearchCharacters(minChars);
+    if (query.length() < minimumSearchCharacters) {
       return patients;
     }
 
@@ -894,7 +895,8 @@ public class HibernatePatientDAO implements PatientDAO {
     if (!StringUtils.isNumeric(minChars)) {
       minChars = "" + OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_MIN_SEARCH_CHARACTERS;
     }
-    if (query.length() < Integer.parseInt(minChars)) {
+    int minimumSearchCharacters = parseMinimumSearchCharacters(minChars);
+    if (query.length() < minimumSearchCharacters) {
       return patients;
     }
 
@@ -924,6 +926,15 @@ public class HibernatePatientDAO implements PatientDAO {
             length);
 
     return patients;
+  }
+
+  private int parseMinimumSearchCharacters(String minChars) {
+    try {
+      return Integer.parseInt(minChars);
+    } catch (NumberFormatException e) {
+      log.warn("Invalid minimum search characters value: {}", minChars, e);
+      return OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_MIN_SEARCH_CHARACTERS;
+    }
   }
 
   private SearchPredicate getPatientIdentifierSearchPredicate(

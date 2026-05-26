@@ -1104,8 +1104,12 @@ public class AdtServiceImpl extends BaseOpenmrsService implements AdtService {
       }
       Obs locationObs = (Obs) (o[5] != null ? o[5] : o[6]);
       if (locationObs != null) {
-        r.setDispositionLocation(
-            locationService.getLocation(Integer.parseInt(locationObs.getValueText())));
+        try {
+          r.setDispositionLocation(
+              locationService.getLocation(Integer.parseInt(locationObs.getValueText())));
+        } catch (NumberFormatException e) {
+          log.warn("Invalid disposition location value: " + locationObs.getValueText(), e);
+        }
       }
       ret.add(r);
     }

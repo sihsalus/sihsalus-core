@@ -239,7 +239,11 @@ public class ORUR01Handler implements Application {
             .getGlobalProperty(
                 OpenmrsConstants.GLOBAL_PROPERTY_MEDICAL_RECORD_OBSERVATIONS, "1238");
     if (StringUtils.hasLength(obrConceptId)) {
-      ignoredConceptIds.add(Integer.valueOf(obrConceptId));
+      try {
+        ignoredConceptIds.add(Integer.valueOf(obrConceptId));
+      } catch (NumberFormatException e) {
+        log.warn("Ignoring invalid medical record observations concept id: " + obrConceptId, e);
+      }
     }
 
     // we also ignore all PROBLEM_LIST that are OBRs
@@ -247,7 +251,11 @@ public class ORUR01Handler implements Application {
         Context.getAdministrationService()
             .getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PROBLEM_LIST, "1284");
     if (StringUtils.hasLength(obrProblemListConceptId)) {
-      ignoredConceptIds.add(Integer.valueOf(obrProblemListConceptId));
+      try {
+        ignoredConceptIds.add(Integer.valueOf(obrProblemListConceptId));
+      } catch (NumberFormatException e) {
+        log.warn("Ignoring invalid problem list concept id: " + obrProblemListConceptId, e);
+      }
     }
 
     ORU_R01_PATIENT_RESULT patientResult = oru.getPATIENT_RESULT();
