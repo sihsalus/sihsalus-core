@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -582,7 +583,7 @@ public class ObjectUtil {
     if (o instanceof OpenmrsObject) {
       return nullSafeToString((OpenmrsObject) o);
     }
-    return o == null ? null : o.toString();
+    return Objects.toString(o, null);
   }
 
   public static String getNameOfCurrentUser() {

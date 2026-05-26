@@ -245,7 +245,10 @@ public class ExcelUtil {
           }
         } else if (att.startsWith("rotation=")) {
           att = att.substring(9);
-          style.setRotation(Short.parseShort(att));
+          Short rotation = parseShort(att, "rotation");
+          if (rotation != null) {
+            style.setRotation(rotation);
+          }
         } else if (att.startsWith("border=")) {
           setBorderStyle(style, att.substring(7));
         } else if (att.equals("date")) {
@@ -262,10 +265,16 @@ public class ExcelUtil {
           font.setUnderline(Font.U_SINGLE);
         } else if (att.startsWith("size=")) {
           att = att.substring(5);
-          font.setFontHeightInPoints(Short.parseShort(att));
+          Short size = parseShort(att, "font size");
+          if (size != null) {
+            font.setFontHeightInPoints(size);
+          }
         } else if (att.startsWith("color=")) {
           att = att.substring(6);
-          font.setColor(Short.parseShort(att));
+          Short color = parseShort(att, "font color");
+          if (color != null) {
+            font.setColor(color);
+          }
         } else if (att.startsWith("background-color=")) {
           att = att.substring(17);
           try {
@@ -553,6 +562,15 @@ public class ExcelUtil {
           toCell.setCellFormula(formula);
         }
       }
+    }
+  }
+
+  private static Short parseShort(String value, String attributeName) {
+    try {
+      return Short.parseShort(value);
+    } catch (NumberFormatException e) {
+      log.warn("Unable to parse Excel " + attributeName + " value: " + value, e);
+      return null;
     }
   }
 }

@@ -222,6 +222,7 @@ public class StockOperationDTOValidator implements Validator {
           messageSourceService.getMessage("stockmanagement.stockoperation.itemsrequired"));
       return;
     }
+    List<StockOperationItemDTO> requestedStockOperationItems = object.getStockOperationItems();
 
     if (permissionLocation == null) {
       errors.rejectValue(
@@ -250,7 +251,7 @@ public class StockOperationDTOValidator implements Validator {
       if (!existingStockOperationItems.stream()
           .allMatch(
               p ->
-                  object.getStockOperationItems().stream()
+                  requestedStockOperationItems.stream()
                       .anyMatch(
                           x ->
                               p.getUuid().equals(x.getUuid())
@@ -279,7 +280,15 @@ public class StockOperationDTOValidator implements Validator {
 
     int index = 1;
     BigDecimal zero = new BigDecimal(0);
-    for (StockOperationItemDTO stockOperationItemDTO : object.getStockOperationItems()) {
+    for (StockOperationItemDTO stockOperationItemDTO : requestedStockOperationItems) {
+      if (stockOperationItemDTO == null) {
+        errors.rejectValue(
+            "stockOperationItems",
+            String.format(
+                messageSourceService.getMessage("stockmanagement.stockoperation.itemuuidrequired"),
+                index));
+        return;
+      }
       if (stockOperationItemDTO.getStockItemUuid() == null) {
         errors.rejectValue(
             "stockOperationItems",

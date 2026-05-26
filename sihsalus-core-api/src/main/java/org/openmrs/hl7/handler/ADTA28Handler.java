@@ -327,15 +327,24 @@ public class ADTA28Handler implements Application {
   private Date tsToDate(TS ts) throws HL7Exception {
     // need to handle timezone
     String dtm = ts.getTime().getValue();
-    int year = Integer.parseInt(dtm.substring(0, 4));
-    int month = (dtm.length() >= 6 ? Integer.parseInt(dtm.substring(4, 6)) - 1 : 0);
-    int day = (dtm.length() >= 8 ? Integer.parseInt(dtm.substring(6, 8)) : 1);
-    int hour = (dtm.length() >= 10 ? Integer.parseInt(dtm.substring(8, 10)) : 0);
-    int min = (dtm.length() >= 12 ? Integer.parseInt(dtm.substring(10, 12)) : 0);
-    int sec = (dtm.length() >= 14 ? Integer.parseInt(dtm.substring(12, 14)) : 0);
+    int year = parseTimestampPart(dtm, 0, 4, "year");
+    int month = (dtm.length() >= 6 ? parseTimestampPart(dtm, 4, 6, "month") - 1 : 0);
+    int day = (dtm.length() >= 8 ? parseTimestampPart(dtm, 6, 8, "day") : 1);
+    int hour = (dtm.length() >= 10 ? parseTimestampPart(dtm, 8, 10, "hour") : 0);
+    int min = (dtm.length() >= 12 ? parseTimestampPart(dtm, 10, 12, "minute") : 0);
+    int sec = (dtm.length() >= 14 ? parseTimestampPart(dtm, 12, 14, "second") : 0);
     Calendar cal = Calendar.getInstance();
     cal.set(year, month, day, hour, min, sec);
 
     return cal.getTime();
+  }
+
+  private int parseTimestampPart(String dtm, int start, int end, String fieldName)
+      throws HL7Exception {
+    try {
+      return Integer.parseInt(dtm.substring(start, end));
+    } catch (NumberFormatException e) {
+      throw new HL7Exception("Invalid HL7 timestamp " + fieldName + ": " + dtm, e);
+    }
   }
 }

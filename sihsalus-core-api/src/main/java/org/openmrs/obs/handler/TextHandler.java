@@ -93,7 +93,7 @@ public class TextHandler extends AbstractHandler implements ComplexObsHandler {
     if (metadata == null) {
       return obs;
     }
-    String mimeType = metadata.getMimeType();
+    String mimeType = metadata == null ? null : metadata.getMimeType();
     if (mimeType == null) {
       mimeType = "text/plain";
     }

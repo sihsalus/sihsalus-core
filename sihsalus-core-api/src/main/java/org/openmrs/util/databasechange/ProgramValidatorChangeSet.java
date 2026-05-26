@@ -78,12 +78,12 @@ public class ProgramValidatorChangeSet implements CustomTaskChange {
     results = DatabaseUtil.executeSQL(conn, query.toString(), true);
     List<Integer> missingInitial = new ArrayList<>();
     for (List<Object> row : results) {
-      missingInitial.add(Integer.valueOf(row.get(0).toString()));
+      missingInitial.add(parseInteger(row.get(0), "concept_id"));
     }
     for (List<Object> row : results) {
-      Integer conceptId = Integer.valueOf(row.get(0).toString());
+      Integer conceptId = parseInteger(row.get(0), "concept_id");
       boolean isInitial = "1".equals(row.get(1).toString());
-      int num = Integer.parseInt(row.get(2).toString());
+      int num = parseInteger(row.get(2), "num");
       if (isInitial && num > 0) {
         missingInitial.remove(conceptId);
       }
@@ -100,6 +100,14 @@ public class ProgramValidatorChangeSet implements CustomTaskChange {
     messages.add(message.toString());
 
     DatabaseUpdater.reportUpdateWarnings(messages);
+  }
+
+  private Integer parseInteger(Object value, String columnName) throws CustomChangeException {
+    try {
+      return Integer.valueOf(value.toString());
+    } catch (NumberFormatException e) {
+      throw new CustomChangeException("Invalid integer value for " + columnName + ": " + value, e);
+    }
   }
 
   /**

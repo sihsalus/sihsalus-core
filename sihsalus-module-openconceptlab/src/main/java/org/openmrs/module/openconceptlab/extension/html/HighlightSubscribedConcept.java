@@ -40,8 +40,10 @@ public class HighlightSubscribedConcept extends Extension {
     HttpServletRequest request =
         ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
-    Concept concept =
-        Context.getConceptService().getConcept(Integer.parseInt(request.getParameter("conceptId")));
+    Concept concept = getConcept(request.getParameter("conceptId"));
+    if (concept == null) {
+      return "";
+    }
 
     String message = "";
 
@@ -52,5 +54,13 @@ public class HighlightSubscribedConcept extends Extension {
     }
 
     return message;
+  }
+
+  private Concept getConcept(String conceptId) {
+    try {
+      return Context.getConceptService().getConcept(Integer.parseInt(conceptId));
+    } catch (NumberFormatException e) {
+      return null;
+    }
   }
 }

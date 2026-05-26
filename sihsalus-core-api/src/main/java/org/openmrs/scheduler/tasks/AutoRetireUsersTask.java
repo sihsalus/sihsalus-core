@@ -71,8 +71,17 @@ public class AutoRetireUsersTask extends AbstractTask {
       return Collections.emptySet();
     }
 
-    long numberOfMillisecondsToRetire =
-        TimeUnit.DAYS.toMillis(Long.parseLong(numberOfDaysToRetire));
+    long numberOfMillisecondsToRetire;
+    try {
+      numberOfMillisecondsToRetire = TimeUnit.DAYS.toMillis(Long.parseLong(numberOfDaysToRetire));
+    } catch (NumberFormatException e) {
+      log.warn(
+          "Invalid value for {}: {}",
+          OpenmrsConstants.GP_NUMBER_OF_DAYS_TO_AUTO_RETIRE_USERS,
+          numberOfDaysToRetire,
+          e);
+      return Collections.emptySet();
+    }
 
     return allUsers.stream()
         .filter(

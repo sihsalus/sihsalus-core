@@ -237,13 +237,13 @@ public class StockForecastReport extends ReportGenerator {
         String[] lineParts = inventoryLine.split(",", -1);
         StockItemInventoryForecast stockItemInventory = new StockItemInventoryForecast();
         if (lineParts[0].length() > 0) {
-          stockItemInventory.setPartyId(Integer.parseInt(lineParts[0]));
+          stockItemInventory.setPartyId(parseInteger(lineParts[0]));
         }
         if (lineParts[1].length() > 0) {
-          stockItemInventory.setStockItemId(Integer.parseInt(lineParts[1]));
+          stockItemInventory.setStockItemId(parseInteger(lineParts[1]));
         }
         if (lineParts[2].length() > 0) {
-          stockItemInventory.setStockBatchId(Integer.parseInt(lineParts[2]));
+          stockItemInventory.setStockBatchId(parseInteger(lineParts[2]));
         }
         int maxLinePartIndex = lineParts.length - 1;
         BigDecimal sumConsumed = BigDecimal.ZERO;
@@ -352,6 +352,14 @@ public class StockForecastReport extends ReportGenerator {
         } catch (Exception we) {
         }
       }
+    }
+  }
+
+  private Integer parseInteger(String value) throws IOException {
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+      throw new IOException("Invalid integer value in stock forecast staging file: " + value, e);
     }
   }
 

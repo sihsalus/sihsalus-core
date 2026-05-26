@@ -199,7 +199,7 @@ public class ExcelTemplateRenderer extends ReportTemplateRenderer {
 
         int numRowsToRepeat = 1;
         if (dataSetSpanSplit.length == 2) {
-          numRowsToRepeat = Integer.parseInt(dataSetSpanSplit[1]);
+          numRowsToRepeat = parseRepeatCount(dataSetSpanSplit[1]);
         }
         log.debug(
             "Repeating this row with dataset: " + dataSet + " and repeat of " + numRowsToRepeat);
@@ -297,7 +297,7 @@ public class ExcelTemplateRenderer extends ReportTemplateRenderer {
         DataSet dataSet = getDataSet(reportData, dataSetName, rowToAdd.getReplacementData());
         int numCellsToRepeat = 1;
         if (dataSetSpanSplit.length == 2) {
-          numCellsToRepeat = Integer.parseInt(dataSetSpanSplit[1]);
+          numCellsToRepeat = parseRepeatCount(dataSetSpanSplit[1]);
         }
         log.debug(
             "Repeating this cell with dataset: " + dataSet + " and repeat of " + numCellsToRepeat);
@@ -521,6 +521,14 @@ public class ExcelTemplateRenderer extends ReportTemplateRenderer {
               + " in this Report Definition");
     }
     return ds;
+  }
+
+  private int parseRepeatCount(String value) throws RenderingException {
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+      throw new RenderingException("Invalid Excel template repeat count: " + value, e);
+    }
   }
 
   /**

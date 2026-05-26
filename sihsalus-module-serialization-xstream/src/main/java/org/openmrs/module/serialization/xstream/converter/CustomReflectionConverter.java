@@ -172,7 +172,8 @@ public class CustomReflectionConverter extends ReflectionConverter {
         value = type != null ? context.convertAnother(result, type) : null;
       }
 
-      if (value != null && type != null && !type.isAssignableFrom(value.getClass())) {
+      Class targetType = type;
+      if (value != null && targetType != null && !targetType.isAssignableFrom(value.getClass())) {
         // TODO Can i be helped to know why this makes some unit tests to fail?
         // ProgramShortSerializationTest & OrderTypeShortSerializationTest
 

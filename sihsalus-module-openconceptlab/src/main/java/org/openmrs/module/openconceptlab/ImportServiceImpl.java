@@ -402,8 +402,10 @@ public class ImportServiceImpl extends BaseOpenmrsService implements ImportServi
             "Time in the wrong format. Expected 'HH:mm', given: " + time);
       }
 
-      subscription.setHours(parseIntegerProperty(OpenConceptLabConstants.GP_SCHEDULED_TIME, formattedTime[0]));
-      subscription.setMinutes(parseIntegerProperty(OpenConceptLabConstants.GP_SCHEDULED_TIME, formattedTime[1]));
+      subscription.setHours(
+          parseIntegerProperty(OpenConceptLabConstants.GP_SCHEDULED_TIME, formattedTime[0]));
+      subscription.setMinutes(
+          parseIntegerProperty(OpenConceptLabConstants.GP_SCHEDULED_TIME, formattedTime[1]));
     }
 
     return subscription;

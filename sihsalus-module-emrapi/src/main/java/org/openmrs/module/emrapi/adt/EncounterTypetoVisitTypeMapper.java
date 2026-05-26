@@ -59,10 +59,14 @@ public class EncounterTypetoVisitTypeMapper {
 
           String visitTypeIdOrUuid = mapping.substring(index + 1).trim();
           if (StringUtils.isNumeric(visitTypeIdOrUuid)) {
+            Integer visitTypeId = parseVisitTypeId(visitTypeIdOrUuid);
+            if (visitTypeId == null) {
+              continue;
+            }
             if ("default".equals(mappedEncounterTypeIdOrUuid)) {
-              defaultVisitType = visitService.getVisitType(Integer.parseInt(visitTypeIdOrUuid));
+              defaultVisitType = visitService.getVisitType(visitTypeId);
             } else {
-              visitType = visitService.getVisitType(Integer.parseInt(visitTypeIdOrUuid));
+              visitType = visitService.getVisitType(visitTypeId);
             }
           } else {
             if ("default".equals(mappedEncounterTypeIdOrUuid)) {
@@ -111,6 +115,14 @@ public class EncounterTypetoVisitTypeMapper {
       mappingString =
           adminService.getGlobalProperty(
               EmrApiConstants.GP_VISIT_ASSIGNMENT_HANDLER_ENCOUNTER_TYPE_TO_VISIT_TYPE_MAP);
+    }
+  }
+
+  private Integer parseVisitTypeId(String value) {
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+      return null;
     }
   }
 }

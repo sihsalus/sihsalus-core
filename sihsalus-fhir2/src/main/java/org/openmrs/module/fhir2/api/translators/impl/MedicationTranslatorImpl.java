@@ -145,10 +145,10 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 
     switch (val) {
       case "maximumDailyDose":
-        drug.setMaximumDailyDose(Double.valueOf(value));
+        drug.setMaximumDailyDose(parseDouble(value));
         break;
       case "minimumDailyDose":
-        drug.setMinimumDailyDose(Double.valueOf(value));
+        drug.setMinimumDailyDose(parseDouble(value));
         break;
       case "strength":
         drug.setStrength(value);
@@ -156,6 +156,14 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
       case DRUG_NAME_EXTENSION:
         drug.setName(value);
         break;
+    }
+  }
+
+  private Double parseDouble(String value) {
+    try {
+      return Double.valueOf(value);
+    } catch (NumberFormatException e) {
+      return null;
     }
   }
 

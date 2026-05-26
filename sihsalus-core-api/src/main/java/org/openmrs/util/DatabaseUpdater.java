@@ -276,13 +276,7 @@ public class DatabaseUpdater {
         log.error("Could not release lock", e);
       }
 
-      try {
-        if (database != null && database.getConnection() != null) {
-          database.getConnection().close();
-        }
-      } catch (Exception e) {
-        // pass
-      }
+      closeDatabaseConnection(database);
     }
 
     return updateWarnings;
@@ -403,13 +397,7 @@ public class DatabaseUpdater {
         }
       }
     } finally {
-      try {
-        if (propertyStream != null) {
-          propertyStream.close();
-        }
-      } catch (Exception e) {
-        // pass
-      }
+      IOUtils.closeQuietly(propertyStream);
     }
   }
 
@@ -468,6 +456,9 @@ public class DatabaseUpdater {
       Database database =
           DatabaseFactory.getInstance()
               .findCorrectDatabaseImplementation(new JdbcConnection(connection));
+      if (database == null) {
+        throw new Exception("Unable to determine database implementation.");
+      }
       database.setDatabaseChangeLogTableName("liquibasechangelog");
       database.setDatabaseChangeLogLockTableName("liquibasechangeloglock");
 
@@ -891,8 +882,10 @@ public class DatabaseUpdater {
 
   private static void closeDatabaseConnection(Database database) {
     try {
-      if (database != null && database.getConnection() != null) {
-        database.getConnection().close();
+      liquibase.database.DatabaseConnection connection =
+          database == null ? null : database.getConnection();
+      if (connection != null) {
+        connection.close();
       }
     } catch (Exception e) {
       // pass
