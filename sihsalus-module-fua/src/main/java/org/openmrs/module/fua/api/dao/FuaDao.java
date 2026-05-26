@@ -42,12 +42,12 @@ public class FuaDao {
   }
 
   /*public void updateEstado(Integer fuaId, Integer nuevoEstadoId) {
-  	Fua fua = getFua(fuaId);
-  	FuaEstado fuaEstado = fuaEstadoService.getEstado(nuevoEstadoId);
-  	if (fua != null) {
-  		fua.setFuaEstado(fuaEstado);
-  		saveFua(fua);
-  	}
+    Fua fua = getFua(fuaId);
+    FuaEstado fuaEstado = fuaEstadoService.getEstado(nuevoEstadoId);
+    if (fua != null) {
+      fua.setFuaEstado(fuaEstado);
+      saveFua(fua);
+    }
   }*/
 
   public Fua getFuaByUuid(String uuid) {
