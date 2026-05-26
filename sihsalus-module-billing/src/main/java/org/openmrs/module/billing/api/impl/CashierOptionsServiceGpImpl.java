@@ -82,11 +82,11 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 			}
 			catch (IllegalArgumentException iae) {
 				/* Use default if option is not set */
-				log.error("IllegalArgumentException occured", iae);
+				log.error("IllegalArgumentException occurred", iae);
 			}
 			catch (NullPointerException e) {
 				/* Use default if option is not set */
-				log.error("NullPointerException occured", e);
+				log.error("NullPointerException occurred", e);
 			}
 		}
 	}
