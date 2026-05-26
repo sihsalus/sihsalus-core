@@ -112,10 +112,10 @@ public class CreateDiscontinueOrders implements CustomTaskChange {
       throws CustomChangeException, SQLException {
     List<DiscontinuedOrder> dcOrders = new ArrayList<>();
     try (PreparedStatement statement =
-          connection.prepareStatement(
-              "select order_id, concept_id, patient_id, encounter_id, date_stopped, "
-                  + "discontinued_by, discontinued_reason, discontinued_reason_non_coded, order_type_id "
-                  + "from orders where discontinued = ?")) {
+        connection.prepareStatement(
+            "select order_id, concept_id, patient_id, encounter_id, date_stopped, "
+                + "discontinued_by, discontinued_reason, discontinued_reason_non_coded, order_type_id "
+                + "from orders where discontinued = ?")) {
       statement.setBoolean(1, true);
       try (ResultSet rs = statement.executeQuery()) {
         while (rs.next()) {

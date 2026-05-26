@@ -657,8 +657,8 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
     Map<Locale, List<ConceptName>> localeConceptNamesMap = null;
 
     try (PreparedStatement pStmt =
-          connection.prepareStatement(
-              "SELECT concept_name_id, name, concept_name_type, locale, locale_preferred FROM concept_name WHERE voided = false AND concept_id = ?")) {
+        connection.prepareStatement(
+            "SELECT concept_name_id, name, concept_name_type, locale, locale_preferred FROM concept_name WHERE voided = false AND concept_id = ?")) {
       pStmt.setInt(1, conceptId);
 
       try (ResultSet rs = pStmt.executeQuery()) {
