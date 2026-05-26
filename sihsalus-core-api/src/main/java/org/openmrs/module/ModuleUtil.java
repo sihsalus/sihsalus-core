@@ -491,10 +491,10 @@ public class ModuleUtil {
       for (int x = 0; x < versionANumbers.size(); x++) {
         String verAPartString = versionANumbers.get(x).trim();
         String verBPartString = versionBNumbers.get(x).trim();
-        Long verAPart = NumberUtils.toLong(verAPartString, 0);
-        Long verBPart = NumberUtils.toLong(verBPartString, 0);
+        long verAPart = NumberUtils.toLong(verAPartString, 0);
+        long verBPart = NumberUtils.toLong(verBPartString, 0);
 
-        int ret = verAPart.compareTo(verBPart);
+        int ret = Long.compare(verAPart, verBPart);
         if (ret != 0) {
           return ret;
         }
@@ -830,7 +830,7 @@ public class ModuleUtil {
    */
   public static Boolean checkForModuleUpdates() throws ModuleException {
 
-    Boolean updateFound = false;
+    boolean updateFound = false;
 
     for (Module mod : ModuleFactory.getLoadedModules()) {
       String updateURL = mod.getUpdateURL();
@@ -1248,7 +1248,7 @@ public class ModuleUtil {
           continue;
         }
 
-        Integer indexOfLastSlash = name.lastIndexOf("/");
+        int indexOfLastSlash = name.lastIndexOf("/");
         if (indexOfLastSlash <= 0) {
           continue;
         }

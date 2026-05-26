@@ -205,7 +205,7 @@ public class OrderGroup extends BaseCustomizableData<OrderGroupAttribute> {
   }
 
   private Integer findListIndexForGivenPosition(Integer position) {
-    Integer size = getOrders().size();
+    int size = getOrders().size();
     if (position != null) {
       if (position < 0 && position >= (-1 - size)) {
         position = position + size + 1;

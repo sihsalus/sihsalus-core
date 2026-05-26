@@ -502,12 +502,12 @@ public class UserServiceImpl extends BaseOpenmrsService implements UserService, 
     LuhnIdentifierValidator liv = new LuhnIdentifierValidator();
 
     String systemId;
-    Integer offset = 0;
+    int offset = 0;
     do {
       // generate and increment the system id if necessary
-      Integer generatedId = dao.generateSystemId() + offset++;
+      int generatedId = dao.generateSystemId() + offset++;
 
-      systemId = generatedId.toString();
+      systemId = Integer.toString(generatedId);
 
       try {
         systemId = liv.getValidIdentifier(systemId);

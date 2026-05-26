@@ -87,7 +87,7 @@ public class CohortUtil {
    */
   public static Cohort getRandomCohort(Integer size) {
 
-    Integer cohortSize =
+    int cohortSize =
         (size != null && size > 0)
             ? size
             : Integer.parseInt(
@@ -112,7 +112,7 @@ public class CohortUtil {
       // Otherwise we create a random cohort
       else {
         for (int i = 0; i < cohortSize; i++) {
-          Integer randomIndex = random.nextInt(tempCohort.getSize());
+          int randomIndex = random.nextInt(tempCohort.getSize());
           Integer patientId = patientIds.get(randomIndex);
           // TODO We need to deal with patients that have already been selected
           //  because we don't want duplicates.  This requires special handling

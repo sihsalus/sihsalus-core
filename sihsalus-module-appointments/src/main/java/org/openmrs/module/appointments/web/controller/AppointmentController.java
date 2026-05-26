@@ -140,7 +140,7 @@ public class AppointmentController extends BaseRestController {
       for (Map.Entry<Date, List<Appointment>> appointmentDateMap :
           appointmentsGroupedByDate.entrySet()) {
         List<Appointment> appointments = appointmentDateMap.getValue();
-        Long missedAppointmentsCount =
+        long missedAppointmentsCount =
             appointments.stream()
                 .filter(s -> s.getStatus().equals(AppointmentStatus.Missed))
                 .count();

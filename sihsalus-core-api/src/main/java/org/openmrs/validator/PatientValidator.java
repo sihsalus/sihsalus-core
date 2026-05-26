@@ -77,7 +77,7 @@ public class PatientValidator extends PersonValidator {
     ValidationUtils.rejectIfEmptyOrWhitespace(errors, "gender", "Person.gender.required");
 
     // Make sure they chose a preferred ID
-    Boolean preferredIdentifierChosen = false;
+    boolean preferredIdentifierChosen = false;
     // Voided patients have only voided identifiers since they were voided with the patient,
     // so get all otherwise get the active ones
     Collection<PatientIdentifier> identifiers =

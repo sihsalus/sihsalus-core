@@ -190,7 +190,7 @@ public class Allergies implements List<Allergy> {
    */
   @Override
   public boolean remove(Object o) {
-    Boolean removed = allergies.remove(o);
+    boolean removed = allergies.remove(o);
     if (allergies.isEmpty()) {
       allergyStatus = UNKNOWN;
     }

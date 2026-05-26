@@ -117,7 +117,7 @@ public class UpgradeUtil {
 
   public static List<Integer> getMemberSetIds(Connection connection, String conceptUuid)
       throws SQLException {
-    Integer conceptSetId;
+    int conceptSetId;
 
     try (PreparedStatement select =
         connection.prepareStatement("select concept_id from concept where uuid = ?")) {
