@@ -99,7 +99,7 @@ import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeOperationTypeDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeSearchFilter;
 import org.openmrs.module.stockmanagement.api.dto.reporting.DispensingLineFilter;
 import org.openmrs.module.stockmanagement.api.dto.reporting.DispensingLineItem;
-import org.openmrs.module.stockmanagement.api.dto.reporting.Fullfillment;
+import org.openmrs.module.stockmanagement.api.dto.reporting.Fulfillment;
 import org.openmrs.module.stockmanagement.api.dto.reporting.PrescriptionLineFilter;
 import org.openmrs.module.stockmanagement.api.dto.reporting.PrescriptionLineItem;
 import org.openmrs.module.stockmanagement.api.dto.reporting.StockBatchLineItem;
@@ -5239,30 +5239,30 @@ class PartialStockManagementService implements InvocationHandler {
   }
 
   private boolean matchesFulfillmentFilter(
-      List<Fullfillment> fulfillments,
+      List<Fulfillment> fulfillments,
       BigDecimal orderedQuantity,
       BigDecimal dispensedQuantity,
       boolean noTransactions) {
-    Set<Fullfillment> requested = new HashSet<>(fulfillments);
-    if (requested.contains(Fullfillment.All)
-        || (requested.contains(Fullfillment.Full)
-            && requested.contains(Fullfillment.Partial)
-            && requested.contains(Fullfillment.None))) {
+    Set<Fulfillment> requested = new HashSet<>(fulfillments);
+    if (requested.contains(Fulfillment.All)
+        || (requested.contains(Fulfillment.Full)
+            && requested.contains(Fulfillment.Partial)
+            && requested.contains(Fulfillment.None))) {
       return true;
     }
     if (noTransactions
         || dispensedQuantity == null
         || dispensedQuantity.compareTo(BigDecimal.ZERO) == 0) {
-      return requested.contains(Fullfillment.None);
+      return requested.contains(Fulfillment.None);
     }
     if (orderedQuantity == null || orderedQuantity.compareTo(BigDecimal.ZERO) == 0) {
-      return requested.contains(Fullfillment.Partial) || requested.contains(Fullfillment.Full);
+      return requested.contains(Fulfillment.Partial) || requested.contains(Fulfillment.Full);
     }
     int comparison = dispensedQuantity.compareTo(orderedQuantity);
     if (comparison >= 0) {
-      return requested.contains(Fullfillment.Full);
+      return requested.contains(Fulfillment.Full);
     }
-    return requested.contains(Fullfillment.Partial);
+    return requested.contains(Fulfillment.Partial);
   }
 
   private StockItemPackagingUOM packagingUomForConcept(StockItem stockItem, Concept concept) {

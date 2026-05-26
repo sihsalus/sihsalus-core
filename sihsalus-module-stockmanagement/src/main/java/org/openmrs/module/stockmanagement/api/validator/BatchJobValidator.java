@@ -16,7 +16,7 @@ import org.openmrs.module.stockmanagement.api.Privileges;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.dto.BatchJobDTO;
 import org.openmrs.module.stockmanagement.api.dto.StockItemInventorySearchFilter;
-import org.openmrs.module.stockmanagement.api.dto.reporting.Fullfillment;
+import org.openmrs.module.stockmanagement.api.dto.reporting.Fulfillment;
 import org.openmrs.module.stockmanagement.api.dto.reporting.MostLeastMoving;
 import org.openmrs.module.stockmanagement.api.model.BatchJobType;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -327,7 +327,7 @@ public class BatchJobValidator implements Validator {
       }
       String[] values = value.split(",");
       for (String option : values) {
-        Fullfillment result = Fullfillment.findByName(option);
+        Fulfillment result = Fulfillment.findByName(option);
         if (result == null) {
           return false;
         }
