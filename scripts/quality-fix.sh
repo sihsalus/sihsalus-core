@@ -6,6 +6,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 MAVEN_CMD="${MAVEN_CMD:-mvn}"
+if [[ "$MAVEN_CMD" == "./mvnw" && ! -x "./mvnw" ]]; then
+  echo "Warning: ./mvnw not found, using mvn instead."
+  MAVEN_CMD="mvn"
+fi
 MODULES=()
 MAVEN_ARGS=("-DskipITs")
 
