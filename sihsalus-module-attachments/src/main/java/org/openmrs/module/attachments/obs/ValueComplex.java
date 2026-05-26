@@ -102,7 +102,9 @@ public class ValueComplex {
     String parsedFileNameAndKey = fileNameAndKey;
     if (parsedFileNameAndKey != null
         && StringUtils.isNotBlank(parsedFileNameAndKey)
-        && PIPE_WITH_LEADING_SPACE_AND_NO_TRAILING_SPACE_REGEX.matcher(parsedFileNameAndKey).find()) {
+        && PIPE_WITH_LEADING_SPACE_AND_NO_TRAILING_SPACE_REGEX
+            .matcher(parsedFileNameAndKey)
+            .find()) {
       // new model, contains filename and path
       String[] fileNameAndKeyParts =
           parsedFileNameAndKey.split(Pattern.quote(PIPE_WITH_LEADING_SPACE), 2);

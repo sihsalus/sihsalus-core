@@ -569,7 +569,7 @@ public class ExcelUtil {
     try {
       return Short.parseShort(value);
     } catch (NumberFormatException e) {
-      log.warn("Unable to parse Excel {} value: {}", attributeName, value, e);
+      log.warn("Unable to parse Excel " + attributeName + " value: " + value, e);
       return null;
     }
   }

@@ -204,7 +204,8 @@ public class ConceptAnswersEditor extends PropertyEditorSupport {
    * @return
    */
   private Integer getConceptId(String conceptId) {
-    String id = conceptId.contains("^") ? conceptId.substring(0, conceptId.indexOf("^")) : conceptId;
+    String id =
+        conceptId.contains("^") ? conceptId.substring(0, conceptId.indexOf("^")) : conceptId;
     return parseInteger(id, "concept id");
   }
 
