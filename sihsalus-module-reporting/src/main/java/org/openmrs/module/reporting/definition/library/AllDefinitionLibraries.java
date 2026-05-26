@@ -94,7 +94,7 @@ public class AllDefinitionLibraries {
             throw new IllegalArgumentException("Expected an even number of arguments.");
         }
 
-        for (int i = 0; i < paramsAndValues.length; i += 2) {
+        for (int i = 0; i + 1 < paramsAndValues.length; i += 2) {
             cd.addParameterValue((String) paramsAndValues[i], paramsAndValues[i + 1]);
         }
         return cd;
