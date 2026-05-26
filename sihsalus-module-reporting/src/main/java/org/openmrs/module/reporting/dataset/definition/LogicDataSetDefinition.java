@@ -83,7 +83,7 @@ public class LogicDataSetDefinition extends BaseDataSetDefinition
 
   // ----- helper class for column definitions ----------
 
-  public class Column extends DataSetColumn {
+  public static class Column extends DataSetColumn {
     public static final long serialVersionUID = 1L;
     private String logic;
     private String format;
