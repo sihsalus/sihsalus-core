@@ -93,7 +93,7 @@ public class IndicatorUtil {
   private static void compileDimensionCombinations(
       int startingIndex, String prefix, List<String> dimensions, List<String> combinations) {
     for (int i = startingIndex; i < dimensions.size(); i++) {
-      String key = prefix + (prefix.equals("") ? "" : "|") + dimensions.get(i);
+      String key = prefix + (prefix.isEmpty() ? "" : "|") + dimensions.get(i);
       combinations.add(key);
       if ((i + 1) < dimensions.size()) {
         compileDimensionCombinations(i + 1, key, dimensions, combinations);

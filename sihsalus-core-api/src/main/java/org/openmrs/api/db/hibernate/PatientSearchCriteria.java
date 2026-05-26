@@ -365,7 +365,7 @@ public class PatientSearchCriteria {
         // if the regex is empty, default to a simple "like" search or if
         // we're in hsql world, also only do the simple like search (because
         // hsql doesn't know how to deal with 'regexp'
-        else if ("".equals(regex) || HibernateUtil.isHSQLDialect(sessionFactory)) {
+        else if (regex.isEmpty() || HibernateUtil.isHSQLDialect(sessionFactory)) {
           predicates.add(getPredicateForSimpleSearch(cb, idsJoin, identifier, adminService));
         }
         // if the regex is present, search on that

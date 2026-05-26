@@ -87,7 +87,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 
     String attributeTypeClassName = attributeType.getClass().getSimpleName();
     if (attributeTypeClassName == null
-        || "".equals(attributeTypeClassName)
+        || attributeTypeClassName.isEmpty()
         || !attributeTypeClassName.endsWith("AttributeType")) {
       return Optional.empty();
     }

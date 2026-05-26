@@ -428,7 +428,7 @@ public class AdministrationServiceImpl extends BaseOpenmrsService
    */
   @Override
   public List<List<Object>> executeSQL(String sql, boolean selectOnly) throws APIException {
-    if (sql == null || "".equals(sql.trim())) {
+    if (sql == null || sql.trim().isEmpty()) {
       return null;
     }
 
@@ -601,7 +601,7 @@ public class AdministrationServiceImpl extends BaseOpenmrsService
     String response = implementationIdHttpClient.post(data);
     response = response.trim();
 
-    if ("".equals(response)) {
+    if (response.isEmpty()) {
       String ms =
           Context.getMessageSourceService()
               .getMessage(

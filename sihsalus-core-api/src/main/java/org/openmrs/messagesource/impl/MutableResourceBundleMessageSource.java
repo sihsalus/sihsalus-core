@@ -118,7 +118,7 @@ public class MutableResourceBundleMessageSource extends ReloadableResourceBundle
     // trim off extension
     String localespec = filename.substring(0, filename.indexOf('.'));
 
-    if ("".equals(localespec)) {
+    if (localespec.isEmpty()) {
       parsedLocale = Locale.getDefault();
     } else {
       localespec = localespec.substring(1); // trim off leading '_'

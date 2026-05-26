@@ -648,7 +648,7 @@ public class ModuleUtil {
             log.debug("Creating parent dirs: " + parent.getAbsolutePath());
           }
           // we don't want to "expand" directories or empty names
-          if (entryName.endsWith("/") || "".equals(entryName)) {
+          if (entryName.endsWith("/") || entryName.isEmpty()) {
             continue;
           }
           try (InputStream input = jarFile.getInputStream(jarEntry)) {
@@ -845,7 +845,7 @@ public class ModuleUtil {
           String content = getURL(url);
 
           // skip empty or invalid updates
-          if ("".equals(content)) {
+          if (content.isEmpty()) {
             continue;
           }
 

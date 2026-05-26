@@ -224,13 +224,13 @@ public class EvaluationUtil {
                 paramValueToFormat = DateUtils.addMonths((Date) paramValueToFormat, numAsInt);
               } else if ("y".equals(unit)) {
                 paramValueToFormat = DateUtils.addYears((Date) paramValueToFormat, numAsInt);
-              } else if ("".equals(unit) || "d".equals(unit)) {
+              } else if (unit.isEmpty() || "d".equals(unit)) {
                 paramValueToFormat = DateUtils.addDays((Date) paramValueToFormat, numAsInt);
               } else {
                 throw new IllegalArgumentException("Unknown unit: " + unit);
               }
             } else { // assume it's a number
-              if (!"".equals(unit)) {
+              if (!unit.isEmpty()) {
                 throw new IllegalArgumentException("Can't specify units in a non-date expression");
               }
               if (paramValueToFormat instanceof Integer && isWholeNumber(number)) {
