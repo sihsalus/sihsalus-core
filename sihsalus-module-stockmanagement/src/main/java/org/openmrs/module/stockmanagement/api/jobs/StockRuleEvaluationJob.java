@@ -176,7 +176,6 @@ public class StockRuleEvaluationJob extends AbstractTask {
     log.debug("Processing mail notifications");
     processMailNotifications(
         rules,
-        usersToNotify,
         stockItemNames,
         locationNames,
         userIdLocationRoleRuleMappings,
@@ -207,7 +206,6 @@ public class StockRuleEvaluationJob extends AbstractTask {
   @SuppressWarnings({"unchecked"})
   private void processMailNotifications(
       List<StockRuleNotificationUser> rules,
-      Map<Integer, List<Integer>> usersToNotify,
       Map<Integer, String> stockItemNames,
       Map<Integer, String> locationNames,
       Map<Integer, List<Pair<Integer, Integer>>> userIdLocationRoleRuleMappings,

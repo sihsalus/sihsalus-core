@@ -600,7 +600,7 @@ public class StockForecastReport extends ReportGenerator {
           Files.newBufferedWriter(
               step1File.toPath(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
       final BufferedWriter finalBufferedWriter = bufferedWriter;
-      setFilters(filter, parameters);
+      setFilters();
       stockManagementService.getStockInventoryForecastData(
           filter,
           inventory -> {
@@ -682,6 +682,5 @@ public class StockForecastReport extends ReportGenerator {
     }
   }
 
-  @SuppressWarnings("unused")
-  protected void setFilters(StockItemInventorySearchFilter filter, Properties parameters) {}
+  protected void setFilters() {}
 }

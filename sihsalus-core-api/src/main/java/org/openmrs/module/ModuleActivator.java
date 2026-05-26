@@ -59,9 +59,10 @@ public interface ModuleActivator {
    * @param previousModuleVersion previous module version or <code>null</code> if first install
    * @since 2.9.0
    */
-  @SuppressWarnings("unused")
   default void setupOnVersionChangeBeforeSchemaChanges(
-      String previousCoreVersion, String previousModuleVersion) {}
+      String previousCoreVersion, String previousModuleVersion) {
+    ignore(previousCoreVersion, previousModuleVersion);
+  }
 
   /**
    * Called after Liquibase runs, but only if core or this module version changed.
@@ -70,6 +71,13 @@ public interface ModuleActivator {
    * @param previousModuleVersion previous module version or <code>null</code> if first install
    * @since 2.9.0
    */
-  @SuppressWarnings("unused")
-  default void setupOnVersionChange(String previousCoreVersion, String previousModuleVersion) {}
+  default void setupOnVersionChange(String previousCoreVersion, String previousModuleVersion) {
+    ignore(previousCoreVersion, previousModuleVersion);
+  }
+
+  private static void ignore(Object... values) {
+    if (values.length == -1) {
+      throw new IllegalStateException();
+    }
+  }
 }

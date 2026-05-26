@@ -16,9 +16,7 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 @Handler(supports = Mapped.class, order = 0)
 public class MappedConverter implements Converter<Mapped> {
 
-  @SuppressWarnings("unused")
-  public DelegatingResourceDescription getResourceDescription(
-      Mapped mapped, Representation representation) {
+  public DelegatingResourceDescription getResourceDescription(Representation representation) {
     if (representation instanceof CustomRepresentation) {
       return ConversionUtil.getCustomRepresentationDescription(
           (CustomRepresentation) representation);
@@ -33,7 +31,7 @@ public class MappedConverter implements Converter<Mapped> {
   public SimpleObject asRepresentation(Mapped o, Representation rep) throws ConversionException {
     SimpleObject ret = new SimpleObject();
     Map<String, DelegatingResourceDescription.Property> props =
-        getResourceDescription(o, rep).getProperties();
+        getResourceDescription(rep).getProperties();
     for (String propName : props.keySet()) {
       Object value = getProperty(o, propName);
       ret.put(

@@ -2411,7 +2411,7 @@ public class HibernateConceptDAO implements ConceptDAO {
         drugReferenceMapJoin.join("conceptReferenceTerm");
     List<Predicate> basePredicates =
         createSearchDrugByMappingPredicates(
-            cb, drugRoot, drugReferenceMapJoin, termJoin, code, conceptSource, includeRetired);
+            cb, drugRoot, termJoin, code, conceptSource, includeRetired);
 
     if (!withAnyOfTheseTypes.isEmpty()) {
       // Create a predicate to check if the ConceptMapType is in the provided collection
@@ -2448,8 +2448,7 @@ public class HibernateConceptDAO implements ConceptDAO {
             drugReferenceMapJoin.join("conceptReferenceTerm");
 
         List<Predicate> basePredicates =
-            createSearchDrugByMappingPredicates(
-                cb, drugRoot, drugReferenceMapJoin, termJoin, code, conceptSource, true);
+            createSearchDrugByMappingPredicates(cb, drugRoot, termJoin, code, conceptSource, true);
 
         List<Predicate> predicates = new ArrayList<>(basePredicates);
         predicates.add(cb.equal(drugReferenceMapJoin.get("conceptMapType"), conceptMapType));
@@ -2473,8 +2472,7 @@ public class HibernateConceptDAO implements ConceptDAO {
           drugReferenceMapJoin.join("conceptReferenceTerm");
 
       List<Predicate> basePredicates =
-          createSearchDrugByMappingPredicates(
-              cb, drugRoot, drugReferenceMapJoin, termJoin, code, conceptSource, true);
+          createSearchDrugByMappingPredicates(cb, drugRoot, termJoin, code, conceptSource, true);
 
       cq.where(basePredicates.toArray(new Predicate[] {}));
 
@@ -2609,7 +2607,6 @@ public class HibernateConceptDAO implements ConceptDAO {
   private List<Predicate> createSearchDrugByMappingPredicates(
       CriteriaBuilder cb,
       Root<Drug> drugRoot,
-      Join<Drug, DrugReferenceMap> drugReferenceMapJoin,
       Join<DrugReferenceMap, ConceptReferenceTerm> termJoin,
       String code,
       ConceptSource conceptSource,

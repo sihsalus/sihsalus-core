@@ -89,7 +89,7 @@ public class HibernateEmrConceptDAO implements EmrConceptDAO {
               null,
               matchedName.getConcept(),
               matchedName,
-              calculateMatchScore(query, uniqueWords, matchedName)));
+              calculateMatchScore(query, matchedName)));
       if (matchedName.isLocalePreferred()) {
         conceptsMatchedByPreferredName.add(matchedName.getConcept());
       }
@@ -270,8 +270,7 @@ public class HibernateEmrConceptDAO implements EmrConceptDAO {
     return 10000d;
   }
 
-  private Double calculateMatchScore(
-      String query, List<String> uniqueWords, ConceptName matchedName) {
+  private Double calculateMatchScore(String query, ConceptName matchedName) {
     double score = 0d;
     if (query.equalsIgnoreCase(matchedName.getName())) {
       score += 1000d;

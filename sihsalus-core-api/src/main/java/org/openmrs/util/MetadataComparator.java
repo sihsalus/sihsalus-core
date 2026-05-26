@@ -10,6 +10,7 @@
 package org.openmrs.util;
 
 import java.io.Serializable;
+import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
 import org.openmrs.OpenmrsMetadata;
@@ -24,12 +25,13 @@ public class MetadataComparator implements Comparator<OpenmrsMetadata>, Serializ
 
   private static final long serialVersionUID = 1L;
 
+  private final Collator collator;
+
   /**
    * @param locale
    */
-  @SuppressWarnings("unused")
   public MetadataComparator(Locale locale) {
-    // locale is currently not used
+    collator = Collator.getInstance(locale == null ? Locale.getDefault() : locale);
   }
 
   /**
@@ -39,8 +41,15 @@ public class MetadataComparator implements Comparator<OpenmrsMetadata>, Serializ
   public int compare(OpenmrsMetadata left, OpenmrsMetadata right) {
     int temp = OpenmrsUtil.compareWithNullAsLowest(left.getRetired(), right.getRetired());
     if (temp == 0) {
-      temp = OpenmrsUtil.compareWithNullAsLowest(left.getName(), right.getName());
+      temp = compareNames(left.getName(), right.getName());
     }
     return temp;
+  }
+
+  private int compareNames(String leftName, String rightName) {
+    if (leftName == null || rightName == null) {
+      return OpenmrsUtil.compareWithNullAsLowest(leftName, rightName);
+    }
+    return collator.compare(leftName, rightName);
   }
 }

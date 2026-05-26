@@ -28,9 +28,9 @@ public class SequenceGenerator implements CustomReferenceByIdMarshaller.IDGenera
 
   /**
    * @see
-   *     org.openmrs.serialization.xstream.strategy.CustomReferenceByIdMarshaller.IDGenerator#next(java.lang.Object)
+   *     org.openmrs.serialization.xstream.strategy.CustomReferenceByIdMarshaller.IDGenerator#next()
    */
-  public String next(Object item) {
+  public String next() {
     return String.valueOf(counter++);
   }
 }
