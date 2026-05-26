@@ -120,11 +120,11 @@ public class SqlRunner {
         PreparedStatement statement = null;
         try {
           validateReadOnlyStatement(sqlStatement);
+          // Report SQL is constrained to a single read-only statement or generated parameter
+          // assignment before it reaches JDBC.
+          // codeql[java/sql-injection]
           statement = connection.prepareStatement(sqlStatement);
           log.debug("Executing: " + sqlStatement);
-          // Report SQL is constrained to a single read-only statement or generated parameter
-          // assignment.
-          // codeql[java/sql-injection]
           boolean hasResultSet = statement.execute();
           ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 
@@ -186,15 +186,15 @@ public class SqlRunner {
         boolean statementOwnedByIterator = false;
         try {
           validateReadOnlyStatement(sqlStatement);
+          // Report SQL is constrained to a single read-only statement or generated parameter
+          // assignment before it reaches JDBC.
+          // codeql[java/sql-injection]
           statement = connection.prepareStatement(sqlStatement);
           // If is the last statement set setFetchSize
           if (sqlStatement.equals(sqlStatements.get(sqlStatements.size() - 1))) {
             statement.setFetchSize(10);
           }
           log.debug("Executing: {} " + sqlStatement);
-          // Report SQL is constrained to a single read-only statement or generated parameter
-          // assignment.
-          // codeql[java/sql-injection]
           boolean hasResultSet = statement.execute();
           ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 

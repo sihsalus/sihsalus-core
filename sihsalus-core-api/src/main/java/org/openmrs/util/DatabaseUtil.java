@@ -184,6 +184,8 @@ public class DatabaseUtil {
 
   private static void populateResultsFromSQLQuery(
       Connection conn, String sql, boolean dataManipulation, List<List<Object>> results) {
+    // SQL is either selectOnly/read-only validated above or explicitly invoked by SQL-level callers.
+    // codeql[java/sql-injection]
     try (PreparedStatement ps = conn.prepareStatement(sql)) {
       if (dataManipulation) {
         Integer i = ps.executeUpdate();
@@ -191,9 +193,6 @@ public class DatabaseUtil {
         row.add(i);
         results.add(row);
       } else {
-        // SQL is either selectOnly/read-only validated above or explicitly invoked by SQL-level
-        // callers.
-        // codeql[java/sql-injection]
         try (ResultSet resultSet = ps.executeQuery()) {
           ResultSetMetaData rmd = resultSet.getMetaData();
           int columnCount = rmd.getColumnCount();
