@@ -119,8 +119,8 @@ public class Fraction extends Number implements Comparable<Fraction>, Serializab
    * @should compare two fractions numerically
    */
   public int compareTo(Fraction that) {
-    long n1 = this.numerator * that.denominator;
-    long n2 = this.denominator * that.numerator;
+    long n1 = (long) this.numerator * that.denominator;
+    long n2 = (long) this.denominator * that.numerator;
     return ((n1 < n2) ? -1 : (n1 > n2 ? 1 : 0));
   }
 

@@ -486,20 +486,20 @@ public class DateUtil {
    */
   public static String getTimeElapsed(long duration) {
     StringBuilder sb = new StringBuilder();
-    int hrs = (int) (duration / (1000 * 60 * 60));
+    int hrs = (int) (duration / (1000L * 60L * 60L));
     if (hrs > 0) {
       sb.append(hrs + "(h) ");
-      duration = duration - (hrs * 1000 * 60 * 60);
+      duration = duration - ((long) hrs * 1000L * 60L * 60L);
     }
-    int mins = (int) (duration / (1000 * 60));
+    int mins = (int) (duration / (1000L * 60L));
     if (mins > 0) {
       sb.append(mins + "(m) ");
-      duration = duration - (mins * 1000 * 60);
+      duration = duration - ((long) mins * 1000L * 60L);
     }
     int secs = (int) (duration / 1000);
     if (secs > 0) {
       sb.append(secs + "(s) ");
-      duration = duration - (secs * 1000);
+      duration = duration - ((long) secs * 1000L);
     }
     sb.append(duration + "(ms)");
     return sb.toString();

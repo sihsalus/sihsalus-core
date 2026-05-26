@@ -652,7 +652,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
     do {
       List<Integer> batch =
           ruleNotificationUsers.stream()
-              .skip(startIndex * updateBatchSize)
+              .skip(startIndex * (long) updateBatchSize)
               .map(p -> p.getId())
               .limit(updateBatchSize)
               .collect(Collectors.toList());
@@ -681,7 +681,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
     do {
       List<Integer> batch =
           ruleNotificationUsers.stream()
-              .skip(startIndex * updateBatchSize)
+              .skip(startIndex * (long) updateBatchSize)
               .map(p -> p.getId())
               .limit(updateBatchSize)
               .collect(Collectors.toList());

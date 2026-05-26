@@ -73,7 +73,7 @@ public class DateUtil {
     int hours = calendar.get(Calendar.HOUR_OF_DAY);
     int minutes = calendar.get(Calendar.MINUTE);
     int seconds = calendar.get(Calendar.SECOND);
-    long milliSeconds = ((hours * 3600 + minutes * 60 + seconds) * 1000);
+    long milliSeconds = (hours * 3600L + minutes * 60L + seconds) * 1000L;
     return milliSeconds;
   }
 

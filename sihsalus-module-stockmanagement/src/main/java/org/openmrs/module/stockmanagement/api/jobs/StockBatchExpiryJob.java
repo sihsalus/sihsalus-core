@@ -599,7 +599,7 @@ public class StockBatchExpiryJob extends AbstractTask {
 
       List<StockBatchDTO> batch =
           stockBatchDTOs.values().stream()
-              .skip(startIndex * batchSize)
+              .skip(startIndex * (long) batchSize)
               .limit(batchSize)
               .collect(Collectors.toList());
       if (batch.isEmpty()) break;

@@ -171,7 +171,7 @@ public class StockExpiryReport extends ReportGenerator {
             inventorySearchFilter.setItemGroupFilters(new ArrayList<>());
             List<Map.Entry<Integer, List<StockBatchLineItem>>> stockItemGroupsPage =
                 stockItemGroups.entrySet().stream()
-                    .skip(startIndex * 100)
+                    .skip(startIndex * 100L)
                     .limit(100)
                     .collect(Collectors.toList());
             if (stockItemGroupsPage.isEmpty()) {

@@ -172,7 +172,7 @@ public class MostLeastMovingItemsReport extends ReportGenerator {
         }
         pageRecords =
             result.getData().stream()
-                .skip(writePageIndex * 100)
+                .skip(writePageIndex * 100L)
                 .limit(100)
                 .collect(Collectors.toList());
         stockInventoryResult.setData(pageRecords);
