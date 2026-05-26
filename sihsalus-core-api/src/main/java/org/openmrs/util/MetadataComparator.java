@@ -27,6 +27,7 @@ public class MetadataComparator implements Comparator<OpenmrsMetadata>, Serializ
   /**
    * @param locale
    */
+  @SuppressWarnings("unused")
   public MetadataComparator(Locale locale) {
     // locale is currently not used
   }
