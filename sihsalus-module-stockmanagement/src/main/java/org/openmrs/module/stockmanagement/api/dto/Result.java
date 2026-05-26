@@ -5,6 +5,7 @@ import org.openmrs.module.stockmanagement.api.PagingInfoBase;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -40,7 +41,7 @@ public class Result<T> extends PagingInfoBase implements IPagingInfo {
 		getMutableData().add(item);
 	}
 
-	public void addAllData(List<T> items) {
+	public void addAllData(Collection<? extends T> items) {
 		getMutableData().addAll(items);
 	}
 
