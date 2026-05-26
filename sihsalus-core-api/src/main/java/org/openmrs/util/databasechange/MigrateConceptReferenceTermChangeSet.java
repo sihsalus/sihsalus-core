@@ -52,10 +52,13 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
       throw new CustomChangeException("A database connection is required");
     }
     DatabaseConnection databaseConnection = database.getConnection();
+    if (databaseConnection == null) {
+      throw new CustomChangeException("A database connection is required");
+    }
     if (!(databaseConnection instanceof JdbcConnection)) {
       throw new CustomChangeException("A database connection is required");
     }
-    JdbcConnection connection = (JdbcConnection) databaseConnection;
+    final JdbcConnection connection = (JdbcConnection) databaseConnection;
     Boolean prevAutoCommit = null;
 
     PreparedStatement selectTypes = null;
@@ -82,6 +85,11 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
         typesToIds.put(
             selectTypeResult.getString("name").trim().toUpperCase(),
             selectTypeResult.getInt("concept_map_type_id"));
+      }
+      Integer defaultMapTypeId = typesToIds.get(DEFAULT_CONCEPT_MAP_TYPE);
+      if (defaultMapTypeId == null) {
+        throw new CustomChangeException(
+            "Missing default concept map type: " + DEFAULT_CONCEPT_MAP_TYPE);
       }
       selectTypes.close();
 
@@ -134,8 +142,7 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
         final String uuid = selectMapResult.getString("uuid");
 
         final Integer mapTypeId = determineMapTypeId(comment, typesToIds);
-        final int updatedMapTypeId =
-            (mapTypeId == null) ? typesToIds.get(DEFAULT_CONCEPT_MAP_TYPE) : mapTypeId;
+        final int updatedMapTypeId = (mapTypeId == null) ? defaultMapTypeId : mapTypeId;
         updateMapType.setInt(1, updatedMapTypeId);
         updateMapType.setInt(2, conceptMapId);
         updateMapType.execute();
@@ -206,9 +213,7 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
       connection.commit();
     } catch (Exception e) {
       try {
-        if (connection != null) {
-          connection.rollback();
-        }
+        connection.rollback();
       } catch (Exception ex) {
         log.error("Failed to rollback", ex);
       }
@@ -224,7 +229,7 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
       closeStatementQuietly(insertTerm);
       closeStatementQuietly(updateMapType);
 
-      if (connection != null && prevAutoCommit != null) {
+      if (prevAutoCommit != null) {
         try {
           connection.setAutoCommit(prevAutoCommit);
         } catch (DatabaseException e) {
