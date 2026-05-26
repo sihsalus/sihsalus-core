@@ -187,7 +187,7 @@ public class MessageServiceImpl implements MessageService {
 	 */
 	@Override
 	public void sendMessage(Message message, User user) throws MessageException {
-		log.debug("Sending message to userId {}", user == null ? null : user.getUserId());
+		log.debug("Sending message to userId {}", user.getUserId());
 		String address = user.getUserProperty(OpenmrsConstants.USER_PROPERTY_NOTIFICATION_ADDRESS);
 		if (address != null) {
 			message.addRecipient(address);
