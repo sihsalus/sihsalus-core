@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
 @Audited
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@SuppressWarnings("java/exposes-internal-representation")
 public class Person extends BaseChangeableOpenmrsData {
 
   public static final long serialVersionUID = 2L;

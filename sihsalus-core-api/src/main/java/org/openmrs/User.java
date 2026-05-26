@@ -62,6 +62,7 @@ import org.slf4j.LoggerFactory;
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Audited
+@SuppressWarnings("java/exposes-internal-representation")
 public class User extends BaseOpenmrsObject
     implements java.io.Serializable, Attributable<User>, Auditable, Retireable {
 

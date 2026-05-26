@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** Provides abstract implementation of the Data interface */
+@SuppressWarnings("java/exposes-internal-representation")
 public abstract class BaseData implements Data {
 
   // ***** PROPERTIES *****

@@ -41,6 +41,7 @@ import org.openmrs.module.reporting.query.IdSet;
  * will likely lose a lot of good cache data, particular between child and parent evaluations -
  * Capabilities to add, remove, and retrieve parameter values
  */
+@SuppressWarnings("java/exposes-internal-representation")
 public class EvaluationContext implements PatientCalculationContext {
 
   /* Logger */

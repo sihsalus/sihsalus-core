@@ -11,6 +11,7 @@ import org.openmrs.*;
 /** The persistent class for the stockmgmt_stock_operation database table. */
 @Entity(name = "stockmanagement.StockOperation")
 @Table(name = "stockmgmt_stock_operation")
+@SuppressWarnings("java/exposes-internal-representation")
 public class StockOperation extends BaseChangeableOpenmrsData implements Serializable {
 
   @Id

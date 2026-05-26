@@ -19,6 +19,7 @@ import java.util.Objects;
  *
  * @since 1.10, 1.9.8, 1.8.5, 1.7.5
  */
+@SuppressWarnings("java/exposes-internal-representation")
 public class ModuleConditionalResource {
 
   private String path;

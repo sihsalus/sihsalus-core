@@ -18,6 +18,7 @@ import org.openmrs.annotation.Independent;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.util.DateUtil;
 
+@SuppressWarnings("java/exposes-internal-representation")
 public class Appointment extends BaseOpenmrsData implements Serializable {
   private Integer appointmentId;
   private String appointmentNumber;

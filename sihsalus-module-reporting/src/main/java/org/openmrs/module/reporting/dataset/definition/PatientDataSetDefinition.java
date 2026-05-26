@@ -33,6 +33,7 @@ import org.openmrs.module.reporting.evaluation.parameter.ParameterizableUtil;
  * @see DataSetDefinition
  */
 @Localized("reporting.PatientDataSetDefinition")
+@SuppressWarnings("java/exposes-internal-representation")
 public class PatientDataSetDefinition extends RowPerObjectDataSetDefinition {
 
   public static final long serialVersionUID = 1L;

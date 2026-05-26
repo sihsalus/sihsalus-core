@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 
+@SuppressWarnings("java/exposes-internal-representation")
 public class AppointmentRecurringPattern {
 
   private Integer id;

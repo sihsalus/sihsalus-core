@@ -76,6 +76,7 @@ import org.springframework.util.ObjectUtils;
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Audited
+@SuppressWarnings("java/exposes-internal-representation")
 public class Concept extends BaseOpenmrsObject
     implements Auditable,
         Retireable,

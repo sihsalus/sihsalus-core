@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Holds all OpenMRS event listeners */
+@SuppressWarnings("java/exposes-internal-representation")
 public class EventListeners {
 
   private static final Logger log = LoggerFactory.getLogger(EventListeners.class);

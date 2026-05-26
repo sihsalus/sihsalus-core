@@ -30,6 +30,7 @@ import org.w3c.dom.Document;
  *
  * @version 1.0
  */
+@SuppressWarnings("java/exposes-internal-representation")
 public final class Module {
 
   private static final Logger log = LoggerFactory.getLogger(Module.class);

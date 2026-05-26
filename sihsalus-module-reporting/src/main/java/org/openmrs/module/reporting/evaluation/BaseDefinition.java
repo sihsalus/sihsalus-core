@@ -18,6 +18,7 @@ import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.evaluation.parameter.Parameterizable;
 
 /** Provides a Base implementation of the Definition interface */
+@SuppressWarnings("java/exposes-internal-representation")
 public abstract class BaseDefinition extends BaseOpenmrsMetadata implements Definition {
 
   protected static Log log = LogFactory.getLog(BaseDefinition.class);

@@ -28,6 +28,7 @@ import org.openmrs.module.reporting.definition.configuration.ConfigurationProper
  *
  * @see DataSetDefinition
  */
+@SuppressWarnings("java/exposes-internal-representation")
 public abstract class RowPerObjectDataSetDefinition extends BaseDataSetDefinition {
 
   public static final long serialVersionUID = 1L;

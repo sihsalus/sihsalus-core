@@ -41,6 +41,7 @@ import org.openmrs.util.OpenmrsUtil;
 @Entity
 @Table(name = "patient_program")
 @Audited
+@SuppressWarnings("java/exposes-internal-representation")
 public class PatientProgram extends BaseChangeableOpenmrsData
     implements Customizable<PatientProgramAttribute> {
 

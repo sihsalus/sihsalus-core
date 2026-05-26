@@ -43,6 +43,7 @@ import org.openmrs.module.cohort.exceptions.ManualChangeNotSupportedException;
 @Slf4j
 @Entity
 @Table(name = "cohort")
+@SuppressWarnings("java/exposes-internal-representation")
 public class CohortM extends BaseCustomizableData<CohortAttribute>
     implements Auditable, Customizable<CohortAttribute> {
 

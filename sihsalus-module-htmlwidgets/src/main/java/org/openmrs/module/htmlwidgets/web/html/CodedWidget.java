@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.module.htmlwidgets.web.WidgetConfig;
 
 /** This represents a single widget on a form. */
+@SuppressWarnings("java/exposes-internal-representation")
 public abstract class CodedWidget implements Widget {
 
   // ******* PROPERTIES *************

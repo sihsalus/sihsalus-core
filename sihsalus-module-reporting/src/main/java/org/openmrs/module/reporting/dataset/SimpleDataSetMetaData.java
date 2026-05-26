@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Implementation of DataSetMetaData which contains a simple list of {@link DataSetColumn} */
+@SuppressWarnings("java/exposes-internal-representation")
 public class SimpleDataSetMetaData implements DataSetMetaData {
 
   // ***** PROPERTIES *****

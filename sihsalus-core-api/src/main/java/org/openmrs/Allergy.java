@@ -32,6 +32,7 @@ import org.openmrs.util.OpenmrsUtil;
 @Entity
 @Table(name = "allergy")
 @Audited
+@SuppressWarnings("java/exposes-internal-representation")
 public class Allergy extends BaseFormRecordableOpenmrsData {
 
   public static final long serialVersionUID = 1;

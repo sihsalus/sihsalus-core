@@ -13,6 +13,7 @@ import org.openmrs.Location;
 import org.openmrs.customdatatype.CustomValueDescriptor;
 import org.openmrs.customdatatype.Customizable;
 
+@SuppressWarnings("java/exposes-internal-representation")
 public class AppointmentServiceDefinition extends BaseOpenmrsData
     implements Serializable, Customizable<AppointmentServiceAttribute> {
 

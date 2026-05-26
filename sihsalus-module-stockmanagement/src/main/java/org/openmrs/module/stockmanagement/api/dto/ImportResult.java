@@ -2,6 +2,7 @@ package org.openmrs.module.stockmanagement.api.dto;
 
 import java.util.List;
 
+@SuppressWarnings("java/exposes-internal-representation")
 public class ImportResult {
 
   private int createdCount = 0;
