@@ -146,7 +146,6 @@ public class DiagnosisMetadata extends ConceptSetDescriptor {
   }
 
   private boolean hasDiagnosisOrder(Obs obsGroup, String codeForDiagnosisOrderToCheckFor) {
-    // return orderObs.getValueCoded()
     throw new RuntimeException("Not Yet Implemented");
   }
 

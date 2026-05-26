@@ -27,7 +27,6 @@ import org.openmrs.obs.ComplexObsHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 /**
  * Handler for storing files for complex obs to the file system. Files are stored in the location
@@ -81,7 +80,10 @@ public class TextHandler extends AbstractHandler implements ComplexObsHandler {
       // NOTE: if adding support for another view, don't forget to update supportedViews list above
       return null;
     }
-    Assert.notNull(complexData, "Complex data must not be null");
+    if (complexData == null) {
+      throw new IllegalArgumentException("Complex data must not be null");
+    }
+    ComplexData nonNullComplexData = complexData;
 
     // Get the Mime Type and set it
     ObjectMetadata metadata;
@@ -98,9 +100,9 @@ public class TextHandler extends AbstractHandler implements ComplexObsHandler {
       mimeType = "text/plain";
     }
     mimeType = "application/octet-stream".equals(mimeType) ? "text/plain" : mimeType;
-    complexData.setMimeType(mimeType);
-    complexData.setLength(metadata.getLength());
-    obs.setComplexData(complexData);
+    nonNullComplexData.setMimeType(mimeType);
+    nonNullComplexData.setLength(metadata.getLength());
+    obs.setComplexData(nonNullComplexData);
 
     return obs;
   }

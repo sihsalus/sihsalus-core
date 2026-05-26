@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.UUID;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.DatabaseException;
@@ -47,12 +48,14 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
    */
   @Override
   public void execute(Database database) throws CustomChangeException {
-    if (database == null || database.getConnection() == null) {
+    if (database == null) {
       throw new CustomChangeException("A database connection is required");
     }
-    final JdbcConnection connection =
-        (JdbcConnection)
-            Objects.requireNonNull(database.getConnection(), "A database connection is required");
+    DatabaseConnection databaseConnection = database.getConnection();
+    if (!(databaseConnection instanceof JdbcConnection)) {
+      throw new CustomChangeException("A database connection is required");
+    }
+    JdbcConnection connection = (JdbcConnection) databaseConnection;
     Boolean prevAutoCommit = null;
 
     PreparedStatement selectTypes = null;
