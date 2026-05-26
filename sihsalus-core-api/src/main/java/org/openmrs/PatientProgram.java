@@ -443,7 +443,6 @@ public class PatientProgram extends BaseChangeableOpenmrsData
     this.program = program;
   }
 
-  @SuppressWarnings("java/internal-representation-exposure")
   public Set<PatientState> getStates() {
     return states;
   }

@@ -18,6 +18,7 @@ import org.openmrs.api.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("java/confusing-method-signature")
 public class Format {
 
   private static final Logger log = LoggerFactory.getLogger(Format.class);

@@ -368,7 +368,6 @@ public class Person extends BaseChangeableOpenmrsData {
    * @return list of known addresses for person
    * @see org.openmrs.PersonAddress
    */
-  @SuppressWarnings("java/internal-representation-exposure")
   public Set<PersonAddress> getAddresses() {
     if (addresses == null) {
       addresses = new TreeSet<>();

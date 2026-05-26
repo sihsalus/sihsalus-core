@@ -22,6 +22,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.Concept;
@@ -85,10 +86,16 @@ public class BillExemption extends BaseOpenmrsMetadata {
   }
 
   public List<BillExemptionRule> getRules() {
-    return rules;
+    return rules == null ? null : new ArrayList<>(rules);
   }
 
   public void setRules(List<BillExemptionRule> rules) {
-    this.rules = rules;
+    this.rules = rules == null ? null : new ArrayList<>(rules);
+  }
+
+  public void removeRule(BillExemptionRule rule) {
+    if (rules != null) {
+      rules.remove(rule);
+    }
   }
 }

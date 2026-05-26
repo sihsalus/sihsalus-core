@@ -39,7 +39,13 @@ public class FlagPatientDashboardHeaderExt extends Extension {
 		
 		FlagService flagService = Context.getService(FlagService.class);
 		
-		Integer patientID = Integer.valueOf(getParameterMap().get("patientId"));
+		Integer patientID;
+		try {
+			patientID = Integer.valueOf(getParameterMap().get("patientId"));
+		}
+		catch (NumberFormatException e) {
+			return "";
+		}
 		
 		Patient patient = Context.getPatientService().getPatient(patientID);
 		

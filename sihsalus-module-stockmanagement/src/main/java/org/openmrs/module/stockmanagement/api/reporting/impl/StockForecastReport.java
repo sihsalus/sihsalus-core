@@ -163,7 +163,7 @@ public class StockForecastReport extends ReportGenerator {
         StockItemInventorySearchFilter.ItemGroupFilter itemGroupFilter =
             new StockItemInventorySearchFilter.ItemGroupFilter();
         itemGroupFilter.setStockItemId(stockItem.getId());
-        inventorySearchFilter.getItemGroupFilters().add(itemGroupFilter);
+        inventorySearchFilter.addItemGroupFilter(itemGroupFilter);
       }
 
       if (!StringUtils.isBlank(stockItemCategoryUuid)) {
@@ -249,7 +249,7 @@ public class StockForecastReport extends ReportGenerator {
         int countOfSummed = 0;
         for (int linePartIndex = 3; linePartIndex < maxLinePartIndex; linePartIndex++) {
           BigDecimal consumed = new BigDecimal(lineParts[linePartIndex]);
-          stockItemInventory.getQuantityConsumed().add(consumed);
+          stockItemInventory.addQuantityConsumed(consumed);
           if (countOfSummed > 0 || consumed.compareTo(BigDecimal.ZERO) != 0) {
             countOfSummed++;
             sumConsumed = sumConsumed.add(consumed);

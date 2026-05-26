@@ -126,7 +126,6 @@ public class PatientDataSetDefinition extends RowPerObjectDataSetDefinition {
   /**
    * @return the rowFilters
    */
-  @SuppressWarnings("java/internal-representation-exposure")
   public List<Mapped<? extends CohortDefinition>> getRowFilters() {
     if (rowFilters == null) {
       rowFilters = new ArrayList<Mapped<? extends CohortDefinition>>();

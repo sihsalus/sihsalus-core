@@ -16,11 +16,18 @@ public class StockItemInventoryForecast extends StockItemInventory {
   }
 
   public List<BigDecimal> getQuantityConsumed() {
-    return quantityConsumed;
+    return quantityConsumed == null ? null : new ArrayList<>(quantityConsumed);
   }
 
   public void setQuantityConsumed(List<BigDecimal> quantityConsumed) {
-    this.quantityConsumed = quantityConsumed;
+    this.quantityConsumed = quantityConsumed == null ? null : new ArrayList<>(quantityConsumed);
+  }
+
+  public void addQuantityConsumed(BigDecimal quantityConsumed) {
+    if (this.quantityConsumed == null) {
+      this.quantityConsumed = new ArrayList<>();
+    }
+    this.quantityConsumed.add(quantityConsumed);
   }
 
   public BigDecimal getConsumptionRate() {

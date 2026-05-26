@@ -22,6 +22,7 @@ import java.util.List;
  * This class has convenience methods to find the fields on a class and superclass as well as
  * methods to check the class type of members in a collection
  */
+@SuppressWarnings("java/confusing-method-signature")
 public class Reflect {
 
   private Class parametrizedClass;

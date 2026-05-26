@@ -184,7 +184,7 @@ public class StockExpiryReport extends ReportGenerator {
               itemGroupFilter.setStockItemId(p.getKey());
               itemGroupFilter.setStockBatchIds(
                   p.getValue().stream().map(x -> x.getStockBatchId()).collect(Collectors.toList()));
-              inventorySearchFilter.getItemGroupFilters().add(itemGroupFilter);
+              inventorySearchFilter.addItemGroupFilter(itemGroupFilter);
             }
 
             Map<Integer, List<StockItemInventory>> inventoryResult =

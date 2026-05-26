@@ -319,7 +319,7 @@ public class ConceptName extends BaseOpenmrsObject
    * @return the tags.
    */
   public Collection<ConceptNameTag> getTags() {
-    return tags;
+    return tags == null ? null : new HashSet<>(tags);
   }
 
   /**
@@ -331,7 +331,7 @@ public class ConceptName extends BaseOpenmrsObject
    * @param tags the tags to set.
    */
   public void setTags(Collection<ConceptNameTag> tags) {
-    this.tags = tags;
+    this.tags = tags == null ? null : new HashSet<>(tags);
   }
 
   /**

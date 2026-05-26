@@ -227,7 +227,6 @@ public class Allergy extends BaseFormRecordableOpenmrsData {
   /**
    * @return Returns the reactions
    */
-  @SuppressWarnings("java/internal-representation-exposure")
   public List<AllergyReaction> getReactions() {
     return reactions;
   }

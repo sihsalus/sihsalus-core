@@ -54,6 +54,7 @@ import org.openmrs.util.OpenmrsUtil;
 @Table(name = "orders")
 @Audited
 @Inheritance(strategy = InheritanceType.JOINED)
+@SuppressWarnings("java/confusing-method-signature")
 public class Order extends BaseCustomizableData<OrderAttribute> implements FormRecordable {
 
   public static final long serialVersionUID = 4334343L;

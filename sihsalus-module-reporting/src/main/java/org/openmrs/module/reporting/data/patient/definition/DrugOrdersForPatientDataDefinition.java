@@ -97,14 +97,15 @@ public class DrugOrdersForPatientDataDefinition extends BaseDataDefinition
    * @return the drugConceptsToInclude
    */
   public List<Concept> getDrugConceptsToInclude() {
-    return drugConceptsToInclude;
+    return drugConceptsToInclude == null ? null : new ArrayList<Concept>(drugConceptsToInclude);
   }
 
   /**
    * @param drugConceptsToInclude the drugConceptsToInclude to set
    */
   public void setDrugConceptsToInclude(List<Concept> drugConceptsToInclude) {
-    this.drugConceptsToInclude = drugConceptsToInclude;
+    this.drugConceptsToInclude =
+        drugConceptsToInclude == null ? null : new ArrayList<Concept>(drugConceptsToInclude);
   }
 
   /**

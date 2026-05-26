@@ -1,6 +1,7 @@
 package org.openmrs.module.stockmanagement.api.dto.reporting;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class StockItemInventoryExpiryForecast extends StockItemInventoryForecast {
@@ -27,12 +28,18 @@ public class StockItemInventoryExpiryForecast extends StockItemInventoryForecast
     this.stockItemConsumptionRate = stockItemConsumptionRate;
   }
 
-  @SuppressWarnings("java/internal-representation-exposure")
   public List<BigDecimal> getForecastBalances() {
-    return forecastBalances;
+    return forecastBalances == null ? null : new ArrayList<>(forecastBalances);
   }
 
   public void setForecastBalances(List<BigDecimal> forecastBalances) {
-    this.forecastBalances = forecastBalances;
+    this.forecastBalances = forecastBalances == null ? null : new ArrayList<>(forecastBalances);
+  }
+
+  public void addForecastBalance(BigDecimal forecastBalance) {
+    if (forecastBalances == null) {
+      forecastBalances = new ArrayList<>();
+    }
+    forecastBalances.add(forecastBalance);
   }
 }
