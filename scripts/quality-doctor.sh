@@ -12,7 +12,9 @@ if [[ "$MAVEN_CMD" == "./mvnw" && ! -x "./mvnw" ]]; then
 fi
 SPOTBUGS_GOAL="com.github.spotbugs:spotbugs-maven-plugin:4.8.6.6:check"
 SKIP_TESTS=1
+RUN_SPOTBUGS=0
 STRICT_SPOTBUGS=0
+RUN_SPOTLESS=1
 MODULES=()
 
 usage() {
@@ -22,6 +24,8 @@ Usage: ./scripts/quality-doctor.sh [options]
 Options:
   --modules module1,module2  Run only specific modules (comma-separated)
   --tests                    Run tests after compile (default: skip tests)
+  --skip-spotless            Skip Maven Spotless check
+  --spotbugs                 Run SpotBugs using the fully-qualified Maven plugin
   --strict-spotbugs          Fail when SpotBugs finds existing issues
   --profiles <list>          Maven profiles to activate (comma-separated)
   -h, --help                Show this help message
@@ -29,11 +33,12 @@ Options:
 Examples:
   ./scripts/quality-doctor.sh
   ./scripts/quality-doctor.sh --modules sihsalus-core-api,sihsalus-module-reporting --tests
+  ./scripts/quality-doctor.sh --modules sihsalus-module-patientflags --spotbugs
   MAVEN_CMD=./mvnw ./scripts/quality-doctor.sh --modules sihsalus-core-api
 EOF
 }
 
-MAVEN_ARGS=("-DskipITs")
+BASE_MAVEN_ARGS=("-DskipITs")
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --modules)
@@ -44,12 +49,21 @@ while [[ $# -gt 0 ]]; do
       SKIP_TESTS=0
       shift
       ;;
+    --skip-spotless)
+      RUN_SPOTLESS=0
+      shift
+      ;;
+    --spotbugs)
+      RUN_SPOTBUGS=1
+      shift
+      ;;
     --strict-spotbugs)
+      RUN_SPOTBUGS=1
       STRICT_SPOTBUGS=1
       shift
       ;;
     --profiles)
-      MAVEN_ARGS+=("-P${2:-}")
+      BASE_MAVEN_ARGS+=("-P${2:-}")
       shift 2
       ;;
     -h|--help)
@@ -64,28 +78,41 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+SPOTLESS_MAVEN_ARGS=("${BASE_MAVEN_ARGS[@]}")
+BUILD_MAVEN_ARGS=("${BASE_MAVEN_ARGS[@]}")
 if (( ${#MODULES[@]} > 0 )); then
-  MAVEN_ARGS+=("-pl" "$(IFS=,; echo "${MODULES[*]}")" "-am")
+  module_list="$(IFS=,; echo "${MODULES[*]}")"
+  SPOTLESS_MAVEN_ARGS+=("-pl" "$module_list")
+  BUILD_MAVEN_ARGS+=("-pl" "$module_list" "-am")
 fi
 
-echo "=== Step 1/4: Spotless check ==="
-"$MAVEN_CMD" "${MAVEN_ARGS[@]}" spotless:check
+echo "=== Step 1: Git whitespace check ==="
+git diff --check
 
-echo "=== Step 2/4: SpotBugs check ==="
-if [[ "$STRICT_SPOTBUGS" == 1 ]]; then
-  "$MAVEN_CMD" "${MAVEN_ARGS[@]}" "$SPOTBUGS_GOAL"
+if [[ "$RUN_SPOTLESS" == 1 ]]; then
+  echo "=== Step 2: Spotless check ==="
+  "$MAVEN_CMD" "${SPOTLESS_MAVEN_ARGS[@]}" spotless:check
 else
-  "$MAVEN_CMD" "${MAVEN_ARGS[@]}" -Dspotbugs.failOnError=false "$SPOTBUGS_GOAL"
+  echo "=== Step 2: Skipped Spotless check ==="
 fi
 
-echo "=== Step 3/4: Compile ==="
-"$MAVEN_CMD" "${MAVEN_ARGS[@]}" -DskipTests compile
+echo "=== Step 3: Compile ==="
+"$MAVEN_CMD" "${BUILD_MAVEN_ARGS[@]}" -DskipTests compile
 
 if [[ "$SKIP_TESTS" == 0 ]]; then
-  echo "=== Step 4/4: Tests ==="
-  "$MAVEN_CMD" "${MAVEN_ARGS[@]}" test
+  echo "=== Step 4: Tests ==="
+  "$MAVEN_CMD" "${BUILD_MAVEN_ARGS[@]}" test
 else
-  echo "=== Step 4/4: Skipped tests ==="
+  echo "=== Step 4: Skipped tests ==="
+fi
+
+if [[ "$RUN_SPOTBUGS" == 1 ]]; then
+  echo "=== Step 5: SpotBugs check ==="
+  if [[ "$STRICT_SPOTBUGS" == 1 ]]; then
+    "$MAVEN_CMD" "${BUILD_MAVEN_ARGS[@]}" "$SPOTBUGS_GOAL"
+  else
+    "$MAVEN_CMD" "${BUILD_MAVEN_ARGS[@]}" -Dspotbugs.failOnError=false "$SPOTBUGS_GOAL"
+  fi
 fi
 
 echo "=== Quality doctor completed ==="

@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if (( ${#MODULES[@]} > 0 )); then
-  MAVEN_ARGS+=("-pl" "$(IFS=,; echo "${MODULES[*]}")" "-am")
+  MAVEN_ARGS+=("-pl" "$(IFS=,; echo "${MODULES[*]}")")
 fi
 
 echo "=== Formatting: Spotless apply ==="
