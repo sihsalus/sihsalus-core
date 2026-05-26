@@ -35,12 +35,16 @@ public class UpdateCohortMemberIdsChangeset implements CustomTaskChange {
   @Override
   public void execute(Database database) throws CustomChangeException {
     JdbcConnection connection = (JdbcConnection) database.getConnection();
-    try (Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM cohort_member");
-        PreparedStatement pStmt =
-            connection.prepareStatement(
-                "UPDATE cohort_member SET cohort_member_id = ?"
-                    + " WHERE cohort_id = ? AND patient_id = ?")) {
+    Statement stmt = null;
+    ResultSet rs = null;
+    PreparedStatement pStmt = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT * FROM cohort_member");
+      pStmt =
+          connection.prepareStatement(
+              "UPDATE cohort_member SET cohort_member_id = ?"
+                  + " WHERE cohort_id = ? AND patient_id = ?");
       int i = 0;
       while (rs.next()) {
         int cohortId = rs.getInt("cohort_id");
@@ -53,6 +57,20 @@ public class UpdateCohortMemberIdsChangeset implements CustomTaskChange {
       pStmt.executeBatch();
     } catch (DatabaseException | SQLException e) {
       log.warn("Error generated", e);
+    } finally {
+      closeQuietly(pStmt, "prepared statement");
+      closeQuietly(rs, "result set");
+      closeQuietly(stmt, "statement");
+    }
+  }
+
+  private void closeQuietly(AutoCloseable resource, String resourceName) {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (Exception e) {
+        log.warn("Failed to close {}", resourceName, e);
+      }
     }
   }
 

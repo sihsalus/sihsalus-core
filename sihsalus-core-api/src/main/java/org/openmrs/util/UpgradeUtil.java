@@ -150,15 +150,32 @@ public class UpgradeUtil {
 
   public static Integer getOrderFrequencyIdForConceptId(
       Connection connection, Integer conceptIdForFrequency) throws SQLException {
-    try (PreparedStatement orderFrequencyIdQuery =
-        connection.prepareStatement(
-            "select order_frequency_id from order_frequency where concept_id = ?")) {
+    PreparedStatement orderFrequencyIdQuery = null;
+    ResultSet orderFrequencyIdResultSet = null;
+    try {
+      orderFrequencyIdQuery =
+          connection.prepareStatement(
+              "select order_frequency_id from order_frequency where concept_id = ?");
       orderFrequencyIdQuery.setInt(1, conceptIdForFrequency);
-      try (ResultSet orderFrequencyIdResultSet = orderFrequencyIdQuery.executeQuery()) {
-        if (!orderFrequencyIdResultSet.next()) {
-          return null;
-        }
-        return orderFrequencyIdResultSet.getInt("order_frequency_id");
+      orderFrequencyIdResultSet = orderFrequencyIdQuery.executeQuery();
+      if (!orderFrequencyIdResultSet.next()) {
+        return null;
+      }
+      return orderFrequencyIdResultSet.getInt("order_frequency_id");
+    } finally {
+      closeQuietly(orderFrequencyIdResultSet);
+      closeQuietly(orderFrequencyIdQuery);
+    }
+  }
+
+  private static void closeQuietly(AutoCloseable resource) throws SQLException {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (SQLException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new SQLException("Unable to close database resource", e);
       }
     }
   }

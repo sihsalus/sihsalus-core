@@ -36,12 +36,15 @@ public class EncryptSecretAnswersChangeSet implements CustomTaskChange {
   @Override
   public void execute(Database database) throws CustomChangeException {
     JdbcConnection connection = (JdbcConnection) database.getConnection();
+    Statement stmt = null;
+    ResultSet rs = null;
     PreparedStatement pStmt = null;
 
-    try (Statement stmt = connection.createStatement();
-        ResultSet rs =
-            stmt.executeQuery(
-                "SELECT user_id, salt, secret_answer FROM users WHERE secret_answer IS NOT NULL")) {
+    try {
+      stmt = connection.createStatement();
+      rs =
+          stmt.executeQuery(
+              "SELECT user_id, salt, secret_answer FROM users WHERE secret_answer IS NOT NULL");
       pStmt = connection.prepareStatement("UPDATE users SET secret_answer = ? WHERE user_id = ?");
       while (rs.next()) {
         String answer = rs.getString("secret_answer");
@@ -56,12 +59,18 @@ public class EncryptSecretAnswersChangeSet implements CustomTaskChange {
     } catch (DatabaseException | SQLException e) {
       throw new CustomChangeException("Failed to update secret answers: " + e);
     } finally {
-      if (pStmt != null) {
-        try {
-          pStmt.close();
-        } catch (SQLException e) {
-          log.warn("Failed to close the prepared statement object");
-        }
+      closeQuietly(pStmt, "prepared statement");
+      closeQuietly(rs, "result set");
+      closeQuietly(stmt, "statement");
+    }
+  }
+
+  private void closeQuietly(AutoCloseable resource, String resourceName) {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (Exception e) {
+        log.warn("Failed to close {}", resourceName, e);
       }
     }
   }

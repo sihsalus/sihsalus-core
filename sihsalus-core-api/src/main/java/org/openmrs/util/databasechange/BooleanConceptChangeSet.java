@@ -294,8 +294,11 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
    * @throws CustomChangeException
    */
   private Integer getInt(JdbcConnection connection, String sql) throws CustomChangeException {
-    try (Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(sql)) {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery(sql);
       Integer result = null;
 
       if (rs.next()) {
@@ -312,6 +315,19 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
       return result;
     } catch (DatabaseException | SQLException e) {
       throw new CustomChangeException("Unable to get int", e);
+    } finally {
+      closeQuietly(rs, "result set");
+      closeQuietly(stmt, "statement");
+    }
+  }
+
+  private void closeQuietly(AutoCloseable resource, String resourceName) {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (Exception e) {
+        log.warn("Failed to close {}", resourceName, e);
+      }
     }
   }
 

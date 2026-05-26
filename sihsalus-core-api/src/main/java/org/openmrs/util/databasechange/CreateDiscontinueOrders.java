@@ -117,7 +117,9 @@ public class CreateDiscontinueOrders implements CustomTaskChange {
                 + "discontinued_by, discontinued_reason, discontinued_reason_non_coded, order_type_id "
                 + "from orders where discontinued = ?")) {
       statement.setBoolean(1, true);
-      try (ResultSet rs = statement.executeQuery()) {
+      ResultSet rs = null;
+      try {
+        rs = statement.executeQuery();
         while (rs.next()) {
           dcOrders.add(
               new DiscontinuedOrder(
@@ -131,11 +133,23 @@ public class CreateDiscontinueOrders implements CustomTaskChange {
                   rs.getDate("date_stopped"),
                   rs.getInt("order_type_id")));
         }
+      } finally {
+        closeQuietly(rs);
       }
     } catch (SQLException | DatabaseException e) {
       throw new CustomChangeException(e);
     }
     return dcOrders;
+  }
+
+  private void closeQuietly(AutoCloseable resource) {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (Exception e) {
+        // Ignore close failures from migration cleanup.
+      }
+    }
   }
 
   @Override
