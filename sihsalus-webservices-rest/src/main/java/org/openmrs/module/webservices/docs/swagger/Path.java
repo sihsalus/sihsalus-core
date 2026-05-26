@@ -24,7 +24,7 @@ public class Path {
 	}
 	
 	/**
-	 * @return the operation
+	 * @return the operations
 	 */
 	@JsonAnyGetter
 	public Map<String, Operation> getOperations() {
@@ -32,7 +32,7 @@ public class Path {
 	}
 	
 	/**
-	 * @param operation the operation to set
+	 * @param operations the operations to set
 	 */
 	public void setOperations(Map<String, Operation> operations) {
 		this.operations = operations;

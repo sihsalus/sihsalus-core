@@ -149,24 +149,26 @@ public class ReportUtil {
 	}
 	
 	public static void decompressFile(File inFile, File outFile) {
-		InputStream in = null;
-		OutputStream out = null;
-		try {
-            try {
-                in = new GZIPInputStream(new FileInputStream(inFile));
-            }
-            catch (ZipException ze) {
-                in = new FileInputStream(inFile); // Safety check.  If the file isn't actually compressed, try to use it as is.
-            }
-			out = new FileOutputStream(outFile);
+		try (InputStream in = openDecompressionInputStream(inFile); OutputStream out = new FileOutputStream(outFile)) {
 			IOUtils.copy(in, out);
 		}
 		catch (Exception e) {
 			log.warn("Unable to unzip file: " + inFile);
 		}
-		finally {
-			IOUtils.closeQuietly(in);
-			IOUtils.closeQuietly(out);
+	}
+
+	private static InputStream openDecompressionInputStream(File inFile) throws IOException {
+		FileInputStream fileIn = new FileInputStream(inFile);
+		try {
+			return new GZIPInputStream(fileIn);
+		}
+		catch (ZipException ze) {
+			IOUtils.closeQuietly(fileIn);
+			return new FileInputStream(inFile); // Safety check. If the file isn't actually compressed, try to use it as is.
+		}
+		catch (IOException ioe) {
+			IOUtils.closeQuietly(fileIn);
+			throw ioe;
 		}
 	}
 

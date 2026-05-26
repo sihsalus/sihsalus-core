@@ -30,7 +30,7 @@ public abstract class WidgetHandler {
 	/**
 	 * This is the main method that should be overridden by subclasses to render the appropriate Widget
 	 * @param config
-	 * @param out
+	 * @param w
 	 */
 	public abstract void render(WidgetConfig config, Writer w) throws IOException;
 	

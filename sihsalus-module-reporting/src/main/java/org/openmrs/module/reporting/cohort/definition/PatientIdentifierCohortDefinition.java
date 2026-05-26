@@ -114,7 +114,7 @@ public class PatientIdentifierCohortDefinition extends BaseCohortDefinition {
 	}
 	
 	/**
-	 * @param type the {@link Location} to add
+	 * @param location the {@link Location} to add
 	 */
 	public void addLocationToMatch(Location location) {
 		if (locationsToMatch == null) {

@@ -769,10 +769,14 @@ public class ModuleUtil {
 			log.warn("io while reading: " + url, io);
 		} finally {
 			try {
-				in.close();
+				if (in != null) {
+					in.close();
+				}
 			} catch (Exception e) { /* pass */}
 			try {
-				out.close();
+				if (out != null) {
+					out.close();
+				}
 			} catch (Exception e) { /* pass */}
 		}
 

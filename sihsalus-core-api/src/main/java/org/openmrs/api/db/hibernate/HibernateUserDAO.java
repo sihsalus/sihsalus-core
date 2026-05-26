@@ -405,9 +405,9 @@ public class HibernateUserDAO implements UserDAO {
 	/**
 	 * @param newHashedPassword
 	 * @param salt
-	 * @param userId
-	 * @param date
-	 * @param userId2
+	 * @param changedBy
+	 * @param dateChanged
+	 * @param userIdToChange
 	 */
 	private void updateUserPassword(String newHashedPassword, String salt, Integer changedBy, Date dateChanged,
 	        Integer userIdToChange) {

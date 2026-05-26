@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +13,6 @@ import org.openmrs.Role;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -25,8 +23,7 @@ public class PersonSearchController {
      * User Search
      */
     @RequestMapping("/module/htmlwidgets/personSearch.form")
-    public void personSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response, 
-    				@RequestParam(required=false, value="roles") String roles,
+    public void personSearch(HttpServletResponse response, @RequestParam(required=false, value="roles") String roles,
 		    		@RequestParam(required=true, value="q") String query) throws Exception {
     	
     	response.setContentType("text/plain");

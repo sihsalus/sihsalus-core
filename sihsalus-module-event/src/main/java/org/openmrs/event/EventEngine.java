@@ -504,16 +504,16 @@ public class EventEngine {
 		if ("getPropertyNames".equals(methodName)) {
 			return Collections.enumeration(properties.keySet());
 		}
-		if ("propertyExists".equals(methodName)) {
+		if ("propertyExists".equals(methodName) && args != null && args.length > 0) {
 			return properties.containsKey(args[0]);
 		}
-		if ("getObjectProperty".equals(methodName)) {
+		if ("getObjectProperty".equals(methodName) && args != null && args.length > 0) {
 			return properties.get(args[0]);
 		}
-		if (methodName.startsWith("get") && methodName.endsWith("Property")) {
+		if (methodName.startsWith("get") && methodName.endsWith("Property") && args != null && args.length > 0) {
 			return coerce(properties.get(args[0]), method.getReturnType());
 		}
-		if (methodName.startsWith("set") && methodName.endsWith("Property")) {
+		if (methodName.startsWith("set") && methodName.endsWith("Property") && args != null && args.length >= 2) {
 			properties.put((String) args[0], args[1]);
 			return null;
 		}

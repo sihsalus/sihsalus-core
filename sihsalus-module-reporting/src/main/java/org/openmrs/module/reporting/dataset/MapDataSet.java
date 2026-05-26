@@ -42,7 +42,6 @@ public class MapDataSet extends SimpleDataSet {
     
 	/**
      * Gets the DataSetRow for this DataSet
-     * @param dataElement - The data to add
      */
     public DataSetRow getData() {
     	if (getRows().isEmpty()) {

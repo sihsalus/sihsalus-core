@@ -40,13 +40,7 @@ public class TaskSearchParams extends BaseResourceSearchParams {
 	/**
 	 * Get collection of tasks corresponding to the provided search parameters
 	 *
-	 * @param basedOnReference A reference list to basedOn resources
-	 * @param ownerReference A reference list to owner resources
-	 * @param status A list of statuses
-	 * @param id The UUID of the requested task
-	 * @param lastUpdated A date range corresponding to when the Tasks were last updated
-	 * @param sort The sort parameters for the search results
-	 * @param includes request for specified referenced resources
+	 * This constructor binds the search criteria for Task resources.
 	 */
 	@Builder
 	public TaskSearchParams(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,

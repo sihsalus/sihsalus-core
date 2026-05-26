@@ -93,11 +93,15 @@ public class ReceiptNumberGeneratorFactory {
 			throw new APIException("Could not locate receipt number generator class.", classEx);
 		}
 		catch (InstantiationException instantiationEx) {
-			throw new APIException("Could not instantiate the '" + cls.getName() + "' class.", instantiationEx);
+			throw new APIException("Could not instantiate the '" + getGeneratorClassName(cls) + "' class.", instantiationEx);
 		}
 		catch (IllegalAccessException accessEx) {
-			throw new APIException("Could not access the '" + cls.getName() + "' class.", accessEx);
+			throw new APIException("Could not access the '" + getGeneratorClassName(cls) + "' class.", accessEx);
 		}
+	}
+
+	private static String getGeneratorClassName(Class<? super IReceiptNumberGenerator> cls) {
+		return cls == null ? "unknown" : cls.getName();
 	}
 	
 	/**

@@ -187,10 +187,12 @@ public class HibernateSessionFactoryBean extends LocalSessionFactoryBean impleme
 
 		// make sure all autowired interceptors are put onto our chaining interceptor
 		// sort on the keys so that the devs/modules have some sort of control over the order of the interceptors
-		List<String> keys = new ArrayList<>(interceptors.keySet());
-		Collections.sort(keys);
-		for (String key : keys) {
-			chainingInterceptor.addInterceptor(interceptors.get(key));
+		if (chainingInterceptor != null) {
+			List<String> keys = new ArrayList<>(interceptors.keySet());
+			Collections.sort(keys);
+			for (String key : keys) {
+				chainingInterceptor.addInterceptor(interceptors.get(key));
+			}
 		}
 
 		setEntityInterceptor(chainingInterceptor);

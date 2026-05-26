@@ -83,7 +83,7 @@ public interface AddressHierarchyService{
 	 * For example, the full address for the Beacon Hill neighborhood in the city of Boston might be:
 	 * "United States|Massachusetts|Suffolk County|Boston|Beacon Hill"
 	 * 
-	 * @param addressHierarchyEntry
+	 * @param entry
 	 * @return a list of full addresses associated with that entry
 	 */
 	public List<String> getPossibleFullAddresses(AddressHierarchyEntry entry);
@@ -226,7 +226,7 @@ public interface AddressHierarchyService{
 	 * be no two entries with the same parent and name)
 	 * 
 	 * @param entry
-	 * @param name
+	 * @param childName
 	 * @return the entry with the specified parent and name
 	 */
 	public AddressHierarchyEntry getChildAddressHierarchyEntryByName(AddressHierarchyEntry entry, String childName);
@@ -403,7 +403,7 @@ public interface AddressHierarchyService{
 	/**
 	 * Fetches the AddressToyEntryMap objects that match the given PersonAddress
 	 * 
-	 * @param personAddress the PersonAddreses to retrieve AddressToEntry records for
+	 * @param address the PersonAddress to retrieve AddressToEntry records for
 	 */
 	public List<AddressToEntryMap> getAddressToEntryMapsByPersonAddress(PersonAddress address);
 	

@@ -186,6 +186,10 @@ public class StockExpiryForecastReport extends ReportGenerator {
             inventorySearchFilter.setDoSetPartyNameField(true);
             inventorySearchFilter.setDoSetQuantityUoM(true);
 
+            if (step1File == null) {
+                stockManagementService.failBatchJob(batchJob.getUuid(), "Stock inventory staging file was not initialized");
+                return;
+            }
             bufferedStagingReader = Files.newBufferedReader(step1File.toPath());
             String inventoryLine = null;
             int recordsToSkip = recordsProcessed;

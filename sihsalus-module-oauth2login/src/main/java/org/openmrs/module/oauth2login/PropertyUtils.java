@@ -32,8 +32,9 @@ public class PropertyUtils {
 	
 	public static Properties getProperties(Path path) throws IOException {
         Properties props = new Properties();
-        try (InputStream inputStream = Files.newInputStream(path)) {
-            props.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        try (InputStream inputStream = Files.newInputStream(path);
+                InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            props.load(reader);
             for (String key : props.stringPropertyNames()) {
                 String value = props.getProperty(key);
                 props.setProperty(key, resolveEnvVariables(value));

@@ -76,7 +76,7 @@ public class OAuth2UserInfoAuthenticationScheme extends DaoAuthenticationScheme 
 				// Get the user again after the user has been created
 				user = getContextDAO().getUserByUsername(clientName);
 			} else {
-				updateUser(user, creds.getUserInfo());
+				updateUser(creds.getUserInfo());
 			}
 			
 			postProcessor.process(creds.getUserInfo());
@@ -98,7 +98,7 @@ public class OAuth2UserInfoAuthenticationScheme extends DaoAuthenticationScheme 
 		}
 	}
 	
-	private void updateUser(User user, UserInfo userInfo) {
+	private void updateUser(UserInfo userInfo) {
 		try {
 			UpdateUserTask task = new UpdateUserTask(userService, userInfo);
 			task.run();

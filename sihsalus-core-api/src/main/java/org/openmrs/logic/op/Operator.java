@@ -14,6 +14,10 @@ package org.openmrs.logic.op;
  */
 public interface Operator {
 
+	default String getSymbol() {
+		return toString();
+	}
+
 	// comparison operators
 	public static final Operator CONTAINS = ComparisonOperator.CONTAINS;
 

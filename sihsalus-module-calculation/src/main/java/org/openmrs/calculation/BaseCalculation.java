@@ -40,14 +40,14 @@ public abstract class BaseCalculation implements Calculation {
 	}
 
 	/**
-	 * @param parameterDefinitions the parameterDefinitions to set
+	 * @param parameterDefinitionSet the parameterDefinitions to set
 	 */
 	public void setParameterDefinitionSet(ParameterDefinitionSet parameterDefinitionSet) {
 		this.parameterDefinitionSet = parameterDefinitionSet;
 	}
 	
 	/**
-	 * @param parameterDefinition the parmaeterDefinition to add
+	 * @param parameterDefinitionSet the parmaeterDefinition to add
 	 */
 	public void addParameterDefinition(ParameterDefinition parameterDefinitionSet) {
 		getParameterDefinitionSet().add(parameterDefinitionSet);

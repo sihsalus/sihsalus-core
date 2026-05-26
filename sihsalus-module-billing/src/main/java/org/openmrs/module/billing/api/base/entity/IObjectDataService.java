@@ -53,7 +53,7 @@ public interface IObjectDataService<E extends OpenmrsObject> extends OpenmrsServ
 	 * single transaction.
 	 *
 	 * @param object The object to be saved to the database
-	 * @param collection The objects to be saved to the database
+	 * @param related The related objects to be saved to the database
 	 * @return The saved object.
 	 */
 	E saveAll(E object, Collection<? extends OpenmrsObject> related);
@@ -61,7 +61,7 @@ public interface IObjectDataService<E extends OpenmrsObject> extends OpenmrsServ
 	/**
 	 * Saves a collection of objects to the database
 	 *
-	 * @param related The related objects to be saved to the database
+	 * @param collection The objects to be saved to the database
 	 */
 	void saveAll(Collection<? extends OpenmrsObject> collection);
 	
