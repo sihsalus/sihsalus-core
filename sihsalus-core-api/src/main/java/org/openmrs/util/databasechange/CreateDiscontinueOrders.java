@@ -111,34 +111,29 @@ public class CreateDiscontinueOrders implements CustomTaskChange {
   private List<DiscontinuedOrder> getDiscontinuedOrders(JdbcConnection connection)
       throws CustomChangeException, SQLException {
     List<DiscontinuedOrder> dcOrders = new ArrayList<>();
-    PreparedStatement statement = null;
-    try {
-      statement =
+    try (PreparedStatement statement =
           connection.prepareStatement(
               "select order_id, concept_id, patient_id, encounter_id, date_stopped, "
                   + "discontinued_by, discontinued_reason, discontinued_reason_non_coded, order_type_id "
-                  + "from orders where discontinued = ?");
+                  + "from orders where discontinued = ?")) {
       statement.setBoolean(1, true);
-      ResultSet rs = statement.executeQuery();
-      while (rs.next()) {
-        dcOrders.add(
-            new DiscontinuedOrder(
-                rs.getInt("order_id"),
-                rs.getInt("concept_id"),
-                rs.getInt("patient_id"),
-                rs.getInt("encounter_id"),
-                rs.getInt("discontinued_by"),
-                rs.getInt("discontinued_reason"),
-                rs.getString("discontinued_reason_non_coded"),
-                rs.getDate("date_stopped"),
-                rs.getInt("order_type_id")));
+      try (ResultSet rs = statement.executeQuery()) {
+        while (rs.next()) {
+          dcOrders.add(
+              new DiscontinuedOrder(
+                  rs.getInt("order_id"),
+                  rs.getInt("concept_id"),
+                  rs.getInt("patient_id"),
+                  rs.getInt("encounter_id"),
+                  rs.getInt("discontinued_by"),
+                  rs.getInt("discontinued_reason"),
+                  rs.getString("discontinued_reason_non_coded"),
+                  rs.getDate("date_stopped"),
+                  rs.getInt("order_type_id")));
+        }
       }
     } catch (SQLException | DatabaseException e) {
       throw new CustomChangeException(e);
-    } finally {
-      if (statement != null) {
-        statement.close();
-      }
     }
     return dcOrders;
   }

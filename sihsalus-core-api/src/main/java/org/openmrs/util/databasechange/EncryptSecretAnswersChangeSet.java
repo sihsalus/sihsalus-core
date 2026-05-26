@@ -40,8 +40,8 @@ public class EncryptSecretAnswersChangeSet implements CustomTaskChange {
 
     try (Statement stmt = connection.createStatement();
         ResultSet rs =
-          stmt.executeQuery(
-              "SELECT user_id, salt, secret_answer FROM users WHERE secret_answer IS NOT NULL")) {
+            stmt.executeQuery(
+                "SELECT user_id, salt, secret_answer FROM users WHERE secret_answer IS NOT NULL")) {
       pStmt = connection.prepareStatement("UPDATE users SET secret_answer = ? WHERE user_id = ?");
       while (rs.next()) {
         String answer = rs.getString("secret_answer");

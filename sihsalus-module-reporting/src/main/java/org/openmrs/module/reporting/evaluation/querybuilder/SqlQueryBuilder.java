@@ -174,10 +174,8 @@ public class SqlQueryBuilder implements QueryBuilder {
 
                 @Override
                 public void execute(Connection connection) throws SQLException {
-                  PreparedStatement statement = null;
-                  try {
-                    statement = createPreparedStatement(connection);
-                    ResultSet resultSet = statement.executeQuery();
+                  try (PreparedStatement statement = createPreparedStatement(connection);
+                      ResultSet resultSet = statement.executeQuery()) {
                     if (resultSet != null) {
                       ResultSetMetaData metaData = resultSet.getMetaData();
                       while (resultSet.next()) {
@@ -187,13 +185,6 @@ public class SqlQueryBuilder implements QueryBuilder {
                         }
                         ret.add(row);
                       }
-                    }
-                  } finally {
-                    try {
-                      if (statement != null) {
-                        statement.close();
-                      }
-                    } catch (Exception e) {
                     }
                   }
                 }
