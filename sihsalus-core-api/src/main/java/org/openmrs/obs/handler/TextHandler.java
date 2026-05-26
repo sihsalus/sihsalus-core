@@ -18,6 +18,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 import org.openmrs.Obs;
 import org.openmrs.api.APIException;
@@ -95,13 +96,14 @@ public class TextHandler extends AbstractHandler implements ComplexObsHandler {
     if (metadata == null) {
       return obs;
     }
-    String mimeType = metadata.getMimeType();
+    ObjectMetadata nonNullMetadata = Objects.requireNonNull(metadata);
+    String mimeType = nonNullMetadata.getMimeType();
     if (mimeType == null) {
       mimeType = "text/plain";
     }
     mimeType = "application/octet-stream".equals(mimeType) ? "text/plain" : mimeType;
     nonNullComplexData.setMimeType(mimeType);
-    nonNullComplexData.setLength(metadata.getLength());
+    nonNullComplexData.setLength(nonNullMetadata.getLength());
     obs.setComplexData(nonNullComplexData);
 
     return obs;

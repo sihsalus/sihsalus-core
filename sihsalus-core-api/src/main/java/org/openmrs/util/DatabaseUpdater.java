@@ -455,11 +455,10 @@ public class DatabaseUpdater {
 
     try {
       Database database =
-          DatabaseFactory.getInstance()
-              .findCorrectDatabaseImplementation(new JdbcConnection(nonNullConnection));
-      if (database == null) {
-        throw new Exception("Unable to determine database implementation.");
-      }
+          Objects.requireNonNull(
+              DatabaseFactory.getInstance()
+                  .findCorrectDatabaseImplementation(new JdbcConnection(nonNullConnection)),
+              "Unable to determine database implementation.");
       database.setDatabaseChangeLogTableName("liquibasechangelog");
       database.setDatabaseChangeLogLockTableName("liquibasechangeloglock");
 
@@ -469,10 +468,8 @@ public class DatabaseUpdater {
               || databaseProductName.contains("H2"))) {
         // a hack because hsqldb and h2 seem to be checking table names in the metadata section case
         // sensitively
-        database.setDatabaseChangeLogTableName(
-            database.getDatabaseChangeLogTableName().toUpperCase());
-        database.setDatabaseChangeLogLockTableName(
-            database.getDatabaseChangeLogLockTableName().toUpperCase());
+        database.setDatabaseChangeLogTableName("LIQUIBASECHANGELOG");
+        database.setDatabaseChangeLogLockTableName("LIQUIBASECHANGELOGLOCK");
       }
 
       if (changeLogFile == null) {
