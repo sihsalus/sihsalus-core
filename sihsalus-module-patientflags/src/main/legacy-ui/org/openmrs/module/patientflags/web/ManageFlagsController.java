@@ -57,7 +57,12 @@ public class ManageFlagsController {
 			
 			@Override
 			public Object convertElement(Object element) {
-				return Context.getService(FlagService.class).getTag(Integer.valueOf((String) element));
+				try {
+					return Context.getService(FlagService.class).getTag(Integer.valueOf((String) element));
+				}
+				catch (NumberFormatException e) {
+					return null;
+				}
 			}
 		});
 	}
