@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Provides methods to access flag services */
 @Transactional
-@SuppressWarnings("unused")
 public interface FlagService extends OpenmrsService {
 
   /** Service methods that operate on Flags */

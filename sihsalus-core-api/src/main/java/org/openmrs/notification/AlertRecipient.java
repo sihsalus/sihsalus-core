@@ -151,7 +151,6 @@ public class AlertRecipient extends BaseOpenmrsObject {
   /**
    * @return Returns the recipientId.
    */
-  @SuppressWarnings("unused")
   private Integer getRecipientId() {
     return recipientId;
   }

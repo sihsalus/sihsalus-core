@@ -566,7 +566,6 @@ public class DbSession {
    * @param entityName The entity name
    * @param object a detached instance containing updated state
    */
-  @SuppressWarnings("unused")
   public void update(String entityName, Object object) {
     HibernateUtil.saveOrUpdate(getSession(), object);
   }

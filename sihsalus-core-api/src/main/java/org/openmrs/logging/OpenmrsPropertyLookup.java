@@ -40,7 +40,6 @@ import org.openmrs.util.OpenmrsUtil;
  * <p>Care should be taken in exposing information through this class to ensure that no
  */
 @Plugin(name = OpenmrsPropertyLookup.NAME, category = StrLookup.CATEGORY)
-@SuppressWarnings("unused")
 public class OpenmrsPropertyLookup extends AbstractLookup {
 
   public static final String NAME = "openmrs";
