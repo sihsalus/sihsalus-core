@@ -444,6 +444,11 @@ public class DatabaseUpdater {
           "Unable to get a connection to the database.  Please check your openmrs runtime properties file and make sure you have the correct connection.username and connection.password set",
           e);
     }
+    if (connection == null) {
+      throw new Exception(
+          "Unable to get a connection to the database.  Please check your openmrs runtime properties file and make sure you have the correct connection.username and connection.password set");
+    }
+    Connection nonNullConnection = connection;
     if (cl == null) {
       cl = OpenmrsClassLoader.getInstance();
     }
@@ -451,14 +456,14 @@ public class DatabaseUpdater {
     try {
       Database database =
           DatabaseFactory.getInstance()
-              .findCorrectDatabaseImplementation(new JdbcConnection(connection));
+              .findCorrectDatabaseImplementation(new JdbcConnection(nonNullConnection));
       if (database == null) {
         throw new Exception("Unable to determine database implementation.");
       }
       database.setDatabaseChangeLogTableName("liquibasechangelog");
       database.setDatabaseChangeLogLockTableName("liquibasechangeloglock");
 
-      String databaseProductName = connection.getMetaData().getDatabaseProductName();
+      String databaseProductName = nonNullConnection.getMetaData().getDatabaseProductName();
       if (databaseProductName != null
           && (databaseProductName.contains("HSQL Database Engine")
               || databaseProductName.contains("H2"))) {

@@ -83,6 +83,7 @@ public class TextHandler extends AbstractHandler implements ComplexObsHandler {
     if (complexData == null) {
       throw new IllegalArgumentException("Complex data must not be null");
     }
+    ComplexData nonNullComplexData = complexData;
 
     // Get the Mime Type and set it
     ObjectMetadata metadata;
@@ -99,9 +100,9 @@ public class TextHandler extends AbstractHandler implements ComplexObsHandler {
       mimeType = "text/plain";
     }
     mimeType = "application/octet-stream".equals(mimeType) ? "text/plain" : mimeType;
-    complexData.setMimeType(mimeType);
-    complexData.setLength(metadata.getLength());
-    obs.setComplexData(complexData);
+    nonNullComplexData.setMimeType(mimeType);
+    nonNullComplexData.setLength(metadata.getLength());
+    obs.setComplexData(nonNullComplexData);
 
     return obs;
   }
