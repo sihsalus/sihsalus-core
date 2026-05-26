@@ -10,6 +10,7 @@
 package org.openmrs.module.emrapi.maternal;
 
 import lombok.Data;
+import lombok.ToString;
 import org.openmrs.Patient;
 import org.openmrs.module.emrapi.adt.InpatientAdmission;
 
@@ -20,7 +21,9 @@ public class MotherAndChild {
 
   private Patient child;
 
+  @ToString.Exclude
   private InpatientAdmission motherAdmission;
 
+  @ToString.Exclude
   private InpatientAdmission childAdmission;
 }
