@@ -782,7 +782,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
         log.debug("Committing updates...");
         connection.commit();
       } catch (BatchUpdateException be) {
-        log.warn("Error generated while processsing batch update", be);
+        log.warn("Error generated while processing batch update", be);
         int[] updateCounts = be.getUpdateCounts();
 
         for (int updateCount : updateCounts) {
