@@ -244,7 +244,7 @@ public class DispensingLogsReport extends ReportGenerator {
         row.getQuantity().multiply(negativeOne).toPlainString(),
         row.getStockItemPackagingUOMName(),
         row.getStockItemPackagingUOMFactor().toPlainString(),
-        row.getOrderNumber() == null ? "" : row.getOrderNumber().toString(),
+        row.getOrderNumber() == null ? "" : row.getOrderNumber(),
         row.getStockItemTransactionId().toString(),
         row.getStockItemDrugId() == null ? "" : row.getStockItemDrugId().toString(),
         row.getStockItemConceptId() == null ? "" : row.getStockItemConceptId().toString());
