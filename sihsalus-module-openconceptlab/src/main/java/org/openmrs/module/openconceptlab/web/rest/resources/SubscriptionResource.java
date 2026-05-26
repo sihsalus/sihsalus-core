@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Locale;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openconceptlab.ImportService;
 import org.openmrs.module.openconceptlab.Subscription;
@@ -70,7 +71,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
   @Override
   public Subscription save(Subscription subscription) {
     requireManageConcepts();
-    if (!"url".equals(subscription.getUrl())) {
+    if (!StringUtils.isBlank(subscription.getUrl())) {
       validateSubscriptionUrl(subscription.getUrl());
       UpdateScheduler updateScheduler = getUpdateScheduler();
       updateScheduler.schedule(subscription);
@@ -206,7 +207,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
   }
 
   private void validateSubscriptionUrl(String url) {
-    if (url == null || url.trim().isEmpty()) {
+    if (StringUtils.isBlank(url)) {
       throw new IllegalRequestException("Subscription URL is required");
     }
     try {
