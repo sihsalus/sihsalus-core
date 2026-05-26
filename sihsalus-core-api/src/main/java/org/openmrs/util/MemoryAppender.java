@@ -27,8 +27,7 @@ import org.apache.logging.log4j.core.config.Property;
  * @deprecated As of 2.4.4, 2.5.1, and 2.6.0 this class is moved to the org.openmrs.logging package
  */
 @Deprecated
-@SuppressWarnings("java/class-name-matches-super-class")
-public class MemoryAppender extends org.openmrs.logging.MemoryAppender {
+public class MemoryAppender extends MemoryAppenderCompatibilityAdapter {
 
   private final org.openmrs.logging.MemoryAppender implementation;
 
@@ -311,5 +310,18 @@ public class MemoryAppender extends org.openmrs.logging.MemoryAppender {
     } else {
       super.stop();
     }
+  }
+}
+
+abstract class MemoryAppenderCompatibilityAdapter extends org.openmrs.logging.MemoryAppender {
+
+  MemoryAppenderCompatibilityAdapter(
+      String name,
+      Filter filter,
+      StringLayout layout,
+      boolean ignoreExceptions,
+      Property[] properties,
+      int bufferSize) {
+    super(name, filter, layout, ignoreExceptions, properties, bufferSize);
   }
 }
