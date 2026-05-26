@@ -13,6 +13,7 @@ package org.openmrs.module.htmlwidgets.web.handler;
 
 import java.io.IOException;
 import java.io.Writer;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.htmlwidgets.web.WidgetConfig;
@@ -39,4 +40,52 @@ public abstract class WidgetHandler {
    * @param type
    */
   public abstract Object parse(String input, Class<?> type);
+
+  protected Integer parseInteger(String input) {
+    if (StringUtils.isBlank(input)) {
+      return null;
+    }
+    try {
+      return Integer.valueOf(input);
+    } catch (NumberFormatException e) {
+      log.warn("Invalid integer value: " + input, e);
+      return null;
+    }
+  }
+
+  protected Long parseLong(String input) {
+    if (StringUtils.isBlank(input)) {
+      return null;
+    }
+    try {
+      return Long.valueOf(input);
+    } catch (NumberFormatException e) {
+      log.warn("Invalid long value: " + input, e);
+      return null;
+    }
+  }
+
+  protected Double parseDouble(String input) {
+    if (StringUtils.isBlank(input)) {
+      return null;
+    }
+    try {
+      return Double.valueOf(input);
+    } catch (NumberFormatException e) {
+      log.warn("Invalid double value: " + input, e);
+      return null;
+    }
+  }
+
+  protected Float parseFloat(String input) {
+    if (StringUtils.isBlank(input)) {
+      return null;
+    }
+    try {
+      return Float.valueOf(input);
+    } catch (NumberFormatException e) {
+      log.warn("Invalid float value: " + input, e);
+      return null;
+    }
+  }
 }

@@ -707,7 +707,14 @@ public class ModuleFileParser {
    * "true".
    */
   private boolean extractMandatory(Element configRoot, String configVersion) {
-    if (Double.parseDouble(configVersion) >= 1.3) {
+    double parsedConfigVersion;
+    try {
+      parsedConfigVersion = Double.parseDouble(configVersion);
+    } catch (NumberFormatException e) {
+      log.warn("Invalid module config version: " + configVersion, e);
+      return false;
+    }
+    if (parsedConfigVersion >= 1.3) {
       String mandatory = getElementTrimmed(configRoot, "mandatory");
       return "true".equalsIgnoreCase(mandatory);
     }

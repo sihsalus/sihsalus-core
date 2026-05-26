@@ -101,8 +101,13 @@ public class LogicUtil {
       List<List<Object>> results =
           Context.getAdministrationService()
               .executeSQL("select min(patient_id) from patient", true);
-      if (CollectionUtils.isNotEmpty(results) && CollectionUtils.isNotEmpty(results.get(0)))
-        testPatientId = Integer.parseInt(results.get(0).get(0).toString());
+      if (CollectionUtils.isNotEmpty(results) && CollectionUtils.isNotEmpty(results.get(0))) {
+        try {
+          testPatientId = Integer.parseInt(results.get(0).get(0).toString());
+        } catch (NumberFormatException e) {
+          throw new LogicException("Unable to parse test patient id", e);
+        }
+      }
     } finally {
       Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
     }

@@ -41,7 +41,8 @@ public class CohortHandler extends CodedHandler {
   @Override
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
-      return Context.getCohortService().getCohort(Integer.parseInt(input));
+      Integer cohortId = parseInteger(input);
+      return cohortId == null ? null : Context.getCohortService().getCohort(cohortId);
     }
     return null;
   }

@@ -50,7 +50,13 @@ public class VerhoeffIdentifierValidator extends BaseHyphenatedIdentifierValidat
    */
   @Override
   protected int getCheckDigit(String undecoratedIdentifier) {
-    int[] a = getBase(Integer.parseInt(undecoratedIdentifier), undecoratedIdentifier.length());
+    int identifier;
+    try {
+      identifier = Integer.parseInt(undecoratedIdentifier);
+    } catch (NumberFormatException e) {
+      throw new UnallowedIdentifierException("Identifier must contain only digits.", e);
+    }
+    int[] a = getBase(identifier, undecoratedIdentifier.length());
     insertCheck(a);
     return a[0];
   }

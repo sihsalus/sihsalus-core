@@ -56,8 +56,14 @@ public class AppointmentDaoImpl implements AppointmentDao {
     Map<String, Object> params = new HashMap<>();
     params.put("cancelled", AppointmentStatus.Cancelled);
     if (hours != null) {
+      Integer hoursOffset;
+      try {
+        hoursOffset = Integer.valueOf(hours);
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Invalid appointment reminder hour value: " + hours, e);
+      }
       Date minDate =
-          new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(Integer.valueOf(hours)));
+          new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(hoursOffset));
       Date maxDate = new Date(minDate.getTime() + TimeUnit.HOURS.toMillis(1));
       hql.append(" and a.startDateTime >= :minDate and a.startDateTime < :maxDate");
       params.put("minDate", minDate);

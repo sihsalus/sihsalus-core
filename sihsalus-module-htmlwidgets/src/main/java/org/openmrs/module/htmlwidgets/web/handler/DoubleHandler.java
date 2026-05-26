@@ -45,9 +45,9 @@ public class DoubleHandler extends WidgetHandler {
   public Object parse(String input, Class<?> type) {
     if (StringUtils.isNotBlank(input)) {
       if (type == Float.class) {
-        return Float.valueOf(input);
+        return parseFloat(input);
       }
-      return Double.valueOf(input);
+      return parseDouble(input);
     }
     return null;
   }

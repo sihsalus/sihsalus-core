@@ -96,7 +96,13 @@ public class AutoRetireUsersTask extends AbstractTask {
     String lastLoginTimeString = Context.getUserService().getLastLoginTime(user);
 
     if (StringUtils.isNotBlank(lastLoginTimeString)) {
-      long lastLoginTime = Long.parseLong(lastLoginTimeString);
+      long lastLoginTime;
+      try {
+        lastLoginTime = Long.parseLong(lastLoginTimeString);
+      } catch (NumberFormatException e) {
+        log.warn("Invalid last login time for user {}: {}", user.getUserId(), lastLoginTimeString, e);
+        return false;
+      }
 
       return System.currentTimeMillis() - lastLoginTime >= numberOfMillisecondsToRetire;
     } else {

@@ -40,6 +40,10 @@ public class FloatDatatype extends SerializingCustomDatatype<Float> {
     if (StringUtils.isEmpty(serializedValue)) {
       return null;
     }
-    return Float.valueOf(serializedValue);
+    try {
+      return Float.valueOf(serializedValue);
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Invalid float value: " + serializedValue, e);
+    }
   }
 }

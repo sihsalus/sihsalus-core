@@ -225,14 +225,19 @@ public class StockExpiryForecastReport extends ReportGenerator {
         String[] lineParts = inventoryLine.split(",", -1);
         StockItemInventoryExpiryForecast stockItemInventory =
             new StockItemInventoryExpiryForecast();
-        if (lineParts[0].length() > 0) {
-          stockItemInventory.setStockItemId(Integer.parseInt(lineParts[0]));
-        }
-        if (lineParts[1].length() > 0) {
-          stockItemInventory.setStockBatchId(Integer.parseInt(lineParts[1]));
-        }
-        if (lineParts[2].length() > 0) {
-          stockItemInventory.setExpiration(new Date(Long.parseLong(lineParts[2])));
+        try {
+          if (lineParts[0].length() > 0) {
+            stockItemInventory.setStockItemId(Integer.parseInt(lineParts[0]));
+          }
+          if (lineParts[1].length() > 0) {
+            stockItemInventory.setStockBatchId(Integer.parseInt(lineParts[1]));
+          }
+          if (lineParts[2].length() > 0) {
+            stockItemInventory.setExpiration(new Date(Long.parseLong(lineParts[2])));
+          }
+        } catch (NumberFormatException e) {
+          log.warn("Skipping inventory forecast row with invalid numeric value: " + inventoryLine, e);
+          continue;
         }
         int maxLinePartIndex = lineParts.length - 1;
         BigDecimal sumConsumed = BigDecimal.ZERO;

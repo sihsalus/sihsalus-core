@@ -1316,7 +1316,13 @@ public class ORUR01Handler implements Application {
           break;
         }
       }
-      int newLocationId = Integer.parseInt(dischargeToLocation);
+      int newLocationId;
+      try {
+        newLocationId = Integer.parseInt(dischargeToLocation);
+      } catch (NumberFormatException e) {
+        log.warn("Ignoring invalid discharge location id: " + dischargeToLocation, e);
+        return;
+      }
       // Hydrate a full patient object from patient object containing only
       // identifier
       patient = Context.getPatientService().getPatient(patient.getPatientId());
