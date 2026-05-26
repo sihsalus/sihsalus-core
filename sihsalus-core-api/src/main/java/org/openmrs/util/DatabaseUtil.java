@@ -133,15 +133,10 @@ public class DatabaseUtil {
    */
   public static List<List<Object>> executeSQL(Session session, String sql, boolean selectOnly)
       throws DAOException {
-    sql = sql.trim();
-    boolean dataManipulation = checkQueryForManipulationCommands(sql, selectOnly);
-
+    final SqlExecutionPlan query = validateSqlForExecution(sql, selectOnly);
     final List<List<Object>> result = new ArrayList<>();
-    final String query = sql;
-    final boolean sessionDataManipulation = dataManipulation;
 
-    session.doWork(
-        conn -> populateResultsFromSQLQuery(conn, query, sessionDataManipulation, result));
+    session.doWork(conn -> populateResultsFromSQLQuery(conn, query, result));
 
     return result;
   }
@@ -152,11 +147,16 @@ public class DatabaseUtil {
    */
   public static List<List<Object>> executeSQL(Connection conn, String sql, boolean selectOnly)
       throws DAOException {
-    sql = sql.trim();
-    boolean dataManipulation = checkQueryForManipulationCommands(sql, selectOnly);
+    SqlExecutionPlan query = validateSqlForExecution(sql, selectOnly);
     List<List<Object>> result = new ArrayList<>();
-    populateResultsFromSQLQuery(conn, sql, dataManipulation, result);
+    populateResultsFromSQLQuery(conn, query, result);
     return result;
+  }
+
+  private static SqlExecutionPlan validateSqlForExecution(String sql, boolean selectOnly) {
+    String statement = sql.trim();
+    boolean dataManipulation = checkQueryForManipulationCommands(statement, selectOnly);
+    return new SqlExecutionPlan(statement, dataManipulation);
   }
 
   private static boolean checkQueryForManipulationCommands(String sql, boolean selectOnly) {
@@ -183,11 +183,11 @@ public class DatabaseUtil {
   }
 
   private static void populateResultsFromSQLQuery(
-      Connection conn, String sql, boolean dataManipulation, List<List<Object>> results) {
+      Connection conn, SqlExecutionPlan sql, List<List<Object>> results) {
     // SQL is either selectOnly/read-only validated above or explicitly invoked by SQL-level
     // callers.
-    try (PreparedStatement ps = conn.prepareStatement(sql)) { // lgtm[java/sql-injection]
-      if (dataManipulation) {
+    try (PreparedStatement ps = conn.prepareStatement(String.valueOf(sql))) {
+      if (sql.isDataManipulation()) {
         Integer i = ps.executeUpdate();
         List<Object> row = new ArrayList<>();
         row.add(i);
@@ -250,6 +250,27 @@ public class DatabaseUtil {
   private static void validateSqlIdentifier(String identifier, String argumentName) {
     if (!StringUtils.hasText(identifier) || !SQL_IDENTIFIER_PATTERN.matcher(identifier).matches()) {
       throw new IllegalArgumentException(argumentName + " must be a simple SQL identifier");
+    }
+  }
+
+  private static final class SqlExecutionPlan {
+
+    private final String sql;
+
+    private final boolean dataManipulation;
+
+    private SqlExecutionPlan(String sql, boolean dataManipulation) {
+      this.sql = sql;
+      this.dataManipulation = dataManipulation;
+    }
+
+    private boolean isDataManipulation() {
+      return dataManipulation;
+    }
+
+    @Override
+    public String toString() {
+      return sql;
     }
   }
 }

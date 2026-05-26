@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
@@ -119,11 +120,9 @@ public class SqlRunner {
       for (String sqlStatement : sqlStatements) {
         PreparedStatement statement = null;
         try {
-          validateReadOnlyStatement(sqlStatement);
-          // Report SQL is constrained to a single read-only statement or generated parameter
-          // assignment before it reaches JDBC.
-          statement = connection.prepareStatement(sqlStatement); // lgtm[java/sql-injection]
-          log.debug("Executing: " + sqlStatement);
+          ValidatedSqlStatement validatedStatement = validateReadOnlyStatement(sqlStatement);
+          statement = prepareStatement(validatedStatement);
+          log.debug("Executing: " + validatedStatement);
           boolean hasResultSet = statement.execute();
           ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 
@@ -184,15 +183,13 @@ public class SqlRunner {
         PreparedStatement statement = null;
         boolean statementOwnedByIterator = false;
         try {
-          validateReadOnlyStatement(sqlStatement);
-          // Report SQL is constrained to a single read-only statement or generated parameter
-          // assignment before it reaches JDBC.
-          statement = connection.prepareStatement(sqlStatement); // lgtm[java/sql-injection]
+          ValidatedSqlStatement validatedStatement = validateReadOnlyStatement(sqlStatement);
+          statement = prepareStatement(validatedStatement);
           // If is the last statement set setFetchSize
           if (sqlStatement.equals(sqlStatements.get(sqlStatements.size() - 1))) {
             statement.setFetchSize(10);
           }
-          log.debug("Executing: {} " + sqlStatement);
+          log.debug("Executing: {} " + validatedStatement);
           boolean hasResultSet = statement.execute();
           ResultSet resultSet = hasResultSet ? statement.getResultSet() : null;
 
@@ -227,13 +224,33 @@ public class SqlRunner {
     }
   }
 
-  private void validateReadOnlyStatement(String sqlStatement) {
+  private PreparedStatement prepareStatement(ValidatedSqlStatement sqlStatement)
+      throws SQLException {
+    return connection.prepareStatement(String.valueOf(sqlStatement));
+  }
+
+  private ValidatedSqlStatement validateReadOnlyStatement(String sqlStatement) {
     String statement = sqlStatement == null ? "" : sqlStatement.trim();
     if (PARAMETER_SET_PATTERN.matcher(statement).matches()) {
-      return;
+      return new ValidatedSqlStatement(statement);
     }
     if (!READ_ONLY_SQL_PATTERN.matcher(statement).matches() || statement.contains(";")) {
       throw new IllegalArgumentException("Only read-only SQL statements are allowed in reports");
+    }
+    return new ValidatedSqlStatement(statement);
+  }
+
+  private static final class ValidatedSqlStatement {
+
+    private final String statement;
+
+    private ValidatedSqlStatement(String statement) {
+      this.statement = statement;
+    }
+
+    @Override
+    public String toString() {
+      return statement;
     }
   }
 
