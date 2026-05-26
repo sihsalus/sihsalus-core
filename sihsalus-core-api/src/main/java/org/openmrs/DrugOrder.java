@@ -37,6 +37,7 @@ import org.openmrs.util.OpenmrsUtil;
 @PrimaryKeyJoinColumn(name = "order_id")
 @OnDelete(action = OnDeleteAction.CASCADE)
 @Audited
+@SuppressWarnings("java/confusing-method-signature")
 public class DrugOrder extends Order {
 
   public static final long serialVersionUID = 72232L;

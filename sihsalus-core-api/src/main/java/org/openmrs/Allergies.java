@@ -18,6 +18,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.util.OpenmrsUtil;
 
 /** Represents patient allergies */
+@SuppressWarnings("java/confusing-method-signature")
 public class Allergies implements List<Allergy> {
 
   public static final String UNKNOWN = "Unknown";

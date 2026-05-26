@@ -49,6 +49,7 @@ import org.openmrs.module.metadatamapping.api.wrapper.ConceptAdapter;
 import org.springframework.transaction.annotation.Transactional;
 
 /** The service implementation. */
+@SuppressWarnings("java/confusing-method-signature")
 public class MetadataMappingServiceImpl extends BaseOpenmrsService
     implements MetadataMappingService {
 

@@ -46,6 +46,7 @@ import org.hibernate.stat.SessionStatistics;
  *
  * @since 1.12, 1.11.3, 1.10.2, 1.9.9
  */
+@SuppressWarnings("java/confusing-method-signature")
 public class DbSession {
 
   private SessionFactory sessionFactory;
