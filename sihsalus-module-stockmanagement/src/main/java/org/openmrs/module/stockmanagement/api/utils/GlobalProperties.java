@@ -336,8 +336,7 @@ public class GlobalProperties {
 
   public static Integer GetReportingRecordsPageSize() {
     try {
-      Integer result =
-          Integer.parseInt(getGlobalProperty("stockmanagement.reportingRecordsPageSize"));
+      int result = Integer.parseInt(getGlobalProperty("stockmanagement.reportingRecordsPageSize"));
       return result <= 0 ? 1000 : result;
     } catch (Exception exception) {
     }

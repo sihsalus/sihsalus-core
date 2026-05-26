@@ -81,7 +81,7 @@ public class CSVWriter extends AbstractCSVWriter {
         continue;
       }
 
-      Boolean stringContainsSpecialCharacters = stringContainsSpecialCharacters(nextElement);
+      boolean stringContainsSpecialCharacters = stringContainsSpecialCharacters(nextElement);
 
       appendQuoteCharacterIfNeeded(applyQuotesToAll, appendable, stringContainsSpecialCharacters);
 
@@ -99,7 +99,7 @@ public class CSVWriter extends AbstractCSVWriter {
   }
 
   private void appendQuoteCharacterIfNeeded(
-      boolean applyQuotesToAll, Appendable appendable, Boolean stringContainsSpecialCharacters)
+      boolean applyQuotesToAll, Appendable appendable, boolean stringContainsSpecialCharacters)
       throws IOException {
     if ((applyQuotesToAll || stringContainsSpecialCharacters) && quotechar != NO_QUOTE_CHARACTER) {
       appendable.append(quotechar);

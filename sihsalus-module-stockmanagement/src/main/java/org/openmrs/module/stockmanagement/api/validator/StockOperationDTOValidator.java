@@ -381,7 +381,8 @@ public class StockOperationDTOValidator implements Validator {
         errors.rejectValue(
             "stockOperationItems",
             String.format(
-                messageSourceService.getMessage("stockmanagement.stockoperation.purchasepriceinvalid"),
+                messageSourceService.getMessage(
+                    "stockmanagement.stockoperation.purchasepriceinvalid"),
                 index));
         return;
       }
