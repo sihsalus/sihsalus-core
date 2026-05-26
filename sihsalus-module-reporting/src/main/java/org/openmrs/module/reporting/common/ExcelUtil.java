@@ -83,9 +83,10 @@ public class ExcelUtil {
         if (ExcelUtil.isCellDateFormatted(cell)) {
           return cell.getDateCellValue();
         } else {
-          Double d = cell.getNumericCellValue();
-          if (d.intValue() == d.doubleValue()) {
-            return Integer.valueOf(d.intValue());
+          double d = cell.getNumericCellValue();
+          int intValue = (int) d;
+          if (intValue == d) {
+            return Integer.valueOf(intValue);
           }
           return d;
         }
