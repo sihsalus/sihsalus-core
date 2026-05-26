@@ -72,4 +72,3 @@ Example:
 mvn -pl sihsalus-module-stockmanagement -am -DskipTests compile
 mvn -pl sihsalus-module-reporting -am -DskipTests compile
 ```
-
