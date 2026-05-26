@@ -85,7 +85,6 @@ public class StockBatchExpiryJob extends AbstractTask {
       return;
     }
 
-    Map<Integer, Location> locationMap = new HashMap<>();
     Map<Integer, String> stockItemNameMap = new HashMap<>();
     Map<Integer, PartyDTO> partyDTOLocationMap = new HashMap<>();
     Map<Integer, PartyDTO> locationPartyDTOMap = new HashMap<>();
@@ -101,7 +100,6 @@ public class StockBatchExpiryJob extends AbstractTask {
             locationService.getLocationsHavingAnyTag(Arrays.asList(mainStore));
         mainStoreLocationIds =
             mainStoreLocations.stream().map(p -> p.getLocationId()).collect(Collectors.toList());
-        mainStoreLocations.forEach(p -> locationMap.putIfAbsent(p.getId(), p));
       }
     }
 
