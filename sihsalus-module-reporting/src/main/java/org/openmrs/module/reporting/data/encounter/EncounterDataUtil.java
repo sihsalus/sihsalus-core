@@ -52,7 +52,7 @@ public class EncounterDataUtil {
 				encIds = new EncounterIdSet(encIdsForPatIds);
 			}
 			else {
-				encIds.getMemberIds().retainAll(encIdsForPatIds);
+				encIds.retainAll(encIdsForPatIds);
 			}
 		}
 

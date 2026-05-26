@@ -16,7 +16,7 @@ public class StockOutReport extends StockStatusReport {
             if(maxReorderLevelRatio == null){
                 maxReorderLevelRatio = BigDecimal.ZERO;
             }
-            stockInventoryResult.getData().removeIf(p -> {
+            stockInventoryResult.removeDataIf(p -> {
                 return p.getQuantity()
                         .compareTo(maxReorderLevelRatio.divide(oneHundered, 5, BigDecimal.ROUND_HALF_EVEN).multiply(p.getReorderLevel() == null ? BigDecimal.ZERO : p.getReorderLevel().multiply(p.getReorderLevelFactor()))) > 0;
             });

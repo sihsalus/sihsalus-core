@@ -69,7 +69,7 @@ public class OrthancConfigurationDao {
 	}
 	
 	/**
-	 * @param config: Orthanc Configuration
+	 * @param config Orthanc Configuration
 	 */
 	public void remove(OrthancConfiguration config) {
 		getSession().delete(config);

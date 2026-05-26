@@ -45,7 +45,7 @@ public class IndicatorEditor extends PropertyEditorSupport {
 		if (i == null) {
 			return "";
 		} else {
-			return i.getUuid().toString();
+			return i.getUuid();
 		}
 	}
 	

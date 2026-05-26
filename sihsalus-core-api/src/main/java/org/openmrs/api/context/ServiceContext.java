@@ -147,6 +147,13 @@ public class ServiceContext implements ApplicationContextAware {
 	 * refreshing (being added/removed) and/or openmrs is shutting down
 	 */
 	public static void destroyInstance() {
+		ServiceContext instance = ServiceContextHolder.instance;
+		int serviceCount = instance == null || instance.services == null ? -1 : instance.services.size();
+		int moduleServiceCount = instance == null || instance.moduleOpenmrsServices == null ? -1
+		        : instance.moduleOpenmrsServices.size();
+		log.debug("Destroying ServiceContext instance [serviceCount={}, moduleServiceCount={}]", serviceCount,
+		    moduleServiceCount);
+
 		if (ServiceContextHolder.instance != null && ServiceContextHolder.instance.services != null) {
 			for (Map.Entry<Class, Object> entry : ServiceContextHolder.instance.services.entrySet()) {
 				log.debug("Service - {} : {}", entry.getKey().getName(), entry.getValue());
@@ -179,7 +186,6 @@ public class ServiceContext implements ApplicationContextAware {
 				ServiceContextHolder.instance.moduleOpenmrsServices = null;
 			}
 		}
-		log.debug("Destroying ServiceContext instance: {}", ServiceContextHolder.instance);
 		ServiceContextHolder.instance = null;
 	}
 

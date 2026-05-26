@@ -35,8 +35,7 @@ import lombok.RequiredArgsConstructor;
  * <strong>Thread Safety:</strong> This class is <em>not</em> thread-safe. Instances maintain
  * mutable state (predicates, joins, aliases) and should be used within a single request context. Do
  * not share instances across threads.
- *
- * @param <V> The type of the root entity for this query
+ * The type parameter {@code V} is the root entity for this query.
  */
 @RequiredArgsConstructor
 public abstract class BaseFhirCriteriaHolder<V> {

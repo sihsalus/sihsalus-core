@@ -163,70 +163,75 @@ public class HtmlUtil  {
 		}
 	}
 	
-	/**
-	 * Render a simple tag that has no body
-	 * @param context
-	 * @param attributes
-	 * @throws IOException
-	 */
+		/**
+		 * Render a simple tag that has no body
+		 * @param w
+		 * @param tagName
+		 * @param attributes
+		 * @throws IOException
+		 */
 	public static void renderSimpleTag(Writer w, String tagName, Collection<Attribute> attributes) throws IOException {
 		w.write("<"+tagName);
 		renderTagAttributes(w, tagName, attributes);
 		w.write("/>");
 	}
 	
-	/**
-	 * Render a simple tag that has no body
-	 * @param context
-	 * @param attributes
-	 * @throws IOException
-	 */
+		/**
+		 * Render a simple tag that has no body
+		 * @param w
+		 * @param tagName
+		 * @param attributeString
+		 * @throws IOException
+		 */
 	public static void renderSimpleTag(Writer w, String tagName, String attributeString) throws IOException {
 		w.write("<"+tagName);
 		renderTagAttributes(w, tagName, attributeString);
 		w.write("/>");
 	}
 
-	/**
-	 * Render an opening tag
-	 * @param context
-	 * @param attributes
-	 * @throws IOException
-	 */
+		/**
+		 * Render an opening tag
+		 * @param w
+		 * @param tagName
+		 * @param attributes
+		 * @throws IOException
+		 */
 	public static void renderOpenTag(Writer w, String tagName, Collection<Attribute> attributes) throws IOException {
 		w.write("<"+tagName);
 		renderTagAttributes(w, tagName, attributes);
 		w.write(">");
 	}
 	
-	/**
-	 * Render an opening tag
-	 * @param context
-	 * @param attributes
-	 * @throws IOException
-	 */
+		/**
+		 * Render an opening tag
+		 * @param w
+		 * @param tagName
+		 * @param attributeString
+		 * @throws IOException
+		 */
 	public static void renderOpenTag(Writer w, String tagName, String attributeString) throws IOException {
 		w.write("<"+tagName);
 		renderTagAttributes(w, tagName, attributeString);
 		w.write(">");
 	}
 	
-	/**
-	 * Render a closing tag
-	 * @param context
-	 * @param attributes
-	 * @throws IOException
-	 */
+		/**
+		 * Render a closing tag
+		 * @param w
+		 * @param tagName
+		 * @throws IOException
+		 */
 	public static void renderCloseTag(Writer w, String tagName) throws IOException {
 		w.write("</"+tagName+">");
 	}
 	
-	/**
-	 * Render the attribute map as it should be output in a tag
-	 * @param context
-	 * @param attributes
-	 * @throws IOException
-	 */
+		/**
+		 * Render the attribute map as it should be output in a tag
+		 * @param w
+		 * @param tagName
+		 * @param attributes
+		 * @throws IOException
+		 */
 	public static void renderTagAttributes(Writer w, String tagName, Collection<Attribute> attributes) throws IOException {
 		if (attributes != null) {
 			for (Attribute a : attributes) {
@@ -240,12 +245,13 @@ public class HtmlUtil  {
 		}
 	}
 	
-	/**
-	 * Render the attribute map as it should be output in a tag
-	 * @param context
-	 * @param attributes
-	 * @throws IOException
-	 */
+		/**
+		 * Render the attribute map as it should be output in a tag
+		 * @param w
+		 * @param tagName
+		 * @param attributeString
+		 * @throws IOException
+		 */
 	public static void renderTagAttributes(Writer w, String tagName, String attributeString) throws IOException {
 		if (StringUtils.isNotEmpty(attributeString)) {
 			for (String attribute : attributeString.split("\\|")) {

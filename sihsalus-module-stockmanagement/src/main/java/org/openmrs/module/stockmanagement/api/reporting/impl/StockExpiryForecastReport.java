@@ -410,7 +410,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
                 }
             }
         }
-        stockInventoryResult.getData().addAll(currentStockItemGroup);
+        stockInventoryResult.addAllData(currentStockItemGroup);
         currentStockItemGroup.clear();
     }
 	
@@ -454,7 +454,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
 		writeRows(stockInventoryResult.getData(), includeBatchInfo, includeLocationInfo);
 		csvWriter.flush();
 		recordsProcessed += stockInventoryResult.getData().size();
-		stockInventoryResult.getData().clear();
+		stockInventoryResult.clearData();
 		updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, null, null, stockManagementService, null);
 		return stockInventoryResult;
 	}

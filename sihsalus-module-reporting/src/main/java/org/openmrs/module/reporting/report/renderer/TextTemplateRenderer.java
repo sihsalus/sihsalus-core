@@ -129,7 +129,7 @@ public class TextTemplateRenderer extends ReportTemplateRenderer {
 			String suffix = getExpressionSuffix(reportDesign);
 			templateContents = EvaluationUtil.evaluateExpression(templateContents, replacements, prefix, suffix).toString();
 
-			pw.write(templateContents.toString());
+			pw.write(templateContents);
 		}
 		catch (RenderingException re) {
 			throw re;

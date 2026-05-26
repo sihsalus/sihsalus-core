@@ -237,7 +237,7 @@ public class StockForecastReport extends ReportGenerator {
                     stockItemInventory.setQuantity(new BigDecimal(lineParts[maxLinePartIndex]));
                 }
 
-                stockInventoryResult.getData().add(stockItemInventory);
+                stockInventoryResult.addData(stockItemInventory);
                 if(stockInventoryResult.getData().size() == bufferRecordCount){
                     writeBuffer(batchJob, inventorySearchFilter, stockInventoryResult, includeBatchInfo, includeLocationInfo, shouldStopExecution);
                     hasWritenRecords = true;
@@ -298,7 +298,7 @@ public class StockForecastReport extends ReportGenerator {
 	
 	protected void preWriteBuffer(StockItemInventorySearchFilter inventorySearchFilter,
 	        StockInventoryResult stockInventoryResult) {
-        stockInventoryResult.getData().removeIf(p->p.getStockBatchId() != null && p.getExpiration() != null && todaysDate.after(p.getExpiration()));
+        stockInventoryResult.removeDataIf(p->p.getStockBatchId() != null && p.getExpiration() != null && todaysDate.after(p.getExpiration()));
 		if (!stockInventoryResult.getData().isEmpty()) {
 			stockManagementService.setStockItemInformation(stockInventoryResult.getData());
 			stockManagementService.postProcessInventoryResult(inventorySearchFilter, stockInventoryResult);
@@ -326,7 +326,7 @@ public class StockForecastReport extends ReportGenerator {
 		writeRows(stockInventoryResult.getData(), includeBatchInfo, includeLocationInfo);
 		csvWriter.flush();
 		recordsProcessed += stockInventoryResult.getData().size();
-		stockInventoryResult.getData().clear();
+		stockInventoryResult.clearData();
 		updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, null, null, stockManagementService, null);
 		return stockInventoryResult;
 	}

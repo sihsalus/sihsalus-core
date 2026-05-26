@@ -140,8 +140,11 @@ public class StockExpiryReport extends ReportGenerator {
                     hasAppendedHeaders = true;
                 }
 
-                if(!data.getData().isEmpty()){
-                    Map<Integer, List<StockBatchLineItem>> stockItemGroups = data.getData().stream().collect(Collectors.groupingBy(p -> p.getStockItemId()));
+                java.util.List<StockBatchLineItem> rows = (data == null || data.getData() == null)
+                        ? java.util.Collections.emptyList()
+                        : data.getData();
+                if (!rows.isEmpty()) {
+                    Map<Integer, List<StockBatchLineItem>> stockItemGroups = rows.stream().collect(Collectors.groupingBy(p -> p.getStockItemId()));
                     int startIndex = 0;
                     StockItemInventorySearchFilter inventorySearchFilter=new StockItemInventorySearchFilter();
                     inventorySearchFilter.setRequireNonExpiredStockBatches(false);
@@ -187,16 +190,16 @@ public class StockExpiryReport extends ReportGenerator {
                     } while (hasMoreUpdatesToDo);
 
                     csvWriter.flush();
-                    recordsProcessed += data.getData().size();
+                    recordsProcessed += rows.size();
                     pageIndex++;
-                    StockBatchLineItem lastRecord = data.getData().get(data.getData().size() - 1);
+                    StockBatchLineItem lastRecord = rows.get(rows.size() - 1);
                     updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, lastRecord.getStockBatchId(), null, stockManagementService, null);
                 }
                 else if (pageIndex == 0) {
                     updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, null, null, stockManagementService, null);
                 }
 
-                hasMoreRecords = data.getData().size() >= pageSize;
+                hasMoreRecords = rows.size() >= pageSize;
             }
 
             csvWriter.close();

@@ -525,10 +525,16 @@ public class EventEngine {
 			return destination;
 		}
 		if ("getBody".equals(methodName)) {
+			if (args == null || args.length != 1 || args[0] == null) {
+				return null;
+			}
 			Class<?> bodyType = (Class<?>) args[0];
 			return bodyType.isInstance(body) ? bodyType.cast(body) : null;
 		}
 		if ("isBodyAssignableTo".equals(methodName)) {
+			if (args == null || args.length != 1 || args[0] == null) {
+				return false;
+			}
 			return ((Class<?>) args[0]).isInstance(body);
 		}
 		if ("acknowledge".equals(methodName) || method.getReturnType() == Void.TYPE) {

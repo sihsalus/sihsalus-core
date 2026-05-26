@@ -292,7 +292,7 @@ public class OrderGroup extends BaseCustomizableData<OrderGroupAttribute> {
 	/**
 	 * Sets the order group reason which denotes the reason why the group was ordered
 	 *
-	 * @param orderGroupReason, the order group reason to set
+	 * @param orderGroupReason the order group reason to set
 	 * @since 2.4.0
 	 */
 	public void setOrderGroupReason(Concept orderGroupReason) {
@@ -303,7 +303,7 @@ public class OrderGroup extends BaseCustomizableData<OrderGroupAttribute> {
 	 * Gets the previous order group to other order groups, to maintain linkages between groups and
 	 * support group nesting
 	 *
-	 * @param returns the previous order group
+	 * @return the previous order group
 	 * @since 2.4.0
 	 */
 	public OrderGroup getPreviousOrderGroup() {
@@ -325,7 +325,7 @@ public class OrderGroup extends BaseCustomizableData<OrderGroupAttribute> {
 	 * Gets the nested order groups to other order groups, to maintain linkages between groups and
 	 * support group nesting
 	 *
-	 * @param returns the nested order groups
+	 * @return the nested order groups
 	 * @since 2.4.0
 	 */
 	public Set<OrderGroup> getNestedOrderGroups() {
@@ -336,7 +336,7 @@ public class OrderGroup extends BaseCustomizableData<OrderGroupAttribute> {
 	 * Sets the nested order groups to other order groups, to maintain linkages between groups and
 	 * support group nesting.
 	 *
-	 * @param nestedOrderGroup The nested order groups to set
+	 * @param nestedOrderGroups The nested order groups to set
 	 * @since 2.4.0
 	 */
 	public void setNestedOrderGroups(Set<OrderGroup> nestedOrderGroups) {

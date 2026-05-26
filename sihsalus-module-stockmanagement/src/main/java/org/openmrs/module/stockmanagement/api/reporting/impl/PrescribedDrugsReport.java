@@ -180,22 +180,23 @@ public class PrescribedDrugsReport extends ReportGenerator {
 					}
 					hasAppendedHeaders = true;
 				}
-				if (!data.getData().isEmpty()) {
-					for (PrescriptionLineItem row : data.getData()) {
-						writeRow(csvWriter, row, messageSourceService);
-					}
-					csvWriter.flush();
-					recordsProcessed += data.getData().size();
-					pageIndex++;
-					PrescriptionLineItem lastRecord = data.getData().get(data.getData().size() - 1);
-					updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, lastRecord.getId(), null,
-					    stockManagementService, null);
-				} else if (pageIndex == 0) {
+			java.util.List<PrescriptionLineItem> rows = (data == null || data.getData() == null) ? java.util.Collections.emptyList() : data.getData();
+			if (!rows.isEmpty()) {
+				for (PrescriptionLineItem row : rows) {
+					writeRow(csvWriter, row, messageSourceService);
+				}
+				csvWriter.flush();
+				recordsProcessed += rows.size();
+				pageIndex++;
+				PrescriptionLineItem lastRecord = rows.get(rows.size() - 1);
+				updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, lastRecord.getId(), null,
+				    stockManagementService, null);
+			} else if (pageIndex == 0) {
 					updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, null, null,
 					    stockManagementService, null);
 				}
 				
-				hasMoreRecords = data.getData().size() >= pageSize;
+			hasMoreRecords = rows.size() >= pageSize;
 			}
 			
 			csvWriter.close();

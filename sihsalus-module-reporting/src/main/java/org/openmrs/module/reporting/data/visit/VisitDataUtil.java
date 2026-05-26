@@ -52,7 +52,7 @@ public class VisitDataUtil {
                 visitIds = new VisitIdSet(visitIdsForPatients);
             }
             else {
-                visitIds.getMemberIds().retainAll(visitIdsForPatients);
+                visitIds.retainAll(visitIdsForPatients);
             }
         }
 

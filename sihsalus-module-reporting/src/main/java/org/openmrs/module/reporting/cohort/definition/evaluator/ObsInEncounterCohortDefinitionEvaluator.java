@@ -85,7 +85,7 @@ public class ObsInEncounterCohortDefinitionEvaluator implements CohortDefinition
 		q.whereIdIn("o.encounter.encounterId", encountersToInclude);
 
 		List<Integer> pIds = evaluationService.evaluateToList(q, Integer.class, context);
-		ret.getMemberIds().addAll(pIds);
+		ret.addAll(pIds);
 
 		return ret;
     }

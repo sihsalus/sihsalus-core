@@ -59,6 +59,7 @@ public class LocaleUtility implements GlobalPropertyListener {
 			synchronized (LocaleUtility.class) {
 				if (defaultLocaleCache == null) {
 					if (Context.isSessionOpen()) {
+						Locale defaultLocale = null;
 						try {
 							Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
 							String locale = Context.getAdministrationService()
@@ -66,7 +67,7 @@ public class LocaleUtility implements GlobalPropertyListener {
 
 							if (StringUtils.hasLength(locale)) {
 								try {
-									defaultLocaleCache = fromSpecification(locale);
+									defaultLocale = fromSpecification(locale);
 								} catch (Exception t) {
 									log.warn("Unable to parse default locale global property value: {}", locale, t);
 								}
@@ -81,10 +82,11 @@ public class LocaleUtility implements GlobalPropertyListener {
 
 						// if we weren't able to load the locale from the global property,
 						// use the default one
-						if (defaultLocaleCache == null) {
-							defaultLocaleCache = fromSpecification(
+						if (defaultLocale == null) {
+							defaultLocale = fromSpecification(
 							    OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE_DEFAULT_VALUE);
 						}
+						defaultLocaleCache = defaultLocale;
 					} else {
 						// if session is not open, return the default locale without caching
 						return fromSpecification(OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE_DEFAULT_VALUE);

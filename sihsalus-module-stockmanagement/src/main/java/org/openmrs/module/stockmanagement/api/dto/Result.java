@@ -3,7 +3,11 @@ package org.openmrs.module.stockmanagement.api.dto;
 import org.openmrs.module.stockmanagement.api.IPagingInfo;
 import org.openmrs.module.stockmanagement.api.PagingInfoBase;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class Result<T> extends PagingInfoBase implements IPagingInfo {
 	
@@ -21,16 +25,39 @@ public class Result<T> extends PagingInfoBase implements IPagingInfo {
 	}
 	
 	public Result(List<T> data, long totalRecordCount) {
-		this.data = data;
+		this.data = data == null ? null : new ArrayList<>(data);
 		this.totalRecordCount = totalRecordCount;
 	}
 	
 	public List<T> getData() {
-		return data;
+		return data == null ? null : Collections.unmodifiableList(data);
 	}
 	
 	public void setData(List<T> data) {
-		this.data = data;
+		this.data = data == null ? null : new ArrayList<>(data);
+	}
+
+	public void addData(T item) {
+		getMutableData().add(item);
+	}
+
+	public void addAllData(Collection<? extends T> items) {
+		getMutableData().addAll(items);
+	}
+
+	public void clearData() {
+		getMutableData().clear();
+	}
+
+	public void removeDataIf(Predicate<? super T> filter) {
+		getMutableData().removeIf(filter);
+	}
+
+	private List<T> getMutableData() {
+		if (data == null) {
+			data = new ArrayList<>();
+		}
+		return data;
 	}
 	
 	public Integer getPageIndex() {

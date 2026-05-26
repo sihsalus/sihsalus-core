@@ -59,7 +59,7 @@ public class ReportUtil {
 		ReportRenderer rr = new CsvReportRenderer();
 		ReportData rd = new ReportData();
 		rd.setDataSets(new HashMap<String, DataSet>());
-		rd.getDataSets().put("dataset", dataset);
+		rd.addDataSet("dataset", dataset);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		rr.render(rd, null, out);
 		return out.toString();
@@ -138,19 +138,13 @@ public class ReportUtil {
 	}
 	
 	public static void compressFile(File inFile, File outFile) {
-		FileInputStream in = null;
-		GZIPOutputStream out = null;
-		try {
-			in = new FileInputStream(inFile);
-			out = new GZIPOutputStream(new FileOutputStream(outFile));
+		try (FileInputStream in = new FileInputStream(inFile);
+		        FileOutputStream fileOut = new FileOutputStream(outFile);
+		        GZIPOutputStream out = new GZIPOutputStream(fileOut)) {
 			IOUtils.copy(in, out);
 		}
 		catch (Exception e) {
 			log.warn("Unable to zip file: " + inFile);
-		}
-		finally {
-			IOUtils.closeQuietly(in);
-			IOUtils.closeQuietly(out);
 		}
 	}
 	
@@ -226,7 +220,7 @@ public class ReportUtil {
 		}
 		resource.setContentType(contentType);
 		resource.setContents(readByteArrayFromResource(resourceName));
-		design.getResources().add(resource);
+		design.addResource(resource);
 
 		ReportRenderer renderer = null;
 		if ("xls".equals(extension)) {

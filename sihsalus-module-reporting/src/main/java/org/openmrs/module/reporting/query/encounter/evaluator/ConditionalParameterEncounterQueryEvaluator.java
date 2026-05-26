@@ -37,7 +37,7 @@ public class ConditionalParameterEncounterQueryEvaluator implements EncounterQue
 		}
 		if (match != null) {
 			EncounterQueryResult r  = encounterQueryService.evaluate(match, context);
-			ret.getMemberIds().addAll(r.getMemberIds());
+			ret.addAll(r.getMemberIds());
 		}
 		return ret;
     }

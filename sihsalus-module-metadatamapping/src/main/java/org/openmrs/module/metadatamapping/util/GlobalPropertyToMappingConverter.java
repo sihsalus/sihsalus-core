@@ -18,7 +18,7 @@ import java.lang.reflect.Type;
  */
 public abstract class GlobalPropertyToMappingConverter<T extends OpenmrsMetadata> {
 	
-	protected static final String MIGRATION_INFO_TMPL = "This global property had been migrated to metadata mapping in source '%s' with code '&s'";
+	protected static final String MIGRATION_INFO_TMPL = "This global property had been migrated to metadata mapping in source '%s' with code '%s'";
 	
 	private MetadataSource source;
 	

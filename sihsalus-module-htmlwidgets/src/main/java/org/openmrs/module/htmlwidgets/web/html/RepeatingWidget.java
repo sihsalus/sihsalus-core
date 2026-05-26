@@ -51,7 +51,12 @@ public class RepeatingWidget implements Widget {
 			}
 		}
 		if (type == null) {
-			throw new IllegalArgumentException("Invalid CollectionHandler configuration: " + config);
+			String configId = config.getId();
+			String configName = config.getName();
+			Type[] configGenericTypes = config.getGenericTypes();
+			String genericTypeDisplay = configGenericTypes == null ? null : Arrays.toString(configGenericTypes);
+			throw new IllegalArgumentException("Invalid CollectionHandler configuration for id=" + configId + ", name="
+			        + configName + ", genericTypes=" + genericTypeDisplay);
 		}
 		
 		// Ensure that we have an appropriate Handler

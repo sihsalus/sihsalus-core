@@ -99,7 +99,7 @@ public abstract class StockOperationTypeProcessorBase implements StockOperationT
 	
 	protected void clearReservedTransactions(StockOperation operation) {
 		Context.getService(StockManagementService.class).deleteReservedTransations(operation.getId());
-		operation.getReservedTransactions().clear();
+		operation.clearReservedTransactions();
 		
 	}
 }

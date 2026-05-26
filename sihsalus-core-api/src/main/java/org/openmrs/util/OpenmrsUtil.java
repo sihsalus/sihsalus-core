@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -238,22 +239,10 @@ public class OpenmrsUtil {
 	 * @throws IOException
 	 */
 	public static byte[] getFileAsBytes(File file) throws IOException {
-		FileInputStream fileInputStream = null;
 		try {
-			fileInputStream = new FileInputStream(file);
-			byte[] b = new byte[fileInputStream.available()];
-			fileInputStream.read(b);
-			return b;
+			return Files.readAllBytes(file.toPath());
 		} catch (Exception e) {
 			log.error("Unable to get file as byte array", e);
-		} finally {
-			if (fileInputStream != null) {
-				try {
-					fileInputStream.close();
-				} catch (IOException io) {
-					log.warn("Couldn't close fileInputStream: " + io);
-				}
-			}
 		}
 
 		return null;

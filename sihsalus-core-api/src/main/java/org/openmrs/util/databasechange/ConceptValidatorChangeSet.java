@@ -361,7 +361,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
 	/**
 	 * Sets the fully specified name from available names
 	 *
-	 * @param localeConceptNamesMap, list of all concept names for the concept
+	 * @param localeConceptNamesMap list of all concept names for the concept
 	 * @return
 	 */
 	private boolean setFullySpecifiedName(int conceptId, Map<Locale, List<ConceptName>> localeConceptNamesMap) {

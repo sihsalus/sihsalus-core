@@ -4,7 +4,9 @@ import org.openmrs.*;
 
 import java.io.Serializable;
 import jakarta.persistence.*;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -387,15 +389,26 @@ public class StockOperation extends BaseChangeableOpenmrsData implements Seriali
 	}
 	
 	public Set<ReservedTransaction> getReservedTransactions() {
-		return reservedTransactions;
+		return reservedTransactions == null ? null : Collections.unmodifiableSet(reservedTransactions);
 	}
 	
 	public void setReservedTransactions(Set<ReservedTransaction> reservedTransactions) {
-		this.reservedTransactions = reservedTransactions;
+		this.reservedTransactions = reservedTransactions == null ? null : new HashSet<>(reservedTransactions);
+	}
+
+	public void clearReservedTransactions() {
+		getMutableReservedTransactions().clear();
+	}
+
+	private Set<ReservedTransaction> getMutableReservedTransactions() {
+		if (reservedTransactions == null) {
+			reservedTransactions = new HashSet<>();
+		}
+		return reservedTransactions;
 	}
 	
 	public ReservedTransaction addReservedTransaction(ReservedTransaction reservedTransaction) {
-		getReservedTransactions().add(reservedTransaction);
+		getMutableReservedTransactions().add(reservedTransaction);
 		reservedTransaction.setStockOperation(this);
 		reservedTransaction.setIsAvailable(getStockOperationType().getAvailableWhenReserved() != null
 		        && getStockOperationType().getAvailableWhenReserved());
@@ -403,7 +416,7 @@ public class StockOperation extends BaseChangeableOpenmrsData implements Seriali
 	}
 	
 	public ReservedTransaction removeReservedTransaction(ReservedTransaction reservedTransaction) {
-		getReservedTransactions().remove(reservedTransaction);
+		getMutableReservedTransactions().remove(reservedTransaction);
 		reservedTransaction.setStockOperation(null);
 		
 		return reservedTransaction;

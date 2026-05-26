@@ -954,8 +954,8 @@ public class Concept extends BaseOpenmrsObject implements Auditable, Retireable,
 
 		if (exact) {
 			if (shortestNameForLocale == null) {
-				log.warn(
-				    "No short concept name found for concept id " + conceptId + " for locale " + locale.getDisplayName());
+				String localeDisplayName = locale == null ? "null" : locale.getDisplayName();
+				log.warn("No short concept name found for concept id " + conceptId + " for locale " + localeDisplayName);
 			}
 			return shortestNameForLocale;
 		}

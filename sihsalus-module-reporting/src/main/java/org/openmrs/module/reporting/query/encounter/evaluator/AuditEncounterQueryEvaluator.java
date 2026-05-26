@@ -59,7 +59,7 @@ public class AuditEncounterQueryEvaluator implements EncounterQueryEvaluator {
 		q.limit(query.getLatestCreatedNumber());
 
 		List<Integer> results = evaluationService.evaluateToList(q, Integer.class, context);
-		result.getMemberIds().addAll(results);
+		result.addAll(results);
         return result;
     }
 }

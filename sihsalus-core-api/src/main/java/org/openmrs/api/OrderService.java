@@ -987,7 +987,7 @@ public interface OrderService extends OpenmrsService {
 	/**
 	 * Fetches order group attribute type using provided Id
 	 *
-	 * @param id The Id of the order group attribute type to fetch from the database
+	 * @param orderGroupAttributeTypeId The Id of the order group attribute type to fetch from the database
 	 * @return the {@link OrderGroupAttributeType} with the given internal id
 	 * @should return the order group attribute type using the provided id
 	 * @should return null if no order group attribute type exists with the given id
@@ -1084,7 +1084,7 @@ public interface OrderService extends OpenmrsService {
 	/**
 	 * Fetches order attribute type using provided Id
 	 *
-	 * @param id The Id of the order attribute type to fetch from the database
+	 * @param orderAttributeTypeId The Id of the order attribute type to fetch from the database
 	 * @return the {@link OrderAttributeType} with the given internal id
 	 * @since 2.5.0
 	 * @should return the order attribute type using the provided id

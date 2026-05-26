@@ -342,7 +342,7 @@ public interface AddressHierarchyService{
 	/**
 	 * Saves an AddressHierarchyLevel
 	 * 
-	 * @param the level to save
+	 * @param level level to save
 	 */
 	@Authorized( { AddressHierarchyConstants.PRIV_MANAGE_ADDRESS_HIERARCHY })
 	public void saveAddressHierarchyLevel(AddressHierarchyLevel level);
@@ -350,7 +350,7 @@ public interface AddressHierarchyService{
 	/**
 	 * Deletes an AddressHierarchyLevel
 	 * 
-	 * @param the level to delete
+	 * @param level level to delete
 	 */
 	@Authorized( { AddressHierarchyConstants.PRIV_MANAGE_ADDRESS_HIERARCHY })
 	public void deleteAddressHierarchyLevel(AddressHierarchyLevel level);

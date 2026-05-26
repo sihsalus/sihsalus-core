@@ -38,7 +38,7 @@ public class AddressSupport extends LayoutSupport<AddressTemplate> implements Gl
 		if (singleton == null) {
 			singleton = this;
 		}
-		log.debug("Setting singleton: " + singleton);
+		log.debug("Setting singleton: {}", singleton == null ? null : singleton.getClass().getName());
 	}
 
 	public static AddressSupport getInstance() {

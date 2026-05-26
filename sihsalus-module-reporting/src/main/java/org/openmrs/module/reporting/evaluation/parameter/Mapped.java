@@ -18,6 +18,7 @@ import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationUtil;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class Mapped<T extends Parameterizable> implements Serializable {
 		this();
 		this.parameterizable = parameterizable;
 		if (parameterMappings != null) {
-			this.parameterMappings = parameterMappings;
+			this.parameterMappings = new HashMap<String, Object>(parameterMappings);
 		}
 	}
 
@@ -216,14 +217,14 @@ public class Mapped<T extends Parameterizable> implements Serializable {
 		if (parameterMappings == null) {
 			parameterMappings = new HashMap<String, Object>();
 		}
-		return parameterMappings;
+		return Collections.unmodifiableMap(parameterMappings);
 	}
 
 	/**
 	 * @param parameterMappings the parameterMappings to set
 	 */
 	public void setParameterMappings(Map<String, Object> parameterMappings) {
-		this.parameterMappings = parameterMappings;
+		this.parameterMappings = parameterMappings == null ? null : new HashMap<String, Object>(parameterMappings);
 	}
 	
 	/**
@@ -231,9 +232,8 @@ public class Mapped<T extends Parameterizable> implements Serializable {
 	 * @return
 	 */
 	public String getUuidOfMappedOpenmrsObject() {
-		if (parameterizable != null && parameterizable instanceof OpenmrsObject) {
-			OpenmrsObject o = (OpenmrsObject) parameterizable;
-			return o.getUuid();
+		if (parameterizable != null) {
+			return parameterizable.getUuid();
 		}
 		else {
 			log.warn("Mapped.getUuidOfMappedOpenmrsObject is null or called for a mapped object that is not an OpenmrsObject.");

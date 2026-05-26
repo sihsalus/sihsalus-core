@@ -119,7 +119,6 @@ public class DefaultMailSender implements MailSender {
 
     /**
      * To be used as fallback. Mail properties are visible in openmrs settings.
-     * @param as
      * @return
      */
     private Properties mailSessionPropertiesFromOMRS() {

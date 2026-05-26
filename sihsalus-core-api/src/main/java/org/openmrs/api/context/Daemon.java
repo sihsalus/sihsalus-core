@@ -334,7 +334,8 @@ public final class Daemon {
 	@SuppressWarnings({ "squid:S1217", "unused" })
 	public static Thread runInDaemonThread(final Runnable runnable, DaemonToken token) {
 		if (!ModuleFactory.isTokenValid(token)) {
-			throw new ContextAuthenticationException("Invalid token " + token);
+			String tokenId = token == null ? null : token.getId();
+			throw new ContextAuthenticationException("Invalid token " + tokenId);
 		}
 
 		DaemonThread thread = new DaemonThread() {

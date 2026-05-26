@@ -19,7 +19,7 @@ package org.openmrs.calculation;
 public interface ConfigurableCalculation extends Calculation {
 	
 	/**
-	 * @param the configuration String that should be used to initialize this Calculation
+	 * @param configuration String that should be used to initialize this Calculation
 	 */
 	public void setConfiguration(String configuration) throws InvalidCalculationException;
 }

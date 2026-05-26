@@ -202,9 +202,9 @@ public class CohortDetailReportRenderer extends ReportDesignRenderer {
 			// First output the name, description, and parameters of the report
 			w.write("<h4>" + results.getDefinition().getName() + "</h4>");		
 			w.write("<small>");
-			for (Iterator<String> i = parameterValues.keySet().iterator(); i.hasNext();) {
-				String key = i.next();
-				w.write(key + ": <strong>" + parameterValues.get(key) + "</strong>" + (i.hasNext() ? " | " : ""));								
+			for (Iterator<Map.Entry<String, String>> i = parameterValues.entrySet().iterator(); i.hasNext();) {
+				Map.Entry<String, String> entry = i.next();
+				w.write(entry.getKey() + ": <strong>" + entry.getValue() + "</strong>" + (i.hasNext() ? " | " : ""));
 			}
 			w.write("</small>");
 			

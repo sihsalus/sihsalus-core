@@ -73,7 +73,7 @@ public interface IndicatorPersister extends DefinitionPersister<Indicator> {
 	/**
 	 * Saves the given {@link Indicator} to the system.
 	 * 
-	 * @param datasetDefinition	the {@link Indicator} to save
+	 * @param indicator	the {@link Indicator} to save
 	 * @return the {@link Indicator} that was 
 	 * 
 	 * @should create new {@link Indicator}
@@ -85,7 +85,7 @@ public interface IndicatorPersister extends DefinitionPersister<Indicator> {
 	/**
 	 * Deletes a {@link Indicator} from the system.
 	 * 
-	 * @param datasetDefinition	the {@link Indicator} to purge
+	 * @param indicator	the {@link Indicator} to purge
 	 * 
 	 * @should remove the Indicator
 	 */

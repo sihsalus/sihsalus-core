@@ -182,7 +182,8 @@ public class HibernateSessionFactoryBean extends LocalSessionFactoryBean impleme
 			entry.setValue(value);
 		}
 
-		log.debug("Setting global Hibernate Session Interceptor for SessionFactory, Interceptor: {}", chainingInterceptor);
+		log.debug("Setting global Hibernate Session Interceptor for SessionFactory, Interceptor: {}",
+		    chainingInterceptor == null ? null : chainingInterceptor.getClass().getName());
 
 		// make sure all autowired interceptors are put onto our chaining interceptor
 		// sort on the keys so that the devs/modules have some sort of control over the order of the interceptors

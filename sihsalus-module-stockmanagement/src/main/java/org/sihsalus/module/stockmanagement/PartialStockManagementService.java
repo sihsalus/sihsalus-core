@@ -1254,7 +1254,7 @@ class PartialStockManagementService implements InvocationHandler {
     }
 
     private void createReservedTransactions(StockOperation operation) {
-        operation.getReservedTransactions().clear();
+        operation.clearReservedTransactions();
         for (StockOperationItem item : operation.getStockOperationItems()) {
             if (Boolean.TRUE.equals(item.getVoided())) {
                 continue;

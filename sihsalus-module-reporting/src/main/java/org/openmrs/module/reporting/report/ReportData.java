@@ -14,6 +14,7 @@ import org.openmrs.module.reporting.evaluation.Evaluated;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -46,6 +47,10 @@ public class ReportData implements Evaluated<ReportDefinition> {
 	 * @return the dataSets
 	 */
 	public Map<String, DataSet> getDataSets() {
+		return Collections.unmodifiableMap(getMutableDataSets());
+	}
+
+	private Map<String, DataSet> getMutableDataSets() {
 		if (dataSets == null) {
 			dataSets = new LinkedHashMap<String, DataSet>();
 		}
@@ -56,7 +61,11 @@ public class ReportData implements Evaluated<ReportDefinition> {
 	 * @param dataSets the dataSets to set
 	 */
 	public void setDataSets(Map<String, DataSet> dataSets) {
-		this.dataSets = dataSets;
+		this.dataSets = dataSets == null ? null : new LinkedHashMap<String, DataSet>(dataSets);
+	}
+
+	public void addDataSet(String key, DataSet dataSet) {
+		getMutableDataSets().put(key, dataSet);
 	}
 
 	/**

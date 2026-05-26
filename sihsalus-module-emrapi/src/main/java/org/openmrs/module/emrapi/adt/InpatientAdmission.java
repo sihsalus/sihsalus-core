@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.emrapi.adt;
 
-import lombok.Data;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Patient;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 /**
  * Represents a hospital Admission
  */
-@Data
 public class InpatientAdmission {
 	
 	private Visit visit;
@@ -40,6 +38,54 @@ public class InpatientAdmission {
 	private Set<Encounter> transferEncounters = new TreeSet<>(getEncounterComparator());
 	
 	private Set<Encounter> dischargeEncounters = new TreeSet<>(getEncounterComparator());
+
+	public Visit getVisit() {
+		return visit;
+	}
+
+	public void setVisit(Visit visit) {
+		this.visit = visit;
+	}
+
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+
+	public InpatientRequest getCurrentInpatientRequest() {
+		return currentInpatientRequest;
+	}
+
+	public void setCurrentInpatientRequest(InpatientRequest currentInpatientRequest) {
+		this.currentInpatientRequest = currentInpatientRequest;
+	}
+
+	public Set<Encounter> getAdmissionEncounters() {
+		return Collections.unmodifiableSet(admissionEncounters);
+	}
+
+	public void addAdmissionEncounter(Encounter encounter) {
+		admissionEncounters.add(encounter);
+	}
+
+	public Set<Encounter> getTransferEncounters() {
+		return Collections.unmodifiableSet(transferEncounters);
+	}
+
+	public void addTransferEncounter(Encounter encounter) {
+		transferEncounters.add(encounter);
+	}
+
+	public Set<Encounter> getDischargeEncounters() {
+		return Collections.unmodifiableSet(dischargeEncounters);
+	}
+
+	public void addDischargeEncounter(Encounter encounter) {
+		dischargeEncounters.add(encounter);
+	}
 	
 	public List<Encounter> getAdmissionAndTransferEncounters() {
 		List<Encounter> encounters = new ArrayList<>();

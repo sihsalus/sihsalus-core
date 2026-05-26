@@ -327,7 +327,7 @@ public abstract class BaseDelegatingResource<T> extends BaseDelegatingConverter<
 	public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
 		DelegatingResourceDescription description = getCreatableProperties();
 		for (String property : getPropertiesToExposeAsSubResources()) {
-			description.getProperties().remove(property);
+			description.removeProperty(property);
 		}
 		return description;
 	}

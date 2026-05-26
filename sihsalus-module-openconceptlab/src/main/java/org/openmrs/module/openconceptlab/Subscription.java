@@ -100,7 +100,8 @@ public class Subscription {
 	}
 	
 	public boolean isManual() {
-		return (days == null && hours == null && minutes == null) || (days == 0 && hours == 0 && minutes == 0);
+		return (days == null && hours == null && minutes == null)
+		        || (days != null && days == 0 && hours != null && hours == 0 && minutes != null && minutes == 0);
 	}
 
 	public boolean isSubscribedToSnapshot() {

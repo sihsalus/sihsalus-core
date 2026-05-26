@@ -184,7 +184,7 @@ public class AccountServiceImpl extends BaseOpenmrsService implements AccountSer
 		
 		AccountSearchResult result = new AccountSearchResult();
 		for (Person p : sortedPersons) {
-			result.getAccounts().add(domainWrapperFactory.newAccountDomainWrapper(p));
+			result.addAccount(domainWrapperFactory.newAccountDomainWrapper(p));
 		}
 		result.setTotalCount(totalCount);
 		log.debug("Returning {} accounts", result.getAccounts().size());

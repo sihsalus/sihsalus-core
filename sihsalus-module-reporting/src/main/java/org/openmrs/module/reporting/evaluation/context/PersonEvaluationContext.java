@@ -60,7 +60,7 @@ public class PersonEvaluationContext extends EvaluationContext {
 		}
 		else {
 			if (basePersons != null) {
-				this.basePersons.getMemberIds().retainAll(basePersons.getMemberIds());
+				this.basePersons.retainAll(basePersons.getMemberIds());
 			}
 		}
 	}

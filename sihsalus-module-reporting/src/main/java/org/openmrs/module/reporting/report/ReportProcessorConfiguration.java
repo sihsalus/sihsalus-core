@@ -187,7 +187,7 @@ public class ReportProcessorConfiguration extends BaseOpenmrsMetadata  {
 
 	/**
 	 * 
-	 * @param the processorMode to set
+	 * @param processorMode processorMode to set
 	 */
 	public void setProcessorMode(ProcessorMode processorMode) {
 		this.processorMode = processorMode;
