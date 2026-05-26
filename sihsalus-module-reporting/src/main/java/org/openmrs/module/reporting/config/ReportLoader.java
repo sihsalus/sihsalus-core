@@ -223,7 +223,7 @@ public class ReportLoader {
                 if (existingParam.getName().equals(parameter.getName())) {
                     found = true;
                     if (parameter.getDefaultValue() != null) {
-                        mappedDsd.getParameterMappings().put(existingParam.getName(), parameter.getDefaultValue());
+                        mappedDsd.addParameterMapping(existingParam.getName(), parameter.getDefaultValue());
                         parameter.setDefaultValue(null);
                     }
                 }

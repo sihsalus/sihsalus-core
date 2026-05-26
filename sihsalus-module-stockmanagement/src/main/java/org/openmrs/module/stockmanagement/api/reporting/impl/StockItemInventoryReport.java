@@ -232,7 +232,7 @@ public class StockItemInventoryReport<T extends StockItemInventory> extends Repo
                     }
                 }
 
-                stockInventoryResult.getData().add(stockItemInventory);
+                stockInventoryResult.addData(stockItemInventory);
                 if(stockInventoryResult.getData().size() == bufferRecordCount){
                     writeBuffer(batchJob, inventorySearchFilter, stockInventoryResult, includeBatchInfo, includeLocationInfo, shouldStopExecution);
                     hasWritenRecords = true;
@@ -307,7 +307,7 @@ public class StockItemInventoryReport<T extends StockItemInventory> extends Repo
 			return null;
 		}
 		writeRows(stockInventoryResult.getData(), includeBatchInfo, includeLocationInfo);
-		stockInventoryResult.getData().clear();
+		stockInventoryResult.clearData();
 		csvWriter.flush();
 		recordsProcessed += stockInventoryResult.getData().size();
 		updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, null, null, stockManagementService, null);

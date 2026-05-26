@@ -76,7 +76,7 @@ public class DefaultReportDefinitionEvaluator implements ReportDefinitionEvaluat
 				EvaluationContext childContext = EvaluationContext.cloneForChild(dataSetContext, mappedDataSetDefinition);
 				try {
 					DataSet ds = dataSetDefinitionService.evaluate(mappedDataSetDefinition.getParameterizable(), childContext);
-					data.getDataSets().put(key, ds);
+					data.addDataSet(key, ds);
 				}
 				catch (Exception ex) {
 					throw new EvaluationException("data set '" + key + "'", ex);

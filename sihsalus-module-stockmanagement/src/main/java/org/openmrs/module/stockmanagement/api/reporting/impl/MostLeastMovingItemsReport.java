@@ -217,7 +217,7 @@ public class MostLeastMovingItemsReport extends ReportGenerator {
 		writeRows(stockInventoryResult.getData(), includeBatchInfo, includeLocationInfo);
 		csvWriter.flush();
 		recordsProcessed += stockInventoryResult.getData().size();
-		stockInventoryResult.getData().clear();
+		stockInventoryResult.clearData();
 		updateExecutionState(batchJob, executionState, pageIndex, recordsProcessed, null, null, stockManagementService, null);
 		return stockInventoryResult;
 	}

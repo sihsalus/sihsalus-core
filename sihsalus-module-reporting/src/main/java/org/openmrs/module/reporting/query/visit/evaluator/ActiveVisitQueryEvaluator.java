@@ -48,7 +48,7 @@ public class ActiveVisitQueryEvaluator implements VisitQueryEvaluator {
         q.whereVisitIn("v.visitId", context);
 
         List<Integer> results = evaluationService.evaluateToList(q, Integer.class, context);
-        queryResult.getMemberIds().addAll(results);
+        queryResult.addAll(results);
         return queryResult;
     }
 

@@ -62,7 +62,7 @@ public class BasicEncounterQueryEvaluator implements EncounterQueryEvaluator {
 
 		if (query.getWhich() == null || query.getWhich() == TimeQualifier.ANY) {
 			List<Integer> results = evaluationService.evaluateToList(q, Integer.class, context);
-			result.getMemberIds().addAll(results);
+			result.addAll(results);
 		}
 		else {
 			q.innerJoin("e.patient", "p");

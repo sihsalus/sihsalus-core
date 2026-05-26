@@ -18,6 +18,7 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +118,7 @@ public class DelegatingResourceDescription implements RepresentationDescription 
 	 * @return the properties
 	 */
 	public Map<String, Property> getProperties() {
-		return properties;
+		return Collections.unmodifiableMap(properties);
 	}
 	
 	/**

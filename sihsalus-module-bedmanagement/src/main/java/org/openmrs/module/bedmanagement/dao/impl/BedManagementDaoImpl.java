@@ -252,7 +252,7 @@ public class BedManagementDaoImpl implements BedManagementDao {
 				if (blm.getBed().getBedTagMap() != null) {
 					for (BedTagMap bedTagMap : blm.getBed().getBedTagMap()) {
 						if (BooleanUtils.isNotTrue(bedTagMap.getVoided())) {
-							bedLayout.getBedTagMaps().add(bedTagMap);
+							bedLayout.addBedTagMap(bedTagMap);
 						}
 					}
 				}

@@ -9,15 +9,33 @@
  */
 package org.openmrs.module.emrapi.account;
 
-import lombok.Data;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-@Data
 public class AccountSearchResult {
 	
-	Long totalCount;
+	private Long totalCount;
 	
-	List<AccountDomainWrapper> accounts = new ArrayList<>();
+	private List<AccountDomainWrapper> accounts = new ArrayList<>();
+
+	public Long getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(Long totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	public List<AccountDomainWrapper> getAccounts() {
+		return Collections.unmodifiableList(accounts);
+	}
+
+	public void setAccounts(List<AccountDomainWrapper> accounts) {
+		this.accounts = accounts == null ? null : new ArrayList<>(accounts);
+	}
+
+	public void addAccount(AccountDomainWrapper account) {
+		accounts.add(account);
+	}
 }

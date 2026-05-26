@@ -64,15 +64,33 @@ public class PatientIdSet extends Cohort implements IdSet<Patient> {
         setMemberIds(s);
     }
 
+    public void retainAll(Collection<Integer> memberIds) {
+	    Set<Integer> s = getMemberIds();
+        s.retainAll(memberIds);
+        setMemberIds(s);
+    }
+
     public void removeAll(IdSet<Patient> set) {
         Set<Integer> s = getMemberIds();
         s.removeAll(set.getMemberIds());
         setMemberIds(s);
     }
 
+    public void removeAll(Collection<Integer> memberIds) {
+        Set<Integer> s = getMemberIds();
+        s.removeAll(memberIds);
+        setMemberIds(s);
+    }
+
     public void addAll(IdSet<Patient> set) {
         Set<Integer> s = getMemberIds();
         s.addAll(set.getMemberIds());
+        setMemberIds(s);
+    }
+
+    public void addAll(Collection<Integer> memberIds) {
+        Set<Integer> s = getMemberIds();
+        s.addAll(memberIds);
         setMemberIds(s);
     }
 

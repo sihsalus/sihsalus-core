@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.reporting.report;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -75,7 +76,7 @@ public class ReportDesign extends BaseOpenmrsMetadata  {
 	 * @param resource the ReportDesignResource to add
 	 */
 	public void addResource(ReportDesignResource resource) {
-		getResources().add(resource);
+		getMutableResources().add(resource);
 	}
 	
 	/**
@@ -187,6 +188,10 @@ public class ReportDesign extends BaseOpenmrsMetadata  {
 	 * @return the resources
 	 */
 	public Set<ReportDesignResource> getResources() {
+		return Collections.unmodifiableSet(getMutableResources());
+	}
+
+	private Set<ReportDesignResource> getMutableResources() {
 		if (resources == null) {
 			resources = new HashSet<ReportDesignResource>();
 		}
@@ -197,7 +202,7 @@ public class ReportDesign extends BaseOpenmrsMetadata  {
 	 * @param resources the resources to set
 	 */
 	public void setResources(Set<ReportDesignResource> resources) {
-		this.resources = resources;
+		this.resources = resources == null ? null : new HashSet<ReportDesignResource>(resources);
 	}
 	
 	/**

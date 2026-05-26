@@ -59,7 +59,7 @@ public class ReportUtil {
 		ReportRenderer rr = new CsvReportRenderer();
 		ReportData rd = new ReportData();
 		rd.setDataSets(new HashMap<String, DataSet>());
-		rd.getDataSets().put("dataset", dataset);
+		rd.addDataSet("dataset", dataset);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		rr.render(rd, null, out);
 		return out.toString();
@@ -220,7 +220,7 @@ public class ReportUtil {
 		}
 		resource.setContentType(contentType);
 		resource.setContents(readByteArrayFromResource(resourceName));
-		design.getResources().add(resource);
+		design.addResource(resource);
 
 		ReportRenderer renderer = null;
 		if ("xls".equals(extension)) {

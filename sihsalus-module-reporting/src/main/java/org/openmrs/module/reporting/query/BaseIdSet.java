@@ -12,6 +12,7 @@ package org.openmrs.module.reporting.query;
 import org.openmrs.OpenmrsObject;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,15 +42,23 @@ public abstract class BaseIdSet<T extends OpenmrsObject> implements IdSet<T> {
     }
 
     public void retainAll(IdSet<T> set) {
-        getMemberIds().retainAll(set.getMemberIds());
+        getMutableMemberIds().retainAll(set.getMemberIds());
     }
+
+	public void retainAll(Collection<Integer> memberIds) {
+		getMutableMemberIds().retainAll(memberIds);
+	}
 
     public void removeAll(IdSet<T> set) {
-        getMemberIds().removeAll(set.getMemberIds());
+        getMutableMemberIds().removeAll(set.getMemberIds());
     }
 
+	public void removeAll(Collection<Integer> memberIds) {
+		getMutableMemberIds().removeAll(memberIds);
+	}
+
     public void addAll(IdSet<T> set) {
-        getMemberIds().addAll(set.getMemberIds());
+        getMutableMemberIds().addAll(set.getMemberIds());
     }
 
     //***** PROPERTY ACCESS *****
@@ -58,6 +67,10 @@ public abstract class BaseIdSet<T extends OpenmrsObject> implements IdSet<T> {
 	 * @return the memberIds
 	 */
 	public Set<Integer> getMemberIds() {
+		return Collections.unmodifiableSet(getMutableMemberIds());
+	}
+
+	private Set<Integer> getMutableMemberIds() {
 		if (memberIds == null) {
 			memberIds = new HashSet<Integer>();
 		}
@@ -68,7 +81,7 @@ public abstract class BaseIdSet<T extends OpenmrsObject> implements IdSet<T> {
 	 * @param memberIds the memberIds to set
 	 */
 	public void setMemberIds(Set<Integer> memberIds) {
-		this.memberIds = memberIds;
+		this.memberIds = memberIds == null ? null : new HashSet<Integer>(memberIds);
 	}
 	
 	/**
@@ -76,7 +89,7 @@ public abstract class BaseIdSet<T extends OpenmrsObject> implements IdSet<T> {
 	 */
 	public void add(Integer... memberIds) {
 		for (Integer memberId : memberIds) {
-			getMemberIds().add(memberId);
+			getMutableMemberIds().add(memberId);
 		}
 	}
 
@@ -84,28 +97,28 @@ public abstract class BaseIdSet<T extends OpenmrsObject> implements IdSet<T> {
 	 * @param memberIds to add to the Query
 	 */
 	public void addAll(Collection<Integer> memberIds) {
-		getMemberIds().addAll(memberIds);
+		getMutableMemberIds().addAll(memberIds);
 	}
 
 	/**
 	 * @see IdSet#contains(Integer)
 	 */
 	public boolean contains(Integer memberId) {
-		return getMemberIds().contains(memberId);
+		return getMutableMemberIds().contains(memberId);
 	}
 
 	/**
 	 * @see IdSet#getSize() ()
 	 */
 	public int getSize() {
-		return getMemberIds().size();
+		return getMutableMemberIds().size();
 	}
 	
 	/**
 	 * @see IdSet#isEmpty()
 	 */
 	public boolean isEmpty() {
-		return getMemberIds().isEmpty();
+		return getMutableMemberIds().isEmpty();
 	}
 
 	/**
@@ -126,6 +139,6 @@ public abstract class BaseIdSet<T extends OpenmrsObject> implements IdSet<T> {
 
 	@Override
 	public String toString() {
-		return getMemberIds().toString();
+		return getMutableMemberIds().toString();
 	}
 }

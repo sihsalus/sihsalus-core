@@ -18,6 +18,7 @@ import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationUtil;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class Mapped<T extends Parameterizable> implements Serializable {
 		this();
 		this.parameterizable = parameterizable;
 		if (parameterMappings != null) {
-			this.parameterMappings = parameterMappings;
+			this.parameterMappings = new HashMap<String, Object>(parameterMappings);
 		}
 	}
 
@@ -216,14 +217,14 @@ public class Mapped<T extends Parameterizable> implements Serializable {
 		if (parameterMappings == null) {
 			parameterMappings = new HashMap<String, Object>();
 		}
-		return parameterMappings;
+		return Collections.unmodifiableMap(parameterMappings);
 	}
 
 	/**
 	 * @param parameterMappings the parameterMappings to set
 	 */
 	public void setParameterMappings(Map<String, Object> parameterMappings) {
-		this.parameterMappings = parameterMappings;
+		this.parameterMappings = parameterMappings == null ? null : new HashMap<String, Object>(parameterMappings);
 	}
 	
 	/**

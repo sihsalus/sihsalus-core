@@ -180,11 +180,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
 
     private void updateAppointmentAudits(Appointment appointment, String notes) {
         AppointmentAudit appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
-        if (appointment.getAppointmentAudits() != null) {
-            appointment.getAppointmentAudits().addAll(new HashSet<>(Collections.singletonList(appointmentAudit)));
-        } else {
-            appointment.setAppointmentAudits(new HashSet<>(Collections.singletonList(appointmentAudit)));
-        }
+        appointment.addAppointmentAudit(appointmentAudit);
     }
 
     public void setAppointmentNumberGeneratorLocator(AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {

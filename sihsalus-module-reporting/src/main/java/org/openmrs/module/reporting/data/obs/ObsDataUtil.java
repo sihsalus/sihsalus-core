@@ -52,7 +52,7 @@ public class ObsDataUtil {
 				obsIds = new ObsIdSet(obsIdsForPatIds);
 			}
 			else {
-				obsIds.getMemberIds().retainAll(obsIdsForPatIds);
+				obsIds.retainAll(obsIdsForPatIds);
 			}
 		}
 

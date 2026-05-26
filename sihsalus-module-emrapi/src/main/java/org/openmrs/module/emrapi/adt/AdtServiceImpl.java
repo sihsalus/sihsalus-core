@@ -1062,11 +1062,11 @@ public class AdtServiceImpl extends BaseOpenmrsService implements AdtService {
 				m.put(visit, admission);
 			}
 			if (encounter.getEncounterType().equals(admissionEncounterType)) {
-				admission.getAdmissionEncounters().add(encounter);
+				admission.addAdmissionEncounter(encounter);
 			} else if (encounter.getEncounterType().equals(transferEncounterType)) {
-				admission.getTransferEncounters().add(encounter);
+				admission.addTransferEncounter(encounter);
 			} else if (encounter.getEncounterType().equals(dischargeEncounterType)) {
-				admission.getDischargeEncounters().add(encounter);
+				admission.addDischargeEncounter(encounter);
 			}
 		}
 		

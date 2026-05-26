@@ -474,8 +474,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         } catch (IOException e) {
             throw new APIException(e);
         }
-        Set<AppointmentAudit> appointmentAudits = appointment.getAppointmentAudits();
-        appointmentAudits.addAll(new HashSet<>(Collections.singleton(appointmentAudit)));
+        appointment.addAppointmentAudit(appointmentAudit);
     }
 
     public void setAppointmentNumberGeneratorLocator(AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {

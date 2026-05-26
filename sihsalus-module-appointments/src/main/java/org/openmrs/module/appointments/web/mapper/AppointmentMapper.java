@@ -222,7 +222,7 @@ public class AppointmentMapper {
             }
         }
 
-        appointment.getReasons().addAll(newReasons);
+        appointment.addReasons(newReasons);
     }
 
     private AppointmentProvider createNewAppointmentProvider(AppointmentProviderDetail providerDetail) {

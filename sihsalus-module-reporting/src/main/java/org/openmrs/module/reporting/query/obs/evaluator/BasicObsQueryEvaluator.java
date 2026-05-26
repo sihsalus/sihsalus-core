@@ -58,7 +58,7 @@ public class BasicObsQueryEvaluator implements ObsQueryEvaluator {
 		q.whereObsIn("o.obsId", context);
 
 		List<Integer> results = evaluationService.evaluateToList(q, Integer.class, context);
-		result.getMemberIds().addAll(results);
+		result.addAll(results);
 
 		return result;
     }

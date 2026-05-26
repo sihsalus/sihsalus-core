@@ -55,11 +55,18 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private List<NotificationResult> notificationResults;
 
     public Set<AppointmentAudit> getAppointmentAudits() {
-        return appointmentAudits;
+        return appointmentAudits == null ? null : Collections.unmodifiableSet(appointmentAudits);
     }
 
     public void setAppointmentAudits(Set<AppointmentAudit> appointmentAudits) {
-        this.appointmentAudits = appointmentAudits;
+        this.appointmentAudits = appointmentAudits == null ? null : new HashSet<>(appointmentAudits);
+    }
+
+    public void addAppointmentAudit(AppointmentAudit appointmentAudit) {
+        if (this.appointmentAudits == null) {
+            this.appointmentAudits = new HashSet<>();
+        }
+        this.appointmentAudits.add(appointmentAudit);
     }
 
     public AppointmentRecurringPattern getAppointmentRecurringPattern() {
@@ -279,10 +286,17 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     }
 
     public Set<AppointmentReason> getReasons() {
-        return reasons;
+        return reasons == null ? null : Collections.unmodifiableSet(reasons);
     }
 
     public void setReasons(Set<AppointmentReason> reasons) {
-        this.reasons = reasons;
+        this.reasons = reasons == null ? null : new HashSet<>(reasons);
+    }
+
+    public void addReasons(Set<AppointmentReason> reasons) {
+        if (this.reasons == null) {
+            this.reasons = new HashSet<>();
+        }
+        this.reasons.addAll(reasons);
     }
 }
