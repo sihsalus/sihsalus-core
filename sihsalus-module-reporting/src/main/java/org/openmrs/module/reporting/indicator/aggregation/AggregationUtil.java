@@ -20,10 +20,11 @@ import org.openmrs.api.APIException;
 public class AggregationUtil {
 
   /**
-   * @param <T>
-   * @param values
-   * @param aggregator
-   * @return
+   * Aggregates a collection of values using the provided aggregator implementation.
+   *
+   * @param values the values to aggregate
+   * @param aggregator the aggregator class to use
+   * @return the aggregated value, or {@code null} if the input collection is null
    */
   public static Number aggregate(
       Collection<Number> values, Class<? extends Aggregator> aggregator) {

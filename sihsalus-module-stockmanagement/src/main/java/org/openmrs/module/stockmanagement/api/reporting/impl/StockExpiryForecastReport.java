@@ -322,11 +322,9 @@ public class StockExpiryForecastReport extends ReportGenerator {
           "csv",
           fileSizeInBytes <= (1024 * 1024),
           stockManagementService);
-      if (step1File != null) {
-        try {
-          step1File.delete();
-        } catch (Exception e) {
-        }
+      try {
+        step1File.delete();
+      } catch (Exception e) {
       }
     } catch (IOException e) {
       stockManagementService.failBatchJob(

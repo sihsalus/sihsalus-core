@@ -86,8 +86,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
   /**
    * @Since 2.8.1
    *
-   * @param conclusion of results
-   * @return conclusion of results
+   * Conclusion of results.
    */
   @Column(name = "conclusion", length = 1024)
   private String conclusion;
@@ -95,8 +94,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
   /**
    * @Since 2.8.1
    *
-   * @param orders references to service requests the report is based on
-   * @return orders the report is based on
+   * References to service requests the report is based on.
    */
   @OneToMany
   @JoinTable(
