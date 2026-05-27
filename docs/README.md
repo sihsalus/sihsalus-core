@@ -5,6 +5,7 @@ Active documentation lives at the top of this directory. Historical planning not
 ## Active
 
 - `architecture.md`: current architecture direction and compatibility boundaries.
+- `spring-boot-runtime.md`: executable runtime map, configuration surface, and stabilization checklist.
 - `stabilization-plan.md`: current stabilization plan now that static module migration is complete.
 - `static-module-conversion-status.md`: migration outcome and stabilization verification queue.
 - `java-modernization.md`: Java baseline and modernization rules.
@@ -14,6 +15,7 @@ Active documentation lives at the top of this directory. Historical planning not
 - `security-baseline.md`: security rules required for production readiness.
 - `ci-baseline.md`: intended CI verification baseline.
 - `database-migrations.md`: Liquibase dry-run and migration review procedure.
+- `ops/README.md`: runtime image, required environment, and deployment notes.
 
 ## Archive
 

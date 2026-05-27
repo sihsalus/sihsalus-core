@@ -37,6 +37,15 @@ The static module migration is complete. The active work is now stabilization: m
 - Use module-scoped validation for focused patches and full reactor validation before release candidates.
 - Do not add broad `@SuppressWarnings` to clear CodeQL findings without a documented compatibility reason.
 
+### Spring Boot Runtime
+
+- Keep `sihsalus-core-boot` as the only executable composition root.
+- Keep OpenMRS runtime properties derived from Spring configuration before OpenMRS beans initialize.
+- Keep Liquibase ahead of Hibernate `SessionFactory` creation.
+- Keep static module wiring covered by boot smoke tests whenever modules, mappings, filters, or service registrations move.
+- Treat direct jar defaults differently from Compose defaults: Compose already requires secrets, but direct startup still needs explicit validation before production use.
+- Use `docs/spring-boot-runtime.md` as the runtime map for startup sequencing, configuration, and immediate gaps.
+
 ### Reliability
 
 - Replace manual stream/zip/file cleanup with try-with-resources.

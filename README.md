@@ -109,6 +109,8 @@ Modernization and technical-debt cleanup priorities are documented in
 
 The stabilization plan is documented in `docs/stabilization-plan.md`.
 
+The Spring Boot runtime map is documented in `docs/spring-boot-runtime.md`.
+
 The default boot configuration targets PostgreSQL:
 
 ```text
@@ -117,7 +119,8 @@ SIHSALUS_DATASOURCE_USERNAME=sihsalus
 SIHSALUS_DATASOURCE_PASSWORD=<set-a-long-local-db-secret>
 ```
 
-Tests use H2 in PostgreSQL compatibility mode.
+Tests use H2 for fast runtime wiring coverage; PostgreSQL migration and SQL behavior
+must still be verified with the Liquibase dry-run flow.
 
 ## Stabilization Milestone
 

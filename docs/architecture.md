@@ -28,6 +28,9 @@ The static module migration is complete. The current architectural decision is t
 
    The runtime baseline is Spring Boot 4 plus Spring Framework 7 and Hibernate 7, aligned with the imported OpenMRS `master` source. Boot logging uses Log4j2 to avoid mixing the OpenMRS Log4j binding with Boot's default Logback bridge.
 
+   The detailed runtime startup map, configuration surface, and stabilization checklist
+   are documented in `spring-boot-runtime.md`.
+
 3. Sihsalus backend extensions
 
    Sihsalus-specific services and modules should live behind clear package/module boundaries. New Java code should use `org.sihsalus.*` unless it is intentionally preserving an OpenMRS extension point.
