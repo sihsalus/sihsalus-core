@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -243,6 +244,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -326,6 +328,19 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void fhirR4SearchRejectsUnsupportedFiltersInsteadOfIgnoringThem() throws Exception {
+    mockMvc
+        .perform(
+            get("/ws/fhir2/R4/Location")
+                .param("name", "unknown")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+        .andExpect(jsonPath("$.resourceType").value("OperationOutcome"))
+        .andExpect(jsonPath("$.issue[0].code").value("invalid"));
+  }
+
+  @Test
   void reportsStaticModulesWithoutOmodRuntime() throws Exception {
     mockMvc
         .perform(get("/api/system/info"))
@@ -333,6 +348,55 @@ class SihsalusCoreApplicationTest {
         .andExpect(header().string("WWW-Authenticate", containsString("Basic")));
     mockMvc
         .perform(get("/api/system/info").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
+  }
+
+  @Test
+  void restAuthorizationChallengeCanBeSuppressedForBrowserClients() throws Exception {
+    mockMvc
+        .perform(get("/api/system/info").header("Disable-WWW-Authenticate", "true"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(header().doesNotExist("WWW-Authenticate"));
+
+    mockMvc
+        .perform(
+            get("/api/system/info")
+                .header("Authorization", basicAuth(TEST_ADMIN_USERNAME, "wrong-password"))
+                .header("Disable-WWW-Authenticate", "true"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(header().doesNotExist("WWW-Authenticate"));
+  }
+
+  @Test
+  void sessionEndpointPersistsOpenmrsAuthenticationForBrowserClients() throws Exception {
+    var loginResult =
+        mockMvc
+            .perform(
+                get("/rest/v1/session")
+                    .header("Authorization", ADMIN_BASIC_AUTH)
+                    .header("Disable-WWW-Authenticate", "true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.authenticated").value(true))
+            .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME))
+            .andExpect(jsonPath("$.user.privileges").isArray())
+            .andExpect(jsonPath("$.user.userProperties").exists())
+            .andExpect(jsonPath("$.sessionId").exists())
+            .andExpect(content().string(containsString("\"sessionLocation\"")))
+            .andExpect(cookie().exists("JSESSIONID"))
+            .andReturn();
+
+    assertNotNull(loginResult.getRequest().getSession(false));
+    MockHttpSession httpSession = (MockHttpSession) loginResult.getRequest().getSession(false);
+
+    mockMvc
+        .perform(get("/rest/v1/session").session(httpSession))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.authenticated").value(true))
+        .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME));
+
+    mockMvc
+        .perform(get("/api/system/info").session(httpSession))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
   }
@@ -589,7 +653,7 @@ class SihsalusCoreApplicationTest {
             "COUNTRY"));
     assertTrue(
         countRows("select count(*) from address_hierarchy_entry") > 90000,
-        "  address hierarchy entries should be loaded from sihsalus-content");
+        "Address hierarchy entries should be loaded from sihsalus-content");
     assertEquals(
         1,
         countRows(
@@ -843,9 +907,9 @@ class SihsalusCoreApplicationTest {
             get("/rest/v1/patient/{uuid}", patientUuid).header("Authorization", ADMIN_BASIC_AUTH))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.uuid").value(patientUuid))
-        .andExpect(jsonPath("$.identifier").value(TEST_IDENTIFIER))
-        .andExpect(jsonPath("$.givenName").value("Sihsalus"))
-        .andExpect(jsonPath("$.familyName").value("Paciente"));
+        .andExpect(
+            jsonPath("$.identifiers[?(@.display =~ /.*" + TEST_IDENTIFIER + ".*/)]").exists())
+        .andExpect(jsonPath("$.person.preferredName.display").value("Sihsalus Paciente"));
 
     assertNotNull(
         jdbcTemplate.queryForObject(
@@ -860,6 +924,69 @@ class SihsalusCoreApplicationTest {
         .andExpect(jsonPath("$.resourceType").value("Patient"))
         .andExpect(jsonPath("$.id").value(patientUuid))
         .andExpect(jsonPath("$.identifier[0].value").value(TEST_IDENTIFIER));
+  }
+
+  @Test
+  void importedOpenmrsRestResourcesAreAvailableThroughLegacyWsRestPrefix() throws Exception {
+    String patientUuid = ensureTestPatient();
+
+    RestService restService = Context.getService(RestService.class);
+    for (String resourceName :
+        List.of(
+            "v1/location",
+            "v1/patient",
+            "v1/visit",
+            "v1/encounter",
+            "v1/obs",
+            "v1/provider",
+            "v1/user",
+            "v1/systemsetting")) {
+      assertNotNull(restService.getResourceByName(resourceName), resourceName);
+    }
+
+    mockMvc
+        .perform(get("/ws/rest/v1").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.version").value("v1"));
+
+    for (String resourceName : List.of("location", "visit", "provider", "user")) {
+      mockMvc
+          .perform(
+              get("/ws/rest/v1/" + resourceName)
+                  .param("limit", "1")
+                  .header("Authorization", ADMIN_BASIC_AUTH))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.results").isArray());
+    }
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/patient")
+                .param("q", "Sihsalus")
+                .param("limit", "1")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results").isArray());
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/patient/{uuid}", patientUuid)
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uuid").value(patientUuid));
+  }
+
+  @Test
+  void fhirR4SearchEndpointInvokesImportedProvider() throws Exception {
+    mockMvc
+        .perform(
+            get("/ws/fhir2/R4/Location")
+                .param("_count", "1")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+        .andExpect(jsonPath("$.resourceType").value("Bundle"))
+        .andExpect(jsonPath("$.type").value("searchset"));
   }
 
   @Test

@@ -112,7 +112,7 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
       ObjectProvider<HibernateMappingContributor> mappingContributors) {
     HibernateSessionFactoryBean sessionFactory = new HibernateSessionFactoryBean();
     sessionFactory.setConfigLocations(new ClassPathResource("hibernate.cfg.xml"));
-    sessionFactory.setPackagesToScan("org.openmrs");
+    sessionFactory.setPackagesToScan("org.openmrs", "org.openmrs.module.fhir2.model");
     String[] mappingResources =
         mappingContributors
             .orderedStream()

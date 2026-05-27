@@ -96,7 +96,7 @@ public class FhirR4ReadController {
       return operationOutcome(exception);
     } catch (APIAuthenticationException exception) {
       return operationOutcome(
-          Context.isAuthenticated() ? 403 : 401,
+          authenticationFailureStatus(),
           exception.getMessage(),
           OperationOutcome.IssueType.FORBIDDEN);
     } catch (ContextAuthenticationException exception) {
@@ -141,12 +141,16 @@ public class FhirR4ReadController {
       return operationOutcome(exception);
     } catch (APIAuthenticationException exception) {
       return operationOutcome(
-          Context.isAuthenticated() ? 403 : 401,
+          authenticationFailureStatus(),
           exception.getMessage(),
           OperationOutcome.IssueType.FORBIDDEN);
     } catch (ContextAuthenticationException exception) {
       return operationOutcome(401, exception.getMessage(), OperationOutcome.IssueType.FORBIDDEN);
     }
+  }
+
+  private int authenticationFailureStatus() {
+    return Context.isSessionOpen() && Context.isAuthenticated() ? 403 : 401;
   }
 
   private String providerResourceType(IResourceProvider provider) {
