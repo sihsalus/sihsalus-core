@@ -42,7 +42,6 @@ public class ServiceClassLoader<C> {
 
   private volatile boolean loaded = false;
 
-  @SuppressWarnings("unused")
   public ServiceClassLoader(Class<C> service) {
     this(service, ClassLoader.getSystemClassLoader());
   }

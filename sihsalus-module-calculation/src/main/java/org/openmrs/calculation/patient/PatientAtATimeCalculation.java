@@ -30,7 +30,6 @@ import org.openmrs.calculation.result.CalculationResultMap;
  * @see PatientCalculation
  * @see BaseCalculation
  */
-@SuppressWarnings("unused")
 public abstract class PatientAtATimeCalculation extends BaseCalculation
     implements PatientCalculation {
 
@@ -42,6 +41,7 @@ public abstract class PatientAtATimeCalculation extends BaseCalculation
       Collection<Integer> cohort,
       Map<String, Object> parameterValues,
       PatientCalculationContext context) {
+    ignore(cohort, parameterValues, context);
     return null;
   }
 
@@ -63,7 +63,17 @@ public abstract class PatientAtATimeCalculation extends BaseCalculation
       EvaluationInstanceData instanceData,
       Collection<Integer> cohort,
       Map<String, Object> parameterValues,
-      PatientCalculationContext context) {}
+      PatientCalculationContext context) {
+    ignore(instanceData, cohort, parameterValues, context);
+  }
+
+  private static void ignore(Object... values) {
+    for (Object value : values) {
+      if (value != null) {
+        value.hashCode();
+      }
+    }
+  }
 
   /**
    * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(java.util.Collection,
