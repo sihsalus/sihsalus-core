@@ -338,6 +338,22 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void restAuthorizationChallengeCanBeSuppressedForBrowserClients() throws Exception {
+    mockMvc
+        .perform(get("/api/system/info").header("Disable-WWW-Authenticate", "true"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(header().doesNotExist("WWW-Authenticate"));
+
+    mockMvc
+        .perform(
+            get("/api/system/info")
+                .header("Authorization", basicAuth(TEST_ADMIN_USERNAME, "wrong-password"))
+                .header("Disable-WWW-Authenticate", "true"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(header().doesNotExist("WWW-Authenticate"));
+  }
+
+  @Test
   void adminAndLegacyModuleEndpointsRequireAuthentication() throws Exception {
     mockMvc
         .perform(get("/api/admin/static-modules"))

@@ -39,6 +39,8 @@ public class AuthorizationFilter implements Filter {
 
   private static final Logger log = LoggerFactory.getLogger(AuthorizationFilter.class);
 
+  private static final String DISABLE_WWW_AUTH_HEADER_NAME = "Disable-WWW-Authenticate";
+
   /**
    * @see jakarta.servlet.Filter#init(jakarta.servlet.FilterConfig)
    */
@@ -112,18 +114,18 @@ public class AuthorizationFilter implements Filter {
               log.debug("authenticated [{}]", username);
             } catch (Exception ex) {
               log.debug("authentication exception ", ex);
-              sendUnauthorized(response, "Invalid username or password");
+              sendUnauthorized(httpRequest, response, "Invalid username or password");
               return;
             }
           } else {
-            sendUnauthorized(response, "Unsupported authorization scheme");
+            sendUnauthorized(httpRequest, response, "Unsupported authorization scheme");
             return;
           }
         }
       }
 
       if (!Context.isAuthenticated() && requiresAuthentication(httpRequest)) {
-        sendUnauthorized(response, "Authentication required");
+        sendUnauthorized(httpRequest, response, "Authentication required");
         return;
       }
     }
@@ -143,9 +145,16 @@ public class AuthorizationFilter implements Filter {
         || requestUri.equals(contextPath + "/ws/rest/" + RestConstants.VERSION_1 + "/session");
   }
 
-  private void sendUnauthorized(ServletResponse response, String message) throws IOException {
+  private void sendUnauthorized(
+      HttpServletRequest request, ServletResponse response, String message) throws IOException {
     HttpServletResponse httpResponse = (HttpServletResponse) response;
-    httpResponse.setHeader("WWW-Authenticate", "Basic realm=\"OpenMRS REST\"");
+    if (shouldAddWWWAuthHeader(request)) {
+      httpResponse.setHeader("WWW-Authenticate", "Basic realm=\"OpenMRS REST\"");
+    }
     httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
+  }
+
+  private boolean shouldAddWWWAuthHeader(HttpServletRequest request) {
+    return !"true".equals(request.getHeader(DISABLE_WWW_AUTH_HEADER_NAME));
   }
 }
