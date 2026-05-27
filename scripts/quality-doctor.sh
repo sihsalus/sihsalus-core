@@ -17,6 +17,40 @@ STRICT_SPOTBUGS=0
 RUN_SPOTLESS=1
 MODULES=()
 
+resolve_module_selector() {
+  local selector="$1"
+  local artifact_selector="${selector#:}"
+  local module_path
+  local artifact_id
+
+  if [[ -f "$selector/pom.xml" ]]; then
+    echo "$selector"
+    return 0
+  fi
+
+  while IFS= read -r module_path; do
+    [[ -f "$module_path/pom.xml" ]] || continue
+    artifact_id="$(
+      awk '
+        /<\/parent>/ { after_parent = 1; next }
+        after_parent && match($0, /<artifactId>[^<]+<\/artifactId>/) {
+          value = $0
+          sub(/^.*<artifactId>/, "", value)
+          sub(/<\/artifactId>.*$/, "", value)
+          print value
+          exit
+        }
+      ' "$module_path/pom.xml"
+    )"
+    if [[ "$artifact_id" == "$artifact_selector" ]]; then
+      echo "$module_path"
+      return 0
+    fi
+  done < <(sed -n 's:.*<module>\([^<][^<]*\)</module>.*:\1:p' pom.xml)
+
+  echo "$selector"
+}
+
 usage() {
   cat <<'EOF'
 Usage: ./scripts/quality-doctor.sh [options]
@@ -81,7 +115,11 @@ done
 SPOTLESS_MAVEN_ARGS=("${BASE_MAVEN_ARGS[@]}")
 BUILD_MAVEN_ARGS=("${BASE_MAVEN_ARGS[@]}")
 if (( ${#MODULES[@]} > 0 )); then
-  module_list="$(IFS=,; echo "${MODULES[*]}")"
+  RESOLVED_MODULES=()
+  for module in "${MODULES[@]}"; do
+    RESOLVED_MODULES+=("$(resolve_module_selector "$module")")
+  done
+  module_list="$(IFS=,; echo "${RESOLVED_MODULES[*]}")"
   SPOTLESS_MAVEN_ARGS+=("-pl" "$module_list")
   BUILD_MAVEN_ARGS+=("-pl" "$module_list" "-am")
 fi

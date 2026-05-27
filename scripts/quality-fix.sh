@@ -13,6 +13,40 @@ fi
 MODULES=()
 MAVEN_ARGS=("-DskipITs")
 
+resolve_module_selector() {
+  local selector="$1"
+  local artifact_selector="${selector#:}"
+  local module_path
+  local artifact_id
+
+  if [[ -f "$selector/pom.xml" ]]; then
+    echo "$selector"
+    return 0
+  fi
+
+  while IFS= read -r module_path; do
+    [[ -f "$module_path/pom.xml" ]] || continue
+    artifact_id="$(
+      awk '
+        /<\/parent>/ { after_parent = 1; next }
+        after_parent && match($0, /<artifactId>[^<]+<\/artifactId>/) {
+          value = $0
+          sub(/^.*<artifactId>/, "", value)
+          sub(/<\/artifactId>.*$/, "", value)
+          print value
+          exit
+        }
+      ' "$module_path/pom.xml"
+    )"
+    if [[ "$artifact_id" == "$artifact_selector" ]]; then
+      echo "$module_path"
+      return 0
+    fi
+  done < <(sed -n 's:.*<module>\([^<][^<]*\)</module>.*:\1:p' pom.xml)
+
+  echo "$selector"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --modules)
@@ -28,7 +62,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 if (( ${#MODULES[@]} > 0 )); then
-  MAVEN_ARGS+=("-pl" "$(IFS=,; echo "${MODULES[*]}")")
+  RESOLVED_MODULES=()
+  for module in "${MODULES[@]}"; do
+    RESOLVED_MODULES+=("$(resolve_module_selector "$module")")
+  done
+  MAVEN_ARGS+=("-pl" "$(IFS=,; echo "${RESOLVED_MODULES[*]}")")
 fi
 
 echo "=== Formatting: Spotless apply ==="

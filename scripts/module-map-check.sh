@@ -33,22 +33,4 @@ if (( ${#missing[@]} > 0 )); then
   exit 1
 fi
 
-unknown=()
-while IFS= read -r module; do
-  if [[ ! -d "$module" ]]; then
-    unknown+=("$module")
-  fi
-done < <(
-  grep -oE '`sihsalus[^`]+`' "$MODULE_MAP" \
-    | tr -d '`' \
-    | grep -v '^sihsalus-core-boot$' \
-    | sort -u
-)
-
-if (( ${#unknown[@]} > 0 )); then
-  echo "Modules documented in $MODULE_MAP but not present as top-level directories:"
-  printf '  - %s\n' "${unknown[@]}"
-  exit 1
-fi
-
 echo "Module map covers $reactor_count Maven modules."

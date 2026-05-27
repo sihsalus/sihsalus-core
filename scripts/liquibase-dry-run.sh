@@ -134,7 +134,7 @@ if [[ "$URL" != offline:* && -z "$PASSWORD" ]]; then
   exit 1
 fi
 
-BOOT_JAR="$ROOT_DIR/sihsalus-core-boot/target/sihsalus-core-boot-0.1.0-SNAPSHOT.jar"
+BOOT_JAR="$ROOT_DIR/apps/backend/target/sihsalus-core-boot-0.1.0-SNAPSHOT.jar"
 OPENMRS_DATA_DIR="${SIHSALUS_LIQUIBASE_OPENMRS_DATA_DIR:-$ROOT_DIR/target/liquibase-dry-run/openmrs-data}"
 EXTRACT_DIR="$ROOT_DIR/target/liquibase-dry-run/boot"
 RUN_DIR="$(mktemp -d "${TMPDIR:-/tmp}/sihsalus-liquibase-dry-run.XXXXXX")"
@@ -160,7 +160,7 @@ EOF
 
 if [[ "$SKIP_BUILD" == 0 ]]; then
   echo "=== Packaging sihsalus-core-boot for Liquibase classpath ==="
-  "$MAVEN_CMD" -q -pl sihsalus-core-boot -am -DskipTests -DskipITs package
+  "$MAVEN_CMD" -q -pl apps/backend -am -DskipTests -DskipITs package
 elif [[ ! -f "$BOOT_JAR" ]]; then
   echo "Missing $BOOT_JAR. Run without --skip-build first."
   exit 1
