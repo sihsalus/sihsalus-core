@@ -6,6 +6,7 @@ Active documentation lives at the top of this directory. Historical planning not
 
 - `architecture.md`: current architecture direction and compatibility boundaries.
 - `spring-boot-runtime.md`: executable runtime map, configuration surface, and stabilization checklist.
+- `backend-endpoints.md`: HTTP endpoint map for REST, FHIR, module controllers, and service-only modules.
 - `module-map.md`: current module ownership boundaries and future repository layout target.
 - `stabilization-plan.md`: current stabilization plan now that static module migration is complete.
 - `runtime-hardening.md`: operational checklist for secrets, OCL, attachments, XStream, auth, and PostgreSQL smoke.
