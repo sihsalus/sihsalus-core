@@ -2,19 +2,20 @@
 
 Sihsalus Core is the backend foundation for the Sihsalus distribution. It starts from OpenMRS compatibility and evolves incrementally toward a maintained, secure, production-ready core.
 
-This repository is intentionally small at the beginning. Code is brought in only when its ownership, compatibility impact, test strategy, and security posture are clear.
+The static module migration has been completed. The repository now focuses on stabilizing the migrated runtime: correctness, security, PostgreSQL/Liquibase behavior, CI gates, and production readiness.
 
 ## Current Phase
 
-Phase 1: static modular monolith skeleton.
+Stabilization after static module migration.
 
 Goals:
 
-- keep a Java 21 Maven reactor as the build boundary
-- compose SIH Salus modules as internal Maven jars instead of runtime `.omod` packages
-- provide a Spring Boot executable runtime
-- run centralized Liquibase migrations
-- expose technical health and first FHIR metadata endpoints
+- keep the Java 21 Maven reactor green and reproducible
+- close CodeQL, formatting, and compiler-warning debt without broad rewrites
+- verify migrated modules through PostgreSQL smoke tests and focused workflow tests
+- harden security defaults, secrets handling, upload/OCL boundaries, and authorization paths
+- validate centralized Liquibase behavior with dry-runs, upgrade fixtures, and rollback notes
+- document compatibility exceptions before changing inherited OpenMRS contracts
 
 ## Compatibility Rule
 
@@ -24,7 +25,7 @@ Sihsalus branding and product experience can evolve independently from OpenMRS c
 
 ## Distro Baseline
 
-The initial compatibility baseline is the current Sihsalus distro, not OpenMRS Core `master`.
+The compatibility baseline remains the current Sihsalus distro, not OpenMRS Core `master`.
 
 Current distro reference:
 
@@ -37,7 +38,7 @@ Current distro reference:
 
 Sihsalus Core targets Java 21 for new backend work and modernization work.
 
-This matches the current OpenMRS core development branch, which uses `maven.compiler.release=21`. The current Sihsalus distro is still based on OpenMRS `2.8.6`, so imported code must be validated against the distro baseline before being modernized.
+This matches the current OpenMRS core development branch, which uses `maven.compiler.release=21`. Stabilization changes must preserve the Sihsalus distro compatibility baseline unless an explicit compatibility review approves the change.
 
 ## Repository Layout
 
@@ -105,6 +106,8 @@ This branch does not include `./mvnw`, so use `mvn` directly.
 Modernization and technical-debt cleanup priorities are documented in
 `docs/technical-debt-modernization.md`.
 
+The stabilization plan is documented in `docs/stabilization-plan.md`.
+
 The default boot configuration targets PostgreSQL:
 
 ```text
@@ -115,6 +118,6 @@ SIHSALUS_DATASOURCE_PASSWORD=<set-a-long-local-db-secret>
 
 Tests use H2 in PostgreSQL compatibility mode.
 
-## First Milestone
+## Stabilization Milestone
 
-The first milestone is a runnable minimal core profile with documented compatibility boundaries, CI, static module composition, centralized migrations, and a first FHIR endpoint.
+The next milestone is a release-candidate backend where the migrated static runtime has predictable CI, PostgreSQL migration validation, smoke coverage for critical modules, hardened security defaults, and a documented residual-risk list.

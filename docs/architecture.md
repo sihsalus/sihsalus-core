@@ -2,7 +2,7 @@
 
 Sihsalus Core will be built as a compatible backend foundation for the Sihsalus distribution.
 
-The current architectural decision is to keep the OpenMRS data model as the canonical core model while removing the `.omod` runtime. Code enters this repository only when it has an owner, a compatibility boundary, and a verification path.
+The static module migration is complete. The current architectural decision is to keep the OpenMRS data model as the canonical core model while stabilizing the `.omod`-free runtime. New changes should improve reliability, security, observability, test coverage, or explicit Sihsalus product behavior.
 
 ## Layers
 
@@ -36,10 +36,17 @@ The current architectural decision is to keep the OpenMRS data model as the cano
 
    Local development, CI, container builds, secrets, backups, and observability are first-class concerns. A module is not production-ready just because it compiles.
 
-## Non-Goals For The Initial Skeleton
+## Stabilization Focus
+
+- keep the static runtime free from `.omod` lifecycle dependencies
+- verify module services, REST/FHIR adapters, Liquibase order, and PostgreSQL behavior with repeatable checks
+- reduce inherited reliability/security debt where Sihsalus actively owns the code path
+- document compatibility exceptions before changing OpenMRS package names, database shape, REST paths, FHIR paths, or module identifiers
+
+## Non-Goals For Stabilization
 
 - rename OpenMRS core packages
-- complete all backend behavior
+- rewrite inherited backend behavior without product or reliability need
 - rewrite authentication
 - replace the OpenMRS persistent model
 

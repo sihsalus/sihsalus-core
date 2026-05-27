@@ -5,7 +5,8 @@ Active documentation lives at the top of this directory. Historical planning not
 ## Active
 
 - `architecture.md`: current architecture direction and compatibility boundaries.
-- `static-module-conversion-status.md`: current module conversion status and porting queue.
+- `stabilization-plan.md`: current stabilization plan now that static module migration is complete.
+- `static-module-conversion-status.md`: migration outcome and stabilization verification queue.
 - `java-modernization.md`: Java baseline and modernization rules.
 - `technical-debt-modernization.md`: prioritized modernization targets and antipatterns to remove.
 - `technical-debt-phase-1.md`: clean baseline, branch rules, and validation workflow for debt cleanup.
