@@ -477,7 +477,7 @@ public class StockBatchExpiryJob extends AbstractTask {
         sentAtleastOneEmail = true;
         batchNumbersNotified.putAll(userBatchNumbersNotified);
       } catch (Exception exception) {
-        log.error("Error sending stock batch expiry email to {}", receipients, exception);
+        log.error("Error sending stock batch expiry email to " + receipients, exception);
         continue;
       }
     }

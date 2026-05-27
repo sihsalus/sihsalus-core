@@ -369,7 +369,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
             body,
             emailAddress);
       } catch (Exception exception) {
-        log.error("Error sending stock rule email to {}", emailAddress, exception);
+        log.error("Error sending stock rule email to " + emailAddress, exception);
         continue;
       }
     }
