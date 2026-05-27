@@ -38,6 +38,6 @@ USER sihsalus
 EXPOSE 8080
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=2m --retries=12 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+  CMD sh -c 'curl -f "http://localhost:${SERVER_PORT:-8080}${SERVER_SERVLET_CONTEXT_PATH:-}/actuator/health" || exit 1'
 
 ENTRYPOINT ["/sbin/tini", "--", "/opt/sihsalus/entrypoint.sh"]

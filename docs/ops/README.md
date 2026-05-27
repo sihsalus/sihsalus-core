@@ -31,7 +31,13 @@ SIHSALUS_POSTGRES_PORT=5432
 SIHSALUS_OCL_STATIC_IMPORT_ENABLED=true
 SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS=true
 SIHSALUS_JAVA_OPTS=-XX:MaxRAMPercentage=75
+SERVER_SERVLET_CONTEXT_PATH=
 ```
+
+When this image is deployed behind the `sihsalus/sihsalus` gateway, set
+`SERVER_SERVLET_CONTEXT_PATH=/openmrs`. The actuator health endpoint then moves
+from `/actuator/health` to `/openmrs/actuator/health`, while REST and FHIR
+routes keep their internal paths under the `/openmrs` gateway prefix.
 
 ## Development Deployment
 
