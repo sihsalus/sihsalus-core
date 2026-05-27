@@ -158,3 +158,14 @@ Rules:
 4. Validate with `git diff --check`, focused Maven compile, and full CI.
 5. Repeat by group only after the pilot proves that tooling, IDE imports, and CI
    handle the new layout.
+
+## Verification
+
+Run this before layout-planning commits:
+
+```bash
+./scripts/module-map-check.sh
+```
+
+The check compares the parent Maven reactor with this document and fails when a
+reactor module is missing from the map.

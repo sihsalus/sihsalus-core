@@ -18,6 +18,10 @@ Active documentation lives at the top of this directory. Historical planning not
 - `database-migrations.md`: Liquibase dry-run and migration review procedure.
 - `ops/README.md`: runtime image, required environment, and deployment notes.
 
+## Checks
+
+- `../scripts/module-map-check.sh`: verifies that `module-map.md` covers every Maven reactor module.
+
 ## Archive
 
 - `archive/`: dated planning, distro review, and migration reference material kept for traceability.
