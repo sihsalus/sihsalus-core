@@ -45,7 +45,14 @@ final class OpenmrsRuntimePropertiesConfigurer
     properties.setProperty("cache.type", "local");
 
     String applicationDataDirectory =
-        property("sihsalus.openmrs.application-data-directory", defaultApplicationDataDirectory());
+        firstProperty(
+            "sihsalus.openmrs.application-data-directory",
+            "openmrs.application-data-directory",
+            "openmrs.application.data.directory",
+            OpenmrsConstants.KEY_OPENMRS_APPLICATION_DATA_DIRECTORY);
+    if (applicationDataDirectory == null) {
+      applicationDataDirectory = defaultApplicationDataDirectory();
+    }
     properties.setProperty(
         OpenmrsConstants.APPLICATION_DATA_DIRECTORY_RUNTIME_PROPERTY, applicationDataDirectory);
     OpenmrsUtil.setApplicationDataDirectory(applicationDataDirectory);
@@ -64,6 +71,16 @@ final class OpenmrsRuntimePropertiesConfigurer
   private String property(String key, String defaultValue) {
     String value = environment.getProperty(key);
     return value == null ? defaultValue : value;
+  }
+
+  private String firstProperty(String... keys) {
+    for (String key : keys) {
+      String value = environment.getProperty(key);
+      if (value != null && !value.isBlank()) {
+        return value;
+      }
+    }
+    return null;
   }
 
   private static String driverFor(String datasourceUrl) {

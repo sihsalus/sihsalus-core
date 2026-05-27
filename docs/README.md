@@ -6,6 +6,7 @@ Active documentation lives at the top of this directory. Historical planning not
 
 - `architecture.md`: current architecture direction and compatibility boundaries.
 - `spring-boot-runtime.md`: executable runtime map, configuration surface, and stabilization checklist.
+- `module-map.md`: current module ownership boundaries and future repository layout target.
 - `stabilization-plan.md`: current stabilization plan now that static module migration is complete.
 - `static-module-conversion-status.md`: migration outcome and stabilization verification queue.
 - `java-modernization.md`: Java baseline and modernization rules.
