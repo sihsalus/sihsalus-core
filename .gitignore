@@ -8,6 +8,7 @@ build/
 out/
 logs/
 tmp/
+${openmrs:applicationDirectory}/
 
 .env
 .env.*

@@ -8,11 +8,13 @@ compose.yml
 *.iml
 
 **/target
+target
 **/build
 **/out
 **/*.log
 **/*.pid
 **/*.class
+${openmrs:applicationDirectory}
 
 .env
 .env.*

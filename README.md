@@ -45,7 +45,7 @@ This matches the current OpenMRS core development branch, which uses `maven.comp
 ```text
 config/     Version pins and local configuration baselines
 docs/       Active architecture, security, CI, and modernization notes
-ops/        Deployment and operations notes
+docs/ops/   Deployment and operations notes
 tests/e2e/  Cross-module end-to-end test workspace
 .dev/       Ignored local reference clones and developer-only scratch data
 core/api/                 Shared SIH Salus core contracts
@@ -111,6 +111,8 @@ Modernization and technical-debt cleanup priorities are documented in
 The stabilization plan is documented in `docs/stabilization-plan.md`.
 
 The Spring Boot runtime map is documented in `docs/spring-boot-runtime.md`.
+
+The current reactor layout is documented in `docs/module-map.md`.
 
 The default boot configuration targets PostgreSQL:
 
