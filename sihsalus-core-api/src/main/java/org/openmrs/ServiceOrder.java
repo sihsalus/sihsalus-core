@@ -63,8 +63,8 @@ public abstract class ServiceOrder extends Order {
   /** Default Constructor */
   public ServiceOrder() {}
 
-  protected ServiceOrder copyHelper(ServiceOrder target) {
-    super.copyHelper(target);
+  protected ServiceOrder copyServiceOrderState(ServiceOrder target) {
+    super.copyOrderState(target);
     target.specimenSource = getSpecimenSource();
     target.laterality = getLaterality();
     target.clinicalHistory = getClinicalHistory();
@@ -167,10 +167,10 @@ public abstract class ServiceOrder extends Order {
   }
 
   /**
-   * @see Order#cloneForRevisionHelper(Order)
+   * @see Order#copyRevisionState(Order)
    */
-  protected ServiceOrder cloneForRevisionHelper(ServiceOrder target) {
-    super.cloneForRevisionHelper(target);
+  protected ServiceOrder copyServiceOrderRevisionState(ServiceOrder target) {
+    super.copyRevisionState(target);
     target.setSpecimenSource(getSpecimenSource());
     target.setLaterality(getLaterality());
     target.setClinicalHistory(getClinicalHistory());

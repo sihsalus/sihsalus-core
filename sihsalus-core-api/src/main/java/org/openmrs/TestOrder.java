@@ -40,7 +40,7 @@ public class TestOrder extends ServiceOrder {
   @Override
   public TestOrder copy() {
     TestOrder newOrder = new TestOrder();
-    super.copyHelper(newOrder);
+    super.copyServiceOrderState(newOrder);
     return newOrder;
   }
 
@@ -66,7 +66,7 @@ public class TestOrder extends ServiceOrder {
   @Override
   public TestOrder cloneForRevision() {
     TestOrder newOrder = new TestOrder();
-    super.cloneForRevisionHelper(newOrder);
+    super.copyServiceOrderRevisionState(newOrder);
     return newOrder;
   }
 }

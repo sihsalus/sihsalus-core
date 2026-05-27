@@ -39,7 +39,7 @@ public class ReferralOrder extends ServiceOrder {
   @Override
   public ReferralOrder copy() {
     ReferralOrder newOrder = new ReferralOrder();
-    super.copyHelper(newOrder);
+    super.copyServiceOrderState(newOrder);
     return newOrder;
   }
 
@@ -65,7 +65,7 @@ public class ReferralOrder extends ServiceOrder {
   @Override
   public ReferralOrder cloneForRevision() {
     ReferralOrder newOrder = new ReferralOrder();
-    super.cloneForRevisionHelper(newOrder);
+    super.copyServiceOrderRevisionState(newOrder);
     return newOrder;
   }
 }

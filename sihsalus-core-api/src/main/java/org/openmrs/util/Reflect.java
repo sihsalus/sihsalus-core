@@ -22,7 +22,6 @@ import java.util.List;
  * This class has convenience methods to find the fields on a class and superclass as well as
  * methods to check the class type of members in a collection
  */
-@SuppressWarnings("java/confusing-method-signature")
 public class Reflect {
 
   private Class parametrizedClass;
@@ -47,8 +46,7 @@ public class Reflect {
    * @param fieldClass
    * @return true if, given fieldClass is Collection otherwise returns false
    */
-  @SuppressWarnings("java/confusing-method-signature")
-  public static boolean isCollection(Class<?> fieldClass) {
+  public static boolean isCollectionClass(Class<?> fieldClass) {
     return Collection.class.isAssignableFrom(fieldClass);
   }
 
@@ -60,7 +58,7 @@ public class Reflect {
    * @return true if, given object is Collection otherwise returns false
    */
   public static boolean isCollection(Object object) {
-    return isCollection(object.getClass());
+    return isCollectionClass(object.getClass());
   }
 
   /**

@@ -37,7 +37,6 @@ import org.openmrs.util.OpenmrsUtil;
 @PrimaryKeyJoinColumn(name = "order_id")
 @OnDelete(action = OnDeleteAction.CASCADE)
 @Audited
-@SuppressWarnings("java/confusing-method-signature")
 public class DrugOrder extends Order {
 
   public static final long serialVersionUID = 72232L;
@@ -120,15 +119,14 @@ public class DrugOrder extends Order {
    */
   @Override
   public DrugOrder copy() {
-    return copyHelper(new DrugOrder());
+    return copyDrugOrderState(new DrugOrder());
   }
 
   /**
-   * @see org.openmrs.Order#copyHelper(Order)
+   * @see org.openmrs.Order#copyOrderState(Order)
    */
-  @SuppressWarnings("java/confusing-method-signature")
-  protected DrugOrder copyHelper(DrugOrder target) {
-    super.copyHelper(target);
+  protected DrugOrder copyDrugOrderState(DrugOrder target) {
+    super.copyOrderState(target);
     target.setDose(getDose());
     target.setDoseUnits(getDoseUnits());
     target.setFrequency(getFrequency());
@@ -486,15 +484,14 @@ public class DrugOrder extends Order {
    */
   @Override
   public DrugOrder cloneForRevision() {
-    return cloneForRevisionHelper(new DrugOrder());
+    return copyDrugOrderRevisionState(new DrugOrder());
   }
 
   /**
-   * @see Order#cloneForRevisionHelper(Order)
+   * @see Order#copyRevisionState(Order)
    */
-  @SuppressWarnings("java/confusing-method-signature")
-  protected DrugOrder cloneForRevisionHelper(DrugOrder target) {
-    super.cloneForRevisionHelper(target);
+  protected DrugOrder copyDrugOrderRevisionState(DrugOrder target) {
+    super.copyRevisionState(target);
     target.setDose(getDose());
     target.setDoseUnits(getDoseUnits());
     target.setFrequency(getFrequency());

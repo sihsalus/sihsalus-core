@@ -43,13 +43,11 @@ import org.openmrs.module.metadatamapping.api.MetadataSetSearchCriteria;
 import org.openmrs.module.metadatamapping.api.MetadataSourceSearchCriteria;
 import org.openmrs.module.metadatamapping.api.MetadataSourceSearchCriteriaBuilder;
 import org.openmrs.module.metadatamapping.api.MetadataTermMappingSearchCriteria;
-import org.openmrs.module.metadatamapping.api.MetadataTermMappingSearchCriteriaBuilder;
 import org.openmrs.module.metadatamapping.api.db.MetadataMappingDAO;
 import org.openmrs.module.metadatamapping.api.wrapper.ConceptAdapter;
 import org.springframework.transaction.annotation.Transactional;
 
 /** The service implementation. */
-@SuppressWarnings("java/confusing-method-signature")
 public class MetadataMappingServiceImpl extends BaseOpenmrsService
     implements MetadataMappingService {
 
@@ -578,18 +576,6 @@ public class MetadataMappingServiceImpl extends BaseOpenmrsService
   }
 
   @Override
-  @Transactional(readOnly = true)
-  @SuppressWarnings("java/confusing-method-signature")
-  public List<MetadataTermMapping> getMetadataTermMappings(OpenmrsMetadata referredObject) {
-    MetadataTermMappingSearchCriteria searchCriteria =
-        new MetadataTermMappingSearchCriteriaBuilder()
-            .setIncludeAll(false)
-            .setReferredObject(referredObject)
-            .build();
-    return dao.getMetadataTermMappings(searchCriteria);
-  }
-
-  @Override
   @Transactional
   public MetadataTermMapping retireMetadataTermMapping(
       MetadataTermMapping metadataTermMapping, String reason) {
@@ -609,17 +595,6 @@ public class MetadataMappingServiceImpl extends BaseOpenmrsService
       String metadataSourceName, String metadataTermCode) {
     return dao.getMetadataTermMapping(
         dao.getMetadataSourceByName(metadataSourceName), metadataTermCode);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public List<MetadataTermMapping> getMetadataTermMappings(MetadataSource metadataSource) {
-    MetadataTermMappingSearchCriteria searchCriteria =
-        new MetadataTermMappingSearchCriteriaBuilder()
-            .setIncludeAll(false)
-            .setMetadataSource(metadataSource)
-            .build();
-    return dao.getMetadataTermMappings(searchCriteria);
   }
 
   @Override

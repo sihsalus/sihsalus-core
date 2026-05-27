@@ -18,7 +18,6 @@ import org.openmrs.api.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("java/confusing-method-signature")
 public class Format {
 
   private static final Logger log = LoggerFactory.getLogger(Format.class);
@@ -41,13 +40,8 @@ public class Format {
     }
   }
 
-  @SuppressWarnings("java/confusing-method-signature")
-  public static String format(double d) {
-    return "" + (d);
-  }
-
   public static String format(Double d) {
-    return d == null ? "" : format(d.doubleValue());
+    return d == null ? "" : d.toString();
   }
 
   public static String formatTextBoxDate(Date date) {

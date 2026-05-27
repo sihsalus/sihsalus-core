@@ -412,19 +412,6 @@ public interface MetadataMappingService extends OpenmrsService {
       MetadataTermMappingSearchCriteria searchCriteria);
 
   /**
-   * Find all the unretired metadata term mappings that refer to the given metadata object.
-   *
-   * @param referredObject find term mappings that refer to this object
-   * @return list of matching metadata term mappings
-   * @since 1.1
-   * @should return unretired term mappings referring to object
-   * @deprecated Use {@link #getMetadataTermMappings(MetadataTermMappingSearchCriteria)} instead
-   */
-  @Authorized()
-  @Deprecated
-  List<MetadataTermMapping> getMetadataTermMappings(OpenmrsMetadata referredObject);
-
-  /**
    * Retire the object and set required info via an AOP injected method.
    *
    * @param metadataTermMapping object to retire
@@ -461,19 +448,6 @@ public interface MetadataMappingService extends OpenmrsService {
    */
   @Authorized()
   MetadataTermMapping getMetadataTermMapping(String metadataSourceName, String metadataTermCode);
-
-  /**
-   * Get all unretired metadata term mappings in the source.
-   *
-   * @param metadataSource source of the terms
-   * @return list of terms
-   * @since 1.1
-   * @should return only unretired term mappings
-   * @deprecated Use {@link #getMetadataTermMappings(MetadataTermMappingSearchCriteria)} instead
-   */
-  @Authorized()
-  @Deprecated
-  List<MetadataTermMapping> getMetadataTermMappings(MetadataSource metadataSource);
 
   /**
    * Get metadata item referred to by the given metadata term mapping
