@@ -987,6 +987,18 @@ class SihsalusCoreApplicationTest {
         .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
         .andExpect(jsonPath("$.resourceType").value("Bundle"))
         .andExpect(jsonPath("$.type").value("searchset"));
+
+    mockMvc
+        .perform(
+            get("/ws/fhir2/R4/Location")
+                .param("_summary", "data")
+                .param("_count", "50")
+                .param("_tag", "Login Location")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+        .andExpect(jsonPath("$.resourceType").value("Bundle"))
+        .andExpect(jsonPath("$.type").value("searchset"));
   }
 
   @Test

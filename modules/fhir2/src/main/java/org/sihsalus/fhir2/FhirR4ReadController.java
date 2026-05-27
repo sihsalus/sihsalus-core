@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
@@ -43,7 +45,7 @@ public class FhirR4ReadController {
   private static final int MAX_SEARCH_COUNT = 50;
 
   private static final Set<String> SUPPORTED_SEARCH_PARAMETERS =
-      Set.of("_count", "_format", "_pretty");
+      Set.of("_count", "_format", "_pretty", "_summary", "_tag");
 
   private final FhirContext fhirContext;
 
@@ -133,7 +135,7 @@ public class FhirR4ReadController {
     try {
       rejectUnsupportedSearchParameters(queryParameters);
       IBundleProvider bundleProvider = invokeSearch(provider, searchMethod);
-      Bundle bundle = bundleFromProvider(bundleProvider, requestedCount(queryParameters));
+      Bundle bundle = bundleFromProvider(bundleProvider, queryParameters);
       return fhirResponse(200, fhirContext.newJsonParser().encodeResourceToString(bundle));
     } catch (IllegalArgumentException exception) {
       return operationOutcome(400, exception.getMessage(), OperationOutcome.IssueType.INVALID);
@@ -223,29 +225,93 @@ public class FhirR4ReadController {
     }
   }
 
-  private Bundle bundleFromProvider(IBundleProvider bundleProvider, int count) {
+  private Bundle bundleFromProvider(
+      IBundleProvider bundleProvider, MultiValueMap<String, String> queryParameters) {
     Bundle bundle = new Bundle();
     bundle.setType(Bundle.BundleType.SEARCHSET);
     if (bundleProvider == null) {
       return bundle;
     }
 
+    int count = requestedCount(queryParameters);
+    List<String> tagFilters = tagFilters(queryParameters);
     Integer total = bundleProvider.size();
-    bundle.setTotal(total == null ? 0 : total);
-    if (count == 0) {
+    int fetchCount = tagFilters.isEmpty() ? count : MAX_SEARCH_COUNT;
+    if (fetchCount == 0) {
+      bundle.setTotal(total == null ? 0 : total);
       return bundle;
     }
 
-    List<IBaseResource> resources = bundleProvider.getResources(0, count);
-    if (total == null) {
-      bundle.setTotal(resources.size());
-    }
-    for (IBaseResource resource : resources) {
-      if (resource instanceof Resource r4Resource) {
-        bundle.addEntry().setResource(r4Resource);
+    List<Resource> resources = new ArrayList<>();
+    for (IBaseResource resource : bundleProvider.getResources(0, fetchCount)) {
+      if (resource instanceof Resource r4Resource && matchesTagFilters(r4Resource, tagFilters)) {
+        resources.add(r4Resource);
       }
     }
+
+    bundle.setTotal(tagFilters.isEmpty() && total != null ? total : resources.size());
+    for (Resource resource : resources.subList(0, Math.min(count, resources.size()))) {
+      bundle.addEntry().setResource(resource);
+    }
     return bundle;
+  }
+
+  private List<String> tagFilters(MultiValueMap<String, String> queryParameters) {
+    List<String> values = queryParameters.get("_tag");
+    if (values == null || values.isEmpty()) {
+      return List.of();
+    }
+
+    List<String> filters = new ArrayList<>();
+    for (String value : values) {
+      if (value == null || value.isBlank()) {
+        throw new IllegalArgumentException("_tag must not be blank");
+      }
+      filters.add(value);
+    }
+    return filters;
+  }
+
+  private boolean matchesTagFilters(Resource resource, List<String> filters) {
+    if (filters.isEmpty()) {
+      return true;
+    }
+    return filters.stream().allMatch(filter -> matchesAnyTagExpression(resource, filter));
+  }
+
+  private boolean matchesAnyTagExpression(Resource resource, String filter) {
+    for (String expression : filter.split(",")) {
+      if (expression.isBlank()) {
+        throw new IllegalArgumentException("_tag must not contain blank values");
+      }
+      if (matchesTagExpression(resource, expression.trim())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean matchesTagExpression(Resource resource, String expression) {
+    String system = null;
+    String code = expression;
+    int separator = expression.indexOf('|');
+    if (separator >= 0) {
+      system = expression.substring(0, separator);
+      code = expression.substring(separator + 1);
+    }
+
+    for (Coding tag : resource.getMeta().getTag()) {
+      boolean systemMatches =
+          system == null || system.isEmpty() || system.equalsIgnoreCase(tag.getSystem());
+      boolean codeMatches =
+          code.isEmpty()
+              || code.equalsIgnoreCase(tag.getCode())
+              || code.equalsIgnoreCase(tag.getDisplay());
+      if (systemMatches && codeMatches) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void rejectUnsupportedSearchParameters(MultiValueMap<String, String> queryParameters) {

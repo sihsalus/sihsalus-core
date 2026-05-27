@@ -1,6 +1,7 @@
 package org.sihsalus.fhir2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.APIAuthenticationException;
@@ -80,6 +82,26 @@ class FhirR4ReadControllerTest {
   }
 
   @Test
+  void filtersSearchResourcesByMetaTag() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new LocationProvider()));
+    LinkedMultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add("_summary", "data");
+    parameters.add("_count", "50");
+    parameters.add("_tag", "Login Location");
+
+    ResponseEntity<String> response = controller.search("Location", parameters);
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"Bundle\""));
+    assertTrue(response.getBody().contains("\"total\":1"));
+    assertTrue(response.getBody().contains("\"id\":\"login-location\""));
+    assertTrue(response.getBody().contains("\"code\":\"Login Location\""));
+    assertFalse(response.getBody().contains("\"id\":\"other-location\""));
+  }
+
+  @Test
   void rejectsUnsupportedSearchParametersInsteadOfIgnoringFilters() {
     FhirR4ReadController controller =
         new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
@@ -120,6 +142,28 @@ class FhirR4ReadControllerTest {
       Patient patient = new Patient();
       patient.setId("patient-search-uuid");
       return new SimpleBundleProvider(List.of(patient));
+    }
+  }
+
+  private static final class LocationProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return Location.class;
+    }
+
+    @Search
+    @SuppressWarnings("unused")
+    public IBundleProvider search() {
+      Location loginLocation = new Location();
+      loginLocation.setId("login-location");
+      loginLocation.getMeta().addTag().setCode("Login Location");
+
+      Location otherLocation = new Location();
+      otherLocation.setId("other-location");
+      otherLocation.getMeta().addTag().setCode("Other");
+
+      return new SimpleBundleProvider(List.of(otherLocation, loginLocation));
     }
   }
 
