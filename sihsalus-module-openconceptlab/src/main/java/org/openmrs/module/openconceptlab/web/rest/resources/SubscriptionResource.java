@@ -71,11 +71,12 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
   @Override
   public Subscription save(Subscription subscription) {
     requireManageConcepts();
-    if (!StringUtils.isBlank(subscription.getUrl())) {
-      validateSubscriptionUrl(subscription.getUrl());
-      UpdateScheduler updateScheduler = getUpdateScheduler();
-      updateScheduler.schedule(subscription);
+    if (StringUtils.isBlank(subscription.getUrl())) {
+      throw new IllegalRequestException("Subscription URL is required");
     }
+    validateSubscriptionUrl(subscription.getUrl());
+    UpdateScheduler updateScheduler = getUpdateScheduler();
+    updateScheduler.schedule(subscription);
     return getImportService().getSubscription();
   }
 
@@ -85,7 +86,7 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
     DelegatingResourceDescription delegatingResourceDescription =
         new DelegatingResourceDescription();
     delegatingResourceDescription.addRequiredProperty("url");
-    delegatingResourceDescription.addRequiredProperty("token");
+    delegatingResourceDescription.addProperty("token");
     delegatingResourceDescription.addProperty("subscribedToSnapshot");
     delegatingResourceDescription.addProperty("validationType");
     return delegatingResourceDescription;
@@ -207,9 +208,6 @@ public class SubscriptionResource extends DelegatingCrudResource<Subscription> {
   }
 
   private void validateSubscriptionUrl(String url) {
-    if (StringUtils.isBlank(url)) {
-      throw new IllegalRequestException("Subscription URL is required");
-    }
     try {
       URI uri = new URI(url.trim());
       String scheme = uri.getScheme();

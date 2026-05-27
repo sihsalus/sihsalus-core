@@ -241,9 +241,11 @@ public class DispensingLogsReport extends ReportGenerator {
         emptyIfNull(row.getStockItemCategoryName()),
         emptyIfNull(row.getBatchNo()),
         row.getExpiration() != null ? DATE_FORMATTER.format(row.getExpiration()) : "",
-        row.getQuantity().multiply(negativeOne).toPlainString(),
+        row.getQuantity() != null ? row.getQuantity().multiply(negativeOne).toPlainString() : "",
         row.getStockItemPackagingUOMName(),
-        row.getStockItemPackagingUOMFactor().toPlainString(),
+        row.getStockItemPackagingUOMFactor() == null
+            ? ""
+            : row.getStockItemPackagingUOMFactor().toPlainString(),
         row.getOrderNumber() == null ? "" : row.getOrderNumber(),
         row.getStockItemTransactionId().toString(),
         row.getStockItemDrugId() == null ? "" : row.getStockItemDrugId().toString(),

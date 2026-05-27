@@ -169,7 +169,7 @@ public class MemoryAppender extends MemoryAppenderCompatibilityAdapter {
   }
 
   @Override
-  public synchronized void addFilter(Filter filter) {
+  public void addFilter(Filter filter) {
     if (implementation != null) {
       implementation.addFilter(filter);
     } else {
@@ -205,7 +205,7 @@ public class MemoryAppender extends MemoryAppenderCompatibilityAdapter {
   }
 
   @Override
-  public synchronized void removeFilter(Filter filter) {
+  public void removeFilter(Filter filter) {
     if (implementation != null) {
       implementation.removeFilter(filter);
     } else {
