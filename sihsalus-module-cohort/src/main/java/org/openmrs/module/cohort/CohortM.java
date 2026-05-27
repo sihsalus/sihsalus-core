@@ -147,12 +147,14 @@ public class CohortM extends BaseCustomizableData<CohortAttribute>
   public void setCohortType(CohortType cohortType) {
     this.cohortType = cohortType;
   }
+
   public Set<CohortMember> getCohortMembers() {
     if (cohortMembers == null) {
       cohortMembers = new HashSet<>();
     }
     return cohortMembers;
   }
+
   public Set<CohortMember> getActiveCohortMembers() {
     if (activeCohortMembers == null) {
       activeCohortMembers = new HashSet<>();
