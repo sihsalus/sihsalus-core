@@ -44,21 +44,22 @@ Spring Boot does not own:
    and container-provided settings.
 3. `OpenmrsRuntimePropertiesConfigurer` maps Spring datasource settings into
    OpenMRS runtime properties before OpenMRS beans are built.
-4. The application-data directory is assigned through OpenMRS runtime properties.
-5. `SpringLiquibase` runs `classpath:/db/changelog/db.changelog-master.xml`.
-6. Liquibase uses the OpenMRS-compatible tables `liquibasechangelog` and
+4. Authentication mode is mapped into OpenMRS runtime properties.
+5. The application-data directory is assigned through OpenMRS runtime properties.
+6. `SpringLiquibase` runs `classpath:/db/changelog/db.changelog-master.xml`.
+7. Liquibase uses the OpenMRS-compatible tables `liquibasechangelog` and
    `liquibasechangeloglock`.
-7. Hibernate builds the `sessionFactory` after Liquibase has completed.
-8. Hibernate mapping contributors from static modules add their mapping resources.
-9. OpenMRS DAOs, services, validators, handlers, message sources, and storage beans
+8. Hibernate builds the `sessionFactory` after Liquibase has completed.
+9. Hibernate mapping contributors from static modules add their mapping resources.
+10. OpenMRS DAOs, services, validators, handlers, message sources, and storage beans
    are registered through static Spring configuration.
-10. `ServiceContext` is populated explicitly with the OpenMRS services that legacy
+11. `ServiceContext` is populated explicitly with the OpenMRS services that legacy
     `Context` callers expect.
-11. `Context` is wired with the static `ServiceContext`, `ContextDAO`, and
+12. `Context` is wired with the static `ServiceContext`, `ContextDAO`, and
     authentication scheme.
-12. `OpenmrsAdminUserBootstrapper` rejects unsafe admin defaults and syncs scheduler
+13. `OpenmrsAdminUserBootstrapper` rejects unsafe admin defaults and syncs scheduler
     credentials.
-13. HTTP requests pass through request tracing and OpenMRS `Context` session filters.
+14. HTTP requests pass through request tracing and OpenMRS `Context` session filters.
 
 ## Configuration Surface
 
@@ -77,6 +78,8 @@ SIHSALUS_DATASOURCE_USERNAME
 SIHSALUS_DATASOURCE_PASSWORD
 SIHSALUS_ADMIN_USERNAME
 SIHSALUS_ADMIN_PASSWORD
+SIHSALUS_AUTH_MODE
+OAUTH2_ENABLED
 OPENMRS_APPLICATION_DATA_DIRECTORY
 SIHSALUS_INITIALIZER_SOURCE_ROOT
 SIHSALUS_INITIALIZER_STARTUP_LOAD
@@ -96,6 +99,17 @@ Supported datasource URL families in the OpenMRS runtime bridge:
 Anything else should fail at startup instead of guessing a Hibernate driver or
 dialect.
 
+Authentication modes:
+
+- `SIHSALUS_AUTH_MODE=frontend` is the default and uses the OpenMRS
+  username/password scheme for SPA session login.
+- `SIHSALUS_AUTH_MODE=keycloak` selects the OAuth2 scheme by writing
+  `authentication.scheme=oauth2` into OpenMRS runtime properties.
+- `OAUTH2_ENABLED=true` is a legacy compatibility input only when
+  `SIHSALUS_AUTH_MODE` is not set.
+
+Invalid authentication modes fail startup with a clear error instead of guessing.
+
 ## Profiles And Environments
 
 Default local runtime:
@@ -114,6 +128,7 @@ Compose runtime:
 - binds backend and PostgreSQL to localhost by default
 - uses `/openmrs/data` for OpenMRS application data
 - uses `/opt/sihsalus/reference-sources/sihsalus-content` for static content
+- defaults to frontend mode when `SIHSALUS_AUTH_MODE` and `OAUTH2_ENABLED` are unset
 - maps initializer startup controls into OpenMRS runtime properties before startup
 - enables OCL static import and fails startup on OCL import errors by default
 

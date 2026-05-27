@@ -4,8 +4,11 @@ import static org.openmrs.module.initializer.InitializerConstants.PROPS_DOMAINS;
 import static org.openmrs.module.initializer.InitializerConstants.PROPS_EXCLUDE;
 import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_LOAD;
 
+import java.util.Locale;
 import java.util.Properties;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.authentication.AuthenticationConfig;
+import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.util.OpenmrsConstants;
 import org.openmrs.util.OpenmrsUtil;
 import org.springframework.beans.BeansException;
@@ -16,6 +19,10 @@ import org.springframework.core.env.Environment;
 
 final class OpenmrsRuntimePropertiesConfigurer
     implements BeanFactoryPostProcessor, EnvironmentAware {
+
+  private static final String AUTH_MODE_FRONTEND = "frontend";
+
+  private static final String AUTH_MODE_KEYCLOAK = "keycloak";
 
   private Environment environment;
 
@@ -84,7 +91,10 @@ final class OpenmrsRuntimePropertiesConfigurer
         PROPS_EXCLUDE + ".addresshierarchy",
         "INITIALIZER_EXCLUDE_ADDRESSHIERARCHY");
 
+    configureAuthentication(properties);
+
     Context.setRuntimeProperties(properties);
+    AuthenticationConfig.setConfig(null);
   }
 
   private String required(String key) {
@@ -115,6 +125,51 @@ final class OpenmrsRuntimePropertiesConfigurer
     String value = firstProperty(sourceKeys);
     if (value != null) {
       properties.setProperty(targetKey, value);
+    }
+  }
+
+  private void configureAuthentication(Properties properties) {
+    String authMode = authenticationMode();
+    boolean keycloakMode = AUTH_MODE_KEYCLOAK.equals(authMode);
+
+    properties.setProperty(
+        OAuth2LoginConstants.OAUTH2_ENABLED_PROPERTY, Boolean.toString(keycloakMode));
+    if (keycloakMode) {
+      properties.setProperty(AuthenticationConfig.SCHEME, OAuth2LoginConstants.OAUTH2_SCHEME_ID);
+    }
+  }
+
+  private String authenticationMode() {
+    String configuredMode = firstProperty("sihsalus.auth.mode", "SIHSALUS_AUTH_MODE");
+    if (configuredMode != null) {
+      return normalizeAuthenticationMode(configuredMode);
+    }
+
+    String oauth2Enabled =
+        firstProperty(
+            "sihsalus.auth.oauth2-enabled",
+            "OAUTH2_ENABLED",
+            OAuth2LoginConstants.OAUTH2_ENABLED_PROPERTY);
+    if (Boolean.parseBoolean(oauth2Enabled)) {
+      return AUTH_MODE_KEYCLOAK;
+    }
+    return AUTH_MODE_FRONTEND;
+  }
+
+  private static String normalizeAuthenticationMode(String authMode) {
+    String normalized = authMode.trim().toLowerCase(Locale.ROOT);
+    switch (normalized) {
+      case "frontend":
+      case "local":
+      case "openmrs":
+      case "basic":
+        return AUTH_MODE_FRONTEND;
+      case "keycloak":
+      case "oauth2":
+        return AUTH_MODE_KEYCLOAK;
+      default:
+        throw new IllegalStateException(
+            "Unsupported SIHSALUS_AUTH_MODE: " + authMode + " (expected frontend or keycloak)");
     }
   }
 

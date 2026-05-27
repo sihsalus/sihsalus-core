@@ -18,6 +18,9 @@ sihsalus:
   admin:
     username: ${SIHSALUS_ADMIN_USERNAME:admin}
     password: ${SIHSALUS_ADMIN_PASSWORD:}
+  auth:
+    mode: ${SIHSALUS_AUTH_MODE:}
+    oauth2-enabled: ${OAUTH2_ENABLED:false}
   initializer:
     startup-load: ${SIHSALUS_INITIALIZER_STARTUP_LOAD:}
     domains: ${SIHSALUS_INITIALIZER_DOMAINS:}

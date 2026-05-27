@@ -28,6 +28,7 @@ SIHSALUS_BACKEND_BIND_ADDRESS=0.0.0.0
 SIHSALUS_BACKEND_PORT=8080
 SIHSALUS_POSTGRES_BIND_ADDRESS=127.0.0.1
 SIHSALUS_POSTGRES_PORT=5432
+SIHSALUS_AUTH_MODE=frontend
 SIHSALUS_OCL_STATIC_IMPORT_ENABLED=true
 SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS=true
 SIHSALUS_JAVA_OPTS=-XX:MaxRAMPercentage=75
@@ -39,12 +40,31 @@ When this image is deployed behind the `sihsalus/sihsalus` gateway, set
 from `/actuator/health` to `/openmrs/actuator/health`, while REST and FHIR
 routes keep their internal paths under the `/openmrs` gateway prefix.
 
+## Authentication Mode
+
+`SIHSALUS_AUTH_MODE` is the supported deployment switch:
+
+- `frontend` is the default. The SPA authenticates against the OpenMRS REST session
+  endpoint with username/password credentials, and the backend uses the OpenMRS
+  username/password authentication scheme.
+- `keycloak` selects the OAuth2 authentication scheme by setting the OpenMRS
+  runtime property `authentication.scheme=oauth2`.
+
+`OAUTH2_ENABLED=true` is still accepted as a legacy compatibility switch when
+`SIHSALUS_AUTH_MODE` is not set. Prefer `SIHSALUS_AUTH_MODE` in new deployments.
+
+Do not enable `keycloak` unless the gateway or frontend integration is also
+providing the expected OAuth2 user-info credentials. The backend mode selection is
+explicit; it does not silently fall back to frontend login if Keycloak is
+misconfigured.
+
 ## Development Deployment
 
 ```bash
 export SIHSALUS_BACKEND_IMAGE=ghcr.io/sihsalus/sihsalus-core:latest
 export SIHSALUS_POSTGRES_PASSWORD='<db-secret>'
 export SIHSALUS_ADMIN_PASSWORD='<admin-secret>'
+export SIHSALUS_AUTH_MODE=frontend
 docker compose -f deploy/compose.yml pull backend
 docker compose -f deploy/compose.yml up -d --no-build backend
 ```

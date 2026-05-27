@@ -27,6 +27,8 @@ services:
         condition: service_healthy
     environment:
       OPENMRS_APPLICATION_DATA_DIRECTORY: /openmrs/data
+      SIHSALUS_AUTH_MODE: ${SIHSALUS_AUTH_MODE:-}
+      OAUTH2_ENABLED: ${OAUTH2_ENABLED:-false}
       SIHSALUS_INITIALIZER_SOURCE_ROOT: /opt/sihsalus/reference-sources/sihsalus-content
       SIHSALUS_INITIALIZER_STARTUP_LOAD: ${SIHSALUS_INITIALIZER_STARTUP_LOAD:-continue_on_error}
       SIHSALUS_INITIALIZER_DOMAINS: ${SIHSALUS_INITIALIZER_DOMAINS:-}

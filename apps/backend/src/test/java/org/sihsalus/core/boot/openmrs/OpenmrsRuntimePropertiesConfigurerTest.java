@@ -11,6 +11,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.authentication.AuthenticationConfig;
+import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.util.OpenmrsConstants;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.mock.env.MockEnvironment;
@@ -89,6 +91,76 @@ class OpenmrsRuntimePropertiesConfigurerTest {
     assertThat(runtimeProperties.getProperty(PROPS_DOMAINS)).isEqualTo("!addresshierarchy");
     assertThat(runtimeProperties.getProperty(PROPS_EXCLUDE + ".addresshierarchy"))
         .isEqualTo("**/*.xml");
+  }
+
+  @Test
+  void defaultsToFrontendAuthenticationMode() {
+    runConfigurer(
+        new MockEnvironment().withProperty("spring.datasource.url", "jdbc:h2:mem:sihsalus"));
+
+    Properties runtimeProperties = Context.getRuntimeProperties();
+
+    assertThat(runtimeProperties.getProperty(OAuth2LoginConstants.OAUTH2_ENABLED_PROPERTY))
+        .isEqualTo("false");
+    assertThat(runtimeProperties.getProperty(AuthenticationConfig.SCHEME)).isNull();
+  }
+
+  @Test
+  void mapsExplicitFrontendAuthenticationMode() {
+    runConfigurer(
+        new MockEnvironment()
+            .withProperty("spring.datasource.url", "jdbc:h2:mem:sihsalus")
+            .withProperty("sihsalus.auth.mode", "frontend")
+            .withProperty("sihsalus.auth.oauth2-enabled", "true"));
+
+    Properties runtimeProperties = Context.getRuntimeProperties();
+
+    assertThat(runtimeProperties.getProperty(OAuth2LoginConstants.OAUTH2_ENABLED_PROPERTY))
+        .isEqualTo("false");
+    assertThat(runtimeProperties.getProperty(AuthenticationConfig.SCHEME)).isNull();
+  }
+
+  @Test
+  void mapsExplicitKeycloakAuthenticationMode() {
+    runConfigurer(
+        new MockEnvironment()
+            .withProperty("spring.datasource.url", "jdbc:h2:mem:sihsalus")
+            .withProperty("SIHSALUS_AUTH_MODE", "keycloak"));
+
+    Properties runtimeProperties = Context.getRuntimeProperties();
+
+    assertThat(runtimeProperties.getProperty(OAuth2LoginConstants.OAUTH2_ENABLED_PROPERTY))
+        .isEqualTo("true");
+    assertThat(runtimeProperties.getProperty(AuthenticationConfig.SCHEME))
+        .isEqualTo(OAuth2LoginConstants.OAUTH2_SCHEME_ID);
+  }
+
+  @Test
+  void mapsLegacyOauth2EnabledToKeycloakAuthenticationMode() {
+    runConfigurer(
+        new MockEnvironment()
+            .withProperty("spring.datasource.url", "jdbc:h2:mem:sihsalus")
+            .withProperty("OAUTH2_ENABLED", "true"));
+
+    Properties runtimeProperties = Context.getRuntimeProperties();
+
+    assertThat(runtimeProperties.getProperty(OAuth2LoginConstants.OAUTH2_ENABLED_PROPERTY))
+        .isEqualTo("true");
+    assertThat(runtimeProperties.getProperty(AuthenticationConfig.SCHEME))
+        .isEqualTo(OAuth2LoginConstants.OAUTH2_SCHEME_ID);
+  }
+
+  @Test
+  void rejectsUnsupportedAuthenticationMode() {
+    MockEnvironment environment =
+        new MockEnvironment()
+            .withProperty("spring.datasource.url", "jdbc:h2:mem:sihsalus")
+            .withProperty("SIHSALUS_AUTH_MODE", "magic");
+
+    IllegalStateException exception =
+        assertThrows(IllegalStateException.class, () -> runConfigurer(environment));
+
+    assertThat(exception).hasMessageContaining("SIHSALUS_AUTH_MODE");
   }
 
   @Test
