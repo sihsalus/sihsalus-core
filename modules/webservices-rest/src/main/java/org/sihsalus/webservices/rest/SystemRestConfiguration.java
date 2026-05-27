@@ -6,11 +6,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ServiceContext;
+import org.openmrs.api.context.UserContext;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.webservices.rest.web.OpenmrsClassScanner;
 import org.openmrs.module.webservices.rest.web.api.RestHelperService;
@@ -30,6 +32,9 @@ import org.springframework.core.Ordered;
 @Configuration
 @ComponentScan(basePackageClasses = MainResourceController.class)
 public class SystemRestConfiguration {
+
+  private static final String OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE =
+      "org.sihsalus.openmrs.USER_CONTEXT";
 
   @Bean
   SystemStatusController systemStatusController() {
@@ -141,11 +146,13 @@ public class SystemRestConfiguration {
       if (isOpenmrsWebRequest(request) && !Context.isSessionOpen()) {
         Context.openSession();
         openedSession = true;
+        restoreUserContextFromHttpSession(request);
       }
       try {
         chain.doFilter(request, response);
       } finally {
         if (openedSession) {
+          persistUserContextToHttpSession(request);
           Context.closeSession();
         }
       }
@@ -193,11 +200,13 @@ public class SystemRestConfiguration {
       if (!Context.isSessionOpen()) {
         Context.openSession();
         openedSession = true;
+        restoreUserContextFromHttpSession(request);
       }
       try {
         delegate.doFilter(request, response, chain);
       } finally {
         if (openedSession) {
+          persistUserContextToHttpSession(request);
           Context.closeSession();
         }
       }
@@ -222,6 +231,40 @@ public class SystemRestConfiguration {
       }
 
       return false;
+    }
+  }
+
+  private static void restoreUserContextFromHttpSession(ServletRequest request) {
+    if (!(request instanceof HttpServletRequest httpRequest)) {
+      return;
+    }
+
+    HttpSession httpSession = httpRequest.getSession(false);
+    if (httpSession == null) {
+      return;
+    }
+
+    Object storedContext = httpSession.getAttribute(OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE);
+    if (storedContext instanceof UserContext userContext) {
+      Context.setUserContext(userContext);
+    }
+  }
+
+  private static void persistUserContextToHttpSession(ServletRequest request) {
+    if (!(request instanceof HttpServletRequest httpRequest)) {
+      return;
+    }
+
+    if (Context.isAuthenticated()) {
+      httpRequest
+          .getSession(true)
+          .setAttribute(OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE, Context.getUserContext());
+      return;
+    }
+
+    HttpSession httpSession = httpRequest.getSession(false);
+    if (httpSession != null) {
+      httpSession.removeAttribute(OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE);
     }
   }
 }

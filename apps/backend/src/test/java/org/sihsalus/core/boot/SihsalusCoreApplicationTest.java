@@ -243,6 +243,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -351,6 +352,34 @@ class SihsalusCoreApplicationTest {
                 .header("Disable-WWW-Authenticate", "true"))
         .andExpect(status().isUnauthorized())
         .andExpect(header().doesNotExist("WWW-Authenticate"));
+  }
+
+  @Test
+  void sessionEndpointPersistsOpenmrsAuthenticationForBrowserClients() throws Exception {
+    var loginResult =
+        mockMvc
+            .perform(
+                get("/rest/v1/session")
+                    .header("Authorization", ADMIN_BASIC_AUTH)
+                    .header("Disable-WWW-Authenticate", "true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.authenticated").value(true))
+            .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME))
+            .andReturn();
+
+    assertNotNull(loginResult.getRequest().getSession(false));
+    MockHttpSession httpSession = (MockHttpSession) loginResult.getRequest().getSession(false);
+
+    mockMvc
+        .perform(get("/rest/v1/session").session(httpSession))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.authenticated").value(true))
+        .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME));
+
+    mockMvc
+        .perform(get("/api/system/info").session(httpSession))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
   }
 
   @Test
