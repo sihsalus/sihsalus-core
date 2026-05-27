@@ -154,7 +154,7 @@ public class SihsalusOpenConceptLabConfiguration {
         administrationService,
         contentLoader,
         environment.getProperty("sihsalus.ocl.static-import.enabled", Boolean.class, true),
-        environment.getProperty("sihsalus.ocl.static-import.fail-on-errors", Boolean.class, false));
+        environment.getProperty("sihsalus.ocl.static-import.fail-on-errors", Boolean.class, true));
   }
 
   private static void ensureGlobalProperties(AdministrationService administrationService) {

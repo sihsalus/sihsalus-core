@@ -1,6 +1,7 @@
 package org.sihsalus.core.boot.openmrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
@@ -68,6 +69,32 @@ class OpenmrsRuntimePropertiesConfigurerTest {
         .isEqualTo("/preferred");
     assertThat(System.getProperty(OpenmrsConstants.KEY_OPENMRS_APPLICATION_DATA_DIRECTORY))
         .isEqualTo("/preferred");
+  }
+
+  @Test
+  void rejectsPostgresqlRuntimeWithoutDatasourceUsername() {
+    MockEnvironment environment =
+        new MockEnvironment()
+            .withProperty("spring.datasource.url", "jdbc:postgresql://localhost:5432/sihsalus")
+            .withProperty("spring.datasource.password", "secret");
+
+    IllegalStateException exception =
+        assertThrows(IllegalStateException.class, () -> runConfigurer(environment));
+
+    assertThat(exception).hasMessageContaining("SIHSALUS_DATASOURCE_USERNAME");
+  }
+
+  @Test
+  void rejectsPostgresqlRuntimeWithoutDatasourcePassword() {
+    MockEnvironment environment =
+        new MockEnvironment()
+            .withProperty("spring.datasource.url", "jdbc:postgresql://localhost:5432/sihsalus")
+            .withProperty("spring.datasource.username", "sihsalus");
+
+    IllegalStateException exception =
+        assertThrows(IllegalStateException.class, () -> runConfigurer(environment));
+
+    assertThat(exception).hasMessageContaining("SIHSALUS_DATASOURCE_PASSWORD");
   }
 
   private void runConfigurer(MockEnvironment environment) {

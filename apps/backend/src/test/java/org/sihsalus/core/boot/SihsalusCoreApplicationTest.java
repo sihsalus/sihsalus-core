@@ -2260,6 +2260,15 @@ class SihsalusCoreApplicationTest {
         jdbcTemplate.queryForObject(
             "select count(*) from global_property where property = 'attachments.defaultConceptComplexUuid'",
             Integer.class));
+    List<String> allowedAttachmentExtensions =
+        Arrays.asList(
+            jdbcTemplate
+                .queryForObject(
+                    "select property_value from global_property where property = 'attachments.allowedFileExtensions'",
+                    String.class)
+                .split(","));
+    assertEquals(4, allowedAttachmentExtensions.size());
+    assertTrue(allowedAttachmentExtensions.containsAll(List.of("jpg", "jpeg", "png", "pdf")));
     assertEquals(
         0,
         jdbcTemplate.queryForObject(

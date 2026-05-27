@@ -100,8 +100,8 @@ Default local runtime:
 - targets PostgreSQL on `localhost`
 - hides error message, binding, and stacktrace details
 - exposes only `health` and `info` actuator endpoints
-- permits blank datasource/admin passwords only if the caller starts the jar
-  directly without the Compose guard
+- rejects PostgreSQL startup when the datasource username or password is blank
+- rejects inherited default admin credentials at startup
 
 Compose runtime:
 
@@ -110,6 +110,7 @@ Compose runtime:
 - binds backend and PostgreSQL to localhost by default
 - uses `/openmrs/data` for OpenMRS application data
 - uses `/opt/sihsalus/reference-sources/sihsalus-content` for static content
+- enables OCL static import and fails startup on OCL import errors by default
 
 Test runtime:
 
@@ -137,20 +138,22 @@ Use this checklist for every runtime-facing change:
 - Verify authorization interceptors when moving OpenMRS service beans.
 - Treat OCL, attachments, XStream, admin credentials, and scheduler credentials as
   production-risk areas.
+- Use `docs/runtime-hardening.md` for release-facing runtime checks.
 - Prefer fixing CodeQL/runtime findings over suppressing them.
 
 ## Immediate Gaps
 
 These are stabilization gaps, not reasons to restart the architecture:
 
-- Direct jar startup can still inherit blank defaults that Compose already blocks.
 - The test profile uses H2, so PostgreSQL-only migration and SQL behavior still need
   dedicated smoke coverage.
 - `ServiceContext` wiring is explicit and large; changes need coverage to avoid
   silently dropping an OpenMRS service.
 - Static module tests prove wiring for many modules, but not every clinical workflow.
-- OCL import, attachment storage, audit, backup/restore, and outage behavior remain
-  release-readiness workstreams.
+- Attachment malware scanning, attachment backup/restore, audit, and outage behavior
+  remain release-readiness workstreams.
+- Object-level authorization coverage needs to move from representative smoke tests
+  to workflow-specific tests.
 - The Docker image expects local static content during build; missing content should
   be treated as a deliberate deployment decision, not an accidental local state leak.
 

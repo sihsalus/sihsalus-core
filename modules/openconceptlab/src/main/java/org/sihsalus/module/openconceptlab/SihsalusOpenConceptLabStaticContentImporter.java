@@ -94,9 +94,6 @@ final class SihsalusOpenConceptLabStaticContentImporter
 
   private void importStaticContent() {
     Path oclDirectory = resolveOclDirectory();
-    if (oclDirectory == null) {
-      return;
-    }
 
     markInProgressImportsAsFailed();
     ensureLoadAtStartupPath(oclDirectory);
@@ -121,9 +118,19 @@ final class SihsalusOpenConceptLabStaticContentImporter
     try {
       Path configRoot = SihsalusContentPaths.resolveConfigRoot();
       if (configRoot == null) {
-        return null;
+        throw new IllegalStateException(
+            "Static Open Concept Lab import is enabled but the SIH Salus content "
+                + "configuration root is not available. Set SIHSALUS_INITIALIZER_SOURCE_ROOT "
+                + "or disable sihsalus.ocl.static-import.enabled for infrastructure smoke tests.");
       }
-      return SihsalusContentPaths.resolveDomainDirectory(configRoot, OCL_DOMAIN);
+      Path oclDirectory = SihsalusContentPaths.resolveDomainDirectory(configRoot, OCL_DOMAIN);
+      if (oclDirectory == null) {
+        throw new IllegalStateException(
+            "Static Open Concept Lab import is enabled but the ocl content directory is not "
+                + "available under "
+                + configRoot);
+      }
+      return oclDirectory;
     } catch (IOException e) {
       throw new IllegalStateException(
           "Failed to resolve static Open Concept Lab content directory", e);
