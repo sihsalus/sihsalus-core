@@ -365,7 +365,7 @@ public class RestUtil implements GlobalPropertyListener {
    *
    * SimpleObject subSimpleObject = convert(openmrsResource, openmrsObject,
    * cascadeRep); simpleObject.put(prop, subSimpleObject); } else if
-   * (Reflect.isCollection(propertyClass)) {
+   * (Reflect.isCollectionClass(propertyClass)) {
    *
    * // the list put onto the "simpleObject" as a list List<Object>
    * listofSimpleObjects = new ArrayList<Object>();

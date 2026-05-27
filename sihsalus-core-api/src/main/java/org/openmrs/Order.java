@@ -54,7 +54,6 @@ import org.openmrs.util.OpenmrsUtil;
 @Table(name = "orders")
 @Audited
 @Inheritance(strategy = InheritanceType.JOINED)
-@SuppressWarnings("java/confusing-method-signature")
 public class Order extends BaseCustomizableData<OrderAttribute> implements FormRecordable {
 
   public static final long serialVersionUID = 4334343L;
@@ -230,7 +229,7 @@ public class Order extends BaseCustomizableData<OrderAttribute> implements FormR
    * @return a shallow copy of this Order
    */
   public Order copy() {
-    return copyHelper(new Order());
+    return copyOrderState(new Order());
   }
 
   /**
@@ -240,8 +239,7 @@ public class Order extends BaseCustomizableData<OrderAttribute> implements FormR
    * @param target an Order that will have the state of <code>this</code> copied into it
    * @return Returns the Order that was passed in, with state copied into it
    */
-  @SuppressWarnings("java/confusing-method-signature")
-  protected Order copyHelper(Order target) {
+  protected Order copyOrderState(Order target) {
     target.setPatient(getPatient());
     target.setOrderType(getOrderType());
     target.setConcept(getConcept());
@@ -868,7 +866,7 @@ public class Order extends BaseCustomizableData<OrderAttribute> implements FormR
    * @since 1.10
    */
   public Order cloneForRevision() {
-    return cloneForRevisionHelper(new Order());
+    return copyRevisionState(new Order());
   }
 
   /**
@@ -879,8 +877,7 @@ public class Order extends BaseCustomizableData<OrderAttribute> implements FormR
    * @param target an Order that will have the state of <code>this</code> copied into it
    * @return Returns the Order that was passed in, with state copied into it
    */
-  @SuppressWarnings("java/confusing-method-signature")
-  protected Order cloneForRevisionHelper(Order target) {
+  protected Order copyRevisionState(Order target) {
     if (getAction() == Action.DISCONTINUE) {
       target.setAction(Action.DISCONTINUE);
       target.setPreviousOrder(getPreviousOrder());

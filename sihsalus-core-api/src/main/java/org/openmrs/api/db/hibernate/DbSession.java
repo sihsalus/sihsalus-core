@@ -46,7 +46,6 @@ import org.hibernate.stat.SessionStatistics;
  *
  * @since 1.12, 1.11.3, 1.10.2, 1.9.9
  */
-@SuppressWarnings("java/confusing-method-signature")
 public class DbSession {
 
   private SessionFactory sessionFactory;
@@ -396,7 +395,7 @@ public class DbSession {
    * @param lockOptions contains the lock level
    * @return the persistent instance or proxy
    */
-  public Object load(Class theClass, Serializable id, LockOptions lockOptions) {
+  public Object getByClassWithLock(Class theClass, Serializable id, LockOptions lockOptions) {
     return getSession().get(theClass, id, lockOptions);
   }
 
@@ -409,7 +408,8 @@ public class DbSession {
    * @param lockOptions contains the lock level
    * @return the persistent instance or proxy
    */
-  public Object load(String entityName, Serializable id, LockOptions lockOptions) {
+  public Object getByEntityNameWithLock(
+      String entityName, Serializable id, LockOptions lockOptions) {
     return getSession().get(entityName, id, lockOptions);
   }
 
@@ -426,8 +426,7 @@ public class DbSession {
    * @param id a valid identifier of an existing persistent instance of the class
    * @return the persistent instance or proxy
    */
-  @SuppressWarnings("java/confusing-method-signature")
-  public Object load(Class theClass, Serializable id) {
+  public Object getReferenceByClass(Class theClass, Serializable id) {
     return getSession().getReference(theClass, id);
   }
 
@@ -444,7 +443,7 @@ public class DbSession {
    * @param id a valid identifier of an existing persistent instance of the class
    * @return the persistent instance or proxy
    */
-  public Object load(String entityName, Serializable id) {
+  public Object getReferenceByEntityName(String entityName, Serializable id) {
     return getSession().getReference(entityName, id);
   }
 
@@ -455,8 +454,7 @@ public class DbSession {
    * @param object an "empty" instance of the persistent class
    * @param id a valid identifier of an existing persistent instance of the class
    */
-  @SuppressWarnings("java/confusing-method-signature")
-  public void load(Object object, Serializable id) {
+  public void loadStateInto(Object object, Serializable id) {
     getSession().load(object, id);
   }
 
@@ -710,8 +708,7 @@ public class DbSession {
    * @param object a persistent or detached instance
    * @param lockOptions contains the lock mode to use
    */
-  @SuppressWarnings("java/confusing-method-signature")
-  public void refresh(Object object, LockOptions lockOptions) {
+  public void refreshWithLockOptions(Object object, LockOptions lockOptions) {
     getSession().refresh(object, lockOptions);
   }
 
@@ -724,7 +721,8 @@ public class DbSession {
    * @param object a persistent or detached instance
    * @param lockOptions contains the lock mode to use
    */
-  public void refresh(String entityName, Object object, LockOptions lockOptions) {
+  public void refreshEntityWithLockOptions(
+      String entityName, Object object, LockOptions lockOptions) {
     getSession().refresh(object, lockOptions);
   }
 

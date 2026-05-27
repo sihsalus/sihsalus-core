@@ -18,7 +18,6 @@ import org.openmrs.api.APIException;
 import org.openmrs.util.OpenmrsUtil;
 
 /** Represents patient allergies */
-@SuppressWarnings("java/confusing-method-signature")
 public class Allergies implements List<Allergy> {
 
   public static final String UNKNOWN = "Unknown";
@@ -43,14 +42,6 @@ public class Allergies implements List<Allergy> {
     throwExceptionIfHasDuplicateAllergen(allergy);
     allergyStatus = SEE_LIST;
     return allergies.add(allergy);
-  }
-
-  public boolean remove(Allergy allergy) {
-    boolean result = allergies.remove(allergy);
-    if (allergies.isEmpty()) {
-      allergyStatus = UNKNOWN;
-    }
-    return result;
   }
 
   @Override
@@ -190,7 +181,6 @@ public class Allergies implements List<Allergy> {
    * @see java.util.List#remove(java.lang.Object)
    */
   @Override
-  @SuppressWarnings("java/confusing-method-signature")
   public boolean remove(Object o) {
     boolean removed = allergies.remove(o);
     if (allergies.isEmpty()) {
