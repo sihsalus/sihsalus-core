@@ -48,8 +48,7 @@ public class StockBatchExpiryJob extends AbstractTask {
       }
       executeInternal();
     } catch (Exception exception) {
-      log.error("Error occurred while executing stock batch job");
-      log.error(exception);
+      log.error("Error occurred while executing stock batch job", exception);
     } finally {
       isAlreadyRunning.set(false);
     }
@@ -286,7 +285,9 @@ public class StockBatchExpiryJob extends AbstractTask {
       }
       template = templates.get(0);
     } catch (Exception exception) {
-      log.error(exception);
+      log.error(
+          "Error loading STOCK_MGMT_BATCH_EXPIRING template for stock batch notifications",
+          exception);
       return false;
     }
 
@@ -476,7 +477,7 @@ public class StockBatchExpiryJob extends AbstractTask {
         sentAtleastOneEmail = true;
         batchNumbersNotified.putAll(userBatchNumbersNotified);
       } catch (Exception exception) {
-        log.error(exception);
+        log.error("Error sending stock batch expiry email to {}", receipients, exception);
         continue;
       }
     }

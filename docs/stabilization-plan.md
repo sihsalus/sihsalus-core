@@ -39,7 +39,7 @@ The static module migration is complete. The active work is now stabilization: m
 
 ### Spring Boot Runtime
 
-- Keep `sihsalus-core-boot` as the only executable composition root.
+- Keep `apps/backend` (`sihsalus-core-boot`) as the only executable composition root.
 - Keep OpenMRS runtime properties derived from Spring configuration before OpenMRS beans initialize.
 - Keep Liquibase ahead of Hibernate `SessionFactory` creation.
 - Keep static module wiring covered by boot smoke tests whenever modules, mappings, filters, or service registrations move.
@@ -73,14 +73,14 @@ The static module migration is complete. The active work is now stabilization: m
 
 High-priority smoke targets:
 
-- `sihsalus-module-stockmanagement`
-- `sihsalus-module-o3forms`
-- `sihsalus-module-billing`
-- `sihsalus-module-fua`
-- `sihsalus-fhir2`
-- `sihsalus-webservices-rest`
-- `sihsalus-module-reporting`
-- `sihsalus-module-openconceptlab`
+- `modules/stockmanagement`
+- `modules/o3forms`
+- `modules/billing`
+- `modules/fua`
+- `modules/fhir2`
+- `modules/webservices-rest`
+- `modules/reporting`
+- `modules/openconceptlab`
 
 Each smoke target should prove:
 

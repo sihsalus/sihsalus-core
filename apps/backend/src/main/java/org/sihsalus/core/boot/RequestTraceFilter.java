@@ -34,11 +34,14 @@ final class RequestTraceFilter extends OncePerRequestFilter implements Ordered {
     long startedAt = System.nanoTime();
     response.setHeader(REQUEST_ID_HEADER, requestId);
     MDC.put(MDC_REQUEST_ID, requestId);
+    boolean failedRequest = false;
     try {
       filterChain.doFilter(request, response);
     } catch (IOException | ServletException | RuntimeException ex) {
-      log.warn(
-          "Unhandled request exception method={} uri={} durationMs={}",
+      failedRequest = true;
+      log.error(
+          "Unhandled request exception requestId={} method={} uri={} durationMs={}",
+          requestId,
           request.getMethod(),
           request.getRequestURI(),
           elapsedMillis(startedAt),
@@ -46,9 +49,10 @@ final class RequestTraceFilter extends OncePerRequestFilter implements Ordered {
       throw ex;
     } finally {
       int status = response.getStatus();
-      if (status >= 500) {
-        log.warn(
-            "HTTP request completed with server error method={} uri={} status={} durationMs={}",
+      if (status >= 500 && !failedRequest) {
+        log.error(
+            "HTTP request completed with server error requestId={} method={} uri={} status={} durationMs={}",
+            requestId,
             request.getMethod(),
             request.getRequestURI(),
             status,

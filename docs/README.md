@@ -20,6 +20,8 @@ Active documentation lives at the top of this directory. Historical planning not
 ## Checks
 
 - `../scripts/module-map-check.sh`: verifies that `module-map.md` covers every Maven reactor module.
+- `../scripts/validate-runtime.sh`: runs the fast local runtime validation set used before Docker/CI-facing changes.
+- `../scripts/git-hooks/pre-push`: optional versioned pre-push hook that runs `git diff --check` defensively.
 
 ## Archive
 
