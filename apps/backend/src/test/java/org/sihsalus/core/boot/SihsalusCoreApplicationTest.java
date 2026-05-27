@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Cohort;
 import org.openmrs.Encounter;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
@@ -399,6 +400,59 @@ class SihsalusCoreApplicationTest {
         .perform(get("/api/system/info").session(httpSession))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
+  }
+
+  @Test
+  void sessionEndpointPersistsSelectedLocationForBrowserClients() throws Exception {
+    Location location = new Location();
+    location.setName("Session Location " + UUID.randomUUID());
+    location.setUuid(UUID.randomUUID().toString());
+
+    boolean openedSession = !Context.isSessionOpen();
+    if (openedSession) {
+      Context.openSession();
+    }
+    try {
+      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
+      location.setCreator(Context.getAuthenticatedUser());
+      location.setDateCreated(new Date());
+      Context.getLocationService().saveLocation(location);
+    } finally {
+      Context.logout();
+      if (openedSession) {
+        Context.closeSession();
+      }
+    }
+
+    var loginResult =
+        mockMvc
+            .perform(
+                get("/rest/v1/session")
+                    .header("Authorization", ADMIN_BASIC_AUTH)
+                    .header("Disable-WWW-Authenticate", "true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.authenticated").value(true))
+            .andReturn();
+
+    assertNotNull(loginResult.getRequest().getSession(false));
+    MockHttpSession httpSession = (MockHttpSession) loginResult.getRequest().getSession(false);
+
+    mockMvc
+        .perform(
+            post("/ws/rest/v1/session")
+                .session(httpSession)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"sessionLocation\":\"" + location.getUuid() + "\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.authenticated").value(true))
+        .andExpect(jsonPath("$.sessionLocation.uuid").value(location.getUuid()))
+        .andExpect(jsonPath("$.sessionLocation.name").value(location.getName()));
+
+    mockMvc
+        .perform(get("/ws/rest/v1/session").session(httpSession))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.authenticated").value(true))
+        .andExpect(jsonPath("$.sessionLocation.uuid").value(location.getUuid()));
   }
 
   @Test

@@ -17,14 +17,36 @@ import org.openmrs.Role;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.util.LocaleUtility;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class SessionController {
 
   @GetMapping({"/rest/v1/session", "/ws/rest/v1/session"})
   public Map<String, Object> session(HttpServletRequest request) {
+    return sessionResponse(request);
+  }
+
+  @PostMapping({"/rest/v1/session", "/ws/rest/v1/session"})
+  public Map<String, Object> updateSession(
+      HttpServletRequest request, @RequestBody(required = false) Map<String, Object> body) {
+    if (Context.isAuthenticated() && body != null) {
+      Object sessionLocation =
+          body.containsKey("sessionLocation") ? body.get("sessionLocation") : body.get("location");
+      if (sessionLocation != null) {
+        Context.getUserContext().setLocation(resolveLocation(sessionLocation));
+      }
+    }
+
+    return sessionResponse(request);
+  }
+
+  private Map<String, Object> sessionResponse(HttpServletRequest request) {
     Map<String, Object> response = new LinkedHashMap<>();
     boolean authenticated = Context.isAuthenticated();
     response.put("authenticated", authenticated);
@@ -47,6 +69,63 @@ public class SessionController {
     }
 
     return response;
+  }
+
+  private Location resolveLocation(Object value) {
+    String identifier = locationIdentifier(value);
+    if (identifier == null) {
+      return null;
+    }
+
+    Location location = Context.getLocationService().getLocationByUuid(identifier);
+    if (location == null && isInteger(identifier)) {
+      location = Context.getLocationService().getLocation(Integer.parseInt(identifier));
+    }
+    if (location == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Unknown session location: " + identifier);
+    }
+
+    return location;
+  }
+
+  private String locationIdentifier(Object value) {
+    if (value instanceof Map<?, ?> map) {
+      Object uuid = map.get("uuid");
+      if (uuid != null) {
+        return normalizeLocationIdentifier(uuid.toString());
+      }
+      Object id = map.get("id");
+      if (id != null) {
+        return normalizeLocationIdentifier(id.toString());
+      }
+      Object reference = map.get("reference");
+      return reference == null ? null : normalizeLocationIdentifier(reference.toString());
+    }
+
+    return normalizeLocationIdentifier(value.toString());
+  }
+
+  private String normalizeLocationIdentifier(String value) {
+    String identifier = blankToNull(value);
+    if (identifier != null && identifier.startsWith("Location/")) {
+      return blankToNull(identifier.substring("Location/".length()));
+    }
+    return identifier;
+  }
+
+  private String blankToNull(String value) {
+    String trimmed = value.trim();
+    return trimmed.isEmpty() ? null : trimmed;
+  }
+
+  private boolean isInteger(String value) {
+    for (int i = 0; i < value.length(); i++) {
+      if (!Character.isDigit(value.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private List<String> localeSpecifications() {
