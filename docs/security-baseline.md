@@ -12,6 +12,8 @@ Sihsalus Core handles clinical data and must be treated as sensitive infrastruct
 - TLS termination must be documented.
 - Database credentials must come from runtime secrets.
 - Administrative bootstrap accounts must be rotated or disabled after setup.
+- OCL static imports must fail closed by default; disabling OCL is only acceptable for infrastructure smoke tests.
+- Attachment uploads must have an explicit extension allow-list and size limits.
 - XStream deserialization must go through serializers configured deny-by-default with explicit type whitelists; do not instantiate raw XStream readers for request-controlled input.
 - Dynamic SQL execution must stay in internal runner APIs, be constrained to single read-only statements unless explicitly invoked by SQL-level maintenance code, and never be used for user-facing search/filter input.
 
@@ -25,6 +27,7 @@ Sihsalus Core handles clinical data and must be treated as sensitive infrastruct
 - role/privilege review
 - log redaction review
 - disaster recovery notes
+- runtime hardening checklist review in `docs/runtime-hardening.md`
 
 ## Initial Tooling Direction
 

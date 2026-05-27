@@ -18,6 +18,10 @@ sihsalus:
   admin:
     username: ${SIHSALUS_ADMIN_USERNAME:admin}
     password: ${SIHSALUS_ADMIN_PASSWORD:}
+  ocl:
+    static-import:
+      enabled: ${SIHSALUS_OCL_STATIC_IMPORT_ENABLED:true}
+      fail-on-errors: ${SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS:true}
 
 management:
   endpoints:

@@ -59,6 +59,8 @@ The static module migration is complete. The active work is now stabilization: m
 - Verify service authorization and object-level access on REST/FHIR paths.
 - Restrict external import destinations and token forwarding behavior.
 - Require explicit attachment allow-lists and storage containment.
+- Use `docs/runtime-hardening.md` as the release checklist for secrets, OCL,
+  attachments, XStream, auth, and PostgreSQL smoke.
 
 ### Database
 
@@ -98,3 +100,4 @@ A stabilization branch is release-candidate ready when:
 - critical module smoke tests pass or have documented blockers.
 - open CodeQL warnings are either fixed, scoped to accepted compatibility debt, or tracked with owners.
 - production defaults fail closed for secrets and risky integrations.
+- the runtime hardening residual-risk register has been reviewed and updated.

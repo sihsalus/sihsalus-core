@@ -27,16 +27,17 @@ final class OpenmrsRuntimePropertiesConfigurer
 
     String datasourceUrl = required("spring.datasource.url");
     String driverClass = property("spring.datasource.driver-class-name", driverFor(datasourceUrl));
+    String datasourceUsername = property("spring.datasource.username", "");
+    String datasourcePassword = property("spring.datasource.password", "");
+    validateDatasourceCredentials(datasourceUrl, datasourceUsername, datasourcePassword);
 
     properties.setProperty("connection.url", datasourceUrl);
-    properties.setProperty("connection.username", property("spring.datasource.username", ""));
-    properties.setProperty("connection.password", property("spring.datasource.password", ""));
+    properties.setProperty("connection.username", datasourceUsername);
+    properties.setProperty("connection.password", datasourcePassword);
     properties.setProperty("connection.driver_class", driverClass);
     properties.setProperty("hibernate.connection.url", datasourceUrl);
-    properties.setProperty(
-        "hibernate.connection.username", property("spring.datasource.username", ""));
-    properties.setProperty(
-        "hibernate.connection.password", property("spring.datasource.password", ""));
+    properties.setProperty("hibernate.connection.username", datasourceUsername);
+    properties.setProperty("hibernate.connection.password", datasourcePassword);
     properties.setProperty("hibernate.connection.driver_class", driverClass);
     properties.setProperty("hibernate.dialect", dialectFor(datasourceUrl));
     properties.setProperty("hibernate.hbm2ddl.auto", "none");
@@ -91,6 +92,21 @@ final class OpenmrsRuntimePropertiesConfigurer
       return "org.postgresql.Driver";
     }
     throw new IllegalArgumentException("Unsupported OpenMRS datasource URL: " + datasourceUrl);
+  }
+
+  private static void validateDatasourceCredentials(
+      String datasourceUrl, String datasourceUsername, String datasourcePassword) {
+    if (!datasourceUrl.startsWith("jdbc:postgresql:")) {
+      return;
+    }
+    if (datasourceUsername == null || datasourceUsername.isBlank()) {
+      throw new IllegalStateException(
+          "SIHSALUS_DATASOURCE_USERNAME must be set for PostgreSQL runtime");
+    }
+    if (datasourcePassword == null || datasourcePassword.isBlank()) {
+      throw new IllegalStateException(
+          "SIHSALUS_DATASOURCE_PASSWORD must be set for PostgreSQL runtime");
+    }
   }
 
   private static String dialectFor(String datasourceUrl) {

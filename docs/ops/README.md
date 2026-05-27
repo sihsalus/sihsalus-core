@@ -29,7 +29,7 @@ SIHSALUS_BACKEND_PORT=8080
 SIHSALUS_POSTGRES_BIND_ADDRESS=127.0.0.1
 SIHSALUS_POSTGRES_PORT=5432
 SIHSALUS_OCL_STATIC_IMPORT_ENABLED=true
-SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS=false
+SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS=true
 SIHSALUS_JAVA_OPTS=-XX:MaxRAMPercentage=75
 ```
 
@@ -49,7 +49,9 @@ If the GHCR package is private, authenticate first with a token that has `read:p
 docker login ghcr.io
 ```
 
-The first start with `SIHSALUS_OCL_STATIC_IMPORT_ENABLED=true` can be slow because it imports static concept packages and builds search indexes. Disable OCL only for fast infrastructure smoke tests.
+The first start with `SIHSALUS_OCL_STATIC_IMPORT_ENABLED=true` can be slow because it imports static concept packages and builds search indexes. OCL import errors fail startup by default. Disable OCL only for fast infrastructure smoke tests.
+
+Use `../runtime-hardening.md` before promoting a runtime build.
 
 ## Still Missing
 

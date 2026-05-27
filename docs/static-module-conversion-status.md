@@ -4,6 +4,10 @@ Date: 2026-05-27
 
 The static module migration from runtime `.omod` loading to SIH Salus internal Maven modules is complete. This file now tracks stabilization status for the migrated runtime.
 
+Use this file for module status only. Runtime release checks live in
+`runtime-hardening.md`; historical conversion details below are traceability notes,
+not an operational checklist.
+
 ## Migration Outcome
 
 The Maven reactor is the source of truth for build participation. The compatibility baseline remains `config/baseline/sihsalus-distro.properties`.

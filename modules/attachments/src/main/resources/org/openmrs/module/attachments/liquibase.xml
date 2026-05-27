@@ -242,4 +242,21 @@
             drop table if exists sihsalus_attachment_concept_cleanup;
         </sql>
     </changeSet>
+
+    <changeSet id="sihsalus-attachments-004-require-upload-allow-list" author="sihsalus">
+        <sql>
+            update global_property
+            set property_value = 'jpg,jpeg,png,pdf'
+            where property = 'attachments.allowedFileExtensions'
+              and (property_value is null or trim(property_value) = '');
+        </sql>
+        <rollback>
+            <sql>
+                update global_property
+                set property_value = ''
+                where property = 'attachments.allowedFileExtensions'
+                  and property_value = 'jpg,jpeg,png,pdf';
+            </sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
