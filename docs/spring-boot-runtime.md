@@ -79,6 +79,9 @@ SIHSALUS_ADMIN_USERNAME
 SIHSALUS_ADMIN_PASSWORD
 OPENMRS_APPLICATION_DATA_DIRECTORY
 SIHSALUS_INITIALIZER_SOURCE_ROOT
+SIHSALUS_INITIALIZER_STARTUP_LOAD
+SIHSALUS_INITIALIZER_DOMAINS
+SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY
 SIHSALUS_OCL_STATIC_IMPORT_ENABLED
 SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS
 SERVER_PORT
@@ -111,7 +114,19 @@ Compose runtime:
 - binds backend and PostgreSQL to localhost by default
 - uses `/openmrs/data` for OpenMRS application data
 - uses `/opt/sihsalus/reference-sources/sihsalus-content` for static content
+- maps initializer startup controls into OpenMRS runtime properties before startup
 - enables OCL static import and fails startup on OCL import errors by default
+
+Initializer startup modes:
+
+- `SIHSALUS_INITIALIZER_STARTUP_LOAD=continue_on_error` loads startup content and
+  logs domain failures.
+- `SIHSALUS_INITIALIZER_STARTUP_LOAD=fail_on_error` fails startup on initializer
+  domain errors.
+- `SIHSALUS_INITIALIZER_STARTUP_LOAD=disabled` skips all initializer startup
+  loading.
+- `SIHSALUS_INITIALIZER_DOMAINS=!addresshierarchy` excludes only the heavy
+  address hierarchy domain while keeping the rest of the startup load enabled.
 
 Test runtime:
 

@@ -2,6 +2,9 @@ package org.sihsalus.core.boot.openmrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.openmrs.module.initializer.InitializerConstants.PROPS_DOMAINS;
+import static org.openmrs.module.initializer.InitializerConstants.PROPS_EXCLUDE;
+import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_LOAD;
 
 import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
@@ -69,6 +72,23 @@ class OpenmrsRuntimePropertiesConfigurerTest {
         .isEqualTo("/preferred");
     assertThat(System.getProperty(OpenmrsConstants.KEY_OPENMRS_APPLICATION_DATA_DIRECTORY))
         .isEqualTo("/preferred");
+  }
+
+  @Test
+  void mapsInitializerSettingsToOpenmrsRuntimeProperties() {
+    runConfigurer(
+        new MockEnvironment()
+            .withProperty("spring.datasource.url", "jdbc:h2:mem:sihsalus")
+            .withProperty("SIHSALUS_INITIALIZER_STARTUP_LOAD", "disabled")
+            .withProperty("SIHSALUS_INITIALIZER_DOMAINS", "!addresshierarchy")
+            .withProperty("SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY", "**/*.xml"));
+
+    Properties runtimeProperties = Context.getRuntimeProperties();
+
+    assertThat(runtimeProperties.getProperty(PROPS_STARTUP_LOAD)).isEqualTo("disabled");
+    assertThat(runtimeProperties.getProperty(PROPS_DOMAINS)).isEqualTo("!addresshierarchy");
+    assertThat(runtimeProperties.getProperty(PROPS_EXCLUDE + ".addresshierarchy"))
+        .isEqualTo("**/*.xml");
   }
 
   @Test

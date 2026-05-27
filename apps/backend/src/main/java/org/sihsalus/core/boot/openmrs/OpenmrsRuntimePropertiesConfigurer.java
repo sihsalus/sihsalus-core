@@ -1,5 +1,9 @@
 package org.sihsalus.core.boot.openmrs;
 
+import static org.openmrs.module.initializer.InitializerConstants.PROPS_DOMAINS;
+import static org.openmrs.module.initializer.InitializerConstants.PROPS_EXCLUDE;
+import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_LOAD;
+
 import java.util.Properties;
 import org.openmrs.api.context.Context;
 import org.openmrs.util.OpenmrsConstants;
@@ -58,6 +62,28 @@ final class OpenmrsRuntimePropertiesConfigurer
         OpenmrsConstants.APPLICATION_DATA_DIRECTORY_RUNTIME_PROPERTY, applicationDataDirectory);
     OpenmrsUtil.setApplicationDataDirectory(applicationDataDirectory);
 
+    copyOptionalOpenmrsRuntimeProperty(
+        properties,
+        PROPS_STARTUP_LOAD,
+        "sihsalus.initializer.startup-load",
+        "SIHSALUS_INITIALIZER_STARTUP_LOAD",
+        PROPS_STARTUP_LOAD,
+        "INITIALIZER_STARTUP_LOAD");
+    copyOptionalOpenmrsRuntimeProperty(
+        properties,
+        PROPS_DOMAINS,
+        "sihsalus.initializer.domains",
+        "SIHSALUS_INITIALIZER_DOMAINS",
+        PROPS_DOMAINS,
+        "INITIALIZER_DOMAINS");
+    copyOptionalOpenmrsRuntimeProperty(
+        properties,
+        PROPS_EXCLUDE + ".addresshierarchy",
+        "sihsalus.initializer.exclude.addresshierarchy",
+        "SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY",
+        PROPS_EXCLUDE + ".addresshierarchy",
+        "INITIALIZER_EXCLUDE_ADDRESSHIERARCHY");
+
     Context.setRuntimeProperties(properties);
   }
 
@@ -82,6 +108,14 @@ final class OpenmrsRuntimePropertiesConfigurer
       }
     }
     return null;
+  }
+
+  private void copyOptionalOpenmrsRuntimeProperty(
+      Properties properties, String targetKey, String... sourceKeys) {
+    String value = firstProperty(sourceKeys);
+    if (value != null) {
+      properties.setProperty(targetKey, value);
+    }
   }
 
   private static String driverFor(String datasourceUrl) {

@@ -71,6 +71,19 @@ root or `configuration/backend_configuration/ocl` directory is missing. Set
 `SIHSALUS_INITIALIZER_SOURCE_ROOT` correctly or disable OCL only for infrastructure
 smoke tests.
 
+Initializer startup is controlled through OpenMRS runtime properties. The backend
+maps these deployment variables before OpenMRS starts:
+
+```text
+SIHSALUS_INITIALIZER_STARTUP_LOAD=continue_on_error|fail_on_error|disabled
+SIHSALUS_INITIALIZER_DOMAINS=!addresshierarchy
+SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY=<wildcard>
+```
+
+For a runtime smoke where address hierarchy is already loaded and is blocking
+readiness, prefer `SIHSALUS_INITIALIZER_DOMAINS=!addresshierarchy` over disabling
+all initializer content.
+
 Verification:
 
 ```bash

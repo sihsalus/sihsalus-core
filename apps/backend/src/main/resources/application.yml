@@ -18,6 +18,11 @@ sihsalus:
   admin:
     username: ${SIHSALUS_ADMIN_USERNAME:admin}
     password: ${SIHSALUS_ADMIN_PASSWORD:}
+  initializer:
+    startup-load: ${SIHSALUS_INITIALIZER_STARTUP_LOAD:}
+    domains: ${SIHSALUS_INITIALIZER_DOMAINS:}
+    exclude:
+      addresshierarchy: ${SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY:}
   ocl:
     static-import:
       enabled: ${SIHSALUS_OCL_STATIC_IMPORT_ENABLED:true}
