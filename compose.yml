@@ -19,7 +19,7 @@ services:
     image: ${SIHSALUS_BACKEND_IMAGE:-sihsalus-core:local}
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
