@@ -16,7 +16,7 @@ Use `scripts/quality-doctor.sh` before committing code changes.
 Default behavior:
 
 ```bash
-./scripts/quality-doctor.sh --modules sihsalus-module-patientflags
+./scripts/quality-doctor.sh --modules modules/patientflags
 ```
 
 The default sequence is:
@@ -29,11 +29,13 @@ The default sequence is:
 Useful options:
 
 ```bash
-./scripts/quality-doctor.sh --modules sihsalus-core-api,sihsalus-module-reporting
-./scripts/quality-doctor.sh --modules sihsalus-module-stockmanagement --tests
-./scripts/quality-doctor.sh --modules sihsalus-module-patientflags --skip-spotless
-./scripts/quality-doctor.sh --modules sihsalus-core-api --spotbugs
+./scripts/quality-doctor.sh --modules core/api,modules/reporting
+./scripts/quality-doctor.sh --modules modules/stockmanagement --tests
+./scripts/quality-doctor.sh --modules modules/patientflags --skip-spotless
+./scripts/quality-doctor.sh --modules core/api --spotbugs
 ```
+
+The script also accepts Maven artifact IDs for compatibility with older notes.
 
 SpotBugs is intentionally opt-in. Use the fully-qualified plugin through the script instead of running `mvn spotbugs:*`, because the repository does not expose a short `spotbugs` Maven prefix consistently.
 
@@ -42,7 +44,7 @@ SpotBugs is intentionally opt-in. Use the fully-qualified plugin through the scr
 Use `scripts/quality-fix.sh` only for formatting branches or isolated modules. It runs Spotless only on the selected modules:
 
 ```bash
-./scripts/quality-fix.sh --modules sihsalus-module-patientflags
+./scripts/quality-fix.sh --modules modules/patientflags
 ```
 
 Do not mix broad Spotless output with behavioral CodeQL fixes.

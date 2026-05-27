@@ -26,7 +26,7 @@ apps/
 
 docs/
 scripts/
-reference-sources/
+.dev/reference-sources/
 ```
 
 Future moves must preserve:
@@ -131,12 +131,13 @@ Future `apps/` contents should be concrete entrypoints or harnesses, such as:
 
 ## Reference Sources
 
-`reference-sources/` is for imported upstream source snapshots, comparison
+`.dev/reference-sources/` is for imported upstream source snapshots, comparison
 copies, or migration references that are not compiled by the Maven reactor.
+Checked-in reference summaries and manifests live under `docs/archive/reference-sources/`.
 
 Rules:
 
-- never depend on `reference-sources/` from production code
+- never depend on `.dev/reference-sources/` from production code
 - keep references out of the parent Maven `<modules>` list
 - document source version, upstream repository, and import reason
 - remove references once they stop being useful for traceability

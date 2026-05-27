@@ -24,4 +24,4 @@ Active documentation lives at the top of this directory. Historical planning not
 
 ## Archive
 
-- `archive/`: dated planning, distro review, and migration reference material kept for traceability.
+- `archive/`: dated audits, planning, distro review, and migration reference material kept for traceability.
