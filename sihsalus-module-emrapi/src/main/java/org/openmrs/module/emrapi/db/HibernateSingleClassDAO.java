@@ -23,7 +23,6 @@ public abstract class HibernateSingleClassDAO<T> implements SingleClassDAO<T> {
    * Marked private because you *must* provide the class at runtime when instantiating one of these,
    * using the next constructor
    */
-  @SuppressWarnings("unused")
   private HibernateSingleClassDAO() {}
 
   /**
