@@ -41,9 +41,13 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubclassH
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.UnknownResourceException;
 import org.openmrs.util.OpenmrsConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Default implementation of the {@link RestService} */
 public class RestServiceImpl implements RestService {
+
+  private static final Logger log = LoggerFactory.getLogger(RestServiceImpl.class);
 
   volatile Map<String, ResourceDefinition> resourceDefinitionsByNames;
 
@@ -164,12 +168,30 @@ public class RestServiceImpl implements RestService {
     }
 
     for (Class<? extends Resource> resource : resources) {
-      ResourceMetadata resourceMetadata = getResourceMetadata(resource);
+      ResourceMetadata resourceMetadata;
+      try {
+        resourceMetadata = getResourceMetadata(resource);
+      } catch (TypeNotPresentException | LinkageError exception) {
+        log.debug(
+            "Skipping REST resource {} because an optional type is not available",
+            resource.getName(),
+            exception);
+        continue;
+      }
       if (resourceMetadata == null) continue;
 
       if (isResourceToBeAdded(
           resourceMetadata, tempResourceDefinitionsByNames.get(resourceMetadata.getName()))) {
-        Resource newResource = newResource(resource);
+        Resource newResource;
+        try {
+          newResource = newResource(resource);
+        } catch (TypeNotPresentException | LinkageError exception) {
+          log.debug(
+              "Skipping REST resource {} because an optional type is not available",
+              resource.getName(),
+              exception);
+          continue;
+        }
 
         tempResourceDefinitionsByNames.put(
             resourceMetadata.getName(),

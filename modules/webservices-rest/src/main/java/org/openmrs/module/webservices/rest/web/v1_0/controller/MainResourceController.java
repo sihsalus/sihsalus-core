@@ -56,6 +56,15 @@ public class MainResourceController extends BaseRestController {
 
   @Autowired BaseUriSetup baseUriSetup;
 
+  @RequestMapping(method = RequestMethod.GET)
+  @ResponseBody
+  public SimpleObject root(HttpServletRequest request) {
+    baseUriSetup.setup(request);
+    return new SimpleObject()
+        .add("version", getNamespace())
+        .add("uriPrefix", RestConstants.URI_PREFIX);
+  }
+
   /**
    * @param uuid
    * @param request

@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -27,10 +28,17 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.core.Ordered;
 
 @Configuration
-@ComponentScan(basePackageClasses = MainResourceController.class)
+@ComponentScan(
+    basePackageClasses = MainResourceController.class,
+    excludeFilters =
+        @ComponentScan.Filter(
+            type = FilterType.REGEX,
+            pattern =
+                "org\\.openmrs\\.module\\.webservices\\.rest\\.web\\.v1_0\\.controller\\.openmrs.*"))
 public class SystemRestConfiguration {
 
   private static final String OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE =
@@ -39,6 +47,11 @@ public class SystemRestConfiguration {
   @Bean
   SystemStatusController systemStatusController() {
     return new SystemStatusController();
+  }
+
+  @Bean
+  Filter legacyWsRestPathAliasFilter() {
+    return new LegacyWsRestPathAliasFilter();
   }
 
   @Bean
@@ -171,6 +184,93 @@ public class SystemRestConfiguration {
               || httpRequest
                   .getRequestURI()
                   .startsWith(httpRequest.getContextPath() + "/ws/fhir2/"));
+    }
+  }
+
+  static final class LegacyWsRestPathAliasFilter implements Filter, Ordered {
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+        throws IOException, ServletException {
+      if (request instanceof HttpServletRequest httpRequest && isLegacyWsRestPath(httpRequest)) {
+        chain.doFilter(new LegacyWsRestRequestWrapper(httpRequest), response);
+        return;
+      }
+
+      chain.doFilter(request, response);
+    }
+
+    @Override
+    public int getOrder() {
+      return -1;
+    }
+
+    private boolean isLegacyWsRestPath(HttpServletRequest request) {
+      String requestUri = request.getRequestURI();
+      String legacyPrefix = request.getContextPath() + "/ws/rest";
+      return requestUri.equals(legacyPrefix) || requestUri.startsWith(legacyPrefix + "/");
+    }
+  }
+
+  static final class LegacyWsRestRequestWrapper extends HttpServletRequestWrapper {
+
+    private final String requestUri;
+
+    private final String servletPath;
+
+    private final String pathInfo;
+
+    LegacyWsRestRequestWrapper(HttpServletRequest request) {
+      super(request);
+      String contextPath = request.getContextPath();
+      this.requestUri = contextPath + normalizeWsRestPath(request.getRequestURI(), contextPath);
+      this.servletPath = normalizeWsRestPath(request.getServletPath(), "");
+      this.pathInfo = normalizeWsRestPath(request.getPathInfo(), "");
+    }
+
+    @Override
+    public String getRequestURI() {
+      return requestUri;
+    }
+
+    @Override
+    public StringBuffer getRequestURL() {
+      HttpServletRequest request = (HttpServletRequest) getRequest();
+      String originalUri = request.getRequestURI();
+      StringBuffer originalUrl = request.getRequestURL();
+      int uriIndex = originalUrl.indexOf(originalUri);
+      if (uriIndex < 0) {
+        return new StringBuffer(originalUrl.toString().replace(originalUri, requestUri));
+      }
+
+      return new StringBuffer(originalUrl.substring(0, uriIndex)).append(requestUri);
+    }
+
+    @Override
+    public String getServletPath() {
+      return servletPath;
+    }
+
+    @Override
+    public String getPathInfo() {
+      return pathInfo;
+    }
+
+    private static String normalizeWsRestPath(String path, String contextPath) {
+      if (path == null) {
+        return null;
+      }
+
+      String pathWithoutContext =
+          contextPath.isEmpty() ? path : path.substring(contextPath.length());
+      if (pathWithoutContext.equals("/ws/rest")) {
+        return "/rest";
+      }
+      if (pathWithoutContext.startsWith("/ws/rest/")) {
+        return pathWithoutContext.substring("/ws".length());
+      }
+
+      return pathWithoutContext;
     }
   }
 

@@ -2,6 +2,8 @@ package org.sihsalus.fhir2;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import java.lang.reflect.InvocationTargetException;
@@ -10,10 +12,13 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
@@ -22,14 +27,23 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class FhirR4ReadController {
 
   private static final MediaType FHIR_JSON = MediaType.parseMediaType("application/fhir+json");
+
+  private static final int DEFAULT_SEARCH_COUNT = 10;
+
+  private static final int MAX_SEARCH_COUNT = 50;
+
+  private static final Set<String> SUPPORTED_SEARCH_PARAMETERS =
+      Set.of("_count", "_format", "_pretty");
 
   private final FhirContext fhirContext;
 
@@ -90,6 +104,51 @@ public class FhirR4ReadController {
     }
   }
 
+  @GetMapping(
+      value = {
+        "/api/fhir/{resourceType}",
+        "/api/fhir/r4/{resourceType}",
+        "/ws/fhir2/R4/{resourceType}"
+      },
+      produces = {"application/fhir+json", "application/json"})
+  ResponseEntity<String> search(
+      @PathVariable("resourceType") String resourceType,
+      @RequestParam MultiValueMap<String, String> queryParameters) {
+    IResourceProvider provider = providersByResourceType.get(resourceType);
+    if (provider == null) {
+      return operationOutcome(
+          404,
+          "FHIR R4 resource type is not registered: " + resourceType,
+          OperationOutcome.IssueType.NOTFOUND);
+    }
+
+    Method searchMethod = searchMethod(provider);
+    if (searchMethod == null) {
+      return operationOutcome(
+          405,
+          "FHIR R4 search is not supported for resource type: " + resourceType,
+          OperationOutcome.IssueType.NOTSUPPORTED);
+    }
+
+    try {
+      rejectUnsupportedSearchParameters(queryParameters);
+      IBundleProvider bundleProvider = invokeSearch(provider, searchMethod);
+      Bundle bundle = bundleFromProvider(bundleProvider, requestedCount(queryParameters));
+      return fhirResponse(200, fhirContext.newJsonParser().encodeResourceToString(bundle));
+    } catch (IllegalArgumentException exception) {
+      return operationOutcome(400, exception.getMessage(), OperationOutcome.IssueType.INVALID);
+    } catch (BaseServerResponseException exception) {
+      return operationOutcome(exception);
+    } catch (APIAuthenticationException exception) {
+      return operationOutcome(
+          Context.isAuthenticated() ? 403 : 401,
+          exception.getMessage(),
+          OperationOutcome.IssueType.FORBIDDEN);
+    } catch (ContextAuthenticationException exception) {
+      return operationOutcome(401, exception.getMessage(), OperationOutcome.IssueType.FORBIDDEN);
+    }
+  }
+
   private String providerResourceType(IResourceProvider provider) {
     return fhirContext.getResourceType(provider.getResourceType());
   }
@@ -99,6 +158,18 @@ public class FhirR4ReadController {
       if (method.isAnnotationPresent(Read.class)
           && method.getParameterCount() == 1
           && method.getParameterTypes()[0].isAssignableFrom(IdType.class)) {
+        return method;
+      }
+    }
+    return null;
+  }
+
+  private Method searchMethod(IResourceProvider provider) {
+    for (Method method : provider.getClass().getMethods()) {
+      Search search = method.getAnnotation(Search.class);
+      if (search != null
+          && search.queryName().isBlank()
+          && IBundleProvider.class.isAssignableFrom(method.getReturnType())) {
         return method;
       }
     }
@@ -124,6 +195,89 @@ public class FhirR4ReadController {
       }
       throw new IllegalStateException("FHIR @Read method failed: " + method, cause);
     }
+  }
+
+  private IBundleProvider invokeSearch(IResourceProvider provider, Method method) {
+    try {
+      Object result = method.invoke(provider, new Object[method.getParameterCount()]);
+      if (result instanceof IBundleProvider bundleProvider) {
+        return bundleProvider;
+      }
+      throw new IllegalStateException("@Search method returned a non-bundle provider: " + method);
+    } catch (IllegalAccessException exception) {
+      throw new IllegalStateException(
+          "FHIR @Search method is not accessible: " + method, exception);
+    } catch (InvocationTargetException exception) {
+      Throwable cause = exception.getCause();
+      if (cause instanceof RuntimeException runtimeException) {
+        throw runtimeException;
+      }
+      if (cause instanceof Error error) {
+        throw error;
+      }
+      throw new IllegalStateException("FHIR @Search method failed: " + method, cause);
+    }
+  }
+
+  private Bundle bundleFromProvider(IBundleProvider bundleProvider, int count) {
+    Bundle bundle = new Bundle();
+    bundle.setType(Bundle.BundleType.SEARCHSET);
+    if (bundleProvider == null) {
+      return bundle;
+    }
+
+    Integer total = bundleProvider.size();
+    bundle.setTotal(total == null ? 0 : total);
+    if (count == 0) {
+      return bundle;
+    }
+
+    List<IBaseResource> resources = bundleProvider.getResources(0, count);
+    if (total == null) {
+      bundle.setTotal(resources.size());
+    }
+    for (IBaseResource resource : resources) {
+      if (resource instanceof Resource r4Resource) {
+        bundle.addEntry().setResource(r4Resource);
+      }
+    }
+    return bundle;
+  }
+
+  private void rejectUnsupportedSearchParameters(MultiValueMap<String, String> queryParameters) {
+    for (String parameterName : queryParameters.keySet()) {
+      if (!SUPPORTED_SEARCH_PARAMETERS.contains(parameterName)) {
+        throw new IllegalArgumentException(
+            "FHIR R4 search parameter is not supported by this endpoint: " + parameterName);
+      }
+    }
+  }
+
+  private int requestedCount(MultiValueMap<String, String> queryParameters) {
+    String count = singleValue(queryParameters, "_count");
+    if (count == null || count.isBlank()) {
+      return DEFAULT_SEARCH_COUNT;
+    }
+    try {
+      int parsed = Integer.parseInt(count);
+      if (parsed < 0) {
+        throw new IllegalArgumentException("_count must be zero or greater");
+      }
+      return Math.min(parsed, MAX_SEARCH_COUNT);
+    } catch (NumberFormatException exception) {
+      throw new IllegalArgumentException("_count must be a whole number", exception);
+    }
+  }
+
+  private String singleValue(MultiValueMap<String, String> queryParameters, String parameterName) {
+    List<String> values = queryParameters.get(parameterName);
+    if (values == null || values.isEmpty()) {
+      return null;
+    }
+    if (values.size() > 1) {
+      throw new IllegalArgumentException(parameterName + " must be specified only once");
+    }
+    return values.get(0);
   }
 
   private ResponseEntity<String> operationOutcome(BaseServerResponseException exception) {

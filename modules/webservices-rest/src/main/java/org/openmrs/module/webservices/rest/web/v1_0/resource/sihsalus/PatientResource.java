@@ -18,7 +18,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 @Resource(
-    name = RestConstants.VERSION_1 + "/patient",
+    name = RestConstants.VERSION_1 + "/sihsaluspatient",
     supportedClass = Patient.class,
     supportedOpenmrsVersions = {"1.9.* - 9.*"})
 public class PatientResource extends DataDelegatingCrudResource<Patient> {

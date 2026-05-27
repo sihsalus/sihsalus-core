@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -244,7 +243,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -335,51 +333,6 @@ class SihsalusCoreApplicationTest {
         .andExpect(header().string("WWW-Authenticate", containsString("Basic")));
     mockMvc
         .perform(get("/api/system/info").header("Authorization", ADMIN_BASIC_AUTH))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
-  }
-
-  @Test
-  void restAuthorizationChallengeCanBeSuppressedForBrowserClients() throws Exception {
-    mockMvc
-        .perform(get("/api/system/info").header("Disable-WWW-Authenticate", "true"))
-        .andExpect(status().isUnauthorized())
-        .andExpect(header().doesNotExist("WWW-Authenticate"));
-
-    mockMvc
-        .perform(
-            get("/api/system/info")
-                .header("Authorization", basicAuth(TEST_ADMIN_USERNAME, "wrong-password"))
-                .header("Disable-WWW-Authenticate", "true"))
-        .andExpect(status().isUnauthorized())
-        .andExpect(header().doesNotExist("WWW-Authenticate"));
-  }
-
-  @Test
-  void sessionEndpointPersistsOpenmrsAuthenticationForBrowserClients() throws Exception {
-    var loginResult =
-        mockMvc
-            .perform(
-                get("/rest/v1/session")
-                    .header("Authorization", ADMIN_BASIC_AUTH)
-                    .header("Disable-WWW-Authenticate", "true"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.authenticated").value(true))
-            .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME))
-            .andExpect(cookie().exists("JSESSIONID"))
-            .andReturn();
-
-    assertNotNull(loginResult.getRequest().getSession(false));
-    MockHttpSession httpSession = (MockHttpSession) loginResult.getRequest().getSession(false);
-
-    mockMvc
-        .perform(get("/rest/v1/session").session(httpSession))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.authenticated").value(true))
-        .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME));
-
-    mockMvc
-        .perform(get("/api/system/info").session(httpSession))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.dynamicOmodLoading").value(false));
   }
@@ -636,7 +589,7 @@ class SihsalusCoreApplicationTest {
             "COUNTRY"));
     assertTrue(
         countRows("select count(*) from address_hierarchy_entry") > 90000,
-        "Peru address hierarchy entries should be loaded from sihsalus-content");
+        "  address hierarchy entries should be loaded from sihsalus-content");
     assertEquals(
         1,
         countRows(

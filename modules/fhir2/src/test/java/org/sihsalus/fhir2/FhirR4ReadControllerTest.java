@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -16,6 +19,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.APIAuthenticationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 class FhirR4ReadControllerTest {
 
@@ -59,6 +64,41 @@ class FhirR4ReadControllerTest {
     assertTrue(response.getBody().contains("FHIR read requires privileges"));
   }
 
+  @Test
+  void searchesResourcesFromR4Provider() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
+
+    ResponseEntity<String> response = controller.search("Patient", searchParameters("_count", "1"));
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"Bundle\""));
+    assertTrue(response.getBody().contains("\"type\":\"searchset\""));
+    assertTrue(response.getBody().contains("\"resourceType\":\"Patient\""));
+    assertTrue(response.getBody().contains("\"id\":\"patient-search-uuid\""));
+  }
+
+  @Test
+  void rejectsUnsupportedSearchParametersInsteadOfIgnoringFilters() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
+
+    ResponseEntity<String> response =
+        controller.search("Patient", searchParameters(Patient.SP_IDENTIFIER, "12345"));
+
+    assertEquals(400, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("identifier"));
+  }
+
+  private static MultiValueMap<String, String> searchParameters(String name, String value) {
+    LinkedMultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(name, value);
+    return parameters;
+  }
+
   private static class PatientProvider implements IResourceProvider {
 
     @Override
@@ -72,6 +112,14 @@ class FhirR4ReadControllerTest {
       Patient patient = new Patient();
       patient.setId(id.getIdPart());
       return patient;
+    }
+
+    @Search
+    @SuppressWarnings("unused")
+    public IBundleProvider search() {
+      Patient patient = new Patient();
+      patient.setId("patient-search-uuid");
+      return new SimpleBundleProvider(List.of(patient));
     }
   }
 
