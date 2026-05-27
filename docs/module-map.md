@@ -24,6 +24,10 @@ modules/
 apps/
   backend/
 
+deploy/
+  compose.yml
+  docker/
+
 docs/
 scripts/
 .dev/reference-sources/

@@ -26,6 +26,6 @@ fi
 MAVEN_CMD="$MAVEN_CMD" ./scripts/liquibase-dry-run.sh "${LIQUIBASE_ARGS[@]}"
 
 echo "=== Docker Compose config ==="
-docker compose config >/dev/null
+docker compose -f deploy/compose.yml config >/dev/null
 
 echo "=== Runtime validation completed ==="

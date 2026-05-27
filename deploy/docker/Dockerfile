@@ -29,7 +29,7 @@ RUN mkdir -p /openmrs/data /opt/sihsalus/reference-sources \
 
 COPY --from=build --chown=sihsalus:sihsalus /workspace/apps/backend/target/sihsalus-core-boot-*.jar /opt/sihsalus/app.jar
 COPY --chown=sihsalus:sihsalus .dev/reference-sources/sihsalus-content /opt/sihsalus/reference-sources/sihsalus-content
-COPY --chown=sihsalus:sihsalus docker/entrypoint.sh /opt/sihsalus/entrypoint.sh
+COPY --chown=sihsalus:sihsalus deploy/docker/entrypoint.sh /opt/sihsalus/entrypoint.sh
 
 RUN chmod 0555 /opt/sihsalus/entrypoint.sh
 

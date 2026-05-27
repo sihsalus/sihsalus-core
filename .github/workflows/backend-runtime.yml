@@ -51,6 +51,7 @@ jobs:
       SIHSALUS_OCL_STATIC_IMPORT_ENABLED: "false"
       DOCKER_BUILDKIT: "1"
       COMPOSE_DOCKER_CLI_BUILD: "1"
+      COMPOSE_FILE: deploy/compose.yml
     steps:
       - name: Checkout backend
         uses: actions/checkout@v6
@@ -188,7 +189,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: ./docker/Dockerfile
+          file: ./deploy/docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
