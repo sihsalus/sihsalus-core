@@ -40,7 +40,7 @@ Options:
   --contexts <list>  Pass Liquibase contexts
   --labels <list>    Pass Liquibase labels
   --output <file>    SQL output file for --sql
-  --skip-build       Reuse the existing sihsalus-core-boot package
+  --skip-build       Reuse the existing apps/backend package
   -h, --help         Show this help message
 
 Defaults:
@@ -159,7 +159,7 @@ cat > "$LOG4J_CONFIG" <<'EOF'
 EOF
 
 if [[ "$SKIP_BUILD" == 0 ]]; then
-  echo "=== Packaging sihsalus-core-boot for Liquibase classpath ==="
+  echo "=== Packaging apps/backend for Liquibase classpath ==="
   "$MAVEN_CMD" -q -pl apps/backend -am -DskipTests -DskipITs package
 elif [[ ! -f "$BOOT_JAR" ]]; then
   echo "Missing $BOOT_JAR. Run without --skip-build first."
