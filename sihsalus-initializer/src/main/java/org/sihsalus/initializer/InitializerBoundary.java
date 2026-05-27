@@ -13,6 +13,6 @@ public final class InitializerBoundary {
     if (environmentValue != null && !environmentValue.isBlank()) {
       return environmentValue;
     }
-    return "reference-sources/sihsalus-content";
+    return ".dev/reference-sources/sihsalus-content";
   }
 }

@@ -19,10 +19,9 @@ tmp/
 __pycache__/
 *.py[cod]
 
-# Local reference repository clones. Keep the checked-in summaries/manifests.
-reference-sources/openmrs-distro-modules/*/
-reference-sources/openmrs-module-datafilter/
-reference-sources/sihsalus-content/
+# Local reference repository clones. Checked-in summaries/manifests live under docs/archive.
+/.dev/reference-sources/
+/reference-sources/
 
 # Generated local analysis artifacts.
 docs/generated/

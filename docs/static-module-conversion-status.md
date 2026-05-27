@@ -6,7 +6,7 @@ The static module migration from runtime `.omod` loading to SIH Salus internal M
 
 ## Migration Outcome
 
-The Maven reactor is the source of truth for build participation. The compatibility baseline remains `baseline/sihsalus-distro.properties`.
+The Maven reactor is the source of truth for build participation. The compatibility baseline remains `config/baseline/sihsalus-distro.properties`.
 
 Status: migrated, now stabilizing.
 
@@ -90,8 +90,8 @@ Source baseline:
 
 - Distro artifact: `reporting-omod` `2.1.0`
 - Distro artifact: `reportingrest-omod` `2.0.0`
-- Local source: `reference-sources/openmrs-distro-modules/reporting`
-- Local source: `reference-sources/openmrs-distro-modules/reportingrest`
+- Local source: `.dev/reference-sources/openmrs-distro-modules/reporting`
+- Local source: `.dev/reference-sources/openmrs-distro-modules/reportingrest`
 
 Runtime decision:
 
@@ -102,7 +102,7 @@ Runtime decision:
 
 Verification:
 
-- `reference-sources/openmrs-distro-modules/openmrs-webapp/mvnw --batch-mode --no-transfer-progress -Denforcer.skip=true -pl sihsalus-core-boot -am test`
+- `.dev/reference-sources/openmrs-distro-modules/openmrs-webapp/mvnw --batch-mode --no-transfer-progress -Denforcer.skip=true -pl sihsalus-core-boot -am test`
 - Result on 2026-05-14: 35-module reactor passed; `SihsalusCoreApplicationTest` ran 20 tests with 0 failures and 0 errors.
 
 Known follow-up:
@@ -126,7 +126,7 @@ Scope:
 Source baseline:
 
 - Distro artifact: `o3forms-omod` `2.3.0`
-- Local source: `reference-sources/openmrs-distro-modules/o3forms`
+- Local source: `.dev/reference-sources/openmrs-distro-modules/o3forms`
 
 Runtime decision:
 

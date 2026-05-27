@@ -32,7 +32,7 @@ class SihsalusStaticContentImportTest {
   void staticContentAndOclPackagesLoadIntoBootDatabase() {
     assumeTrue(
         sihsalusContentConfigurationAvailable(),
-        "reference-sources/sihsalus-content is a local reference clone and is not present in this checkout");
+        ".dev/reference-sources/sihsalus-content is a local reference clone and is not present in this checkout");
 
     assertEquals(
         1,

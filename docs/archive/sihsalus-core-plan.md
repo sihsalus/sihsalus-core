@@ -28,8 +28,8 @@ The OpenMRS data model is preserved for the first core. FHIR and REST must stay 
 
 Local reference code:
 
-- `reference-sources/openmrs-distro-modules`: OpenMRS core, OpenMRS modules, Bahmni modules, SIH Salus local modules, and reference content packages from the distro POM.
-- `reference-sources/sihsalus-content`: SIH Salus content package, kept separately because it represents configuration/content, not core module source.
+- `.dev/reference-sources/openmrs-distro-modules`: OpenMRS core, OpenMRS modules, Bahmni modules, SIH Salus local modules, and reference content packages from the distro POM.
+- `.dev/reference-sources/sihsalus-content`: SIH Salus content package, kept separately because it represents configuration/content, not core module source.
 
 Reference docs:
 
@@ -255,7 +255,7 @@ Deliverables:
 
 Acceptance:
 
-- SIH Salus content can be loaded from `reference-sources/sihsalus-content`
+- SIH Salus content can be loaded from `.dev/reference-sources/sihsalus-content`
 - concepts and mappings can be queried by API
 - invalid content fails with actionable validation errors
 
@@ -349,7 +349,7 @@ Acceptance:
 Start with:
 
 - patient registry resource path in both FHIR and REST
-- concept/metadata import design from `reference-sources/sihsalus-content`
+- concept/metadata import design from `.dev/reference-sources/sihsalus-content`
 - patient identifier strategy
 - FHIR search/write scope for Patient and Concept
 - concrete REST v1 Patient and Concept resource imports

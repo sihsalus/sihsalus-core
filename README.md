@@ -32,7 +32,7 @@ Current distro reference:
 - repository: `sihsalus/sihsalus`
 - distro parent: `3.7.0-SNAPSHOT`
 - OpenMRS runtime: `2.8.6`
-- module baseline: see `baseline/sihsalus-distro.properties`
+- module baseline: see `config/baseline/sihsalus-distro.properties`
 
 ## Java Baseline
 
@@ -43,10 +43,11 @@ This matches the current OpenMRS core development branch, which uses `maven.comp
 ## Repository Layout
 
 ```text
-baseline/   Version pins from the current Sihsalus distro
+config/     Version pins and local configuration baselines
 docs/       Active architecture, security, CI, and modernization notes
 ops/        Deployment and operations notes
-e2e/        Cross-module end-to-end test workspace
+tests/e2e/  Cross-module end-to-end test workspace
+.dev/       Ignored local reference clones and developer-only scratch data
 sihsalus-core-api/        Shared SIH Salus core contracts
 sihsalus-core-liquibase/  Centralized database changelogs
 sihsalus-core-boot/       Spring Boot executable runtime
