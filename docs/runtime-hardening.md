@@ -66,6 +66,18 @@ Release smoke must run once with OCL enabled and valid static content. Import
 failures should stop startup instead of leaving a partially imported terminology
 baseline.
 
+When OCL import is enabled, startup also fails if the configured static content
+root or `configuration/backend_configuration/ocl` directory is missing. Set
+`SIHSALUS_INITIALIZER_SOURCE_ROOT` correctly or disable OCL only for infrastructure
+smoke tests.
+
+Verification:
+
+```bash
+mvn --batch-mode --no-transfer-progress -pl modules/openconceptlab -am \
+  -Dtest=SihsalusOpenConceptLabStaticContentImporterTest test
+```
+
 Operational checks:
 
 ```sql
@@ -168,7 +180,7 @@ feedback fast; that does not replace release smoke.
 | Area | Current Control | Remaining Work |
 | --- | --- | --- |
 | Secrets | Compose requires secrets; PostgreSQL direct runtime rejects blank datasource credentials; admin bootstrap rejects default password. | External secret manager and rotation procedure. |
-| OCL | Static import enabled and fail-on-errors by default. | Full enabled release smoke with production-like content. |
+| OCL | Static import enabled and fail-on-errors by default; missing content root fails startup. | Full enabled release smoke with production-like content. |
 | Attachments | New installs get an upload extension allow-list. | Malware scan, quarantine, storage backup, object-level download tests. |
 | XStream | Deny-by-default serializer tests exist. | Audit any new serializer endpoints before exposing them. |
 | Auth | REST/FHIR unauthenticated smoke coverage exists. | Object-level/BOLA coverage per clinical workflow. |
