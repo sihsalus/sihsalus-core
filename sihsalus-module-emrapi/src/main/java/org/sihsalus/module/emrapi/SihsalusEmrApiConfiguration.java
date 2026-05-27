@@ -71,7 +71,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SihsalusEmrApiConfiguration {
 
-  private static final String DEFAULT_CONTENT_SOURCE_ROOT = "reference-sources/sihsalus-content";
+  private static final String DEFAULT_CONTENT_SOURCE_ROOT =
+      ".dev/reference-sources/sihsalus-content";
 
   private static final String BACKEND_CONFIGURATION_ROOT = "configuration/backend_configuration";
 

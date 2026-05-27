@@ -36,7 +36,7 @@ OpenMRS Core `master` is useful as a modernization signal, but imports and runti
 - Imaging: `1.2.2`
 - Sihsalus content package: `1.8.30`
 
-The full machine-readable list is stored in `baseline/sihsalus-distro.properties`.
+The full machine-readable list is stored in `config/baseline/sihsalus-distro.properties`.
 
 ## Java Implication
 

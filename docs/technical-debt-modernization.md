@@ -1,8 +1,10 @@
 # Technical Debt Modernization Plan
 
-This document defines the first modernization targets for Sihsalus Core. The goal is not to rewrite OpenMRS code wholesale. The goal is to contain inherited risk, make behavior testable, and modernize the parts that Sihsalus owns or actively changes.
+This document defines stabilization-era modernization targets for Sihsalus Core. The static module migration is complete, so technical-debt work should now reduce release risk in the migrated runtime. The goal is not to rewrite OpenMRS code wholesale. The goal is to contain inherited risk, make behavior testable, and modernize the parts that Sihsalus owns or actively changes.
 
 ## Priorities
+
+Stabilization work should favor narrow, verifiable fixes over broad mechanical cleanup. A patch should usually map to a CodeQL warning, CI failure, PostgreSQL smoke gap, security hardening item, or known runtime failure mode.
 
 1. Null and resource safety
 

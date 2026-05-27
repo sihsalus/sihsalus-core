@@ -18,8 +18,9 @@ compose.yml
 .env.*
 !.env.example
 
-reference-sources/.DS_Store
-reference-sources/openmrs-distro-modules
-reference-sources/openmrs-module-datafilter
-reference-sources/sihsalus-content/.git
-reference-sources/sihsalus-content/target
+reference-sources
+.dev/reference-sources/.DS_Store
+.dev/reference-sources/openmrs-distro-modules
+.dev/reference-sources/openmrs-module-datafilter
+.dev/reference-sources/sihsalus-content/.git
+.dev/reference-sources/sihsalus-content/target

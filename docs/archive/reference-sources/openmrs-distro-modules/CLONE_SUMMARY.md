@@ -5,13 +5,13 @@ Clone date: 2026-05-14
 Location:
 
 ```text
-reference-sources/openmrs-distro-modules
+.dev/reference-sources/openmrs-distro-modules
 ```
 
 Separate SIH Salus content checkout:
 
 ```text
-reference-sources/sihsalus-content
+.dev/reference-sources/sihsalus-content
 ```
 
 The active source repositories from the distro POM were cloned as shallow reference checkouts. The POM versions are tracked in `repositories.tsv`; the table below records the checked-out branch and commit used locally.
@@ -59,5 +59,5 @@ The active source repositories from the distro POM were cloned as shallow refere
 ## Notes
 
 - `sihsalusinterop-omod` is commented out in the provided POM, but it was cloned because the repository and `1.0.3` tag exist.
-- `sihsalus-content` also exists as a separate checkout at `reference-sources/sihsalus-content`, because it is distribution content/configuration rather than module source.
+- `sihsalus-content` also exists as a separate checkout at `.dev/reference-sources/sihsalus-content`, because it is distribution content/configuration rather than module source.
 - These are default-branch shallow clones, intended as local source references. They are not yet checked out to the exact Maven release tags or snapshot commits from the distro POM.
