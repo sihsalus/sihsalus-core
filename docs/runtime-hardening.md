@@ -59,7 +59,7 @@ Disable OCL only for infrastructure smoke tests where the goal is to verify the
 container and auth surface quickly:
 
 ```bash
-SIHSALUS_OCL_STATIC_IMPORT_ENABLED=false docker compose up -d backend
+SIHSALUS_OCL_STATIC_IMPORT_ENABLED=false docker compose -f deploy/compose.yml up -d backend
 ```
 
 Release smoke must run once with OCL enabled and valid static content. Import
@@ -138,7 +138,7 @@ requests and that the admin session can authenticate through the static runtime.
 Minimum local check:
 
 ```bash
-docker compose up -d --build backend
+docker compose -f deploy/compose.yml up -d --build backend
 curl -i http://localhost:8080/rest/v1/patient?q=test
 curl -i http://localhost:8080/api/fhir/r4/Patient/example
 curl -i -u admin:"$SIHSALUS_ADMIN_PASSWORD" http://localhost:8080/rest/v1/session
@@ -157,7 +157,7 @@ Use H2 tests for fast wiring feedback. Use PostgreSQL smoke for release confiden
 
 ```bash
 export SIHSALUS_POSTGRES_PASSWORD='<local-db-password>'
-docker compose up -d postgres
+docker compose -f deploy/compose.yml up -d postgres
 
 SIHSALUS_POSTGRES_PASSWORD='<local-db-password>' ./scripts/liquibase-dry-run.sh --status
 SIHSALUS_POSTGRES_PASSWORD='<local-db-password>' ./scripts/liquibase-dry-run.sh --validate

@@ -51,6 +51,7 @@ jobs:
       SIHSALUS_OCL_STATIC_IMPORT_ENABLED: "false"
       DOCKER_BUILDKIT: "1"
       COMPOSE_DOCKER_CLI_BUILD: "1"
+      COMPOSE_FILE: deploy/compose.yml
     steps:
       - name: Checkout backend
         uses: actions/checkout@v6
@@ -62,8 +63,18 @@ jobs:
           path: .dev/reference-sources/sihsalus-content
           token: ${{ secrets.SIHSALUS_CONTENT_TOKEN || github.token }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
       - name: Build backend image
-        run: docker compose build backend
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./deploy/docker/Dockerfile.buildkit
+          load: true
+          tags: sihsalus-core:local
+          cache-from: type=gha,scope=backend-image
+          cache-to: type=gha,mode=max,scope=backend-image
 
       - name: Start backend stack
         run: docker compose up -d --no-build backend
@@ -188,9 +199,9 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: ./docker/Dockerfile
+          file: ./deploy/docker/Dockerfile.buildkit
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=backend-image
+          cache-to: type=gha,mode=max,scope=backend-image

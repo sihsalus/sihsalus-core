@@ -44,6 +44,7 @@ This matches the current OpenMRS core development branch, which uses `maven.comp
 
 ```text
 config/     Version pins and local configuration baselines
+deploy/     Docker image and local Compose runtime assets
 docs/       Active architecture, security, CI, and modernization notes
 docs/ops/   Deployment and operations notes
 tests/e2e/  Cross-module end-to-end test workspace
@@ -63,7 +64,7 @@ Start the local PostgreSQL dependency:
 
 ```bash
 export SIHSALUS_POSTGRES_PASSWORD='<set-a-long-local-db-secret>'
-docker compose up -d postgres
+docker compose -f deploy/compose.yml up -d postgres
 ```
 
 Set explicit database and admin passwords before starting the backend. A runtime with the default OpenMRS admin password is rejected at startup.
@@ -71,7 +72,7 @@ Set explicit database and admin passwords before starting the backend. A runtime
 ```bash
 export SIHSALUS_POSTGRES_PASSWORD='<set-a-long-local-db-secret>'
 export SIHSALUS_ADMIN_PASSWORD='<set-a-long-local-secret>'
-docker compose up -d backend
+docker compose -f deploy/compose.yml up -d backend
 ```
 
 ```bash

@@ -45,8 +45,8 @@ routes keep their internal paths under the `/openmrs` gateway prefix.
 export SIHSALUS_BACKEND_IMAGE=ghcr.io/sihsalus/sihsalus-core:latest
 export SIHSALUS_POSTGRES_PASSWORD='<db-secret>'
 export SIHSALUS_ADMIN_PASSWORD='<admin-secret>'
-docker compose pull backend
-docker compose up -d --no-build backend
+docker compose -f deploy/compose.yml pull backend
+docker compose -f deploy/compose.yml up -d --no-build backend
 ```
 
 If the GHCR package is private, authenticate first with a token that has `read:packages`.

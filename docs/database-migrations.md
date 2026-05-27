@@ -14,7 +14,7 @@ Start the local PostgreSQL dependency first:
 
 ```bash
 export SIHSALUS_POSTGRES_PASSWORD='<local-db-password>'
-docker compose up -d postgres
+docker compose -f deploy/compose.yml up -d postgres
 ```
 
 Check what is pending:

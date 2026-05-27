@@ -105,6 +105,7 @@ Default local runtime:
 
 Compose runtime:
 
+- lives in `deploy/compose.yml` with image build assets in `deploy/docker/`
 - requires `SIHSALUS_POSTGRES_PASSWORD`
 - requires `SIHSALUS_ADMIN_PASSWORD`
 - binds backend and PostgreSQL to localhost by default
