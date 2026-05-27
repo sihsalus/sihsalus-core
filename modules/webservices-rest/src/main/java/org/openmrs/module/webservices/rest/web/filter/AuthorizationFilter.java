@@ -120,8 +120,12 @@ public class AuthorizationFilter implements Filter {
               log.debug("authenticated [{}]", username);
             } catch (Exception ex) {
               log.debug("authentication exception ", ex);
-              sendUnauthorized(httpRequest, response, "Invalid username or password");
-              return;
+              if (isSessionResource(httpRequest)) {
+                log.debug("continuing unauthenticated session request after invalid credentials");
+              } else {
+                sendUnauthorized(httpRequest, response, "Invalid username or password");
+                return;
+              }
             }
           } else {
             sendUnauthorized(httpRequest, response, "Unsupported authorization scheme");

@@ -402,6 +402,29 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void sessionEndpointReportsUnauthenticatedForInvalidBrowserCredentials() throws Exception {
+    mockMvc
+        .perform(
+            get("/rest/v1/session")
+                .header("Authorization", basicAuth(TEST_ADMIN_USERNAME, "wrong-password"))
+                .header("Disable-WWW-Authenticate", "true"))
+        .andExpect(status().isOk())
+        .andExpect(header().doesNotExist("WWW-Authenticate"))
+        .andExpect(cookie().doesNotExist("JSESSIONID"))
+        .andExpect(jsonPath("$.authenticated").value(false));
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/session")
+                .header("Authorization", basicAuth(TEST_ADMIN_USERNAME, "wrong-password"))
+                .header("Disable-WWW-Authenticate", "true"))
+        .andExpect(status().isOk())
+        .andExpect(header().doesNotExist("WWW-Authenticate"))
+        .andExpect(cookie().doesNotExist("JSESSIONID"))
+        .andExpect(jsonPath("$.authenticated").value(false));
+  }
+
+  @Test
   void adminAndLegacyModuleEndpointsRequireAuthentication() throws Exception {
     mockMvc
         .perform(get("/api/admin/static-modules"))
