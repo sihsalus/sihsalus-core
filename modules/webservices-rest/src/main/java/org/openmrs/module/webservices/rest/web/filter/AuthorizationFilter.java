@@ -15,8 +15,10 @@ import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -40,6 +42,9 @@ public class AuthorizationFilter implements Filter {
   private static final Logger log = LoggerFactory.getLogger(AuthorizationFilter.class);
 
   private static final String DISABLE_WWW_AUTH_HEADER_NAME = "Disable-WWW-Authenticate";
+
+  private static final String OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE =
+      "org.sihsalus.openmrs.USER_CONTEXT";
 
   /**
    * @see jakarta.servlet.Filter#init(jakarta.servlet.FilterConfig)
@@ -111,6 +116,7 @@ public class AuthorizationFilter implements Filter {
               String username = decoded.substring(0, separator);
               String password = decoded.substring(separator + 1);
               Context.authenticate(username, password);
+              persistAuthenticatedUserContext(httpRequest, (HttpServletResponse) response);
               log.debug("authenticated [{}]", username);
             } catch (Exception ex) {
               log.debug("authentication exception ", ex);
@@ -132,6 +138,22 @@ public class AuthorizationFilter implements Filter {
 
     // continue with the filter chain (unless IP is not allowed)
     chain.doFilter(request, response);
+  }
+
+  private void persistAuthenticatedUserContext(
+      HttpServletRequest request, HttpServletResponse response) {
+    if (!Context.isAuthenticated()) {
+      return;
+    }
+
+    HttpSession session = request.getSession(true);
+    session.setAttribute(OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE, Context.getUserContext());
+
+    Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
+    sessionCookie.setHttpOnly(true);
+    sessionCookie.setSecure(request.isSecure());
+    sessionCookie.setPath(StringUtils.defaultIfBlank(request.getContextPath(), "/"));
+    response.addCookie(sessionCookie);
   }
 
   private boolean requiresAuthentication(HttpServletRequest request) {
