@@ -53,11 +53,11 @@ Stabilization work should favor narrow, verifiable fixes over broad mechanical c
 
 ## First Modules To Clean
 
-- `sihsalus-module-stockmanagement`: import jobs, CSV reports, paging state, permission checks.
-- `sihsalus-module-reporting`: query builders, report utilities, evaluator null handling, SQL safety.
-- `sihsalus-fhir2`: DAO sorting/search helpers and null-safe query construction.
-- `sihsalus-module-appointments`: mapper mutation boundaries and DTO collection exposure.
-- `sihsalus-module-billing`: receipt generation, file output, and reflection-based extension points.
+- `modules/stockmanagement`: import jobs, CSV reports, paging state, permission checks.
+- `modules/reporting`: query builders, report utilities, evaluator null handling, SQL safety.
+- `modules/fhir2`: DAO sorting/search helpers and null-safe query construction.
+- `modules/appointments`: mapper mutation boundaries and DTO collection exposure.
+- `modules/billing`: receipt generation, file output, and reflection-based extension points.
 
 ## Verification Standard
 

@@ -1,0 +1,41 @@
+#!/bin/sh
+set -eu
+
+zero=0000000000000000000000000000000000000000
+failed=0
+
+fallback_base() {
+  local_sha="$1"
+  remote_ref="$2"
+  remote_branch=${remote_ref#refs/heads/}
+
+  if git rev-parse --verify --quiet "origin/$remote_branch" >/dev/null; then
+    git merge-base "$local_sha" "origin/$remote_branch"
+  elif git rev-parse --verify --quiet "origin/HEAD" >/dev/null; then
+    git merge-base "$local_sha" "origin/HEAD"
+  else
+    git rev-list --max-parents=0 "$local_sha" | tail -n 1
+  fi
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$local_sha" = "$zero" ]; then
+    continue
+  fi
+
+  if [ "$remote_sha" != "$zero" ] && git cat-file -e "$remote_sha^{commit}" 2>/dev/null; then
+    base=$remote_sha
+  else
+    base=$(fallback_base "$local_sha" "$remote_ref")
+  fi
+
+  echo "pre-push: checking whitespace in $base..$local_sha" >&2
+  if ! git diff --check "$base" "$local_sha"; then
+    failed=1
+  fi
+done
+
+if [ "$failed" -ne 0 ]; then
+  echo "pre-push: whitespace errors found; push aborted." >&2
+  exit 1
+fi

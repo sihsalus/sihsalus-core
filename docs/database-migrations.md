@@ -2,7 +2,7 @@
 
 Sihsalus Core uses a centralized Liquibase changelog for the static runtime:
 
-- Runtime bean: `sihsalus-core-boot`
+- Runtime module: `apps/backend` (`sihsalus-core-boot`)
 - Master changelog: `db/changelog/db.changelog-master.xml`
 - Liquibase tables: `liquibasechangelog` and `liquibasechangeloglock`
 

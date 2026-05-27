@@ -46,8 +46,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
       }
       executeInternal();
     } catch (Exception exception) {
-      log.error("Error occurred while executing stock rule job");
-      log.error(exception);
+      log.error("Error occurred while executing stock rule job", exception);
     } finally {
       isAlreadyRunning.set(false);
     }
@@ -229,7 +228,9 @@ public class StockRuleEvaluationJob extends AbstractTask {
       }
       template = templates.get(0);
     } catch (Exception exception) {
-      log.error(exception);
+      log.error(
+          "Error loading STOCK_MGMT_QTY_BELOW_THRESHOLD template for stock rule notifications",
+          exception);
       return;
     }
 
@@ -368,7 +369,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
             body,
             emailAddress);
       } catch (Exception exception) {
-        log.error(exception);
+        log.error("Error sending stock rule email to " + emailAddress, exception);
         continue;
       }
     }
