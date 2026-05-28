@@ -22,6 +22,10 @@ Status: migrated, now stabilizing.
 - `sihsalus-module-identitylookup` was removed because it had no current distro source baseline and only existed as a placeholder.
 - Future identity lookup work should be added as a real feature module when the product scope is defined.
 
+Parity note: this status does not mean 1:1 parity with a classic OpenMRS WAR.
+The current verdict and remaining parity gates are tracked in
+`openmrs-parity-audit.md`.
+
 ## Stabilization Status Model
 
 Use these levels when reporting module stabilization:

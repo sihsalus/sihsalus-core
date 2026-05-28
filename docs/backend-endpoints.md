@@ -189,7 +189,7 @@ listed as active HTTP endpoints.
 ## Service-Only Modules
 
 Some static modules are intentionally available as Java/Spring services and database model support,
-not as HTTP endpoints. EMR API is in this group.
+not as HTTP endpoints. EMR API and Idgen are in this group.
 
 EMR API currently registers services including:
 
@@ -204,6 +204,13 @@ EMR API currently registers services including:
 The backend test `emrApiIsWiredAsStaticInternalModule` validates these service registrations and the
 EMR API Liquibase tables. No `/rest/v1/emrapi/...` endpoint root is currently declared in
 `modules/emrapi`.
+
+Idgen currently registers `IdentifierSourceService`, Hibernate mappings, validators, prefix
+providers, and identifier-source Liquibase tables. The dev-server functional smoke on 2026-05-28
+confirmed that module inventory reports `idgen` as started and database migrated, and that source
+`101` exists in PostgreSQL. However, no `/rest/v1/idgen/...` or `/ws/rest/v1/idgen/...` endpoint root
+is currently declared in `modules/idgen`; `/ws/rest/v1/idgen/identifiersource/101/identifier`
+returns `404 Unknown resource`.
 
 ## Verification
 

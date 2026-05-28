@@ -265,6 +265,8 @@ class SihsalusCoreApplicationTest {
 
   private static final String TEST_IDENTIFIER_TYPE_UUID = "f7c1c7d2-cf2d-45fd-9660-e81975cf50da";
 
+  private static final String TEST_IDGEN_SOURCE_UUID = "0f6758ce-a33d-4aa5-8306-cc0f5f3b2a92";
+
   private static final String TEST_REQUIRED_IDENTIFIER =
       new LuhnMod30IdentifierValidator().getValidIdentifier("HC000001");
 
@@ -1332,6 +1334,40 @@ class SihsalusCoreApplicationTest {
             .getIdentifierValidator((Class) LuhnMod30IdentifierValidator.class));
     assertNotNull(
         jdbcTemplate.queryForObject("select count(*) from idgen_identifier_source", Integer.class));
+  }
+
+  @Test
+  void idgenIdentifierGenerationEndpointReturnsOpenmrsRestPayload() throws Exception {
+    int sourceId = ensureTestSequentialIdentifierSourceExists();
+
+    mockMvc
+        .perform(
+            post("/ws/rest/v1/idgen/identifiersource/{sourceId}/identifier", sourceId)
+                .header("Authorization", ADMIN_BASIC_AUTH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+        .andExpect(status().isCreated())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.identifier").value("100000"));
+
+    mockMvc
+        .perform(
+            post("/rest/v1/idgen/identifiersource/{sourceUuid}/identifier", TEST_IDGEN_SOURCE_UUID)
+                .header("Authorization", ADMIN_BASIC_AUTH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"comment\":\"follow-up\"}"))
+        .andExpect(status().isCreated())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.identifier").value("100001"));
+
+    assertEquals(
+        1,
+        countRows(
+            "select count(*) from idgen_log_entry where source = ? "
+                + "and identifier = ? and comment = ?",
+            sourceId,
+            "100001",
+            "follow-up"));
   }
 
   @Test
@@ -3134,6 +3170,92 @@ class SihsalusCoreApplicationTest {
         PatientIdentifierType.UniquenessBehavior.UNIQUE.name());
   }
 
+  private int ensureTestSequentialIdentifierSourceExists() {
+    ensureTestIdentifierTypeExists();
+    ensureIdgenSequentialGeneratorCompatibilityColumns();
+    List<Integer> existingIds =
+        jdbcTemplate.queryForList(
+            "select id from idgen_identifier_source where uuid = ?",
+            Integer.class,
+            TEST_IDGEN_SOURCE_UUID);
+    if (!existingIds.isEmpty()) {
+      int sourceId = existingIds.get(0);
+      resetTestSequentialIdentifierSource(sourceId);
+      return sourceId;
+    }
+
+    Integer identifierTypeId =
+        jdbcTemplate.queryForObject(
+            "select patient_identifier_type_id from patient_identifier_type where uuid = ?",
+            Integer.class,
+            TEST_IDENTIFIER_TYPE_UUID);
+    Integer sourceId =
+        jdbcTemplate.queryForObject(
+            "select coalesce(max(id), 0) + 100 from idgen_identifier_source", Integer.class);
+    assertNotNull(identifierTypeId);
+    assertNotNull(sourceId);
+    jdbcTemplate.update(
+        "insert into idgen_identifier_source "
+            + "(id, uuid, name, description, identifier_type, creator, date_created, retired) "
+            + "values (?, ?, ?, ?, ?, ?, current_timestamp, false)",
+        sourceId,
+        TEST_IDGEN_SOURCE_UUID,
+        "SIH Salus test generator",
+        "Identifier source used by REST boot smoke tests",
+        identifierTypeId,
+        1);
+    jdbcTemplate.update(
+        "insert into idgen_seq_id_gen "
+            + "(id, next_sequence_value, base_character_set, first_identifier_base, prefix, "
+            + "suffix, min_length, max_length) values (?, ?, ?, ?, ?, ?, ?, ?)",
+        sourceId,
+        -1,
+        "0123456789",
+        "100000",
+        "",
+        "",
+        6,
+        20);
+    return sourceId;
+  }
+
+  private void resetTestSequentialIdentifierSource(int sourceId) {
+    jdbcTemplate.update("delete from idgen_log_entry where source = ?", sourceId);
+    if (countRows("select count(*) from idgen_seq_id_gen where id = ?", sourceId) == 0) {
+      jdbcTemplate.update(
+          "insert into idgen_seq_id_gen "
+              + "(id, next_sequence_value, base_character_set, first_identifier_base, prefix, "
+              + "suffix, min_length, max_length) values (?, ?, ?, ?, ?, ?, ?, ?)",
+          sourceId,
+          -1,
+          "0123456789",
+          "100000",
+          "",
+          "",
+          6,
+          20);
+      return;
+    }
+    jdbcTemplate.update(
+        "update idgen_seq_id_gen set next_sequence_value = -1 where id = ?", sourceId);
+  }
+
+  private void ensureIdgenSequentialGeneratorCompatibilityColumns() {
+    jdbcTemplate.execute(
+        "alter table idgen_id_pool add column if not exists "
+            + "refill_with_scheduled_task boolean default true");
+    jdbcTemplate.execute("alter table idgen_remote_source add column if not exists user varchar(50)");
+    jdbcTemplate.execute(
+        "alter table idgen_remote_source add column if not exists password varchar(20)");
+    jdbcTemplate.execute("alter table idgen_seq_id_gen add column if not exists min_length int");
+    jdbcTemplate.execute("alter table idgen_seq_id_gen add column if not exists max_length int");
+    if (columnExists("idgen_seq_id_gen", "length")) {
+      jdbcTemplate.update("update idgen_seq_id_gen set min_length = coalesce(min_length, length)");
+    }
+    jdbcTemplate.update(
+        "update idgen_seq_id_gen set max_length = coalesce(max_length, min_length)");
+  }
+
   private static String basicAuth(String username, String password) {
     String token =
         Base64.getEncoder()
@@ -3155,6 +3277,15 @@ class SihsalusCoreApplicationTest {
   private int countRows(String sql, Object... args) {
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, args);
     return count == null ? 0 : count;
+  }
+
+  private boolean columnExists(String tableName, String columnName) {
+    return countRows(
+            "select count(*) from information_schema.columns "
+                + "where lower(table_name) = ? and lower(column_name) = ?",
+            tableName.toLowerCase(Locale.ROOT),
+            columnName.toLowerCase(Locale.ROOT))
+        > 0;
   }
 
   private void restartIdentityAfterSeedData(String tableName, String columnName) {

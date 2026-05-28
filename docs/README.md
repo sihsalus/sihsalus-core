@@ -6,6 +6,7 @@ Active documentation lives at the top of this directory. Historical planning not
 
 - `architecture.md`: current architecture direction and compatibility boundaries.
 - `spring-boot-runtime.md`: executable runtime map, configuration surface, and stabilization checklist.
+- `openmrs-parity-audit.md`: current verdict on OpenMRS 1:1 parity, module coverage, and remaining release gates.
 - `backend-endpoints.md`: HTTP endpoint map for REST, FHIR, module controllers, and service-only modules.
 - `module-map.md`: current module ownership boundaries and future repository layout target.
 - `stabilization-plan.md`: current stabilization plan now that static module migration is complete.
