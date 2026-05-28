@@ -7,9 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -17,6 +23,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.APIAuthenticationException;
@@ -102,6 +109,31 @@ class FhirR4ReadControllerTest {
   }
 
   @Test
+  void passesAnnotatedSearchParametersToProvider() {
+    ObservationProvider provider = new ObservationProvider();
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(provider));
+    LinkedMultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add("subject:Patient", "patient-uuid");
+    parameters.add("code", "LOINC|1234-5");
+    parameters.add("_sort", "-date");
+    parameters.add("_summary", "data");
+    parameters.add("_count", "100");
+
+    ResponseEntity<String> response = controller.search("Observation", parameters);
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(provider.patientReference);
+    assertTrue(provider.patientReference.toString().contains("patient-uuid"));
+    assertNotNull(provider.code);
+    assertTrue(provider.code.toString().contains("LOINC"));
+    assertTrue(provider.code.toString().contains("1234-5"));
+    assertNotNull(provider.sort);
+    assertEquals("date", provider.sort.getParamName());
+    assertEquals(SortOrderEnum.DESC, provider.sort.getOrder());
+  }
+
+  @Test
   void rejectsUnsupportedSearchParametersInsteadOfIgnoringFilters() {
     FhirR4ReadController controller =
         new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
@@ -164,6 +196,35 @@ class FhirR4ReadControllerTest {
       otherLocation.getMeta().addTag().setCode("Other");
 
       return new SimpleBundleProvider(List.of(otherLocation, loginLocation));
+    }
+  }
+
+  private static final class ObservationProvider implements IResourceProvider {
+
+    private ReferenceAndListParam patientReference;
+
+    private TokenAndListParam code;
+
+    private SortSpec sort;
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return Observation.class;
+    }
+
+    @Search
+    @SuppressWarnings("unused")
+    public IBundleProvider search(
+        @OptionalParam(name = Observation.SP_SUBJECT) ReferenceAndListParam patientReference,
+        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code,
+        @Sort SortSpec sort) {
+      this.patientReference = patientReference;
+      this.code = code;
+      this.sort = sort;
+
+      Observation observation = new Observation();
+      observation.setId("observation-search-uuid");
+      return new SimpleBundleProvider(List.of(observation));
     }
   }
 

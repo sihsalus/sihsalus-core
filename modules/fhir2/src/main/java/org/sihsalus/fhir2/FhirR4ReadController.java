@@ -1,16 +1,28 @@
 package org.sihsalus.fhir2;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +56,7 @@ public class FhirR4ReadController {
 
   private static final int MAX_SEARCH_COUNT = 50;
 
-  private static final Set<String> SUPPORTED_SEARCH_PARAMETERS =
+  private static final Set<String> COMMON_SEARCH_PARAMETERS =
       Set.of("_count", "_format", "_pretty", "_summary", "_tag");
 
   private final FhirContext fhirContext;
@@ -133,8 +145,8 @@ public class FhirR4ReadController {
     }
 
     try {
-      rejectUnsupportedSearchParameters(queryParameters);
-      IBundleProvider bundleProvider = invokeSearch(provider, searchMethod);
+      rejectUnsupportedSearchParameters(searchMethod, queryParameters);
+      IBundleProvider bundleProvider = invokeSearch(provider, searchMethod, queryParameters);
       Bundle bundle = bundleFromProvider(bundleProvider, queryParameters);
       return fhirResponse(200, fhirContext.newJsonParser().encodeResourceToString(bundle));
     } catch (IllegalArgumentException exception) {
@@ -203,9 +215,10 @@ public class FhirR4ReadController {
     }
   }
 
-  private IBundleProvider invokeSearch(IResourceProvider provider, Method method) {
+  private IBundleProvider invokeSearch(
+      IResourceProvider provider, Method method, MultiValueMap<String, String> queryParameters) {
     try {
-      Object result = method.invoke(provider, new Object[method.getParameterCount()]);
+      Object result = method.invoke(provider, searchArguments(method, queryParameters));
       if (result instanceof IBundleProvider bundleProvider) {
         return bundleProvider;
       }
@@ -314,13 +327,191 @@ public class FhirR4ReadController {
     return false;
   }
 
-  private void rejectUnsupportedSearchParameters(MultiValueMap<String, String> queryParameters) {
+  private Object[] searchArguments(Method method, MultiValueMap<String, String> queryParameters) {
+    Parameter[] parameters = method.getParameters();
+    Object[] arguments = new Object[parameters.length];
+    for (int i = 0; i < parameters.length; i++) {
+      Parameter parameter = parameters[i];
+      OptionalParam optionalParam = parameter.getAnnotation(OptionalParam.class);
+      if (optionalParam != null) {
+        arguments[i] = optionalParameterArgument(parameter, optionalParam, queryParameters);
+        continue;
+      }
+
+      if (parameter.isAnnotationPresent(Sort.class)) {
+        arguments[i] = sortArgument(queryParameters);
+        continue;
+      }
+
+      IncludeParam includeParam = parameter.getAnnotation(IncludeParam.class);
+      if (includeParam != null) {
+        arguments[i] = includeArgument(includeParam, queryParameters);
+      }
+    }
+    return arguments;
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private Object optionalParameterArgument(
+      Parameter parameter,
+      OptionalParam optionalParam,
+      MultiValueMap<String, String> queryParameters) {
+    List<QueryValue> values = queryValues(optionalParam.name(), queryParameters);
+    if (values.isEmpty()) {
+      return null;
+    }
+
+    Class<?> parameterType = parameter.getType();
+    try {
+      Object argument = parameterType.getDeclaredConstructor().newInstance();
+      if (argument instanceof IQueryParameterAnd andArgument) {
+        List<QualifiedParamList> qualifiedValues = new ArrayList<>();
+        for (QueryValue value : values) {
+          qualifiedValues.addAll(qualifiedParamLists(value.qualifier(), value.value()));
+        }
+        andArgument.setValuesAsQueryTokens(fhirContext, optionalParam.name(), qualifiedValues);
+        return argument;
+      }
+
+      if (argument instanceof IQueryParameterType typeArgument) {
+        if (values.size() > 1) {
+          throw new IllegalArgumentException(
+              "FHIR R4 search parameter must be specified only once: " + optionalParam.name());
+        }
+
+        QueryValue value = values.get(0);
+        typeArgument.setValueAsQueryToken(
+            fhirContext, optionalParam.name(), value.qualifier(), value.value());
+        return argument;
+      }
+
+      throw new IllegalArgumentException(
+          "FHIR R4 search parameter type is not supported by this endpoint: "
+              + parameterType.getName());
+    } catch (ReflectiveOperationException exception) {
+      throw new IllegalArgumentException(
+          "FHIR R4 search parameter type cannot be created: " + parameterType.getName(), exception);
+    }
+  }
+
+  private List<QualifiedParamList> qualifiedParamLists(String qualifier, String value) {
+    return List.of(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, value));
+  }
+
+  private SortSpec sortArgument(MultiValueMap<String, String> queryParameters) {
+    List<String> values = queryParameters.get("_sort");
+    if (values == null || values.isEmpty()) {
+      return null;
+    }
+
+    SortSpec first = null;
+    SortSpec previous = null;
+    for (String value : values) {
+      for (String rawSort : value.split(",")) {
+        if (rawSort.isBlank()) {
+          throw new IllegalArgumentException("_sort must not contain blank values");
+        }
+
+        String sortParameter = rawSort.trim();
+        SortOrderEnum order = SortOrderEnum.ASC;
+        if (sortParameter.startsWith("-")) {
+          order = SortOrderEnum.DESC;
+          sortParameter = sortParameter.substring(1);
+        }
+        if (sortParameter.isBlank()) {
+          throw new IllegalArgumentException("_sort must include a parameter name");
+        }
+
+        SortSpec current = new SortSpec(sortParameter, order);
+        if (first == null) {
+          first = current;
+        } else {
+          previous.setChain(current);
+        }
+        previous = current;
+      }
+    }
+    return first;
+  }
+
+  private HashSet<Include> includeArgument(
+      IncludeParam includeParam, MultiValueMap<String, String> queryParameters) {
+    List<String> values = queryParameters.get(includeParam.reverse() ? "_revinclude" : "_include");
+    if (values == null || values.isEmpty()) {
+      return null;
+    }
+
+    HashSet<Include> includes = new HashSet<>();
+    for (String value : values) {
+      for (String token : value.split(",")) {
+        if (token.isBlank()) {
+          throw new IllegalArgumentException(
+              "FHIR include parameter must not contain blank values");
+        }
+        includes.add(new Include(token.trim(), includeParam.reverse()));
+      }
+    }
+    return includes;
+  }
+
+  private void rejectUnsupportedSearchParameters(
+      Method method, MultiValueMap<String, String> queryParameters) {
+    Set<String> supportedSearchParameters = supportedSearchParameters(method);
     for (String parameterName : queryParameters.keySet()) {
-      if (!SUPPORTED_SEARCH_PARAMETERS.contains(parameterName)) {
+      if (!supportedSearchParameters.contains(baseSearchParameterName(parameterName))) {
         throw new IllegalArgumentException(
             "FHIR R4 search parameter is not supported by this endpoint: " + parameterName);
       }
     }
+  }
+
+  private Set<String> supportedSearchParameters(Method method) {
+    Set<String> supported = new LinkedHashSet<>(COMMON_SEARCH_PARAMETERS);
+    for (Parameter parameter : method.getParameters()) {
+      OptionalParam optionalParam = parameter.getAnnotation(OptionalParam.class);
+      if (optionalParam != null) {
+        supported.add(optionalParam.name());
+      }
+
+      if (parameter.isAnnotationPresent(Sort.class)) {
+        supported.add("_sort");
+      }
+
+      IncludeParam includeParam = parameter.getAnnotation(IncludeParam.class);
+      if (includeParam != null) {
+        supported.add(includeParam.reverse() ? "_revinclude" : "_include");
+      }
+    }
+    return supported;
+  }
+
+  private List<QueryValue> queryValues(
+      String parameterName, MultiValueMap<String, String> queryParameters) {
+    List<QueryValue> values = new ArrayList<>();
+    for (Map.Entry<String, List<String>> entry : queryParameters.entrySet()) {
+      if (!baseSearchParameterName(entry.getKey()).equals(parameterName)) {
+        continue;
+      }
+
+      String qualifier = qualifier(entry.getKey(), parameterName);
+      for (String value : entry.getValue()) {
+        if (value != null && !value.isBlank()) {
+          values.add(new QueryValue(qualifier, value));
+        }
+      }
+    }
+    return values;
+  }
+
+  private String baseSearchParameterName(String parameterName) {
+    int qualifierStart = parameterName.indexOf(':');
+    return qualifierStart < 0 ? parameterName : parameterName.substring(0, qualifierStart);
+  }
+
+  private String qualifier(String qualifiedName, String parameterName) {
+    return qualifiedName.length() == parameterName.length()
+        ? null
+        : qualifiedName.substring(parameterName.length());
   }
 
   private int requestedCount(MultiValueMap<String, String> queryParameters) {
@@ -386,4 +577,6 @@ public class FhirR4ReadController {
         .header(HttpHeaders.CACHE_CONTROL, "no-store")
         .body(body);
   }
+
+  private record QueryValue(String qualifier, String value) {}
 }

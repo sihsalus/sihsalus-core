@@ -344,7 +344,7 @@ class SihsalusCoreApplicationTest {
     mockMvc
         .perform(
             get("/ws/fhir2/R4/Location")
-                .param("name", "unknown")
+                .param("not-supported", "unknown")
                 .header("Authorization", ADMIN_BASIC_AUTH))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
@@ -1116,7 +1116,76 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void patientChartCompatibilityEndpointsBypassLegacyJavaxResources() throws Exception {
+    String patientUuid = ensureTestPatient();
+    String conceptUuid =
+        jdbcTemplate.queryForObject(
+            "select uuid from concept where retired = false order by concept_id limit 1",
+            String.class);
+    String careSettingUuid =
+        jdbcTemplate.queryForObject(
+            "select uuid from care_setting order by care_setting_id limit 1", String.class);
+    String orderTypeUuid =
+        jdbcTemplate.queryForObject(
+            "select uuid from order_type order by order_type_id limit 1", String.class);
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/programenrollment")
+                .param("patient", patientUuid)
+                .param(
+                    "v",
+                    "custom:(uuid,display,program,dateEnrolled,dateCompleted,location:(uuid,display))")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results").isArray());
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/obs")
+                .param("patient", patientUuid)
+                .param("concept", conceptUuid)
+                .param("v", "full")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results").isArray());
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/order")
+                .param("patient", patientUuid)
+                .param("careSetting", careSettingUuid)
+                .param("orderTypes", orderTypeUuid)
+                .param("excludeCanceledAndExpired", "true")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results").isArray());
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/metadatamapping/termmapping")
+                .param("code", "emr.primaryIdentifierType")
+                .param("v", "custom:(metadataUuid)")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results").isArray());
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/concept/{uuid}", conceptUuid)
+                .param(
+                    "v",
+                    "custom:(setMembers:(uuid,display,hiNormal,hiAbsolute,hiCritical,lowNormal,lowAbsolute,lowCritical,units))")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uuid").value(conceptUuid))
+        .andExpect(jsonPath("$.setMembers").isArray());
+  }
+
+  @Test
   void fhirR4SearchEndpointInvokesImportedProvider() throws Exception {
+    String patientUuid = ensureTestPatient();
+
     mockMvc
         .perform(
             get("/ws/fhir2/R4/Location")
@@ -1133,6 +1202,31 @@ class SihsalusCoreApplicationTest {
                 .param("_summary", "data")
                 .param("_count", "50")
                 .param("_tag", "Login Location")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+        .andExpect(jsonPath("$.resourceType").value("Bundle"))
+        .andExpect(jsonPath("$.type").value("searchset"));
+
+    mockMvc
+        .perform(
+            get("/ws/fhir2/R4/Condition")
+                .param("patient", patientUuid)
+                .param("_count", "100")
+                .param("_summary", "data")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+        .andExpect(jsonPath("$.resourceType").value("Bundle"))
+        .andExpect(jsonPath("$.type").value("searchset"));
+
+    mockMvc
+        .perform(
+            get("/ws/fhir2/R4/Observation")
+                .param("subject:Patient", patientUuid)
+                .param("_summary", "data")
+                .param("_sort", "-date")
+                .param("_count", "100")
                 .header("Authorization", ADMIN_BASIC_AUTH))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
