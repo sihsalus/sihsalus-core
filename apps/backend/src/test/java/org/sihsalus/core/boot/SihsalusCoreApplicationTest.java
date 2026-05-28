@@ -391,6 +391,7 @@ class SihsalusCoreApplicationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.authenticated").value(true))
             .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME))
+            .andExpect(jsonPath("$.user.person.uuid").exists())
             .andExpect(jsonPath("$.user.privileges").isArray())
             .andExpect(jsonPath("$.user.privileges").isNotEmpty())
             .andExpect(jsonPath("$.user.roles[?(@.name == 'Authenticated')]").exists())
@@ -407,7 +408,8 @@ class SihsalusCoreApplicationTest {
         .perform(get("/rest/v1/session").session(httpSession))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.authenticated").value(true))
-        .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME));
+        .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME))
+        .andExpect(jsonPath("$.user.person.uuid").exists());
 
     mockMvc
         .perform(get("/api/system/info").session(httpSession))

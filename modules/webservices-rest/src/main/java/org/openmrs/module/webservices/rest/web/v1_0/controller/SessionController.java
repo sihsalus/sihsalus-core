@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openmrs.Location;
+import org.openmrs.Person;
 import org.openmrs.Privilege;
 import org.openmrs.Role;
 import org.openmrs.User;
@@ -65,6 +66,7 @@ public class SessionController {
       user.put("systemId", authenticatedUser.getSystemId());
       user.put("username", authenticatedUser.getUsername());
       user.put("display", authenticatedUser.getDisplayString());
+      user.put("person", personReference(authenticatedUser.getPerson()));
       user.put("userProperties", new LinkedHashMap<>(authenticatedUser.getUserProperties()));
       user.put("privileges", privileges(authenticatedUser));
       user.put("roles", roles(authenticatedUser));
@@ -182,6 +184,19 @@ public class SessionController {
     reference.put("uuid", role.getUuid());
     reference.put("name", role.getRole());
     reference.put("display", role.getRole());
+    return reference;
+  }
+
+  private Map<String, Object> personReference(Person person) {
+    if (person == null) {
+      return null;
+    }
+
+    Map<String, Object> reference = new LinkedHashMap<>();
+    reference.put("uuid", person.getUuid());
+    reference.put(
+        "display",
+        person.getPersonName() == null ? person.getUuid() : person.getPersonName().toString());
     return reference;
   }
 
