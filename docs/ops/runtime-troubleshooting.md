@@ -108,9 +108,15 @@ These are healthy responses:
 | `GET /openmrs/admin/index.htm` with valid Basic credentials | `302` to `/openmrs/api/admin/static-modules`. |
 | `GET /openmrs/ws/rest/v1/session` | `200` with `authenticated=false` when anonymous. |
 | `GET /openmrs/ws/rest/v1/session` with valid Basic credentials | `200` with `authenticated=true` and `JSESSIONID`. |
+| `GET /openmrs/ws/rest/v1/user/{uuid}` with a valid session or Basic credentials | `200` with `userProperties`, `roles`, and `person`. |
 
 `/openmrs/admin/index.htm` is a legacy compatibility route. The supported
 operator endpoint is `/openmrs/api/admin/static-modules`.
+
+The user endpoint is also a compatibility route in the Spring Boot runtime. It
+prevents the SPA user-properties lookup from falling through to the imported
+legacy REST renderer, which can fail with old Apache Commons or servlet API
+method signatures.
 
 ## Symptom Matrix
 
@@ -125,6 +131,7 @@ operator endpoint is `/openmrs/api/admin/static-modules`.
 | Health check flips to `unhealthy` after startup | Database, migrations, or app runtime dependency became unavailable. | `/openmrs/actuator/health/readiness` and logs with `X-Request-Id`. | Fix DB connectivity or failed runtime dependency. |
 | Redirects use `http://` behind HTTPS | Missing forwarded proto headers. | `curl -I` through the public gateway. | Forward `X-Forwarded-Proto=https` and keep `SERVER_FORWARD_HEADERS_STRATEGY=framework`. |
 | Browser login session disappears | Cookie path/proxy context mismatch or multiple backend replicas without shared session. | Inspect `Set-Cookie` path and gateway routing. | Keep context path consistent; use sticky sessions or shared session strategy before scaling replicas. |
+| SPA shows `Error fetching user properties` and `/openmrs/ws/rest/v1/user/{uuid}` returns `400` | Old backend image or request falling through to the legacy REST user renderer. | Check the deployed image tag and call the user endpoint with valid credentials. | Deploy an image with `UserCompatibilityController`; the endpoint must return `200` and include `userProperties`. |
 | Startup fails with OCL/content errors | OCL import is enabled and fail-on-errors is true. | Search logs for `SihsalusOpenConceptLabStaticContentImporter`. | Fix content root or disable OCL only for infrastructure smoke tests. |
 
 ## Triage Commands
@@ -156,6 +163,14 @@ curl -i "$BASE_URL/ws/rest/v1/session"
 curl -i -u "$ADMIN_USER:$SIHSALUS_ADMIN_PASSWORD" "$BASE_URL/ws/rest/v1/session"
 ```
 
+REST user properties:
+
+```bash
+SESSION_BODY=$(curl -fsS -u "$ADMIN_USER:$SIHSALUS_ADMIN_PASSWORD" "$BASE_URL/ws/rest/v1/session")
+USER_UUID=$(printf '%s' "$SESSION_BODY" | sed -n 's/.*"user":{"uuid":"\([^"]*\)".*/\1/p')
+curl -i -u "$ADMIN_USER:$SIHSALUS_ADMIN_PASSWORD" "$BASE_URL/ws/rest/v1/user/$USER_UUID"
+```
+
 Static module status:
 
 ```bash
@@ -179,7 +194,7 @@ Before promoting an image behind `/openmrs`, verify:
 
 ```bash
 mvn -pl apps/backend -am \
-  -Dtest=SihsalusCoreApplicationTest#adminAndLegacyModuleEndpointsRequireAuthentication \
+  -Dtest=SihsalusCoreApplicationTest#adminAndLegacyModuleEndpointsRequireAuthentication+userCompatibilityEndpointReturnsUserPropertiesWithoutLegacyRoleConversion \
   -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
@@ -189,6 +204,9 @@ Then run the public checks:
 curl -fsS "$BASE_URL/actuator/health/readiness"
 curl -fsS "$BASE_URL/ws/rest/v1/session"
 curl -i -u "$ADMIN_USER:$SIHSALUS_ADMIN_PASSWORD" "$BASE_URL/admin/index.htm"
+SESSION_BODY=$(curl -fsS -u "$ADMIN_USER:$SIHSALUS_ADMIN_PASSWORD" "$BASE_URL/ws/rest/v1/session")
+USER_UUID=$(printf '%s' "$SESSION_BODY" | sed -n 's/.*"user":{"uuid":"\([^"]*\)".*/\1/p')
+curl -i -u "$ADMIN_USER:$SIHSALUS_ADMIN_PASSWORD" "$BASE_URL/ws/rest/v1/user/$USER_UUID"
 ```
 
 The authenticated admin compatibility check must return `302` with:

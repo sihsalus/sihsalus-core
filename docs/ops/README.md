@@ -86,6 +86,11 @@ The first start with `SIHSALUS_OCL_STATIC_IMPORT_ENABLED=true` can be slow becau
 Use `runtime-troubleshooting.md` for `/openmrs` gateway shape, proxy timeouts,
 health checks, and common 401/404/502/504 diagnosis.
 
+After deploying a new backend image behind the gateway, run the public smoke
+checks in `runtime-troubleshooting.md`. At minimum, validate health, REST
+session creation, user properties, login locations, and a patient chart bootstrap
+path before handing the environment back to frontend users.
+
 Use `../runtime-hardening.md` before promoting a runtime build.
 
 ## Still Missing

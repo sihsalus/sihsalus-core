@@ -76,6 +76,30 @@ Important behavior: availability does not mean every resource supports anonymous
 For example, patient retrieval by UUID is validated through `/ws/rest/v1/patient/{uuid}`, and patient
 search is validated as a search endpoint returning a `results` array.
 
+### Spring-Owned REST Compatibility Adapters
+
+Some OpenMRS REST paths are intentionally served by Spring Boot compatibility adapters instead of
+the imported legacy REST renderer. These adapters exist when the OpenMRS frontend expects a stable
+REST shape but the imported renderer depends on legacy servlet or Apache Commons APIs that are not
+compatible with the static Jakarta/Spring Boot runtime.
+
+Compatibility adapters are not alternate security paths. They are covered by the same REST
+authentication filter and must preserve the `/rest/v1` and `/ws/rest/v1` contracts expected by the
+frontend.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/rest/v1/user` and `/ws/rest/v1/user` | Search/list users with a `results` array. Supports `q`, `startIndex`, and `limit`. |
+| `GET` | `/rest/v1/user/{uuid}` and `/ws/rest/v1/user/{uuid}` | User profile payload for the SPA, including `uuid`, `display`, `username`, `person`, `roles`, `userProperties`, and privileges for the direct UUID read. |
+| `GET` | `/rest/v1/obs` | Patient chart observations by `patient`, optionally filtered by `concept`. |
+| `GET` | `/rest/v1/order` | Patient chart orders by `patient`, optionally filtered by `careSetting` and `orderTypes`. |
+| `GET` | `/rest/v1/programenrollment` | Patient program enrollments by `patient`. |
+| `GET` | `/rest/v1/metadatamapping/termmapping` | Metadata term mapping lookup by `code`. |
+| `GET` | `/rest/v1/concept/{uuid}` | Concept reference used by frontend metadata lookups. |
+
+The patient chart adapter paths are declared under `/rest/v1`; the `/ws/rest/v1` compatibility prefix
+is routed to the same handlers by the REST path alias filter.
+
 ## FHIR R4
 
 | Method | Path | Purpose |
@@ -91,9 +115,18 @@ search is validated as a search endpoint returning a `results` array.
 | `GET` | `/api/fhir/r4/{resourceType}` | R4 search bundle alias. |
 | `GET` | `/ws/fhir2/R4/{resourceType}` | FHIR2 compatibility search route. |
 
-The current lightweight FHIR search route supports the neutral parameters `_count`, `_format`, and
-`_pretty`. Other query parameters return an `OperationOutcome` with `issue.code = invalid` instead
-of being silently ignored.
+The current lightweight FHIR search route forwards resource-specific `@Search` parameters to the
+imported FHIR2 providers and supports these common parameters:
+
+- `_count`: caps returned bundle entries, with a backend maximum of 50.
+- `_format` and `_pretty`: accepted for compatibility.
+- `_summary`: accepted for OpenMRS frontend compatibility; it does not guarantee field trimming for
+  every imported provider.
+- `_tag`: filters returned R4 resources against `meta.tag.system`, `meta.tag.code`, or
+  `meta.tag.display`. This is required by the OpenMRS login-location selector.
+
+Unsupported query parameters return an `OperationOutcome` with `issue.code = invalid` instead of
+being silently ignored.
 
 Registered R4 resource types:
 
@@ -120,7 +153,9 @@ Registered R4 resource types:
 Validated examples:
 
 - `GET /ws/fhir2/R4/Location?_count=1`
+- `GET /ws/fhir2/R4/Location?_summary=data&_count=50&_tag=Login%20Location`
 - `GET /api/fhir/r4/Patient/{uuid}`
+- `GET /ws/fhir2/R4/Observation?subject:Patient={patientUuid}&code={conceptUuidA},{conceptUuidB}`
 
 ## Module REST Resources
 

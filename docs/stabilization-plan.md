@@ -46,6 +46,26 @@ The static module migration is complete. The active work is now stabilization: m
 - Treat direct jar defaults differently from Compose defaults: Compose already requires secrets, but direct startup still needs explicit validation before production use.
 - Use `docs/spring-boot-runtime.md` as the runtime map for startup sequencing, configuration, and immediate gaps.
 
+### Compatibility Adapters
+
+Compatibility adapters are allowed during stabilization, but only when they keep an inherited
+OpenMRS/frontend contract working while the imported static-module implementation is being made
+Jakarta/Spring Boot safe.
+
+Rules for these adapters:
+
+- Keep the public path compatible with OpenMRS frontend expectations.
+- Reuse the normal REST/FHIR authentication filter; never create a bypass.
+- Return the smallest response shape the frontend contract needs.
+- Add a focused boot test for the compatibility path and the failure mode it replaces.
+- Document the adapter in `docs/backend-endpoints.md` and operational triage in
+  `docs/ops/runtime-troubleshooting.md` when it affects deployment behavior.
+- Prefer deleting the adapter later if the underlying imported module becomes compatible and its
+  renderer can satisfy the same contract safely.
+
+Current high-value adapters support SPA login/session, user properties, login locations, and the
+patient chart bootstrap paths. These are stabilization bridges, not a second REST API design.
+
 ### Reliability
 
 - Replace manual stream/zip/file cleanup with try-with-resources.
