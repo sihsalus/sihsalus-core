@@ -494,6 +494,38 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void standardRestModuleEndpointReportsStaticModulesForSpaDependencies() throws Exception {
+    mockMvc
+        .perform(
+            get("/rest/v1/module").param("v", "full").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')]").exists())
+        .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')].version").value("3.4.1"))
+        .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')].started").value(true))
+        .andExpect(jsonPath("$.results[?(@.uuid == 'fhir2')]").exists())
+        .andExpect(jsonPath("$.results[?(@.uuid == 'stockmanagement')]").exists())
+        .andExpect(jsonPath("$.results[?(@.uuid == 'ordertemplates')]").exists());
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/module")
+                .param("v", "custom:(uuid,version)")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')].version").value("3.4.1"));
+
+    mockMvc
+        .perform(
+            get("/rest/v1/module/webservices.rest")
+                .param("v", "full")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uuid").value("webservices.rest"))
+        .andExpect(jsonPath("$.version").value("3.4.1"))
+        .andExpect(jsonPath("$.started").value(true));
+  }
+
+  @Test
   @Disabled(
       "Covered by SihsalusStaticContentImportTest; keep the general boot suite off the heavy OCL import path")
   void sihsalusContentPackageIsLoadedIntoStaticBootDatabase() {
