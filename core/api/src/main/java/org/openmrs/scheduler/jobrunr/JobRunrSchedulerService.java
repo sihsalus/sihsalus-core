@@ -53,6 +53,7 @@ import org.openmrs.scheduler.db.SchedulerDAO;
 import org.openmrs.util.PrivilegeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,15 +74,19 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
 
   private SchedulerDAO schedulerDAO;
 
+  private String defaultSchedulerUsername;
+
   public JobRunrSchedulerService(
       StorageProvider storageProvider,
       JobRequestScheduler jobRequestScheduler,
       JobScheduler jobScheduler,
-      SchedulerDAO schedulerDAO) {
+      SchedulerDAO schedulerDAO,
+      @Value("${sihsalus.admin.username:admin}") String defaultSchedulerUsername) {
     this.jobRequestScheduler = jobRequestScheduler;
     this.jobScheduler = jobScheduler;
     this.storageProvider = storageProvider;
     this.schedulerDAO = schedulerDAO;
+    this.defaultSchedulerUsername = defaultSchedulerUsername;
   }
 
   @Override
@@ -91,7 +96,7 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
         JobId jobId =
             jobRequestScheduler.enqueue(
                 UUID.fromString(taskDefinition.getUuid()),
-                new JobRequestAdapter(taskDefinition, taskDefinition.getCreator().getSystemId()));
+                new JobRequestAdapter(taskDefinition, scheduledBy(taskDefinition)));
         String name = taskDefinition.getName();
         if (name == null) {
           name = taskDefinition.getTaskClass();
@@ -100,10 +105,8 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
         log.info("Scheduled legacy task {} [{}] to run on startup", name, taskDefinition.getUuid());
       }
 
-      Optional<RecurringTaskDetails> recurringTask = getRecurringTask(taskDefinition.getUuid());
-      if (!recurringTask.isPresent()) {
-        Optional<TaskDetails> task = getTask(taskDefinition.getUuid());
-        if (!task.isPresent()) {
+      if (!recurringTaskExists(taskDefinition.getUuid())) {
+        if (!taskExists(taskDefinition.getUuid())) {
           try {
             scheduleTask(taskDefinition);
             log.info(
@@ -116,6 +119,18 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
         }
       }
     }
+  }
+
+  private boolean taskExists(String uuid) {
+    try {
+      return !StateName.DELETED.equals(storageProvider.getJobById(JobId.parse(uuid)).getState());
+    } catch (JobNotFoundException e) {
+      return false;
+    }
+  }
+
+  private boolean recurringTaskExists(String uuid) {
+    return storageProvider.getRecurringJobs().stream().anyMatch(r -> r.getId().equals(uuid));
   }
 
   @Override
@@ -147,7 +162,7 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
         if (name == null) {
           name = task.getTaskClass();
         }
-        String scheduledBy = task.getCreator() != null ? task.getCreator().getSystemId() : "daemon";
+        String scheduledBy = scheduledBy(task);
 
         if (task.getRepeatInterval() != null && task.getRepeatInterval() > 0) {
           if (task.getStartTime() == null) {
@@ -188,11 +203,18 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
                   UUID.fromString(task.getUuid()), new JobRequestAdapter(task, scheduledBy));
           updateJobWithName(jobId, name);
         }
-        task.setStarted(true);
-        if (task.getId() != null) {
-          schedulerDAO.updateTask(task);
+        if (task.getCreator() != null) {
+          task.setStarted(true);
+          if (task.getId() != null) {
+            schedulerDAO.updateTask(task);
+          } else {
+            schedulerDAO.createTask(task);
+          }
         } else {
-          schedulerDAO.createTask(task);
+          log.warn(
+              "Scheduled legacy task {} [{}] without updating task_definition because creator is null",
+              name,
+              task.getUuid());
         }
       } catch (Exception e) {
         throw new SchedulerException("Failed to schedule task", e);
@@ -209,7 +231,7 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
   public void scheduleRecurrently(String uuid) {
     TaskDefinition task = getTaskByUuid(uuid);
     if (task != null) {
-      String scheduledBy = task.getCreator() != null ? task.getCreator().getSystemId() : "daemon";
+      String scheduledBy = scheduledBy(task);
       String jobId =
           jobRequestScheduler.scheduleRecurrently(
               task.getUuid(),
@@ -217,6 +239,20 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
               new JobRequestAdapter(task, scheduledBy));
       updateRecurringJobWithName(jobId, task.getName());
     }
+  }
+
+  private String scheduledBy(TaskDefinition task) {
+    User creator = task.getCreator();
+    if (creator != null && creator.getUsername() != null && !creator.getUsername().isBlank()) {
+      return creator.getUsername();
+    }
+    if (creator != null && creator.getSystemId() != null && !creator.getSystemId().isBlank()) {
+      return creator.getSystemId();
+    }
+    if (defaultSchedulerUsername != null && !defaultSchedulerUsername.isBlank()) {
+      return defaultSchedulerUsername;
+    }
+    return "admin";
   }
 
   @Override

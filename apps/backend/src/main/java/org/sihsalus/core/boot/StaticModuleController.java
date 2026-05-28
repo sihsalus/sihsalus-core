@@ -1,5 +1,6 @@
 package org.sihsalus.core.boot;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,9 +15,15 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class StaticModuleController {
 
+  private final StaticModuleRuntimeInspector runtimeInspector;
+
+  StaticModuleController(StaticModuleRuntimeInspector runtimeInspector) {
+    this.runtimeInspector = runtimeInspector;
+  }
+
   @GetMapping("/api/admin/static-modules")
-  List<SihsalusModuleDescriptor> modules() {
-    return StaticModuleCatalog.staticInternalModules();
+  List<Map<String, Object>> modules() {
+    return StaticModuleCatalog.staticInternalModules().stream().map(this::toAdminModule).toList();
   }
 
   @GetMapping("/rest/v1/module")
@@ -41,12 +48,39 @@ public class StaticModuleController {
 
   private Map<String, Object> toRestModule(SihsalusModuleDescriptor module) {
     String moduleId = restModuleId(module);
-    return Map.of(
-        "uuid", moduleId,
-        "display", moduleId,
-        "name", moduleId,
-        "version", module.baselineVersion(),
-        "started", true);
+    StaticModuleRuntimeState runtimeState = runtimeInspector.inspect(module);
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("uuid", moduleId);
+    response.put("display", moduleId);
+    response.put("name", moduleId);
+    response.put("version", module.baselineVersion());
+    response.put("started", runtimeState.started());
+    response.put("compiled", runtimeState.compiled());
+    response.put("configured", runtimeState.configured());
+    response.put("springRegistered", runtimeState.springRegistered());
+    response.put("databaseManaged", runtimeState.databaseManaged());
+    response.put("databaseMigrated", runtimeState.databaseMigrated());
+    response.put("activeScheduledTasks", runtimeState.activeScheduledTasks());
+    response.put("runtime", runtimeState.details());
+    return response;
+  }
+
+  private Map<String, Object> toAdminModule(SihsalusModuleDescriptor module) {
+    StaticModuleRuntimeState runtimeState = runtimeInspector.inspect(module);
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("id", module.id());
+    response.put("sourceModule", module.sourceModule());
+    response.put("baselineVersion", module.baselineVersion());
+    response.put("status", module.status());
+    response.put("compiled", runtimeState.compiled());
+    response.put("configured", runtimeState.configured());
+    response.put("springRegistered", runtimeState.springRegistered());
+    response.put("started", runtimeState.started());
+    response.put("databaseManaged", runtimeState.databaseManaged());
+    response.put("databaseMigrated", runtimeState.databaseMigrated());
+    response.put("activeScheduledTasks", runtimeState.activeScheduledTasks());
+    response.put("runtime", runtimeState.details());
+    return response;
   }
 
   private String restModuleId(SihsalusModuleDescriptor module) {

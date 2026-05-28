@@ -41,6 +41,7 @@ import org.openmrs.logging.LoggingConfigurationGlobalPropertyListener;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.notification.AlertService;
 import org.openmrs.notification.MessageService;
+import org.openmrs.scheduler.SchedulerService;
 import org.openmrs.util.ConfigUtil;
 import org.openmrs.util.HttpClient;
 import org.openmrs.util.LocaleUtility;
@@ -77,6 +78,7 @@ import org.springframework.core.io.ClassPathResource;
       "org.openmrs.obs.handler",
       "org.openmrs.patient.impl",
       "org.openmrs.scheduler.db.hibernate",
+      "org.openmrs.scheduler.jobrunr",
       "org.openmrs.serialization",
       "org.openmrs.validator"
     },
@@ -210,7 +212,8 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
       ObjectProvider<HL7Service> hl7Service,
       MessageSourceService messageSourceService,
       VisitService visitService,
-      ProviderService providerService) {
+      ProviderService providerService,
+      SchedulerService schedulerService) {
     ServiceContext serviceContext = ServiceContext.getInstance();
     serviceContext.setPatientService(patientService);
     serviceContext.setPersonService(personService);
@@ -236,6 +239,7 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
     serviceContext.setMessageSourceService(messageSourceService);
     serviceContext.setVisitService(visitService);
     serviceContext.setProviderService(providerService);
+    serviceContext.setSchedulerService(schedulerService);
     return serviceContext;
   }
 

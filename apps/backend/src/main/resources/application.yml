@@ -30,6 +30,9 @@ sihsalus:
     static-import:
       enabled: ${SIHSALUS_OCL_STATIC_IMPORT_ENABLED:true}
       fail-on-errors: ${SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS:true}
+  scheduler:
+    startup:
+      enabled: ${SIHSALUS_SCHEDULER_STARTUP_ENABLED:true}
 
 management:
   endpoints:

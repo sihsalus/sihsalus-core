@@ -233,6 +233,7 @@ import org.openmrs.module.stockmanagement.api.reporting.Report;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.module.webservices.rest.web.resource.api.Converter;
+import org.openmrs.scheduler.SchedulerService;
 import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.PrivilegeConstants;
 import org.sihsalus.core.api.StaticModuleTaskRunner;
@@ -297,6 +298,16 @@ class SihsalusCoreApplicationTest {
   @Test
   void healthcheckResponds() throws Exception {
     mockMvc.perform(get("/actuator/health")).andExpect(status().isOk());
+  }
+
+  @Test
+  void schedulerServiceIsRegisteredInStaticRuntime() {
+    SchedulerService schedulerService = Context.getSchedulerService();
+
+    assertNotNull(schedulerService);
+    assertTrue(applicationContext.containsBean("schedulerService"));
+    assertTrue(applicationContext.containsBean("jobRequestHandlerAdapter"));
+    assertTrue(applicationContext.containsBean("storageProvider"));
   }
 
   @Test
@@ -487,7 +498,11 @@ class SihsalusCoreApplicationTest {
     mockMvc
         .perform(get("/api/admin/static-modules").header("Authorization", ADMIN_BASIC_AUTH))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[?(@.id == 'webservices-rest')]").exists());
+        .andExpect(jsonPath("$[?(@.id == 'webservices-rest')]").exists())
+        .andExpect(jsonPath("$[?(@.id == 'webservices-rest')].compiled").value(true))
+        .andExpect(jsonPath("$[?(@.id == 'webservices-rest')].configured").value(true))
+        .andExpect(jsonPath("$[?(@.id == 'webservices-rest')].springRegistered").value(true))
+        .andExpect(jsonPath("$[?(@.id == 'webservices-rest')].started").value(true));
     mockMvc
         .perform(get("/module/htmlwidgets/patientSearch.form").param("q", "a"))
         .andExpect(status().isUnauthorized());
@@ -502,6 +517,13 @@ class SihsalusCoreApplicationTest {
         .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')]").exists())
         .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')].version").value("3.4.1"))
         .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')].started").value(true))
+        .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')].compiled").value(true))
+        .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')].configured").value(true))
+        .andExpect(
+            jsonPath("$.results[?(@.uuid == 'webservices.rest')].springRegistered").value(true))
+        .andExpect(
+            jsonPath("$.results[?(@.uuid == 'webservices.rest')].runtime.lifecycle")
+                .value("started"))
         .andExpect(jsonPath("$.results[?(@.uuid == 'fhir2')]").exists())
         .andExpect(jsonPath("$.results[?(@.uuid == 'stockmanagement')]").exists())
         .andExpect(jsonPath("$.results[?(@.uuid == 'ordertemplates')]").exists());
@@ -522,7 +544,11 @@ class SihsalusCoreApplicationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.uuid").value("webservices.rest"))
         .andExpect(jsonPath("$.version").value("3.4.1"))
-        .andExpect(jsonPath("$.started").value(true));
+        .andExpect(jsonPath("$.started").value(true))
+        .andExpect(jsonPath("$.compiled").value(true))
+        .andExpect(jsonPath("$.configured").value(true))
+        .andExpect(jsonPath("$.springRegistered").value(true))
+        .andExpect(jsonPath("$.runtime.lifecycle").value("started"));
   }
 
   @Test
