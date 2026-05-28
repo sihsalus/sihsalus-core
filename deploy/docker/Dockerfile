@@ -25,6 +25,12 @@ ENV OPENMRS_APPLICATION_DATA_DIRECTORY=/openmrs/data \
     SIHSALUS_INITIALIZER_DOMAINS="" \
     SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY="" \
     SERVER_PORT=8080 \
+    SERVER_FORWARD_HEADERS_STRATEGY=framework \
+    SERVER_TOMCAT_CONNECTION_TIMEOUT=20s \
+    SERVER_SERVLET_SESSION_TIMEOUT=30m \
+    SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE=30s \
+    SIHSALUS_DATASOURCE_CONNECTION_TIMEOUT=30000 \
+    SIHSALUS_DATASOURCE_VALIDATION_TIMEOUT=5000 \
     JAVA_OPTS=""
 
 RUN mkdir -p /openmrs/data /opt/sihsalus/reference-sources \
@@ -40,7 +46,7 @@ USER sihsalus
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=10s --timeout=5s --start-period=2m --retries=12 \
-  CMD sh -c 'curl -f "http://localhost:${SERVER_PORT:-8080}${SERVER_SERVLET_CONTEXT_PATH:-}/actuator/health" || exit 1'
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5m --retries=12 \
+  CMD sh -c 'curl --fail --max-time 5 "http://localhost:${SERVER_PORT:-8080}${SERVER_SERVLET_CONTEXT_PATH:-}/actuator/health/readiness" || exit 1'
 
 ENTRYPOINT ["/sbin/tini", "--", "/opt/sihsalus/entrypoint.sh"]

@@ -365,6 +365,14 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void readinessHealthEndpointIsExposedForContainerChecks() throws Exception {
+    mockMvc
+        .perform(get("/actuator/health/readiness"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("UP"));
+  }
+
+  @Test
   void restAuthorizationChallengeCanBeSuppressedForBrowserClients() throws Exception {
     mockMvc
         .perform(get("/api/system/info").header("Disable-WWW-Authenticate", "true"))

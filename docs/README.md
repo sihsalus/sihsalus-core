@@ -17,6 +17,7 @@ Active documentation lives at the top of this directory. Historical planning not
 - `ci-baseline.md`: intended CI verification baseline.
 - `database-migrations.md`: Liquibase dry-run and migration review procedure.
 - `ops/README.md`: runtime image, required environment, and deployment notes.
+- `ops/runtime-troubleshooting.md`: gateway shape, timeout defaults, health checks, and runtime symptom triage.
 
 ## Checks
 

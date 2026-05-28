@@ -33,6 +33,12 @@ SIHSALUS_OCL_STATIC_IMPORT_ENABLED=true
 SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS=true
 SIHSALUS_JAVA_OPTS=-XX:MaxRAMPercentage=75
 SERVER_SERVLET_CONTEXT_PATH=
+SERVER_FORWARD_HEADERS_STRATEGY=framework
+SERVER_TOMCAT_CONNECTION_TIMEOUT=20s
+SERVER_SERVLET_SESSION_TIMEOUT=30m
+SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE=30s
+SIHSALUS_DATASOURCE_CONNECTION_TIMEOUT=30000
+SIHSALUS_DATASOURCE_VALIDATION_TIMEOUT=5000
 ```
 
 When this image is deployed behind the `sihsalus/sihsalus` gateway, set
@@ -77,12 +83,14 @@ docker login ghcr.io
 
 The first start with `SIHSALUS_OCL_STATIC_IMPORT_ENABLED=true` can be slow because it imports static concept packages and builds search indexes. OCL import errors fail startup by default. Disable OCL only for fast infrastructure smoke tests.
 
+Use `runtime-troubleshooting.md` for `/openmrs` gateway shape, proxy timeouts,
+health checks, and common 401/404/502/504 diagnosis.
+
 Use `../runtime-hardening.md` before promoting a runtime build.
 
 ## Still Missing
 
 - backup and restore runbook
 - monitoring and alerting
-- TLS and reverse proxy notes
 - log retention and redaction policy
 - incident response checklist

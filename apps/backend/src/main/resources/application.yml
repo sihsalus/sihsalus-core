@@ -5,14 +5,26 @@ spring:
     url: ${SIHSALUS_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sihsalus}
     username: ${SIHSALUS_DATASOURCE_USERNAME:sihsalus}
     password: ${SIHSALUS_DATASOURCE_PASSWORD:}
+    hikari:
+      connection-timeout: ${SIHSALUS_DATASOURCE_CONNECTION_TIMEOUT:30000}
+      validation-timeout: ${SIHSALUS_DATASOURCE_VALIDATION_TIMEOUT:5000}
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
+  lifecycle:
+    timeout-per-shutdown-phase: ${SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE:30s}
 
 server:
+  shutdown: graceful
+  forward-headers-strategy: ${SERVER_FORWARD_HEADERS_STRATEGY:framework}
   error:
     include-binding-errors: never
     include-message: never
     include-stacktrace: never
+  servlet:
+    session:
+      timeout: ${SERVER_SERVLET_SESSION_TIMEOUT:30m}
+  tomcat:
+    connection-timeout: ${SERVER_TOMCAT_CONNECTION_TIMEOUT:20s}
 
 sihsalus:
   admin:

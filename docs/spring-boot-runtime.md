@@ -88,6 +88,13 @@ SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY
 SIHSALUS_OCL_STATIC_IMPORT_ENABLED
 SIHSALUS_OCL_STATIC_IMPORT_FAIL_ON_ERRORS
 SERVER_PORT
+SERVER_SERVLET_CONTEXT_PATH
+SERVER_FORWARD_HEADERS_STRATEGY
+SERVER_TOMCAT_CONNECTION_TIMEOUT
+SERVER_SERVLET_SESSION_TIMEOUT
+SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE
+SIHSALUS_DATASOURCE_CONNECTION_TIMEOUT
+SIHSALUS_DATASOURCE_VALIDATION_TIMEOUT
 JAVA_OPTS
 ```
 
@@ -131,6 +138,8 @@ Compose runtime:
 - defaults to frontend mode when `SIHSALUS_AUTH_MODE` and `OAUTH2_ENABLED` are unset
 - maps initializer startup controls into OpenMRS runtime properties before startup
 - enables OCL static import and fails startup on OCL import errors by default
+- uses readiness health checks with a 5 minute container start period to tolerate
+  first-start content import and index creation
 
 Initializer startup modes:
 
