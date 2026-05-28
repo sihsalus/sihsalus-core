@@ -4,7 +4,7 @@
  * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
  * http://openmrs.org/license.
  */
-package org.sihsalus.webservices.rest.resource;
+package org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,6 @@ import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.LocationResource1_8;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PatientResource1_8;
-import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9.VisitResource1_9;
 
 /**
  * Jakarta-compatible override for the upstream OpenMRS visit REST resource.

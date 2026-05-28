@@ -10,6 +10,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.annotation.Resource;
+import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9.SihsalusVisitResource1_9;
 
 class RestStaticModuleBoundaryTest {
 
@@ -33,5 +36,18 @@ class RestStaticModuleBoundaryTest {
       assertFalse(
           content.contains("ModuleActivator"), source + " must not declare an OMOD activator");
     }
+  }
+
+  @Test
+  void sihsalusRestOverridesStayInOpenmrsScannerNamespace() {
+    assertTrue(
+        SihsalusVisitResource1_9.class.getName().startsWith("org.openmrs."),
+        "OpenmrsClassScanner only scans org.openmrs packages");
+
+    Resource resource = SihsalusVisitResource1_9.class.getAnnotation(Resource.class);
+    assertTrue(resource.order() < Integer.MAX_VALUE, "Override must win resource ordering");
+    assertTrue(
+        (RestConstants.VERSION_1 + "/visit").equals(resource.name()),
+        "Override must keep the public visit resource name");
   }
 }
