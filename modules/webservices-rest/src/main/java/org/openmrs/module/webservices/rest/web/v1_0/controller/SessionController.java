@@ -7,10 +7,13 @@
 package org.openmrs.module.webservices.rest.web.v1_0.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.openmrs.Location;
 import org.openmrs.Privilege;
 import org.openmrs.Role;
@@ -133,7 +136,20 @@ public class SessionController {
   }
 
   private List<Map<String, Object>> privileges(User user) {
-    return user.getPrivileges().stream()
+    Collection<Privilege> privileges;
+    if (user.isSuperUser()) {
+      privileges = Context.getUserService().getAllPrivileges();
+    } else {
+      Set<Privilege> effectivePrivileges = new HashSet<>();
+      for (Role role : sessionRoles(user)) {
+        if (role.getPrivileges() != null) {
+          effectivePrivileges.addAll(role.getPrivileges());
+        }
+      }
+      privileges = effectivePrivileges;
+    }
+
+    return privileges.stream()
         .sorted(Comparator.comparing(Privilege::getPrivilege))
         .map(this::privilegeReference)
         .toList();
@@ -147,10 +163,18 @@ public class SessionController {
   }
 
   private List<Map<String, Object>> roles(User user) {
-    return user.getAllRoles().stream()
+    return sessionRoles(user).stream()
         .sorted(Comparator.comparing(Role::getRole))
         .map(this::roleReference)
         .toList();
+  }
+
+  private Collection<Role> sessionRoles(User user) {
+    try {
+      return Context.getUserContext().getAllRoles(user);
+    } catch (Exception exception) {
+      return user.getAllRoles();
+    }
   }
 
   private Map<String, Object> roleReference(Role role) {

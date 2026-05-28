@@ -392,6 +392,8 @@ class SihsalusCoreApplicationTest {
             .andExpect(jsonPath("$.authenticated").value(true))
             .andExpect(jsonPath("$.user.username").value(TEST_ADMIN_USERNAME))
             .andExpect(jsonPath("$.user.privileges").isArray())
+            .andExpect(jsonPath("$.user.privileges").isNotEmpty())
+            .andExpect(jsonPath("$.user.roles[?(@.name == 'Authenticated')]").exists())
             .andExpect(jsonPath("$.user.userProperties").exists())
             .andExpect(jsonPath("$.sessionId").exists())
             .andExpect(content().string(containsString("\"sessionLocation\"")))
