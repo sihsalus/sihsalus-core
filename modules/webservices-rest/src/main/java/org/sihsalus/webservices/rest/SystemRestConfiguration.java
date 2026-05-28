@@ -73,6 +73,8 @@ public class SystemRestConfiguration {
         "/ws/rest/",
         "/api/fhir/",
         "/ws/fhir2/",
+        "/admin",
+        "/admin/",
         "/api/admin/",
         "/api/system/",
         "/module/");
@@ -325,7 +327,11 @@ public class SystemRestConfiguration {
       String contextPath = httpRequest.getContextPath();
       String requestUri = httpRequest.getRequestURI();
       for (String pathPrefix : pathPrefixes) {
-        if (requestUri.startsWith(contextPath + pathPrefix)) {
+        String scopedPath = contextPath + pathPrefix;
+        if (pathPrefix.endsWith("/") && requestUri.startsWith(scopedPath)) {
+          return true;
+        }
+        if (!pathPrefix.endsWith("/") && requestUri.equals(scopedPath)) {
           return true;
         }
       }

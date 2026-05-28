@@ -25,6 +25,7 @@ Most REST, FHIR, admin, and legacy module endpoints require an authenticated Ope
 | `GET` | `/actuator/health` | Spring Boot health check. |
 | `GET` | `/api/system/info` | Runtime metadata, including static module/runtime status. |
 | `GET` | `/api/admin/static-modules` | Static module inventory for operators, including compiled/configured/Spring/migration/scheduler signals. |
+| `GET` | `/admin/index.htm` | Legacy OpenMRS admin index compatibility route; redirects to `/api/admin/static-modules`. |
 | `GET` | `/spa/frontend.json` | SPA frontend manifest, if packaged in the runtime image. |
 | `GET` | `/spa/importmap.json` | SPA import map, if packaged in the runtime image. |
 

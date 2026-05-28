@@ -418,6 +418,34 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void userCompatibilityEndpointReturnsUserPropertiesWithoutLegacyRoleConversion()
+      throws Exception {
+    String adminUuid =
+        jdbcTemplate.queryForObject(
+            "select uuid from users where username = ?", String.class, TEST_ADMIN_USERNAME);
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/user/{uuid}", adminUuid).header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uuid").value(adminUuid))
+        .andExpect(jsonPath("$.username").value(TEST_ADMIN_USERNAME))
+        .andExpect(jsonPath("$.person.uuid").exists())
+        .andExpect(jsonPath("$.roles").isArray())
+        .andExpect(jsonPath("$.userProperties").exists());
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/user")
+                .param("q", TEST_ADMIN_USERNAME)
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results").isArray())
+        .andExpect(jsonPath("$.results[0].username").value(TEST_ADMIN_USERNAME))
+        .andExpect(jsonPath("$.results[0].roles").isArray());
+  }
+
+  @Test
   void sessionEndpointPersistsSelectedLocationForBrowserClients() throws Exception {
     Location location = new Location();
     location.setName("Session Location " + UUID.randomUUID());
@@ -500,6 +528,10 @@ class SihsalusCoreApplicationTest {
         .andExpect(status().isUnauthorized())
         .andExpect(header().string("WWW-Authenticate", containsString("Basic")));
     mockMvc
+        .perform(get("/openmrs/admin/index.htm").contextPath("/openmrs"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(header().string("WWW-Authenticate", containsString("Basic")));
+    mockMvc
         .perform(get("/api/admin/static-modules").header("Authorization", ADMIN_BASIC_AUTH))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.id == 'webservices-rest')]").exists())
@@ -507,6 +539,13 @@ class SihsalusCoreApplicationTest {
         .andExpect(jsonPath("$[?(@.id == 'webservices-rest')].configured").value(true))
         .andExpect(jsonPath("$[?(@.id == 'webservices-rest')].springRegistered").value(true))
         .andExpect(jsonPath("$[?(@.id == 'webservices-rest')].started").value(true));
+    mockMvc
+        .perform(
+            get("/openmrs/admin/index.htm")
+                .contextPath("/openmrs")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isFound())
+        .andExpect(header().string("Location", "/openmrs/api/admin/static-modules"));
     mockMvc
         .perform(get("/module/htmlwidgets/patientSearch.form").param("q", "a"))
         .andExpect(status().isUnauthorized());
