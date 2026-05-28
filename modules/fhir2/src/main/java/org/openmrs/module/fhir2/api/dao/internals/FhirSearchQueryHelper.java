@@ -377,22 +377,16 @@ public class FhirSearchQueryHelper extends BaseDao {
         concepts,
         (system, tokens) -> {
           if (system.isEmpty()) {
+            List<Integer> conceptIds =
+                tokensToParams(tokens)
+                    .filter(NumberUtils::isDigits)
+                    .map(NumberUtils::toInt)
+                    .collect(Collectors.toList());
             Predicate inConceptId =
-                criteriaContext
-                    .getCriteriaBuilder()
-                    .in(conceptAlias.get("conceptId"))
-                    .value(
-                        criteriaContext
-                            .getCriteriaBuilder()
-                            .literal(
-                                tokensToParams(tokens)
-                                    .map(NumberUtils::toInt)
-                                    .collect(Collectors.toList())));
-            Predicate inUuid =
-                criteriaContext
-                    .getCriteriaBuilder()
-                    .in(conceptAlias.get("uuid"))
-                    .value(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens)));
+                conceptIds.isEmpty()
+                    ? criteriaContext.getCriteriaBuilder().disjunction()
+                    : conceptAlias.get("conceptId").in(conceptIds);
+            Predicate inUuid = conceptAlias.get("uuid").in(tokensToList(tokens));
 
             return Optional.of(criteriaContext.getCriteriaBuilder().or(inConceptId, inUuid));
           } else {

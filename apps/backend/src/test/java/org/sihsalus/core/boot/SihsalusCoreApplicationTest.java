@@ -1185,6 +1185,10 @@ class SihsalusCoreApplicationTest {
   @Test
   void fhirR4SearchEndpointInvokesImportedProvider() throws Exception {
     String patientUuid = ensureTestPatient();
+    List<String> observationCodes =
+        jdbcTemplate.queryForList(
+            "select uuid from concept where retired = false order by concept_id limit 2",
+            String.class);
 
     mockMvc
         .perform(
@@ -1224,6 +1228,20 @@ class SihsalusCoreApplicationTest {
         .perform(
             get("/ws/fhir2/R4/Observation")
                 .param("subject:Patient", patientUuid)
+                .param("_summary", "data")
+                .param("_sort", "-date")
+                .param("_count", "100")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith("application/fhir+json"))
+        .andExpect(jsonPath("$.resourceType").value("Bundle"))
+        .andExpect(jsonPath("$.type").value("searchset"));
+
+    mockMvc
+        .perform(
+            get("/ws/fhir2/R4/Observation")
+                .param("subject:Patient", patientUuid)
+                .param("code", String.join(",", observationCodes))
                 .param("_summary", "data")
                 .param("_sort", "-date")
                 .param("_count", "100")
