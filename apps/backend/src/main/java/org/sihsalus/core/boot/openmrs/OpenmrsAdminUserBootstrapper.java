@@ -6,9 +6,9 @@ import java.sql.SQLException;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.util.Security;
+import org.sihsalus.core.boot.SihsalusRuntimeProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -36,12 +36,10 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
   private final String adminPassword;
 
   OpenmrsAdminUserBootstrapper(
-      JdbcTemplate jdbcTemplate,
-      @Value("${sihsalus.admin.username:admin}") String adminUsername,
-      @Value("${sihsalus.admin.password:}") String adminPassword) {
+      JdbcTemplate jdbcTemplate, SihsalusRuntimeProperties runtimeProperties) {
     this.jdbcTemplate = jdbcTemplate;
-    this.adminUsername = adminUsername;
-    this.adminPassword = adminPassword;
+    this.adminUsername = runtimeProperties.getAdmin().getUsername();
+    this.adminPassword = runtimeProperties.getAdmin().getPassword();
   }
 
   @Override

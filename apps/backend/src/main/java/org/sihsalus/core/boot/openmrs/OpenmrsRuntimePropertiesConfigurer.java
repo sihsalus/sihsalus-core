@@ -4,25 +4,24 @@ import static org.openmrs.module.initializer.InitializerConstants.PROPS_DOMAINS;
 import static org.openmrs.module.initializer.InitializerConstants.PROPS_EXCLUDE;
 import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_LOAD;
 
-import java.util.Locale;
 import java.util.Properties;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.authentication.AuthenticationConfig;
 import org.openmrs.module.oauth2login.OAuth2LoginConstants;
 import org.openmrs.util.OpenmrsConstants;
 import org.openmrs.util.OpenmrsUtil;
+import org.sihsalus.core.boot.SihsalusRuntimeProperties;
+import org.sihsalus.core.boot.SihsalusRuntimeProperties.AuthMode;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
 final class OpenmrsRuntimePropertiesConfigurer
     implements BeanFactoryPostProcessor, EnvironmentAware {
-
-  private static final String AUTH_MODE_FRONTEND = "frontend";
-
-  private static final String AUTH_MODE_KEYCLOAK = "keycloak";
 
   private Environment environment;
 
@@ -34,6 +33,7 @@ final class OpenmrsRuntimePropertiesConfigurer
   @Override
   public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
       throws BeansException {
+    SihsalusRuntimeProperties sihsalus = sihsalusRuntimeProperties();
     Properties properties = new Properties();
 
     String datasourceUrl = required("spring.datasource.url");
@@ -57,7 +57,8 @@ final class OpenmrsRuntimePropertiesConfigurer
     properties.setProperty("cache.type", "local");
 
     String applicationDataDirectory =
-        firstProperty(
+        firstNonBlank(
+            sihsalus.getOpenmrs().getApplicationDataDirectory(),
             "sihsalus.openmrs.application-data-directory",
             "openmrs.application-data-directory",
             "openmrs.application.data.directory",
@@ -72,6 +73,7 @@ final class OpenmrsRuntimePropertiesConfigurer
     copyOptionalOpenmrsRuntimeProperty(
         properties,
         PROPS_STARTUP_LOAD,
+        sihsalus.getInitializer().getStartupLoad(),
         "sihsalus.initializer.startup-load",
         "SIHSALUS_INITIALIZER_STARTUP_LOAD",
         PROPS_STARTUP_LOAD,
@@ -79,6 +81,7 @@ final class OpenmrsRuntimePropertiesConfigurer
     copyOptionalOpenmrsRuntimeProperty(
         properties,
         PROPS_DOMAINS,
+        sihsalus.getInitializer().getDomains(),
         "sihsalus.initializer.domains",
         "SIHSALUS_INITIALIZER_DOMAINS",
         PROPS_DOMAINS,
@@ -86,15 +89,22 @@ final class OpenmrsRuntimePropertiesConfigurer
     copyOptionalOpenmrsRuntimeProperty(
         properties,
         PROPS_EXCLUDE + ".addresshierarchy",
+        sihsalus.getInitializer().getExclude().getAddresshierarchy(),
         "sihsalus.initializer.exclude.addresshierarchy",
         "SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY",
         PROPS_EXCLUDE + ".addresshierarchy",
         "INITIALIZER_EXCLUDE_ADDRESSHIERARCHY");
 
-    configureAuthentication(properties);
+    configureAuthentication(properties, sihsalus.getAuth());
 
     Context.setRuntimeProperties(properties);
     AuthenticationConfig.setConfig(null);
+  }
+
+  private SihsalusRuntimeProperties sihsalusRuntimeProperties() {
+    return Binder.get(environment)
+        .bind("sihsalus", Bindable.of(SihsalusRuntimeProperties.class))
+        .orElseGet(SihsalusRuntimeProperties::new);
   }
 
   private String required(String key) {
@@ -120,17 +130,25 @@ final class OpenmrsRuntimePropertiesConfigurer
     return null;
   }
 
+  private String firstNonBlank(String configuredValue, String... fallbackKeys) {
+    if (configuredValue != null && !configuredValue.isBlank()) {
+      return configuredValue;
+    }
+    return firstProperty(fallbackKeys);
+  }
+
   private void copyOptionalOpenmrsRuntimeProperty(
-      Properties properties, String targetKey, String... sourceKeys) {
-    String value = firstProperty(sourceKeys);
+      Properties properties, String targetKey, String configuredValue, String... sourceKeys) {
+    String value = firstNonBlank(configuredValue, sourceKeys);
     if (value != null) {
       properties.setProperty(targetKey, value);
     }
   }
 
-  private void configureAuthentication(Properties properties) {
-    String authMode = authenticationMode();
-    boolean keycloakMode = AUTH_MODE_KEYCLOAK.equals(authMode);
+  private void configureAuthentication(
+      Properties properties, SihsalusRuntimeProperties.Auth authProperties) {
+    AuthMode authMode = authenticationMode(authProperties);
+    boolean keycloakMode = AuthMode.KEYCLOAK.equals(authMode);
 
     properties.setProperty(
         OAuth2LoginConstants.OAUTH2_ENABLED_PROPERTY, Boolean.toString(keycloakMode));
@@ -139,10 +157,10 @@ final class OpenmrsRuntimePropertiesConfigurer
     }
   }
 
-  private String authenticationMode() {
-    String configuredMode = firstProperty("sihsalus.auth.mode", "SIHSALUS_AUTH_MODE");
+  private AuthMode authenticationMode(SihsalusRuntimeProperties.Auth authProperties) {
+    String configuredMode = firstNonBlank(authProperties.getMode(), "SIHSALUS_AUTH_MODE");
     if (configuredMode != null) {
-      return normalizeAuthenticationMode(configuredMode);
+      return AuthMode.from(configuredMode);
     }
 
     String oauth2Enabled =
@@ -150,27 +168,10 @@ final class OpenmrsRuntimePropertiesConfigurer
             "sihsalus.auth.oauth2-enabled",
             "OAUTH2_ENABLED",
             OAuth2LoginConstants.OAUTH2_ENABLED_PROPERTY);
-    if (Boolean.parseBoolean(oauth2Enabled)) {
-      return AUTH_MODE_KEYCLOAK;
+    if (authProperties.isOauth2Enabled() || Boolean.parseBoolean(oauth2Enabled)) {
+      return AuthMode.KEYCLOAK;
     }
-    return AUTH_MODE_FRONTEND;
-  }
-
-  private static String normalizeAuthenticationMode(String authMode) {
-    String normalized = authMode.trim().toLowerCase(Locale.ROOT);
-    switch (normalized) {
-      case "frontend":
-      case "local":
-      case "openmrs":
-      case "basic":
-        return AUTH_MODE_FRONTEND;
-      case "keycloak":
-      case "oauth2":
-        return AUTH_MODE_KEYCLOAK;
-      default:
-        throw new IllegalStateException(
-            "Unsupported SIHSALUS_AUTH_MODE: " + authMode + " (expected frontend or keycloak)");
-    }
+    return AuthMode.FRONTEND;
   }
 
   private static String driverFor(String datasourceUrl) {

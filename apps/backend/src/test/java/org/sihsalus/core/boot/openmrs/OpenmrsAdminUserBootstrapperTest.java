@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.util.Security;
+import org.sihsalus.core.boot.SihsalusRuntimeProperties;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -46,7 +47,7 @@ final class OpenmrsAdminUserBootstrapperTest {
         "", "4a1750c8607dfa237de36c6305715c223415189", "c788c6ad82a157b712392ca695dfcf2eed193d7f");
 
     OpenmrsAdminUserBootstrapper bootstrapper =
-        new OpenmrsAdminUserBootstrapper(jdbcTemplate, "admin", "");
+        new OpenmrsAdminUserBootstrapper(jdbcTemplate, runtimeProperties("admin", ""));
 
     assertThrows(IllegalStateException.class, () -> bootstrapper.run(null));
   }
@@ -57,7 +58,7 @@ final class OpenmrsAdminUserBootstrapperTest {
     insertAdminUser("", Security.encodeString("Admin123" + salt), salt);
 
     OpenmrsAdminUserBootstrapper bootstrapper =
-        new OpenmrsAdminUserBootstrapper(jdbcTemplate, "admin", "");
+        new OpenmrsAdminUserBootstrapper(jdbcTemplate, runtimeProperties("admin", ""));
 
     assertThrows(IllegalStateException.class, () -> bootstrapper.run(null));
   }
@@ -67,7 +68,7 @@ final class OpenmrsAdminUserBootstrapperTest {
     insertAdminUser("admin", "already-changed", "custom-salt");
 
     OpenmrsAdminUserBootstrapper bootstrapper =
-        new OpenmrsAdminUserBootstrapper(jdbcTemplate, "", "");
+        new OpenmrsAdminUserBootstrapper(jdbcTemplate, runtimeProperties("", ""));
 
     assertThrows(IllegalStateException.class, () -> bootstrapper.run(null));
   }
@@ -78,7 +79,8 @@ final class OpenmrsAdminUserBootstrapperTest {
         "", "4a1750c8607dfa237de36c6305715c223415189", "c788c6ad82a157b712392ca695dfcf2eed193d7f");
 
     OpenmrsAdminUserBootstrapper bootstrapper =
-        new OpenmrsAdminUserBootstrapper(jdbcTemplate, "admin", "configured-password");
+        new OpenmrsAdminUserBootstrapper(
+            jdbcTemplate, runtimeProperties("admin", "configured-password"));
 
     bootstrapper.run(null);
 
@@ -101,7 +103,7 @@ final class OpenmrsAdminUserBootstrapperTest {
     insertAdminUser("admin", "already-changed", "custom-salt");
 
     OpenmrsAdminUserBootstrapper bootstrapper =
-        new OpenmrsAdminUserBootstrapper(jdbcTemplate, "admin", "");
+        new OpenmrsAdminUserBootstrapper(jdbcTemplate, runtimeProperties("admin", ""));
 
     bootstrapper.run(null);
 
@@ -113,7 +115,7 @@ final class OpenmrsAdminUserBootstrapperTest {
     insertAdminUser("admin", "already-changed", "custom-salt");
 
     OpenmrsAdminUserBootstrapper bootstrapper =
-        new OpenmrsAdminUserBootstrapper(jdbcTemplate, "runtime-admin", "");
+        new OpenmrsAdminUserBootstrapper(jdbcTemplate, runtimeProperties("runtime-admin", ""));
 
     bootstrapper.run(null);
 
@@ -138,5 +140,12 @@ final class OpenmrsAdminUserBootstrapperTest {
 
   private String queryString(String sql) {
     return jdbcTemplate.queryForObject(sql, String.class);
+  }
+
+  private SihsalusRuntimeProperties runtimeProperties(String adminUsername, String adminPassword) {
+    SihsalusRuntimeProperties properties = new SihsalusRuntimeProperties();
+    properties.getAdmin().setUsername(adminUsername);
+    properties.getAdmin().setPassword(adminPassword);
+    return properties;
   }
 }

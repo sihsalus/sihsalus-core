@@ -1,7 +1,7 @@
 package org.sihsalus.core.boot.openmrs;
 
 import org.openmrs.scheduler.SchedulerService;
-import org.springframework.beans.factory.annotation.Value;
+import org.sihsalus.core.boot.SihsalusRuntimeProperties;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -16,10 +16,9 @@ final class OpenmrsSchedulerStartupRunner implements ApplicationRunner {
   private final boolean startupEnabled;
 
   OpenmrsSchedulerStartupRunner(
-      SchedulerService schedulerService,
-      @Value("${sihsalus.scheduler.startup.enabled:true}") boolean startupEnabled) {
+      SchedulerService schedulerService, SihsalusRuntimeProperties runtimeProperties) {
     this.schedulerService = schedulerService;
-    this.startupEnabled = startupEnabled;
+    this.startupEnabled = runtimeProperties.getScheduler().getStartup().isEnabled();
   }
 
   @Override

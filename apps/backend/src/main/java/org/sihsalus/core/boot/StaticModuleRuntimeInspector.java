@@ -94,11 +94,17 @@ final class StaticModuleRuntimeInspector {
 
   private final Environment environment;
 
+  private final SihsalusRuntimeProperties runtimeProperties;
+
   StaticModuleRuntimeInspector(
-      ApplicationContext applicationContext, JdbcTemplate jdbcTemplate, Environment environment) {
+      ApplicationContext applicationContext,
+      JdbcTemplate jdbcTemplate,
+      Environment environment,
+      SihsalusRuntimeProperties runtimeProperties) {
     this.applicationContext = applicationContext;
     this.jdbcTemplate = jdbcTemplate;
     this.environment = environment;
+    this.runtimeProperties = runtimeProperties;
   }
 
   StaticModuleRuntimeState inspect(SihsalusModuleDescriptor module) {
@@ -177,20 +183,21 @@ final class StaticModuleRuntimeInspector {
     if ("initializer".equals(moduleId)) {
       details.put(
           "startupLoad",
-          environment.getProperty("sihsalus.initializer.startup-load", "continue_on_error"));
+          defaultIfBlank(runtimeProperties.getInitializer().getStartupLoad(), "continue_on_error"));
       details.put("sourceRoot", SihsalusContentPaths.resolveSourceRoot().toString());
       details.put("configurationRootAvailable", configurationRootAvailable());
     }
     if ("openconceptlab".equals(moduleId)) {
-      details.put(
-          "staticImportEnabled",
-          environment.getProperty("sihsalus.ocl.static-import.enabled", Boolean.class, true));
+      details.put("staticImportEnabled", runtimeProperties.getOcl().getStaticImport().isEnabled());
       details.put(
           "staticImportFailOnErrors",
-          environment.getProperty(
-              "sihsalus.ocl.static-import.fail-on-errors", Boolean.class, true));
+          runtimeProperties.getOcl().getStaticImport().isFailOnErrors());
       details.put("oclContentDirectoryAvailable", oclContentDirectoryAvailable());
     }
+  }
+
+  private String defaultIfBlank(String value, String defaultValue) {
+    return value == null || value.isBlank() ? defaultValue : value;
   }
 
   private boolean configurationRootAvailable() {
