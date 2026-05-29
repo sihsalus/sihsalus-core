@@ -87,7 +87,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
   public Set<AppointmentProvider> getProvidersWithResponse(
       AppointmentProviderResponse providerResponse) {
-    if (providers == null) return Collections.EMPTY_SET;
+    if (providers == null) return Collections.emptySet();
 
     return providers.stream()
         .filter(provider -> provider.getResponse().equals(providerResponse))

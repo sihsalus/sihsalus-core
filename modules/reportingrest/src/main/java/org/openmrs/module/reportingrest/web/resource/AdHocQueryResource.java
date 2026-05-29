@@ -19,8 +19,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Cohort;
+import org.openmrs.CohortMembership;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.cohort.Cohorts;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
@@ -38,7 +42,6 @@ import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.query.IdSet;
-import org.openmrs.module.reporting.query.Query;
 import org.openmrs.module.reportingrest.SimpleIdSet;
 import org.openmrs.module.reportingrest.adhoc.AdHocColumn;
 import org.openmrs.module.reportingrest.adhoc.AdHocDataSet;
@@ -56,7 +59,6 @@ import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.Creatable;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-import org.openmrs.util.OpenmrsUtil;
 
 /**
  * Used for <em>evaluating</em> a list of queries +/- columns that refer to definition libraries on
@@ -163,7 +165,7 @@ public class AdHocQueryResource implements Creatable {
       throw new IllegalArgumentException("Error in parameter", e);
     }
 
-    List<Mapped> queries = new ArrayList<Mapped>();
+    List<Mapped<CohortDefinition>> queries = new ArrayList<Mapped<CohortDefinition>>();
     for (AdHocRowFilter rowFilter : adHocDataSet.getRowFilters()) {
       DefinitionLibraryCohortDefinition cd =
           new DefinitionLibraryCohortDefinition(rowFilter.getKey());
@@ -175,14 +177,12 @@ public class AdHocQueryResource implements Creatable {
       } catch (Exception e) {
         throw new IllegalArgumentException("Error in rowFilter " + rowFilter.getKey(), e);
       }
-      Mapped<? extends Query> mappedQuery =
+      Mapped<CohortDefinition> mappedQuery =
           mapMissingParametersStraightThrough(cd, rowFilter.getParameterValues());
       queries.add(mappedQuery);
 
       try {
-        EvaluatedCohort evaluated =
-            cohortDefinitionService.evaluate(
-                (Mapped<CohortDefinition>) mappedQuery, evaluationContext);
+        EvaluatedCohort evaluated = cohortDefinitionService.evaluate(mappedQuery, evaluationContext);
         rowFilterResults.addResult(simplify(evaluated));
       } catch (EvaluationException e) {
         throw new IllegalStateException("Failed to evaluate: " + rowFilter.getKey(), e);
@@ -204,7 +204,7 @@ public class AdHocQueryResource implements Creatable {
 
       try {
         allRows = cohortDefinitionService.evaluate(cd, evaluationContext);
-        rowFilterResults.setResult(new SimpleIdSet(allRows.getMemberIds()));
+        rowFilterResults.setResult(new SimpleIdSet(patientIds(allRows)));
       } catch (EvaluationException e) {
         throw new IllegalArgumentException(
             "Failed to evaluate composition: " + adHocDataSet.getCustomRowFilterCombination(), e);
@@ -236,7 +236,7 @@ public class AdHocQueryResource implements Creatable {
       if (context.getRepresentation().getRepresentation().equals("preview")) {
         Cohort cohort = new Cohort();
         int j = 0;
-        for (Integer member : allRows.getMemberIds()) {
+        for (Integer member : patientIds(allRows)) {
           j += 1;
           cohort.addMember(member);
           if (j >= 10) {
@@ -262,8 +262,8 @@ public class AdHocQueryResource implements Creatable {
     return o;
   }
 
-  private Mapped<Query> mapMissingParametersStraightThrough(
-      Query cd, Map<String, Object> parameterValues) {
+  private Mapped<CohortDefinition> mapMissingParametersStraightThrough(
+      CohortDefinition cd, Map<String, Object> parameterValues) {
     Map<String, Object> mappings = new HashMap<String, Object>();
     for (Parameter parameter : cd.getParameters()) {
       if (parameterValues == null || parameterValues.get(parameter.getName()) == null) {
@@ -271,11 +271,17 @@ public class AdHocQueryResource implements Creatable {
       }
     }
 
-    return new Mapped<Query>(cd, mappings);
+    return new Mapped<CohortDefinition>(cd, mappings);
   }
 
   private IdSet<?> simplify(IdSet<?> complex) {
     return new SimpleIdSet(complex.getMemberIds());
+  }
+
+  private Set<Integer> patientIds(Cohort cohort) {
+    return cohort.getMemberships().stream()
+        .map(CohortMembership::getPatientId)
+        .collect(Collectors.toCollection(TreeSet::new));
   }
 
   private String defaultCompositionString(int size) {
@@ -283,7 +289,7 @@ public class AdHocQueryResource implements Creatable {
     for (int i = 1; i <= size; ++i) {
       list.add(i);
     }
-    return OpenmrsUtil.join(list, " AND ");
+    return list.stream().map(String::valueOf).collect(Collectors.joining(" AND "));
   }
 
   @Override

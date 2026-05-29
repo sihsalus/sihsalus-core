@@ -79,7 +79,7 @@ public class DefinitionLibraryResource implements CrudResource, Searchable {
     Class<? extends Definition> definitionClass = types.get(typeName);
     if (definitionClass == null) {
       try {
-        definitionClass = (Class<? extends Definition>) Context.loadClass(typeName);
+        definitionClass = Context.loadClass(typeName).asSubclass(Definition.class);
       } catch (ClassNotFoundException e) {
         throw new IllegalArgumentException("Unknown type: " + typeName);
       }

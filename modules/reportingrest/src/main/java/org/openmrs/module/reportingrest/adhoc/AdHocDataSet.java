@@ -113,7 +113,9 @@ public class AdHocDataSet {
         ((PatientDataSetDefinition) dsd).getRowFilters().clear();
       }
     } else {
-      dsd = (RowPerObjectDataSetDefinition) Context.loadClass(type).newInstance();
+      dsd =
+          (RowPerObjectDataSetDefinition)
+              Context.loadClass(type).getDeclaredConstructor().newInstance();
     }
     dsd.setName(name);
     dsd.setDescription(description);
@@ -134,7 +136,8 @@ public class AdHocDataSet {
           int i = 0;
           for (AdHocRowFilter filter : rowFilters) {
             i += 1;
-            Mapped mappedQuery = filter.toQuery(dsd.getClass(), definitionLibraries);
+            Mapped<? extends CohortDefinition> mappedQuery =
+                filter.toQuery(dsd.getClass(), definitionLibraries);
             composition.addSearch("" + i, mappedQuery);
             //                        DefinitionLibraryCohortDefinition cohortDefinition = new
             // DefinitionLibraryCohortDefinition(filter.getKey());
@@ -144,12 +147,11 @@ public class AdHocDataSet {
             //                        composition.addSearch("" + i, cohortDefinition, mappings);
           }
           composition.setCompositionString(customRowFilterCombination);
-          ((PatientDataSetDefinition) dsd)
-              .addRowFilter(Mapped.mapStraightThrough((CohortDefinition) composition));
+          ((PatientDataSetDefinition) dsd).addRowFilter(Mapped.mapStraightThrough(composition));
         } else {
           for (AdHocRowFilter filter : rowFilters) {
-            Mapped<CohortDefinition> mappedQuery =
-                (Mapped<CohortDefinition>) filter.toQuery(dsd.getClass(), definitionLibraries);
+            Mapped<? extends CohortDefinition> mappedQuery =
+                filter.toQuery(dsd.getClass(), definitionLibraries);
             ((PatientDataSetDefinition) dsd).addRowFilter(mappedQuery);
           }
         }

@@ -92,33 +92,42 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
   @Override
   public void onStartup() {
     for (TaskDefinition taskDefinition : schedulerDAO.getTasks()) {
-      if (Boolean.TRUE.equals(taskDefinition.getStartOnStartup())) {
-        JobId jobId =
-            jobRequestScheduler.enqueue(
-                UUID.fromString(taskDefinition.getUuid()),
-                new JobRequestAdapter(taskDefinition, scheduledBy(taskDefinition)));
-        String name = taskDefinition.getName();
-        if (name == null) {
-          name = taskDefinition.getTaskClass();
-        }
-        updateJobWithName(jobId, name);
-        log.info("Scheduled legacy task {} [{}] to run on startup", name, taskDefinition.getUuid());
-      }
-
-      if (!recurringTaskExists(taskDefinition.getUuid())) {
-        if (!taskExists(taskDefinition.getUuid())) {
-          try {
-            scheduleTask(taskDefinition);
-            log.info(
-                "Scheduled legacy task {} [{}] to run on schedule",
-                taskDefinition.getName(),
-                taskDefinition.getUuid());
-          } catch (SchedulerException e) {
-            throw new APIException(e);
-          }
-        }
+      try {
+        scheduleTaskOnStartup(taskDefinition);
+      } catch (Exception e) {
+        log.error(
+            "Failed to schedule legacy task {} [{}] during scheduler startup",
+            taskDefinition.getName(),
+            taskDefinition.getUuid(),
+            e);
       }
     }
+  }
+
+  private void scheduleTaskOnStartup(TaskDefinition taskDefinition) throws SchedulerException {
+    String name = taskName(taskDefinition);
+    if (Boolean.TRUE.equals(taskDefinition.getStartOnStartup())) {
+      JobId jobId =
+          jobRequestScheduler.enqueue(
+              UUID.fromString(taskDefinition.getUuid()),
+              new JobRequestAdapter(taskDefinition, scheduledBy(taskDefinition)));
+      updateJobWithName(jobId, name);
+      log.info("Scheduled legacy task {} [{}] to run on startup", name, taskDefinition.getUuid());
+    }
+
+    if (!recurringTaskExists(taskDefinition.getUuid()) && !taskExists(taskDefinition.getUuid())) {
+      scheduleTask(taskDefinition);
+      log.info(
+          "Scheduled legacy task {} [{}] to run on schedule", name, taskDefinition.getUuid());
+    }
+  }
+
+  private String taskName(TaskDefinition taskDefinition) {
+    String name = taskDefinition.getName();
+    if (name == null) {
+      return taskDefinition.getTaskClass();
+    }
+    return name;
   }
 
   private boolean taskExists(String uuid) {
@@ -156,12 +165,13 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
   public Task scheduleTask(TaskDefinition legacyTask) throws SchedulerException {
     if (legacyTask != null) {
       // Reload task from DB, to get a session attached version
-      final TaskDefinition task = schedulerDAO.getTask(legacyTask.getId());
+      final TaskDefinition task =
+          legacyTask.getId() == null ? legacyTask : schedulerDAO.getTask(legacyTask.getId());
+      if (task == null) {
+        throw new SchedulerException("Task definition " + legacyTask.getId() + " not found");
+      }
       try {
-        String name = task.getName();
-        if (name == null) {
-          name = task.getTaskClass();
-        }
+        String name = taskName(task);
         String scheduledBy = scheduledBy(task);
 
         if (task.getRepeatInterval() != null && task.getRepeatInterval() > 0) {

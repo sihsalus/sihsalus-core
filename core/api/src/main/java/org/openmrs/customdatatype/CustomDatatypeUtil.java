@@ -220,10 +220,13 @@ public class CustomDatatypeUtil {
    * @return whether or not handler is compatible with datatype
    */
   public static boolean isCompatibleHandler(
-      CustomDatatypeHandler handler, CustomDatatype<?> datatype) {
-    List<Class<? extends CustomDatatypeHandler>> handlerClasses =
+      CustomDatatypeHandler<?, ?> handler, CustomDatatype<?> datatype) {
+    @SuppressWarnings("unchecked")
+    Class<? extends CustomDatatype<?>> datatypeClass =
+        (Class<? extends CustomDatatype<?>>) datatype.getClass();
+    List<Class<? extends CustomDatatypeHandler<?, ?>>> handlerClasses =
         Context.getDatatypeService()
-            .getHandlerClasses((Class<? extends CustomDatatype<?>>) datatype.getClass());
+            .getHandlerClasses(datatypeClass);
     return handlerClasses.contains(handler.getClass());
   }
 

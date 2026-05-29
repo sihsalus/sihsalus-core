@@ -21,6 +21,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentsService;
@@ -216,7 +217,7 @@ public class RecurringAppointmentsController extends BaseRestController {
       validateRecurringPattern(recurringAppointmentRequest.getRecurringPattern());
       validateRecurringAppointmentLimit(recurringAppointmentRequest);
       List<Appointment> appointments = getValidAppointments(recurringAppointmentRequest);
-      Map<Enum, List<Appointment>> appointmentsConflicts =
+      Map<AppointmentConflictType, List<Appointment>> appointmentsConflicts =
           appointmentsService.getAppointmentsConflicts(appointments);
       if (appointmentsConflicts.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
       return new ResponseEntity<>(

@@ -252,7 +252,9 @@ public class EvaluatedCohortResource extends EvaluatedResource<EvaluatedCohort> 
     // verified it with hibernate.show_sql=true
     HqlQueryBuilder qb = new HqlQueryBuilder();
     qb.select("patientId", "uuid").from(Patient.class, "p");
-    qb.whereIdIn("p.patientId", evaluatedCohort.getMemberIds());
+    qb.whereIdIn(
+        "p.patientId",
+        evaluatedCohort.getMemberships().stream().map(m -> m.getPatientId()).toList());
     List<Patient> ret = new ArrayList<Patient>();
     for (Object[] row :
         Context.getService(EvaluationService.class).evaluateToList(qb, new EvaluationContext())) {

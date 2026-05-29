@@ -30,6 +30,10 @@ public class HttpClient {
 
   private static final Logger log = LoggerFactory.getLogger(HttpClient.class);
 
+  private static final int CONNECT_TIMEOUT_MS = 10_000;
+
+  private static final int READ_TIMEOUT_MS = 60_000;
+
   private HttpUrl url;
 
   public HttpClient(String url) throws MalformedURLException {
@@ -50,6 +54,7 @@ public class HttpClient {
 
       // Send the data
       HttpURLConnection connection = url.openConnection();
+      applyTimeouts(connection);
       connection.setDoOutput(true);
       connection.setDoInput(true);
       connection.setRequestMethod("POST");
@@ -76,6 +81,7 @@ public class HttpClient {
         // get redirect url from "location" header field
         String newUrl = connection.getHeaderField("Location");
         connection = (HttpURLConnection) new URL(newUrl).openConnection();
+        applyTimeouts(connection);
 
         log.info("Redirection to : " + newUrl);
 
@@ -122,6 +128,11 @@ public class HttpClient {
     }
 
     return response;
+  }
+
+  private void applyTimeouts(HttpURLConnection connection) {
+    connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+    connection.setReadTimeout(READ_TIMEOUT_MS);
   }
 
   private StringBuilder constructData(Map<String, String> parameters)

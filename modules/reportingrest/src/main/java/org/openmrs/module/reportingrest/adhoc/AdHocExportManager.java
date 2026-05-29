@@ -133,7 +133,7 @@ public class AdHocExportManager {
             + Context.getAuthenticatedUser().getUsername()
             + " at "
             + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-    rd.setDescription(OpenmrsUtil.join(datasetNames, ", "));
+    rd.setDescription(String.join(", ", datasetNames));
 
     reportDefinitionService.saveDefinition(rd);
 

@@ -91,7 +91,7 @@ public class AdHocParameter {
     p.setLabel(label);
     p.setType(Context.loadClass(type));
     if (collectionType != null) {
-      p.setCollectionType((Class<? extends Collection>) Context.loadClass(collectionType));
+      p.setCollectionType(Context.loadClass(collectionType).asSubclass(Collection.class));
     }
     return p;
   }

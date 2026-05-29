@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -229,7 +230,7 @@ public class ReportingRestController extends MainResourceController {
 
     RenderingMode renderingMode = null;
     for (RenderingMode mode : getReportService().getRenderingModes(definition)) {
-      if (StringUtils.equals(mode.getArgument(), reportDesignUuid)) {
+      if (Objects.equals(mode.getArgument(), reportDesignUuid)) {
         renderingMode = mode;
         break;
       }

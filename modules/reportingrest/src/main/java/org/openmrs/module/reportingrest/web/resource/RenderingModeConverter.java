@@ -50,7 +50,7 @@ public class RenderingModeConverter implements Converter<RenderingMode> {
     try {
       Class<? extends ReportRenderer> c =
           (Class<? extends ReportRenderer>) Context.loadClass(typeArgSplit[0]);
-      mode.setRenderer(c.newInstance());
+      mode.setRenderer(c.getDeclaredConstructor().newInstance());
       if (typeArgSplit.length == 2) {
         mode.setArgument(typeArgSplit[1]);
       }

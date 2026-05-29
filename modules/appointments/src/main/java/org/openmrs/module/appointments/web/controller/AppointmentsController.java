@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.service.AppointmentsService;
@@ -121,7 +122,7 @@ public class AppointmentsController extends BaseRestController {
   public ResponseEntity<Object> getConflicts(@RequestBody AppointmentRequest appointmentRequest) {
     try {
       Appointment appointment = appointmentMapper.fromRequestClonedAppointment(appointmentRequest);
-      Map<Enum, List<Appointment>> appointmentConflicts =
+      Map<AppointmentConflictType, List<Appointment>> appointmentConflicts =
           appointmentsService.getAppointmentConflicts(appointment);
       if (appointmentConflicts.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
       return new ResponseEntity<>(

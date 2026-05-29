@@ -39,8 +39,7 @@ public class AppointmentServiceAttributeTypeDaoImpl implements AppointmentServic
 
   @Override
   public AppointmentServiceAttributeType getAttributeTypeById(Integer id) {
-    return (AppointmentServiceAttributeType)
-        sessionFactory.getCurrentSession().get(AppointmentServiceAttributeType.class, id);
+    return sessionFactory.getCurrentSession().find(AppointmentServiceAttributeType.class, id);
   }
 
   @Transactional

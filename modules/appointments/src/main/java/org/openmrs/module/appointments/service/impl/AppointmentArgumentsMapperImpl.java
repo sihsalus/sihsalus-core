@@ -70,13 +70,13 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
             .getMessage(
                 Context.getAdministrationService().getGlobalProperty("sms.timezone"),
                 null,
-                new Locale("en"));
+                Locale.ENGLISH);
     String smsDateFormat =
         Context.getMessageSourceService()
             .getMessage(
                 Context.getAdministrationService().getGlobalProperty("sms.dateformat"),
                 null,
-                new Locale("en"));
+                Locale.ENGLISH);
     String date = convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
     String helpdeskNumber =
         Context.getAdministrationService()

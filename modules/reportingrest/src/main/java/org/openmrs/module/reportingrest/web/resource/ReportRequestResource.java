@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
@@ -221,7 +222,7 @@ public class ReportRequestResource extends DelegatingCrudResource<ReportRequest>
     List<RenderingMode> renderingModes = reportService.getRenderingModes(reportDefinition);
     RenderingMode renderingMode = null;
     for (RenderingMode mode : renderingModes) {
-      if (StringUtils.equals(mode.getArgument(), reportRequest.getRenderingMode().getArgument())) {
+      if (Objects.equals(mode.getArgument(), reportRequest.getRenderingMode().getArgument())) {
         renderingMode = mode;
         break;
       }
@@ -362,7 +363,7 @@ public class ReportRequestResource extends DelegatingCrudResource<ReportRequest>
       } else if (propertyName.equals("baseCohort")) {
         definitionClassType = CohortDefinition.class;
       } else if (propertyName.equals("renderingMode")) {
-        Map<String, Object> renderingModeMap = (Map) value;
+        Map<?, ?> renderingModeMap = requireMap(value, propertyName);
         String rendererUuid = (String) renderingModeMap.get("argument");
         RenderingMode rm = new RenderingMode();
         rm.setArgument(rendererUuid);
@@ -373,21 +374,43 @@ public class ReportRequestResource extends DelegatingCrudResource<ReportRequest>
         return;
       }
 
-      Map parametrizableMap = (Map) ((Map) value).get("parameterizable");
-      Map<String, Object> parameterMappings = (Map) ((Map) value).get("parameterMappings");
-
-      if (parametrizableMap == null) {
-        throw new ConversionException("Missing parameterizable");
-      }
+      Map<?, ?> mappedValue = requireMap(value, propertyName);
+      Map<?, ?> parametrizableMap =
+          requireMap(mappedValue.get("parameterizable"), "parameterizable");
+      Map<String, Object> parameterMappings =
+          toStringKeyMap(mappedValue.get("parameterMappings"), "parameterMappings");
 
       Parameterizable parameterizable =
           (Parameterizable)
               ConversionUtil.convert(parametrizableMap.get("uuid"), definitionClassType);
-      Mapped mappedInstance = new Mapped(parameterizable, parameterMappings);
+      Mapped<Parameterizable> mappedInstance = new Mapped<>(parameterizable, parameterMappings);
       PropertyUtils.setProperty(instance, propertyName, mappedInstance);
     } catch (Exception ex) {
       throw new ConversionException(propertyName, ex);
     }
+  }
+
+  private Map<?, ?> requireMap(Object value, String propertyName) {
+    if (value instanceof Map<?, ?> map) {
+      return map;
+    }
+    throw new IllegalArgumentException("Property " + propertyName + " should be an object");
+  }
+
+  private Map<String, Object> toStringKeyMap(Object value, String propertyName) {
+    if (value == null) {
+      return null;
+    }
+
+    Map<?, ?> source = requireMap(value, propertyName);
+    Map<String, Object> target = new HashMap<>();
+    for (Map.Entry<?, ?> entry : source.entrySet()) {
+      if (!(entry.getKey() instanceof String key)) {
+        throw new IllegalArgumentException("Property " + propertyName + " should use string keys");
+      }
+      target.put(key, entry.getValue());
+    }
+    return target;
   }
 
   /**

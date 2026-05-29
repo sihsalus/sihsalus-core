@@ -11,7 +11,8 @@ public class AppointmentsSummary {
   @JsonCreator
   public AppointmentsSummary(
       @JsonProperty("appointmentService") AppointmentServiceDefaultResponse appointmentService,
-      @JsonProperty("appointmentCountMap") Map appointmentCountMap) {
+      @JsonProperty("appointmentCountMap")
+          Map<String, DailyAppointmentServiceSummary> appointmentCountMap) {
     this.appointmentService = appointmentService;
     this.appointmentCountMap = appointmentCountMap;
   }

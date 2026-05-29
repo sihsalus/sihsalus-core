@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
@@ -93,10 +94,10 @@ public interface AppointmentsService {
   List<Appointment> search(AppointmentSearchRequestModel searchQuery);
 
   @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
-  Map<Enum, List<Appointment>> getAppointmentConflicts(Appointment appointment);
+  Map<AppointmentConflictType, List<Appointment>> getAppointmentConflicts(Appointment appointment);
 
   @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
-  Map<Enum, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
+  Map<AppointmentConflictType, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
 
   /**
    * Note, this API is introduced to fix potential error of transaction not being atomic. Please see

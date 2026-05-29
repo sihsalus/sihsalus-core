@@ -116,7 +116,7 @@ public abstract class EvaluatedResource<T extends Evaluated> extends DelegatingC
 
         // we don't create collection until we confirm we have a parameter value, see
         // https://issues.openmrs.org/browse/REPORT-835
-        Collection collection = null;
+        Collection<Object> collection = null;
 
         if (request.getParameterMap().containsKey(paramName)) {
           collection = createCollection(param.getCollectionType());
@@ -133,8 +133,8 @@ public abstract class EvaluatedResource<T extends Evaluated> extends DelegatingC
             collection = createCollection(param.getCollectionType());
             Object posted = postBody.get(paramName);
             if (posted != null) {
-              if (posted instanceof Collection) {
-                for (Object item : ((Collection) posted)) {
+              if (posted instanceof Collection<?> postedCollection) {
+                for (Object item : postedCollection) {
                   if (item != null) {
                     collection.add(ConversionUtil.convert(item, param.getType()));
                   }
@@ -166,11 +166,11 @@ public abstract class EvaluatedResource<T extends Evaluated> extends DelegatingC
     return evalContext;
   }
 
-  private Collection createCollection(Class collectionType) {
+  private Collection<Object> createCollection(Class<? extends Collection> collectionType) {
     if (Set.class.isAssignableFrom(collectionType)) {
-      return new LinkedHashSet();
+      return new LinkedHashSet<>();
     } else if (List.class.isAssignableFrom(collectionType)) {
-      return new ArrayList();
+      return new ArrayList<>();
     } else {
       throw new IllegalStateException("Cannot handle collection type: " + collectionType);
     }

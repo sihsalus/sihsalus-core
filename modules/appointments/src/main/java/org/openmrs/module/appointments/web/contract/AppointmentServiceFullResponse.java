@@ -4,22 +4,22 @@ import java.util.List;
 
 public class AppointmentServiceFullResponse extends AppointmentServiceDefaultResponse {
 
-  private List weeklyAvailability;
-  private List serviceTypes;
+  private List<?> weeklyAvailability;
+  private List<?> serviceTypes;
 
-  public List getWeeklyAvailability() {
+  public List<?> getWeeklyAvailability() {
     return weeklyAvailability;
   }
 
-  public void setWeeklyAvailability(List weeklyAvailability) {
+  public void setWeeklyAvailability(List<?> weeklyAvailability) {
     this.weeklyAvailability = weeklyAvailability;
   }
 
-  public List getServiceTypes() {
+  public List<?> getServiceTypes() {
     return serviceTypes;
   }
 
-  public void setServiceTypes(List serviceTypes) {
+  public void setServiceTypes(List<?> serviceTypes) {
     this.serviceTypes = serviceTypes;
   }
 }

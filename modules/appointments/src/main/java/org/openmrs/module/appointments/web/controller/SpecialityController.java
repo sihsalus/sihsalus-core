@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.web.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -21,11 +22,11 @@ public class SpecialityController extends BaseRestController {
 
   @RequestMapping(method = RequestMethod.GET, value = "all")
   @ResponseBody
-  public List getAllSpecialities() {
+  public List<Map<String, String>> getAllSpecialities() {
     List<Speciality> allSpecialities = specialityService.getAllSpecialities();
-    List specialities = new ArrayList();
+    List<Map<String, String>> specialities = new ArrayList<>();
     for (Speciality speciality : allSpecialities) {
-      HashMap specialityResponse = new HashMap<>();
+      HashMap<String, String> specialityResponse = new HashMap<>();
       specialityResponse.put("name", speciality.getName());
       specialityResponse.put("uuid", speciality.getUuid());
       specialities.add(specialityResponse);

@@ -18,7 +18,6 @@ import org.openmrs.module.appointments.events.publisher.AppointmentEventPublishe
 import org.openmrs.module.appointments.model.Appointment;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.lang.Nullable;
 
 public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBeforeAdvice {
 
@@ -55,7 +54,7 @@ public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBefo
   }
 
   @Override
-  public void before(Method method, Object[] objects, @Nullable Object o) {
+  public void before(Method method, Object[] objects, Object o) {
     if (adviceMethodNames.contains(method.getName())) {
       if (objects == null || objects.length == 0) {
         return;

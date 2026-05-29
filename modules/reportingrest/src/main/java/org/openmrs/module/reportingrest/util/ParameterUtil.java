@@ -59,11 +59,11 @@ public class ParameterUtil {
         Resource resource = getResourceFor(parameter.getType());
         Object convertedValue;
         if (parameter.getCollectionType() != null) {
-          Collection target = newCollectionFor(parameter);
+          Collection<Object> target = newCollectionFor(parameter);
           if (resource != null) {
             // use the resource for this type, assuming a uuid for minimal representation was
             // submitted
-            List original = (List) entry.getValue();
+            List<?> original = (List<?>) entry.getValue();
             for (Object item : original) {
               target.add(getRealInstanceByUuid(resource, item));
             }
@@ -135,11 +135,11 @@ public class ParameterUtil {
     }
   }
 
-  private static Collection newCollectionFor(Parameter parameter) {
+  private static Collection<Object> newCollectionFor(Parameter parameter) {
     Class<? extends Collection> collectionType = parameter.getCollectionType();
     return collectionType == null
         ? null
-        : collectionType.equals(Set.class) ? new HashSet() : new ArrayList();
+        : collectionType.equals(Set.class) ? new HashSet<>() : new ArrayList<>();
   }
 
   private static Resource getResourceFor(Class<?> type) {

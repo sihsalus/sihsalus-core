@@ -25,6 +25,7 @@ import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
@@ -390,20 +391,22 @@ public class AppointmentsServiceImpl implements AppointmentsService {
   }
 
   @Override
-  public Map<Enum, List<Appointment>> getAppointmentConflicts(Appointment appointment) {
+  public Map<AppointmentConflictType, List<Appointment>> getAppointmentConflicts(Appointment appointment) {
     return getAllConflicts(Collections.singletonList(appointment));
   }
 
   @Override
-  public Map<Enum, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments) {
+  public Map<AppointmentConflictType, List<Appointment>> getAppointmentsConflicts(
+      List<Appointment> appointments) {
     List<Appointment> filteredAppointments = getNonVoidedFutureAppointments(appointments);
     return CollectionUtils.isEmpty(filteredAppointments)
         ? new HashMap<>()
         : getAllConflicts(filteredAppointments);
   }
 
-  private Map<Enum, List<Appointment>> getAllConflicts(List<Appointment> appointments) {
-    Map<Enum, List<Appointment>> conflictsMap = new HashMap<>();
+  private Map<AppointmentConflictType, List<Appointment>> getAllConflicts(
+      List<Appointment> appointments) {
+    Map<AppointmentConflictType, List<Appointment>> conflictsMap = new HashMap<>();
     for (AppointmentConflict appointmentConflict : appointmentConflicts) {
       List<Appointment> conflictAppointments = appointmentConflict.getConflicts(appointments);
       if (CollectionUtils.isNotEmpty(conflictAppointments))
@@ -488,8 +491,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
       newAppointment.setUuid(null);
       newAppointment.setDateCreated(null);
       newAppointment.setCreator(null);
-      newAppointment.setDateChanged(null);
-      newAppointment.setChangedBy(null);
+      clearEditAuditFields(newAppointment);
       if (retainAppointmentNumber) {
         newAppointment.setAppointmentNumber(prevAppointment.getAppointmentNumber());
       }
@@ -500,6 +502,12 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @SuppressWarnings("deprecation")
+  private void clearEditAuditFields(Appointment appointment) {
+    appointment.setDateChanged(null);
+    appointment.setChangedBy(null);
   }
 
   private void createEventInAppointmentAudit(Appointment appointment, String notes) {

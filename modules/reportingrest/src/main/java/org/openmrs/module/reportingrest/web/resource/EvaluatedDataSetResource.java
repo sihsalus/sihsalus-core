@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
@@ -259,7 +261,7 @@ public class EvaluatedDataSetResource extends EvaluatedResource<DataSet> {
         if (value instanceof IndicatorResult) {
           value = ((IndicatorResult) value).getValue();
         } else if (value instanceof IdSet) {
-          IdSet idSet = (IdSet) value;
+          IdSet<?> idSet = (IdSet<?>) value;
           value =
               new SimpleObject()
                   .add("size", idSet.getSize())
@@ -268,7 +270,13 @@ public class EvaluatedDataSetResource extends EvaluatedResource<DataSet> {
           // EvaluatedCohort implements IdSet, but Cohort doesn't
           Cohort cohort = (Cohort) value;
           value =
-              new SimpleObject().add("size", cohort.size()).add("memberIds", cohort.getMemberIds());
+              new SimpleObject()
+                  .add("size", cohort.size())
+                  .add(
+                      "memberIds",
+                      cohort.getMemberships().stream()
+                          .map(m -> m.getPatientId())
+                          .collect(Collectors.toCollection(TreeSet::new)));
         }
 
         rowMap.put(rowEntry.getKey().getName(), value);

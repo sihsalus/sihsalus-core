@@ -7,12 +7,12 @@ public class AppointmentServiceDefaultResponse {
   private Integer appointmentServiceId;
   private String name;
   private String description;
-  private Map speciality;
+  private Map<String, ?> speciality;
   private String startTime;
   private String endTime;
   private Integer maxAppointmentsLimit;
   private Integer durationMins;
-  private Map location;
+  private Map<String, ?> location;
   private String uuid;
   private String color;
   private String initialAppointmentStatus;
@@ -75,19 +75,19 @@ public class AppointmentServiceDefaultResponse {
     this.description = description;
   }
 
-  public Map getSpeciality() {
+  public Map<String, ?> getSpeciality() {
     return speciality;
   }
 
-  public void setSpeciality(Map speciality) {
+  public void setSpeciality(Map<String, ?> speciality) {
     this.speciality = speciality;
   }
 
-  public Map getLocation() {
+  public Map<String, ?> getLocation() {
     return location;
   }
 
-  public void setLocation(Map location) {
+  public void setLocation(Map<String, ?> location) {
     this.location = location;
   }
 

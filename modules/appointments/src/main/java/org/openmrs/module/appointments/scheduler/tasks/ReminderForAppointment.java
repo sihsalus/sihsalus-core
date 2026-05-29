@@ -13,6 +13,7 @@ import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.scheduler.tasks.AbstractTask;
 
+@SuppressWarnings("deprecation")
 public class ReminderForAppointment extends AbstractTask {
   private Log log = LogFactory.getLog(this.getClass());
 

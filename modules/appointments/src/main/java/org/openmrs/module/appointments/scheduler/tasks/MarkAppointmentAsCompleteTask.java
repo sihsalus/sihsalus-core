@@ -11,6 +11,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.scheduler.tasks.AbstractTask;
 
+@SuppressWarnings("deprecation")
 public class MarkAppointmentAsCompleteTask extends AbstractTask {
 
   @Override

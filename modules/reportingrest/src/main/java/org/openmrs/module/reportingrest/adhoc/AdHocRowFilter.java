@@ -19,13 +19,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.DefinitionLibraryCohortDefinition;
 import org.openmrs.module.reporting.dataset.definition.PatientDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.RowPerObjectDataSetDefinition;
 import org.openmrs.module.reporting.definition.library.AllDefinitionLibraries;
 import org.openmrs.module.reporting.evaluation.Definition;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
-import org.openmrs.module.reporting.query.Query;
 import org.openmrs.module.reportingrest.util.ParameterUtil;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
@@ -86,7 +86,7 @@ public class AdHocRowFilter {
     this.parameterValues = parameterValues;
   }
 
-  public Mapped<? extends Query> toQuery(
+  public Mapped<? extends CohortDefinition> toQuery(
       Class<? extends RowPerObjectDataSetDefinition> dsdClass,
       AllDefinitionLibraries definitionLibraries)
       throws Exception {

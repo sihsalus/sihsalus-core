@@ -21,6 +21,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.model.AppointmentProvider;
@@ -445,9 +446,9 @@ public class AppointmentMapper {
   }
 
   public Map<String, List<AppointmentDefaultResponse>> constructConflictResponse(
-      Map<Enum, List<Appointment>> conflicts) {
+      Map<AppointmentConflictType, List<Appointment>> conflicts) {
     Map<String, List<AppointmentDefaultResponse>> conflictsResponse = new HashMap<>();
-    for (Map.Entry<Enum, List<Appointment>> entry : conflicts.entrySet()) {
+    for (Map.Entry<AppointmentConflictType, List<Appointment>> entry : conflicts.entrySet()) {
       conflictsResponse.put(entry.getKey().name(), constructResponse(entry.getValue()));
     }
     return conflictsResponse;

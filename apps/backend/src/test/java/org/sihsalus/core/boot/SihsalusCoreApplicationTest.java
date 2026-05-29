@@ -535,6 +535,10 @@ class SihsalusCoreApplicationTest {
         .andExpect(status().isUnauthorized())
         .andExpect(header().string("WWW-Authenticate", containsString("Basic")));
     mockMvc
+        .perform(get("/openmrs/admin/index.htm"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(header().string("WWW-Authenticate", containsString("Basic")));
+    mockMvc
         .perform(get("/api/admin/static-modules").header("Authorization", ADMIN_BASIC_AUTH))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.id == 'webservices-rest')]").exists())
@@ -550,7 +554,14 @@ class SihsalusCoreApplicationTest {
         .andExpect(status().isFound())
         .andExpect(header().string("Location", "/openmrs/api/admin/static-modules"));
     mockMvc
+        .perform(get("/openmrs/admin/index.htm").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isFound())
+        .andExpect(header().string("Location", "/openmrs/api/admin/static-modules"));
+    mockMvc
         .perform(get("/module/htmlwidgets/patientSearch.form").param("q", "a"))
+        .andExpect(status().isUnauthorized());
+    mockMvc
+        .perform(get("/openmrs/module/htmlwidgets/patientSearch.form").param("q", "a"))
         .andExpect(status().isUnauthorized());
   }
 
@@ -584,6 +595,14 @@ class SihsalusCoreApplicationTest {
 
     mockMvc
         .perform(
+            get("/openmrs/ws/rest/v1/module")
+                .param("v", "custom:(uuid,version)")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results[?(@.uuid == 'webservices.rest')].version").value("3.4.1"));
+
+    mockMvc
+        .perform(
             get("/rest/v1/module/webservices.rest")
                 .param("v", "full")
                 .header("Authorization", ADMIN_BASIC_AUTH))
@@ -594,6 +613,15 @@ class SihsalusCoreApplicationTest {
         .andExpect(jsonPath("$.compiled").value(true))
         .andExpect(jsonPath("$.configured").value(true))
         .andExpect(jsonPath("$.springRegistered").value(true))
+        .andExpect(jsonPath("$.runtime.lifecycle").value("started"));
+
+    mockMvc
+        .perform(
+            get("/openmrs/rest/v1/module/webservices.rest")
+                .param("v", "full")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uuid").value("webservices.rest"))
         .andExpect(jsonPath("$.runtime.lifecycle").value("started"));
   }
 
@@ -1352,6 +1380,16 @@ class SihsalusCoreApplicationTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.identifier").value("100001"));
 
+    mockMvc
+        .perform(
+            post("/openmrs/ws/rest/v1/idgen/identifiersource/{sourceId}/identifier", sourceId)
+                .header("Authorization", ADMIN_BASIC_AUTH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"comment\":\"prefixed\"}"))
+        .andExpect(status().isCreated())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.identifier").value("100002"));
+
     assertEquals(
         1,
         countRows(
@@ -1360,6 +1398,14 @@ class SihsalusCoreApplicationTest {
             sourceId,
             "100001",
             "follow-up"));
+    assertEquals(
+        1,
+        countRows(
+            "select count(*) from idgen_log_entry where source = ? "
+                + "and identifier = ? and comment = ?",
+            sourceId,
+            "100002",
+            "prefixed"));
   }
 
   @Test

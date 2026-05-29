@@ -250,8 +250,8 @@ public class AppointmentServiceMapper {
         .collect(Collectors.toList());
   }
 
-  private Map constructServiceTypeResponse(AppointmentServiceType serviceType) {
-    Map serviceTypeMap = new HashMap();
+  private Map<String, Object> constructServiceTypeResponse(AppointmentServiceType serviceType) {
+    Map<String, Object> serviceTypeMap = new HashMap<>();
     serviceTypeMap.put("name", serviceType.getName());
     serviceTypeMap.put("duration", serviceType.getDuration());
     serviceTypeMap.put("uuid", serviceType.getUuid());
@@ -308,7 +308,7 @@ public class AppointmentServiceMapper {
       asResponse.setInitialAppointmentStatus(initialAppointmentStatus.name());
     }
 
-    Map specialityMap = new HashMap();
+    Map<String, String> specialityMap = new HashMap<>();
     Speciality speciality = as.getSpeciality();
     if (speciality != null) {
       specialityMap.put("name", speciality.getName());
@@ -316,7 +316,7 @@ public class AppointmentServiceMapper {
     }
     asResponse.setSpeciality(specialityMap);
 
-    Map locationMap = new HashMap();
+    Map<String, String> locationMap = new HashMap<>();
     Location location = as.getLocation();
     if (location != null) {
       locationMap.put("name", location.getName());
@@ -337,8 +337,9 @@ public class AppointmentServiceMapper {
     return asResponse;
   }
 
-  private Map constructAvailabilityResponse(ServiceWeeklyAvailability availability) {
-    Map availabilityMap = new HashMap();
+  private Map<String, Object> constructAvailabilityResponse(
+      ServiceWeeklyAvailability availability) {
+    Map<String, Object> availabilityMap = new HashMap<>();
     availabilityMap.put("dayOfWeek", availability.getDayOfWeek());
     availabilityMap.put("startTime", convertTimeToString(availability.getStartTime()));
     availabilityMap.put("endTime", convertTimeToString(availability.getEndTime()));

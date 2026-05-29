@@ -19,6 +19,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +39,10 @@ import org.springframework.stereotype.Component;
 public class RemoteIdentifierSourceProcessor implements IdentifierSourceProcessor {
 
   private static Log log = LogFactory.getLog(RemoteIdentifierSourceProcessor.class);
+
+  private static final Duration HTTP_CONNECT_TIMEOUT = Duration.ofSeconds(10);
+
+  private static final Duration HTTP_REQUEST_TIMEOUT = Duration.ofSeconds(30);
 
   /**
    * @see IdentifierSourceProcessor#getIdentifiers(IdentifierSource, int)
@@ -75,11 +80,15 @@ public class RemoteIdentifierSourceProcessor implements IdentifierSourceProcesso
 
     HttpRequest request =
         HttpRequest.newBuilder(URI.create(source.getUrl()))
+            .timeout(HTTP_REQUEST_TIMEOUT)
             .header("Content-Type", "application/x-www-form-urlencoded")
             .POST(HttpRequest.BodyPublishers.ofString(formEncode(formValues)))
             .build();
     HttpResponse<String> httpResponse =
-        HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        HttpClient.newBuilder()
+            .connectTimeout(HTTP_CONNECT_TIMEOUT)
+            .build()
+            .send(request, HttpResponse.BodyHandlers.ofString());
     String responseText = httpResponse.body();
     int statusCode = httpResponse.statusCode();
 

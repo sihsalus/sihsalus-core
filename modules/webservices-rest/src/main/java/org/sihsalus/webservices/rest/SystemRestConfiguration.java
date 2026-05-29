@@ -44,6 +44,8 @@ public class SystemRestConfiguration {
   private static final String OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE =
       "org.sihsalus.openmrs.USER_CONTEXT";
 
+  private static final String LEGACY_OPENMRS_PATH_PREFIX = "/openmrs";
+
   @Bean
   SystemStatusController systemStatusController() {
     return new SystemStatusController();
@@ -194,7 +196,7 @@ public class SystemRestConfiguration {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws IOException, ServletException {
-      if (request instanceof HttpServletRequest httpRequest && isLegacyWsRestPath(httpRequest)) {
+      if (request instanceof HttpServletRequest httpRequest && isLegacyOpenmrsPath(httpRequest)) {
         chain.doFilter(new LegacyWsRestRequestWrapper(httpRequest), response);
         return;
       }
@@ -212,9 +214,15 @@ public class SystemRestConfiguration {
       String legacyPrefix = request.getContextPath() + "/ws/rest";
       return requestUri.equals(legacyPrefix) || requestUri.startsWith(legacyPrefix + "/");
     }
+
+    private boolean isLegacyOpenmrsPath(HttpServletRequest request) {
+      return isLegacyWsRestPath(request) || usesOpenmrsPathPrefix(request);
+    }
   }
 
   static final class LegacyWsRestRequestWrapper extends HttpServletRequestWrapper {
+
+    private final String contextPath;
 
     private final String requestUri;
 
@@ -224,10 +232,16 @@ public class SystemRestConfiguration {
 
     LegacyWsRestRequestWrapper(HttpServletRequest request) {
       super(request);
-      String contextPath = request.getContextPath();
-      this.requestUri = contextPath + normalizeWsRestPath(request.getRequestURI(), contextPath);
-      this.servletPath = normalizeWsRestPath(request.getServletPath(), "");
-      this.pathInfo = normalizeWsRestPath(request.getPathInfo(), "");
+      this.contextPath = effectiveContextPath(request);
+      this.requestUri =
+          contextPath + normalizeOpenmrsPath(request.getRequestURI(), request.getContextPath());
+      this.servletPath = normalizeOpenmrsPath(request.getServletPath(), "");
+      this.pathInfo = normalizeOpenmrsPath(request.getPathInfo(), "");
+    }
+
+    @Override
+    public String getContextPath() {
+      return contextPath;
     }
 
     @Override
@@ -258,13 +272,18 @@ public class SystemRestConfiguration {
       return pathInfo;
     }
 
-    private static String normalizeWsRestPath(String path, String contextPath) {
+    private static String normalizeOpenmrsPath(String path, String contextPath) {
       if (path == null) {
         return null;
       }
 
       String pathWithoutContext =
           contextPath.isEmpty() ? path : path.substring(contextPath.length());
+      if (pathWithoutContext.equals(LEGACY_OPENMRS_PATH_PREFIX)) {
+        pathWithoutContext = "/";
+      } else if (pathWithoutContext.startsWith(LEGACY_OPENMRS_PATH_PREFIX + "/")) {
+        pathWithoutContext = pathWithoutContext.substring(LEGACY_OPENMRS_PATH_PREFIX.length());
+      }
       if (pathWithoutContext.equals("/ws/rest")) {
         return "/rest";
       }
@@ -273,6 +292,12 @@ public class SystemRestConfiguration {
       }
 
       return pathWithoutContext;
+    }
+
+    private static String effectiveContextPath(HttpServletRequest request) {
+      return usesOpenmrsPathPrefix(request)
+          ? request.getContextPath() + LEGACY_OPENMRS_PATH_PREFIX
+          : request.getContextPath();
     }
   }
 
@@ -372,5 +397,16 @@ public class SystemRestConfiguration {
     if (httpSession != null) {
       httpSession.removeAttribute(OPENMRS_USER_CONTEXT_SESSION_ATTRIBUTE);
     }
+  }
+
+  private static boolean usesOpenmrsPathPrefix(HttpServletRequest request) {
+    String contextPath = request.getContextPath();
+    if (!contextPath.isEmpty()) {
+      return false;
+    }
+
+    String requestUri = request.getRequestURI();
+    return requestUri.equals(LEGACY_OPENMRS_PATH_PREFIX)
+        || requestUri.startsWith(LEGACY_OPENMRS_PATH_PREFIX + "/");
   }
 }

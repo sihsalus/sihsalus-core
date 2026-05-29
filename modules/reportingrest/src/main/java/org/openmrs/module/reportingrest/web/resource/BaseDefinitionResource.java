@@ -47,7 +47,7 @@ public abstract class BaseDefinitionResource<T extends Definition>
   @Override
   public T newDelegate() {
     try {
-      return getDefinitionType().newInstance();
+      return getDefinitionType().getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       throw new RuntimeException("Unable to create new " + getDefinitionType());
     }
