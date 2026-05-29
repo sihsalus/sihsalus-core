@@ -24,7 +24,10 @@ public class IdgenIdentifierController {
 
   @PostMapping({
     "/rest/v1/idgen/identifiersource/{sourceUniqueId}/identifier",
-    "/ws/rest/v1/idgen/identifiersource/{sourceUniqueId}/identifier"
+    "/ws/rest/v1/idgen/identifiersource/{sourceUniqueId}/identifier",
+    "/rest/v1/idgen/{sourceUniqueId}/identifier",
+    "/ws/rest/v1/idgen/{sourceUniqueId}/identifier",
+    "/ws/rest/v1/idgen/identifierSource/{sourceUniqueId}/identifier"
   })
   ResponseEntity<Map<String, Object>> generateIdentifier(
       @PathVariable("sourceUniqueId") String sourceUniqueId,
