@@ -22,6 +22,10 @@ public class IdgenIdentifierController {
     this.identifierSourceService = identifierSourceService;
   }
 
+  /**
+   * Exposes the legacy and REST module identifier-generation endpoint variations used by UI and
+   * integrations.
+   */
   @PostMapping({
     "/rest/v1/idgen/identifiersource/{sourceUniqueId}/identifier",
     "/ws/rest/v1/idgen/identifiersource/{sourceUniqueId}/identifier",
