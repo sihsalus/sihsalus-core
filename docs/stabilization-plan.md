@@ -70,7 +70,7 @@ keep runtime-risk findings ahead of cosmetic generic cleanup.
 
 ### Spring Boot Runtime
 
-- Keep `apps/backend` (`sihsalus-core-boot`) as the only executable composition root.
+- Keep `runtime` (`sihsalus-core-boot`) as the only executable composition root.
 - Keep OpenMRS runtime properties derived from Spring configuration before OpenMRS beans initialize.
 - Keep Liquibase ahead of Hibernate `SessionFactory` creation.
 - Keep static module wiring covered by boot smoke tests whenever modules, mappings, filters, or service registrations move.

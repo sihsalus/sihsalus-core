@@ -19,7 +19,7 @@ The target architecture is a static Spring Boot modular monolith:
 
 Spring Boot owns:
 
-- process startup through `apps/backend` (`sihsalus-core-boot`)
+- process startup through `runtime` (`sihsalus-core-boot`)
 - environment and property loading
 - datasource creation
 - Liquibase startup
@@ -169,7 +169,7 @@ PostgreSQL Liquibase and runtime smoke validation.
 
 Use this checklist for every runtime-facing change:
 
-- Keep `apps/backend` (`sihsalus-core-boot`) as the single executable composition root.
+- Keep `runtime` (`sihsalus-core-boot`) as the single executable composition root.
 - Keep `.omod` lifecycle code out of the production startup path.
 - Keep Liquibase table names aligned with OpenMRS `DatabaseUpdater` expectations.
 - Add or update a boot smoke test when changing static module wiring.

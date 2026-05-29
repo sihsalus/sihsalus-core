@@ -42,7 +42,7 @@ username or password is blank. H2 remains allowed for tests.
 Verification:
 
 ```bash
-mvn --batch-mode --no-transfer-progress -pl apps/backend -am \
+mvn --batch-mode --no-transfer-progress -pl runtime -am \
   -Dtest=OpenmrsRuntimePropertiesConfigurerTest test
 ```
 
@@ -139,7 +139,7 @@ Current expected behavior:
 Verification:
 
 ```bash
-mvn --batch-mode --no-transfer-progress -pl core/api,modules/serialization-xstream -am \
+mvn --batch-mode --no-transfer-progress -pl platform/api,modules/serialization-xstream -am \
   -Dtest=SimpleXStreamSerializerTest,XStreamSerializerTest test
 ```
 

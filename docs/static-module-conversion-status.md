@@ -110,7 +110,7 @@ Runtime decision:
 
 Verification:
 
-- `.dev/reference-sources/openmrs-distro-modules/openmrs-webapp/mvnw --batch-mode --no-transfer-progress -Denforcer.skip=true -pl apps/backend -am test`
+- `.dev/reference-sources/openmrs-distro-modules/openmrs-webapp/mvnw --batch-mode --no-transfer-progress -Denforcer.skip=true -pl runtime -am test`
 - Result on 2026-05-14: 35-module reactor passed; `SihsalusCoreApplicationTest` ran 20 tests with 0 failures and 0 errors.
 
 Known follow-up:

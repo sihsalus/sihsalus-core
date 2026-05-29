@@ -14,9 +14,9 @@
     <url>https://github.com/sihsalus/sihsalus-core</url>
 
     <modules>
-        <module>core/openmrs-bom</module>
-        <module>core/api</module>
-        <module>core/liquibase</module>
+        <module>platform/openmrs-bom</module>
+        <module>platform/api</module>
+        <module>platform/liquibase</module>
         <module>modules/fhir2</module>
         <module>modules/webservices-rest</module>
         <module>modules/initializer</module>
@@ -50,7 +50,7 @@
         <module>modules/ordertemplates</module>
         <module>modules/patientflags</module>
         <module>modules/legacyui</module>
-        <module>apps/backend</module>
+        <module>runtime</module>
     </modules>
 
     <licenses>

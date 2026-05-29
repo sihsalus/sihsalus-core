@@ -9,7 +9,7 @@ WORKDIR /workspace
 
 COPY . .
 
-RUN mvn --batch-mode --no-transfer-progress -pl apps/backend -am package -DskipTests
+RUN mvn --batch-mode --no-transfer-progress -pl runtime -am package -DskipTests
 
 FROM ${RUNTIME_IMAGE}
 
@@ -36,7 +36,7 @@ ENV OPENMRS_APPLICATION_DATA_DIRECTORY=/openmrs/data \
 RUN mkdir -p /openmrs/data /opt/sihsalus/reference-sources \
     && chown -R sihsalus:sihsalus /openmrs /opt/sihsalus
 
-COPY --from=build --chown=sihsalus:sihsalus /workspace/apps/backend/target/sihsalus-core-boot-*.jar /opt/sihsalus/app.jar
+COPY --from=build --chown=sihsalus:sihsalus /workspace/runtime/target/sihsalus-core-boot-*.jar /opt/sihsalus/app.jar
 COPY --chown=sihsalus:sihsalus .dev/reference-sources/sihsalus-content /opt/sihsalus/reference-sources/sihsalus-content
 COPY --chown=sihsalus:sihsalus deploy/docker/entrypoint.sh /opt/sihsalus/entrypoint.sh
 

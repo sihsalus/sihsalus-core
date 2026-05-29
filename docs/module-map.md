@@ -1,7 +1,7 @@
 # Module Map
 
 This document records the current Maven reactor layout after the source tree was
-organized into `core/`, `modules/`, and `apps/`.
+organized into `platform/`, `modules/`, and `runtime/`.
 
 The move is intentionally physical only. Maven artifact IDs, Java package names,
 Liquibase paths inside jars, resource names, REST paths, FHIR paths, and OpenMRS
@@ -13,7 +13,7 @@ The repository root remains the Maven reactor parent. Child modules now live in
 functional folders:
 
 ```text
-core/
+platform/
   api/
   liquibase/
   openmrs-bom/
@@ -21,8 +21,7 @@ core/
 modules/
   <static Sihsalus/OpenMRS-compatible modules>
 
-apps/
-  backend/
+runtime/
 
 deploy/
   compose.yml
@@ -49,10 +48,10 @@ migration foundation, and executable runtime composition.
 
 | Reactor path | Artifact ID | Responsibility |
 | --- | --- | --- |
-| `core/openmrs-bom` | `openmrs-bom` | dependency baseline for OpenMRS-compatible imports |
-| `core/api` | `sihsalus-core-api` | OpenMRS-compatible domain, services, DAOs, utilities, and shared contracts |
-| `core/liquibase` | `sihsalus-core-liquibase` | centralized database migration ordering |
-| `apps/backend` | `sihsalus-core-boot` | Spring Boot runtime composition and startup configuration |
+| `platform/openmrs-bom` | `openmrs-bom` | dependency baseline for OpenMRS-compatible imports |
+| `platform/api` | `sihsalus-core-api` | OpenMRS-compatible domain, services, DAOs, utilities, and shared contracts |
+| `platform/liquibase` | `sihsalus-core-liquibase` | centralized database migration ordering |
+| `runtime` | `sihsalus-core-boot` | Spring Boot runtime composition and startup configuration |
 
 ## API Adapters
 
@@ -121,13 +120,14 @@ runtime path is actively owned and tested.
 | `modules/serialization-xstream` | `sihsalus-module-serialization-xstream` | XStream serialization compatibility |
 | `modules/ordertemplates` | `sihsalus-module-ordertemplates` | order template compatibility |
 
-## Apps
+## Runtime
 
-`apps/backend` is the executable Spring Boot backend module. Runtime wiring
+`runtime` is the executable Spring Boot backend module. Runtime wiring
 still lives in the `sihsalus-core-boot` artifact so dependency coordinates remain
 stable.
 
-Future `apps/` contents should be concrete entrypoints or harnesses, such as:
+Future executable entrypoints should be added only when they are concrete
+runtime targets, such as:
 
 - smoke-test harnesses for module workflows
 - e2e support apps or fixtures

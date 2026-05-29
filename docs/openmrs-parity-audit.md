@@ -48,7 +48,7 @@ Comparison source:
 
 - baseline modules from `HEAD:config/baseline/sihsalus-distro.properties`
 - static runtime modules from
-  `core/api/src/main/java/org/sihsalus/core/api/StaticModuleCatalog.java`
+  `platform/api/src/main/java/org/sihsalus/core/api/StaticModuleCatalog.java`
 
 Result:
 
@@ -159,7 +159,7 @@ Idgen detail from the same dev server:
   `uuid = 8549f706-7e85-4c1d-9424-217d50a2988b`, name
   `Generator for SIHSALUS`.
 - Current branch verification:
-  `mvn -pl apps/backend -am -Dtest=SihsalusCoreApplicationTest#idgenIdentifierGenerationEndpointReturnsOpenmrsRestPayload -Dsurefire.failIfNoSpecifiedTests=false test`
+  `mvn -pl runtime -am -Dtest=SihsalusCoreApplicationTest#idgenIdentifierGenerationEndpointReturnsOpenmrsRestPayload -Dsurefire.failIfNoSpecifiedTests=false test`
   passes and proves `POST /ws/rest/v1/idgen/identifiersource/{sourceId}/identifier`
   plus the `/rest/v1` UUID variant return `201` and persist the optional comment.
 
@@ -172,8 +172,8 @@ the dev smoke; the observed `404` was not a timeout or gateway issue.
 ## What Is Covered
 
 - The Maven reactor includes the OpenMRS-compatible core, static modules, and
-  `apps/backend` composition root.
-- `apps/backend` depends on all static modules in the runtime catalog.
+  `runtime` composition root.
+- `runtime` depends on all static modules in the runtime catalog.
 - `StaticModuleRuntimeInspector` exposes compiled/configured/Spring/migration
   status through `/api/admin/static-modules`.
 - Core OpenMRS REST resources are registered through the static

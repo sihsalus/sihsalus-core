@@ -222,7 +222,7 @@ The current endpoint wiring is covered by these focused checks:
 
 ```bash
 mvn -pl modules/fhir2 -Dtest=FhirR4ReadControllerTest test
-mvn -pl apps/backend -am -Dtest=SihsalusCoreApplicationTest#patientRegistryPatientRequiresAuthenticationThroughRestAndFhir+importedOpenmrsRestResourcesAreAvailableThroughLegacyWsRestPrefix+fhirR4SearchEndpointInvokesImportedProvider -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl apps/backend -am -Dtest=SihsalusCoreApplicationTest#emrApiIsWiredAsStaticInternalModule -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl apps/backend -am -Dtest=SihsalusCoreApplicationTest#idgenIdentifierGenerationEndpointReturnsOpenmrsRestPayload -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl runtime -am -Dtest=SihsalusCoreApplicationTest#patientRegistryPatientRequiresAuthenticationThroughRestAndFhir+importedOpenmrsRestResourcesAreAvailableThroughLegacyWsRestPrefix+fhirR4SearchEndpointInvokesImportedProvider -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl runtime -am -Dtest=SihsalusCoreApplicationTest#emrApiIsWiredAsStaticInternalModule -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl runtime -am -Dtest=SihsalusCoreApplicationTest#idgenIdentifierGenerationEndpointReturnsOpenmrsRestPayload -Dsurefire.failIfNoSpecifiedTests=false test
 ```
