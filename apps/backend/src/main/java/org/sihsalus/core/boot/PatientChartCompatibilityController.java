@@ -231,7 +231,7 @@ public class PatientChartCompatibilityController {
     Map<String, Object> response = conceptMember(concept);
     response.put("conceptClass", reference(concept.getConceptClass()));
     response.put("datatype", reference(concept.getDatatype()));
-    response.put("set", Boolean.TRUE.equals(concept.isSet()));
+    response.put("set", Boolean.TRUE.equals(concept.getSet()));
     response.put(
         "setMembers", concept.getSetMembers(false).stream().map(this::conceptMember).toList());
     return response;

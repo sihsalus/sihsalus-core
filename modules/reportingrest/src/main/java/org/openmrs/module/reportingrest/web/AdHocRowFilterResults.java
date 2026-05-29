@@ -41,7 +41,7 @@ public class AdHocRowFilterResults {
     this.individualResults = individualResults;
   }
 
-  public void addResult(IdSet result) {
+  public void addResult(IdSet<?> result) {
     if (individualResults == null) {
       individualResults = new ArrayList<IdSet<?>>();
     }

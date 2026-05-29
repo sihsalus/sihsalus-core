@@ -103,7 +103,7 @@ differently from classic OpenMRS.
 | Patient documents | PDF/document endpoints are wired. | `patientDocumentsIsWiredAsStaticInternalModule`; endpoint docs. | Partial. End-to-end generation/download workflows need real content and storage smoke. |
 | Patient flags | Services and REST resources are wired. | `patientFlagsIsWiredAsStaticInternalModule`; endpoint docs. | Partial. Legacy UI controllers under `src/main/legacy-ui` are not functional parity evidence. |
 | Address hierarchy | Service and content loader support are present. | `addressHierarchyIsWiredAsStaticInternalModule`; static content checks. | Partial. Real content load is covered only by opt-in content test. |
-| ID generation | Services and authorization proxy checks exist. The dev server has source `101` in PostgreSQL and `idgen` reports `started=true`, but `/ws/rest/v1/idgen/identifiersource/101/identifier` returns `404 Unknown resource`. | `idgenIsWiredAsStaticInternalModule`; auth interceptor tests; dev smoke below. | Partial. Service/DB wiring exists, but REST identifier-generation parity is missing. |
+| ID generation | Services, authorization proxy checks, and the identifier-generation compatibility endpoint exist in the current branch. The dev server image checked on 2026-05-28 still returned the pre-fix `404` for `/ws/rest/v1/idgen/identifiersource/101/identifier`. | `idgenIsWiredAsStaticInternalModule`; auth interceptor tests; `idgenIdentifierGenerationEndpointReturnsOpenmrsRestPayload`; dev smoke below. | Partial. Single identifier generation is covered locally; batch/admin workflows and redeployed dev smoke remain open. |
 | Metadata mapping | Service and frontend lookup adapter exist. | `metadataMappingIsWiredAsStaticInternalModule`; patient chart adapter. | Partial. Selected lookup path is covered; full module parity is not proven. |
 | Imaging | Services and authorization proxy checks exist. | `imagingIsWiredAsStaticInternalModule`; imaging proxy auth tests. | Partial. External imaging integration workflow parity is not proven. |
 | FUA | Static service/schema wiring exists. | `fuaIsWiredAsStaticInternalModule`; stabilization queue. | Partial. Sihsalus-specific workflow parity needs persistence smoke tests. |
@@ -150,7 +150,7 @@ Authenticated smoke results:
 | `GET /rest/v1/openconceptlab/import?limit=1` | `200` | OCL REST import resource responds. |
 | `GET /rest/v1/attachment?limit=1` | `400` | Attachment resource does not support this direct list operation. |
 | `GET /rest/v1/patientflags/flag?limit=1` | `200` | Patient flags REST path responds. |
-| `POST /ws/rest/v1/idgen/identifiersource/101/identifier` | `404` | Idgen REST identifier-generation endpoint is missing from this runtime. |
+| `POST /ws/rest/v1/idgen/identifiersource/101/identifier` | `404` | Pre-fix dev image is missing the Idgen REST identifier-generation endpoint; current branch adds and tests it locally. |
 
 Idgen detail from the same dev server:
 
@@ -160,11 +160,16 @@ Idgen detail from the same dev server:
 - PostgreSQL contains `idgen_identifier_source.id = 101`,
   `uuid = 8549f706-7e85-4c1d-9424-217d50a2988b`, name
   `Generator for SIHSALUS`.
+- Current branch verification:
+  `mvn -pl apps/backend -am -Dtest=SihsalusCoreApplicationTest#idgenIdentifierGenerationEndpointReturnsOpenmrsRestPayload -Dsurefire.failIfNoSpecifiedTests=false test`
+  passes and proves `POST /ws/rest/v1/idgen/identifiersource/{sourceId}/identifier`
+  plus the `/rest/v1` UUID variant return `201` and persist the optional comment.
 
 Functional conclusion from this smoke: the deployment is up and several
 frontend-critical REST/FHIR paths work, but the Idgen REST identifier-generation
-path expected by the client is not present. That is a functional parity gap, not
-a timeout or gateway issue.
+path expected by the client is not present in the checked dev image. The branch
+now fixes that gap locally, so the remaining step is redeploying and repeating
+the dev smoke; the observed `404` was not a timeout or gateway issue.
 
 ## What Is Covered
 

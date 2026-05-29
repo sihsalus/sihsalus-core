@@ -37,7 +37,7 @@ public class InvalidOperationOnObjectException extends APIException {
   /**
    * @param clazz the type of the object on which the operation was attempted
    */
-  public InvalidOperationOnObjectException(Class clazz) {
+  public InvalidOperationOnObjectException(Class<?> clazz) {
     this("An invalid operation was attempted on an instance of " + clazz.getName());
   }
 }

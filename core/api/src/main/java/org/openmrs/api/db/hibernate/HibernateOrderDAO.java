@@ -439,7 +439,7 @@ public class HibernateOrderDAO implements OrderDAO {
     if (order != null) {
       sessionFactory
           .getCurrentSession()
-          .createQuery("delete Obs where order = :order")
+          .createMutationQuery("delete Obs where order = :order")
           .setParameter("order", order)
           .executeUpdate();
     }
@@ -842,12 +842,12 @@ public class HibernateOrderDAO implements OrderDAO {
    */
   @Override
   public OrderType getOrderTypeByConceptClass(ConceptClass conceptClass) {
-    return (OrderType)
-        sessionFactory
-            .getCurrentSession()
-            .createQuery("from OrderType where :conceptClass in elements(conceptClasses)")
-            .setParameter("conceptClass", conceptClass)
-            .uniqueResult();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery(
+            "from OrderType where :conceptClass in elements(conceptClasses)", OrderType.class)
+        .setParameter("conceptClass", conceptClass)
+        .uniqueResult();
   }
 
   /**

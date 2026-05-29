@@ -83,8 +83,8 @@ public class Report<T extends ReportGenerator> {
     this.uuid = uuid;
   }
 
-  public static List<Report> getAllReports() {
-    List<Report> reports = new ArrayList<>();
+  public static List<Report<?>> getAllReports() {
+    List<Report<?>> reports = new ArrayList<>();
 
     reports.add(
         new Report<>(

@@ -83,7 +83,7 @@ public class DrugOrdersForPatientDataEvaluator implements PatientDataEvaluator {
         concepts = new ArrayList<Concept>();
       }
       for (Concept conceptSet : def.getDrugConceptSetsToInclude()) {
-        if (conceptSet.isSet()) {
+        if (Boolean.TRUE.equals(conceptSet.getSet())) {
           concepts.addAll(conceptSet.getSetMembers());
         }
       }

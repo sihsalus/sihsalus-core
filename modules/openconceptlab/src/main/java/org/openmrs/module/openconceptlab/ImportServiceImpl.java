@@ -426,7 +426,7 @@ public class ImportServiceImpl extends BaseOpenmrsService implements ImportServi
 
   @SuppressWarnings("unchecked")
   private <T> Query<T> createQuery(String hql) {
-    return getSession().createQuery(hql);
+    return (Query<T>) getSession().createQuery(hql);
   }
 
   @Override

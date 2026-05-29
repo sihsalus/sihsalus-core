@@ -9,7 +9,7 @@
  */
 package org.openmrs.api.db.hibernate;
 
-import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
@@ -212,7 +212,6 @@ public class HibernateFormDAO implements FormDAO {
    *     java.util.Collection, boolean)
    */
   @Override
-  @SuppressWarnings("unchecked")
   public FormField getFormField(
       Form form, Concept concept, Collection<FormField> ignoreFormFields, boolean force)
       throws DAOException {
@@ -287,10 +286,9 @@ public class HibernateFormDAO implements FormDAO {
    * @see org.openmrs.api.db.FormDAO#getFormsContainingConcept(org.openmrs.Concept)
    */
   @Override
-  @SuppressWarnings("unchecked")
   public List<Form> getFormsContainingConcept(Concept c) throws DAOException {
     String q = "select distinct ff.form from FormField ff where ff.field.concept = :concept";
-    Query query = sessionFactory.getCurrentSession().createQuery(q);
+    TypedQuery<Form> query = sessionFactory.getCurrentSession().createQuery(q, Form.class);
     query.setParameter("concept", c);
 
     return query.getResultList();

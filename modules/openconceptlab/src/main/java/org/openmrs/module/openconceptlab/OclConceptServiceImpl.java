@@ -12,7 +12,6 @@ public class OclConceptServiceImpl extends BaseOpenmrsService implements OclConc
 
   @Override
   public Concept getConceptWithSameAsMapping(String code, String source) {
-    @SuppressWarnings("unchecked")
     List<Concept> concepts =
         dbSessionFactory
             .getCurrentSession()
@@ -25,10 +24,11 @@ public class OclConceptServiceImpl extends BaseOpenmrsService implements OclConc
                     + "and crt.code = :code "
                     + "and upper(cm.conceptMapType.name) = 'SAME-AS' "
                     + "and c.retired = false "
-                    + "and crt.retired = false")
+                    + "and crt.retired = false",
+                Concept.class)
             .setParameter("code", code)
             .setParameter("source", source)
-            .list();
+            .getResultList();
 
     if (concepts == null) {
       return null;

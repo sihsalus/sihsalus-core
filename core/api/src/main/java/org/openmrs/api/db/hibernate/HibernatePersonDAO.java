@@ -213,7 +213,6 @@ public class HibernatePersonDAO implements PersonDAO {
    *     gender)
    */
   @Override
-  @SuppressWarnings("unchecked")
   public Set<Person> getSimilarPeople(String name, Integer birthyear, String gender)
       throws DAOException {
     if (birthyear == null) {
@@ -279,7 +278,6 @@ public class HibernatePersonDAO implements PersonDAO {
    * @see org.openmrs.api.db.PersonDAO#getPeople(java.lang.String, java.lang.Boolean)
    */
   @Override
-  @SuppressWarnings("unchecked")
   public List<Person> getPeople(String searchString, Boolean dead, Boolean voided) {
     if (searchString == null) {
       return new ArrayList<>();
@@ -799,14 +797,12 @@ public class HibernatePersonDAO implements PersonDAO {
    * @see org.openmrs.api.db.PersonDAO#getWinningPersonMergeLogs(org.openmrs.Person)
    */
   @Override
-  @SuppressWarnings("unchecked")
   public List<PersonMergeLog> getWinningPersonMergeLogs(Person person) throws DAOException {
-    return (List<PersonMergeLog>)
-        sessionFactory
-            .getCurrentSession()
-            .createQuery("from PersonMergeLog p where p.winner.id = :winnerId")
-            .setParameter("winnerId", person.getId())
-            .list();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery("from PersonMergeLog p where p.winner.id = :winnerId", PersonMergeLog.class)
+        .setParameter("winnerId", person.getId())
+        .getResultList();
   }
 
   /**
@@ -814,22 +810,22 @@ public class HibernatePersonDAO implements PersonDAO {
    */
   @Override
   public PersonMergeLog getLosingPersonMergeLogs(Person person) throws DAOException {
-    return (PersonMergeLog)
-        sessionFactory
-            .getCurrentSession()
-            .createQuery("from PersonMergeLog p where p.loser.id = :loserId")
-            .setParameter("loserId", person.getId())
-            .uniqueResult();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery("from PersonMergeLog p where p.loser.id = :loserId", PersonMergeLog.class)
+        .setParameter("loserId", person.getId())
+        .uniqueResult();
   }
 
   /**
    * @see org.openmrs.api.db.PersonDAO#getAllPersonMergeLogs()
    */
   @Override
-  @SuppressWarnings("unchecked")
   public List<PersonMergeLog> getAllPersonMergeLogs() throws DAOException {
-    return (List<PersonMergeLog>)
-        sessionFactory.getCurrentSession().createQuery("from PersonMergeLog p").list();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery("from PersonMergeLog p", PersonMergeLog.class)
+        .getResultList();
   }
 
   @Override

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UsernamePasswordCredentials;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.BillableServiceService;
@@ -39,15 +40,7 @@ class SihsalusBillingAuditIntegrationTest {
 
   @Test
   void billingVoidAndRetireServicesSetAuditFields() {
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    boolean authenticatedBeforeTest = Context.isAuthenticated();
-    if (!authenticatedBeforeTest) {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-    }
-
+    AuthenticatedOpenmrsSession authenticatedSession = openAuthenticatedOpenmrsSession();
     try {
       Integer adminUserId =
           jdbcTemplate.queryForObject(
@@ -225,10 +218,43 @@ class SihsalusBillingAuditIntegrationTest {
               "select date_retired from cashier_billable_service where uuid = ?",
               fixtures.billableServiceUuid()));
     } finally {
-      if (!authenticatedBeforeTest && Context.isSessionOpen()) {
+      authenticatedSession.close();
+    }
+  }
+
+  private static AuthenticatedOpenmrsSession openAuthenticatedOpenmrsSession() {
+    boolean openedSession = !Context.isSessionOpen();
+    if (openedSession) {
+      Context.openSession();
+    }
+    boolean authenticatedBeforeSession = Context.isAuthenticated();
+    if (!authenticatedBeforeSession) {
+      authenticateTestAdmin();
+    }
+    return new AuthenticatedOpenmrsSession(openedSession, authenticatedBeforeSession);
+  }
+
+  private static void authenticateTestAdmin() {
+    Context.authenticate(new UsernamePasswordCredentials(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD));
+  }
+
+  private static final class AuthenticatedOpenmrsSession implements AutoCloseable {
+
+    private final boolean openedSession;
+
+    private final boolean authenticatedBeforeSession;
+
+    private AuthenticatedOpenmrsSession(boolean openedSession, boolean authenticatedBeforeSession) {
+      this.openedSession = openedSession;
+      this.authenticatedBeforeSession = authenticatedBeforeSession;
+    }
+
+    @Override
+    public void close() {
+      if (!authenticatedBeforeSession && Context.isSessionOpen() && Context.isAuthenticated()) {
         Context.logout();
       }
-      if (openedSession) {
+      if (openedSession && Context.isSessionOpen()) {
         Context.closeSession();
       }
     }

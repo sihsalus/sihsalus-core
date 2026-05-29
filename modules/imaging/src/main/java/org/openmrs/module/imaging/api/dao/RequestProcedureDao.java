@@ -40,41 +40,43 @@ public class RequestProcedureDao {
     return (RequestProcedure) getSession().get(RequestProcedure.class, id);
   }
 
-  @SuppressWarnings("unchecked")
   public List<RequestProcedure> getAll() {
-    return getSession().createQuery("FROM RequestProcedure").getResultList();
+    return getSession()
+        .createQuery("FROM RequestProcedure", RequestProcedure.class)
+        .getResultList();
   }
 
-  @SuppressWarnings("unchecked")
   public List<RequestProcedure> getAllByStudyInstanceUID(String studyInstanceUID) {
     return getSession()
-        .createQuery("FROM RequestProcedure r WHERE r.studyInstanceUID = :studyInstanceUID")
+        .createQuery(
+            "FROM RequestProcedure r WHERE r.studyInstanceUID = :studyInstanceUID",
+            RequestProcedure.class)
         .setParameter("studyInstanceUID", studyInstanceUID)
         .getResultList();
   }
 
-  @SuppressWarnings("unchecked")
   public List<RequestProcedure> getAllByProcedureStatus(String status) {
     return getSession()
-        .createQuery("FROM RequestProcedure r WHERE r.status = :status")
+        .createQuery("FROM RequestProcedure r WHERE r.status = :status", RequestProcedure.class)
         .setParameter("status", status)
         .getResultList();
   }
 
-  @SuppressWarnings("unchecked")
   public List<RequestProcedure> getByPatient(Patient patient) {
     return getSession()
-        .createQuery("FROM RequestProcedure r WHERE r.mrsPatient = :patient")
+        .createQuery(
+            "FROM RequestProcedure r WHERE r.mrsPatient = :patient", RequestProcedure.class)
         .setParameter("patient", patient)
         .getResultList();
   }
 
   public RequestProcedure getByAccessionNumber(String accessionNumber) {
-    return (RequestProcedure)
-        getSession()
-            .createQuery("FROM RequestProcedure r WHERE r.accessionNumber = :accessionNumber")
-            .setParameter("accessionNumber", accessionNumber)
-            .uniqueResult();
+    return getSession()
+        .createQuery(
+            "FROM RequestProcedure r WHERE r.accessionNumber = :accessionNumber",
+            RequestProcedure.class)
+        .setParameter("accessionNumber", accessionNumber)
+        .uniqueResult();
   }
 
   public void save(RequestProcedure requestProcedure) {
@@ -89,11 +91,12 @@ public class RequestProcedureDao {
     getSession().delete(requestProcedure);
   }
 
-  @SuppressWarnings("unchecked")
   public List<RequestProcedure> getRequestProcedureByConfig(
       OrthancConfiguration orthancConfiguration) {
     return getSession()
-        .createQuery("FROM RequestProcedure r WHERE r.orthancConfiguration = :orthancConfiguration")
+        .createQuery(
+            "FROM RequestProcedure r WHERE r.orthancConfiguration = :orthancConfiguration",
+            RequestProcedure.class)
         .setParameter("orthancConfiguration", orthancConfiguration)
         .getResultList();
   }

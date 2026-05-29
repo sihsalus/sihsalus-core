@@ -33,7 +33,7 @@ public class CannotDeleteObjectInUseException extends InvalidOperationOnObjectEx
   /**
    * @see InvalidOperationOnObjectException#InvalidOperationOnObjectException(Class)
    */
-  public CannotDeleteObjectInUseException(Class clazz) {
+  public CannotDeleteObjectInUseException(Class<?> clazz) {
     super(clazz);
   }
 }

@@ -37,6 +37,37 @@ The static module migration is complete. The active work is now stabilization: m
 - Use module-scoped validation for focused patches and full reactor validation before release candidates.
 - Do not add broad `@SuppressWarnings` to clear CodeQL findings without a documented compatibility reason.
 
+### Local JDTLS Warning Baseline
+
+On 2026-05-28, JDTLS launched with Lombok support initially reported `0` Java
+errors and `2002` Java warnings for the full workspace. After the current
+warning cleanup passes, the workspace reports `0` Java errors, `1668` Java
+warnings, and `580` information diagnostics.
+
+No warning family was hidden in Zed or JDTLS. The cleanup focused on warnings
+that were low-risk to fix during stabilization: typed Hibernate/JPA queries,
+raw generic DTO maps, unnecessary local `@SuppressWarnings`, deprecated
+`Context.authenticate(String, String)`, deprecated `Concept.isSet()`, and
+deprecated `BigDecimal.ROUND_*` usage. The remaining warnings are inherited
+OpenMRS/static-module modernization debt, not a release-blocking compile error
+state.
+
+Largest warning families in the latest JDTLS run:
+
+- raw `Class` references: `98`
+- deprecated scheduler/reporting APIs: `TaskDefinition` (`72`) and
+  `Cohort.getMemberIds()` (`58`)
+- unnecessary local `@SuppressWarnings("unchecked")`: `40`
+- raw collections/maps: `Map` (`35`), `Collection` (`30`), `List` (`23`)
+- Java/OpenMRS deprecations that need compatibility review before replacement:
+  `Locale(String)`, `BaseOpenmrsData` change/voiding methods, `AbstractTask`,
+  `Temporal`/`TemporalType`, and legacy Hibernate annotations
+
+Workspace Zed settings keep warnings visible while excluding generated/build
+trees such as `target`, `.tmp`, `.dev`, and `reference-sources` from file
+scans. Reduce the warning count incrementally by module or warning family, and
+keep runtime-risk findings ahead of cosmetic generic cleanup.
+
 ### Spring Boot Runtime
 
 - Keep `apps/backend` (`sihsalus-core-boot`) as the only executable composition root.

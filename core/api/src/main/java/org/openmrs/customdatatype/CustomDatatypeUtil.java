@@ -51,9 +51,9 @@ public class CustomDatatypeUtil {
    */
   public static CustomDatatype<?> getDatatype(String datatypeClassname, String datatypeConfig) {
     try {
-      Class dtClass = Context.loadClass(datatypeClassname);
+      Class<?> dtClass = Context.loadClass(datatypeClassname);
       CustomDatatype<?> ret =
-          (CustomDatatype<?>) Context.getDatatypeService().getDatatype(dtClass, datatypeConfig);
+          Context.getDatatypeService().getDatatype(dtClass.asSubclass(CustomDatatype.class), datatypeConfig);
       if (ret == null) {
         throw new CustomDatatypeException("Can't find datatype: " + datatypeClassname);
       }

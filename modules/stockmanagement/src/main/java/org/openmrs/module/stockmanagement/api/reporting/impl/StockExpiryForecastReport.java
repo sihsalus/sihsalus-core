@@ -2,6 +2,7 @@ package org.openmrs.module.stockmanagement.api.reporting.impl;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -254,8 +255,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
         stockItemInventory.setConsumptionRate(
             countOfSummed == 0
                 ? BigDecimal.ZERO
-                : sumConsumed.divide(
-                    BigDecimal.valueOf(countOfSummed), 5, BigDecimal.ROUND_HALF_EVEN));
+                : sumConsumed.divide(BigDecimal.valueOf(countOfSummed), 5, RoundingMode.HALF_EVEN));
 
         if (lineParts[maxLinePartIndex].length() > 0) {
           stockItemInventory.setQuantity(new BigDecimal(lineParts[maxLinePartIndex]));
@@ -419,7 +419,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
                     .divide(
                         BigDecimal.valueOf(forecastDate.lengthOfMonth()),
                         5,
-                        BigDecimal.ROUND_HALF_EVEN);
+                        RoundingMode.HALF_EVEN);
             BigDecimal usageForecast =
                 dailyUsage.multiply(BigDecimal.valueOf(daysToExpiry)).add(balanceSpillOver);
             balanceSpillOver = BigDecimal.ZERO;
@@ -427,8 +427,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
             if (tempBalance.compareTo(BigDecimal.ZERO) < 0) {
               forecast.setLoss(BigDecimal.ZERO);
               balanceSpillOver = tempBalance.multiply(BigDecimal.valueOf(-1));
-              BigDecimal daysToAddOnStartDate =
-                  balance.divide(dailyUsage, 0, BigDecimal.ROUND_FLOOR);
+              BigDecimal daysToAddOnStartDate = balance.divide(dailyUsage, 0, RoundingMode.FLOOR);
               balanceStartDate =
                   balanceStartDate.plusDays(
                       daysToAddOnStartDate.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) < 0
@@ -465,7 +464,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
                       .divide(
                           BigDecimal.valueOf(forecastDate.lengthOfMonth()),
                           5,
-                          BigDecimal.ROUND_HALF_EVEN)
+                          RoundingMode.HALF_EVEN)
                       .multiply(BigDecimal.valueOf(daysToMonthEnd));
             } else {
               if (balanceStartDate.getDayOfMonth() == 1) {
@@ -479,7 +478,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
                         .divide(
                             BigDecimal.valueOf(forecastDate.lengthOfMonth()),
                             5,
-                            BigDecimal.ROUND_HALF_EVEN)
+                            RoundingMode.HALF_EVEN)
                         .multiply(BigDecimal.valueOf(daysToMonthEnd));
               }
             }
@@ -494,9 +493,8 @@ public class StockExpiryForecastReport extends ReportGenerator {
                       .divide(
                           BigDecimal.valueOf(forecastDate.lengthOfMonth()),
                           5,
-                          BigDecimal.ROUND_HALF_EVEN);
-              BigDecimal daysToAddOnStartDate =
-                  balance.divide(dailyUsage, 0, BigDecimal.ROUND_FLOOR);
+                          RoundingMode.HALF_EVEN);
+              BigDecimal daysToAddOnStartDate = balance.divide(dailyUsage, 0, RoundingMode.FLOOR);
               balanceStartDate =
                   balanceStartDate.plusDays(
                       daysToAddOnStartDate.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) < 0
@@ -537,16 +535,14 @@ public class StockExpiryForecastReport extends ReportGenerator {
         forecast.setConsumptionRate(
             forecast
                 .getConsumptionRate()
-                .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                .divide(forecast.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
         forecast.setStockItemConsumptionRate(
             forecast
                 .getStockItemConsumptionRate()
-                .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                .divide(forecast.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
         if (forecast.getLoss() != null) {
           forecast.setLoss(
-              forecast
-                  .getLoss()
-                  .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+              forecast.getLoss().divide(forecast.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
         }
         for (int i = 0; i < forecast.getQuantityConsumed().size(); i++) {
           forecast
@@ -556,7 +552,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
                   forecast
                       .getQuantityConsumed()
                       .get(i)
-                      .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                      .divide(forecast.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
         }
         for (int i = 0; i < forecast.getForecastBalances().size(); i++) {
           forecast
@@ -566,7 +562,7 @@ public class StockExpiryForecastReport extends ReportGenerator {
                   forecast
                       .getForecastBalances()
                       .get(i)
-                      .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                      .divide(forecast.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
         }
       }
     }

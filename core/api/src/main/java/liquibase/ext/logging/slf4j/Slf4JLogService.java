@@ -29,6 +29,7 @@ public class Slf4JLogService extends AbstractLogService {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public Logger getLog(Class clazz) {
     return loggers.computeIfAbsent(clazz, c -> new Slf4JLogger(c, getFilter()));
   }

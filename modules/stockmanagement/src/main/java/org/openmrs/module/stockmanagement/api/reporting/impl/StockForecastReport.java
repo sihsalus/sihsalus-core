@@ -2,6 +2,7 @@ package org.openmrs.module.stockmanagement.api.reporting.impl;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -258,8 +259,7 @@ public class StockForecastReport extends ReportGenerator {
         stockItemInventory.setConsumptionRate(
             countOfSummed == 0
                 ? BigDecimal.ZERO
-                : sumConsumed.divide(
-                    BigDecimal.valueOf(countOfSummed), 5, BigDecimal.ROUND_HALF_EVEN));
+                : sumConsumed.divide(BigDecimal.valueOf(countOfSummed), 5, RoundingMode.HALF_EVEN));
 
         if (lineParts[maxLinePartIndex].length() > 0) {
           stockItemInventory.setQuantity(new BigDecimal(lineParts[maxLinePartIndex]));
@@ -378,14 +378,14 @@ public class StockForecastReport extends ReportGenerator {
         forecast.setConsumptionRate(
             forecast
                 .getConsumptionRate()
-                .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                .divide(forecast.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
         List<BigDecimal> quantityConsumed = forecast.getQuantityConsumed();
         for (int i = 0; i < quantityConsumed.size(); i++) {
           quantityConsumed.set(
               i,
               quantityConsumed
                   .get(i)
-                  .divide(forecast.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                  .divide(forecast.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
         }
         forecast.setQuantityConsumed(quantityConsumed);
       }
@@ -483,7 +483,7 @@ public class StockForecastReport extends ReportGenerator {
       balance =
           balance.subtract(
               row.getConsumptionRate()
-                  .divide(daysInMonth, 5, BigDecimal.ROUND_HALF_EVEN)
+                  .divide(daysInMonth, 5, RoundingMode.HALF_EVEN)
                   .multiply(BigDecimal.valueOf(daysToEndOfMonth)));
       line[columnIndex++] = balance.toPlainString();
     }

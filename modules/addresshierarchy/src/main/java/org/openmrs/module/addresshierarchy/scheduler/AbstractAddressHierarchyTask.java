@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
+import org.openmrs.api.context.UsernamePasswordCredentials;
 
 /** Used as a base class for tasks we configure via build-in Spring scheduling */
 public abstract class AbstractAddressHierarchyTask extends TimerTask {
@@ -41,7 +42,7 @@ public abstract class AbstractAddressHierarchyTask extends TimerTask {
       AdministrationService adminService = Context.getAdministrationService();
       String userName = adminService.getGlobalProperty("scheduler.username");
       String password = adminService.getGlobalProperty("scheduler.password");
-      Context.authenticate(userName, password);
+      Context.authenticate(new UsernamePasswordCredentials(userName, password));
     } catch (ContextAuthenticationException e) {
       log.error(
           "Error authenticating user. Please ensure you scheduler username and password are configured correctly in your global properties",

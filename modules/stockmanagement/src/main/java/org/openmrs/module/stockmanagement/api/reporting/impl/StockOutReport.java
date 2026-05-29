@@ -1,6 +1,7 @@
 package org.openmrs.module.stockmanagement.api.reporting.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import org.openmrs.module.stockmanagement.api.dto.StockInventoryResult;
 import org.openmrs.module.stockmanagement.api.dto.StockItemInventorySearchFilter;
 
@@ -22,7 +23,7 @@ public class StockOutReport extends StockStatusReport {
             return p.getQuantity()
                     .compareTo(
                         maxReorderLevelRatio
-                            .divide(oneHundred, 5, BigDecimal.ROUND_HALF_EVEN)
+                            .divide(oneHundred, 5, RoundingMode.HALF_EVEN)
                             .multiply(
                                 p.getReorderLevel() == null
                                     ? BigDecimal.ZERO

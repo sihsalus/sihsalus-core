@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.openmrs.Cohort;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
@@ -52,6 +53,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.UserContext;
+import org.openmrs.api.context.UsernamePasswordCredentials;
 import org.openmrs.api.db.hibernate.HibernateSessionFactoryBean;
 import org.openmrs.api.handler.SaveHandler;
 import org.openmrs.calculation.api.CalculationRegistrationService;
@@ -461,21 +463,12 @@ class SihsalusCoreApplicationTest {
     location.setName("Session Location " + UUID.randomUUID());
     location.setUuid(UUID.randomUUID().toString());
 
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    try {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-      location.setCreator(Context.getAuthenticatedUser());
-      location.setDateCreated(new Date());
-      Context.getLocationService().saveLocation(location);
-    } finally {
-      Context.logout();
-      if (openedSession) {
-        Context.closeSession();
-      }
-    }
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          location.setCreator(Context.getAuthenticatedUser());
+          location.setDateCreated(new Date());
+          Context.getLocationService().saveLocation(location);
+        });
 
     var loginResult =
         mockMvc
@@ -981,8 +974,7 @@ class SihsalusCoreApplicationTest {
       assertNotNull(restService.getResourceByName(resourceName));
     }
 
-    List<SaveHandler> visitSaveHandlers =
-        HandlerUtil.getHandlersForType(SaveHandler.class, Visit.class);
+    List<SaveHandler<Visit>> visitSaveHandlers = getSaveHandlersForType(Visit.class);
     assertTrue(
         visitSaveHandlers.stream().anyMatch(VisitWithQueueEntriesSaveHandler.class::isInstance),
         () ->
@@ -1718,253 +1710,186 @@ class SihsalusCoreApplicationTest {
 
   @Test
   void stockManagementVoidUserRoleScopesUsesAuthenticatedUser() {
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    boolean authenticatedBeforeTest = Context.isAuthenticated();
-    if (!authenticatedBeforeTest) {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-    }
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          Integer adminUserId =
+              jdbcTemplate.queryForObject(
+                  "select user_id from users where username = ?",
+                  Integer.class,
+                  TEST_ADMIN_USERNAME);
+          String role =
+              jdbcTemplate.queryForObject(
+                  "select role from role order by role limit 1", String.class);
+          String scopeUuid = UUID.randomUUID().toString();
 
-    try {
-      Integer adminUserId =
-          jdbcTemplate.queryForObject(
-              "select user_id from users where username = ?", Integer.class, TEST_ADMIN_USERNAME);
-      String role =
-          jdbcTemplate.queryForObject("select role from role order by role limit 1", String.class);
-      String scopeUuid = UUID.randomUUID().toString();
+          jdbcTemplate.update(
+              "insert into stockmgmt_user_role_scope "
+                  + "(user_id, role, is_permanent, enabled, creator, date_created, voided, uuid) "
+                  + "values (?, ?, true, true, ?, current_timestamp, false, ?)",
+              adminUserId,
+              role,
+              adminUserId,
+              scopeUuid);
 
-      jdbcTemplate.update(
-          "insert into stockmgmt_user_role_scope "
-              + "(user_id, role, is_permanent, enabled, creator, date_created, voided, uuid) "
-              + "values (?, ?, true, true, ?, current_timestamp, false, ?)",
-          adminUserId,
-          role,
-          adminUserId,
-          scopeUuid);
+          StockManagementService stockManagementService =
+              Context.getService(StockManagementService.class);
+          assertDoesNotThrow(
+              () -> stockManagementService.voidUserRoleScopes(List.of(scopeUuid), "test void"));
 
-      StockManagementService stockManagementService =
-          Context.getService(StockManagementService.class);
-      assertDoesNotThrow(
-          () -> stockManagementService.voidUserRoleScopes(List.of(scopeUuid), "test void"));
-
-      assertEquals(
-          Boolean.TRUE,
-          jdbcTemplate.queryForObject(
-              "select voided from stockmgmt_user_role_scope where uuid = ?",
-              Boolean.class,
-              scopeUuid));
-      assertEquals(
-          adminUserId,
-          jdbcTemplate.queryForObject(
-              "select voided_by from stockmgmt_user_role_scope where uuid = ?",
-              Integer.class,
-              scopeUuid));
-    } finally {
-      if (!authenticatedBeforeTest && Context.isSessionOpen()) {
-        Context.logout();
-      }
-      if (openedSession) {
-        Context.closeSession();
-      }
-    }
+          assertEquals(
+              Boolean.TRUE,
+              jdbcTemplate.queryForObject(
+                  "select voided from stockmgmt_user_role_scope where uuid = ?",
+                  Boolean.class,
+                  scopeUuid));
+          assertEquals(
+              adminUserId,
+              jdbcTemplate.queryForObject(
+                  "select voided_by from stockmgmt_user_role_scope where uuid = ?",
+                  Integer.class,
+                  scopeUuid));
+        });
   }
 
   @Test
   void stockManagementSaveUserRoleScopeAcceptsDtoPayloads() {
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    boolean authenticatedBeforeTest = Context.isAuthenticated();
-    if (!authenticatedBeforeTest) {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-    }
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          List<String> userUuids =
+              jdbcTemplate.queryForList(
+                  "select uuid from users where username <> ? order by user_id limit 1",
+                  String.class,
+                  TEST_ADMIN_USERNAME);
+          assumeTrue(!userUuids.isEmpty());
 
-    try {
-      List<String> userUuids =
-          jdbcTemplate.queryForList(
-              "select uuid from users where username <> ? order by user_id limit 1",
-              String.class,
-              TEST_ADMIN_USERNAME);
-      assumeTrue(!userUuids.isEmpty());
+          String role =
+              jdbcTemplate.queryForObject(
+                  "select role from role order by role limit 1", String.class);
+          Integer existingScopes =
+              jdbcTemplate.queryForObject(
+                  "select count(*) from stockmgmt_user_role_scope urs "
+                      + "join users u on u.user_id = urs.user_id "
+                      + "where u.uuid = ? and urs.role = ? and urs.voided = false",
+                  Integer.class,
+                  userUuids.get(0),
+                  role);
+          UserRoleScopeDTO dto = new UserRoleScopeDTO();
+          dto.setUserUuid(userUuids.get(0));
+          dto.setRole(role);
+          dto.setPermanent(true);
+          dto.setEnabled(true);
+          dto.setLocations(Collections.emptyList());
+          dto.setOperationTypes(Collections.emptyList());
 
-      String role =
-          jdbcTemplate.queryForObject("select role from role order by role limit 1", String.class);
-      Integer existingScopes =
-          jdbcTemplate.queryForObject(
-              "select count(*) from stockmgmt_user_role_scope urs "
-                  + "join users u on u.user_id = urs.user_id "
-                  + "where u.uuid = ? and urs.role = ? and urs.voided = false",
-              Integer.class,
-              userUuids.get(0),
-              role);
-      UserRoleScopeDTO dto = new UserRoleScopeDTO();
-      dto.setUserUuid(userUuids.get(0));
-      dto.setRole(role);
-      dto.setPermanent(true);
-      dto.setEnabled(true);
-      dto.setLocations(Collections.emptyList());
-      dto.setOperationTypes(Collections.emptyList());
+          StockManagementService stockManagementService =
+              Context.getService(StockManagementService.class);
+          assertDoesNotThrow(() -> stockManagementService.saveUserRoleScope(dto));
 
-      StockManagementService stockManagementService =
-          Context.getService(StockManagementService.class);
-      assertDoesNotThrow(() -> stockManagementService.saveUserRoleScope(dto));
-
-      assertEquals(
-          existingScopes + 1,
-          jdbcTemplate.queryForObject(
-              "select count(*) from stockmgmt_user_role_scope urs "
-                  + "join users u on u.user_id = urs.user_id "
-                  + "where u.uuid = ? and urs.role = ? and urs.voided = false",
-              Integer.class,
-              userUuids.get(0),
-              role));
-    } finally {
-      if (!authenticatedBeforeTest && Context.isSessionOpen()) {
-        Context.logout();
-      }
-      if (openedSession) {
-        Context.closeSession();
-      }
-    }
+          assertEquals(
+              existingScopes + 1,
+              jdbcTemplate.queryForObject(
+                  "select count(*) from stockmgmt_user_role_scope urs "
+                      + "join users u on u.user_id = urs.user_id "
+                      + "where u.uuid = ? and urs.role = ? and urs.voided = false",
+                  Integer.class,
+                  userUuids.get(0),
+                  role));
+        });
   }
 
   @Test
   void stockManagementPackagingUomLookupPrefersNonVoidedRows() {
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    boolean authenticatedBeforeTest = Context.isAuthenticated();
-    if (!authenticatedBeforeTest) {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-    }
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          Integer adminUserId =
+              jdbcTemplate.queryForObject(
+                  "select user_id from users where username = ?",
+                  Integer.class,
+                  TEST_ADMIN_USERNAME);
+          Integer conceptId =
+              jdbcTemplate.queryForObject(
+                  "select concept_id from concept where retired = false order by concept_id limit 1",
+                  Integer.class);
+          String stockItemUuid = UUID.randomUUID().toString();
 
-    try {
-      Integer adminUserId =
-          jdbcTemplate.queryForObject(
-              "select user_id from users where username = ?", Integer.class, TEST_ADMIN_USERNAME);
-      Integer conceptId =
-          jdbcTemplate.queryForObject(
-              "select concept_id from concept where retired = false order by concept_id limit 1",
-              Integer.class);
-      String stockItemUuid = UUID.randomUUID().toString();
-
-      jdbcTemplate.update(
-          "insert into stockmgmt_stock_item "
-              + "(concept_id, has_expiration, common_name, is_drug, creator, date_created, voided, uuid) "
-              + "values (?, false, ?, false, ?, current_timestamp, false, ?)",
-          conceptId,
-          "Test stock item " + stockItemUuid,
-          adminUserId,
-          stockItemUuid);
-      Integer stockItemId =
-          jdbcTemplate.queryForObject(
-              "select stock_item_id from stockmgmt_stock_item where uuid = ?",
-              Integer.class,
+          jdbcTemplate.update(
+              "insert into stockmgmt_stock_item "
+                  + "(concept_id, has_expiration, common_name, is_drug, creator, date_created, voided, uuid) "
+                  + "values (?, false, ?, false, ?, current_timestamp, false, ?)",
+              conceptId,
+              "Test stock item " + stockItemUuid,
+              adminUserId,
               stockItemUuid);
+          Integer stockItemId =
+              jdbcTemplate.queryForObject(
+                  "select stock_item_id from stockmgmt_stock_item where uuid = ?",
+                  Integer.class,
+                  stockItemUuid);
 
-      String voidedUomUuid = UUID.randomUUID().toString();
-      jdbcTemplate.update(
-          "insert into stockmgmt_stock_item_packaging_uom "
-              + "(stock_item_id, packaging_uom_id, factor, creator, date_created, voided, uuid) "
-              + "values (?, ?, 1, ?, current_timestamp, true, ?)",
-          stockItemId,
-          conceptId,
-          adminUserId,
-          voidedUomUuid);
+          String voidedUomUuid = UUID.randomUUID().toString();
+          jdbcTemplate.update(
+              "insert into stockmgmt_stock_item_packaging_uom "
+                  + "(stock_item_id, packaging_uom_id, factor, creator, date_created, voided, uuid) "
+                  + "values (?, ?, 1, ?, current_timestamp, true, ?)",
+              stockItemId,
+              conceptId,
+              adminUserId,
+              voidedUomUuid);
 
-      String activeUomUuid = UUID.randomUUID().toString();
-      jdbcTemplate.update(
-          "insert into stockmgmt_stock_item_packaging_uom "
-              + "(stock_item_id, packaging_uom_id, factor, creator, date_created, voided, uuid) "
-              + "values (?, ?, 1, ?, current_timestamp, false, ?)",
-          stockItemId,
-          conceptId,
-          adminUserId,
-          activeUomUuid);
-      Integer activeUomId =
-          jdbcTemplate.queryForObject(
-              "select stock_item_packaging_uom_id from stockmgmt_stock_item_packaging_uom where uuid = ?",
-              Integer.class,
+          String activeUomUuid = UUID.randomUUID().toString();
+          jdbcTemplate.update(
+              "insert into stockmgmt_stock_item_packaging_uom "
+                  + "(stock_item_id, packaging_uom_id, factor, creator, date_created, voided, uuid) "
+                  + "values (?, ?, 1, ?, current_timestamp, false, ?)",
+              stockItemId,
+              conceptId,
+              adminUserId,
               activeUomUuid);
+          Integer activeUomId =
+              jdbcTemplate.queryForObject(
+                  "select stock_item_packaging_uom_id from stockmgmt_stock_item_packaging_uom where uuid = ?",
+                  Integer.class,
+                  activeUomUuid);
 
-      StockManagementService stockManagementService =
-          Context.getService(StockManagementService.class);
-      assertEquals(
-          activeUomId,
-          stockManagementService.getStockItemPackagingUOMByConcept(stockItemId, conceptId).getId());
-    } finally {
-      if (!authenticatedBeforeTest && Context.isSessionOpen()) {
-        Context.logout();
-      }
-      if (openedSession) {
-        Context.closeSession();
-      }
-    }
+          StockManagementService stockManagementService =
+              Context.getService(StockManagementService.class);
+          assertEquals(
+              activeUomId,
+              stockManagementService
+                  .getStockItemPackagingUOMByConcept(stockItemId, conceptId)
+                  .getId());
+        });
   }
 
   @Test
   void stockManagementReportsExposeStaticCatalog() {
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    boolean authenticatedBeforeTest = Context.isAuthenticated();
-    if (!authenticatedBeforeTest) {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-    }
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          StockManagementService stockManagementService =
+              Context.getService(StockManagementService.class);
+          List<Report<?>> reports = stockManagementService.getReports();
 
-    try {
-      StockManagementService stockManagementService =
-          Context.getService(StockManagementService.class);
-      List<Report> reports = stockManagementService.getReports();
-
-      assertEquals(Report.getAllReports().size(), reports.size());
-      assertTrue(
-          reports.stream()
-              .anyMatch(report -> "STOCK_STATUS_REPORT".equals(report.getSystemName())));
-      assertTrue(
-          reports.stream()
-              .anyMatch(report -> "STOCK_EXPIRY_REPORT".equals(report.getSystemName())));
-    } finally {
-      if (!authenticatedBeforeTest && Context.isSessionOpen()) {
-        Context.logout();
-      }
-      if (openedSession) {
-        Context.closeSession();
-      }
-    }
+          assertEquals(Report.getAllReports().size(), reports.size());
+          assertTrue(
+              reports.stream()
+                  .anyMatch(report -> "STOCK_STATUS_REPORT".equals(report.getSystemName())));
+          assertTrue(
+              reports.stream()
+                  .anyMatch(report -> "STOCK_EXPIRY_REPORT".equals(report.getSystemName())));
+        });
   }
 
   @Test
   void stockManagementStockItemReferencesReturnsEmptyListForMissingItem() {
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    boolean authenticatedBeforeTest = Context.isAuthenticated();
-    if (!authenticatedBeforeTest) {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-    }
-
-    try {
-      StockManagementService stockManagementService =
-          Context.getService(StockManagementService.class);
-      assertTrue(
-          stockManagementService
-              .getStockItemReferenceByStockItem(UUID.randomUUID().toString())
-              .isEmpty());
-    } finally {
-      if (!authenticatedBeforeTest && Context.isSessionOpen()) {
-        Context.logout();
-      }
-      if (openedSession) {
-        Context.closeSession();
-      }
-    }
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          StockManagementService stockManagementService =
+              Context.getService(StockManagementService.class);
+          assertTrue(
+              stockManagementService
+                  .getStockItemReferenceByStockItem(UUID.randomUUID().toString())
+                  .isEmpty());
+        });
   }
 
   @Test
@@ -2163,8 +2088,7 @@ class SihsalusCoreApplicationTest {
     }
     assertNotNull(HandlerUtil.getPreferredHandler(Converter.class, BedLayout.class));
 
-    List<SaveHandler> encounterSaveHandlers =
-        HandlerUtil.getHandlersForType(SaveHandler.class, Encounter.class);
+    List<SaveHandler<Encounter>> encounterSaveHandlers = getSaveHandlersForType(Encounter.class);
     assertTrue(
         encounterSaveHandlers.stream()
             .anyMatch(EncounterWithBedPatientAssignmentSaveHandler.class::isInstance),
@@ -2173,8 +2097,7 @@ class SihsalusCoreApplicationTest {
                 + encounterSaveHandlers.stream()
                     .map(handler -> handler.getClass().getName())
                     .toList());
-    List<SaveHandler> visitSaveHandlers =
-        HandlerUtil.getHandlersForType(SaveHandler.class, Visit.class);
+    List<SaveHandler<Visit>> visitSaveHandlers = getSaveHandlersForType(Visit.class);
     assertTrue(
         visitSaveHandlers.stream()
             .anyMatch(VisitWithBedPatientAssignmentSaveHandler.class::isInstance),
@@ -2286,8 +2209,7 @@ class SihsalusCoreApplicationTest {
     assertOpenmrsValidatorRegistered(Bill.class, BillValidator.class);
     assertOpenmrsValidatorRegistered(BillDiscount.class, BillDiscountValidator.class);
     assertOpenmrsValidatorRegistered(BillRefund.class, BillRefundValidator.class);
-    List<SaveHandler> billSaveHandlers =
-        HandlerUtil.getHandlersForType(SaveHandler.class, Bill.class);
+    List<SaveHandler<Bill>> billSaveHandlers = getSaveHandlersForType(Bill.class);
     assertTrue(
         billSaveHandlers.stream().anyMatch(BillReceiptNumberHandler.class::isInstance),
         () ->
@@ -2628,40 +2550,28 @@ class SihsalusCoreApplicationTest {
             Integer.class,
             "SIH SALUS Interop Queue Processor"));
 
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    boolean authenticatedBeforeQueueSmoke = Context.isAuthenticated();
-    if (!authenticatedBeforeQueueSmoke) {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-    }
     InteropQueueItem queuedItem = null;
+    AuthenticatedOpenmrsSession authenticatedSession = openAuthenticatedOpenmrsSession();
     try {
-      queuedItem =
-          dyakuSenderService.queueMessage(
-              "FHIR_BUNDLE",
-              "{\"resourceType\":\"Bundle\",\"type\":\"transaction\"}",
-              "http://request-controlled.example/fhir");
-      String configuredEndpoint =
-          jdbcTemplate.queryForObject(
-              "select property_value from global_property where property = ?",
-              String.class,
-              "sihsalusinterop.renhice.endpoint");
-      assertEquals(configuredEndpoint, queuedItem.getTargetEndpoint());
-    } finally {
       try {
+        queuedItem =
+            dyakuSenderService.queueMessage(
+                "FHIR_BUNDLE",
+                "{\"resourceType\":\"Bundle\",\"type\":\"transaction\"}",
+                "http://request-controlled.example/fhir");
+        String configuredEndpoint =
+            jdbcTemplate.queryForObject(
+                "select property_value from global_property where property = ?",
+                String.class,
+                "sihsalusinterop.renhice.endpoint");
+        assertEquals(configuredEndpoint, queuedItem.getTargetEndpoint());
+      } finally {
         if (queuedItem != null) {
           dyakuSenderService.deleteQueueItem(queuedItem.getQueueId());
         }
-      } finally {
-        if (!authenticatedBeforeQueueSmoke && Context.isSessionOpen()) {
-          Context.logout();
-        }
-        if (openedSession && Context.isSessionOpen()) {
-          Context.closeSession();
-        }
       }
+    } finally {
+      authenticatedSession.close();
     }
 
     boolean openedRequestSession = !Context.isSessionOpen();
@@ -2966,7 +2876,6 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
-  @SuppressWarnings({"rawtypes", "unchecked"})
   void reportingRestIsWiredAsStaticInternalModule() {
     assertNotNull(Context.getService(SerializedDefinitionService.class));
     assertNotNull(Context.getService(EvaluationService.class));
@@ -3016,15 +2925,8 @@ class SihsalusCoreApplicationTest {
   }
 
   private String ensureTestPatient() {
-    boolean openedSession = !Context.isSessionOpen();
-    if (openedSession) {
-      Context.openSession();
-    }
-    restartOpenmrsIdentityColumnsForH2();
-    boolean authenticatedForSetup = !Context.isAuthenticated();
-    if (authenticatedForSetup) {
-      Context.authenticate(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD);
-    }
+    AuthenticatedOpenmrsSession authenticatedSession =
+        openAuthenticatedOpenmrsSession(this::restartOpenmrsIdentityColumnsForH2);
 
     Context.addProxyPrivilege(
         PrivilegeConstants.GET_PATIENTS,
@@ -3096,10 +2998,65 @@ class SihsalusCoreApplicationTest {
           PrivilegeConstants.ADD_PATIENT_IDENTIFIERS,
           PrivilegeConstants.GET_IDENTIFIER_TYPES,
           PrivilegeConstants.MANAGE_IDENTIFIER_TYPES);
-      if (authenticatedForSetup) {
+      authenticatedSession.close();
+    }
+  }
+
+  private static AuthenticatedOpenmrsSession openAuthenticatedOpenmrsSession() {
+    return openAuthenticatedOpenmrsSession(null);
+  }
+
+  private static AuthenticatedOpenmrsSession openAuthenticatedOpenmrsSession(
+      Runnable afterOpenBeforeAuthentication) {
+    boolean openedSession = !Context.isSessionOpen();
+    if (openedSession) {
+      Context.openSession();
+    }
+    if (afterOpenBeforeAuthentication != null) {
+      afterOpenBeforeAuthentication.run();
+    }
+    boolean authenticatedBeforeSession = Context.isAuthenticated();
+    if (!authenticatedBeforeSession) {
+      authenticateTestAdmin();
+    }
+    return new AuthenticatedOpenmrsSession(openedSession, authenticatedBeforeSession);
+  }
+
+  private static void authenticateTestAdmin() {
+    Context.authenticate(new UsernamePasswordCredentials(TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD));
+  }
+
+  private void runWithAuthenticatedOpenmrsSession(OpenmrsSessionAction action) {
+    AuthenticatedOpenmrsSession authenticatedSession = openAuthenticatedOpenmrsSession();
+    try {
+      action.run();
+    } finally {
+      authenticatedSession.close();
+    }
+  }
+
+  @FunctionalInterface
+  private interface OpenmrsSessionAction {
+    void run();
+  }
+
+  private static final class AuthenticatedOpenmrsSession implements AutoCloseable {
+
+    private final boolean openedSession;
+
+    private final boolean authenticatedBeforeSession;
+
+    private AuthenticatedOpenmrsSession(boolean openedSession, boolean authenticatedBeforeSession) {
+      this.openedSession = openedSession;
+      this.authenticatedBeforeSession = authenticatedBeforeSession;
+    }
+
+    @Override
+    public void close() {
+      if (!authenticatedBeforeSession && Context.isSessionOpen() && Context.isAuthenticated()) {
         Context.logout();
       }
-      if (openedSession) {
+      if (openedSession && Context.isSessionOpen()) {
         Context.closeSession();
       }
     }
@@ -3244,7 +3201,8 @@ class SihsalusCoreApplicationTest {
     jdbcTemplate.execute(
         "alter table idgen_id_pool add column if not exists "
             + "refill_with_scheduled_task boolean default true");
-    jdbcTemplate.execute("alter table idgen_remote_source add column if not exists user varchar(50)");
+    jdbcTemplate.execute(
+        "alter table idgen_remote_source add column if not exists user varchar(50)");
     jdbcTemplate.execute(
         "alter table idgen_remote_source add column if not exists password varchar(20)");
     jdbcTemplate.execute("alter table idgen_seq_id_gen add column if not exists min_length int");
@@ -3272,6 +3230,12 @@ class SihsalusCoreApplicationTest {
             supportedClass.getSimpleName()
                 + " Validators: "
                 + validators.stream().map(validator -> validator.getClass().getName()).toList());
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private <T extends OpenmrsObject> List<SaveHandler<T>> getSaveHandlersForType(
+      Class<T> supportedClass) {
+    return HandlerUtil.getHandlersForType((Class) SaveHandler.class, supportedClass);
   }
 
   private int countRows(String sql, Object... args) {

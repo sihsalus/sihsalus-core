@@ -47,7 +47,7 @@ public class AppointmentServiceHelper {
   // TODO refactor throwing of IOExeption. Its forcing everywhere the exception to be caught and
   // rethrown
   public String getAppointmentAsJsonString(Appointment appointment) throws IOException {
-    Map appointmentJson = new HashMap<String, String>();
+    Map<String, String> appointmentJson = new HashMap<>();
     String serviceUuid = appointment.getService().getUuid();
     appointmentJson.put("serviceUuid", serviceUuid);
     String serviceTypeUuid =

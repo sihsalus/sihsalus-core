@@ -94,9 +94,8 @@ public interface HL7DAO {
    * @param query
    * @return list of hl7s
    */
-  @SuppressWarnings("rawtypes")
   public <T> List<T> getHL7Batch(
-      Class clazz, int start, int length, Integer messageState, String query);
+      Class<T> clazz, int start, int length, Integer messageState, String query);
 
   /**
    * Returns the amount of HL7 items in the database
@@ -106,8 +105,7 @@ public interface HL7DAO {
    * @param query
    * @return count of HL7 items
    */
-  @SuppressWarnings("rawtypes")
-  public Long countHL7s(Class clazz, Integer messageState, String query);
+  public Long countHL7s(Class<?> clazz, Integer messageState, String query);
 
   /* HL7InArchive */
 

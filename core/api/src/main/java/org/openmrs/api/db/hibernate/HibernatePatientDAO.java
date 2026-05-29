@@ -253,7 +253,6 @@ public class HibernatePatientDAO implements PatientDAO {
   /**
    * @see org.openmrs.api.db.PatientDAO#getAllPatients(boolean)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public List<Patient> getAllPatients(boolean includeVoided) throws DAOException {
     Session session = sessionFactory.getCurrentSession();
@@ -286,7 +285,6 @@ public class HibernatePatientDAO implements PatientDAO {
    * @see org.openmrs.api.PatientService#getPatientIdentifiers(java.lang.String, java.util.List,
    *     java.util.List, java.util.List, java.lang.Boolean)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public List<PatientIdentifier> getPatientIdentifiers(
       String identifier,
@@ -369,7 +367,6 @@ public class HibernatePatientDAO implements PatientDAO {
    *
    * @see org.openmrs.api.db.PatientDAO#getAllPatientIdentifierTypes(boolean)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public List<PatientIdentifierType> getAllPatientIdentifierTypes(boolean includeRetired)
       throws DAOException {
@@ -414,7 +411,6 @@ public class HibernatePatientDAO implements PatientDAO {
    * @see org.openmrs.api.db.PatientDAO#getPatientIdentifierTypes(java.lang.String,
    *     java.lang.String, java.lang.Boolean, java.lang.Boolean)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public List<PatientIdentifierType> getPatientIdentifierTypes(
       String name, String format, Boolean required, Boolean hasCheckDigit) throws DAOException {
@@ -461,7 +457,6 @@ public class HibernatePatientDAO implements PatientDAO {
    * @return list of patients that match other patients
    * @see org.openmrs.api.db.PatientDAO#getDuplicatePatientsByAttributes(java.util.List)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public List<Patient> getDuplicatePatientsByAttributes(List<String> attributes) {
     List<Patient> patients = new ArrayList<>();

@@ -311,7 +311,7 @@ public class AppointmentMapper {
     response.setReasons(mapAppointmentReasons(a.getReasons()));
     response.setRecurring(a.isRecurring());
     response.setVoided(a.getVoided());
-    HashMap extensions = new HashMap();
+    HashMap<Object, Object> extensions = new HashMap<>();
     extensions.put("patientEmailDefined", isPatientEmailDefined(a));
     response.setExtensions(extensions);
     response.setTeleconsultationLink(a.getTeleHealthVideoLink());
@@ -379,10 +379,10 @@ public class AppointmentMapper {
     return reasonsList;
   }
 
-  private Map createServiceTypeMap(AppointmentServiceType s) {
-    Map serviceTypeMap = null;
+  private Map<String, Object> createServiceTypeMap(AppointmentServiceType s) {
+    Map<String, Object> serviceTypeMap = null;
     if (s != null) {
-      serviceTypeMap = new HashMap();
+      serviceTypeMap = new HashMap<>();
       serviceTypeMap.put("name", s.getName());
       serviceTypeMap.put("uuid", s.getUuid());
       serviceTypeMap.put("duration", s.getDuration());
@@ -390,18 +390,18 @@ public class AppointmentMapper {
     return serviceTypeMap;
   }
 
-  private Map createLocationMap(Location l) {
-    Map locationMap = null;
+  private Map<String, String> createLocationMap(Location l) {
+    Map<String, String> locationMap = null;
     if (l != null) {
-      locationMap = new HashMap();
+      locationMap = new HashMap<>();
       locationMap.put("name", l.getName());
       locationMap.put("uuid", l.getUuid());
     }
     return locationMap;
   }
 
-  private Map createPatientMap(Patient p) {
-    Map map = new HashMap();
+  private Map<String, Object> createPatientMap(Patient p) {
+    Map<String, Object> map = new HashMap<>();
     Map<String, String> customAttributesMap = mapAttributeTypes(p);
     map.put("name", p.getPersonName().getFullName());
     map.put("uuid", p.getUuid());

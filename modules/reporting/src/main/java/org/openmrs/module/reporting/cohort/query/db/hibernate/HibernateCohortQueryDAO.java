@@ -88,9 +88,10 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
               + " patient.gender is null or (patient.gender != 'M' and patient.gender != 'F')");
     }
     query.append(")");
-    Query q = sessionFactory.getCurrentSession().createQuery(query.toString());
+    Query<Integer> q =
+        sessionFactory.getCurrentSession().createQuery(query.toString(), Integer.class);
     q.setCacheMode(CacheMode.IGNORE);
-    return new Cohort(q.list());
+    return new Cohort(q.getResultList());
   }
 
   /**
@@ -180,7 +181,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     log.warn("query: " + sql);
 
     // Execute query
-    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createSQLQuery(sql.toString(), Integer.class);
 
     log.debug(
         "Patients having started or stopped drug orders between dates:\n "
@@ -189,7 +191,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     if (!drugIds.isEmpty()) query.setParameterList("drugIds", drugIds);
     if (changedOnOrAfter != null) query.setParameter("changedOnOrAfter", changedOnOrAfter);
     if (changedOnOrBefore != null) query.setParameter("changedOnOrBefore", changedOnOrBefore);
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /**
@@ -223,13 +225,14 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     log.warn("query: " + sql);
 
     // Execute query
-    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createSQLQuery(sql.toString(), Integer.class);
 
     log.debug("Patients having active drug orders between dates:\n " + query.getQueryString());
 
     if (!drugIds.isEmpty()) query.setParameterList("drugIds", drugIds);
     if (asOfDate != null) query.setParameter("asOfDate", asOfDate);
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /**
@@ -284,7 +287,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     sql.append(" group by pp.patient_id");
     log.debug("query: " + sql);
 
-    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createSQLQuery(sql.toString(), Integer.class);
 
     log.debug("Patients having programs and states between dates: " + query.getQueryString());
 
@@ -293,7 +297,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     if (fromDate != null) query.setParameter("fromDate", fromDate);
     if (toDate != null) query.setParameter("toDate", toDate);
 
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /** */
@@ -322,7 +326,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
       }
     }
 
-    Query query = sessionFactory.getCurrentSession().createQuery(queryString.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createQuery(queryString.toString(), Integer.class);
 
     log.debug("Patients having birthdate between dates: " + query.getQueryString());
 
@@ -333,7 +338,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     if (bornOnOrBefore != null) {
       query.setParameter("bornOnOrBefore", bornOnOrBefore);
     }
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /** */
@@ -362,7 +367,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
         queryString.append(" and ").append(clause);
       }
     }
-    Query query = sessionFactory.getCurrentSession().createQuery(queryString.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createQuery(queryString.toString(), Integer.class);
     query.setCacheMode(CacheMode.IGNORE);
     if (diedOnOrAfter != null) {
       query.setParameter("diedOnOrAfter", diedOnOrAfter);
@@ -372,7 +378,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     }
     log.debug("Patients having died between dates query: " + query.getQueryString());
 
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /**
@@ -402,12 +408,13 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     log.debug("query: " + sql);
 
     // Execute query
-    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createSQLQuery(sql.toString(), Integer.class);
     if (!programIds.isEmpty()) query.setParameterList("programIds", programIds);
     if (onOrAfter != null) query.setParameter("onOrAfter", onOrAfter);
     if (onOrBefore != null)
       query.setParameter("onOrBefore", DateUtil.getEndOfDayIfTimeExcluded(onOrBefore));
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /**
@@ -443,7 +450,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     log.debug("query: " + sql);
 
     // Execute query
-    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createSQLQuery(sql.toString(), Integer.class);
 
     if (!stateIds.isEmpty()) query.setParameterList("stateIds", stateIds);
     if (startedOnOrAfter != null) query.setParameter("startedOnOrAfter", startedOnOrAfter);
@@ -454,7 +462,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     if (endedOnOrBefore != null)
       query.setParameter("endedOnOrBefore", DateUtil.getEndOfDayIfTimeExcluded(endedOnOrBefore));
 
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /**
@@ -485,12 +493,13 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     log.debug("query: " + sql);
 
     // Execute query
-    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createSQLQuery(sql.toString(), Integer.class);
     if (!stateIds.isEmpty()) query.setParameterList("stateIds", stateIds);
     if (onOrAfter != null) query.setParameter("onOrAfter", onOrAfter);
     if (onOrBefore != null)
       query.setParameter("onOrBefore", DateUtil.getEndOfDayIfTimeExcluded(onOrBefore));
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   public Cohort getPatientsHavingEncounters(
@@ -588,7 +597,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 
     log.debug("query: " + sb);
 
-    Query query = sessionFactory.getCurrentSession().createSQLQuery(sb.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createSQLQuery(sb.toString(), Integer.class);
     if (encTypeIds != null) query.setParameterList("encTypeIds", encTypeIds);
     if (locationIds != null) query.setParameterList("locationIds", locationIds);
     if (providerIds != null) query.setParameterList("providerIds", providerIds);
@@ -604,7 +614,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
       query.setParameter(
           "createdOnOrBefore", DateUtil.getEndOfDayIfTimeExcluded(createdOnOrBefore));
 
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /**
@@ -643,7 +653,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     log.debug("query: " + sqlQuery);
 
     // Create hibernate query
-    Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery.toString());
+    Query<Integer> query =
+        sessionFactory.getCurrentSession().createSQLQuery(sqlQuery.toString(), Integer.class);
 
     // Set attribute type parameter
     if (attributeType != null)
@@ -658,7 +669,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
       }
     }
     // Execute query and return cohort
-    return new Cohort(query.list());
+    return new Cohort(query.getResultList());
   }
 
   /**
@@ -698,7 +709,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
   public Cohort executeSqlQuery(String sqlQuery, Map<String, Object> paramMap) {
     try {
       validateSqlQuery(sqlQuery, paramMap);
-      Query query = prepareQuery(sqlQuery, paramMap);
+      Query<Integer> query = prepareQuery(sqlQuery, paramMap);
       return executeQuery(query);
     } catch (HibernateException e) {
       throw new ParameterException(
@@ -720,10 +731,10 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
    * @param paramMap
    * @return a Hibernate Query object
    */
-  public Query prepareQuery(String sqlQuery, Map<String, Object> paramMap) {
-    Query query = null;
+  public Query<Integer> prepareQuery(String sqlQuery, Map<String, Object> paramMap) {
+    Query<Integer> query = null;
     try {
-      query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery);
+      query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery, Integer.class);
       // query.setCacheMode(CacheMode.IGNORE);	// TODO figure out what this does before using it
 
       // Bind the query parameters (query is mutable)
@@ -742,11 +753,11 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
    * This needs to be a separate method so we can call it from both the executeSqlQuery() and
    * validateSqlQuery() methods
    */
-  private Cohort executeQuery(Query query) {
+  private Cohort executeQuery(Query<Integer> query) {
     // Needs to be a separate method
     try {
       // TODO Should test to make sure the returned List doesn't have more than one column
-      return new Cohort(query.list());
+      return new Cohort(query.getResultList());
     } catch (HibernateException e) {
       throw new ParameterException(
           "Error while executing SQL query ["
@@ -768,8 +779,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
    * @param query
    * @param paramMap
    */
-  @SuppressWarnings("unchecked")
-  private void bindQueryParameters(Query query, Map<String, Object> paramMap) {
+  private void bindQueryParameters(Query<?> query, Map<String, Object> paramMap) {
 
     // Iterate over parameters and bind them to the Query object
     for (String paramName : paramMap.keySet()) {
@@ -801,19 +811,19 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
         }
         // Collection<OpenmrsObject> (e.g. List<Location>)
         else if (Collection.class.isAssignableFrom(paramValue.getClass())) {
-          Collection collection = (Collection) paramValue;
+          Collection<?> collection = (Collection<?>) paramValue;
           if (collection.iterator().hasNext()) {
             if (OpenmrsObject.class.isAssignableFrom(collection.iterator().next().getClass())) {
+              List<OpenmrsObject> openmrsObjects = new ArrayList<>();
+              for (Object object : collection) {
+                openmrsObjects.add((OpenmrsObject) object);
+              }
               query.setParameterList(
-                  paramName,
-                  SqlUtils.openmrsObjectIdListHelper(
-                      new ArrayList<OpenmrsObject>((Collection<OpenmrsObject>) paramValue)));
+                  paramName, SqlUtils.openmrsObjectIdListHelper(openmrsObjects));
             } else {
+              List<Object> objects = new ArrayList<>(collection);
               // a List of Strings, Integers?
-              query.setParameterList(
-                  paramName,
-                  SqlUtils.objectListHelper(
-                      new ArrayList<Object>((Collection<Object>) paramValue)));
+              query.setParameterList(paramName, SqlUtils.objectListHelper(objects));
             }
           } else {
             query.setParameter(paramName, null);
@@ -907,7 +917,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     if (diedOnOrAfter != null) sql.append(" and death_date >= :diedOnOrAfter ");
     if (diedOnOrBefore != null) sql.append(" and death_date <= :diedOnOrBefore ");
 
-    Query q = sessionFactory.getCurrentSession().createSQLQuery(sql.toString());
+    Query<Integer> q =
+        sessionFactory.getCurrentSession().createSQLQuery(sql.toString(), Integer.class);
     q.setCacheMode(CacheMode.IGNORE);
 
     if (bornOnOrAfter != null) q.setParameter("bornOnOrAfter", bornOnOrAfter);
@@ -917,6 +928,6 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
     if (diedOnOrBefore != null)
       q.setParameter("diedOnOrBefore", DateUtil.getEndOfDayIfTimeExcluded(diedOnOrBefore));
 
-    return new Cohort(q.list());
+    return new Cohort(q.getResultList());
   }
 }

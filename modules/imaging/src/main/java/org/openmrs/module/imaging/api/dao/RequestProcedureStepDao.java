@@ -39,16 +39,18 @@ public class RequestProcedureStepDao {
     return (RequestProcedureStep) getSession().get(RequestProcedureStep.class, id);
   }
 
-  @SuppressWarnings("unchecked")
   public List<RequestProcedureStep> getAll() {
-    return getSession().createQuery("FROM RequestProcedureStep").getResultList();
+    return getSession()
+        .createQuery("FROM RequestProcedureStep", RequestProcedureStep.class)
+        .getResultList();
   }
 
-  @SuppressWarnings("unchecked")
   public List<RequestProcedureStep> getAllStepByRequestProcedure(
       RequestProcedure requestProcedure) {
     return getSession()
-        .createQuery("FROM RequestProcedureStep s WHERE s.requestProcedure = :requestProcedure")
+        .createQuery(
+            "FROM RequestProcedureStep s WHERE s.requestProcedure = :requestProcedure",
+            RequestProcedureStep.class)
         .setParameter("requestProcedure", requestProcedure)
         .getResultList();
   }

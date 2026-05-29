@@ -33,7 +33,7 @@ public class CannotUpdateObjectInUseException extends InvalidOperationOnObjectEx
   /**
    * @see InvalidOperationOnObjectException#InvalidOperationOnObjectException(Class)
    */
-  public CannotUpdateObjectInUseException(Class clazz) {
+  public CannotUpdateObjectInUseException(Class<?> clazz) {
     super(clazz);
   }
 }

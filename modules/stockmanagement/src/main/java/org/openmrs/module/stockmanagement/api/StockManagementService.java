@@ -548,7 +548,7 @@ public interface StockManagementService extends OpenmrsService {
 
   @Transactional(readOnly = true)
   @Authorized(value = Privileges.APP_STOCKMANAGEMENT_REPORTS)
-  List<Report> getReports();
+  List<Report<?>> getReports();
 
   @Transactional(readOnly = true)
   BatchJob getNextActiveBatchJob();

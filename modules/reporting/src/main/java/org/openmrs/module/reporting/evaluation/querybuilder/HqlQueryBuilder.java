@@ -469,8 +469,8 @@ public class HqlQueryBuilder implements QueryBuilder {
     profiler.logBefore("EXECUTING_QUERY", toString());
     List<Object[]> ret = new ArrayList<Object[]>();
     try {
-      Query q = buildQuery(sessionFactory);
-      for (Object resultRow : q.list()) {
+      Query<?> q = buildQuery(sessionFactory);
+      for (Object resultRow : q.getResultList()) {
         if (resultRow instanceof Object[]) {
           ret.add((Object[]) resultRow);
         } else {
@@ -566,18 +566,18 @@ public class HqlQueryBuilder implements QueryBuilder {
     return q.toString();
   }
 
-  protected Query buildQuery(DbSessionFactory sessionFactory) {
+  protected Query<?> buildQuery(DbSessionFactory sessionFactory) {
 
     if ((positionIndex - 1) > parameters.size()) {
       throw new IllegalStateException(
           "You have not specified enough parameters for the specified constraints");
     }
 
-    Query query = sessionFactory.getCurrentSession().createQuery(getQueryString());
+    Query<?> query = sessionFactory.getCurrentSession().createQuery(getQueryString());
 
     for (Map.Entry<String, Object> e : parameters.entrySet()) {
       if (e.getValue() instanceof Collection) {
-        query.setParameterList(e.getKey(), (Collection) e.getValue());
+        query.setParameterList(e.getKey(), (Collection<?>) e.getValue());
       } else if (e.getValue() instanceof Object[]) {
         query.setParameterList(e.getKey(), (Object[]) e.getValue());
       } else if (e.getValue() instanceof Cohort) {

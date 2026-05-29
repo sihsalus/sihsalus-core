@@ -11,10 +11,10 @@
  */
 package org.openmrs.module.metadatamapping.api.db.hibernate;
 
-import jakarta.persistence.Query;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import org.hibernate.query.Query;
 import org.openmrs.Concept;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.OpenmrsObject;
@@ -51,7 +51,8 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
   @Override
   @Transactional(readOnly = true)
   public List<Concept> getConcepts(final int firstResult, final int maxResults) {
-    Query query = getCurrentSession().createQuery("from Concept c order by c.conceptId");
+    Query<Concept> query =
+        getCurrentSession().createQuery("from Concept c order by c.conceptId", Concept.class);
     query.setFirstResult(firstResult);
     query.setMaxResults(maxResults);
     return list(query);
@@ -73,7 +74,8 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
     }
     hql.append(" order by source.name asc, source.id asc");
 
-    Query query = getCurrentSession().createQuery(hql.toString());
+    Query<MetadataSource> query =
+        getCurrentSession().createQuery(hql.toString(), MetadataSource.class);
     if (searchCriteria.getSourceName() != null) {
       query.setParameter("sourceName", searchCriteria.getSourceName());
     }
@@ -88,8 +90,10 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
 
   @Override
   public MetadataSource getMetadataSourceByName(String metadataSourceName) {
-    Query query =
-        getCurrentSession().createQuery("from MetadataSource source where source.name = :name");
+    Query<MetadataSource> query =
+        getCurrentSession()
+            .createQuery(
+                "from MetadataSource source where source.name = :name", MetadataSource.class);
     query.setParameter("name", metadataSourceName);
     return uniqueResult(query);
   }
@@ -154,7 +158,8 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
     }
     hql.append(" order by mapping.metadataSource asc, mapping.metadataTermMappingId asc");
 
-    Query query = getCurrentSession().createQuery(hql.toString());
+    Query<MetadataTermMapping> query =
+        getCurrentSession().createQuery(hql.toString(), MetadataTermMapping.class);
     if (searchCriteria.getReferredObject() != null) {
       query.setParameter("referredUuid", searchCriteria.getReferredObject().getUuid());
       query.setParameter(
@@ -182,10 +187,11 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
   @Override
   public MetadataTermMapping getMetadataTermMapping(
       MetadataSource metadataSource, String metadataTermCode) {
-    Query query =
+    Query<MetadataTermMapping> query =
         getCurrentSession()
             .createQuery(
-                "from MetadataTermMapping mapping where mapping.metadataSource = :metadataSource and mapping.code = :code");
+                "from MetadataTermMapping mapping where mapping.metadataSource = :metadataSource and mapping.code = :code",
+                MetadataTermMapping.class);
     query.setParameter("metadataSource", metadataSource);
     query.setParameter("code", metadataTermCode);
     return uniqueResult(query);
@@ -243,7 +249,7 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
         searchCriteria.isIncludeAll()
             ? "from MetadataSet metadataSet"
             : "from MetadataSet metadataSet where metadataSet.retired = false";
-    Query query = getCurrentSession().createQuery(hql);
+    Query<MetadataSet> query = getCurrentSession().createQuery(hql, MetadataSet.class);
     applyPaging(query, searchCriteria.getFirstResult(), searchCriteria.getMaxResults());
     return list(query);
   }
@@ -286,7 +292,8 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
     }
     hql.append(" order by member.sortWeight desc");
 
-    Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
+    Query<MetadataSetMember> query =
+        sessionFactory.getCurrentSession().createQuery(hql.toString(), MetadataSetMember.class);
     query.setParameter("metadataSet", metadataSet);
     applyPaging(query, firstResult, maxResults);
     return list(query);
@@ -324,10 +331,11 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
   }
 
   private <T extends OpenmrsObject> T internalGetByUuid(Class<T> openmrsObjectClass, String uuid) {
-    Query query =
+    Query<T> query =
         getCurrentSession()
             .createQuery(
-                "from " + openmrsObjectClass.getName() + " object where object.uuid = :uuid");
+                "from " + openmrsObjectClass.getName() + " object where object.uuid = :uuid",
+                openmrsObjectClass);
     query.setParameter("uuid", uuid);
     return uniqueResult(query);
   }
@@ -350,7 +358,7 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
             metadataSourceName, metadataClass, metadataTermCode, firstResult, maxResults));
   }
 
-  private Query getSourceMetadataTermsQuery(
+  private Query<MetadataTermMapping> getSourceMetadataTermsQuery(
       String metadataSourceName,
       Class<?> metadataClass,
       String metadataTermCode,
@@ -366,7 +374,8 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
       hql.append(" and mapping.code = :code");
     }
 
-    Query query = getCurrentSession().createQuery(hql.toString());
+    Query<MetadataTermMapping> query =
+        getCurrentSession().createQuery(hql.toString(), MetadataTermMapping.class);
     query.setParameter("sourceName", metadataSourceName);
     if (metadataClass != null) {
       query.setParameter("metadataClass", metadataClass.getCanonicalName());
@@ -385,7 +394,7 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
           "To obtain MetadataSet items, reference to MetadataSet must be given");
     }
 
-    Query query =
+    Query<T> query =
         sessionFactory
             .getCurrentSession()
             .createQuery(
@@ -396,13 +405,14 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
                     + " and item.retired = false"
                     + " and member.retired = false"
                     + " and member.metadataSet = :metadataSet"
-                    + " order by member.sortWeight desc");
+                    + " order by member.sortWeight desc",
+                type);
     query.setParameter("metadataSet", metadataSet);
     applyPaging(query, firstResult, maxResults);
     return list(query);
   }
 
-  private void applyPaging(Query query, Integer firstResult, Integer maxResults) {
+  private void applyPaging(Query<?> query, Integer firstResult, Integer maxResults) {
     if (firstResult != null) {
       query.setFirstResult(firstResult);
     }
@@ -411,12 +421,11 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private <T> List<T> list(Query query) {
+  private <T> List<T> list(Query<T> query) {
     return query.getResultList();
   }
 
-  private <T> T uniqueResult(Query query) {
+  private <T> T uniqueResult(Query<T> query) {
     List<T> results = list(query);
     return results.isEmpty() ? null : results.get(0);
   }

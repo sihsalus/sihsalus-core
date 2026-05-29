@@ -41,36 +41,33 @@ public class DicomStudyDao {
     return (DicomStudy) getSession().get(DicomStudy.class, id);
   }
 
-  @SuppressWarnings("unchecked")
   public List<DicomStudy> getAll() {
-    return getSession().createQuery("FROM DicomStudy").getResultList();
+    return getSession().createQuery("FROM DicomStudy", DicomStudy.class).getResultList();
   }
 
-  @SuppressWarnings("unchecked")
   public List<DicomStudy> getByPatient(Patient patient) {
     return getSession()
-        .createQuery("FROM DicomStudy d WHERE d.mrsPatient = :patient")
+        .createQuery("FROM DicomStudy d WHERE d.mrsPatient = :patient", DicomStudy.class)
         .setParameter("patient", patient)
         .getResultList();
   }
 
-  @SuppressWarnings("unchecked")
   public List<DicomStudy> getByConfiguration(OrthancConfiguration config) {
     return getSession()
-        .createQuery("FROM DicomStudy d WHERE d.orthancConfiguration = :config")
+        .createQuery("FROM DicomStudy d WHERE d.orthancConfiguration = :config", DicomStudy.class)
         .setParameter("config", config)
         .getResultList();
   }
 
   public DicomStudy getByStudyInstanceUID(OrthancConfiguration config, String studyInstanceUID) {
-    return (DicomStudy)
-        getSession()
-            .createQuery(
-                "FROM DicomStudy d WHERE d.studyInstanceUID = :studyInstanceUID "
-                    + "AND d.orthancConfiguration = :config")
-            .setParameter("studyInstanceUID", studyInstanceUID)
-            .setParameter("config", config)
-            .uniqueResult();
+    return getSession()
+        .createQuery(
+            "FROM DicomStudy d WHERE d.studyInstanceUID = :studyInstanceUID "
+                + "AND d.orthancConfiguration = :config",
+            DicomStudy.class)
+        .setParameter("studyInstanceUID", studyInstanceUID)
+        .setParameter("config", config)
+        .uniqueResult();
   }
 
   public void save(DicomStudy study) {

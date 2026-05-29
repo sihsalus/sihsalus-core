@@ -92,13 +92,13 @@ public class ServiceContext implements ApplicationContextAware {
   private boolean useSystemClassLoader = false;
 
   // Cached service objects
-  Map<Class, Object> services = new HashMap<>();
+  Map<Class<?>, Object> services = new HashMap<>();
 
   // Advisors added to services by this service
-  Map<Class, Set<Advisor>> addedAdvisors = new HashMap<>();
+  Map<Class<?>, Set<Advisor>> addedAdvisors = new HashMap<>();
 
   // Advice added to services by this service
-  Map<Class, Set<Advice>> addedAdvice = new HashMap<>();
+  Map<Class<?>, Set<Advice>> addedAdvice = new HashMap<>();
 
   /**
    * Services implementing the OpenmrsService interface for each module. The map is keyed by the
@@ -158,12 +158,12 @@ public class ServiceContext implements ApplicationContextAware {
         moduleServiceCount);
 
     if (ServiceContextHolder.instance != null && ServiceContextHolder.instance.services != null) {
-      for (Map.Entry<Class, Object> entry : ServiceContextHolder.instance.services.entrySet()) {
+      for (Map.Entry<Class<?>, Object> entry : ServiceContextHolder.instance.services.entrySet()) {
         log.debug("Service - {} : {}", entry.getKey().getName(), entry.getValue());
       }
 
       // Remove advice and advisors that this service added
-      for (Class serviceClass : ServiceContextHolder.instance.services.keySet()) {
+      for (Class<?> serviceClass : ServiceContextHolder.instance.services.keySet()) {
         ServiceContextHolder.instance.removeAddedAOP(serviceClass);
       }
 
@@ -537,7 +537,7 @@ public class ServiceContext implements ApplicationContextAware {
    * @param cls
    * @param advisor
    */
-  public void addAdvisor(Class cls, Advisor advisor) {
+  public void addAdvisor(Class<?> cls, Advisor advisor) {
     Advised advisedService = (Advised) services.get(cls);
     if (advisedService.indexOf(advisor) < 0) {
       advisedService.addAdvisor(advisor);
@@ -550,7 +550,7 @@ public class ServiceContext implements ApplicationContextAware {
    * @param cls
    * @param advice
    */
-  public void addAdvice(Class cls, Advice advice) {
+  public void addAdvice(Class<?> cls, Advice advice) {
     Advised advisedService = (Advised) services.get(cls);
     if (advisedService.indexOf(advice) < 0) {
       advisedService.addAdvice(advice);
@@ -563,7 +563,7 @@ public class ServiceContext implements ApplicationContextAware {
    * @param cls
    * @param advisor
    */
-  public void removeAdvisor(Class cls, Advisor advisor) {
+  public void removeAdvisor(Class<?> cls, Advisor advisor) {
     Advised advisedService = (Advised) services.get(cls);
     advisedService.removeAdvisor(advisor);
     getAddedAdvisors(cls).remove(advisor);
@@ -573,7 +573,7 @@ public class ServiceContext implements ApplicationContextAware {
    * @param cls
    * @param advice
    */
-  public void removeAdvice(Class cls, Advice advice) {
+  public void removeAdvice(Class<?> cls, Advice advice) {
     Advised advisedService = (Advised) services.get(cls);
     advisedService.removeAdvice(advice);
     getAddedAdvice(cls).remove(advice);
@@ -586,7 +586,7 @@ public class ServiceContext implements ApplicationContextAware {
    * @param target the new service
    */
   private void moveAddedAOP(Advised source, Advised target) {
-    Class serviceClass = source.getClass();
+    Class<?> serviceClass = source.getClass();
     Set<Advisor> existingAdvisors = getAddedAdvisors(serviceClass);
     for (Advisor advisor : existingAdvisors) {
       target.addAdvisor(advisor);
@@ -605,7 +605,7 @@ public class ServiceContext implements ApplicationContextAware {
    *
    * @param cls the class of the cached service to cleanup
    */
-  private void removeAddedAOP(Class cls) {
+  private void removeAddedAOP(Class<?> cls) {
     removeAddedAdvisors(cls);
     removeAddedAdvice(cls);
   }
@@ -615,7 +615,7 @@ public class ServiceContext implements ApplicationContextAware {
    *
    * @param cls the class of the cached service to cleanup
    */
-  private void removeAddedAdvisors(Class cls) {
+  private void removeAddedAdvisors(Class<?> cls) {
     Advised advisedService = (Advised) services.get(cls);
     Set<Advisor> advisorsToRemove = addedAdvisors.get(cls);
     if (advisedService != null && advisorsToRemove != null) {
@@ -631,10 +631,9 @@ public class ServiceContext implements ApplicationContextAware {
    * @param cls the class of the cached service
    * @return the set of advisors or an empty set
    */
-  @SuppressWarnings("unchecked")
-  private Set<Advisor> getAddedAdvisors(Class cls) {
+  private Set<Advisor> getAddedAdvisors(Class<?> cls) {
     Set<Advisor> result = addedAdvisors.get(cls);
-    return (Set<Advisor>) (result == null ? Collections.emptySet() : result);
+    return result == null ? Collections.emptySet() : result;
   }
 
   /**
@@ -642,7 +641,7 @@ public class ServiceContext implements ApplicationContextAware {
    *
    * @param cls the class of the caches service to cleanup
    */
-  private void removeAddedAdvice(Class cls) {
+  private void removeAddedAdvice(Class<?> cls) {
     Advised advisedService = (Advised) services.get(cls);
     Set<Advice> adviceToRemove = addedAdvice.get(cls);
     if (advisedService != null && adviceToRemove != null) {
@@ -658,10 +657,9 @@ public class ServiceContext implements ApplicationContextAware {
    * @param cls the class of the cached service
    * @return the set of advice or an empty set
    */
-  @SuppressWarnings("unchecked")
-  private Set<Advice> getAddedAdvice(Class cls) {
+  private Set<Advice> getAddedAdvice(Class<?> cls) {
     Set<Advice> result = addedAdvice.get(cls);
-    return (Set<Advice>) (result == null ? Collections.emptySet() : result);
+    return result == null ? Collections.emptySet() : result;
   }
 
   /**
@@ -724,7 +722,7 @@ public class ServiceContext implements ApplicationContextAware {
 
           if (!serviceAdvised) {
             // Adding a bare service, wrap with AOP proxy
-            Class[] interfaces = {cls};
+            Class<?>[] interfaces = {cls};
             ProxyFactory factory = new ProxyFactory(interfaces);
             factory.setTarget(classInstance);
             ClassLoader proxyClassLoader = classInstance.getClass().getClassLoader();
@@ -773,7 +771,7 @@ public class ServiceContext implements ApplicationContextAware {
               classString, classInstance));
     }
 
-    Class cls = null;
+    Class<?> cls = null;
 
     // load the given 'classString' class from either the openmrs class
     // loader or the system class loader depending on if we're in a testing

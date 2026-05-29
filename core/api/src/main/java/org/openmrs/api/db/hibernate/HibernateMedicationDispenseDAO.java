@@ -72,7 +72,7 @@ public class HibernateMedicationDispenseDAO implements MedicationDispenseDAO {
       criteriaQuery.where(predicates.toArray(new Predicate[] {}));
     }
     criteriaQuery.orderBy(criteriaBuilder.asc(md.get("medicationDispenseId")));
-    return sessionFactory.getCurrentSession().createQuery(criteriaQuery).list();
+    return sessionFactory.getCurrentSession().createQuery(criteriaQuery).getResultList();
   }
 
   @Override

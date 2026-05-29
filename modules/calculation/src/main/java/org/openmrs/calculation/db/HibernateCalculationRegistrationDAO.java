@@ -14,10 +14,10 @@
 package org.openmrs.calculation.db;
 
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.Query;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.query.Query;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.calculation.CalculationRegistration;
@@ -62,8 +62,11 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
   @Override
   @Transactional(readOnly = true)
   public CalculationRegistration getCalculationRegistrationByUuid(String uuid) {
-    Query query =
-        getCurrentSession().createQuery("from CalculationRegistration tr where tr.uuid = :uuid");
+    Query<CalculationRegistration> query =
+        getCurrentSession()
+            .createQuery(
+                "from CalculationRegistration tr where tr.uuid = :uuid",
+                CalculationRegistration.class);
     query.setParameter("uuid", uuid);
     return uniqueResult(query);
   }
@@ -75,9 +78,11 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
   @Override
   @Transactional(readOnly = true)
   public CalculationRegistration getCalculationRegistrationByToken(String token) {
-    Query query =
+    Query<CalculationRegistration> query =
         getCurrentSession()
-            .createQuery("from CalculationRegistration tr where lower(tr.token) = lower(:token)");
+            .createQuery(
+                "from CalculationRegistration tr where lower(tr.token) = lower(:token)",
+                CalculationRegistration.class);
     query.setParameter("token", token);
     return uniqueResult(query);
   }
@@ -85,12 +90,12 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
   /**
    * @see org.openmrs.calculation.db.CalculationRegistrationDAO#getAllCalculationRegistrations()
    */
-  @SuppressWarnings("unchecked")
   @Override
   @Transactional(readOnly = true)
   public List<CalculationRegistration> getAllCalculationRegistrations() {
     return getCurrentSession()
-        .createQuery("from CalculationRegistration tr order by tr.token")
+        .createQuery(
+            "from CalculationRegistration tr order by tr.token", CalculationRegistration.class)
         .getResultList();
   }
 
@@ -101,10 +106,11 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
   @Transactional(readOnly = true)
   public List<CalculationRegistration> getCalculationRegistrationsByProviderClassname(
       String providerClassname) {
-    Query query =
+    Query<CalculationRegistration> query =
         getCurrentSession()
             .createQuery(
-                "from CalculationRegistration tr where tr.providerClassName = :providerClassName");
+                "from CalculationRegistration tr where tr.providerClassName = :providerClassName",
+                CalculationRegistration.class);
     query.setParameter("providerClassName", providerClassname);
     return query.getResultList();
   }
@@ -113,14 +119,14 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
    * @see
    *     org.openmrs.calculation.db.CalculationRegistrationDAO#findCalculationRegistrations(java.lang.String)
    */
-  @SuppressWarnings("unchecked")
   @Override
   @Transactional(readOnly = true)
   public List<CalculationRegistration> findCalculationRegistrations(String partialToken) {
-    Query query =
+    Query<CalculationRegistration> query =
         getCurrentSession()
             .createQuery(
-                "from CalculationRegistration tr where lower(tr.token) like lower(:partialToken)");
+                "from CalculationRegistration tr where lower(tr.token) like lower(:partialToken)",
+                CalculationRegistration.class);
     query.setParameter("partialToken", "%" + partialToken + "%");
     return query.getResultList();
   }
@@ -147,10 +153,9 @@ public class HibernateCalculationRegistrationDAO implements CalculationRegistrat
     getCurrentSession().delete(calculationRegistration);
   }
 
-  @SuppressWarnings("unchecked")
-  private <T> T uniqueResult(Query query) {
+  private <T> T uniqueResult(Query<T> query) {
     try {
-      return (T) query.getSingleResult();
+      return query.getSingleResult();
     } catch (NoResultException e) {
       return null;
     }

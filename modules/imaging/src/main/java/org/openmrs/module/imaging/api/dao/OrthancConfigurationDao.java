@@ -32,9 +32,10 @@ public class OrthancConfigurationDao {
     this.sessionFactory = sessionFactory;
   }
 
-  @SuppressWarnings("unchecked")
   public List<OrthancConfiguration> getAll() {
-    return getSession().createQuery("FROM OrthancConfiguration").getResultList();
+    return getSession()
+        .createQuery("FROM OrthancConfiguration", OrthancConfiguration.class)
+        .getResultList();
   }
 
   /**
@@ -49,7 +50,9 @@ public class OrthancConfigurationDao {
    */
   public void saveNew(OrthancConfiguration config) {
     if (!getSession()
-        .createQuery("FROM OrthancConfiguration c WHERE c.orthancBaseUrl = :orthancBaseUrl")
+        .createQuery(
+            "FROM OrthancConfiguration c WHERE c.orthancBaseUrl = :orthancBaseUrl",
+            OrthancConfiguration.class)
         .setParameter("orthancBaseUrl", config.getOrthancBaseUrl())
         .getResultList()
         .isEmpty()) {

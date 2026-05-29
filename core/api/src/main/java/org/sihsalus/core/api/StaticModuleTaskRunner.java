@@ -8,6 +8,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.Daemon;
 import org.openmrs.api.context.UserContext;
+import org.openmrs.api.context.UsernamePasswordCredentials;
 import org.openmrs.module.DaemonToken;
 import org.openmrs.module.ModuleFactory;
 import org.openmrs.util.OpenmrsThreadPoolHolder;
@@ -90,7 +91,7 @@ public final class StaticModuleTaskRunner {
           "Static module background tasks require scheduler.username and scheduler.password global properties");
     }
 
-    Context.authenticate(username, password);
+    Context.authenticate(new UsernamePasswordCredentials(username, password));
   }
 
   private static Runnable withFailureLogging(Runnable task) {

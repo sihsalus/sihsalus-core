@@ -24,9 +24,8 @@ public class FuaDao {
     this.sessionFactory = sessionFactory;
   }
 
-  @SuppressWarnings("unchecked")
   public List<Fua> getAllFuas() {
-    return getSession().createQuery("FROM Fua").getResultList();
+    return getSession().createQuery("FROM Fua", Fua.class).getResultList();
   }
 
   public Fua getFua(Integer fuaId) {
@@ -51,24 +50,22 @@ public class FuaDao {
   }*/
 
   public Fua getFuaByUuid(String uuid) {
-    return (Fua)
-        getSession()
-            .createQuery("FROM Fua f WHERE f.uuid = :uuid")
-            .setParameter("uuid", uuid)
-            .uniqueResult();
+    return getSession()
+        .createQuery("FROM Fua f WHERE f.uuid = :uuid", Fua.class)
+        .setParameter("uuid", uuid)
+        .uniqueResult();
   }
 
   public Fua getFuaByVisitUuid(String visitUuid) {
-    return (Fua)
-        getSession()
-            .createQuery(
-                "FROM Fua f WHERE f.visitUuid = :visitUuid ORDER BY f.fechaActualizacion DESC")
-            .setParameter("visitUuid", visitUuid)
-            .setMaxResults(1)
-            .uniqueResult();
+    return getSession()
+        .createQuery(
+            "FROM Fua f WHERE f.visitUuid = :visitUuid ORDER BY f.fechaActualizacion DESC",
+            Fua.class)
+        .setParameter("visitUuid", visitUuid)
+        .setMaxResults(1)
+        .uniqueResult();
   }
 
-  @SuppressWarnings("unchecked")
   public List<Fua> getFuasFiltrados(
       String estadoNombre, LocalDate fechaInicio, LocalDate fechaFin, int offset, int limit) {
     String hql = "SELECT f FROM Fua f";
@@ -88,7 +85,7 @@ public class FuaDao {
       hql += " AND f.fechaCreacion <= :fin";
     }
 
-    Query query = getSession().createQuery(hql);
+    Query<Fua> query = getSession().createQuery(hql, Fua.class);
 
     if (estadoNombre != null) query.setParameter("estado", estadoNombre);
     if (fechaInicio != null) query.setParameter("inicio", toDate(fechaInicio));
@@ -100,13 +97,15 @@ public class FuaDao {
     return query.getResultList();
   }
 
-  @SuppressWarnings("unchecked")
   public List<Fua> getFuasByPatientUuid(String patientUuid) {
     String hql =
         "SELECT f FROM Fua f, org.openmrs.Visit v "
             + "WHERE f.visitUuid = v.uuid AND v.patient.uuid = :patientUuid "
             + "ORDER BY f.fechaCreacion DESC";
-    return getSession().createQuery(hql).setParameter("patientUuid", patientUuid).getResultList();
+    return getSession()
+        .createQuery(hql, Fua.class)
+        .setParameter("patientUuid", patientUuid)
+        .getResultList();
   }
 
   private Date toDate(LocalDate localDate) {

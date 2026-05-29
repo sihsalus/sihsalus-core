@@ -32,7 +32,7 @@ public class MissingRequiredPropertyException extends APIException {
    * @param clazz the class of the object on which the property is required
    * @param property the name of the missing required property
    */
-  public MissingRequiredPropertyException(Class clazz, String property) {
+  public MissingRequiredPropertyException(Class<?> clazz, String property) {
     this(clazz.getName() + "." + property + " is required");
   }
 }

@@ -20,9 +20,8 @@ public class FuaEstadoDao {
     this.sessionFactory = sessionFactory;
   }
 
-  @SuppressWarnings("unchecked")
   public List<FuaEstado> getAllEstados() {
-    return getSession().createQuery("FROM FuaEstado").getResultList();
+    return getSession().createQuery("FROM FuaEstado", FuaEstado.class).getResultList();
   }
 
   public FuaEstado getEstado(Integer id) {
@@ -38,10 +37,9 @@ public class FuaEstadoDao {
   }
 
   public FuaEstado getByUuid(String uuid) {
-    return (FuaEstado)
-        getSession()
-            .createQuery("FROM FuaEstado fe WHERE fe.uuid = :uuid")
-            .setParameter("uuid", uuid)
-            .uniqueResult();
+    return getSession()
+        .createQuery("FROM FuaEstado fe WHERE fe.uuid = :uuid", FuaEstado.class)
+        .setParameter("uuid", uuid)
+        .uniqueResult();
   }
 }

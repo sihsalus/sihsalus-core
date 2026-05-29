@@ -369,7 +369,7 @@ public class EmrApiProperties {
         getConceptsByGlobalProperty(EmrApiConstants.GP_NON_DIAGNOSIS_CONCEPT_SETS);
 
     for (Concept concept : concepts) {
-      if (!concept.isSet()) {
+      if (!Boolean.TRUE.equals(concept.getSet())) {
         throw new IllegalStateException(
             "Invalid configuration: concept '"
                 + concept.getUuid()

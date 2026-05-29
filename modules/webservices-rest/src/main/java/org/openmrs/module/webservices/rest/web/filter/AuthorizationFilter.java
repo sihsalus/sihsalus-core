@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UsernamePasswordCredentials;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.slf4j.Logger;
@@ -115,7 +116,7 @@ public class AuthorizationFilter implements Filter {
 
               String username = decoded.substring(0, separator);
               String password = decoded.substring(separator + 1);
-              Context.authenticate(username, password);
+              Context.authenticate(new UsernamePasswordCredentials(username, password));
               persistAuthenticatedUserContext(httpRequest, (HttpServletResponse) response);
               log.debug("authenticated [{}]", username);
             } catch (Exception ex) {

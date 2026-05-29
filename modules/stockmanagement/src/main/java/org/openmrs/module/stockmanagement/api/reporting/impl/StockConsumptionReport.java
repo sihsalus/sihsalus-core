@@ -1,6 +1,7 @@
 package org.openmrs.module.stockmanagement.api.reporting.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -32,22 +33,19 @@ public class StockConsumptionReport
                       consumption.setClosingQuantity(
                           consumption
                               .getClosingQuantity()
-                              .divide(
-                                  consumption.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                              .divide(consumption.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
                     }
                     if (consumption.getQuantityConsumed() != null) {
                       consumption.setQuantityConsumed(
                           consumption
                               .getQuantityConsumed()
-                              .divide(
-                                  consumption.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                              .divide(consumption.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
                     }
                     if (consumption.getQuantityReceived() != null) {
                       consumption.setQuantityReceived(
                           consumption
                               .getQuantityReceived()
-                              .divide(
-                                  consumption.getQuantityFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                              .divide(consumption.getQuantityFactor(), 5, RoundingMode.HALF_EVEN));
                     }
                   }
                   if (consumption.getQuantityConsumed() != null
@@ -67,9 +65,9 @@ public class StockConsumptionReport
                                     .divide(
                                         GlobalProperties.GetReportingCalculationsNoDaysInMonth(),
                                         5,
-                                        BigDecimal.ROUND_HALF_EVEN),
+                                        RoundingMode.HALF_EVEN),
                                 5,
-                                BigDecimal.ROUND_HALF_EVEN));
+                                RoundingMode.HALF_EVEN));
                   }
                 });
       }

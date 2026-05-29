@@ -35,7 +35,7 @@ public class UnchangeableObjectException extends InvalidOperationOnObjectExcepti
   /**
    * @see InvalidOperationOnObjectException#InvalidOperationOnObjectException(Class)
    */
-  public UnchangeableObjectException(Class clazz) {
+  public UnchangeableObjectException(Class<?> clazz) {
     super(clazz);
   }
 }

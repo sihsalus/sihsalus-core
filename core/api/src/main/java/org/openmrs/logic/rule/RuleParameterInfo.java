@@ -16,31 +16,31 @@ package org.openmrs.logic.rule;
  */
 public class RuleParameterInfo {
 
-  private Class parameterClass;
+  private Class<?> parameterClass;
 
   private boolean required;
 
   private Object defaultValue;
 
-  public RuleParameterInfo(Class parameterClass) {
+  public RuleParameterInfo(Class<?> parameterClass) {
     this(parameterClass, false, null);
   }
 
-  public RuleParameterInfo(Class parameterClass, boolean required) {
+  public RuleParameterInfo(Class<?> parameterClass, boolean required) {
     this(parameterClass, required, null);
   }
 
-  public RuleParameterInfo(Class parameterClass, boolean required, Object defaultValue) {
+  public RuleParameterInfo(Class<?> parameterClass, boolean required, Object defaultValue) {
     this.parameterClass = parameterClass;
     this.required = required;
     this.defaultValue = defaultValue;
   }
 
-  public Class getParameterClass() {
+  public Class<?> getParameterClass() {
     return parameterClass;
   }
 
-  public void setParameterClass(Class parameterClass) {
+  public void setParameterClass(Class<?> parameterClass) {
     this.parameterClass = parameterClass;
   }
 

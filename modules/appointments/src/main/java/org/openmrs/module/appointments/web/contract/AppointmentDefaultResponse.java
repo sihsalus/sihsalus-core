@@ -10,22 +10,22 @@ public class AppointmentDefaultResponse {
   private String appointmentNumber;
   private Date dateCreated;
   private Date dateAppointmentScheduled;
-  private Map patient;
+  private Map<String, ?> patient;
   private AppointmentServiceDefaultResponse service;
-  private Map serviceType;
-  private Map provider;
-  private Map location;
+  private Map<String, ?> serviceType;
+  private Map<String, ?> provider;
+  private Map<String, ?> location;
   private Date startDateTime;
   private Date endDateTime;
   private String appointmentKind;
   private String status;
   private String comments;
-  private Map additionalInfo;
+  private Map<String, ?> additionalInfo;
   private Boolean teleconsultation;
   private List<AppointmentProviderDetail> providers;
   private Boolean isRecurring;
   private Boolean voided;
-  private HashMap extensions;
+  private HashMap<Object, Object> extensions;
   private String teleconsultationLink;
   private String priority;
   private List<AppointmentReasonResponse> reasons;
@@ -46,11 +46,11 @@ public class AppointmentDefaultResponse {
     this.appointmentNumber = appointmentNumber;
   }
 
-  public Map getPatient() {
+  public Map<String, ?> getPatient() {
     return patient;
   }
 
-  public void setPatient(Map patient) {
+  public void setPatient(Map<String, ?> patient) {
     this.patient = patient;
   }
 
@@ -62,27 +62,27 @@ public class AppointmentDefaultResponse {
     this.service = service;
   }
 
-  public Map getServiceType() {
+  public Map<String, ?> getServiceType() {
     return serviceType;
   }
 
-  public void setServiceType(Map serviceType) {
+  public void setServiceType(Map<String, ?> serviceType) {
     this.serviceType = serviceType;
   }
 
-  public Map getProvider() {
+  public Map<String, ?> getProvider() {
     return provider;
   }
 
-  public void setProvider(Map provider) {
+  public void setProvider(Map<String, ?> provider) {
     this.provider = provider;
   }
 
-  public Map getLocation() {
+  public Map<String, ?> getLocation() {
     return location;
   }
 
-  public void setLocation(Map location) {
+  public void setLocation(Map<String, ?> location) {
     this.location = location;
   }
 
@@ -134,11 +134,11 @@ public class AppointmentDefaultResponse {
     this.comments = comments;
   }
 
-  public Map getAdditionalInfo() {
+  public Map<String, ?> getAdditionalInfo() {
     return additionalInfo;
   }
 
-  public void setAdditionalInfo(Map additionalInfo) {
+  public void setAdditionalInfo(Map<String, ?> additionalInfo) {
     this.additionalInfo = additionalInfo;
   }
 
@@ -166,17 +166,17 @@ public class AppointmentDefaultResponse {
     this.voided = voided;
   }
 
-  public void setExtensions(HashMap extensions) {
-    this.extensions = extensions == null ? null : new HashMap(extensions);
+  public void setExtensions(HashMap<Object, Object> extensions) {
+    this.extensions = extensions == null ? null : new HashMap<>(extensions);
   }
 
-  public HashMap getExtensions() {
-    return extensions == null ? null : new HashMap(extensions);
+  public HashMap<Object, Object> getExtensions() {
+    return extensions == null ? null : new HashMap<>(extensions);
   }
 
   public void putExtension(Object key, Object value) {
     if (extensions == null) {
-      extensions = new HashMap();
+      extensions = new HashMap<>();
     }
     extensions.put(key, value);
   }

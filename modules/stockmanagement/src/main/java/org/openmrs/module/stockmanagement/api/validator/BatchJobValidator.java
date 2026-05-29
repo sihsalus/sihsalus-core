@@ -133,7 +133,7 @@ public class BatchJobValidator implements Validator {
     }
 
     final String finalReportSystemName = reportSystemName;
-    Optional<Report> report =
+    Optional<Report<?>> report =
         Report.getAllReports().stream()
             .filter(p -> p.getSystemName().equals(finalReportSystemName))
             .findAny();

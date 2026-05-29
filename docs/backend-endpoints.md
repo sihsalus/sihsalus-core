@@ -96,6 +96,7 @@ frontend.
 | `GET` | `/rest/v1/programenrollment` | Patient program enrollments by `patient`. |
 | `GET` | `/rest/v1/metadatamapping/termmapping` | Metadata term mapping lookup by `code`. |
 | `GET` | `/rest/v1/concept/{uuid}` | Concept reference used by frontend metadata lookups. |
+| `POST` | `/rest/v1/idgen/identifiersource/{sourceIdOrUuid}/identifier` | Generates one identifier from an Idgen source by numeric source id or UUID. Accepts optional `comment` in the JSON body or query string and returns `201` with `identifier`. |
 
 The patient chart adapter paths are declared under `/rest/v1`; the `/ws/rest/v1` compatibility prefix
 is routed to the same handlers by the REST path alias filter.
@@ -170,6 +171,7 @@ catalog.
 | Billing | `/rest/v1/billing/bill`, `/rest/v1/billing/bill/{uuid}/payment`, `/rest/v1/billing/billDiscount`, `/rest/v1/billing/billExemption`, `/rest/v1/billing/billExemption/{uuid}/rule`, `/rest/v1/billing/billLineItem`, `/rest/v1/billing/billRefund`, `/rest/v1/billing/billableService`, `/rest/v1/billing/cashierItemPrice`, `/rest/v1/billing/cashPoint`, `/rest/v1/billing/paymentAttribute`, `/rest/v1/billing/paymentMode`, `/rest/v1/billing/paymentModeAttributeType`, `/rest/v1/billing/attributetype`, `/rest/v1/billing/receipt`, `/rest/v1/billing/api/billable-service`, `/rest/v2/billing/timesheet` |
 | Cohort | `/rest/v1/cohortm/cohort`, `/rest/v1/cohortm/cohort/{uuid}/attribute`, `/rest/v1/cohortm/cohortmember`, `/rest/v1/cohortm/cohortmember/{uuid}/attribute`, `/rest/v1/cohortm/cohorttype`, `/rest/v1/cohortm/cohortattributetype`, `/rest/v1/cohortm/cohort-member-attribute-type` |
 | HTML Widgets | `/module/htmlwidgets/conceptSearch.form`, `/module/htmlwidgets/personSearch.form`, `/module/htmlwidgets/userSearch.form`, `/module/htmlwidgets/patientSearch.form`, `/module/htmlwidgets/demonstration.form` |
+| ID Generation | `/rest/v1/idgen/identifiersource/{sourceIdOrUuid}/identifier` |
 | O3 Forms | `/rest/v1/o3/forms/{formNameOrUuid}` |
 | Open Concept Lab | `/rest/v1/openconceptlab/import`, `/rest/v1/openconceptlab/import/{uuid}/item`, `/rest/v1/openconceptlab/importaction`, `/rest/v1/openconceptlab/subscription` |
 | Order Templates | `/rest/v1/ordertemplates/orderTemplate` |
@@ -189,7 +191,7 @@ listed as active HTTP endpoints.
 ## Service-Only Modules
 
 Some static modules are intentionally available as Java/Spring services and database model support,
-not as HTTP endpoints. EMR API and Idgen are in this group.
+not as HTTP endpoints. EMR API is in this group.
 
 EMR API currently registers services including:
 
@@ -205,12 +207,14 @@ The backend test `emrApiIsWiredAsStaticInternalModule` validates these service r
 EMR API Liquibase tables. No `/rest/v1/emrapi/...` endpoint root is currently declared in
 `modules/emrapi`.
 
-Idgen currently registers `IdentifierSourceService`, Hibernate mappings, validators, prefix
-providers, and identifier-source Liquibase tables. The dev-server functional smoke on 2026-05-28
-confirmed that module inventory reports `idgen` as started and database migrated, and that source
-`101` exists in PostgreSQL. However, no `/rest/v1/idgen/...` or `/ws/rest/v1/idgen/...` endpoint root
-is currently declared in `modules/idgen`; `/ws/rest/v1/idgen/identifiersource/101/identifier`
-returns `404 Unknown resource`.
+Idgen registers `IdentifierSourceService`, Hibernate mappings, validators, prefix providers,
+identifier-source Liquibase tables, and a Spring-owned compatibility endpoint for identifier
+generation. The dev-server functional smoke on 2026-05-28 confirmed that the pre-fix image
+`c999fd5fd9a63933830f09480b5333352c2af87f` reported `idgen` as started and database migrated, and
+that source `101` existed in PostgreSQL, but still returned `404` for
+`/ws/rest/v1/idgen/identifiersource/101/identifier`. Current branch coverage proves the endpoint
+locally; redeploy the backend before expecting the public dev server to stop returning that pre-fix
+404.
 
 ## Verification
 
@@ -220,4 +224,5 @@ The current endpoint wiring is covered by these focused checks:
 mvn -pl modules/fhir2 -Dtest=FhirR4ReadControllerTest test
 mvn -pl apps/backend -am -Dtest=SihsalusCoreApplicationTest#patientRegistryPatientRequiresAuthenticationThroughRestAndFhir+importedOpenmrsRestResourcesAreAvailableThroughLegacyWsRestPrefix+fhirR4SearchEndpointInvokesImportedProvider -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl apps/backend -am -Dtest=SihsalusCoreApplicationTest#emrApiIsWiredAsStaticInternalModule -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl apps/backend -am -Dtest=SihsalusCoreApplicationTest#idgenIdentifierGenerationEndpointReturnsOpenmrsRestPayload -Dsurefire.failIfNoSpecifiedTests=false test
 ```

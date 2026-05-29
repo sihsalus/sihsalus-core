@@ -69,14 +69,14 @@ public class ConversionUtil {
   //  org.apache.commons.lang3.tuple.Pair (through omrs-api) messed up other tests
   private static final Map<String, Type> typeVariableMap = new ConcurrentHashMap<String, Type>();
 
-  private static ConcurrentMap<Class<?>, Converter> converterCache;
+  private static ConcurrentMap<Class<?>, Converter<?>> converterCache;
 
-  private static final Converter nullConverter;
+  private static final Converter<?> nullConverter;
 
   static {
-    converterCache = new ConcurrentHashMap<Class<?>, Converter>();
+    converterCache = new ConcurrentHashMap<Class<?>, Converter<?>>();
     nullConverter =
-        new Converter() {
+        new Converter<Object>() {
 
           @Override
           public Object newInstance(String type) {
@@ -107,12 +107,13 @@ public class ConversionUtil {
   }
 
   public static void clearCache() {
-    converterCache = new ConcurrentHashMap<Class<?>, Converter>();
+    converterCache = new ConcurrentHashMap<Class<?>, Converter<?>>();
   }
 
   @SuppressWarnings("unchecked")
   public static <T> Converter<T> getConverter(Class<T> clazz) {
-    Converter<T> result = converterCache.get(clazz);
+    Converter<?> cached = converterCache.get(clazz);
+    Converter<T> result = (Converter<T>) cached;
     if (result != null) {
       return result == nullConverter ? null : result;
     }
@@ -176,7 +177,7 @@ public class ConversionUtil {
    *     <strong>Should</strong> convert strings to enum values <strong>Should</strong> convert to
    *     an array <strong>Should</strong> convert to a class
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings("unchecked")
   public static Object convert(Object object, Type toType) throws ConversionException {
     if (object == null) {
       return null;
@@ -199,7 +200,7 @@ public class ConversionUtil {
 
       if (toClass.isArray()) {
         Class<?> targetElementType = toClass.getComponentType();
-        Collection input = (Collection) object;
+        Collection<?> input = (Collection<?>) object;
         Object ret = Array.newInstance(targetElementType, input.size());
 
         int i = 0;
@@ -210,13 +211,13 @@ public class ConversionUtil {
         return ret;
       }
 
-      Collection ret = null;
+      Collection<Object> ret = null;
       if (SortedSet.class.isAssignableFrom(toClass)) {
-        ret = new TreeSet();
+        ret = new TreeSet<>();
       } else if (Set.class.isAssignableFrom(toClass)) {
-        ret = new HashSet();
+        ret = new HashSet<>();
       } else if (List.class.isAssignableFrom(toClass)) {
-        ret = new ArrayList();
+        ret = new ArrayList<>();
       } else {
         throw new ConversionException(
             "Don't know how to handle collection class: " + toClass, null);
@@ -227,12 +228,12 @@ public class ConversionUtil {
         // conversion
         ParameterizedType toParameterizedType = (ParameterizedType) toType;
         Type targetElementType = toParameterizedType.getActualTypeArguments()[0];
-        for (Object element : (Collection) object) {
+        for (Object element : (Collection<?>) object) {
           ret.add(convert(element, targetElementType));
         }
       } else {
         // otherwise we must just add all items in a non-type-safe manner
-        ret.addAll((Collection) object);
+        ret.addAll((Collection<?>) object);
       }
       return ret;
     }
@@ -296,7 +297,7 @@ public class ConversionUtil {
       } catch (Exception ex) {
       }
     } else if (object instanceof Map) {
-      return convertMap((Map<String, ?>) object, toClass);
+      return convertMap((Map<?, ?>) object, toClass);
     }
     if (toClass.isAssignableFrom(Double.class) && object instanceof Number) {
       return ((Number) object).doubleValue();
@@ -321,10 +322,9 @@ public class ConversionUtil {
    *     it
    * @throws ConversionException
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public static Object convertMap(Map<String, ?> map, Class<?> toClass) throws ConversionException {
+  public static Object convertMap(Map<?, ?> map, Class<?> toClass) throws ConversionException {
     // TODO handle refs by fetching the object at their URI
-    Converter converter = getConverter(toClass);
+    Converter<?> converter = getConverter(toClass);
 
     Object ret = null;
     Object uuid = map.get(RestConstants.PROPERTY_UUID);
@@ -341,7 +341,7 @@ public class ConversionUtil {
     // representation
     if (converter instanceof DelegatingResourceHandler) {
 
-      DelegatingResourceHandler handler = (DelegatingResourceHandler) converter;
+      DelegatingResourceHandler<?> handler = (DelegatingResourceHandler<?>) converter;
       DelegatingResourceDescription resDesc =
           handler.getRepresentationDescription(new DefaultRepresentation());
 
@@ -356,9 +356,10 @@ public class ConversionUtil {
       }
     }
 
-    for (Map.Entry<String, ?> prop : map.entrySet()) {
-      if (RestConstants.PROPERTY_FOR_TYPE.equals(prop.getKey())) continue;
-      converter.setProperty(ret, prop.getKey(), prop.getValue());
+    for (Map.Entry<?, ?> prop : map.entrySet()) {
+      String propertyName = String.valueOf(prop.getKey());
+      if (RestConstants.PROPERTY_FOR_TYPE.equals(propertyName)) continue;
+      converter.setProperty(ret, propertyName, prop.getValue());
     }
     return ret;
   }
@@ -389,13 +390,11 @@ public class ConversionUtil {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public static <S> Object convertToRepresentation(S o, Representation rep)
       throws ConversionException {
-    return convertToRepresentation(o, rep, (Converter) null);
+    return convertToRepresentation(o, rep, (Converter<S>) null);
   }
 
-  @SuppressWarnings("unchecked")
   public static <S> Object convertToRepresentation(S o, Representation rep, Class<?> convertAs)
       throws ConversionException {
     Converter<?> converter = convertAs != null ? getConverter(convertAs) : null;
@@ -408,8 +407,8 @@ public class ConversionUtil {
     o = new HibernateLazyLoader().load(o);
 
     if (o instanceof Collection) {
-      List ret = new ArrayList();
-      for (Object item : ((Collection) o)) {
+      List<Object> ret = new ArrayList<>();
+      for (Object item : ((Collection<?>) o)) {
         ret.add(convertToRepresentation(item, rep, specificConverter));
       }
       return ret;
@@ -498,11 +497,11 @@ public class ConversionUtil {
 
     // Walk the inheritance chain up and try to find the generic type with the specified name
     while (result == null && type != null && !type.equals(Object.class)) {
-      if (type instanceof Class) {
-        type = ((Class) type).getGenericSuperclass();
+      if (type instanceof Class<?> typeClass) {
+        type = typeClass.getGenericSuperclass();
       } else {
         ParameterizedType parameterizedType = (ParameterizedType) type;
-        Class<?> rawType = (Class) parameterizedType.getRawType();
+        Class<?> rawType = (Class<?>) parameterizedType.getRawType();
 
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
         TypeVariable<?>[] typeParameters = rawType.getTypeParameters();

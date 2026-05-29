@@ -274,7 +274,7 @@ public class AdHocQueryResource implements Creatable {
     return new Mapped<Query>(cd, mappings);
   }
 
-  private IdSet simplify(IdSet<?> complex) {
+  private IdSet<?> simplify(IdSet<?> complex) {
     return new SimpleIdSet(complex.getMemberIds());
   }
 

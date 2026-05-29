@@ -22,7 +22,6 @@ import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.hibernate.transform.Transformers;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.module.bedmanagement.AdmissionLocation;
@@ -46,67 +45,61 @@ public class BedManagementDaoImpl implements BedManagementDao {
 
   @Override
   public Bed getBedById(int id) {
-    Bed bed = null;
-    bed =
-        (Bed)
-            sessionFactory
-                .getCurrentSession()
-                .createQuery("from Bed b where b.id = :id")
-                .setParameter("id", id)
-                .uniqueResult();
-    return bed;
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery("from Bed b where b.id = :id", Bed.class)
+        .setParameter("id", id)
+        .uniqueResult();
   }
 
   @Override
   public Bed getBedByUuid(String uuid) {
-    return (Bed)
-        sessionFactory
-            .getCurrentSession()
-            .createQuery("from Bed b where b.uuid = :uuid and b.voided=false")
-            .setParameter("uuid", uuid)
-            .uniqueResult();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery("from Bed b where b.uuid = :uuid and b.voided=false", Bed.class)
+        .setParameter("uuid", uuid)
+        .uniqueResult();
   }
 
   @Override
   public Bed getBedByPatient(Patient patient) {
     Session session = sessionFactory.getCurrentSession();
-    Bed bed =
-        (Bed)
-            session
-                .createQuery(
-                    "select bpa.bed.bedNumber as bedNumber,bpa.bed.id as id from BedPatientAssignment bpa "
-                        + "where bpa.patient = :patient and bpa.endDatetime is null AND bpa.voided is false")
-                .setParameter("patient", patient)
-                .setResultTransformer(Transformers.aliasToBean(Bed.class))
-                .uniqueResult();
+    Object[] row =
+        session
+            .createQuery(
+                "select bpa.bed.bedNumber, bpa.bed.id from BedPatientAssignment bpa "
+                    + "where bpa.patient = :patient and bpa.endDatetime is null AND bpa.voided is false",
+                Object[].class)
+            .setParameter("patient", patient)
+            .uniqueResult();
+    Bed bed = null;
+    if (row != null) {
+      bed = new Bed();
+      bed.setBedNumber((String) row[0]);
+      bed.setId((Integer) row[1]);
+    }
     return bed;
   }
 
   @Override
   public Location getWardForBed(Bed bed) {
     Session session = sessionFactory.getCurrentSession();
-    BedLocationMapping bedLocationMapping =
-        (BedLocationMapping)
-            session
-                .createQuery(
-                    "select blm.location as location from BedLocationMapping blm where blm.bed = :bed")
-                .setParameter("bed", bed)
-                .setResultTransformer(Transformers.aliasToBean(BedLocationMapping.class))
-                .uniqueResult();
-    if (bedLocationMapping != null) {
-      return bedLocationMapping.getLocation();
-    }
-    return null;
+    return session
+        .createQuery(
+            "select blm.location from BedLocationMapping blm where blm.bed = :bed", Location.class)
+        .setParameter("bed", bed)
+        .uniqueResult();
   }
 
   @Override
   public BedPatientAssignment getBedPatientAssignmentByUuid(String uuid) {
     Session session = sessionFactory.getCurrentSession();
-    return (BedPatientAssignment)
-        session
-            .createQuery("from BedPatientAssignment bpa " + "where bpa.uuid = :uuid")
-            .setParameter("uuid", uuid)
-            .uniqueResult();
+    return session
+        .createQuery(
+            "from BedPatientAssignment bpa " + "where bpa.uuid = :uuid",
+            BedPatientAssignment.class)
+        .setParameter("uuid", uuid)
+        .uniqueResult();
   }
 
   @Override
@@ -114,18 +107,18 @@ public class BedManagementDaoImpl implements BedManagementDao {
       String patientUuid, boolean includeEnded) {
     Session session = sessionFactory.getCurrentSession();
     List<BedPatientAssignment> bpaList =
-        (List<BedPatientAssignment>)
-            session
-                .createQuery(
-                    "select bpa from BedPatientAssignment bpa "
-                        + "inner join bpa.patient p "
-                        + "where p.uuid = :patientUuid AND "
-                        + "(bpa.endDatetime IS NULL OR :includeEnded IS TRUE) AND "
-                        + "(bpa.voided IS FALSE) "
-                        + "order by bpa.startDatetime DESC")
-                .setParameter("patientUuid", patientUuid)
-                .setParameter("includeEnded", includeEnded)
-                .list();
+        session
+            .createQuery(
+                "select bpa from BedPatientAssignment bpa "
+                    + "inner join bpa.patient p "
+                    + "where p.uuid = :patientUuid AND "
+                    + "(bpa.endDatetime IS NULL OR :includeEnded IS TRUE) AND "
+                    + "(bpa.voided IS FALSE) "
+                    + "order by bpa.startDatetime DESC",
+                BedPatientAssignment.class)
+            .setParameter("patientUuid", patientUuid)
+            .setParameter("includeEnded", includeEnded)
+            .getResultList();
 
     return bpaList;
   }
@@ -139,18 +132,18 @@ public class BedManagementDaoImpl implements BedManagementDao {
     try {
       session.setHibernateFlushMode(FlushMode.MANUAL);
       bpaList =
-          (List<BedPatientAssignment>)
-              session
-                  .createQuery(
-                      "select bpa from BedPatientAssignment bpa "
-                          + "inner join bpa.encounter enc "
-                          + "where enc.uuid = :encounterUuid AND "
-                          + "(bpa.endDatetime IS NULL OR :includeEnded IS TRUE) AND "
-                          + "(bpa.voided IS FALSE) "
-                          + "order by bpa.startDatetime DESC")
-                  .setParameter("encounterUuid", encounterUuid)
-                  .setParameter("includeEnded", includeEnded)
-                  .list();
+          session
+              .createQuery(
+                  "select bpa from BedPatientAssignment bpa "
+                      + "inner join bpa.encounter enc "
+                      + "where enc.uuid = :encounterUuid AND "
+                      + "(bpa.endDatetime IS NULL OR :includeEnded IS TRUE) AND "
+                      + "(bpa.voided IS FALSE) "
+                      + "order by bpa.startDatetime DESC",
+                  BedPatientAssignment.class)
+              .setParameter("encounterUuid", encounterUuid)
+              .setParameter("includeEnded", includeEnded)
+              .getResultList();
     } finally {
       session.setHibernateFlushMode(flushMode);
     }
@@ -161,19 +154,19 @@ public class BedManagementDaoImpl implements BedManagementDao {
       String visitUuid, boolean includeEnded) {
     Session session = sessionFactory.getCurrentSession();
     List<BedPatientAssignment> bpaList =
-        (List<BedPatientAssignment>)
-            session
-                .createQuery(
-                    "select bpa from BedPatientAssignment bpa "
-                        + "inner join bpa.encounter enc "
-                        + "inner join enc.visit v "
-                        + "where v.uuid = :visitUuid AND "
-                        + "(bpa.endDatetime IS NULL OR :includeEnded IS TRUE) AND "
-                        + "(bpa.voided IS FALSE) "
-                        + "order by bpa.startDatetime DESC")
-                .setParameter("visitUuid", visitUuid)
-                .setParameter("includeEnded", includeEnded)
-                .list();
+        session
+            .createQuery(
+                "select bpa from BedPatientAssignment bpa "
+                    + "inner join bpa.encounter enc "
+                    + "inner join enc.visit v "
+                    + "where v.uuid = :visitUuid AND "
+                    + "(bpa.endDatetime IS NULL OR :includeEnded IS TRUE) AND "
+                    + "(bpa.voided IS FALSE) "
+                    + "order by bpa.startDatetime DESC",
+                BedPatientAssignment.class)
+            .setParameter("visitUuid", visitUuid)
+            .setParameter("includeEnded", includeEnded)
+            .getResultList();
 
     return bpaList;
   }
@@ -184,35 +177,34 @@ public class BedManagementDaoImpl implements BedManagementDao {
     List<BedPatientAssignment> assignments =
         session
             .createQuery(
-                "from BedPatientAssignment where bed=:bed and endDatetime is null and voided is false")
+                "from BedPatientAssignment where bed=:bed and endDatetime is null and voided is false",
+                BedPatientAssignment.class)
             .setParameter("bed", bed)
-            .list();
+            .getResultList();
     return assignments;
   }
 
   @Override
   public Bed getLatestBedByVisit(String visitUuid) {
     Session session = sessionFactory.getCurrentSession();
-    Bed bed =
-        (Bed)
-            session
-                .createQuery(
-                    "select bpa.bed from BedPatientAssignment bpa "
-                        + "inner join bpa.encounter enc "
-                        + "inner join enc.visit v where v.uuid = :visitUuid and bpa.voided is false order by bpa.startDatetime DESC")
-                .setParameter("visitUuid", visitUuid)
-                .setMaxResults(1)
-                .uniqueResult();
-    return bed;
+    return session
+        .createQuery(
+            "select bpa.bed from BedPatientAssignment bpa "
+                + "inner join bpa.encounter enc "
+                + "inner join enc.visit v where v.uuid = :visitUuid and bpa.voided is false order by bpa.startDatetime DESC",
+            Bed.class)
+        .setParameter("visitUuid", visitUuid)
+        .setMaxResults(1)
+        .uniqueResult();
   }
 
   @Override
   public List<BedTag> getAllBedTags() {
     Session session = sessionFactory.getCurrentSession();
     return session
-        .createQuery("from BedTag where voided =:voided")
+        .createQuery("from BedTag where voided =:voided", BedTag.class)
         .setParameter("voided", false)
-        .list();
+        .getResultList();
   }
 
   @Override
@@ -222,9 +214,9 @@ public class BedManagementDaoImpl implements BedManagementDao {
             + "where l in :locations and "
             + "(l.parentLocation not in :locations or l.parentLocation is null) and "
             + "l.retired = false";
-    Query query = sessionFactory.getCurrentSession().createQuery(sql);
+    Query<Location> query = sessionFactory.getCurrentSession().createQuery(sql, Location.class);
     query.setParameterList("locations", locations);
-    List<Location> locationList = query.list();
+    List<Location> locationList = query.getResultList();
 
     List<AdmissionLocation> admissionLocations = new ArrayList<>();
     for (Location location : locationList) {
@@ -248,14 +240,17 @@ public class BedManagementDaoImpl implements BedManagementDao {
             + " COALESCE(sum(CASE WHEN blm.bed IS NOT NULL AND blm.bed.status = :occupied THEN 1 ELSE 0 END), 0) as occupiedBeds"
             + " from BedLocationMapping blm where blm.location in (:locations)";
 
-    AdmissionLocation admissionLocation =
-        (AdmissionLocation)
-            session
-                .createQuery(hql)
-                .setParameterList("locations", locations)
-                .setParameter("occupied", BedStatus.OCCUPIED.toString())
-                .setResultTransformer(Transformers.aliasToBean(AdmissionLocation.class))
-                .uniqueResult();
+    Object[] row =
+        session
+            .createQuery(hql, Object[].class)
+            .setParameterList("locations", locations)
+            .setParameter("occupied", BedStatus.OCCUPIED.toString())
+            .uniqueResult();
+    AdmissionLocation admissionLocation = new AdmissionLocation();
+    if (row != null) {
+      admissionLocation.setTotalBeds(((Number) row[0]).longValue());
+      admissionLocation.setOccupiedBeds(((Number) row[1]).longValue());
+    }
     List<BedLayout> bedLayouts = getBedLayoutsByLocation(location);
 
     admissionLocation.setWard(location);
@@ -267,9 +262,10 @@ public class BedManagementDaoImpl implements BedManagementDao {
   public List<BedLocationMapping> getBedLocationMappingsByLocation(Location location) {
     String hql = "select blm " + "from BedLocationMapping blm " + "where blm.location=:location";
 
-    Query query = sessionFactory.getCurrentSession().createQuery(hql);
+    Query<BedLocationMapping> query =
+        sessionFactory.getCurrentSession().createQuery(hql, BedLocationMapping.class);
     query.setParameter("location", location);
-    return query.list();
+    return query.getResultList();
   }
 
   @Override
@@ -281,11 +277,12 @@ public class BedManagementDaoImpl implements BedManagementDao {
             + "where blm.location=:location "
             + "and blm.row=:row and blm.column=:column";
 
-    Query query = sessionFactory.getCurrentSession().createQuery(hql);
+    Query<BedLocationMapping> query =
+        sessionFactory.getCurrentSession().createQuery(hql, BedLocationMapping.class);
     query.setParameter("location", location);
     query.setParameter("row", row);
     query.setParameter("column", column);
-    return (BedLocationMapping) query.uniqueResult();
+    return query.uniqueResult();
   }
 
   @Override
@@ -306,9 +303,10 @@ public class BedManagementDaoImpl implements BedManagementDao {
         sessionFactory
             .getCurrentSession()
             .createQuery(
-                "select blm from BedLocationMapping blm where blm.location in (:locations) ")
+                "select blm from BedLocationMapping blm where blm.location in (:locations) ",
+                BedLocationMapping.class)
             .setParameter("locations", locations)
-            .list();
+            .getResultList();
     for (BedLocationMapping blm : bedLocationMappings) {
       BedLayout bedLayout = new BedLayout();
       bedLayout.setRowNumber(blm.getRow());
@@ -342,10 +340,11 @@ public class BedManagementDaoImpl implements BedManagementDao {
             + "from BedLocationMapping blm "
             + "where blm.bed.voided=:voided and blm.bed=:bed";
 
-    Query query = sessionFactory.getCurrentSession().createQuery(hql);
+    Query<BedLocationMapping> query =
+        sessionFactory.getCurrentSession().createQuery(hql, BedLocationMapping.class);
     query.setParameter("voided", false);
     query.setParameter("bed", bed);
-    return (BedLocationMapping) query.uniqueResult();
+    return query.uniqueResult();
   }
 
   private Query<Bed> createGetBedsQuery(

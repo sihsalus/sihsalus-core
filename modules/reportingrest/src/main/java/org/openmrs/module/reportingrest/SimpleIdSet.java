@@ -17,10 +17,11 @@ package org.openmrs.module.reportingrest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
 import java.util.Set;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.module.reporting.query.IdSet;
 
 /** A simple implementation of IdSet that can be safely serialized by Jackson or XStream. */
-public class SimpleIdSet implements IdSet {
+public class SimpleIdSet implements IdSet<OpenmrsObject> {
 
   @JsonProperty private Set<Integer> memberIds;
 
@@ -53,27 +54,27 @@ public class SimpleIdSet implements IdSet {
   }
 
   @Override
-  public IdSet clone() {
+  public IdSet<OpenmrsObject> clone() {
     return new SimpleIdSet(new HashSet<Integer>(memberIds));
   }
 
   @Override
-  public void retainAll(IdSet idSet) {
+  public void retainAll(IdSet<OpenmrsObject> idSet) {
     memberIds.retainAll(idSet.getMemberIds());
   }
 
   @Override
-  public void removeAll(IdSet idSet) {
+  public void removeAll(IdSet<OpenmrsObject> idSet) {
     memberIds.removeAll(idSet.getMemberIds());
   }
 
   @Override
-  public void addAll(IdSet idSet) {
+  public void addAll(IdSet<OpenmrsObject> idSet) {
     memberIds.addAll(idSet.getMemberIds());
   }
 
   @Override
-  public void setMemberIds(Set set) {
+  public void setMemberIds(Set<Integer> set) {
     memberIds = set;
   }
 }

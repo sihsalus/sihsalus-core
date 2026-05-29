@@ -62,7 +62,7 @@ public class RestHelperServiceImpl extends BaseOpenmrsService implements RestHel
 
   @Override
   public <T> T getObjectById(Class<? extends T> type, Serializable id) {
-    return type.cast(getHibernateSession().get(type, id));
+    return type.cast(getHibernateSession().find(type, id));
   }
 
   /**

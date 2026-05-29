@@ -35,7 +35,7 @@ public class ConceptMapper {
         new EncounterTransaction.Concept(
             concept.getUuid(),
             concept.getName().getName(),
-            concept.isSet(),
+            Boolean.TRUE.equals(concept.getSet()),
             concept.getDatatype().getName(),
             null,
             conceptClassName,

@@ -96,7 +96,7 @@ public class DbSession {
    * @param queryName the name of a query defined externally
    * @return The query instance for manipulation and execution
    */
-  public Query getNamedQuery(String queryName) {
+  public Query<?> getNamedQuery(String queryName) {
     return getSession().getNamedQuery(queryName);
   }
 
@@ -106,8 +106,20 @@ public class DbSession {
    * @param queryString The HQL query
    * @return The query instance for manipulation and execution
    */
-  public Query createQuery(String queryString) {
+  @SuppressWarnings("deprecation")
+  public Query<?> createQuery(String queryString) {
     return getSession().createQuery(queryString);
+  }
+
+  /**
+   * Create a typed {@link Query} instance for the given HQL query string.
+   *
+   * @param queryString The HQL query
+   * @param resultClass The expected query result type
+   * @return The typed query instance for manipulation and execution
+   */
+  public <T> Query<T> createQuery(String queryString, Class<T> resultClass) {
+    return getSession().createQuery(queryString, resultClass);
   }
 
   /**
@@ -159,7 +171,7 @@ public class DbSession {
    * @param resultClasses The entity(s) to map the result on to.
    * @return The representation of the procedure call.
    */
-  public ProcedureCall createStoredProcedureCall(String procedureName, Class... resultClasses) {
+  public ProcedureCall createStoredProcedureCall(String procedureName, Class<?>... resultClasses) {
     return getSession().createStoredProcedureCall(procedureName, resultClasses);
   }
 
@@ -395,7 +407,7 @@ public class DbSession {
    * @param lockOptions contains the lock level
    * @return the persistent instance or proxy
    */
-  public Object getByClassWithLock(Class theClass, Serializable id, LockOptions lockOptions) {
+  public <T> T getByClassWithLock(Class<T> theClass, Serializable id, LockOptions lockOptions) {
     return getSession().get(theClass, id, lockOptions);
   }
 
@@ -426,7 +438,7 @@ public class DbSession {
    * @param id a valid identifier of an existing persistent instance of the class
    * @return the persistent instance or proxy
    */
-  public Object getReferenceByClass(Class theClass, Serializable id) {
+  public <T> T getReferenceByClass(Class<T> theClass, Serializable id) {
     return getSession().getReference(theClass, id);
   }
 
@@ -753,7 +765,7 @@ public class DbSession {
    * @param id an identifier
    * @return a persistent instance or null
    */
-  public Object get(Class clazz, Serializable id) {
+  public <T> T get(Class<T> clazz, Serializable id) {
     return getSession().get(clazz, id);
   }
 
@@ -768,7 +780,7 @@ public class DbSession {
    * @param lockOptions the lock mode
    * @return a persistent instance or null
    */
-  public Object get(Class clazz, Serializable id, LockOptions lockOptions) {
+  public <T> T get(Class<T> clazz, Serializable id, LockOptions lockOptions) {
     return getSession().get(clazz, id, lockOptions);
   }
 
@@ -818,7 +830,7 @@ public class DbSession {
    * @return load delegate for loading the specified entity type by primary key
    * @throws HibernateException If the specified entity name cannot be resolved as an entity name
    */
-  public IdentifierLoadAccess byId(String entityName) {
+  public IdentifierLoadAccess<?> byId(String entityName) {
     return getSession().byId(entityName);
   }
 
@@ -830,7 +842,7 @@ public class DbSession {
    * @return load delegate for loading the specified entity type by primary key
    * @throws HibernateException If the specified Class cannot be resolved as a mapped entity
    */
-  public IdentifierLoadAccess byId(Class entityClass) {
+  public <T> IdentifierLoadAccess<T> byId(Class<T> entityClass) {
     return getSession().byId(entityClass);
   }
 
@@ -842,7 +854,7 @@ public class DbSession {
    * @return load delegate for loading the specified entity type by natural id
    * @throws HibernateException If the specified entity name cannot be resolved as an entity name
    */
-  public NaturalIdLoadAccess byNaturalId(String entityName) {
+  public NaturalIdLoadAccess<?> byNaturalId(String entityName) {
     return getSession().byNaturalId(entityName);
   }
 
@@ -854,7 +866,7 @@ public class DbSession {
    * @return load delegate for loading the specified entity type by natural id
    * @throws HibernateException If the specified Class cannot be resolved as a mapped entity
    */
-  public NaturalIdLoadAccess byNaturalId(Class entityClass) {
+  public <T> NaturalIdLoadAccess<T> byNaturalId(Class<T> entityClass) {
     return getSession().byNaturalId(entityClass);
   }
 
@@ -868,7 +880,7 @@ public class DbSession {
    *     or if the entity does not define a natural-id or if its natural-id is made up of multiple
    *     attributes.
    */
-  public SimpleNaturalIdLoadAccess bySimpleNaturalId(String entityName) {
+  public SimpleNaturalIdLoadAccess<?> bySimpleNaturalId(String entityName) {
     return getSession().bySimpleNaturalId(entityName);
   }
 
@@ -882,7 +894,7 @@ public class DbSession {
    *     or if the entity does not define a natural-id or if its natural-id is made up of multiple
    *     attributes.
    */
-  public SimpleNaturalIdLoadAccess bySimpleNaturalId(Class entityClass) {
+  public <T> SimpleNaturalIdLoadAccess<T> bySimpleNaturalId(Class<T> entityClass) {
     return getSession().bySimpleNaturalId(entityClass);
   }
 

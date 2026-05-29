@@ -65,7 +65,7 @@ public class DispositionMapper {
             new EncounterTransaction.Concept(
                 groupMember.getConcept().getUuid(),
                 groupMember.getConcept().getName().getName(),
-                groupMember.getConcept().isSet()));
+                Boolean.TRUE.equals(groupMember.getConcept().getSet())));
         observation.setValue(groupMember.getValueAsString(Context.getLocale()));
         observation.setVoidReason(groupMember.getVoidReason());
         observation.setVoided(groupMember.getVoided());

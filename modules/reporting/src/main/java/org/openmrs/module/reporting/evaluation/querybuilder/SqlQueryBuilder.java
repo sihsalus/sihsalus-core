@@ -284,11 +284,11 @@ public class SqlQueryBuilder implements QueryBuilder {
 
       StringBuilder replacementValue = new StringBuilder("?");
       if (parameterValue instanceof Collection) {
-        Collection c = (Collection) parameterValue;
+        Collection<?> c = (Collection<?>) parameterValue;
         if (c.isEmpty()) {
           replacementValue = new StringBuilder("");
         } else {
-          for (Iterator i = c.iterator(); i.hasNext(); ) {
+          for (Iterator<?> i = c.iterator(); i.hasNext(); ) {
             i.next();
             if (i.hasNext()) {
               replacementValue.append(",?");
@@ -320,7 +320,7 @@ public class SqlQueryBuilder implements QueryBuilder {
   protected int setPositionalQueryParameter(PreparedStatement statement, int position, Object value)
       throws SQLException {
     if (value instanceof Collection) {
-      Collection c = (Collection) value;
+      Collection<?> c = (Collection<?>) value;
       for (Object o : c) {
         position = setPositionalQueryParameter(statement, position, o);
       }
@@ -354,9 +354,9 @@ public class SqlQueryBuilder implements QueryBuilder {
     if (value == null) {
       return null;
     }
-    Collection c = null;
+    Collection<?> c = null;
     if (value instanceof Collection) {
-      c = (Collection) value;
+      c = (Collection<?>) value;
     } else if (value instanceof Object[]) {
       c = Arrays.asList((Object[]) value);
     } else if (value instanceof Cohort) {

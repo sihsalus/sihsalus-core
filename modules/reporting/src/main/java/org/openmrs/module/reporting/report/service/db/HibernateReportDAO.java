@@ -40,9 +40,11 @@ public class HibernateReportDAO implements ReportDAO {
    * @return the ReportDesign with the given uuid
    */
   public ReportDesign getReportDesignByUuid(String uuid) throws DAOException {
-    Query q =
-        sessionFactory.getCurrentSession().createQuery("from ReportDesign r where r.uuid = :uuid");
-    return (ReportDesign) q.setParameter("uuid", uuid).uniqueResult();
+    Query<ReportDesign> q =
+        sessionFactory
+            .getCurrentSession()
+            .createQuery("from ReportDesign r where r.uuid = :uuid", ReportDesign.class);
+    return q.setParameter("uuid", uuid).uniqueResult();
   }
 
   /**
@@ -65,7 +67,6 @@ public class HibernateReportDAO implements ReportDAO {
    * @return a List<ReportDesign> object containing all of the {@link ReportDesign}s
    * @throws DAOException
    */
-  @SuppressWarnings("unchecked")
   public List<ReportDesign> getReportDesigns(
       ReportDefinition reportDefinition,
       Class<? extends ReportRenderer> rendererType,
@@ -81,14 +82,15 @@ public class HibernateReportDAO implements ReportDAO {
     if (includeRetired == false) {
       hql.append(" and r.retired = false");
     }
-    Query q = sessionFactory.getCurrentSession().createQuery(hql.toString());
+    Query<ReportDesign> q =
+        sessionFactory.getCurrentSession().createQuery(hql.toString(), ReportDesign.class);
     if (reportDefinition != null) {
       q.setParameter("reportDefinition", reportDefinition);
     }
     if (rendererType != null) {
       q.setParameter("rendererType", rendererType);
     }
-    return q.list();
+    return q.getResultList();
   }
 
   /**
@@ -134,33 +136,39 @@ public class HibernateReportDAO implements ReportDAO {
    * @return the {@link ReportProcessorConfiguration} with the passed uuid
    */
   public ReportProcessorConfiguration getReportProcessorConfigurationByUuid(String uuid) {
-    Query q =
+    Query<ReportProcessorConfiguration> q =
         sessionFactory
             .getCurrentSession()
-            .createQuery("from ReportProcessorConfiguration r where r.uuid = :uuid");
-    return (ReportProcessorConfiguration) q.setParameter("uuid", uuid).uniqueResult();
+            .createQuery(
+                "from ReportProcessorConfiguration r where r.uuid = :uuid",
+                ReportProcessorConfiguration.class);
+    return q.setParameter("uuid", uuid).uniqueResult();
   }
 
   /**
    * @return all the {@link ReportProcessorConfiguration}s
    */
-  @SuppressWarnings("unchecked")
   public List<ReportProcessorConfiguration> getAllReportProcessorConfigurations(
       boolean includeRetired) {
     String hql =
         "from ReportProcessorConfiguration r" + (includeRetired ? "" : " where r.retired = false");
-    return sessionFactory.getCurrentSession().createQuery(hql).list();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery(hql, ReportProcessorConfiguration.class)
+        .getResultList();
   }
 
   /**
    * @return all the {@link ReportProcessorConfiguration}s that are meant to be applied globally,
    *     i.e., their reportDesign property is null
    */
-  @SuppressWarnings("unchecked")
   public List<ReportProcessorConfiguration> getGlobalReportProcessorConfigurations() {
     String hql =
         "from ReportProcessorConfiguration r where r.retired = false and r.reportDesign is null";
-    return sessionFactory.getCurrentSession().createQuery(hql).list();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery(hql, ReportProcessorConfiguration.class)
+        .getResultList();
   }
 
   /** Deletes the passed {@link ReportProcessorConfiguration} */
@@ -189,15 +197,16 @@ public class HibernateReportDAO implements ReportDAO {
    * @see ReportDAO#getReportRequestByUuid(java.lang.String)
    */
   public ReportRequest getReportRequestByUuid(String uuid) {
-    Query q =
-        sessionFactory.getCurrentSession().createQuery("from ReportRequest r where r.uuid = :uuid");
-    return (ReportRequest) q.setParameter("uuid", uuid).uniqueResult();
+    Query<ReportRequest> q =
+        sessionFactory
+            .getCurrentSession()
+            .createQuery("from ReportRequest r where r.uuid = :uuid", ReportRequest.class);
+    return q.setParameter("uuid", uuid).uniqueResult();
   }
 
   /**
    * @see ReportDAO#getReportRequests(ReportDefinition, Date, Date, Integer, Integer, Status...)
    */
-  @SuppressWarnings("unchecked")
   public List<ReportRequest> getReportRequests(
       ReportDefinition reportDefinition,
       Date requestOnOrAfter,
@@ -205,9 +214,10 @@ public class HibernateReportDAO implements ReportDAO {
       Integer firstResult,
       Integer maxResults,
       Status... statuses) {
-    final Query query =
+    final Query<ReportRequest> query =
         createReportRequestsBaseQuery(
             "from ReportRequest r",
+            ReportRequest.class,
             reportDefinition,
             requestOnOrAfter,
             requestOnOrBefore,
@@ -222,7 +232,7 @@ public class HibernateReportDAO implements ReportDAO {
       query.setMaxResults(maxResults);
     }
 
-    return query.list();
+    return query.getResultList();
   }
 
   @Override
@@ -231,14 +241,15 @@ public class HibernateReportDAO implements ReportDAO {
       Date requestOnOrAfter,
       Date requestOnOrBefore,
       Status... statuses) {
-    final Query query =
+    final Query<Long> query =
         createReportRequestsBaseQuery(
             "select count(r) from ReportRequest r",
+            Long.class,
             reportDefinition,
             requestOnOrAfter,
             requestOnOrBefore,
             statuses);
-    return ((Number) query.uniqueResult()).longValue();
+    return query.uniqueResult();
   }
 
   /**
@@ -254,7 +265,7 @@ public class HibernateReportDAO implements ReportDAO {
   @Override
   public void purgeReportRequestsForReportDefinition(String reportDefinitionUuid) {
     String hql = "delete from ReportRequest r where r.reportDefinitionUuid=:uuid";
-    Query query = sessionFactory.getCurrentSession().createQuery(hql);
+    Query<?> query = sessionFactory.getCurrentSession().createQuery(hql);
     query.setParameter("uuid", reportDefinitionUuid);
     query.executeUpdate();
   }
@@ -265,7 +276,7 @@ public class HibernateReportDAO implements ReportDAO {
   @Override
   public void purgeReportDesignsForReportDefinition(String reportDefinitionUuid) {
     String hql = "delete from ReportDesign r where r.reportDefinition=:uuid";
-    Query query = sessionFactory.getCurrentSession().createQuery(hql);
+    Query<?> query = sessionFactory.getCurrentSession().createQuery(hql);
     query.setParameter("uuid", reportDefinitionUuid);
     query.executeUpdate();
   }
@@ -276,9 +287,9 @@ public class HibernateReportDAO implements ReportDAO {
   @Override
   public List<String> getReportRequestUuids(String reportDefinitionUuid) {
     String hql = "select uuid from ReportRequest r where r.reportDefinitionUuid=:uuid";
-    Query query = sessionFactory.getCurrentSession().createQuery(hql);
+    Query<String> query = sessionFactory.getCurrentSession().createQuery(hql, String.class);
     query.setParameter("uuid", reportDefinitionUuid);
-    return query.list();
+    return query.getResultList();
   }
 
   // ***** PROPERTY ACCESS *****
@@ -297,8 +308,9 @@ public class HibernateReportDAO implements ReportDAO {
     this.sessionFactory = sessionFactory;
   }
 
-  private Query createReportRequestsBaseQuery(
+  private <T> Query<T> createReportRequestsBaseQuery(
       String select,
+      Class<T> resultClass,
       ReportDefinition reportDefinition,
       Date requestOnOrAfter,
       Date requestOnOrBefore,
@@ -320,7 +332,7 @@ public class HibernateReportDAO implements ReportDAO {
       hql.append(
           " order by r.requestDate desc, r.evaluateStartDatetime desc, r.evaluateCompleteDatetime desc, r.priority desc");
     }
-    Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
+    Query<T> query = sessionFactory.getCurrentSession().createQuery(hql.toString(), resultClass);
     if (reportDefinition != null) {
       query.setParameter("reportDefinitionUuid", reportDefinition.getUuid());
     }

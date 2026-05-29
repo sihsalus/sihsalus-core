@@ -2,6 +2,7 @@ package org.openmrs.module.stockmanagement.api.jobs;
 
 import jakarta.mail.Session;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -277,7 +278,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
           break;
         }
         BigDecimal quantityRule =
-            rule.getQuantity().divide(rule.getFactor(), 2, BigDecimal.ROUND_HALF_EVEN);
+            rule.getQuantity().divide(rule.getFactor(), 2, RoundingMode.HALF_EVEN);
         List<StockRuleCurrentQuantity> quantityCurrent =
             stockItemLocationEnableDescendantsBalanceMap.getOrDefault(
                 rule.getStockItemLocationEnableDescendantsHashCode(), null);
@@ -287,7 +288,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
               quantityCurrent
                   .get(0)
                   .getQuantity()
-                  .divide(rule.getFactor(), 2, BigDecimal.ROUND_HALF_EVEN);
+                  .divide(rule.getFactor(), 2, RoundingMode.HALF_EVEN);
         }
 
         if (itemCount > 1) {
@@ -461,7 +462,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
         if (maxAlerts == 0) break;
         if (rule.getAlert() == null) {
           BigDecimal quantityRule =
-              rule.getQuantity().divide(rule.getFactor(), 2, BigDecimal.ROUND_HALF_EVEN);
+              rule.getQuantity().divide(rule.getFactor(), 2, RoundingMode.HALF_EVEN);
           List<StockRuleCurrentQuantity> quantityCurrent =
               stockItemLocationEnableDescendantsBalanceMap.getOrDefault(
                   rule.getStockItemLocationEnableDescendantsHashCode(), null);
@@ -471,7 +472,7 @@ public class StockRuleEvaluationJob extends AbstractTask {
                 quantityCurrent
                     .get(0)
                     .getQuantity()
-                    .divide(rule.getFactor(), 2, BigDecimal.ROUND_HALF_EVEN);
+                    .divide(rule.getFactor(), 2, RoundingMode.HALF_EVEN);
           }
 
           String alertLine =

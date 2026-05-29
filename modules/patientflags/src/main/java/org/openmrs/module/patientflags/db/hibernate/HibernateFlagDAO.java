@@ -44,17 +44,15 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#getAllFlags()
    */
-  @SuppressWarnings("unchecked")
   public List<Flag> getAllFlags() throws DAOException {
-    return sessionFactory.getCurrentSession().createQuery("from Flag").list();
+    return sessionFactory.getCurrentSession().createQuery("from Flag", Flag.class).getResultList();
   }
 
-  @SuppressWarnings("unchecked")
   public List<Flag> getAllEnabledFlags() throws DAOException {
     return sessionFactory
         .getCurrentSession()
-        .createQuery("from Flag f where f.enabled = true")
-        .list();
+        .createQuery("from Flag f where f.enabled = true", Flag.class)
+        .getResultList();
   }
 
   /**
@@ -68,31 +66,29 @@ public class HibernateFlagDAO implements FlagDAO {
    * @see org.openmrs.module.patientflags.db.FlagDAO#getFlagByUuid(String)
    */
   public Flag getFlagByUuid(String uuid) throws DAOException {
-    return (Flag)
-        this.sessionFactory
-            .getCurrentSession()
-            .createQuery("from Flag f where f.uuid = :uuid")
-            .setParameter("uuid", uuid)
-            .uniqueResult();
+    return this.sessionFactory
+        .getCurrentSession()
+        .createQuery("from Flag f where f.uuid = :uuid", Flag.class)
+        .setParameter("uuid", uuid)
+        .uniqueResult();
   }
 
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#getPatientFlagByUuid(String)
    */
   public PatientFlag getPatientFlagByUuid(String uuid) throws DAOException {
-    return (PatientFlag)
-        this.sessionFactory
-            .getCurrentSession()
-            .createQuery("from PatientFlag f where f.uuid = :uuid")
-            .setParameter("uuid", uuid)
-            .uniqueResult();
+    return this.sessionFactory
+        .getCurrentSession()
+        .createQuery("from PatientFlag f where f.uuid = :uuid", PatientFlag.class)
+        .setParameter("uuid", uuid)
+        .uniqueResult();
   }
 
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#getFlagByName(String)
    */
   public Flag getFlagByName(String name) throws DAOException {
-    List<Flag> list = getByName("Flag", name);
+    List<Flag> list = getByName(Flag.class, name);
 
     if (list.size() == 1) {
       return list.get(0);
@@ -117,7 +113,6 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#searchFlags(String, String, Boolean, List)
    */
-  @SuppressWarnings("unchecked")
   public List<Flag> searchFlags(String name, String evaluator, Boolean enabled, List<String> tags)
       throws DAOException {
     StringBuilder hql = new StringBuilder("select distinct f from Flag f");
@@ -145,7 +140,7 @@ public class HibernateFlagDAO implements FlagDAO {
       hql.append(conjunction).append("t.name in (:tags)");
     }
 
-    Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
+    Query<Flag> query = sessionFactory.getCurrentSession().createQuery(hql.toString(), Flag.class);
     if (StringUtils.isNotBlank(name)) {
       query.setParameter("name", name.toLowerCase() + "%");
     }
@@ -158,7 +153,7 @@ public class HibernateFlagDAO implements FlagDAO {
     if (tags != null && tags.size() > 0) {
       query.setParameterList("tags", tags);
     }
-    return query.list();
+    return query.getResultList();
   }
 
   /**
@@ -172,9 +167,8 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#getAllTags()
    */
-  @SuppressWarnings("unchecked")
   public List<Tag> getAllTags() throws DAOException {
-    return sessionFactory.getCurrentSession().createQuery("from Tag").list();
+    return sessionFactory.getCurrentSession().createQuery("from Tag", Tag.class).getResultList();
   }
 
   /**
@@ -188,7 +182,7 @@ public class HibernateFlagDAO implements FlagDAO {
    * @see org.openmrs.module.patientflags.db.FlagDAO#getTag(String)
    */
   public Tag getTag(String name) {
-    List<Tag> list = getByName("Tag", name);
+    List<Tag> list = getByName(Tag.class, name);
 
     if (list.size() == 1) {
       return list.get(0);
@@ -203,12 +197,11 @@ public class HibernateFlagDAO implements FlagDAO {
    * @see org.openmrs.module.patientflags.db.FlagDAO#getTagByUuid(String)
    */
   public Tag getTagByUuid(String uuid) throws DAOException {
-    return (Tag)
-        this.sessionFactory
-            .getCurrentSession()
-            .createQuery("from Tag t where t.uuid = :uuid")
-            .setParameter("uuid", uuid)
-            .uniqueResult();
+    return this.sessionFactory
+        .getCurrentSession()
+        .createQuery("from Tag t where t.uuid = :uuid", Tag.class)
+        .setParameter("uuid", uuid)
+        .uniqueResult();
   }
 
   /**
@@ -225,7 +218,6 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#purgeTag(Integer)
    */
-  @SuppressWarnings("unchecked")
   public void purgeTag(Integer tagId) throws DAOException {
     Tag tag = getTag(tagId);
 
@@ -233,9 +225,10 @@ public class HibernateFlagDAO implements FlagDAO {
     List<Flag> flags =
         sessionFactory
             .getCurrentSession()
-            .createQuery("select distinct f from Flag f join f.tags t where t.tagId = :tagId")
+            .createQuery(
+                "select distinct f from Flag f join f.tags t where t.tagId = :tagId", Flag.class)
             .setParameter("tagId", tagId)
-            .list();
+            .getResultList();
     flags.forEach(
         flag -> {
           flag.removeTag(tag);
@@ -249,9 +242,11 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#getAllPriorities()
    */
-  @SuppressWarnings("unchecked")
   public List<Priority> getAllPriorities() throws DAOException {
-    return sessionFactory.getCurrentSession().createQuery("from Priority").list();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery("from Priority", Priority.class)
+        .getResultList();
   }
 
   /**
@@ -265,19 +260,18 @@ public class HibernateFlagDAO implements FlagDAO {
    * @see org.openmrs.module.patientflags.db.FlagDAO#getPriorityByUuid(String)
    */
   public Priority getPriorityByUuid(String uuid) throws DAOException {
-    return (Priority)
-        this.sessionFactory
-            .getCurrentSession()
-            .createQuery("from Priority p where p.uuid = :uuid")
-            .setParameter("uuid", uuid)
-            .uniqueResult();
+    return this.sessionFactory
+        .getCurrentSession()
+        .createQuery("from Priority p where p.uuid = :uuid", Priority.class)
+        .setParameter("uuid", uuid)
+        .uniqueResult();
   }
 
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#getPriorityByName(String)
    */
   public Priority getPriorityByName(String name) throws DAOException {
-    List<Priority> list = getByName("Priority", name);
+    List<Priority> list = getByName(Priority.class, name);
 
     if (list.size() == 1) {
       return list.get(0);
@@ -310,9 +304,11 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#getAllDisplayPoints()
    */
-  @SuppressWarnings("unchecked")
   public List<DisplayPoint> getAllDisplayPoints() throws DAOException {
-    return sessionFactory.getCurrentSession().createQuery("from DisplayPoint").list();
+    return sessionFactory
+        .getCurrentSession()
+        .createQuery("from DisplayPoint", DisplayPoint.class)
+        .getResultList();
   }
 
   /**
@@ -326,16 +322,15 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#getDisplayPoint(String)
    */
-  @SuppressWarnings("unchecked")
   public DisplayPoint getDisplayPoint(String name) {
-    Query query =
+    Query<DisplayPoint> query =
         sessionFactory
             .getCurrentSession()
-            .createQuery("from DisplayPoint d where lower(d.name) = :name");
+            .createQuery("from DisplayPoint d where lower(d.name) = :name", DisplayPoint.class);
     query.setParameter("name", StringUtils.lowerCase(name));
     query.setMaxResults(1);
 
-    List<DisplayPoint> list = query.list();
+    List<DisplayPoint> list = query.getResultList();
     if (list.size() > 0) {
       // note the assumption here is that two displaypoints with the same case-insensitive tags
       // aren't allowed; if there are two, this just returns the first one it finds
@@ -365,21 +360,21 @@ public class HibernateFlagDAO implements FlagDAO {
   }
 
   public boolean isPriorityNameDuplicated(Priority priority) {
-    return isNameDuplicated("Priority", "priorityId", priority.getName(), priority.getPriorityId());
+    return isNameDuplicated(
+        Priority.class, "priorityId", priority.getName(), priority.getPriorityId());
   }
 
   public boolean isFlagNameDuplicated(Flag flag) {
-    return isNameDuplicated("Flag", "flagId", flag.getName(), flag.getFlagId());
+    return isNameDuplicated(Flag.class, "flagId", flag.getName(), flag.getFlagId());
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<Flag> getFlagsForPatient(Patient patient) throws DAOException {
     return sessionFactory
         .getCurrentSession()
-        .createQuery("select pf.flag from PatientFlag pf where pf.patient = :patient")
+        .createQuery("select pf.flag from PatientFlag pf where pf.patient = :patient", Flag.class)
         .setParameter("patient", patient)
-        .list();
+        .getResultList();
   }
 
   /**
@@ -392,15 +387,16 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#deletePatientFlagsForPatient(Patient)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void deletePatientFlagsForPatient(Patient patient) throws DAOException {
     List<PatientFlag> flags =
         sessionFactory
             .getCurrentSession()
-            .createQuery("from PatientFlag pf where pf.patient = :patient and pf.voided = false")
+            .createQuery(
+                "from PatientFlag pf where pf.patient = :patient and pf.voided = false",
+                PatientFlag.class)
             .setParameter("patient", patient)
-            .list();
+            .getResultList();
     flags.forEach(
         patientFlag -> {
           sessionFactory.getCurrentSession().delete(patientFlag);
@@ -410,17 +406,17 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#deletePatientFlagForPatient(Patient, Flag)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void deletePatientFlagForPatient(Patient patient, Flag flag) throws DAOException {
     List<PatientFlag> flags =
         sessionFactory
             .getCurrentSession()
             .createQuery(
-                "from PatientFlag pf where pf.patient = :patient and pf.flag = :flag and pf.voided = false")
+                "from PatientFlag pf where pf.patient = :patient and pf.flag = :flag and pf.voided = false",
+                PatientFlag.class)
             .setParameter("patient", patient)
             .setParameter("flag", flag)
-            .list(); // Should return a maximum of one flag
+            .getResultList(); // Should return a maximum of one flag
     flags.forEach(
         patientFlag -> {
           sessionFactory.getCurrentSession().delete(patientFlag);
@@ -430,29 +426,29 @@ public class HibernateFlagDAO implements FlagDAO {
   /**
    * @see org.openmrs.module.patientflags.db.FlagDAO#deletePatientFlagsForFlag(Flag)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void deletePatientFlagsForFlag(Flag flag) throws DAOException {
     List<PatientFlag> flags =
         sessionFactory
             .getCurrentSession()
-            .createQuery("from PatientFlag pf where pf.flag = :flag and pf.voided = false")
+            .createQuery(
+                "from PatientFlag pf where pf.flag = :flag and pf.voided = false",
+                PatientFlag.class)
             .setParameter("flag", flag)
-            .list();
+            .getResultList();
     flags.forEach(
         patientFlag -> {
           sessionFactory.getCurrentSession().delete(patientFlag);
         });
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<PatientFlag> getPatientFlags(Patient patient) throws DAOException {
     return sessionFactory
         .getCurrentSession()
-        .createQuery("from PatientFlag pf where pf.patient = :patient")
+        .createQuery("from PatientFlag pf where pf.patient = :patient", PatientFlag.class)
         .setParameter("patient", patient)
-        .list();
+        .getResultList();
   }
 
   /**
@@ -460,11 +456,13 @@ public class HibernateFlagDAO implements FlagDAO {
    *
    * @throws DAOException the dao exception
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void deleteAllPatientFlags() throws DAOException {
     List<PatientFlag> flags =
-        sessionFactory.getCurrentSession().createQuery("from PatientFlag").list();
+        sessionFactory
+            .getCurrentSession()
+            .createQuery("from PatientFlag", PatientFlag.class)
+            .getResultList();
 
     flags.forEach(
         patientFlag -> {
@@ -472,28 +470,31 @@ public class HibernateFlagDAO implements FlagDAO {
         });
   }
 
-  @SuppressWarnings("unchecked")
-  private <T> List<T> getByName(String entityName, String name) {
-    Query query;
+  private <T> List<T> getByName(Class<T> entityClass, String name) {
+    Query<T> query;
+    String entityName = entityClass.getSimpleName();
     if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
       query =
           sessionFactory
               .getCurrentSession()
-              .createQuery("from " + entityName + " e where lower(e.name) = :name");
+              .createQuery("from " + entityName + " e where lower(e.name) = :name", entityClass);
       query.setParameter("name", StringUtils.lowerCase(name));
     } else {
       query =
           sessionFactory
               .getCurrentSession()
-              .createQuery("from " + entityName + " e where e.name = :name");
+              .createQuery("from " + entityName + " e where e.name = :name", entityClass);
       query.setParameter("name", name);
     }
-    return query.list();
+    return query.getResultList();
   }
 
-  private boolean isNameDuplicated(String entityName, String idProperty, String name, Integer id) {
+  private boolean isNameDuplicated(
+      Class<?> entityClass, String idProperty, String name, Integer id) {
     StringBuilder hql =
-        new StringBuilder("from ").append(entityName).append(" e where e.retired = false");
+        new StringBuilder("from ")
+            .append(entityClass.getSimpleName())
+            .append(" e where e.retired = false");
     if (name != null) {
       hql.append(" and e.name = :name");
     }
@@ -501,7 +502,7 @@ public class HibernateFlagDAO implements FlagDAO {
       hql.append(" and e.").append(idProperty).append(" <> :id");
     }
 
-    Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
+    Query<?> query = sessionFactory.getCurrentSession().createQuery(hql.toString(), entityClass);
     if (name != null) {
       query.setParameter("name", name);
     }
@@ -509,6 +510,6 @@ public class HibernateFlagDAO implements FlagDAO {
       query.setParameter("id", id);
     }
     query.setMaxResults(1);
-    return !query.list().isEmpty();
+    return !query.getResultList().isEmpty();
   }
 }
