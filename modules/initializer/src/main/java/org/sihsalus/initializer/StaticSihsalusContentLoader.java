@@ -2,45 +2,30 @@ package org.sihsalus.initializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -4034,93 +4019,6 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     return id;
   }
 
-  private List<CsvRecord> readDomain(
-      Path configRoot, String domain, List<String> wildcardExclusions)
-      throws IOException, CsvException {
-    List<CsvRecord> records = new ArrayList<>();
-    for (Path csvFile : csvFiles(configRoot, domain, wildcardExclusions)) {
-      records.addAll(readCsv(csvFile));
-    }
-    return records;
-  }
-
-  private List<Path> csvFiles(Path configRoot, String domain, List<String> wildcardExclusions)
-      throws IOException {
-    return domainFiles(configRoot, domain, ".csv", wildcardExclusions);
-  }
-
-  private List<Path> xmlFiles(Path configRoot, String domain, List<String> wildcardExclusions)
-      throws IOException {
-    return domainFiles(configRoot, domain, ".xml", wildcardExclusions);
-  }
-
-  private List<Path> zipFiles(Path configRoot, String domain, List<String> wildcardExclusions)
-      throws IOException {
-    return domainFiles(configRoot, domain, ".zip", wildcardExclusions);
-  }
-
-  private List<Path> domainFiles(
-      Path configRoot, String domain, String extension, List<String> wildcardExclusions)
-      throws IOException {
-    Path directory = SihsalusContentPaths.resolveDomainDirectory(configRoot, domain);
-    if (directory == null) {
-      return List.of();
-    }
-
-    try (Stream<Path> stream = Files.list(directory)) {
-      return stream
-          .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-          .filter(
-              path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(extension))
-          .filter(path -> !excludedByWildcard(path, directory, wildcardExclusions))
-          .sorted()
-          .toList();
-    }
-  }
-
-  private boolean excludedByWildcard(Path path, Path directory, List<String> wildcardExclusions) {
-    if (wildcardExclusions == null || wildcardExclusions.isEmpty()) {
-      return false;
-    }
-
-    Path fileName = path.getFileName();
-    Path relativePath = directory.relativize(path);
-    for (String wildcardExclusion : wildcardExclusions) {
-      if (isBlank(wildcardExclusion)) {
-        continue;
-      }
-      try {
-        PathMatcher matcher =
-            FileSystems.getDefault().getPathMatcher("glob:" + wildcardExclusion.trim());
-        if (matcher.matches(fileName) || matcher.matches(relativePath)) {
-          return true;
-        }
-      } catch (PatternSyntaxException e) {
-        log.warn("Ignoring invalid initializer wildcard exclusion '{}'.", wildcardExclusion);
-      }
-    }
-    return false;
-  }
-
-  private List<CsvRecord> readCsv(Path csvFile) throws IOException, CsvException {
-    try (CSVReader reader =
-        new CSVReader(
-            new InputStreamReader(Files.newInputStream(csvFile), StandardCharsets.UTF_8))) {
-      String[] headers = reader.readNext();
-      if (headers == null) {
-        return List.of();
-      }
-
-      List<CsvRecord> records = new ArrayList<>();
-      for (String[] row : reader.readAll()) {
-        if (!allBlank(row)) {
-          records.add(new CsvRecord(csvFile, headers, row));
-        }
-      }
-      return records;
-    }
-  }
-
   private List<GlobalPropertyRecord> readGlobalProperties(Path xmlFile)
       throws IOException, ParserConfigurationException, SAXException {
     DocumentBuilderFactory factory = secureDocumentBuilderFactory();
@@ -4171,39 +4069,6 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
   }
 
-  private DocumentBuilderFactory secureDocumentBuilderFactory()
-      throws ParserConfigurationException {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-    factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-    factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-    factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-    factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-    setXmlAttributeIfSupported(factory, XMLConstants.ACCESS_EXTERNAL_DTD, "");
-    setXmlAttributeIfSupported(factory, XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-    factory.setExpandEntityReferences(false);
-    factory.setXIncludeAware(false);
-    return factory;
-  }
-
-  private String elementText(Element element, String tagName) {
-    NodeList children = element.getElementsByTagName(tagName);
-    if (children.getLength() == 0) {
-      return null;
-    }
-    String text = children.item(0).getTextContent();
-    return isBlank(text) ? null : text.trim();
-  }
-
-  private void setXmlAttributeIfSupported(
-      DocumentBuilderFactory factory, String attributeName, String value) {
-    try {
-      factory.setAttribute(attributeName, value);
-    } catch (IllegalArgumentException e) {
-      log.debug("XML parser does not support secure attribute {}.", attributeName);
-    }
-  }
-
   private record GlobalPropertyRecord(String property, String value, String description) {}
 
   private record MetadataSourceRecord(
@@ -4232,7 +4097,6 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
   private record AddressHierarchyEntryValue(String name, String userGeneratedId) {}
 
   private record AddressHierarchyEntryKey(Integer parentId, Integer levelId, String name) {}
-
 
   private record PaymentModeAttributeRecord(
       String uuid,
