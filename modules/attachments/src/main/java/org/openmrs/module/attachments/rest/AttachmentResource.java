@@ -55,6 +55,7 @@ import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 import org.springframework.web.multipart.MultipartFile;
 
 @Resource(
@@ -99,6 +100,7 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment>
     if (!obs.isComplex())
       throw new GenericRestException(uniqueId + " does not identify a complex obs.", null);
     else {
+      requirePatientAccess(obs);
       return new Attachment(
           obs,
           Context.getRegisteredComponent(
@@ -190,6 +192,7 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment>
       throw new IllegalRequestException(
           "A patient parameter must be provided when uploading an attachment.");
     }
+    PatientObjectAuthorizationService.current().requireCanReadPatient(patient.getUuid());
 
     if (StringUtils.isEmpty(instructions)) instructions = ValueComplex.INSTRUCTIONS_DEFAULT;
 
@@ -421,6 +424,9 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment>
       Encounter encounter,
       String includeEncounterless,
       boolean includeVoided) {
+    if (patient != null) {
+      PatientObjectAuthorizationService.current().requireCanReadPatient(patient.getUuid());
+    }
 
     List<Attachment> attachmentList = new ArrayList<>();
 
@@ -474,6 +480,7 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment>
       throw new IllegalRequestException(
           "A patient parameter must be provided when searching the attachments.");
     }
+    PatientObjectAuthorizationService.current().requireCanReadPatient(patient.getUuid());
 
     // Search Attachments
     List<Attachment> attachmentList =
@@ -491,6 +498,12 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment>
       return new NeedsPaging<>(attachmentList, context);
     }
     return new EmptySearchResult();
+  }
+
+  private void requirePatientAccess(Obs obs) {
+    if (obs.getPerson() instanceof Patient patient) {
+      PatientObjectAuthorizationService.current().requireCanReadPatient(patient.getUuid());
+    }
   }
 
   /**

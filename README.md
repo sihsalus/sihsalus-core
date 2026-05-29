@@ -49,10 +49,10 @@ docs/       Active architecture, security, CI, and modernization notes
 docs/ops/   Deployment and operations notes
 tests/e2e/  Cross-module end-to-end test workspace
 .dev/       Ignored local reference clones and developer-only scratch data
-core/api/                 Shared SIH Salus core contracts
-core/liquibase/           Centralized database changelogs
-core/openmrs-bom/         OpenMRS-compatible dependency baseline
-apps/backend/             Spring Boot executable runtime
+platform/api/                 Shared SIH Salus core contracts
+platform/liquibase/           Centralized database changelogs
+platform/openmrs-bom/         OpenMRS-compatible dependency baseline
+runtime/             Spring Boot executable runtime
 modules/fhir2/            First FHIR API surface
 modules/webservices-rest/ REST compatibility surface
 modules/*/                Static internal modules for distro capabilities
@@ -91,8 +91,8 @@ mvn -DskipITs test
 Module-scoped checks:
 
 ```bash
-mvn -pl core/api -am spotless:check -Dspotbugs.failOnError=false com.github.spotbugs:spotbugs-maven-plugin:4.8.6.6:check -DskipITs -DskipTests compile
-mvn -pl core/api -am -DskipITs test
+mvn -pl platform/api -am spotless:check -Dspotbugs.failOnError=false com.github.spotbugs:spotbugs-maven-plugin:4.8.6.6:check -DskipITs -DskipTests compile
+mvn -pl platform/api -am -DskipITs test
 ```
 
 Liquibase dry-run and migration review:

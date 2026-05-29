@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Obs;
+import org.openmrs.Patient;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.attachments.AttachmentsConstants;
@@ -24,6 +25,7 @@ import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.openmrs.obs.ComplexData;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,6 +64,9 @@ public class AttachmentBytesResource extends BaseRestController {
           "The following obs is not a complex obs, no complex data can be retrieved. "
               + "Obs UUID: "
               + obs.getUuid());
+    }
+    if (obs.getPerson() instanceof Patient patient) {
+      PatientObjectAuthorizationService.current().requireCanReadPatient(patient.getUuid());
     }
 
     ComplexViewHelper viewHelper = context.getComplexViewHelper();

@@ -193,7 +193,7 @@ If the container name differs, get it from `docker compose ps`.
 Before promoting an image behind `/openmrs`, verify:
 
 ```bash
-mvn -pl apps/backend -am \
+mvn -pl runtime -am \
   -Dtest=SihsalusCoreApplicationTest#adminAndLegacyModuleEndpointsRequireAuthentication+userCompatibilityEndpointReturnsUserPropertiesWithoutLegacyRoleConversion \
   -Dsurefire.failIfNoSpecifiedTests=false test
 ```

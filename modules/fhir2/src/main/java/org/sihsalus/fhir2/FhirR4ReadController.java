@@ -37,6 +37,9 @@ import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -63,10 +66,31 @@ public class FhirR4ReadController {
 
   private final Map<String, IResourceProvider> providersByResourceType;
 
+  private final PatientObjectAuthorizationService patientAuthorization;
+
+  @Autowired
+  FhirR4ReadController(
+      @Qualifier("fhirR4") FhirContext fhirContext,
+      @R4Provider List<IResourceProvider> providers,
+      ObjectProvider<PatientObjectAuthorizationService> patientAuthorization) {
+    this(
+        fhirContext,
+        providers,
+        patientAuthorization.getIfAvailable(PatientObjectAuthorizationService::permitAll));
+  }
+
   FhirR4ReadController(
       @Qualifier("fhirR4") FhirContext fhirContext, @R4Provider List<IResourceProvider> providers) {
+    this(fhirContext, providers, PatientObjectAuthorizationService.permitAll());
+  }
+
+  private FhirR4ReadController(
+      FhirContext fhirContext,
+      List<IResourceProvider> providers,
+      PatientObjectAuthorizationService patientAuthorization) {
     this.fhirContext = fhirContext;
     this.providersByResourceType = new LinkedHashMap<>();
+    this.patientAuthorization = patientAuthorization;
     providers.stream()
         .sorted(Comparator.comparing(this::providerResourceType))
         .forEach(provider -> providersByResourceType.put(providerResourceType(provider), provider));
@@ -98,6 +122,9 @@ public class FhirR4ReadController {
     }
 
     try {
+      if (isPatientResource(resourceType) && !patientAuthorization.canReadPatient(id)) {
+        return patientAccessDenied(id);
+      }
       IBaseResource resource = invokeRead(provider, readMethod, id);
       if (resource == null) {
         return operationOutcome(
@@ -146,8 +173,12 @@ public class FhirR4ReadController {
 
     try {
       rejectUnsupportedSearchParameters(searchMethod, queryParameters);
+      String deniedPatientUuid = deniedPatientSearchReference(queryParameters);
+      if (deniedPatientUuid != null) {
+        return patientAccessDenied(deniedPatientUuid);
+      }
       IBundleProvider bundleProvider = invokeSearch(provider, searchMethod, queryParameters);
-      Bundle bundle = bundleFromProvider(bundleProvider, queryParameters);
+      Bundle bundle = bundleFromProvider(resourceType, bundleProvider, queryParameters);
       return fhirResponse(200, fhirContext.newJsonParser().encodeResourceToString(bundle));
     } catch (IllegalArgumentException exception) {
       return operationOutcome(400, exception.getMessage(), OperationOutcome.IssueType.INVALID);
@@ -165,6 +196,17 @@ public class FhirR4ReadController {
 
   private int authenticationFailureStatus() {
     return Context.isSessionOpen() && Context.isAuthenticated() ? 403 : 401;
+  }
+
+  private boolean isPatientResource(String resourceType) {
+    return "Patient".equals(resourceType);
+  }
+
+  private ResponseEntity<String> patientAccessDenied(String patientUuid) {
+    return operationOutcome(
+        403,
+        "Patient access denied: " + patientUuid,
+        OperationOutcome.IssueType.FORBIDDEN);
   }
 
   private String providerResourceType(IResourceProvider provider) {
@@ -239,7 +281,9 @@ public class FhirR4ReadController {
   }
 
   private Bundle bundleFromProvider(
-      IBundleProvider bundleProvider, MultiValueMap<String, String> queryParameters) {
+      String resourceType,
+      IBundleProvider bundleProvider,
+      MultiValueMap<String, String> queryParameters) {
     Bundle bundle = new Bundle();
     bundle.setType(Bundle.BundleType.SEARCHSET);
     if (bundleProvider == null) {
@@ -257,7 +301,9 @@ public class FhirR4ReadController {
 
     List<Resource> resources = new ArrayList<>();
     for (IBaseResource resource : bundleProvider.getResources(0, fetchCount)) {
-      if (resource instanceof Resource r4Resource && matchesTagFilters(r4Resource, tagFilters)) {
+      if (resource instanceof Resource r4Resource
+          && matchesTagFilters(r4Resource, tagFilters)
+          && canExposeResource(resourceType, r4Resource)) {
         resources.add(r4Resource);
       }
     }
@@ -267,6 +313,49 @@ public class FhirR4ReadController {
       bundle.addEntry().setResource(resource);
     }
     return bundle;
+  }
+
+  private boolean canExposeResource(String resourceType, Resource resource) {
+    if (!isPatientResource(resourceType)) {
+      return true;
+    }
+    String id = resource.getIdElement().getIdPart();
+    return id == null || id.isBlank() || patientAuthorization.canReadPatient(id);
+  }
+
+  private String deniedPatientSearchReference(MultiValueMap<String, String> queryParameters) {
+    for (Map.Entry<String, List<String>> entry : queryParameters.entrySet()) {
+      String parameterName = entry.getKey();
+      if (!"patient".equals(baseSearchParameterName(parameterName))
+          && !"subject".equals(baseSearchParameterName(parameterName))) {
+        continue;
+      }
+      if (parameterName.contains(":") && !parameterName.endsWith(":Patient")) {
+        continue;
+      }
+      for (String value : entry.getValue()) {
+        for (String reference : value.split(",")) {
+          String patientUuid = patientUuidFromReference(reference);
+          if (patientUuid != null && !patientAuthorization.canReadPatient(patientUuid)) {
+            return patientUuid;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  private String patientUuidFromReference(String reference) {
+    if (reference == null || reference.isBlank()) {
+      return null;
+    }
+    String trimmed = reference.trim();
+    int tokenSeparator = trimmed.lastIndexOf('|');
+    if (tokenSeparator >= 0) {
+      trimmed = trimmed.substring(tokenSeparator + 1);
+    }
+    int slash = trimmed.lastIndexOf('/');
+    return slash >= 0 ? trimmed.substring(slash + 1) : trimmed;
   }
 
   private List<String> tagFilters(MultiValueMap<String, String> queryParameters) {

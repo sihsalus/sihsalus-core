@@ -29,10 +29,10 @@ The default sequence is:
 Useful options:
 
 ```bash
-./scripts/quality-doctor.sh --modules core/api,modules/reporting
+./scripts/quality-doctor.sh --modules platform/api,modules/reporting
 ./scripts/quality-doctor.sh --modules modules/stockmanagement --tests
 ./scripts/quality-doctor.sh --modules modules/patientflags --skip-spotless
-./scripts/quality-doctor.sh --modules core/api --spotbugs
+./scripts/quality-doctor.sh --modules platform/api --spotbugs
 ```
 
 The script also accepts Maven artifact IDs for compatibility with older notes.

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -71,6 +72,122 @@ class FhirR4ReadControllerTest {
     assertNotNull(response.getBody());
     assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
     assertTrue(response.getBody().contains("FHIR read requires privileges"));
+  }
+
+  @Test
+  void readReturnsMethodNotSupportedWhenProviderLacksReadAnnotation() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(
+            FhirContext.forR4Cached(), List.of(new SearchOnlyPatientProvider()));
+
+    ResponseEntity<String> response = controller.read("Patient", "patient-uuid");
+
+    assertEquals(405, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("read is not supported"));
+  }
+
+  @Test
+  void searchReturnsMethodNotSupportedWhenProviderLacksSearchAnnotation() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new ReadOnlyPatientProvider()));
+
+    ResponseEntity<String> response = controller.search("Patient", searchParameters("_count", "10"));
+
+    assertEquals(405, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("search is not supported"));
+  }
+
+  @Test
+  void readsNullResourceAsNotFound() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new NullReturningPatientProvider()));
+
+    ResponseEntity<String> response = controller.read("Patient", "patient-uuid");
+
+    assertEquals(404, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("resource was not found: Patient/patient-uuid"));
+  }
+
+  @Test
+  void propagatesRuntimeReadExceptions() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new ExplodingPatientProvider()));
+
+    assertThrows(
+        IllegalStateException.class, () -> controller.read("Patient", "patient-uuid"));
+  }
+
+  @Test
+  void rejectsNegativeSearchCount() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
+
+    ResponseEntity<String> response = controller.search("Patient", searchParameters("_count", "-1"));
+
+    assertEquals(400, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("_count must be zero or greater"));
+  }
+
+  @Test
+  void rejectsMalformedSearchCount() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
+
+    ResponseEntity<String> response = controller.search("Patient", searchParameters("_count", "abc"));
+
+    assertEquals(400, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("_count must be a whole number"));
+  }
+
+  @Test
+  void rejectsDuplicateSearchCountParameter() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
+    LinkedMultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add("_count", "10");
+    parameters.add("_count", "20");
+
+    ResponseEntity<String> response = controller.search("Patient", parameters);
+
+    assertEquals(400, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("_count must be specified only once"));
+  }
+
+  @Test
+  void rejectsBlankSortParameterName() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new ObservationProvider()));
+    LinkedMultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add("_sort", ",date");
+
+    ResponseEntity<String> response = controller.search("Observation", parameters);
+
+    assertEquals(400, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().contains("\"resourceType\":\"OperationOutcome\""));
+    assertTrue(response.getBody().contains("_sort must not contain blank values"));
+  }
+
+  @Test
+  void propagatesRuntimeSearchExceptions() {
+    FhirR4ReadController controller =
+        new FhirR4ReadController(
+            FhirContext.forR4Cached(), List.of(new ExplodingSearchPatientProvider()));
+
+    assertThrows(
+        IllegalStateException.class, () -> controller.search("Patient", searchParameters("_count", "10")));
   }
 
   @Test
@@ -174,6 +291,65 @@ class FhirR4ReadControllerTest {
       Patient patient = new Patient();
       patient.setId("patient-search-uuid");
       return new SimpleBundleProvider(List.of(patient));
+    }
+  }
+
+  private static final class SearchOnlyPatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return Patient.class;
+    }
+
+    @Search
+    @SuppressWarnings("unused")
+    public IBundleProvider search() {
+      Patient patient = new Patient();
+      patient.setId("patient-search-uuid");
+      return new SimpleBundleProvider(List.of(patient));
+    }
+  }
+
+  private static final class ReadOnlyPatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return Patient.class;
+    }
+
+    @Read
+    @SuppressWarnings("unused")
+    public Patient read(@IdParam IdType id) {
+      Patient patient = new Patient();
+      patient.setId(id.getIdPart());
+      return patient;
+    }
+  }
+
+  private static final class NullReturningPatientProvider extends PatientProvider {
+
+    @Override
+    @Read
+    public Patient read(@IdParam IdType id) {
+      return null;
+    }
+  }
+
+  private static final class ExplodingPatientProvider extends PatientProvider {
+
+    @Override
+    @Read
+    public Patient read(@IdParam IdType id) {
+      throw new IllegalStateException("boom");
+    }
+  }
+
+  private static final class ExplodingSearchPatientProvider extends PatientProvider {
+
+    @Override
+    @Search
+    public IBundleProvider search() {
+      throw new IllegalStateException("boom");
     }
   }
 

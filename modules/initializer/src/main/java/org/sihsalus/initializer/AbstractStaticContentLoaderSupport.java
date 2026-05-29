@@ -1,7 +1,15 @@
 package org.sihsalus.initializer;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.Time;
@@ -17,11 +25,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.PatternSyntaxException;
+import java.util.stream.Stream;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Generic, domain-agnostic plumbing shared by the static content loader: database introspection,
@@ -495,6 +510,124 @@ abstract class AbstractStaticContentLoaderSupport {
       id = ids.isEmpty() ? null : ids.get(0);
     }
     return id;
+  }
+
+  List<CsvRecord> readDomain(Path configRoot, String domain, List<String> wildcardExclusions)
+      throws IOException, CsvException {
+    List<CsvRecord> records = new ArrayList<>();
+    for (Path csvFile : csvFiles(configRoot, domain, wildcardExclusions)) {
+      records.addAll(readCsv(csvFile));
+    }
+    return records;
+  }
+
+  List<Path> csvFiles(Path configRoot, String domain, List<String> wildcardExclusions)
+      throws IOException {
+    return domainFiles(configRoot, domain, ".csv", wildcardExclusions);
+  }
+
+  List<Path> xmlFiles(Path configRoot, String domain, List<String> wildcardExclusions)
+      throws IOException {
+    return domainFiles(configRoot, domain, ".xml", wildcardExclusions);
+  }
+
+  List<Path> zipFiles(Path configRoot, String domain, List<String> wildcardExclusions)
+      throws IOException {
+    return domainFiles(configRoot, domain, ".zip", wildcardExclusions);
+  }
+
+  List<Path> domainFiles(
+      Path configRoot, String domain, String extension, List<String> wildcardExclusions)
+      throws IOException {
+    Path directory = SihsalusContentPaths.resolveDomainDirectory(configRoot, domain);
+    if (directory == null) {
+      return List.of();
+    }
+
+    try (Stream<Path> stream = Files.list(directory)) {
+      return stream
+          .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+          .filter(
+              path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(extension))
+          .filter(path -> !excludedByWildcard(path, directory, wildcardExclusions))
+          .sorted()
+          .toList();
+    }
+  }
+
+  boolean excludedByWildcard(Path path, Path directory, List<String> wildcardExclusions) {
+    if (wildcardExclusions == null || wildcardExclusions.isEmpty()) {
+      return false;
+    }
+
+    Path fileName = path.getFileName();
+    Path relativePath = directory.relativize(path);
+    for (String wildcardExclusion : wildcardExclusions) {
+      if (isBlank(wildcardExclusion)) {
+        continue;
+      }
+      try {
+        PathMatcher matcher =
+            FileSystems.getDefault().getPathMatcher("glob:" + wildcardExclusion.trim());
+        if (matcher.matches(fileName) || matcher.matches(relativePath)) {
+          return true;
+        }
+      } catch (PatternSyntaxException e) {
+        log.warn("Ignoring invalid initializer wildcard exclusion '{}'.", wildcardExclusion);
+      }
+    }
+    return false;
+  }
+
+  List<CsvRecord> readCsv(Path csvFile) throws IOException, CsvException {
+    try (CSVReader reader =
+        new CSVReader(
+            new InputStreamReader(Files.newInputStream(csvFile), StandardCharsets.UTF_8))) {
+      String[] headers = reader.readNext();
+      if (headers == null) {
+        return List.of();
+      }
+
+      List<CsvRecord> records = new ArrayList<>();
+      for (String[] row : reader.readAll()) {
+        if (!allBlank(row)) {
+          records.add(new CsvRecord(csvFile, headers, row));
+        }
+      }
+      return records;
+    }
+  }
+
+  DocumentBuilderFactory secureDocumentBuilderFactory() throws ParserConfigurationException {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+    factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    setXmlAttributeIfSupported(factory, XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    setXmlAttributeIfSupported(factory, XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+    factory.setExpandEntityReferences(false);
+    factory.setXIncludeAware(false);
+    return factory;
+  }
+
+  String elementText(Element element, String tagName) {
+    NodeList children = element.getElementsByTagName(tagName);
+    if (children.getLength() == 0) {
+      return null;
+    }
+    String text = children.item(0).getTextContent();
+    return isBlank(text) ? null : text.trim();
+  }
+
+  void setXmlAttributeIfSupported(
+      DocumentBuilderFactory factory, String attributeName, String value) {
+    try {
+      factory.setAttribute(attributeName, value);
+    } catch (IllegalArgumentException e) {
+      log.debug("XML parser does not support secure attribute {}.", attributeName);
+    }
   }
 
   static final class CsvRecord {

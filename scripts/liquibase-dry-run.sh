@@ -30,6 +30,7 @@ Modes:
   --sql              Generate pending SQL without applying it (default)
   --status           Show pending changesets
   --validate         Validate the changelog against the target database
+  --update           Apply pending changesets to the target database
 
 Options:
   --offline          Use Liquibase offline PostgreSQL mode instead of a live database
@@ -40,7 +41,7 @@ Options:
   --contexts <list>  Pass Liquibase contexts
   --labels <list>    Pass Liquibase labels
   --output <file>    SQL output file for --sql
-  --skip-build       Reuse the existing apps/backend package
+  --skip-build       Reuse the existing runtime package
   -h, --help         Show this help message
 
 Defaults:
@@ -68,6 +69,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --validate)
       MODE="validate"
+      shift
+      ;;
+    --update)
+      MODE="update"
       shift
       ;;
     --offline)
@@ -134,7 +139,7 @@ if [[ "$URL" != offline:* && -z "$PASSWORD" ]]; then
   exit 1
 fi
 
-BOOT_JAR="$ROOT_DIR/apps/backend/target/sihsalus-core-boot-0.1.0-SNAPSHOT.jar"
+BOOT_JAR="$ROOT_DIR/runtime/target/sihsalus-core-boot-0.1.0-SNAPSHOT.jar"
 OPENMRS_DATA_DIR="${SIHSALUS_LIQUIBASE_OPENMRS_DATA_DIR:-$ROOT_DIR/target/liquibase-dry-run/openmrs-data}"
 EXTRACT_DIR="$ROOT_DIR/target/liquibase-dry-run/boot"
 RUN_DIR="$(mktemp -d "${TMPDIR:-/tmp}/sihsalus-liquibase-dry-run.XXXXXX")"
@@ -159,8 +164,8 @@ cat > "$LOG4J_CONFIG" <<'EOF'
 EOF
 
 if [[ "$SKIP_BUILD" == 0 ]]; then
-  echo "=== Packaging apps/backend for Liquibase classpath ==="
-  "$MAVEN_CMD" -q -pl apps/backend -am -DskipTests -DskipITs package
+  echo "=== Packaging runtime for Liquibase classpath ==="
+  "$MAVEN_CMD" -q -pl runtime -am -DskipTests -DskipITs package
 elif [[ ! -f "$BOOT_JAR" ]]; then
   echo "Missing $BOOT_JAR. Run without --skip-build first."
   exit 1
@@ -187,6 +192,8 @@ if [[ "$MODE" == "status" ]]; then
   LIQUIBASE_COMMAND="status"
 elif [[ "$MODE" == "validate" ]]; then
   LIQUIBASE_COMMAND="validate"
+elif [[ "$MODE" == "update" ]]; then
+  LIQUIBASE_COMMAND="update"
 fi
 
 LIQUIBASE_ARGS=(

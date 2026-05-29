@@ -66,9 +66,9 @@ Options:
 
 Examples:
   ./scripts/quality-doctor.sh
-  ./scripts/quality-doctor.sh --modules core/api,modules/reporting --tests
+  ./scripts/quality-doctor.sh --modules platform/api,modules/reporting --tests
   ./scripts/quality-doctor.sh --modules modules/patientflags --spotbugs
-  MAVEN_CMD=./mvnw ./scripts/quality-doctor.sh --modules core/api
+  MAVEN_CMD=./mvnw ./scripts/quality-doctor.sh --modules platform/api
 EOF
 }
 

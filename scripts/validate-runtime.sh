@@ -6,8 +6,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 MAVEN_CMD="${MAVEN_CMD:-mvn}"
-QUALITY_MODULES="${QUALITY_MODULES:-core/api,apps/backend}"
-BOOT_JAR="$ROOT_DIR/apps/backend/target/sihsalus-core-boot-0.1.0-SNAPSHOT.jar"
+QUALITY_MODULES="${QUALITY_MODULES:-platform/api,runtime}"
+BOOT_JAR="$ROOT_DIR/runtime/target/sihsalus-core-boot-0.1.0-SNAPSHOT.jar"
 
 export SIHSALUS_POSTGRES_PASSWORD="${SIHSALUS_POSTGRES_PASSWORD:-dummy}"
 export SIHSALUS_ADMIN_PASSWORD="${SIHSALUS_ADMIN_PASSWORD:-dummy}"

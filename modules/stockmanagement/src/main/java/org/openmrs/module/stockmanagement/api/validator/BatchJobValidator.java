@@ -25,6 +25,7 @@ import org.openmrs.module.stockmanagement.api.reporting.Report;
 import org.openmrs.module.stockmanagement.api.reporting.ReportParameter;
 import org.openmrs.module.stockmanagement.api.utils.DateUtil;
 import org.openmrs.module.stockmanagement.api.utils.GlobalProperties;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -291,6 +292,9 @@ public class BatchJobValidator implements Validator {
       if (!StringUtils.isBlank(value)) {
         Patient patient = Context.getPatientService().getPatientByUuid(value);
         if (patient == null) {
+          return false;
+        }
+        if (!PatientObjectAuthorizationService.current().canReadPatient(patient.getUuid())) {
           return false;
         }
       }

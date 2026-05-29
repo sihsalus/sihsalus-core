@@ -27,6 +27,7 @@ import org.openmrs.module.stockmanagement.api.reporting.ReportGenerator;
 import org.openmrs.module.stockmanagement.api.utils.DateUtil;
 import org.openmrs.module.stockmanagement.api.utils.GlobalProperties;
 import org.openmrs.module.stockmanagement.api.utils.csv.CSVWriter;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 
 public class DispensingLogsReport extends ReportGenerator {
 
@@ -106,6 +107,11 @@ public class DispensingLogsReport extends ReportGenerator {
         if (patient == null) {
           stockManagementService.failBatchJob(
               batchJob.getUuid(), "Report patient parameter not found");
+          return;
+        }
+        if (!PatientObjectAuthorizationService.current().canReadPatient(patient.getUuid())) {
+          stockManagementService.failBatchJob(
+              batchJob.getUuid(), "Report patient parameter is not authorized");
           return;
         }
         filter.setPatientId(patient.getId());

@@ -2,45 +2,30 @@ package org.sihsalus.initializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -64,8 +49,62 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  @FunctionalInterface
+  private interface DomainLoader {
+    void load(Path configRoot, List<String> wildcardExclusions) throws Exception;
+  }
+
+  private final Map<String, DomainLoader> domainLoaders;
+
   StaticSihsalusContentLoader(JdbcTemplate jdbcTemplate) {
     super(jdbcTemplate);
+    this.domainLoaders = createDomainLoaders();
+  }
+
+  private Map<String, DomainLoader> createDomainLoaders() {
+    Map<String, DomainLoader> loaders = new HashMap<>();
+    loaders.put("conceptclasses", this::loadConceptClasses);
+    loaders.put("conceptsources", this::loadConceptSources);
+    loaders.put("metadatasharing", this::loadMetadataSharing);
+    loaders.put("visittypes", this::loadVisitTypes);
+    loaders.put("patientidentifiertypes", this::loadPatientIdentifierTypes);
+    loaders.put("relationshiptypes", this::loadRelationshipTypes);
+    loaders.put("privileges", this::loadPrivileges);
+    loaders.put("encountertypes", this::loadEncounterTypes);
+    loaders.put("encounterroles", this::loadEncounterRoles);
+    loaders.put("roles", this::loadRoles);
+    loaders.put("globalproperties", this::loadGlobalProperties);
+    loaders.put("addresshierarchy", this::loadAddressHierarchy);
+    loaders.put("attributetypes", this::loadAttributeTypes);
+    loaders.put("locationtags", this::loadLocationTags);
+    loaders.put("locations", this::loadLocations);
+    loaders.put("personattributetypes", this::loadPersonAttributeTypes);
+    loaders.put("ordertypes", this::loadOrderTypes);
+    loaders.put("billableservices", this::loadBillableServices);
+    loaders.put("paymentmodes", this::loadPaymentModes);
+    loaders.put("cashpoints", this::loadCashPoints);
+    loaders.put("appointmentspecialities", this::loadAppointmentSpecialities);
+    loaders.put("appointmentservicedefinitions", this::loadAppointmentServiceDefinitions);
+    loaders.put("cohorttypes", this::loadCohortTypes);
+    loaders.put("cohortattributetypes", this::loadCohortAttributeTypes);
+    loaders.put("fhirconceptsources", this::loadFhirConceptSources);
+    loaders.put("fhirpatientidentifiersystems", this::loadFhirPatientIdentifierSystems);
+    loaders.put("idgen", this::loadIdentifierSources);
+    loaders.put("autogenerationoptions", this::loadAutoGenerationOptions);
+    loaders.put("conceptsets", this::loadConceptSets);
+    loaders.put("orderfrequencies", this::loadOrderFrequencies);
+    loaders.put("drugs", this::loadDrugs);
+    loaders.put("programs", this::loadPrograms);
+    loaders.put("programworkflows", this::loadProgramWorkflows);
+    loaders.put("programworkflowstates", this::loadProgramWorkflowStates);
+    loaders.put("queues", this::loadQueues);
+    loaders.put("datafiltermappings", this::loadDataFilterMappings);
+    loaders.put("conceptreferencerange", this::loadConceptReferenceRanges);
+    loaders.put("ampathforms", this::loadAmpathForms);
+    loaders.put("ampathformstranslations", this::loadAmpathFormTranslations);
+    loaders.put("metadatasets", this::loadMetadataSets);
+    loaders.put("metadatatermmappings", this::loadMetadataTermMappings);
+    return loaders;
   }
 
   void load() {
@@ -107,6 +146,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     loadDomains(
         List.of(
             "personattributetypes",
+            "appointmentspecialities",
+            "appointmentservicedefinitions",
             "billableservices",
             "conceptsets",
             "orderfrequencies",
@@ -136,134 +177,12 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     if (configRoot == null) {
       return;
     }
-
-    switch (domainName) {
-      case "conceptclasses":
-        loadConceptClasses(configRoot, wildcardExclusions);
-        break;
-      case "conceptsources":
-        loadConceptSources(configRoot, wildcardExclusions);
-        break;
-      case "metadatasharing":
-        loadMetadataSharing(configRoot, wildcardExclusions);
-        break;
-      case "visittypes":
-        loadVisitTypes(configRoot, wildcardExclusions);
-        break;
-      case "patientidentifiertypes":
-        loadPatientIdentifierTypes(configRoot, wildcardExclusions);
-        break;
-      case "relationshiptypes":
-        loadRelationshipTypes(configRoot, wildcardExclusions);
-        break;
-      case "privileges":
-        loadPrivileges(configRoot, wildcardExclusions);
-        break;
-      case "encountertypes":
-        loadEncounterTypes(configRoot, wildcardExclusions);
-        break;
-      case "encounterroles":
-        loadEncounterRoles(configRoot, wildcardExclusions);
-        break;
-      case "roles":
-        loadRoles(configRoot, wildcardExclusions);
-        break;
-      case "globalproperties":
-        loadGlobalProperties(configRoot, wildcardExclusions);
-        break;
-      case "addresshierarchy":
-        loadAddressHierarchy(configRoot, wildcardExclusions);
-        break;
-      case "attributetypes":
-        loadAttributeTypes(configRoot, wildcardExclusions);
-        break;
-      case "locationtags":
-        loadLocationTags(configRoot, wildcardExclusions);
-        break;
-      case "locations":
-        loadLocations(configRoot, wildcardExclusions);
-        break;
-      case "personattributetypes":
-        loadPersonAttributeTypes(configRoot, wildcardExclusions);
-        break;
-      case "ordertypes":
-        loadOrderTypes(configRoot, wildcardExclusions);
-        break;
-      case "billableservices":
-        loadBillableServices(configRoot, wildcardExclusions);
-        break;
-      case "paymentmodes":
-        loadPaymentModes(configRoot, wildcardExclusions);
-        break;
-      case "cashpoints":
-        loadCashPoints(configRoot, wildcardExclusions);
-        break;
-      case "appointmentspecialities":
-        loadAppointmentSpecialities(configRoot, wildcardExclusions);
-        break;
-      case "appointmentservicedefinitions":
-        loadAppointmentServiceDefinitions(configRoot, wildcardExclusions);
-        break;
-      case "cohorttypes":
-        loadCohortTypes(configRoot, wildcardExclusions);
-        break;
-      case "cohortattributetypes":
-        loadCohortAttributeTypes(configRoot, wildcardExclusions);
-        break;
-      case "fhirconceptsources":
-        loadFhirConceptSources(configRoot, wildcardExclusions);
-        break;
-      case "fhirpatientidentifiersystems":
-        loadFhirPatientIdentifierSystems(configRoot, wildcardExclusions);
-        break;
-      case "idgen":
-        loadIdentifierSources(configRoot, wildcardExclusions);
-        break;
-      case "autogenerationoptions":
-        loadAutoGenerationOptions(configRoot, wildcardExclusions);
-        break;
-      case "conceptsets":
-        loadConceptSets(configRoot, wildcardExclusions);
-        break;
-      case "orderfrequencies":
-        loadOrderFrequencies(configRoot, wildcardExclusions);
-        break;
-      case "drugs":
-        loadDrugs(configRoot, wildcardExclusions);
-        break;
-      case "programs":
-        loadPrograms(configRoot, wildcardExclusions);
-        break;
-      case "programworkflows":
-        loadProgramWorkflows(configRoot, wildcardExclusions);
-        break;
-      case "programworkflowstates":
-        loadProgramWorkflowStates(configRoot, wildcardExclusions);
-        break;
-      case "queues":
-        loadQueues(configRoot, wildcardExclusions);
-        break;
-      case "datafiltermappings":
-        loadDataFilterMappings(configRoot, wildcardExclusions);
-        break;
-      case "conceptreferencerange":
-        loadConceptReferenceRanges(configRoot, wildcardExclusions);
-        break;
-      case "ampathforms":
-        loadAmpathForms(configRoot, wildcardExclusions);
-        break;
-      case "ampathformstranslations":
-        loadAmpathFormTranslations(configRoot, wildcardExclusions);
-        break;
-      case "metadatasets":
-        loadMetadataSets(configRoot, wildcardExclusions);
-        break;
-      case "metadatatermmappings":
-        loadMetadataTermMappings(configRoot, wildcardExclusions);
-        break;
-      default:
-        log.debug("No static SIH Salus content loader is registered for domain {}.", domainName);
+    DomainLoader loader = domainLoaders.get(domainName);
+    if (loader == null) {
+      log.debug("No static SIH Salus content loader is registered for domain {}.", domainName);
+      return;
     }
+    loader.load(configRoot, wildcardExclusions);
   }
 
   private void loadConceptClasses(Path configRoot, List<String> wildcardExclusions)
@@ -4034,93 +3953,6 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     return id;
   }
 
-  private List<CsvRecord> readDomain(
-      Path configRoot, String domain, List<String> wildcardExclusions)
-      throws IOException, CsvException {
-    List<CsvRecord> records = new ArrayList<>();
-    for (Path csvFile : csvFiles(configRoot, domain, wildcardExclusions)) {
-      records.addAll(readCsv(csvFile));
-    }
-    return records;
-  }
-
-  private List<Path> csvFiles(Path configRoot, String domain, List<String> wildcardExclusions)
-      throws IOException {
-    return domainFiles(configRoot, domain, ".csv", wildcardExclusions);
-  }
-
-  private List<Path> xmlFiles(Path configRoot, String domain, List<String> wildcardExclusions)
-      throws IOException {
-    return domainFiles(configRoot, domain, ".xml", wildcardExclusions);
-  }
-
-  private List<Path> zipFiles(Path configRoot, String domain, List<String> wildcardExclusions)
-      throws IOException {
-    return domainFiles(configRoot, domain, ".zip", wildcardExclusions);
-  }
-
-  private List<Path> domainFiles(
-      Path configRoot, String domain, String extension, List<String> wildcardExclusions)
-      throws IOException {
-    Path directory = SihsalusContentPaths.resolveDomainDirectory(configRoot, domain);
-    if (directory == null) {
-      return List.of();
-    }
-
-    try (Stream<Path> stream = Files.list(directory)) {
-      return stream
-          .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-          .filter(
-              path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(extension))
-          .filter(path -> !excludedByWildcard(path, directory, wildcardExclusions))
-          .sorted()
-          .toList();
-    }
-  }
-
-  private boolean excludedByWildcard(Path path, Path directory, List<String> wildcardExclusions) {
-    if (wildcardExclusions == null || wildcardExclusions.isEmpty()) {
-      return false;
-    }
-
-    Path fileName = path.getFileName();
-    Path relativePath = directory.relativize(path);
-    for (String wildcardExclusion : wildcardExclusions) {
-      if (isBlank(wildcardExclusion)) {
-        continue;
-      }
-      try {
-        PathMatcher matcher =
-            FileSystems.getDefault().getPathMatcher("glob:" + wildcardExclusion.trim());
-        if (matcher.matches(fileName) || matcher.matches(relativePath)) {
-          return true;
-        }
-      } catch (PatternSyntaxException e) {
-        log.warn("Ignoring invalid initializer wildcard exclusion '{}'.", wildcardExclusion);
-      }
-    }
-    return false;
-  }
-
-  private List<CsvRecord> readCsv(Path csvFile) throws IOException, CsvException {
-    try (CSVReader reader =
-        new CSVReader(
-            new InputStreamReader(Files.newInputStream(csvFile), StandardCharsets.UTF_8))) {
-      String[] headers = reader.readNext();
-      if (headers == null) {
-        return List.of();
-      }
-
-      List<CsvRecord> records = new ArrayList<>();
-      for (String[] row : reader.readAll()) {
-        if (!allBlank(row)) {
-          records.add(new CsvRecord(csvFile, headers, row));
-        }
-      }
-      return records;
-    }
-  }
-
   private List<GlobalPropertyRecord> readGlobalProperties(Path xmlFile)
       throws IOException, ParserConfigurationException, SAXException {
     DocumentBuilderFactory factory = secureDocumentBuilderFactory();
@@ -4171,39 +4003,6 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
   }
 
-  private DocumentBuilderFactory secureDocumentBuilderFactory()
-      throws ParserConfigurationException {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-    factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-    factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-    factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-    factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-    setXmlAttributeIfSupported(factory, XMLConstants.ACCESS_EXTERNAL_DTD, "");
-    setXmlAttributeIfSupported(factory, XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-    factory.setExpandEntityReferences(false);
-    factory.setXIncludeAware(false);
-    return factory;
-  }
-
-  private String elementText(Element element, String tagName) {
-    NodeList children = element.getElementsByTagName(tagName);
-    if (children.getLength() == 0) {
-      return null;
-    }
-    String text = children.item(0).getTextContent();
-    return isBlank(text) ? null : text.trim();
-  }
-
-  private void setXmlAttributeIfSupported(
-      DocumentBuilderFactory factory, String attributeName, String value) {
-    try {
-      factory.setAttribute(attributeName, value);
-    } catch (IllegalArgumentException e) {
-      log.debug("XML parser does not support secure attribute {}.", attributeName);
-    }
-  }
-
   private record GlobalPropertyRecord(String property, String value, String description) {}
 
   private record MetadataSourceRecord(
@@ -4232,7 +4031,6 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
   private record AddressHierarchyEntryValue(String name, String userGeneratedId) {}
 
   private record AddressHierarchyEntryKey(Integer parentId, Integer levelId, String name) {}
-
 
   private record PaymentModeAttributeRecord(
       String uuid,

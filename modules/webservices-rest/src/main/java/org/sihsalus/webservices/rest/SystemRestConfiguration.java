@@ -7,6 +7,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -23,6 +24,7 @@ import org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl;
 import org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter;
 import org.openmrs.module.webservices.rest.web.filter.ContentTypeFilter;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
@@ -80,6 +82,12 @@ public class SystemRestConfiguration {
         "/api/admin/",
         "/api/system/",
         "/module/");
+  }
+
+  @Bean
+  Filter patientObjectAuthorizationFilter() {
+    return new PathScopedFilter(
+        new PatientObjectAuthorizationFilter(), 3, "/rest/v1/patient/", "/ws/rest/v1/patient/");
   }
 
   @Bean
@@ -217,6 +225,39 @@ public class SystemRestConfiguration {
 
     private boolean isLegacyOpenmrsPath(HttpServletRequest request) {
       return isLegacyWsRestPath(request) || usesOpenmrsPathPrefix(request);
+    }
+  }
+
+  static final class PatientObjectAuthorizationFilter implements Filter {
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+        throws IOException, ServletException {
+      if (request instanceof HttpServletRequest httpRequest
+          && response instanceof HttpServletResponse httpResponse) {
+        String patientUuid = patientUuidFromPath(httpRequest);
+        if (patientUuid != null
+            && !PatientObjectAuthorizationService.current().canReadPatient(patientUuid)) {
+          httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Patient access denied");
+          return;
+        }
+      }
+
+      chain.doFilter(request, response);
+    }
+
+    private String patientUuidFromPath(HttpServletRequest request) {
+      String path = request.getRequestURI().substring(request.getContextPath().length());
+      String prefix = path.startsWith("/ws/rest/") ? "/ws/rest/v1/patient/" : "/rest/v1/patient/";
+      if (!path.startsWith(prefix)) {
+        return null;
+      }
+      String patientUuid = path.substring(prefix.length());
+      int nextSegment = patientUuid.indexOf('/');
+      if (nextSegment >= 0) {
+        patientUuid = patientUuid.substring(0, nextSegment);
+      }
+      return patientUuid.isBlank() ? null : patientUuid;
     }
   }
 
