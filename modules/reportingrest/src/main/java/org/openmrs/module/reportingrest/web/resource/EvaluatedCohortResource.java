@@ -45,6 +45,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 
 /** {@link Resource} for evaluating {@link CohortDefinition}s */
 @Resource(
@@ -260,7 +261,9 @@ public class EvaluatedCohortResource extends EvaluatedResource<EvaluatedCohort> 
         Context.getService(EvaluationService.class).evaluateToList(qb, new EvaluationContext())) {
       Patient pt = new Patient((Integer) row[0]);
       pt.setUuid((String) row[1]);
-      ret.add(pt);
+      if (PatientObjectAuthorizationService.current().canReadPatient(pt.getUuid())) {
+        ret.add(pt);
+      }
     }
     return ret;
   }

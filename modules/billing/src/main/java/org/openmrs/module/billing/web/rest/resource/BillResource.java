@@ -50,6 +50,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudR
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 import org.springframework.web.client.RestClientException;
 
 /** REST resource representing a {@link Bill}. */
@@ -185,6 +186,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
   @Override
   public Bill save(Bill bill) {
     Context.requirePrivilege(PrivilegeConstants.MANAGE_BILLS);
+    requireBillPatientAccess(bill);
     // TODO: Test all the ways that this could fail
 
     if (bill.getId() == null) {
@@ -220,10 +222,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
   protected AlreadyPaged<Bill> doSearch(RequestContext context) {
     Context.requirePrivilege(PrivilegeConstants.VIEW_BILLS);
     BillSearch billSearch = buildBillSearchFromRequest(context);
+    if (StringUtils.isNotBlank(billSearch.getPatientUuid())) {
+      PatientObjectAuthorizationService.current().requireCanReadPatient(billSearch.getPatientUuid());
+    }
     PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 
     BillService service = Context.getService(BillService.class);
     List<Bill> result = service.getBills(billSearch, pagingInfo);
+    result = result.stream().filter(this::canReadBillPatient).toList();
 
     return new AlreadyPaged<>(
         context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
@@ -241,20 +247,36 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
       return null;
     }
 
-    return Context.getService(BillService.class).getBillByUuid(uniqueId);
+    Bill bill = Context.getService(BillService.class).getBillByUuid(uniqueId);
+    requireBillPatientAccess(bill);
+    return bill;
   }
 
   @Override
   protected void delete(Bill bill, String s, RequestContext requestContext)
       throws ResponseException {
     Context.requirePrivilege(PrivilegeConstants.DELETE_BILLS);
+    requireBillPatientAccess(bill);
     Context.getService(BillService.class).voidBill(bill, s);
   }
 
   @Override
   public void purge(Bill bill, RequestContext requestContext) throws ResponseException {
     Context.requirePrivilege(PrivilegeConstants.PURGE_BILLS);
+    requireBillPatientAccess(bill);
     Context.getService(BillService.class).purgeBill(bill);
+  }
+
+  private void requireBillPatientAccess(Bill bill) {
+    if (bill != null && bill.getPatient() != null) {
+      PatientObjectAuthorizationService.current().requireCanReadPatient(bill.getPatient().getUuid());
+    }
+  }
+
+  private boolean canReadBillPatient(Bill bill) {
+    return bill == null
+        || bill.getPatient() == null
+        || PatientObjectAuthorizationService.current().canReadPatient(bill.getPatient().getUuid());
   }
 
   @Override

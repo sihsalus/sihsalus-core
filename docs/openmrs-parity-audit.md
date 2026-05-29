@@ -38,11 +38,9 @@ Core `master`.
 - Expected machine-readable baseline:
   `config/baseline/sihsalus-distro.properties`
 
-Worktree note from this audit: `config/baseline/sihsalus-distro.properties`
-is currently deleted in the local worktree. The comparison below used the
-baseline copy from `HEAD` plus the archive reference in
-`docs/archive/sihsalus-distro-baseline.md`. Restore the baseline file before
-claiming the repository documentation is internally consistent.
+The machine-readable baseline is present at
+`config/baseline/sihsalus-distro.properties`. Keep this file aligned with
+`docs/archive/sihsalus-distro-baseline.md` before updating parity claims.
 
 ## Module Coverage
 

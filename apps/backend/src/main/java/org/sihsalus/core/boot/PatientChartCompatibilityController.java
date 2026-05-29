@@ -24,6 +24,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.metadatamapping.MetadataTermMapping;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.metadatamapping.api.MetadataTermMappingSearchCriteriaBuilder;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class PatientChartCompatibilityController {
+
+  private final PatientObjectAuthorizationService patientAuthorization;
+
+  PatientChartCompatibilityController(PatientObjectAuthorizationService patientAuthorization) {
+    this.patientAuthorization = patientAuthorization;
+  }
 
   @GetMapping("/rest/v1/programenrollment")
   Map<String, Object> programEnrollments(@RequestParam("patient") String patientUuid) {
@@ -110,6 +117,9 @@ public class PatientChartCompatibilityController {
   }
 
   private Patient requiredPatient(String patientUuid) {
+    if (!patientAuthorization.canReadPatient(patientUuid)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Patient access denied: " + patientUuid);
+    }
     Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
     if (patient == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found: " + patientUuid);

@@ -30,6 +30,7 @@ Modes:
   --sql              Generate pending SQL without applying it (default)
   --status           Show pending changesets
   --validate         Validate the changelog against the target database
+  --update           Apply pending changesets to the target database
 
 Options:
   --offline          Use Liquibase offline PostgreSQL mode instead of a live database
@@ -68,6 +69,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --validate)
       MODE="validate"
+      shift
+      ;;
+    --update)
+      MODE="update"
       shift
       ;;
     --offline)
@@ -187,6 +192,8 @@ if [[ "$MODE" == "status" ]]; then
   LIQUIBASE_COMMAND="status"
 elif [[ "$MODE" == "validate" ]]; then
   LIQUIBASE_COMMAND="validate"
+elif [[ "$MODE" == "update" ]]; then
+  LIQUIBASE_COMMAND="update"
 fi
 
 LIQUIBASE_ARGS=(

@@ -8,6 +8,32 @@ Sihsalus Core uses a centralized Liquibase changelog for the static runtime:
 
 Use `scripts/liquibase-dry-run.sh` before merging migration changes. The script packages the boot runtime, extracts the same classpath used by the application, and runs Liquibase CLI against the configured database.
 
+CI runs `scripts/postgres-migration-gate.sh` as the merge gate. It validates, generates `updateSQL`, applies `update`, and checks post-update status against a clean PostgreSQL database and the restored upgrade fixture.
+
+## GitHub Actions Secrets
+
+Configure the upgrade fixture connection in GitHub, not in this repository:
+
+1. Open the repository in GitHub.
+2. Go to **Settings** > **Secrets and variables** > **Actions**.
+3. Under **Repository secrets**, add:
+
+```text
+SIHSALUS_UPGRADE_FIXTURE_URL
+SIHSALUS_UPGRADE_FIXTURE_USERNAME
+SIHSALUS_UPGRADE_FIXTURE_PASSWORD
+```
+
+`SIHSALUS_UPGRADE_FIXTURE_URL` must be a JDBC URL, for example:
+
+```text
+jdbc:postgresql://host:5432/sihsalus_upgrade_fixture
+```
+
+Do not commit fixture credentials or hospital database URLs to the repo. The
+workflow reads them through `${{ secrets.* }}` in
+`.github/workflows/backend-runtime.yml`.
+
 ## Standard Checks
 
 Start the local PostgreSQL dependency first:
@@ -43,6 +69,27 @@ Validate changelog parsing and database connectivity:
 SIHSALUS_POSTGRES_PASSWORD='<local-db-password>' ./scripts/liquibase-dry-run.sh --validate
 ```
 
+Apply pending changesets to the target database:
+
+```bash
+SIHSALUS_POSTGRES_PASSWORD='<local-db-password>' ./scripts/liquibase-dry-run.sh --update
+```
+
+Run the full local PostgreSQL gate:
+
+```bash
+SIHSALUS_POSTGRES_PASSWORD='<local-db-password>' ./scripts/postgres-migration-gate.sh
+```
+
+For release-candidate readiness, the upgrade fixture is mandatory:
+
+```bash
+export SIHSALUS_UPGRADE_FIXTURE_URL='jdbc:postgresql://localhost:5432/sihsalus_upgrade_fixture'
+export SIHSALUS_UPGRADE_FIXTURE_USERNAME='sihsalus'
+export SIHSALUS_UPGRADE_FIXTURE_PASSWORD='<fixture-password>'
+./scripts/postgres-migration-gate.sh --require-upgrade-fixture
+```
+
 ## Target Database
 
 The script defaults to the compose PostgreSQL service exposed locally:
@@ -73,8 +120,8 @@ Treat offline SQL as an install-shape artifact, not as proof that a hospital upg
 
 ## Review Rules
 
-- Run `--status`, `--validate`, and `--sql` against a live PostgreSQL database before merging migration work.
+- Run the PostgreSQL migration gate against a live database before merging migration work.
 - Review `target/liquibase-dry-run/update.sql` for broad deletes, table rewrites, expensive indexes, missing preconditions, and lock-heavy DDL.
-- If a changeset uses Java `CustomTaskChange`, also test against a restored database fixture. `updateSQL` cannot fully prove runtime behavior for Java changesets.
+- If a changeset uses Java `CustomTaskChange`, the restored upgrade fixture gate is required. `updateSQL` cannot fully prove runtime behavior for Java changesets.
 - Keep the centralized changelog aligned with Spring Boot table names. Do not let local dry runs create default `databasechangelog` tables.
 - Include rollback notes or an explicit “no rollback” explanation in the change review when a migration is irreversible.

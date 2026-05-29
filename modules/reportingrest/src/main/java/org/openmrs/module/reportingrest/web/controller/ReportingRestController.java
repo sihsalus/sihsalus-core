@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.dataset.DataSet;
@@ -44,6 +45,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -183,6 +185,7 @@ public class ReportingRestController extends MainResourceController {
         }
       } else {
         Object convertedValue = ConversionUtil.convert(value, parameter.getType());
+        requirePatientParameterAccess(parameter, convertedValue, value);
         context.addParameterValue(parameter.getName(), convertedValue);
       }
     }
@@ -273,13 +276,25 @@ public class ReportingRestController extends MainResourceController {
     for (Parameter param : definition.getParameters()) {
       String value = request.getParameter(param.getName());
       if (value != null) {
+        Object convertedValue = ConversionUtil.convert(value, param.getType());
+        requirePatientParameterAccess(param, convertedValue, value);
         evalContext.addParameterValue(
-            param.getName(), ConversionUtil.convert(value, param.getType()));
+            param.getName(), convertedValue);
       } else if (param.isRequired()) {
         throw new IllegalArgumentException("Missing required parameter: " + param.getName());
       }
     }
     return evalContext;
+  }
+
+  private void requirePatientParameterAccess(Parameter parameter, Object convertedValue, String rawValue) {
+    if (convertedValue instanceof Patient patient) {
+      PatientObjectAuthorizationService.current().requireCanReadPatient(patient.getUuid());
+      return;
+    }
+    if (Patient.class.isAssignableFrom(parameter.getType())) {
+      PatientObjectAuthorizationService.current().requireCanReadPatient(rawValue);
+    }
   }
 
   private ReportData evaluateReport(ReportDefinition definition, EvaluationContext evalContext) {

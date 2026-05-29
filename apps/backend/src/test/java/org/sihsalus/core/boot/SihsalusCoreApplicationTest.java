@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -115,6 +116,7 @@ import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.validator.BillDiscountValidator;
 import org.openmrs.module.billing.validator.BillRefundValidator;
 import org.openmrs.module.billing.validator.BillValidator;
+import org.openmrs.module.billing.web.rest.resource.BillResource;
 import org.openmrs.module.cohort.CohortAttributeType;
 import org.openmrs.module.cohort.CohortM;
 import org.openmrs.module.cohort.CohortType;
@@ -207,6 +209,7 @@ import org.openmrs.module.queue.validators.QueueValidator;
 import org.openmrs.module.queue.validators.RoomProviderMapValidator;
 import org.openmrs.module.queue.validators.VisitWithQueueEntriesValidator;
 import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
+import org.openmrs.module.reporting.cohort.EvaluatedCohort;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.dataset.DataSetMetaData;
 import org.openmrs.module.reporting.dataset.definition.service.DataSetDefinitionService;
@@ -221,6 +224,7 @@ import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.module.reporting.report.task.ReportingTimerTask;
 import org.openmrs.module.reporting.serializer.ReportingSerializer;
+import org.openmrs.module.reportingrest.web.resource.EvaluatedCohortResource;
 import org.openmrs.module.reportingrest.adhoc.AdHocExportManager;
 import org.openmrs.module.serialization.xstream.XStreamSerializer;
 import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
@@ -230,8 +234,11 @@ import org.openmrs.module.sihsalusinterop.api.model.InteropQueueItem;
 import org.openmrs.module.sihsalusinterop.api.service.BundleBuilderService;
 import org.openmrs.module.stockmanagement.api.Privileges;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
+import org.openmrs.module.stockmanagement.api.dto.BatchJobDTO;
 import org.openmrs.module.stockmanagement.api.dto.UserRoleScopeDTO;
+import org.openmrs.module.stockmanagement.api.model.BatchJobType;
 import org.openmrs.module.stockmanagement.api.reporting.Report;
+import org.openmrs.module.stockmanagement.api.validator.BatchJobValidator;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.module.webservices.rest.web.resource.api.Converter;
@@ -239,6 +246,8 @@ import org.openmrs.scheduler.SchedulerService;
 import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.PrivilegeConstants;
 import org.sihsalus.core.api.StaticModuleTaskRunner;
+import org.sihsalus.core.api.authorization.PatientObjectAccessDeniedException;
+import org.sihsalus.core.api.authorization.PatientObjectAuthorizationService;
 import org.sihsalus.initializer.InitializerBoundary;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -253,6 +262,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Validator;
 
 @SpringBootTest(properties = "sihsalus.ocl.static-import.enabled=false")
@@ -1132,6 +1142,87 @@ class SihsalusCoreApplicationTest {
         .andExpect(jsonPath("$.resourceType").value("Patient"))
         .andExpect(jsonPath("$.id").value(patientUuid))
         .andExpect(jsonPath("$.identifier[0].value").value(TEST_IDENTIFIER));
+  }
+
+  @Test
+  void patientObjectAuthorizationIsEnforcedAcrossCriticalPatientWorkflows() throws Exception {
+    String patientUuid = ensureTestPatient();
+    setGlobalProperty(
+        ConfiguredPatientObjectAuthorizationService.DENIED_PATIENT_UUIDS_PROPERTY, patientUuid);
+
+    try {
+      mockMvc
+          .perform(
+              get("/rest/v1/patient/{uuid}", patientUuid)
+                  .header("Authorization", ADMIN_BASIC_AUTH))
+          .andExpect(status().isForbidden());
+
+      mockMvc
+          .perform(
+              get("/api/fhir/r4/Patient/{uuid}", patientUuid)
+                  .header("Authorization", ADMIN_BASIC_AUTH))
+          .andExpect(status().isForbidden())
+          .andExpect(content().contentTypeCompatibleWith("application/fhir+json"));
+
+      mockMvc
+          .perform(
+              get("/rest/v1/obs")
+                  .param("patient", patientUuid)
+                  .header("Authorization", ADMIN_BASIC_AUTH))
+          .andExpect(status().isForbidden());
+
+      runWithAuthenticatedOpenmrsSession(
+          () -> {
+            Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
+            assertNotNull(patient);
+
+            assertThrows(
+                PatientObjectAccessDeniedException.class,
+                () -> PatientObjectAuthorizationService.current().requireCanReadPatient(patientUuid));
+
+            AttachmentResource attachmentResource =
+                (AttachmentResource)
+                    Context.getService(RestService.class).getResourceByName("v1/attachment");
+            assertThrows(
+                PatientObjectAccessDeniedException.class,
+                () ->
+                    attachmentResource.search(
+                        Context.getService(AttachmentsService.class),
+                        patient,
+                        null,
+                        null,
+                        null,
+                        false));
+
+            BillResource billResource =
+                (BillResource)
+                    Context.getService(RestService.class).getResourceByName("v1/billing/bill");
+            Bill bill = new Bill();
+            bill.setPatient(patient);
+            assertThrows(PatientObjectAccessDeniedException.class, () -> billResource.save(bill));
+
+            EvaluatedCohortResource cohortResource =
+                (EvaluatedCohortResource)
+                    Context.getService(RestService.class).getResourceByName("v1/reportingrest/cohort");
+            EvaluatedCohort cohort =
+                new EvaluatedCohort(
+                    new Cohort(Set.of(patient.getPatientId())), null, new EvaluationContext());
+            assertTrue(cohortResource.getMembers(cohort).isEmpty());
+
+            BatchJobDTO batchJob = new BatchJobDTO();
+            batchJob.setBatchJobType(BatchJobType.Report);
+            batchJob.setDescription("Denied patient stock report");
+            batchJob.setParameters(
+                "param.report=DISPENSING_LOGS\nparam.Patient.value=" + patientUuid);
+            BeanPropertyBindingResult errors =
+                new BeanPropertyBindingResult(batchJob, "batchJob");
+            new BatchJobValidator().validate(batchJob, errors);
+            assertTrue(errors.hasErrors());
+          });
+    } finally {
+      deleteGlobalProperty(
+          ConfiguredPatientObjectAuthorizationService.DENIED_PATIENT_UUIDS_PROPERTY);
+    }
   }
 
   @Test
@@ -2968,6 +3059,24 @@ class SihsalusCoreApplicationTest {
     assertNotNull(
         jdbcTemplate.queryForObject(
             "select count(*) from reporting_report_request", Integer.class));
+  }
+
+  private void setGlobalProperty(String property, String value) {
+    int updated =
+        jdbcTemplate.update(
+            "update global_property set property_value = ? where property = ?", value, property);
+    if (updated == 0) {
+      jdbcTemplate.update(
+          "insert into global_property (property, property_value, description, uuid) values (?, ?, ?, ?)",
+          property,
+          value,
+          "Test override",
+          UUID.randomUUID().toString());
+    }
+  }
+
+  private void deleteGlobalProperty(String property) {
+    jdbcTemplate.update("delete from global_property where property = ?", property);
   }
 
   private String ensureTestPatient() {
