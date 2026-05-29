@@ -129,3 +129,6 @@ must still be verified with the Liquibase dry-run flow.
 ## Stabilization Milestone
 
 The next milestone is a release-candidate backend where the migrated static runtime has predictable CI, PostgreSQL migration validation, smoke coverage for critical modules, hardened security defaults, and a documented residual-risk list.
+
+## Observacion Encontrada
+En el modulo de fua, no aparecen sus controllers "FuaController.java", "FuaEstadoController.java", "FuaRedirectionController.java", "MultipartInputStreamFileResource.java" etc
