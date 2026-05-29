@@ -49,8 +49,62 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  @FunctionalInterface
+  private interface DomainLoader {
+    void load(Path configRoot, List<String> wildcardExclusions) throws Exception;
+  }
+
+  private final Map<String, DomainLoader> domainLoaders;
+
   StaticSihsalusContentLoader(JdbcTemplate jdbcTemplate) {
     super(jdbcTemplate);
+    this.domainLoaders = createDomainLoaders();
+  }
+
+  private Map<String, DomainLoader> createDomainLoaders() {
+    Map<String, DomainLoader> loaders = new HashMap<>();
+    loaders.put("conceptclasses", this::loadConceptClasses);
+    loaders.put("conceptsources", this::loadConceptSources);
+    loaders.put("metadatasharing", this::loadMetadataSharing);
+    loaders.put("visittypes", this::loadVisitTypes);
+    loaders.put("patientidentifiertypes", this::loadPatientIdentifierTypes);
+    loaders.put("relationshiptypes", this::loadRelationshipTypes);
+    loaders.put("privileges", this::loadPrivileges);
+    loaders.put("encountertypes", this::loadEncounterTypes);
+    loaders.put("encounterroles", this::loadEncounterRoles);
+    loaders.put("roles", this::loadRoles);
+    loaders.put("globalproperties", this::loadGlobalProperties);
+    loaders.put("addresshierarchy", this::loadAddressHierarchy);
+    loaders.put("attributetypes", this::loadAttributeTypes);
+    loaders.put("locationtags", this::loadLocationTags);
+    loaders.put("locations", this::loadLocations);
+    loaders.put("personattributetypes", this::loadPersonAttributeTypes);
+    loaders.put("ordertypes", this::loadOrderTypes);
+    loaders.put("billableservices", this::loadBillableServices);
+    loaders.put("paymentmodes", this::loadPaymentModes);
+    loaders.put("cashpoints", this::loadCashPoints);
+    loaders.put("appointmentspecialities", this::loadAppointmentSpecialities);
+    loaders.put("appointmentservicedefinitions", this::loadAppointmentServiceDefinitions);
+    loaders.put("cohorttypes", this::loadCohortTypes);
+    loaders.put("cohortattributetypes", this::loadCohortAttributeTypes);
+    loaders.put("fhirconceptsources", this::loadFhirConceptSources);
+    loaders.put("fhirpatientidentifiersystems", this::loadFhirPatientIdentifierSystems);
+    loaders.put("idgen", this::loadIdentifierSources);
+    loaders.put("autogenerationoptions", this::loadAutoGenerationOptions);
+    loaders.put("conceptsets", this::loadConceptSets);
+    loaders.put("orderfrequencies", this::loadOrderFrequencies);
+    loaders.put("drugs", this::loadDrugs);
+    loaders.put("programs", this::loadPrograms);
+    loaders.put("programworkflows", this::loadProgramWorkflows);
+    loaders.put("programworkflowstates", this::loadProgramWorkflowStates);
+    loaders.put("queues", this::loadQueues);
+    loaders.put("datafiltermappings", this::loadDataFilterMappings);
+    loaders.put("conceptreferencerange", this::loadConceptReferenceRanges);
+    loaders.put("ampathforms", this::loadAmpathForms);
+    loaders.put("ampathformstranslations", this::loadAmpathFormTranslations);
+    loaders.put("metadatasets", this::loadMetadataSets);
+    loaders.put("metadatatermmappings", this::loadMetadataTermMappings);
+    return loaders;
   }
 
   void load() {
@@ -123,134 +177,12 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     if (configRoot == null) {
       return;
     }
-
-    switch (domainName) {
-      case "conceptclasses":
-        loadConceptClasses(configRoot, wildcardExclusions);
-        break;
-      case "conceptsources":
-        loadConceptSources(configRoot, wildcardExclusions);
-        break;
-      case "metadatasharing":
-        loadMetadataSharing(configRoot, wildcardExclusions);
-        break;
-      case "visittypes":
-        loadVisitTypes(configRoot, wildcardExclusions);
-        break;
-      case "patientidentifiertypes":
-        loadPatientIdentifierTypes(configRoot, wildcardExclusions);
-        break;
-      case "relationshiptypes":
-        loadRelationshipTypes(configRoot, wildcardExclusions);
-        break;
-      case "privileges":
-        loadPrivileges(configRoot, wildcardExclusions);
-        break;
-      case "encountertypes":
-        loadEncounterTypes(configRoot, wildcardExclusions);
-        break;
-      case "encounterroles":
-        loadEncounterRoles(configRoot, wildcardExclusions);
-        break;
-      case "roles":
-        loadRoles(configRoot, wildcardExclusions);
-        break;
-      case "globalproperties":
-        loadGlobalProperties(configRoot, wildcardExclusions);
-        break;
-      case "addresshierarchy":
-        loadAddressHierarchy(configRoot, wildcardExclusions);
-        break;
-      case "attributetypes":
-        loadAttributeTypes(configRoot, wildcardExclusions);
-        break;
-      case "locationtags":
-        loadLocationTags(configRoot, wildcardExclusions);
-        break;
-      case "locations":
-        loadLocations(configRoot, wildcardExclusions);
-        break;
-      case "personattributetypes":
-        loadPersonAttributeTypes(configRoot, wildcardExclusions);
-        break;
-      case "ordertypes":
-        loadOrderTypes(configRoot, wildcardExclusions);
-        break;
-      case "billableservices":
-        loadBillableServices(configRoot, wildcardExclusions);
-        break;
-      case "paymentmodes":
-        loadPaymentModes(configRoot, wildcardExclusions);
-        break;
-      case "cashpoints":
-        loadCashPoints(configRoot, wildcardExclusions);
-        break;
-      case "appointmentspecialities":
-        loadAppointmentSpecialities(configRoot, wildcardExclusions);
-        break;
-      case "appointmentservicedefinitions":
-        loadAppointmentServiceDefinitions(configRoot, wildcardExclusions);
-        break;
-      case "cohorttypes":
-        loadCohortTypes(configRoot, wildcardExclusions);
-        break;
-      case "cohortattributetypes":
-        loadCohortAttributeTypes(configRoot, wildcardExclusions);
-        break;
-      case "fhirconceptsources":
-        loadFhirConceptSources(configRoot, wildcardExclusions);
-        break;
-      case "fhirpatientidentifiersystems":
-        loadFhirPatientIdentifierSystems(configRoot, wildcardExclusions);
-        break;
-      case "idgen":
-        loadIdentifierSources(configRoot, wildcardExclusions);
-        break;
-      case "autogenerationoptions":
-        loadAutoGenerationOptions(configRoot, wildcardExclusions);
-        break;
-      case "conceptsets":
-        loadConceptSets(configRoot, wildcardExclusions);
-        break;
-      case "orderfrequencies":
-        loadOrderFrequencies(configRoot, wildcardExclusions);
-        break;
-      case "drugs":
-        loadDrugs(configRoot, wildcardExclusions);
-        break;
-      case "programs":
-        loadPrograms(configRoot, wildcardExclusions);
-        break;
-      case "programworkflows":
-        loadProgramWorkflows(configRoot, wildcardExclusions);
-        break;
-      case "programworkflowstates":
-        loadProgramWorkflowStates(configRoot, wildcardExclusions);
-        break;
-      case "queues":
-        loadQueues(configRoot, wildcardExclusions);
-        break;
-      case "datafiltermappings":
-        loadDataFilterMappings(configRoot, wildcardExclusions);
-        break;
-      case "conceptreferencerange":
-        loadConceptReferenceRanges(configRoot, wildcardExclusions);
-        break;
-      case "ampathforms":
-        loadAmpathForms(configRoot, wildcardExclusions);
-        break;
-      case "ampathformstranslations":
-        loadAmpathFormTranslations(configRoot, wildcardExclusions);
-        break;
-      case "metadatasets":
-        loadMetadataSets(configRoot, wildcardExclusions);
-        break;
-      case "metadatatermmappings":
-        loadMetadataTermMappings(configRoot, wildcardExclusions);
-        break;
-      default:
-        log.debug("No static SIH Salus content loader is registered for domain {}.", domainName);
+    DomainLoader loader = domainLoaders.get(domainName);
+    if (loader == null) {
+      log.debug("No static SIH Salus content loader is registered for domain {}.", domainName);
+      return;
     }
+    loader.load(configRoot, wildcardExclusions);
   }
 
   private void loadConceptClasses(Path configRoot, List<String> wildcardExclusions)

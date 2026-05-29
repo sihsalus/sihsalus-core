@@ -148,6 +148,11 @@ class StaticSihsalusContentLoaderTest {
   }
 
   @Test
+  void loadDomainUnknownDomainIsIgnored() throws Exception {
+    loader.loadDomain("unknown-domain", List.of());
+  }
+
+  @Test
   void dataFilterMappingsUseRuntimeIdentifiersAndRemainIdempotent() throws Exception {
     String roleUuid = "11111111-1111-1111-1111-111111111111";
     String locationUuid = "22222222-2222-2222-2222-222222222222";
