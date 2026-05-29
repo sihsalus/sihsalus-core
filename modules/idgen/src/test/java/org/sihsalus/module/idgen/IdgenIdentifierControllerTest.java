@@ -2,6 +2,8 @@ package org.sihsalus.module.idgen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -109,6 +111,56 @@ class IdgenIdentifierControllerTest {
   }
 
   @Test
+  void generateIdentifierFallsBackToUuidWhenNumericIdNotFound() {
+    IdentifierSource serviceSource = new SequentialIdentifierGenerator();
+    serviceSource.setUuid("42");
+
+    AtomicReference<IdentifierSource> receivedSource = new AtomicReference<>();
+    IdentifierSourceService service =
+        createServiceStub(
+            41,
+            null,
+            "42",
+            serviceSource,
+            (source, comment) -> {
+              receivedSource.set(source);
+              return "ID-FALLBACK";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> response =
+        controller.generateIdentifier("42", new LinkedHashMap<>(), null).getBody();
+
+    assertEquals("ID-FALLBACK", response.get("identifier"));
+    assertEquals(serviceSource, receivedSource.get());
+  }
+
+  @Test
+  void generateIdentifierFallsBackToUuidWhenNumericOverflowsInt() {
+    IdentifierSource serviceSource = new SequentialIdentifierGenerator();
+    serviceSource.setUuid("2147483648");
+
+    AtomicReference<String> receivedComment = new AtomicReference<>();
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "2147483648",
+            serviceSource,
+            (source, comment) -> {
+              receivedComment.set(comment);
+              return "ID-OVERFLOW";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> response =
+        controller.generateIdentifier("2147483648", null, "overflow").getBody();
+
+    assertEquals("ID-OVERFLOW", response.get("identifier"));
+    assertEquals("overflow", receivedComment.get());
+  }
+
+  @Test
   void generateIdentifierUsesEmptyCommentWhenNoCommentIsProvided() {
     IdentifierSource source = new SequentialIdentifierGenerator();
     source.setUuid("uuid-789");
@@ -131,6 +183,81 @@ class IdgenIdentifierControllerTest {
 
     assertEquals("ID-789", response.get("identifier"));
     assertEquals("", receivedComment.get());
+  }
+
+  @Test
+  void generateIdentifierReturnsNullWhenBodyCommentIsNull() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-null");
+
+    AtomicReference<String> receivedComment = new AtomicReference<>("not-empty");
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "uuid-null",
+            source,
+            (ignoredSource, comment) -> {
+              receivedComment.set(comment);
+              return "ID-NULL";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("comment", null);
+    Map<String, Object> response = controller.generateIdentifier("uuid-null", body, null).getBody();
+
+    assertEquals("ID-NULL", response.get("identifier"));
+    assertNull(receivedComment.get());
+  }
+
+  @Test
+  void generateIdentifierAcceptsNonStringBodyCommentValues() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-number");
+
+    AtomicReference<String> receivedComment = new AtomicReference<>();
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "uuid-number",
+            source,
+            (ignoredSource, comment) -> {
+              receivedComment.set(comment);
+              return "ID-NUM";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> response =
+        controller
+            .generateIdentifier("uuid-number", new LinkedHashMap<>(Map.of("comment", 12345)), null)
+            .getBody();
+
+    assertEquals("ID-NUM", response.get("identifier"));
+    assertEquals("12345", receivedComment.get());
+  }
+
+  @Test
+  void generateIdentifierReturnsCreatedStatusAndResponseBody() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-created");
+
+    IdgenIdentifierController controller =
+        new IdgenIdentifierController(
+            createServiceStub(
+                null,
+                null,
+                "uuid-created",
+                source,
+                (ignoredSource, ignoredComment) -> "ID-CREATED"));
+
+    var response =
+        controller.generateIdentifier("uuid-created", new LinkedHashMap<>(), "created-comment");
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertEquals(Map.of("identifier", "ID-CREATED"), response.getBody());
   }
 
   @Test
