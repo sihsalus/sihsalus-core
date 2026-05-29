@@ -384,6 +384,11 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
 
   @Override
   public Stream<TaskDetails> getTasks(TaskState state, Instant before) {
+    User authenticatedUser = Context.getAuthenticatedUser();
+    if (authenticatedUser == null) {
+      return Stream.empty();
+    }
+
     return StreamSupport.stream(
         new Spliterators.AbstractSpliterator<TaskDetails>(
             Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.NONNULL) {
@@ -393,9 +398,9 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
           private Iterator<Job> currentBatch;
 
           private final boolean isSchedulerManager =
-              isSchedulerManager(Context.getAuthenticatedUser());
+              isSchedulerManager(authenticatedUser);
 
-          private final String userSystemId = Context.getAuthenticatedUser().getSystemId();
+          private final String userSystemId = authenticatedUser.getSystemId();
 
           @Override
           public boolean tryAdvance(Consumer<? super TaskDetails> action) {
@@ -433,11 +438,17 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
   }
 
   public boolean isSchedulerManager(User user) {
+    if (user == null) {
+      return false;
+    }
     return user.hasPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
   }
 
   public boolean hasPrivileges(JobDetails jobDetails) {
     User user = Context.getAuthenticatedUser();
+    if (user == null) {
+      return false;
+    }
     return isSchedulerManager(user) || isScheduledBy(jobDetails, user.getSystemId());
   }
 
@@ -456,6 +467,9 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
   @Override
   public Stream<RecurringTaskDetails> getRecurringTasks() {
     User user = Context.getAuthenticatedUser();
+    if (user == null) {
+      return Stream.empty();
+    }
     boolean isSchedulerManager = isSchedulerManager(user);
     return storageProvider.getRecurringJobs().stream()
         .filter(j -> isSchedulerManager || isScheduledBy(j.getJobDetails(), user.getSystemId()))
