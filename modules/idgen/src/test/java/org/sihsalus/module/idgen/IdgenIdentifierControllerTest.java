@@ -109,6 +109,31 @@ class IdgenIdentifierControllerTest {
   }
 
   @Test
+  void generateIdentifierUsesEmptyCommentWhenNoCommentIsProvided() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-789");
+
+    AtomicReference<String> receivedComment = new AtomicReference<>("not-empty");
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "uuid-789",
+            source,
+            (ignoredSource, comment) -> {
+              receivedComment.set(comment);
+              return "ID-789";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> response =
+        controller.generateIdentifier("uuid-789", new LinkedHashMap<>(), null).getBody();
+
+    assertEquals("ID-789", response.get("identifier"));
+    assertEquals("", receivedComment.get());
+  }
+
+  @Test
   void generateIdentifierReturns404WhenSourceNotFound() {
     IdentifierSourceService service =
         createServiceStub(null, null, null, null, (source, comment) -> "should-not-happen");
