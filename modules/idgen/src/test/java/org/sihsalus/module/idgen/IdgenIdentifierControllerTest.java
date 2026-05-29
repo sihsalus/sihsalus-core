@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import org.openmrs.api.APIException;
 import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
@@ -260,6 +261,99 @@ class IdgenIdentifierControllerTest {
             ResponseStatusException.class,
             () -> controller.generateIdentifier("-42", new LinkedHashMap<>(), null));
     assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+  }
+
+  @Test
+  void generateIdentifierFallsBackToUuidWhenSourceUniqueIdContainsWhitespaceOnlyAroundNumber() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid(" 42 ");
+
+    AtomicReference<IdentifierSource> receivedSource = new AtomicReference<>();
+    IdentifierSourceService service =
+        createServiceStub(
+            42,
+            null,
+            " 42 ",
+            source,
+            (sourceById, comment) -> {
+              receivedSource.set(sourceById);
+              return "ID-WHITESPACE";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> response =
+        controller.generateIdentifier(" 42 ", new LinkedHashMap<>(), null).getBody();
+
+    assertEquals("ID-WHITESPACE", response.get("identifier"));
+    assertEquals(source, receivedSource.get());
+  }
+
+  @Test
+  void generateIdentifierPrefersQueryOverNullBodyComment() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-null-body");
+
+    AtomicReference<String> receivedComment = new AtomicReference<>("initial");
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "uuid-null-body",
+            source,
+            (ignoredSource, comment) -> {
+              receivedComment.set(comment);
+              return "ID-QUERY-NULL-BODY";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("comment", null);
+    Map<String, Object> response =
+        controller.generateIdentifier("uuid-null-body", body, "query-comment").getBody();
+
+    assertEquals("ID-QUERY-NULL-BODY", response.get("identifier"));
+    assertEquals("query-comment", receivedComment.get());
+  }
+
+  @Test
+  void generateIdentifierPropagatesRuntimeExceptions() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-bad-service");
+
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "uuid-bad-service",
+            source,
+            (ignoredSource, ignoredComment) -> {
+              throw new RuntimeException("boom");
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    assertThrows(
+        RuntimeException.class,
+        () -> controller.generateIdentifier("uuid-bad-service", null, null));
+  }
+
+  @Test
+  void generateIdentifierPropagatesApiException() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-api-error");
+
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "uuid-api-error",
+            source,
+            (ignoredSource, ignoredComment) -> {
+              throw new APIException("api broken");
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    assertThrows(
+        APIException.class, () -> controller.generateIdentifier("uuid-api-error", null, null));
   }
 
   @Test
