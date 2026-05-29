@@ -92,6 +92,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     loadDomains(
         List.of(
             "personattributetypes",
+            "appointmentspecialities",
+            "appointmentservicedefinitions",
             "billableservices",
             "conceptsets",
             "orderfrequencies",
