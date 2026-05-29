@@ -212,6 +212,113 @@ class IdgenIdentifierControllerTest {
   }
 
   @Test
+  void generateIdentifierFallsBackToUuidWhenSourceHasLeadingZerosAndNoNumericMatch() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("0007");
+
+    AtomicReference<String> receivedComment = new AtomicReference<>();
+    IdentifierSourceService service =
+        createServiceStub(
+            7,
+            null,
+            "0007",
+            source,
+            (ignoredSource, comment) -> {
+              receivedComment.set(comment);
+              return "ID-LEADING-ZERO";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> response =
+        controller.generateIdentifier("0007", new LinkedHashMap<>(), null).getBody();
+
+    assertEquals("ID-LEADING-ZERO", response.get("identifier"));
+    assertEquals("0007", ((SequentialIdentifierGenerator) source).getUuid());
+  }
+
+  @Test
+  void generateIdentifierReturns404WhenSourceUniqueIdIsBlank() {
+    IdentifierSourceService service =
+        createServiceStub(null, null, null, null, (source, comment) -> "should-not-happen");
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> controller.generateIdentifier("   ", new LinkedHashMap<>(), null));
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+  }
+
+  @Test
+  void generateIdentifierReturns404WhenSourceUniqueIdIsNegativeLikeInt() {
+    IdentifierSourceService service =
+        createServiceStub(null, null, null, null, (source, comment) -> "should-not-happen");
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> controller.generateIdentifier("-42", new LinkedHashMap<>(), null));
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+  }
+
+  @Test
+  void generateIdentifierKeepsEmptyQueryCommentOverBodyWhenBodyHasComment() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-empty-query");
+
+    AtomicReference<String> receivedComment = new AtomicReference<>("not-empty");
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "uuid-empty-query",
+            source,
+            (ignoredSource, comment) -> {
+              receivedComment.set(comment);
+              return "ID-EMPTY-QUERY";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> response =
+        controller
+            .generateIdentifier(
+                "uuid-empty-query", new LinkedHashMap<>(Map.of("comment", "from-body")), "")
+            .getBody();
+
+    assertEquals("ID-EMPTY-QUERY", response.get("identifier"));
+    assertEquals("", receivedComment.get());
+  }
+
+  @Test
+  void generateIdentifierIgnoresUnrelatedBodyProperties() {
+    IdentifierSource source = new SequentialIdentifierGenerator();
+    source.setUuid("uuid-unrelated");
+
+    AtomicReference<String> receivedComment = new AtomicReference<>();
+    IdentifierSourceService service =
+        createServiceStub(
+            null,
+            null,
+            "uuid-unrelated",
+            source,
+            (ignoredSource, comment) -> {
+              receivedComment.set(comment);
+              return "ID-UNRELATED";
+            });
+
+    IdgenIdentifierController controller = new IdgenIdentifierController(service);
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("comment", "from-body");
+    body.put("other", "value");
+    Map<String, Object> response =
+        controller.generateIdentifier("uuid-unrelated", body, null).getBody();
+
+    assertEquals("ID-UNRELATED", response.get("identifier"));
+    assertEquals("from-body", receivedComment.get());
+  }
+
+  @Test
   void generateIdentifierAcceptsNonStringBodyCommentValues() {
     IdentifierSource source = new SequentialIdentifierGenerator();
     source.setUuid("uuid-number");
