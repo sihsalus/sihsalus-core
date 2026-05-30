@@ -17,7 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "sihsalus.ocl.static-import.enabled=false")
+        properties = {
+            "sihsalus.ocl.static-import.enabled=false",
+            "sihsalus.admin.password=test-admin-password"
+        })
 @Testcontainers
 public class ComposeSmokeIntegrationTest {
 
