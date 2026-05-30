@@ -37,9 +37,11 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ComponentScan(basePackages = "org.openmrs.module.idgen.web.controller")
 public class SihsalusIdgenConfiguration {
 
   private static final Logger log = LoggerFactory.getLogger(SihsalusIdgenConfiguration.class);

@@ -20,9 +20,11 @@ import org.openmrs.module.imaging.api.impl.RequestProcedureStepServiceImpl;
 import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ComponentScan(basePackages = "org.openmrs.module.imaging.web.controller")
 public class SihsalusImagingConfiguration {
 
   @Bean
