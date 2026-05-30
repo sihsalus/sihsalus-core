@@ -2,9 +2,7 @@ package org.sihsalus.core.boot;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -12,15 +10,16 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {
-            "sihsalus.ocl.static-import.enabled=false",
-            "sihsalus.admin.password=test-admin-password"
-        })
+    properties = {
+      "sihsalus.ocl.static-import.enabled=false",
+      "sihsalus.admin.password=test-admin-password"
+    })
 @Testcontainers
 public class ComposeSmokeIntegrationTest {
 
