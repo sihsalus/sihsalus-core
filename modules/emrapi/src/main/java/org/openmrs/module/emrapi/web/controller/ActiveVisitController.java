@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * "ensureActiveVisit")
  */
 @Controller
-@RequestMapping(value = "/rest/**/emrapi/activevisit")
+@RequestMapping(value = {"/rest/v1/emrapi/activevisit", "/ws/rest/v1/emrapi/activevisit"})
 public class ActiveVisitController extends BaseRestController {
 
 	@Autowired

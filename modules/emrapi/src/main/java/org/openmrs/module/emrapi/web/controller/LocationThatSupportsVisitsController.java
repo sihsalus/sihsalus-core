@@ -32,7 +32,7 @@ public class LocationThatSupportsVisitsController {
 	@Autowired
 	private AdtService adtService;
 
-	@RequestMapping(method = RequestMethod.GET, value = "/rest/**/emrapi/locationThatSupportsVisits")
+	@RequestMapping(method = RequestMethod.GET, value = "/rest/v1/emrapi/locationThatSupportsVisits")
 	@ResponseBody
 	public SimpleObject getLocationThatSupportsVisits(HttpServletRequest request, HttpServletResponse response,
 	        @RequestParam(required = true, value = "location") Location location) {

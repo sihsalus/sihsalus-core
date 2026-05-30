@@ -36,7 +36,7 @@ public class MothersAndChildrenController {
 	@Autowired
 	private MaternalService maternalService;
 
-	@RequestMapping(method = RequestMethod.GET, value = "/rest/**/emrapi/maternal/mothersAndChildren")
+	@RequestMapping(method = RequestMethod.GET, value = "/rest/v1/emrapi/maternal/mothersAndChildren")
 	@ResponseBody
 	public SimpleObject getMothersAndChildren(HttpServletRequest request, HttpServletResponse response,
 	        @RequestParam(required = false, value = "mother") List<String> motherUuids,

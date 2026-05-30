@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = "/rest/**/emrapi/inpatient")
+@RequestMapping(value = {"/rest/v1/emrapi/inpatient", "/ws/rest/v1/emrapi/inpatient"})
 @Deprecated
 public class InpatientVisitsController {
 
