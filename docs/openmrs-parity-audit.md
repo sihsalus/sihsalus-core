@@ -39,8 +39,8 @@ Core `master`.
   `config/baseline/sihsalus-distro.properties`
 
 The machine-readable baseline is present at
-`config/baseline/sihsalus-distro.properties`. Keep this file aligned with
-`docs/archive/sihsalus-distro-baseline.md` before updating parity claims.
+`config/baseline/sihsalus-distro.properties`. Keep this file aligned with the
+current runtime baseline when updating parity claims.
 
 ## Module Coverage
 

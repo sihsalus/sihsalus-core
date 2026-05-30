@@ -16,7 +16,7 @@ rg -n --no-heading "TODO|FIXME|HACK" \
   --glob '!reference-sources/**' \
   --glob '!.git/**' \
   --glob '!scripts/todo-debt-report.sh' \
-  --glob '!docs/todo-debt-register.md' \
+  --glob '!docs/archive/todo-debt-register.md' \
   --glob '!*.class' \
   > "$OUT_DIR/raw.txt" || true
 
