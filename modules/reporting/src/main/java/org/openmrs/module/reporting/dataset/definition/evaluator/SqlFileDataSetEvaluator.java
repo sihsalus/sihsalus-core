@@ -38,6 +38,7 @@ import org.openmrs.module.reporting.dataset.definition.SqlFileDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.SqlFileDataSetDefinition.MetadataParameterConversion;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
+import org.openmrs.util.DatabaseUtil;
 import org.openmrs.util.OpenmrsUtil;
 
 /** Evaluates a SqlFileDataSetDefinition and produces results */
@@ -152,12 +153,10 @@ public class SqlFileDataSetEvaluator implements DataSetEvaluator {
       throws EvaluationException {
     Properties connectionProperties = getConnectionProperties(dsd.getConnectionPropertyFile());
     try {
-      String driver =
-          connectionProperties.getProperty("connection.driver_class", "com.mysql.jdbc.Driver");
       String url = connectionProperties.getProperty("connection.url");
       String user = connectionProperties.getProperty("connection.username");
       String password = connectionProperties.getProperty("connection.password");
-      Context.loadClass(driver);
+      DatabaseUtil.loadDatabaseDriver(url, connectionProperties.getProperty("connection.driver_class"));
       return DriverManager.getConnection(url, user, password);
     } catch (Exception e) {
       throw new EvaluationException("Unable to create a new connection to the database", e);

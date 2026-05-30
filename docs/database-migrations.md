@@ -112,6 +112,11 @@ The Liquibase helper infers the JDBC driver from the target URL, so PostgreSQL
 targets use `org.postgresql.Driver` automatically unless you override it with
 `SIHSALUS_LIQUIBASE_DRIVER`.
 
+Legacy module helpers follow the same direction: billing's sample
+`liquibase.properties` now points at PostgreSQL, and reporting SQL-file data
+sets resolve the JDBC driver from the configured URL instead of falling back to
+MySQL when the driver is omitted.
+
 ## Offline Mode
 
 Offline mode is useful for syntax review of generated PostgreSQL SQL, but it does not inspect an existing `liquibasechangelog` table:
