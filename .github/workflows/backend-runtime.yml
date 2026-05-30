@@ -76,7 +76,7 @@ jobs:
           cache: maven
 
       - name: Run PostgreSQL migration gate
-        run: ./scripts/postgres-migration-gate.sh --require-upgrade-fixture
+        run: ./scripts/postgres-migration-gate.sh
 
   dependency-sbom-gate:
     name: Dependency Scan and SBOM

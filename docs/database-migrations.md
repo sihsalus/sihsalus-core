@@ -8,7 +8,7 @@ Sihsalus Core uses a centralized Liquibase changelog for the static runtime:
 
 Use `scripts/liquibase-dry-run.sh` before merging migration changes. The script packages the boot runtime, extracts the same classpath used by the application, and runs Liquibase CLI against the configured database.
 
-CI runs `scripts/postgres-migration-gate.sh` as the merge gate. It validates, generates `updateSQL`, applies `update`, and checks post-update status against a clean PostgreSQL database and the restored upgrade fixture.
+CI runs `scripts/postgres-migration-gate.sh` as the merge gate. It validates, generates `updateSQL`, applies `update`, and checks post-update status against a clean PostgreSQL database. When the upgrade fixture secrets are configured, it also runs the restored fixture path.
 
 ## GitHub Actions Secrets
 
