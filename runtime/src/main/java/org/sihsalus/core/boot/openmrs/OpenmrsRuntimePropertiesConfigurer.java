@@ -98,6 +98,7 @@ final class OpenmrsRuntimePropertiesConfigurer
     configureAuthentication(properties, sihsalus.getAuth());
 
     Context.setRuntimeProperties(properties);
+    // Reset cached authentication config so it is rebuilt from the updated runtime properties.
     AuthenticationConfig.setConfig(null);
   }
 
