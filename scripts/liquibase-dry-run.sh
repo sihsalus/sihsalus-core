@@ -20,6 +20,7 @@ USERNAME="${SIHSALUS_LIQUIBASE_USERNAME:-${SIHSALUS_DATASOURCE_USERNAME:-${SIHSA
 PASSWORD="${SIHSALUS_LIQUIBASE_PASSWORD:-${SIHSALUS_DATASOURCE_PASSWORD:-${SIHSALUS_POSTGRES_PASSWORD:-}}}"
 CONTEXTS="${SIHSALUS_LIQUIBASE_CONTEXTS:-}"
 LABELS="${SIHSALUS_LIQUIBASE_LABELS:-}"
+DRIVER="${SIHSALUS_LIQUIBASE_DRIVER:-}"
 EXTRA_ARGS=()
 
 usage() {
@@ -134,6 +135,14 @@ if [[ -z "$URL" ]]; then
   URL="jdbc:postgresql://localhost:${SIHSALUS_POSTGRES_PORT:-5432}/${SIHSALUS_POSTGRES_DB:-sihsalus}"
 fi
 
+if [[ -z "$DRIVER" ]]; then
+  if [[ "$URL" == jdbc:postgresql:* ]]; then
+    DRIVER="org.postgresql.Driver"
+  elif [[ "$URL" == jdbc:mysql:* ]]; then
+    DRIVER="com.mysql.cj.jdbc.Driver"
+  fi
+fi
+
 if [[ "$URL" != offline:* && -z "$PASSWORD" ]]; then
   echo "Missing database password. Set SIHSALUS_LIQUIBASE_PASSWORD, SIHSALUS_DATASOURCE_PASSWORD, or SIHSALUS_POSTGRES_PASSWORD."
   exit 1
@@ -205,6 +214,9 @@ LIQUIBASE_ARGS=(
 
 if [[ "$URL" != offline:* ]]; then
   LIQUIBASE_ARGS+=("--username=$USERNAME" "--password=$PASSWORD")
+  if [[ -n "$DRIVER" ]]; then
+    LIQUIBASE_ARGS+=("--driver=$DRIVER")
+  fi
 fi
 if [[ -n "$CONTEXTS" ]]; then
   LIQUIBASE_ARGS+=("--contexts=$CONTEXTS")

@@ -108,6 +108,10 @@ export SIHSALUS_LIQUIBASE_PASSWORD='<fixture-password>'
 ./scripts/liquibase-dry-run.sh --sql --output target/liquibase-dry-run/upgrade-fixture.sql
 ```
 
+The Liquibase helper infers the JDBC driver from the target URL, so PostgreSQL
+targets use `org.postgresql.Driver` automatically unless you override it with
+`SIHSALUS_LIQUIBASE_DRIVER`.
+
 ## Offline Mode
 
 Offline mode is useful for syntax review of generated PostgreSQL SQL, but it does not inspect an existing `liquibasechangelog` table:
