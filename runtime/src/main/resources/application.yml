@@ -34,7 +34,7 @@ sihsalus:
     mode: ${SIHSALUS_AUTH_MODE:}
     oauth2-enabled: ${OAUTH2_ENABLED:false}
   initializer:
-    startup-load: ${SIHSALUS_INITIALIZER_STARTUP_LOAD:}
+    startup-load: ${SIHSALUS_INITIALIZER_STARTUP_LOAD:continue_on_error}
     domains: ${SIHSALUS_INITIALIZER_DOMAINS:}
     exclude:
       addresshierarchy: ${SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY:}
