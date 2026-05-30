@@ -264,6 +264,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Validator;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @SpringBootTest(properties = "sihsalus.ocl.static-import.enabled=false")
 @AutoConfigureMockMvc
@@ -3144,6 +3145,57 @@ class SihsalusCoreApplicationTest {
     assertNotNull(
         jdbcTemplate.queryForObject(
             "select count(*) from reporting_report_request", Integer.class));
+  }
+
+  @Test
+  void migratedLegacyWebControllersAreRegistered() {
+    for (String pattern :
+        List.of(
+            "/module/addresshierarchy/ajax/getChildAddressHierarchyEntries.form",
+            "/rest/**/emrapi/activevisit",
+            "/rest/**/emrapi/patientdiagnoses",
+            "/rest/**/emrapi/configuration",
+            "/rest/**/emrapi/concept",
+            "/rest/**/emrapi/encounter",
+            "/rest/**/emrapi/inpatient/admission",
+            "/rest/**/emrapi/inpatient/request",
+            "/rest/**/emrapi/inpatient/visits",
+            "/rest/**/emrapi/locationThatSupportsVisits",
+            "/rest/**/emrapi/maternal/mothersAndChildren",
+            "/rest/**/emrapi/patient/{patientUuid}/visit",
+            "viewCustomValue.form",
+            "/admin/hl7/hl7InArchives.htm",
+            "/admin/hl7/hl7InError.htm",
+            "/admin/hl7/hl7InQueuePending.htm",
+            "/q/message",
+            "/q/locationHierarchy",
+            "/admin/modules/manage/checkdependencies.form",
+            "admin/maintenance/searchIndex.htm",
+            "/admin/visits/datatable.list",
+            "/module/reporting/datasets/editDataSet.form")) {
+      assertRequestMappingPatternIsRegistered(pattern);
+    }
+  }
+
+  private void assertRequestMappingPatternIsRegistered(String expectedPattern) {
+    boolean registered =
+        applicationContext.getBeansOfType(RequestMappingHandlerMapping.class).values().stream()
+            .flatMap(mapping -> mapping.getHandlerMethods().keySet().stream())
+            .flatMap(info -> info.getPatternValues().stream())
+            .anyMatch(pattern -> matchesRequestMappingPattern(pattern, expectedPattern));
+
+    assertTrue(
+        registered, () -> "Expected request mapping pattern to be registered: " + expectedPattern);
+  }
+
+  private boolean matchesRequestMappingPattern(String registeredPattern, String expectedPattern) {
+    return registeredPattern.equals(expectedPattern)
+        || normalizeRequestMappingPattern(registeredPattern)
+            .equals(normalizeRequestMappingPattern(expectedPattern));
+  }
+
+  private String normalizeRequestMappingPattern(String pattern) {
+    return pattern.startsWith("/") ? pattern.substring(1) : pattern;
   }
 
   private void setGlobalProperty(String property, String value) {

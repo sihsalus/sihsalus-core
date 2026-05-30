@@ -66,9 +66,11 @@ import org.openmrs.module.emrapi.procedure.ProcedureServiceImpl;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ComponentScan(basePackages = "org.openmrs.module.emrapi.web.controller")
 public class SihsalusEmrApiConfiguration {
 
   private static final String DEFAULT_CONTENT_SOURCE_ROOT =

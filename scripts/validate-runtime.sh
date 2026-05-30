@@ -15,6 +15,9 @@ export SIHSALUS_ADMIN_PASSWORD="${SIHSALUS_ADMIN_PASSWORD:-dummy}"
 echo "=== Module map ==="
 ./scripts/module-map-check.sh
 
+echo "=== REST surface ==="
+./scripts/rest-surface-check.sh
+
 echo "=== Quality doctor: $QUALITY_MODULES ==="
 MAVEN_CMD="$MAVEN_CMD" ./scripts/quality-doctor.sh --modules "$QUALITY_MODULES" --skip-spotless
 
