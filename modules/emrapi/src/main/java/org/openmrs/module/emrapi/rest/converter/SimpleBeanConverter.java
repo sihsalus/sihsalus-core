@@ -34,9 +34,9 @@ import java.util.Map;
 @Handler(supports = { EmrApiProperties.class, DiagnosisMetadata.class, Disposition.class, DispositionObs.class,
         DispositionDescriptor.class, Diagnosis.class, }, order = 0)
 public class SimpleBeanConverter<T> implements Converter<T> {
-	
+
 	private final Log log = LogFactory.getLog(getClass());
-	
+
 	/**
 	 * @return a resource description that represents a custom representation, or one that represents
 	 *         all bean properties in the class
@@ -54,7 +54,7 @@ public class SimpleBeanConverter<T> implements Converter<T> {
 		}
 		return ret;
 	}
-	
+
 	@Override
 	public SimpleObject asRepresentation(T o, Representation rep) throws ConversionException {
 		SimpleObject ret = new SimpleObject();
@@ -72,22 +72,22 @@ public class SimpleBeanConverter<T> implements Converter<T> {
 		}
 		return ret;
 	}
-	
+
 	@Override
 	public T newInstance(String s) {
 		throw new ResourceDoesNotSupportOperationException();
 	}
-	
+
 	@Override
 	public T getByUniqueId(String s) {
 		throw new ResourceDoesNotSupportOperationException();
 	}
-	
+
 	@Override
 	public Object getProperty(T o, String s) throws ConversionException {
 		throw new ResourceDoesNotSupportOperationException();
 	}
-	
+
 	@Override
 	public void setProperty(Object o, String s, Object o1) throws ConversionException {
 		throw new ResourceDoesNotSupportOperationException();

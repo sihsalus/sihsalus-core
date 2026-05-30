@@ -19,48 +19,48 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Class dedicated for DataTables. It is a request that can be extracted from
  * {@link HttpServletRequest} with {@link #parseRequest(HttpServletRequest)}.
- * 
+ *
  * @see <a href="http://datatables.net/">http://datatables.net/</a>
  */
 public class DatatableRequest {
-	
+
 	private Integer iDisplayStart;
-	
+
 	private Integer iDisplayLength;
-	
+
 	private Integer iColumns;
-	
+
 	private String sSearch;
-	
+
 	private Boolean bRegex;
-	
+
 	private Integer sEcho;
-	
+
 	private Integer iSortingCols;
-	
+
 	private Boolean[] bSearchableCol;
-	
+
 	private String[] sSearchCol;
-	
+
 	private Boolean[] bRegexCol;
-	
+
 	private Boolean[] bSortableCol;
-	
+
 	private Integer[] iSortCol;
-	
+
 	private String[] sSortDirCol;
-	
+
 	private String[] mDataPropCol;
-	
+
 	/**
 	 * Display start point in the current data set.
-	 * 
+	 *
 	 * @return the iDisplayStart
 	 */
 	public Integer getiDisplayStart() {
 		return iDisplayStart;
 	}
-	
+
 	/**
 	 * @see #getiDisplayStart()
 	 * @param iDisplayStart the iDisplayStart to set
@@ -68,18 +68,18 @@ public class DatatableRequest {
 	public void setiDisplayStart(Integer iDisplayStart) {
 		this.iDisplayStart = iDisplayStart;
 	}
-	
+
 	/**
 	 * Number of records that the table can display in the current draw. It is expected that the
 	 * number of records returned will be equal to this number, unless the server has fewer records
 	 * to return.
-	 * 
+	 *
 	 * @return the iDisplayLength
 	 */
 	public Integer getiDisplayLength() {
 		return iDisplayLength;
 	}
-	
+
 	/**
 	 * @see #getiDisplayLength()
 	 * @param iDisplayLength the iDisplayLength to set
@@ -87,16 +87,16 @@ public class DatatableRequest {
 	public void setiDisplayLength(Integer iDisplayLength) {
 		this.iDisplayLength = iDisplayLength;
 	}
-	
+
 	/**
 	 * Number of columns being displayed (useful for getting individual column search info).
-	 * 
+	 *
 	 * @return the iColumns
 	 */
 	public Integer getiColumns() {
 		return iColumns;
 	}
-	
+
 	/**
 	 * @see #getiColumns()
 	 * @param iColumns the iColumns to set
@@ -104,16 +104,16 @@ public class DatatableRequest {
 	public void setiColumns(Integer iColumns) {
 		this.iColumns = iColumns;
 	}
-	
+
 	/**
 	 * Global search field.
-	 * 
+	 *
 	 * @return the sSearch
 	 */
 	public String getsSearch() {
 		return sSearch;
 	}
-	
+
 	/**
 	 * @see #getsSearch()
 	 * @param sSearch the sSearch to set
@@ -121,17 +121,17 @@ public class DatatableRequest {
 	public void setsSearch(String sSearch) {
 		this.sSearch = sSearch;
 	}
-	
+
 	/**
 	 * True if the global filter should be treated as a regular expression for advanced filtering,
 	 * false if not.
-	 * 
+	 *
 	 * @return the bRegex
 	 */
 	public Boolean getbRegex() {
 		return bRegex;
 	}
-	
+
 	/**
 	 * @see #getbRegex()
 	 * @param bRegex the bRegex to set
@@ -139,16 +139,16 @@ public class DatatableRequest {
 	public void setbRegex(Boolean bRegex) {
 		this.bRegex = bRegex;
 	}
-	
+
 	/**
 	 * Indicator for if a column is flagged as searchable or not on the client-side.
-	 * 
+	 *
 	 * @return the bSearchableCol
 	 */
 	public Boolean[] getbSearchableCol() {
 		return bSearchableCol;
 	}
-	
+
 	/**
 	 * @see #getbSearchableCol()
 	 * @param bSearchableCol the bSearchable to set
@@ -160,16 +160,16 @@ public class DatatableRequest {
 			this.bSearchableCol = Arrays.copyOf(bSearchableCol, bSearchableCol.length);
 		}
 	}
-	
+
 	/**
 	 * Individual column filter.
-	 * 
+	 *
 	 * @return the sSearchCol
 	 */
 	public String[] getsSearchCol() {
 		return sSearchCol;
 	}
-	
+
 	/**
 	 * @see #getsSearchCol()
 	 * @param sSearchCol the sSearchColumn to set
@@ -181,17 +181,17 @@ public class DatatableRequest {
 			this.sSearchCol = Arrays.copyOf(sSearchCol, sSearchCol.length);
 		}
 	}
-	
+
 	/**
 	 * True if the individual column filter should be treated as a regular expression for advanced
 	 * filtering, false if not.
-	 * 
+	 *
 	 * @return the bRegexCol
 	 */
 	public Boolean[] getbRegexCol() {
 		return bRegexCol;
 	}
-	
+
 	/**
 	 * @see #getbRegexCol()
 	 * @param bRegexCol the bRegexColumn to set
@@ -203,16 +203,16 @@ public class DatatableRequest {
 			this.bRegexCol = Arrays.copyOf(bRegexCol, bRegexCol.length);
 		}
 	}
-	
+
 	/**
 	 * Indicator for if a column is flagged as sortable or not on the client-side.
-	 * 
+	 *
 	 * @return the bSortableCol
 	 */
 	public Boolean[] getbSortableCol() {
 		return bSortableCol;
 	}
-	
+
 	/**
 	 * @see #getbSortableCol()
 	 * @param bSortableCol the bSortable to set
@@ -224,16 +224,16 @@ public class DatatableRequest {
 			this.bSortableCol = Arrays.copyOf(bSortableCol, bSortableCol.length);
 		}
 	}
-	
+
 	/**
 	 * Number of columns to sort on.
-	 * 
+	 *
 	 * @return the iSortingCols
 	 */
 	public Integer getiSortingCols() {
 		return iSortingCols;
 	}
-	
+
 	/**
 	 * @see #getiSortingCols()
 	 * @param iSortingCols the iSortingCols to set
@@ -241,16 +241,16 @@ public class DatatableRequest {
 	public void setiSortingCols(Integer iSortingCols) {
 		this.iSortingCols = iSortingCols;
 	}
-	
+
 	/**
 	 * Column being sorted on (you will need to decode this number for your database).
-	 * 
+	 *
 	 * @return the iSortCol
 	 */
 	public Integer[] getiSortCol() {
 		return iSortCol;
 	}
-	
+
 	/**
 	 * @see #getiSortCol()
 	 * @param iSortCol the iSortCol to set
@@ -262,16 +262,16 @@ public class DatatableRequest {
 			this.iSortCol = Arrays.copyOf(iSortCol, iSortCol.length);
 		}
 	}
-	
+
 	/**
 	 * Direction to be sorted - "desc" or "asc".
-	 * 
+	 *
 	 * @return the sSortDirCol
 	 */
 	public String[] getsSortDirCol() {
 		return sSortDirCol;
 	}
-	
+
 	/**
 	 * @see #getsSortDirCol()
 	 * @param sSortDirCol the sSortDir to set
@@ -283,17 +283,17 @@ public class DatatableRequest {
 			this.sSortDirCol = Arrays.copyOf(sSortDirCol, sSortDirCol.length);
 		}
 	}
-	
+
 	/**
 	 * The value specified by mDataProp for each column. This can be useful for ensuring that the
 	 * processing of data is independent from the order of the columns.
-	 * 
+	 *
 	 * @return the mDataPropCol
 	 */
 	public String[] getmDataPropCol() {
 		return mDataPropCol;
 	}
-	
+
 	/**
 	 * @see #getmDataPropCol()
 	 * @param mDataPropCol the mDataProp to set
@@ -305,16 +305,16 @@ public class DatatableRequest {
 			this.mDataPropCol = Arrays.copyOf(mDataPropCol, mDataPropCol.length);
 		}
 	}
-	
+
 	/**
 	 * Information for DataTables to use for rendering.
-	 * 
+	 *
 	 * @return the sEcho
 	 */
 	public Integer getsEcho() {
 		return sEcho;
 	}
-	
+
 	/**
 	 * @see #getsEcho()
 	 * @param sEcho the sEcho to set
@@ -322,16 +322,16 @@ public class DatatableRequest {
 	public void setsEcho(Integer sEcho) {
 		this.sEcho = sEcho;
 	}
-	
+
 	/**
 	 * Creates {@link DatatableRequest} from parameters found in the given request.
-	 * 
+	 *
 	 * @param request
 	 * @return {@link DatatableRequest}
 	 */
 	public static DatatableRequest parseRequest(HttpServletRequest request) {
 		DatatableRequest d = new DatatableRequest();
-		
+
 		d.setiDisplayStart(Integer.valueOf(request.getParameter("iDisplayStart")));
 		d.setiDisplayLength(Integer.valueOf(request.getParameter("iDisplayLength")));
 		d.setiColumns(Integer.valueOf(request.getParameter("iColumns")));
@@ -339,31 +339,31 @@ public class DatatableRequest {
 		d.setbRegex(Boolean.valueOf(request.getParameter("bRegex")));
 		d.setsEcho(Integer.valueOf(request.getParameter("sEcho")));
 		d.setiSortingCols(Integer.valueOf(request.getParameter("iSortingCols")));
-		
+
 		String[] values = parseColumns("bSearchable", request);
 		d.setbSearchableCol(convertToBoolean(values));
-		
+
 		values = parseColumns("sSearch", request);
 		d.setsSearchCol(values);
-		
+
 		values = parseColumns("bRegex", request);
 		d.setbRegexCol(convertToBoolean(values));
-		
+
 		values = parseColumns("bSortable", request);
 		d.setbSortableCol(convertToBoolean(values));
-		
+
 		values = parseColumns("iSortCol", request);
 		d.setiSortCol(convertToInteger(values));
-		
+
 		values = parseColumns("sSortDir", request);
 		d.setsSortDirCol(values);
-		
+
 		values = parseColumns("mDataProp", request);
 		d.setmDataPropCol(values);
-		
+
 		return d;
 	}
-	
+
 	private static Boolean[] convertToBoolean(String[] values) {
 		Boolean[] result = new Boolean[values.length];
 		for (int i = 0; i < result.length; i++) {
@@ -371,7 +371,7 @@ public class DatatableRequest {
 		}
 		return result;
 	}
-	
+
 	private static Integer[] convertToInteger(String[] values) {
 		Integer[] result = new Integer[values.length];
 		for (int i = 0; i < result.length; i++) {
@@ -379,14 +379,14 @@ public class DatatableRequest {
 		}
 		return result;
 	}
-	
+
 	private static String[] parseColumns(String type, HttpServletRequest request) {
 		@SuppressWarnings("unchecked")
 		Map<String, String[]> parameterMap = request.getParameterMap();
-		
+
 		Map<Integer, String> parameters = new HashMap<Integer, String>();
 		type = type + "_";
-		
+
 		for (Entry<String, String[]> parameter : parameterMap.entrySet()) {
 			if (parameter.getKey().startsWith(type)) {
 				Integer index = Integer.valueOf(parameter.getKey().replace(type, ""));
@@ -394,7 +394,7 @@ public class DatatableRequest {
 				parameters.put(index, value);
 			}
 		}
-		
+
 		String[] values = new String[parameters.size()];
 		for (Entry<Integer, String> parameter : parameters.entrySet()) {
 			values[parameter.getKey()] = parameter.getValue();

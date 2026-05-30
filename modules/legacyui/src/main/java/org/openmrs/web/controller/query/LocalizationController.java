@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class LocalizationController {
-	
+
 	@RequestMapping("/q/message")
 	@ResponseBody
 	public String getMessage(@RequestParam("key") String key, @RequestParam(required = false, value = "locale") Locale locale) {

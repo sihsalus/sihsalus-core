@@ -35,15 +35,15 @@ import org.openmrs.util.PrivilegeConstants;
 @Controller
 @RequirePrivilege(PrivilegeConstants.GET_HL7_IN_ARCHIVE)
 public class Hl7InArchiveListController {
-	
+
 	/**
 	 * Logger for this class and subclasses
 	 */
 	private static final Log log = LogFactory.getLog(Hl7InArchiveListController.class);
-	
+
 	/**
 	 * Render the archived HL7 messages page
-	 * 
+	 *
 	 * @param modelMap
 	 * @return path
 	 */
@@ -51,10 +51,10 @@ public class Hl7InArchiveListController {
 	public String listArchivedHL7s(ModelMap modelMap) {
 		return "module/legacyui/admin/hl7/hl7InArchiveList";
 	}
-	
+
 	/**
 	 * method for returning a batch of HL7s from the queue based on datatable parameters
-	 * 
+	 *
 	 * @param iDisplayStart start index for search
 	 * @param iDisplayLength amount of terms to return
 	 * @param sSearch search term(s)
@@ -67,17 +67,17 @@ public class Hl7InArchiveListController {
 	Map<String, Object> getHL7InArchiveBatchAsJson(@RequestParam("iDisplayStart") int iDisplayStart,
 	        @RequestParam("iDisplayLength") int iDisplayLength, @RequestParam("sSearch") String sSearch,
 	        @RequestParam("sEcho") int sEcho) throws IOException {
-		
+
 		// get the data
 		List<HL7InArchive> hl7s = Context.getHL7Service().getHL7InArchiveBatch(iDisplayStart, iDisplayLength,
 		    HL7Constants.HL7_STATUS_PROCESSED, sSearch);
-		
+
 		// form the results dataset
 		List<Object> results = new ArrayList<Object>();
 		for (HL7InArchive hl7 : hl7s) {
 			results.add(splitHL7InArchive(hl7));
 		}
-		
+
 		// build the response
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("iTotalRecords", Context.getHL7Service().countHL7InArchive(HL7Constants.HL7_STATUS_PROCESSED, null));
@@ -85,14 +85,14 @@ public class Hl7InArchiveListController {
 		    Context.getHL7Service().countHL7InArchive(HL7Constants.HL7_STATUS_PROCESSED, sSearch));
 		response.put("sEcho", sEcho);
 		response.put("aaData", results.toArray());
-		
+
 		// send it
 		return response;
 	}
-	
+
 	/**
 	 * create an object array for a given HL7InArchive
-	 * 
+	 *
 	 * @param q HL7InArchive object
 	 * @return object array for use with datatables
 	 */
@@ -101,5 +101,5 @@ public class Hl7InArchiveListController {
 		return new Object[] { Integer.toString(q.getHL7InArchiveId()), q.getHL7Source().getName(),
 		        Context.getDateFormat().format(q.getDateCreated()), q.getHL7Data() };
 	}
-	
+
 }

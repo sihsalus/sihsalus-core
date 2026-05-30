@@ -30,11 +30,11 @@ import org.openmrs.util.PrivilegeConstants;
 @Controller
 @RequirePrivilege(PrivilegeConstants.MANAGE_SEARCH_INDEX)
 public class SearchIndexController {
-	
+
 	protected final Log log = LogFactory.getLog(getClass());
-	
+
 	private Future<?> updateSearchIndexAsync = null;
-	
+
 	/**
 	 * @should return the search index view
 	 * @return the searchIndex view
@@ -43,7 +43,7 @@ public class SearchIndexController {
 	public String showPage() {
 		return "/module/legacyui/admin/maintenance/searchIndex";
 	}
-	
+
 	/**
 	 * @should return true for success if the update does not fail
 	 * @should return false for success if a RuntimeException is thrown
@@ -68,7 +68,7 @@ public class SearchIndexController {
 		results.put("success", success);
 		return results;
 	}
-	
+
 	/**
 	 * @should return return inProgress for status if a rebuildSearchIndex is not completed
 	 * @should return success for status if a rebuildSearchIndex is completed successfully

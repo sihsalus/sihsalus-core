@@ -35,15 +35,15 @@ import org.openmrs.util.PrivilegeConstants;
 @Controller
 @RequirePrivilege(PrivilegeConstants.GET_HL7_IN_QUEUE)
 public class Hl7InQueueListController {
-	
+
 	/**
 	 * Logger for this class and subclasses
 	 */
 	private static final Log log = LogFactory.getLog(Hl7InQueueListController.class);
-	
+
 	/**
 	 * Render the pending HL7 queue messages page
-	 * 
+	 *
 	 * @param modelMap
 	 * @return path
 	 */
@@ -52,10 +52,10 @@ public class Hl7InQueueListController {
 		modelMap.addAttribute("messageState", HL7Constants.HL7_STATUS_PENDING);
 		return "/module/legacyui/admin/hl7/hl7InQueueList";
 	}
-	
+
 	/**
 	 * Render the suspended HL7 queue messages page
-	 * 
+	 *
 	 * @param modelMap
 	 * @return path
 	 */
@@ -64,10 +64,10 @@ public class Hl7InQueueListController {
 		modelMap.addAttribute("messageState", HL7Constants.HL7_STATUS_DELETED);
 		return "module/legacyui/admin/hl7/hl7OnHoldList";
 	}
-	
+
 	/**
 	 * suspends or restores a HL7InQueue based on current status
-	 * 
+	 *
 	 * @param id HL7InQueueId for identifying the HL7 message
 	 * @return formatted success or failure message for display
 	 * @throws Exception
@@ -79,10 +79,10 @@ public class Hl7InQueueListController {
 		MessageSourceService mss = Context.getMessageSourceService();
 		StringBuffer success = new StringBuffer();
 		StringBuffer error = new StringBuffer();
-		
+
 		// Argument to pass to the success/error message
 		Object[] args = new Object[] { id };
-		
+
 		try {
 			//Update the hl7 message's status based on existing status
 			HL7InQueue hl7InQueue = hL7Service.getHL7InQueue(id);
@@ -92,7 +92,7 @@ public class Hl7InQueueListController {
 				hl7InQueue.setMessageState(HL7Constants.HL7_STATUS_PENDING);
 			}
 			hL7Service.saveHL7InQueue(hl7InQueue);
-			
+
 			//Display a message for the operation
 			if (hl7InQueue.getMessageState().equals(HL7Constants.HL7_STATUS_PENDING)) {
 				success.append(mss.getMessage("Hl7inQueue.queueList.restored", args, Context.getLocale()) + ", ");
@@ -104,22 +104,22 @@ public class Hl7InQueueListController {
 			log.warn("Error updating a queue entry", e);
 			error.append(mss.getMessage("Hl7inQueue.queueList.error", args, Context.getLocale()) + ", ");
 		}
-		
+
 		Map<String, Object> results = new HashMap<String, Object>();
-		
+
 		if (!"".equals(success.toString())) {
 			results.put(WebConstants.OPENMRS_MSG_ATTR, success.toString());
 		}
 		if (!"".equals(error.toString())) {
 			results.put(WebConstants.OPENMRS_ERROR_ATTR, error.toString());
 		}
-		
+
 		return results;
 	}
-	
+
 	/**
 	 * method for returning a batch of HL7s from the queue based on datatable parameters
-	 * 
+	 *
 	 * @param iDisplayStart start index for search
 	 * @param iDisplayLength amount of terms to return
 	 * @param sSearch search term(s)
@@ -133,31 +133,31 @@ public class Hl7InQueueListController {
 	Map<String, Object> getHL7InQueueBatchAsJson(@RequestParam("iDisplayStart") int iDisplayStart,
 	        @RequestParam("iDisplayLength") int iDisplayLength, @RequestParam("sSearch") String sSearch,
 	        @RequestParam("sEcho") int sEcho, @RequestParam("messageState") int messageState) throws IOException {
-		
+
 		// get the data
 		List<HL7InQueue> hl7s = Context.getHL7Service().getHL7InQueueBatch(iDisplayStart, iDisplayLength, messageState,
 		    sSearch);
-		
+
 		// form the results dataset
 		List<Object> results = new ArrayList<Object>();
 		for (HL7InQueue hl7 : hl7s) {
 			results.add(splitHL7InQueue(hl7));
 		}
-		
+
 		// build the response
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("iTotalRecords", Context.getHL7Service().countHL7InQueue(messageState, null));
 		response.put("iTotalDisplayRecords", Context.getHL7Service().countHL7InQueue(messageState, sSearch));
 		response.put("sEcho", sEcho);
 		response.put("aaData", results.toArray());
-		
+
 		// send it
 		return response;
 	}
-	
+
 	/**
 	 * create an object array for a given HL7InQueue
-	 * 
+	 *
 	 * @param q HL7InQueue object
 	 * @return object array for use with datatables
 	 */
@@ -166,5 +166,5 @@ public class Hl7InQueueListController {
 		return new Object[] { q.getHL7InQueueId().toString(), q.getHL7Source().getName(),
 		        Context.getDateFormat().format(q.getDateCreated()), q.getHL7Data() };
 	}
-	
+
 }

@@ -44,16 +44,16 @@ import java.util.Map;
 @Setter
 @Controller
 public class VisitController extends BaseRestController {
-	
+
 	@Autowired
 	PatientService patientService;
-	
+
 	@Autowired
 	DiagnosisService diagnosisService;
-	
+
 	@Autowired
 	EmrPatientService emrPatientService;
-	
+
 	/**
 	 * Custom representation supported includes:
 	 * visit:Visit,diagnoses:List<org.openmrs.Diagnosis>,visitNotes:Obs
@@ -61,16 +61,16 @@ public class VisitController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/rest/**/emrapi/patient/{patientUuid}/visit")
 	public ResponseEntity<?> getVisitsWithDiagnosesAndNotesByPatient(HttpServletRequest request,
 	        HttpServletResponse response, @PathVariable("patientUuid") String patientUuid) {
-		
+
 		RequestContext context = RestUtil.getRequestContext(request, response, null);
 		Representation representation = context.getRepresentation();
 		Representation defaultRep = (representation instanceof CustomRepresentation) ? null : representation;
-		
+
 		// Determine what representations to render for each property.  Only compute if requested
 		Representation visitRepresentation = defaultRep;
 		Representation notesRepresentation = defaultRep;
 		Representation diagnosisRepresentation = defaultRep;
-		
+
 		if (context.getRepresentation() instanceof CustomRepresentation) {
 			CustomRepresentation customRep = (CustomRepresentation) context.getRepresentation();
 			DelegatingResourceDescription customProps = ConversionUtil.getCustomRepresentationDescription(customRep);
@@ -78,7 +78,7 @@ public class VisitController extends BaseRestController {
 			diagnosisRepresentation = getRepresentation(customProps, "diagnoses");
 			notesRepresentation = getRepresentation(customProps, "visitNotes");
 		}
-		
+
 		// First, retrieve the appropriate Visits for the patient
 		Map<Visit, SimpleObject> visitData = new LinkedHashMap<>();
 		try {
@@ -98,7 +98,7 @@ public class VisitController extends BaseRestController {
 		catch (APIException e) {
 			return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
-		
+
 		// Retrieve diagnoses if requested
 		if (diagnosisRepresentation != null) {
 			Map<Visit, List<org.openmrs.Diagnosis>> diagnoses = diagnosisService.getDiagnoses(visitData.keySet());
@@ -113,7 +113,7 @@ public class VisitController extends BaseRestController {
 				visitData.get(visit).add("diagnoses", diagnosisData);
 			}
 		}
-		
+
 		// Retrieve visitNotes if requested
 		if (notesRepresentation != null) {
 			Map<Visit, List<Obs>> notes = emrPatientService.getVisitNoteObservations(visitData.keySet());
@@ -128,11 +128,11 @@ public class VisitController extends BaseRestController {
 				visitData.get(visit).add("visitNotes", notesData);
 			}
 		}
-		
+
 		List<SimpleObject> visitDataToReturn = new ArrayList<>(visitData.values());
 		return new ResponseEntity<>(new NeedsPaging<>(visitDataToReturn, context), HttpStatus.OK);
 	}
-	
+
 	private Representation getRepresentation(DelegatingResourceDescription drd, String propertyName) {
 		DelegatingResourceDescription.Property property = drd.getProperties().get(propertyName);
 		if (property == null) {

@@ -96,7 +96,7 @@ public class AddressHierarchyAjaxController {
 	 */
 	@RequestMapping("/module/addresshierarchy/ajax/getPossibleAddressHierarchyEntries.form")
 	public void getPossibleAddressHierarchyEntries(ModelMap model, HttpServletRequest request, HttpServletResponse response,
-	                                               	@RequestParam("searchString") String searchString,
+	                                                   @RequestParam("searchString") String searchString,
 						                            @RequestParam("addressField") String addressFieldString) throws IOException {
 
 		if (StringUtils.isBlank(searchString) || StringUtils.isBlank(addressFieldString)) {
@@ -338,10 +338,10 @@ public class AddressHierarchyAjaxController {
 		}
 
 		response.setContentType("text/json");
-    	response.setCharacterEncoding("UTF-8");
-    	PrintWriter out = response.getWriter();
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
 
-    	out.print("[");
+        out.print("[");
 
 		if (addresses != null && addresses.size() > 0) {
 			Iterator<String> i = addresses.iterator();
@@ -365,6 +365,6 @@ public class AddressHierarchyAjaxController {
 			}
 		}
 
-    	out.print("]");
+        out.print("]");
 	}
 }

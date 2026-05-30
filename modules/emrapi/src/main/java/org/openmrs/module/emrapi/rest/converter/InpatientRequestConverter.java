@@ -20,9 +20,9 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 
 @Handler(supports = InpatientRequest.class, order = 0)
 public class InpatientRequestConverter extends SimpleBeanConverter<InpatientRequest> {
-	
+
 	private final Log log = LogFactory.getLog(getClass());
-	
+
 	@Override
 	public DelegatingResourceDescription getResourceDescription(InpatientRequest req, Representation representation) {
 		DelegatingResourceDescription ret = super.getResourceDescription(req, representation);

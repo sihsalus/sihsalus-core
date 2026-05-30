@@ -32,10 +32,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class MothersAndChildrenController {
-	
+
 	@Autowired
 	private MaternalService maternalService;
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/rest/**/emrapi/maternal/mothersAndChildren")
 	@ResponseBody
 	public SimpleObject getMothersAndChildren(HttpServletRequest request, HttpServletResponse response,
@@ -54,5 +54,5 @@ public class MothersAndChildrenController {
 		List<MotherAndChild> motherAndChildList = maternalService.getMothersAndChildren(criteria);
 		return new NeedsPaging<>(motherAndChildList, context).toSimpleObject(new SimpleBeanConverter<MotherAndChild>());
 	}
-	
+
 }

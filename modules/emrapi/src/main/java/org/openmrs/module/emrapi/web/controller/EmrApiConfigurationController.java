@@ -27,10 +27,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 @RequestMapping(value = "/rest/**/emrapi/configuration")
 public class EmrApiConfigurationController {
-	
+
 	@Autowired
 	private EmrApiProperties emrApiProperties;
-	
+
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public SimpleObject getEmrApiConfiguration(HttpServletRequest request, HttpServletResponse response) {

@@ -25,32 +25,32 @@ import org.openmrs.module.web.extension.FormEntryHandler;
 
 /**
  * Contains utility method(s) to be used by PortletControllers
- * 
+ *
  * @since 1.9
  */
 public class PortletControllerUtil {
-	
+
 	private static final Log log = LogFactory.getLog(PortletControllerUtil.class);
-	
+
 	/**
 	 * Adds encounter formToEdit and formToView Url maps to the specified model
-	 * 
+	 *
 	 * @param model the model to which to add the maps
 	 */
 	public static void addFormToEditAndViewUrlMaps(Map<String, Object> model) {
 		if (log.isDebugEnabled()) {
 			log.debug("In PortletControllerUtil....");
 		}
-		
+
 		if (model.containsKey("formToEditUrlMap")) {
 			return;
 		}
-		
+
 		Person person = (Person) model.get("person");
 		if (person == null) {
 			throw new IllegalArgumentException("This portlet may only be used in the context of a Person");
 		}
-		
+
 		Map<Form, String> viewUrlMap = new HashMap<Form, String>();
 		Map<Form, String> editUrlMap = new HashMap<Form, String>();
 		List<Extension> handlers = ModuleFactory.getExtensions("org.openmrs.module.web.extension.FormEntryHandler",
@@ -87,5 +87,5 @@ public class PortletControllerUtil {
 		model.put("formToViewUrlMap", viewUrlMap);
 		model.put("formToEditUrlMap", editUrlMap);
 	}
-	
+
 }

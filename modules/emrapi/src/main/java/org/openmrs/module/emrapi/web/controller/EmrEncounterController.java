@@ -25,31 +25,31 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "/rest/**/emrapi/encounter")
 public class EmrEncounterController extends BaseRestController {
-	
+
 	@Autowired
 	private EmrEncounterService emrEncounterService;
-	
+
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
 	@Transactional
 	public EncounterTransaction update(@RequestBody EncounterTransaction encounterTransaction) {
 		return emrEncounterService.save(encounterTransaction);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/active")
 	@ResponseBody
 	public EncounterTransaction getActiveEncounter(
 	        @ModelAttribute("activeEncounterParameters") ActiveEncounterParameters activeEncounterParameters) {
 		return emrEncounterService.getActiveEncounter(activeEncounterParameters);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
 	@ResponseBody
 	public EncounterTransaction get(@PathVariable("uuid") String uuid,
 	        @RequestParam(value = "includeAll", required = false) Boolean includeAll) {
 		return emrEncounterService.getEncounterTransaction(uuid, includeAll);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public List<EncounterTransaction> find(@RequestParam(required = false) List<String> visitUuids,

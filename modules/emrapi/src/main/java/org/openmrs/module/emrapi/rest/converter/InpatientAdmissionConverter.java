@@ -19,7 +19,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 
 @Handler(supports = InpatientAdmission.class, order = 0)
 public class InpatientAdmissionConverter extends SimpleBeanConverter<InpatientAdmission> {
-	
+
 	@Override
 	public DelegatingResourceDescription getResourceDescription(InpatientAdmission req, Representation representation) {
 		DelegatingResourceDescription ret = super.getResourceDescription(req, representation);
@@ -42,11 +42,11 @@ public class InpatientAdmissionConverter extends SimpleBeanConverter<InpatientAd
 		}
 		return ret;
 	}
-	
+
 	public Representation getEncounterRepresentation() {
 		return new CustomRepresentation("uuid,display,encounterDatetime,location:ref,encounterType:ref");
 	}
-	
+
 	public Representation getInpatientRequestRepresentation() {
 		return new CustomRepresentation(
 		        "dispositionType,dispositionEncounter:(uuid,display,encounterDatetime),dispositionLocation:ref");

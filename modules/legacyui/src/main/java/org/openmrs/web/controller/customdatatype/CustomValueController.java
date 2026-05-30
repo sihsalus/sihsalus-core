@@ -35,16 +35,16 @@ import org.openmrs.web.security.RequirePrivilege;
 @Controller
 @RequirePrivilege
 public class CustomValueController {
-	
+
 	private final Log log = LogFactory.getLog(getClass());
-	
+
 	private static final String HTML_START = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head></head><body>";
-	
+
 	private static final String HTML_END = "</body></html>";
-	
+
 	/**
 	 * Displays a custom value, as HTML, in its own page.
-	 * 
+	 *
 	 * @param handlerClassname
 	 * @param datatypeClassname
 	 * @param valueReference
@@ -56,23 +56,23 @@ public class CustomValueController {
 	public String viewCustomValue(@RequestParam("handler") String handlerClassname,
 	        @RequestParam(value = "datatype", required = true) String datatypeClassname,
 	        @RequestParam(value = "value", required = true) String valueReference) throws IOException {
-		
+
 		CustomDatatype<?> datatype = CustomDatatypeUtil.getDatatype(datatypeClassname, null);
 		HtmlDisplayableDatatypeHandler handler = (HtmlDisplayableDatatypeHandler) CustomDatatypeUtil.getHandler(datatype,
 		    handlerClassname, null);
-		
+
 		// die if not enough information
 		if (datatype == null || StringUtils.isBlank(valueReference)) {
 			throw new IOException("datatype and value are required parameters");
 		}
-		
+
 		String html = handler.toHtml(datatype, valueReference);
 		return HTML_START + html + HTML_END;
 	}
-	
+
 	/**
 	 * Downloads a custom value
-	 * 
+	 *
 	 * @param response
 	 * @param handlerClassname
 	 * @param datatypeClassname
@@ -83,30 +83,30 @@ public class CustomValueController {
 	public void downloadCustomValue(HttpServletResponse response, @RequestParam("handler") String handlerClassname,
 	        @RequestParam(value = "datatype", required = true) String datatypeClassname,
 	        @RequestParam(value = "value", required = true) String valueReference) throws IOException {
-		
+
 		// get the datatype and handler
 		CustomDatatype datatype = CustomDatatypeUtil.getDatatype(datatypeClassname, null);
 		CustomDatatypeHandler<?, ?> handler = CustomDatatypeUtil.getHandler(datatype, handlerClassname, null);
-		
+
 		if (!(handler instanceof DownloadableDatatypeHandler)) {
 			throw new IllegalArgumentException(handler.getClass().getName() + " does not support downloading");
 		}
-		
+
 		// die if not enough information
 		if (datatype == null || StringUtils.isBlank(valueReference)) {
 			throw new IOException("datatype and value are required parameters");
 		}
-		
+
 		// render the output
 		DownloadableDatatypeHandler<?> downloadHandler = (DownloadableDatatypeHandler<?>) handler;
 		response.setHeader("Content-Type", downloadHandler.getContentType(datatype, valueReference));
-		
+
 		String filename = downloadHandler.getFilename(datatype, valueReference);
 		if (filename == null) {
 			filename = "openmrs-custom-value_" + valueReference + ".txt";
 		}
 		response.setHeader("Content-Disposition", "attachment; filename=" + filename);
-		
+
 		// write the resource as a string
 		OutputStream out = response.getOutputStream();
 		downloadHandler.writeToStream(datatype, valueReference, out);

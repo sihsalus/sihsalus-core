@@ -40,13 +40,13 @@ import static org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NON
 @Controller
 @RequestMapping(method = RequestMethod.GET, value = "/rest/**/emrapi/concept")
 public class EmrConceptSearchController {
-	
+
 	@Autowired
 	EmrApiProperties emrApiProperties;
-	
+
 	@Autowired
 	EmrConceptService emrService;
-	
+
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Object search(@RequestParam("term") String query, @RequestParam Integer limit,
@@ -59,11 +59,11 @@ public class EmrConceptSearchController {
 		ConceptSource conceptSource = conceptSources.isEmpty() ? null : conceptSources.get(0);
 		return createListResponse(conceptSearchResults, conceptSource, searchLocale);
 	}
-	
+
 	private List<SimpleObject> createListResponse(List<ConceptSearchResult> resultList, ConceptSource conceptSource,
 	        Locale searchLocale) {
 		List<SimpleObject> allDiagnoses = new ArrayList<SimpleObject>();
-		
+
 		for (ConceptSearchResult diagnosis : resultList) {
 			SimpleObject diagnosisObject = new SimpleObject();
 			ConceptName conceptName = diagnosis.getConcept().getName(searchLocale);
@@ -83,7 +83,7 @@ public class EmrConceptSearchController {
 		}
 		return allDiagnoses;
 	}
-	
+
 	private ConceptReferenceTerm getConceptReferenceTermByConceptSource(Concept concept, ConceptSource conceptSource) {
 		Collection<ConceptMap> conceptMappings = concept.getConceptMappings();
 		if (conceptMappings != null && conceptSource != null) {
@@ -96,7 +96,7 @@ public class EmrConceptSearchController {
 		}
 		return null;
 	}
-	
+
 	private Locale getSearchLocale(String localeStr) {
 		if (localeStr == null) {
 			return Context.getLocale();
@@ -114,12 +114,12 @@ public class EmrConceptSearchController {
 			throw new IllegalArgumentException(localeErrorMessage("emrapi.conceptSearch.unsupportedLocale", localeStr));
 		}
 	}
-	
+
 	private boolean allowedLocale(Locale locale) {
 		Set<Locale> allowedLocales = new HashSet<Locale>(Context.getAdministrationService().getAllowedLocales());
 		return allowedLocales.contains(locale);
 	}
-	
+
 	private String localeErrorMessage(String msgKey, String localeStr) {
 		return Context.getMessageSourceService().getMessage(msgKey, new Object[] { localeStr }, Context.getLocale());
 	}

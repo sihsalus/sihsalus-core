@@ -29,26 +29,26 @@ import java.util.List;
 @RequestMapping(value = "/rest/**/emrapi/inpatient")
 @Deprecated
 public class InpatientVisitsController {
-	
+
 	@Autowired
 	private AdtService adtService;
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/visits")
 	@ResponseBody
 	public List<SimpleObject> getInpatientVisits(@RequestParam(value = "currentLocation") Location currentLocation) {
-		
+
 		if (currentLocation == null) {
 			throw new IllegalArgumentException("currentLocation is required");
 		}
-		
+
 		List<VisitDomainWrapper> visits = adtService
 		        .getInpatientVisits(adtService.getLocationThatSupportsVisits(currentLocation), currentLocation);
 		List<SimpleObject> response = new ArrayList<SimpleObject>();
-		
+
 		if (visits == null) {
 			return response;
 		}
-		
+
 		for (VisitDomainWrapper visit : visits) {
 			SimpleObject inpatientVisit = new SimpleObject();
 			inpatientVisit.put("visit", ConversionUtil.convertToRepresentation(visit.getVisit(), Representation.DEFAULT));
@@ -60,7 +60,7 @@ public class InpatientVisitsController {
 			inpatientVisit.put("timeAtInpatientLocationInMinutes", visit.getTimeAtCurrentInpatientLocationInMinutes());
 			response.add(inpatientVisit);
 		}
-		
+
 		return response;
 	}
 }

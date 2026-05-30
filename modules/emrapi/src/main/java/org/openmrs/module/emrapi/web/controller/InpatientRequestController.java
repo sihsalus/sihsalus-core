@@ -36,10 +36,10 @@ import java.util.stream.Collectors;
 
 @Controller
 public class InpatientRequestController {
-	
+
 	@Autowired
 	private AdtService adtService;
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/rest/**/emrapi/inpatient/request")
 	@ResponseBody
 	public SimpleObject getInpatientRequests(HttpServletRequest request, HttpServletResponse response,
@@ -53,7 +53,7 @@ public class InpatientRequestController {
 		criteria.setVisitLocation(visitLocation);
 		criteria.setDispositionLocations(dispositionLocations);
 		criteria.setDispositionTypes(dispositionTypes);
-		
+
 		if (patients != null) {
 			criteria.setPatientIds(patients.stream().map(Patient::getId).collect(Collectors.toList()));
 		}

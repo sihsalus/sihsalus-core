@@ -16,25 +16,25 @@ import org.openmrs.Person;
  * form entry handlers to decide which forms to show at a particular time.
  */
 public class FormEntryContext {
-	
+
 	private Person person;
-	
+
 	public FormEntryContext(Person person) {
 		this.person = person;
 	}
-	
+
 	/**
 	 * @return the person
 	 */
 	public Person getPerson() {
 		return person;
 	}
-	
+
 	/**
 	 * @param person the person to set
 	 */
 	public void setPerson(Person person) {
 		this.person = person;
 	}
-	
+
 }

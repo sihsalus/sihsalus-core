@@ -16,26 +16,26 @@ import org.openmrs.customdatatype.CustomDatatypeHandler;
  * A CustomDatatypeHandler that is capable of producing HTML output for display
  */
 public interface HtmlDisplayableDatatypeHandler<T> extends CustomDatatypeHandler<CustomDatatype<T>, T> {
-	
+
 	/**
 	 * Renders an HTML-formatted summary view of the custom value, that does not take a lot of
 	 * space. (This is subjective, but generally means &lt; 100 characters in length, or an image of
 	 * &lt; 200 pixels in each dimension.) This method should return quickly, e.g. in case we're
 	 * rendering thousands of custom values in a table.
-	 * 
+	 *
 	 * @param datatype
 	 * @param valueReference
 	 * @return an HTML-formatted summary view of valueReference
 	 */
 	CustomDatatype.Summary toHtmlSummary(CustomDatatype<T> datatype, String valueReference);
-	
+
 	/**
 	 * Renders the full view of a custom value, as HTML.
-	 * 
+	 *
 	 * @param datatype
 	 * @param valueReference
 	 * @return an HTML-formatted full view of valueReference
 	 */
 	String toHtml(CustomDatatype<T> datatype, String valueReference);
-	
+
 }

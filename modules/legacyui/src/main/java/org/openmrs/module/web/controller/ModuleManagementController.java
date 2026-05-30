@@ -34,18 +34,18 @@ import org.openmrs.util.PrivilegeConstants;
 @RequestMapping(value = "/admin/modules/manage/")
 @RequirePrivilege(PrivilegeConstants.MANAGE_MODULES)
 public class ModuleManagementController {
-	
+
 	/**
 	 * Logger for this class and subclasses
 	 */
 	protected final Log log = LogFactory.getLog(getClass());
-	
+
 	@RequestMapping(value = "/checkdependencies.form", method = RequestMethod.GET)
 	@ResponseBody
 	public List<String> manage(@RequestParam(value = "moduleId") String moduleId, HttpServletRequest request,
 	        HttpServletResponse response) throws IOException {
 		return ModuleFactory.getDependencies(moduleId);
-		
+
 	}
-	
+
 }

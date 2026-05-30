@@ -35,7 +35,7 @@ import org.openmrs.util.PrivilegeConstants;
 @Controller
 @RequirePrivilege(PrivilegeConstants.GET_LOCATIONS)
 public class LocationQueryController {
-	
+
 	@RequestMapping("/q/locationHierarchy")
 	public @ResponseBody
 	List<Map<String, Object>> getHierarchyAsJson(@RequestParam("selectLeafOnly") boolean selectLeafOnly,
@@ -49,10 +49,10 @@ public class LocationQueryController {
 		options.includeNullOption = includeNullOption == null ? true : includeNullOption;
 		return getHierarchy(options); // returning a POJO will be handled by a spring Converter
 	}
-	
+
 	/**
 	 * Gets JSON formatted for jstree jquery plugin [ { data: ..., children: ...}, ... ]
-	 * 
+	 *
 	 * @return
 	 * @throws IOException
 	 */
@@ -69,7 +69,7 @@ public class LocationQueryController {
 				}
 			}
 		}
-		
+
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		if (options.includeNullOption) {
 			list.add(toJsonHelper(null, options));
@@ -79,10 +79,10 @@ public class LocationQueryController {
 		}
 		return list;
 	}
-	
+
 	/**
 	 * { data: "Location's name (tags)", children: [ recursive calls to this method, ... ] }
-	 * 
+	 *
 	 * @param loc
 	 * @return
 	 */
@@ -93,20 +93,20 @@ public class LocationQueryController {
 			attrs.put("id", 0);
 			attrs.put("name", none);
 			attrs.put("rel", "nulloption");
-			
+
 			Map<String, Object> ret = new LinkedHashMap<String, Object>();
 			ret.put("attributes", attrs);
 			ret.put("data", none);
 			return ret;
-			
+
 		} else {
 			String nodeType = isSelectable(loc, options) ? "selectable" : "default";
-			
+
 			Map<String, Object> attrs = new HashMap<String, Object>();
 			attrs.put("id", loc.getLocationId());
 			attrs.put("name", getName(loc));
 			attrs.put("rel", nodeType);
-			
+
 			Map<String, Object> ret = new LinkedHashMap<String, Object>();
 			ret.put("attributes", attrs);
 			StringBuilder sb = new StringBuilder(getName(loc));
@@ -132,7 +132,7 @@ public class LocationQueryController {
 			return ret;
 		}
 	}
-	
+
 	/**
 	 * Can this node be selected given the specified options?
 	 */
@@ -150,10 +150,10 @@ public class LocationQueryController {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Returns metadata name formatted if retired
-	 * 
+	 *
 	 * @param metadata
 	 * @return
 	 */
@@ -162,16 +162,16 @@ public class LocationQueryController {
 		name = StringEscapeUtils.escapeEcmaScript(name);
 		return metadata.isRetired() ? "<strike>" + name + "</strike>" : name;
 	}
-	
+
 	class HierarchyOptions {
-		
+
 		public boolean includeNullOption = true;
-		
+
 		public boolean selectOnlyLeaves;
-		
+
 		public List<String> selectableTags;
-		
+
 		public String startFromTag;
 	}
-	
+
 }

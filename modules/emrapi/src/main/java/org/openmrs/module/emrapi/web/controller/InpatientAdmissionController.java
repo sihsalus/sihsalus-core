@@ -35,10 +35,10 @@ import java.util.stream.Collectors;
 
 @Controller
 public class InpatientAdmissionController {
-	
+
 	@Autowired
 	private AdtService adtService;
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/rest/**/emrapi/inpatient/admission")
 	@ResponseBody
 	public SimpleObject getInpatientAdmissions(HttpServletRequest request, HttpServletResponse response,
@@ -52,11 +52,11 @@ public class InpatientAdmissionController {
 		criteria.setVisitLocation(visitLocation);
 		criteria.setCurrentInpatientLocations(currentInpatientLocations);
 		criteria.setIncludeDischarged(includeDischarged);
-		
+
 		if (patients != null) {
 			criteria.setPatientIds(patients.stream().map(Patient::getId).collect(Collectors.toList()));
 		}
-		
+
 		if (visits != null) {
 			criteria.setVisitIds(visits.stream().map(Visit::getId).collect(Collectors.toList()));
 		}

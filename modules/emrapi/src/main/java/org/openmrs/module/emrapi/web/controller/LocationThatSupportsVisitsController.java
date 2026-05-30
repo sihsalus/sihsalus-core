@@ -28,25 +28,25 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class LocationThatSupportsVisitsController {
-	
+
 	@Autowired
 	private AdtService adtService;
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/rest/**/emrapi/locationThatSupportsVisits")
 	@ResponseBody
 	public SimpleObject getLocationThatSupportsVisits(HttpServletRequest request, HttpServletResponse response,
 	        @RequestParam(required = true, value = "location") Location location) {
-		
+
 		SimpleObject res = new SimpleObject();
-		
+
 		RequestContext context = RestUtil.getRequestContext(request, response, Representation.DEFAULT);
 		Location visitLocation = adtService.getLocationThatSupportsVisits(location);
-		
+
 		if (visitLocation != null) {
 			res = (SimpleObject) ConversionUtil.convertToRepresentation(visitLocation, context.getRepresentation());
 		}
-		
+
 		return res;
 	}
-	
+
 }
