@@ -15,7 +15,6 @@
     <name>Sihsalus FHIR2</name>
 
     <properties>
-        <hapi.fhir.version>5.7.9</hapi.fhir.version>
         <ucum.version>1.0.9</ucum.version>
         <lombok.version>1.18.38</lombok.version>
     </properties>
