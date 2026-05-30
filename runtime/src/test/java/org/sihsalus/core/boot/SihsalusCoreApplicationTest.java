@@ -264,6 +264,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Validator;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @SpringBootTest(properties = "sihsalus.ocl.static-import.enabled=false")
 @AutoConfigureMockMvc
@@ -1434,6 +1435,15 @@ class SihsalusCoreApplicationTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   void idgenIsWiredAsStaticInternalModule() {
     assertNotNull(Context.getService(IdentifierSourceService.class));
+    RestService restService = Context.getService(RestService.class);
+    for (String resourceName :
+        List.of(
+            "v1/idgen/identifiersource",
+            "v1/idgen/autogenerationoption",
+            "v1/idgen/logentry",
+            "v1/idgen/nextIdentifier")) {
+      assertNotNull(restService.getResourceByName(resourceName), resourceName);
+    }
     assertNotNull(
         Context.getPatientService()
             .getIdentifierValidator((Class) LuhnMod10IdentifierValidator.class));
@@ -1554,6 +1564,14 @@ class SihsalusCoreApplicationTest {
   @Test
   void metadataMappingIsWiredAsStaticInternalModule() {
     assertNotNull(Context.getService(MetadataMappingService.class));
+    RestService restService = Context.getService(RestService.class);
+    for (String resourceName :
+        List.of(
+            "v1/metadatamapping/source",
+            "v1/metadatamapping/termmapping",
+            "v1/metadatamapping/metadataset")) {
+      assertNotNull(restService.getResourceByName(resourceName), resourceName);
+    }
     assertNotNull(
         jdbcTemplate.queryForObject(
             "select count(*) from metadatamapping_metadata_source", Integer.class));
@@ -1821,6 +1839,45 @@ class SihsalusCoreApplicationTest {
                 + ") and (started = true or start_on_startup = true)",
             Integer.class,
             UNPORTED_STOCKMANAGEMENT_SCHEDULER_JOBS.toArray()));
+  }
+
+  @Test
+  void stockManagementRestResourcesAreWiredAsStaticInternalModule() throws Exception {
+    RestService restService = Context.getService(RestService.class);
+    for (String resourceName :
+        List.of(
+            "v1/stockmanagement/batchjob",
+            "v1/stockmanagement/batchjobowner",
+            "v1/stockmanagement/dispenserequest",
+            "v1/stockmanagement/location",
+            "v1/stockmanagement/orderitem",
+            "v1/stockmanagement/party",
+            "v1/stockmanagement/privilegescope",
+            "v1/stockmanagement/report",
+            "v1/stockmanagement/stockbatch",
+            "v1/stockmanagement/stockitem",
+            "v1/stockmanagement/stockiteminventory",
+            "v1/stockmanagement/stockitempackaginguom",
+            "v1/stockmanagement/stockitemreference",
+            "v1/stockmanagement/stockitemtransaction",
+            "v1/stockmanagement/stockoperation",
+            "v1/stockmanagement/stockoperationaction",
+            "v1/stockmanagement/stockoperationactionlineitem",
+            "v1/stockmanagement/stockoperationbatchnumbers",
+            "v1/stockmanagement/stockoperationitem",
+            "v1/stockmanagement/stockoperationitemcost",
+            "v1/stockmanagement/stockoperationlink",
+            "v1/stockmanagement/stockoperationtype",
+            "v1/stockmanagement/stockoperationtypelocationscope",
+            "v1/stockmanagement/stockrule",
+            "v1/stockmanagement/stocksource",
+            "v1/stockmanagement/userrolescope")) {
+      assertNotNull(restService.getResourceByName(resourceName), resourceName);
+    }
+
+    mockMvc
+        .perform(get("/rest/v1/stockmanagement/session").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -2489,6 +2546,19 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void fuaWebControllersAreWiredAsStaticInternalModule() throws Exception {
+    mockMvc
+        .perform(get("/module/fua/list").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+    mockMvc
+        .perform(get("/module/fua/estado/list").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+  }
+
+  @Test
   void fuaProxyPreservesOpenmrsAuthorizationInterceptors() {
     boolean openedSession = !Context.isSessionOpen();
     if (openedSession) {
@@ -2586,6 +2656,22 @@ class SihsalusCoreApplicationTest {
                 + ")",
             Integer.class,
             imagingPrivileges.toArray()));
+  }
+
+  @Test
+  void imagingWebControllersAreWiredAsStaticInternalModule() throws Exception {
+    mockMvc
+        .perform(get("/rest/v1/imaging/configurations").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+    mockMvc
+        .perform(
+            get("/rest/v1/worklist/requests")
+                .param("status", "all")
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
   @Test
@@ -3059,6 +3145,58 @@ class SihsalusCoreApplicationTest {
     assertNotNull(
         jdbcTemplate.queryForObject(
             "select count(*) from reporting_report_request", Integer.class));
+  }
+
+  @Test
+  void migratedLegacyWebControllersAreRegistered() {
+    for (String pattern :
+        List.of(
+            "/module/addresshierarchy/ajax/getChildAddressHierarchyEntries.form",
+            "/rest/v1/emrapi/activevisit",
+            "/ws/rest/v1/emrapi/activevisit",
+            "/rest/v1/emrapi/patientdiagnoses",
+            "/rest/v1/emrapi/configuration",
+            "/rest/v1/emrapi/concept",
+            "/rest/v1/emrapi/encounter",
+            "/rest/v1/emrapi/inpatient/admission",
+            "/rest/v1/emrapi/inpatient/request",
+            "/rest/v1/emrapi/inpatient/visits",
+            "/rest/v1/emrapi/locationThatSupportsVisits",
+            "/rest/v1/emrapi/maternal/mothersAndChildren",
+            "/rest/v1/emrapi/patient/{patientUuid}/visit",
+            "viewCustomValue.form",
+            "/admin/hl7/hl7InArchives.htm",
+            "/admin/hl7/hl7InError.htm",
+            "/admin/hl7/hl7InQueuePending.htm",
+            "/q/message",
+            "/q/locationHierarchy",
+            "/admin/modules/manage/checkdependencies.form",
+            "admin/maintenance/searchIndex.htm",
+            "/admin/visits/datatable.list",
+            "/module/reporting/datasets/editDataSet.form")) {
+      assertRequestMappingPatternIsRegistered(pattern);
+    }
+  }
+
+  private void assertRequestMappingPatternIsRegistered(String expectedPattern) {
+    boolean registered =
+        applicationContext.getBeansOfType(RequestMappingHandlerMapping.class).values().stream()
+            .flatMap(mapping -> mapping.getHandlerMethods().keySet().stream())
+            .flatMap(info -> info.getPatternValues().stream())
+            .anyMatch(pattern -> matchesRequestMappingPattern(pattern, expectedPattern));
+
+    assertTrue(
+        registered, () -> "Expected request mapping pattern to be registered: " + expectedPattern);
+  }
+
+  private boolean matchesRequestMappingPattern(String registeredPattern, String expectedPattern) {
+    return registeredPattern.equals(expectedPattern)
+        || normalizeRequestMappingPattern(registeredPattern)
+            .equals(normalizeRequestMappingPattern(expectedPattern));
+  }
+
+  private String normalizeRequestMappingPattern(String pattern) {
+    return pattern.startsWith("/") ? pattern.substring(1) : pattern;
   }
 
   private void setGlobalProperty(String property, String value) {

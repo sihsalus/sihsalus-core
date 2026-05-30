@@ -14,6 +14,8 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.OrderService;
+import org.openmrs.api.OrderSetService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.ProgramWorkflowService;
@@ -47,6 +49,32 @@ import org.openmrs.module.emrapi.diagnosis.ObsGroupDiagnosisService;
 import org.openmrs.module.emrapi.disposition.DispositionService;
 import org.openmrs.module.emrapi.disposition.DispositionServiceImpl;
 import org.openmrs.module.emrapi.domainwrapper.DomainWrapperFactory;
+import org.openmrs.module.emrapi.encounter.ConceptMapper;
+import org.openmrs.module.emrapi.encounter.DiagnosisMapper;
+import org.openmrs.module.emrapi.encounter.DispositionMapper;
+import org.openmrs.module.emrapi.encounter.DrugMapper;
+import org.openmrs.module.emrapi.encounter.EmrEncounterService;
+import org.openmrs.module.emrapi.encounter.EmrEncounterServiceImpl;
+import org.openmrs.module.emrapi.encounter.EmrOrderService;
+import org.openmrs.module.emrapi.encounter.EmrOrderServiceImpl;
+import org.openmrs.module.emrapi.encounter.EncounterDispositionServiceHelper;
+import org.openmrs.module.emrapi.encounter.EncounterObservationServiceHelper;
+import org.openmrs.module.emrapi.encounter.EncounterObservationsMapper;
+import org.openmrs.module.emrapi.encounter.EncounterProviderMapper;
+import org.openmrs.module.emrapi.encounter.EncounterProviderServiceHelper;
+import org.openmrs.module.emrapi.encounter.EncounterTransactionMapper;
+import org.openmrs.module.emrapi.encounter.ObservationMapper;
+import org.openmrs.module.emrapi.encounter.OrderMapper;
+import org.openmrs.module.emrapi.encounter.OrderMetadataService;
+import org.openmrs.module.emrapi.encounter.mapper.DefaultDrugMapper;
+import org.openmrs.module.emrapi.encounter.mapper.DefaultOrderMapper;
+import org.openmrs.module.emrapi.encounter.mapper.DosingInstructionsMapper;
+import org.openmrs.module.emrapi.encounter.mapper.ObsMapper;
+import org.openmrs.module.emrapi.encounter.mapper.OpenMRSDrugOrderMapper;
+import org.openmrs.module.emrapi.encounter.mapper.OpenMRSOrderGroupMapper;
+import org.openmrs.module.emrapi.encounter.mapper.OpenMRSOrderMapper;
+import org.openmrs.module.emrapi.encounter.mapper.UserMapper;
+import org.openmrs.module.emrapi.encounter.matcher.ObservationTypeMatcher;
 import org.openmrs.module.emrapi.exitfromcare.ExitFromCareService;
 import org.openmrs.module.emrapi.exitfromcare.ExitFromCareServiceImpl;
 import org.openmrs.module.emrapi.maternal.MaternalService;
@@ -66,9 +94,11 @@ import org.openmrs.module.emrapi.procedure.ProcedureServiceImpl;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ComponentScan(basePackages = "org.openmrs.module.emrapi.web.controller")
 public class SihsalusEmrApiConfiguration {
 
   private static final String DEFAULT_CONTENT_SOURCE_ROOT =
@@ -323,6 +353,182 @@ public class SihsalusEmrApiConfiguration {
   }
 
   @Bean
+  ConceptMapper conceptMapper() {
+    return new ConceptMapper();
+  }
+
+  @Bean
+  UserMapper userMapper() {
+    return new UserMapper();
+  }
+
+  @Bean
+  DrugMapper drugMapper() {
+    return new DefaultDrugMapper();
+  }
+
+  @Bean
+  OrderMapper orderMapper() {
+    return new DefaultOrderMapper();
+  }
+
+  @Bean
+  ObservationMapper observationMapper(
+      ConceptMapper conceptMapper, DrugMapper drugMapper, UserMapper userMapper) {
+    return new ObservationMapper(conceptMapper, drugMapper, userMapper);
+  }
+
+  @Bean
+  ObsMapper obsMapper(
+      ConceptService conceptService,
+      EmrApiProperties emrApiProperties,
+      ObsService obsService,
+      OrderService orderService) {
+    return new ObsMapper(conceptService, emrApiProperties, obsService, orderService);
+  }
+
+  @Bean
+  DiagnosisMapper diagnosisMapper() {
+    return new DiagnosisMapper();
+  }
+
+  @Bean
+  DispositionMapper dispositionMapper(
+      ConceptService conceptService, UserMapper userMapper, EmrApiProperties emrApiProperties) {
+    return new DispositionMapper(conceptService, userMapper, emrApiProperties);
+  }
+
+  @Bean
+  ObservationTypeMatcher observationTypeMatcher(
+      EmrApiProperties emrApiProperties, ConceptService conceptService) {
+    return new ObservationTypeMatcher(emrApiProperties, conceptService);
+  }
+
+  @Bean
+  EncounterObservationsMapper encounterObservationsMapper(
+      ObservationMapper observationMapper,
+      DiagnosisMapper diagnosisMapper,
+      DispositionMapper dispositionMapper,
+      EmrApiProperties emrApiProperties,
+      ObservationTypeMatcher observationTypeMatcher) {
+    return new EncounterObservationsMapper(
+        observationMapper, diagnosisMapper, dispositionMapper, emrApiProperties,
+        observationTypeMatcher);
+  }
+
+  @Bean
+  EncounterProviderMapper encounterProviderMapper() {
+    return new EncounterProviderMapper();
+  }
+
+  @Bean
+  EncounterTransactionMapper encounterTransactionMapper(
+      EncounterObservationsMapper encounterObservationsMapper,
+      EncounterProviderMapper encounterProviderMapper,
+      OrderMapper orderMapper) {
+    return new EncounterTransactionMapper(
+        encounterObservationsMapper, encounterProviderMapper, orderMapper);
+  }
+
+  @Bean
+  EncounterObservationServiceHelper encounterObservationServiceHelper(
+      ConceptService conceptService,
+      EmrApiProperties emrApiProperties,
+      ObsService obsService,
+      OrderService orderService,
+      ObsMapper obsMapper) {
+    return new EncounterObservationServiceHelper(
+        conceptService, emrApiProperties, obsService, orderService, obsMapper);
+  }
+
+  @Bean
+  EncounterDispositionServiceHelper encounterDispositionServiceHelper(
+      ConceptService conceptService, EmrApiProperties emrApiProperties) {
+    return new EncounterDispositionServiceHelper(conceptService, emrApiProperties);
+  }
+
+  @Bean
+  EncounterProviderServiceHelper encounterProviderServiceHelper(
+      ProviderService providerService, EncounterService encounterService) {
+    return new EncounterProviderServiceHelper(providerService, encounterService);
+  }
+
+  @Bean
+  OrderMetadataService orderMetadataService(OrderService orderService) {
+    return new OrderMetadataService(orderService);
+  }
+
+  @Bean
+  DosingInstructionsMapper dosingInstructionsMapper(
+      ConceptService conceptService, OrderMetadataService orderMetadataService) {
+    return new DosingInstructionsMapper(conceptService, orderMetadataService);
+  }
+
+  @Bean
+  OpenMRSDrugOrderMapper openMRSDrugOrderMapper(
+      OrderService orderService,
+      ConceptService conceptService,
+      DosingInstructionsMapper dosingInstructionsMapper,
+      OrderMetadataService orderMetadataService) {
+    return new OpenMRSDrugOrderMapper(
+        orderService, conceptService, dosingInstructionsMapper, orderMetadataService);
+  }
+
+  @Bean
+  OpenMRSOrderMapper openMRSOrderMapper(
+      OrderService orderService, ConceptService conceptService) {
+    return new OpenMRSOrderMapper(orderService, conceptService);
+  }
+
+  @Bean
+  OpenMRSOrderGroupMapper openMRSOrderGroupMapper(
+      OrderSetService orderSetService, OrderService orderService) {
+    return new OpenMRSOrderGroupMapper(orderSetService, orderService);
+  }
+
+  @Bean
+  EmrOrderService emrOrderService(
+      OpenMRSDrugOrderMapper openMRSDrugOrderMapper,
+      EncounterService encounterService,
+      OpenMRSOrderMapper openMRSOrderMapper,
+      OrderSetService orderSetService,
+      OpenMRSOrderGroupMapper openMRSOrderGroupMapper) {
+    return new EmrOrderServiceImpl(
+        openMRSDrugOrderMapper,
+        encounterService,
+        openMRSOrderMapper,
+        orderSetService,
+        openMRSOrderGroupMapper);
+  }
+
+  @Bean
+  EmrEncounterService emrEncounterService(
+      PatientService patientService,
+      VisitService visitService,
+      EncounterService encounterService,
+      LocationService locationService,
+      ProviderService providerService,
+      AdministrationService adminService,
+      EncounterObservationServiceHelper encounterObservationServiceHelper,
+      EncounterDispositionServiceHelper encounterDispositionServiceHelper,
+      EncounterTransactionMapper encounterTransactionMapper,
+      EncounterProviderServiceHelper encounterProviderServiceHelper,
+      EmrOrderService emrOrderService) {
+    return new EmrEncounterServiceImpl(
+        patientService,
+        visitService,
+        encounterService,
+        locationService,
+        providerService,
+        adminService,
+        encounterObservationServiceHelper,
+        encounterDispositionServiceHelper,
+        encounterTransactionMapper,
+        encounterProviderServiceHelper,
+        emrOrderService);
+  }
+
+  @Bean
   EmrEncounterDAO emrEncounterDAO(DbSessionFactory dbSessionFactory) {
     HibernateEmrEncounterDAO dao = new HibernateEmrEncounterDAO();
     dao.setSessionFactory(dbSessionFactory);
@@ -356,6 +562,7 @@ public class SihsalusEmrApiConfiguration {
       EmrPatientProfileService emrPatientProfileService,
       DispositionService dispositionService,
       DiagnosisService emrDiagnosisService,
+      EmrEncounterService emrEncounterService,
       ProcedureService procedureService) {
     return () -> {
       serviceContext.setService(AccountService.class, accountService);
@@ -368,6 +575,7 @@ public class SihsalusEmrApiConfiguration {
       serviceContext.setService(EmrPatientProfileService.class, emrPatientProfileService);
       serviceContext.setService(DispositionService.class, dispositionService);
       serviceContext.setService(DiagnosisService.class, emrDiagnosisService);
+      serviceContext.setService(EmrEncounterService.class, emrEncounterService);
       serviceContext.setService(ProcedureService.class, procedureService);
     };
   }

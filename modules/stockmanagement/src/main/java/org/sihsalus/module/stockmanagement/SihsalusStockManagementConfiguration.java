@@ -14,10 +14,12 @@ import org.openmrs.module.stockmanagement.api.validator.StockRuleValidator;
 import org.openmrs.module.stockmanagement.api.validator.UserRoleScopeDTOValidator;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.TransactionManager;
 
 @Configuration
+@ComponentScan(basePackages = "org.openmrs.module.stockmanagement.web.controller")
 public class SihsalusStockManagementConfiguration {
 
   @Bean

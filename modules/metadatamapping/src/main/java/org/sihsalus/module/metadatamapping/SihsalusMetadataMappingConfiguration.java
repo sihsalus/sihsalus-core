@@ -13,9 +13,11 @@ import org.openmrs.module.metadatamapping.api.wrapper.ConceptAdapter;
 import org.sihsalus.core.api.HibernateMappingContributor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ComponentScan(basePackages = "org.openmrs.module.metadatamapping.web.controller")
 public class SihsalusMetadataMappingConfiguration {
 
   @Bean
