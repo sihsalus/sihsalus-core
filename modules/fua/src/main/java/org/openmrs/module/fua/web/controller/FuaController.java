@@ -11,6 +11,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fua.Fua;
 import org.openmrs.module.fua.FuaConfig;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.HtmlUtils;
 
 @Controller
 @RequestMapping("/module/fua")
@@ -286,11 +289,11 @@ public class FuaController {
       if (!response.getStatusCode().is2xxSuccessful()) {
         return ResponseEntity.status(response.getStatusCode()).body("<h2>Error renderizando FUA</h2>");
       }
-      return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(response.getBody());
+      return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(sanitizeHtml(response.getBody()));
     } catch (Exception ex) {
       log.error("Error rendering FUA", ex);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body("<h2>Error interno renderizando FUA</h2><pre>" + ex.getMessage() + "</pre>");
+          .body("<h2>Error interno renderizando FUA</h2><pre>" + HtmlUtils.htmlEscape(StringUtils.defaultString(ex.getMessage())) + "</pre>");
     }
   }
 
@@ -309,6 +312,10 @@ public class FuaController {
 
   private String getFuaIdentifierBase() {
     return Context.getAdministrationService().getGlobalProperty(FuaConfig.FUA_GENERATOR_IDENTIFIER);
+  }
+
+  private String sanitizeHtml(String body) {
+    return StringUtils.defaultString(Jsoup.clean(StringUtils.defaultString(body), Safelist.relaxed()));
   }
 
   private String generarFuadeFuaGenerator(Fua fua) {

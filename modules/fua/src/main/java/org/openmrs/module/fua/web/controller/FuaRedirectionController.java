@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fua.FuaConfig;
 import org.openmrs.module.fua.web.utils.MultipartInputStreamFileResource;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriUtils;
 
 @Controller
@@ -64,7 +67,7 @@ public class FuaRedirectionController {
             new HttpEntity<>(body, headers),
             String.class);
 
-    return ResponseEntity.status(response.getStatusCode())
+      return ResponseEntity.status(response.getStatusCode())
         .contentType(MediaType.APPLICATION_JSON)
         .body(response.getBody());
   }
@@ -108,7 +111,7 @@ public class FuaRedirectionController {
         return renderError(response.getStatusCode(), remoteUrl, response.getBody());
       }
 
-      return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(response.getBody());
+      return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(sanitizeHtml(response.getBody()));
     } catch (HttpStatusCodeException ex) {
       log.error("HTTP error rendering FUAFormat id " + id + " at " + remoteUrl, ex);
       return renderError(ex.getStatusCode(), remoteUrl, ex.getResponseBodyAsString());
@@ -143,11 +146,11 @@ public class FuaRedirectionController {
         .contentType(MediaType.TEXT_HTML)
         .body(
             "<h2>Error renderizando FUAFormat</h2><pre>Status: "
-                + statusCode
+          + HtmlUtils.htmlEscape(String.valueOf(statusCode))
                 + "\nURL: "
-                + remoteUrl
+          + HtmlUtils.htmlEscape(StringUtils.defaultString(remoteUrl))
                 + "\n\n"
-                + body
+          + HtmlUtils.htmlEscape(StringUtils.defaultString(body))
                 + "</pre>");
   }
 
@@ -155,6 +158,10 @@ public class FuaRedirectionController {
     HttpHeaders headers = new HttpHeaders();
     headers.set("fuagentoken", "fuagenerator");
     return headers;
+  }
+
+  private String sanitizeHtml(String body) {
+    return StringUtils.defaultString(Jsoup.clean(StringUtils.defaultString(body), Safelist.relaxed()));
   }
 
   private String getFuaGeneratorBaseUrl() {

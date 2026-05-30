@@ -122,27 +122,27 @@ public class StockItemImportController {
       catch (Exception exception) {}
     }
 
-    if (userId == null || !Context.getAuthenticatedUser().getUserId().equals(userId)) {
-      return Context.getMessageSourceService().getMessage("stockmanagement.importoperation.nofileuploaded");
-    }
-
-    String uuidPart = null;
+    UUID sessionUuid = null;
     if ((userIdPartEnds + 1) < importSessionId.length()) {
       try {
-        uuidPart = importSessionId.substring(userIdPartEnds + 1);
-        UUID.fromString(uuidPart);
-
+        sessionUuid = UUID.fromString(importSessionId.substring(userIdPartEnds + 1));
       }
       catch (Exception exception) {
-        uuidPart = null;
+        sessionUuid = null;
       }
     }
-    if (uuidPart == null) {
+
+    if (userId == null || sessionUuid == null || !Context.getAuthenticatedUser().getUserId().equals(userId)) {
       return Context.getMessageSourceService().getMessage("stockmanagement.importoperation.nofileuploaded");
     }
 
     File workingDir = FileUtil.getWorkingDirectory();
-    File fileName = new File(workingDir, userId.toString() + "_" + uuidPart + "_" + "errors");
+    Path errorsPath = workingDir.toPath().resolve(userId + "_" + sessionUuid + "_errors").normalize();
+    if (!errorsPath.startsWith(workingDir.toPath())) {
+      return Context.getMessageSourceService().getMessage("stockmanagement.importoperation.nofileuploaded");
+    }
+
+    File fileName = errorsPath.toFile();
     if (!fileName.exists()) {
       response.setStatus(404);
       return Context.getMessageSourceService().getMessage("stockmanagement.importoperation.nofileuploaded");
