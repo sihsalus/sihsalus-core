@@ -183,7 +183,7 @@ jobs:
           assert_status 401 http://localhost:8080/api/system/info
           assert_status 401 'http://localhost:8080/module/htmlwidgets/patientSearch.form?q=a'
 
-          session="$(docker compose exec -T backend curl -fsS -u admin:Admin123 http://localhost:8080/rest/v1/session)"
+          session="$(docker compose exec -T backend curl -fsS -H 'Disable-WWW-Authenticate: true' -u admin:Admin123 http://localhost:8080/ws/rest/v1/session)"
           echo "$session" | grep -q '"authenticated":true'
           echo "$session" | grep -q '"username":"admin"'
 
