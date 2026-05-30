@@ -1,9 +1,11 @@
-
 package org.openmrs.module.idgen.rest.resource.handler;
 
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.RemoteIdentifierSource;
@@ -24,17 +26,14 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
+@SubClassHandler(
+    supportedClass = RemoteIdentifierSource.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+public class RemoteIdentifierSourceResourceHandler
+    extends BaseDelegatingSubclassHandler<IdentifierSource, RemoteIdentifierSource>
+    implements DelegatingSubclassHandler<IdentifierSource, RemoteIdentifierSource> {
 
-@SubClassHandler(supportedClass = RemoteIdentifierSource.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
-public class RemoteIdentifierSourceResourceHandler extends BaseDelegatingSubclassHandler<IdentifierSource, RemoteIdentifierSource>
-implements DelegatingSubclassHandler<IdentifierSource, RemoteIdentifierSource> {
-
-  @Autowired
-  IdentifierSourceService service;
+  @Autowired IdentifierSourceService service;
 
   @Override
   public String getResourceVersion() {
@@ -57,50 +56,52 @@ implements DelegatingSubclassHandler<IdentifierSource, RemoteIdentifierSource> {
     DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
     if (representation instanceof DefaultRepresentation) {
       representationDescription.addProperty("uuid");
-                representationDescription.addProperty("name");
-                representationDescription.addProperty("display");
-                representationDescription.addProperty("identifierType", Representation.DEFAULT);
-                representationDescription.addSelfLink();
+      representationDescription.addProperty("name");
+      representationDescription.addProperty("display");
+      representationDescription.addProperty("identifierType", Representation.DEFAULT);
+      representationDescription.addSelfLink();
       return representationDescription;
     }
     if (representation instanceof FullRepresentation) {
       representationDescription.addProperty("uuid");
-                representationDescription.addProperty("name");
-                representationDescription.addProperty("display");
-                representationDescription.addProperty("identifierType", Representation.FULL);
-                representationDescription.addProperty("password");
-                representationDescription.addProperty("user");
-                representationDescription.addProperty("url");
-                representationDescription.addSelfLink();
+      representationDescription.addProperty("name");
+      representationDescription.addProperty("display");
+      representationDescription.addProperty("identifierType", Representation.FULL);
+      representationDescription.addProperty("password");
+      representationDescription.addProperty("user");
+      representationDescription.addProperty("url");
+      representationDescription.addSelfLink();
       return representationDescription;
     }
     if (representation instanceof RefRepresentation) {
       representationDescription.addProperty("uuid");
-             representationDescription.addProperty("name");
-             representationDescription.addProperty("display");
-             representationDescription.addProperty("identifierType", Representation.REF);
-             representationDescription.addSelfLink();
-             return representationDescription;
+      representationDescription.addProperty("name");
+      representationDescription.addProperty("display");
+      representationDescription.addProperty("identifierType", Representation.REF);
+      representationDescription.addSelfLink();
+      return representationDescription;
     }
     return null;
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
     representationDescription.addProperty("uuid");
     representationDescription.addProperty("name");
-          representationDescription.addProperty("password");
-          representationDescription.addProperty("url");
+    representationDescription.addProperty("password");
+    representationDescription.addProperty("url");
     return representationDescription;
   }
 
   @Override
-  public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
-          representationDescription.addProperty("name");
-          representationDescription.addProperty("password");
-          representationDescription.addProperty("url");
+    representationDescription.addProperty("name");
+    representationDescription.addProperty("password");
+    representationDescription.addProperty("url");
     return representationDescription;
   }
 
@@ -110,8 +111,10 @@ implements DelegatingSubclassHandler<IdentifierSource, RemoteIdentifierSource> {
   }
 
   @Override
-  public PageableResult getAllByType(RequestContext context) throws ResourceDoesNotSupportOperationException {
-    List<IdentifierSource> identifierSources = Context.getService(IdentifierSourceService.class).getAllIdentifierSources(false);
+  public PageableResult getAllByType(RequestContext context)
+      throws ResourceDoesNotSupportOperationException {
+    List<IdentifierSource> identifierSources =
+        Context.getService(IdentifierSourceService.class).getAllIdentifierSources(false);
     if (identifierSources == null) {
       return null;
     }
@@ -126,16 +129,17 @@ implements DelegatingSubclassHandler<IdentifierSource, RemoteIdentifierSource> {
 
   @Override
   public Model getGETModel(Representation rep) {
-    ModelImpl model = new ModelImpl()
+    ModelImpl model =
+        new ModelImpl()
             .property("uuid", new StringProperty())
             .property("name", new StringProperty())
             .property("display", new StringProperty());
 
     if (rep instanceof FullRepresentation) {
       model
-        .property("password", new StringProperty())
-        .property("url", new StringProperty())
-        .property("user", new RefProperty("#/definitions/UserGet"));
+          .property("password", new StringProperty())
+          .property("url", new StringProperty())
+          .property("user", new RefProperty("#/definitions/UserGet"));
     }
 
     return model;
@@ -144,17 +148,18 @@ implements DelegatingSubclassHandler<IdentifierSource, RemoteIdentifierSource> {
   @Override
   public Model getCREATEModel(Representation rep) {
     return new ModelImpl()
-          .property("uuid", new StringProperty())
-          .property("name", new StringProperty())
-          .property("url", new StringProperty())
-          .property("password", new StringProperty());
+        .property("uuid", new StringProperty())
+        .property("name", new StringProperty())
+        .property("url", new StringProperty())
+        .property("password", new StringProperty());
   }
 
   @PropertyGetter("display")
-    public String getDisplayString(RemoteIdentifierSource identifierSource) {
-        return identifierSource.getIdentifierType() + " - "
-                + identifierSource.getName() + " - "
-                + identifierSource.getClass().getName();
-    }
-
+  public String getDisplayString(RemoteIdentifierSource identifierSource) {
+    return identifierSource.getIdentifierType()
+        + " - "
+        + identifierSource.getName()
+        + " - "
+        + identifierSource.getClass().getName();
+  }
 }

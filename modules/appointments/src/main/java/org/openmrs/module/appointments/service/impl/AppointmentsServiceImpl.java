@@ -391,7 +391,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
   }
 
   @Override
-  public Map<AppointmentConflictType, List<Appointment>> getAppointmentConflicts(Appointment appointment) {
+  public Map<AppointmentConflictType, List<Appointment>> getAppointmentConflicts(
+      Appointment appointment) {
     return getAllConflicts(Collections.singletonList(appointment));
   }
 

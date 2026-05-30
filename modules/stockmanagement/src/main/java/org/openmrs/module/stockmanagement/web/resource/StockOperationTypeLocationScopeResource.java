@@ -4,24 +4,31 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
 import io.swagger.models.properties.StringProperty;
+import java.util.List;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.model.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationtypelocationscope", supportedClass = StockOperationTypeLocationScope.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
-public class StockOperationTypeLocationScopeResource extends ResourceBase<StockOperationTypeLocationScope> {
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + "/"
+            + ModuleConstants.MODULE_ID
+            + "/stockoperationtypelocationscope",
+    supportedClass = StockOperationTypeLocationScope.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
+public class StockOperationTypeLocationScopeResource
+    extends ResourceBase<StockOperationTypeLocationScope> {
 
   @Override
   public StockOperationTypeLocationScope getByUniqueId(String uniqueId) {
@@ -29,8 +36,9 @@ public class StockOperationTypeLocationScopeResource extends ResourceBase<StockO
   }
 
   @Override
-  protected void delete(StockOperationTypeLocationScope delegate, String reason, RequestContext context)
-          throws ResponseException {
+  protected void delete(
+      StockOperationTypeLocationScope delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -41,7 +49,8 @@ public class StockOperationTypeLocationScopeResource extends ResourceBase<StockO
 
   @Override
   protected PageableResult doGetAll(RequestContext context) throws ResponseException {
-    List<StockOperationTypeLocationScope> result = getStockManagementService().getAllStockOperationTypeLocationScopes();
+    List<StockOperationTypeLocationScope> result =
+        getStockManagementService().getAllStockOperationTypeLocationScopes();
     return toAlreadyPaged(result, context);
   }
 
@@ -56,7 +65,8 @@ public class StockOperationTypeLocationScopeResource extends ResourceBase<StockO
   }
 
   @Override
-  public void purge(StockOperationTypeLocationScope delegate, RequestContext context) throws ResponseException {
+  public void purge(StockOperationTypeLocationScope delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
@@ -91,21 +101,24 @@ public class StockOperationTypeLocationScopeResource extends ResourceBase<StockO
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("dateCreated", new DateTimeProperty())
-              .property("dateChanged", new DateTimeProperty()).property("locationTag", new StringProperty())
-              .property("isSource", new BooleanProperty()).property("isDestination", new BooleanProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("dateCreated", new DateTimeProperty())
+          .property("dateChanged", new DateTimeProperty())
+          .property("locationTag", new StringProperty())
+          .property("isSource", new BooleanProperty())
+          .property("isDestination", new BooleanProperty());
     }
-    if (rep instanceof DefaultRepresentation) {
-
-    }
+    if (rep instanceof DefaultRepresentation) {}
 
     if (rep instanceof FullRepresentation) {}
 
     if (rep instanceof RefRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("locationTag", new StringProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("locationTag", new StringProperty());
     }
 
     return modelImpl;
   }
-
 }

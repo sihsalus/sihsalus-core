@@ -182,7 +182,8 @@ public class AdHocQueryResource implements Creatable {
       queries.add(mappedQuery);
 
       try {
-        EvaluatedCohort evaluated = cohortDefinitionService.evaluate(mappedQuery, evaluationContext);
+        EvaluatedCohort evaluated =
+            cohortDefinitionService.evaluate(mappedQuery, evaluationContext);
         rowFilterResults.addResult(simplify(evaluated));
       } catch (EvaluationException e) {
         throw new IllegalStateException("Failed to evaluate: " + rowFilter.getKey(), e);

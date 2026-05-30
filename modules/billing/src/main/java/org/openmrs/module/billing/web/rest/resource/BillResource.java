@@ -223,7 +223,8 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
     Context.requirePrivilege(PrivilegeConstants.VIEW_BILLS);
     BillSearch billSearch = buildBillSearchFromRequest(context);
     if (StringUtils.isNotBlank(billSearch.getPatientUuid())) {
-      PatientObjectAuthorizationService.current().requireCanReadPatient(billSearch.getPatientUuid());
+      PatientObjectAuthorizationService.current()
+          .requireCanReadPatient(billSearch.getPatientUuid());
     }
     PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 
@@ -269,7 +270,8 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 
   private void requireBillPatientAccess(Bill bill) {
     if (bill != null && bill.getPatient() != null) {
-      PatientObjectAuthorizationService.current().requireCanReadPatient(bill.getPatient().getUuid());
+      PatientObjectAuthorizationService.current()
+          .requireCanReadPatient(bill.getPatient().getUuid());
     }
   }
 

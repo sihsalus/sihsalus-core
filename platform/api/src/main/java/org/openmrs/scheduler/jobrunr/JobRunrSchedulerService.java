@@ -117,8 +117,7 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
 
     if (!recurringTaskExists(taskDefinition.getUuid()) && !taskExists(taskDefinition.getUuid())) {
       scheduleTask(taskDefinition);
-      log.info(
-          "Scheduled legacy task {} [{}] to run on schedule", name, taskDefinition.getUuid());
+      log.info("Scheduled legacy task {} [{}] to run on schedule", name, taskDefinition.getUuid());
     }
   }
 
@@ -397,8 +396,7 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
 
           private Iterator<Job> currentBatch;
 
-          private final boolean isSchedulerManager =
-              isSchedulerManager(authenticatedUser);
+          private final boolean isSchedulerManager = isSchedulerManager(authenticatedUser);
 
           private final String userSystemId = authenticatedUser.getSystemId();
 

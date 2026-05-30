@@ -8,9 +8,13 @@
  */
 package org.openmrs.module.idgen.rest.resource;
 
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.DateProperty;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import java.util.Date;
 import java.util.List;
-
 import org.openmrs.User;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
@@ -36,26 +40,24 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.properties.DateProperty;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
-
-@Resource(name = RestConstants.VERSION_1 + IdgenRestController.IDGEN_NAMESPACE
-    + "/logentry", supportedClass = LogEntry.class, supportedOpenmrsVersions = {"1.9.* - 9.9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + IdgenRestController.IDGEN_NAMESPACE + "/logentry",
+    supportedClass = LogEntry.class,
+    supportedOpenmrsVersions = {"1.9.* - 9.9.*"})
 public class LogEntryResource extends MetadataDelegatingCrudResource<LogEntry> {
 
   @Override
   protected NeedsPaging<LogEntry> doGetAll(RequestContext context) {
     return new NeedsPaging<LogEntry>(
-        Context.getService(IdentifierSourceService.class).getLogEntries(null, null, null, null, null, null),
+        Context.getService(IdentifierSourceService.class)
+            .getLogEntries(null, null, null, null, null, null),
         context);
   }
 
   @Override
   protected PageableResult doSearch(RequestContext context) {
-    IdentifierSourceService identifierSourceService = Context.getService(IdentifierSourceService.class);
+    IdentifierSourceService identifierSourceService =
+        Context.getService(IdentifierSourceService.class);
     UserService service = Context.getUserService();
 
     String source = context.getRequest().getParameter("source");
@@ -65,16 +67,22 @@ public class LogEntryResource extends MetadataDelegatingCrudResource<LogEntry> {
     String comment = context.getRequest().getParameter("comment");
     String generatedBy = context.getRequest().getParameter("generatedBy");
 
-    IdentifierSource logSource = source != null ? identifierSourceService.getIdentifierSourceByUuid(source) : null;
+    IdentifierSource logSource =
+        source != null ? identifierSourceService.getIdentifierSourceByUuid(source) : null;
     Date dateFrom = fromDate != null ? (Date) ConversionUtil.convert(fromDate, Date.class) : null;
     Date dateTo = toDate != null ? (Date) ConversionUtil.convert(toDate, Date.class) : null;
     User user = generatedBy != null ? service.getUserByUuid(generatedBy) : null;
-    if (logSource == null && identifier == null && comment == null && dateFrom == null && dateTo == null
+    if (logSource == null
+        && identifier == null
+        && comment == null
+        && dateFrom == null
+        && dateTo == null
         && user == null) {
       return new EmptySearchResult();
     }
-    List<LogEntry> logEntries = identifierSourceService.getLogEntries(logSource, dateFrom, dateTo, identifier, user,
-        comment);
+    List<LogEntry> logEntries =
+        identifierSourceService.getLogEntries(
+            logSource, dateFrom, dateTo, identifier, user, comment);
     return new NeedsPaging<LogEntry>(logEntries, context);
   }
 
@@ -120,8 +128,9 @@ public class LogEntryResource extends MetadataDelegatingCrudResource<LogEntry> {
 
   @Override
   public LogEntry getByUniqueId(String uniqueId) {
-    List<LogEntry> logentries = Context.getService(IdentifierSourceService.class).getLogEntries(null, null, null,
-        uniqueId, null, null);
+    List<LogEntry> logentries =
+        Context.getService(IdentifierSourceService.class)
+            .getLogEntries(null, null, null, uniqueId, null, null);
     if (logentries.size() != 0) {
       return logentries.get(0);
     } else {
@@ -130,7 +139,8 @@ public class LogEntryResource extends MetadataDelegatingCrudResource<LogEntry> {
   }
 
   @Override
-  public void purge(LogEntry delegate, RequestContext context) throws ResourceDoesNotSupportOperationException {
+  public void purge(LogEntry delegate, RequestContext context)
+      throws ResourceDoesNotSupportOperationException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -147,22 +157,22 @@ public class LogEntryResource extends MetadataDelegatingCrudResource<LogEntry> {
     if (!(rep instanceof FullRepresentation)) {
       model
           .property("uuid", new StringProperty())
-              .property("name", new StringProperty())
-              .property("identifier", new StringProperty())
-              .property("comment", new StringProperty())
-              .property("generatedBy", new RefProperty("#/definitions/UserGet"))
-              .property("dateGenerated", new DateProperty())
-              .property("description", new StringProperty());
+          .property("name", new StringProperty())
+          .property("identifier", new StringProperty())
+          .property("comment", new StringProperty())
+          .property("generatedBy", new RefProperty("#/definitions/UserGet"))
+          .property("dateGenerated", new DateProperty())
+          .property("description", new StringProperty());
     }
     if (rep instanceof DefaultRepresentation) {
-      model
-          .property("full", new StringProperty());
+      model.property("full", new StringProperty());
     }
     return model;
   }
 
   @Override
-    public Object update(String uuid, SimpleObject updateBody, RequestContext context) throws ResponseException {
+  public Object update(String uuid, SimpleObject updateBody, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -175,5 +185,4 @@ public class LogEntryResource extends MetadataDelegatingCrudResource<LogEntry> {
   public Model getUPDATEModel(Representation rep) {
     return null;
   }
-
 }

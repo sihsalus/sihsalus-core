@@ -4,56 +4,52 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
 import io.swagger.models.properties.StringProperty;
-import org.apache.commons.lang3.StringUtils;
+import java.math.BigDecimal;
+import java.util.List;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
-import org.openmrs.module.stockmanagement.api.Privileges;
 import org.openmrs.module.stockmanagement.api.StockManagementException;
 import org.openmrs.module.stockmanagement.api.dto.*;
-import org.openmrs.module.stockmanagement.api.model.Party;
-import org.openmrs.module.stockmanagement.api.model.StockOperationType;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationitem", supportedClass = StockOperationItemDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationitem",
+    supportedClass = StockOperationItemDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockOperationItemResource extends ResourceBase<StockOperationItemDTO> {
 
-  public StockOperationItemResource() {
-  }
+  public StockOperationItemResource() {}
 
   @Override
   public StockOperationItemDTO getByUniqueId(String uniqueId) {
     StockOperationItemSearchFilter filter = new StockOperationItemSearchFilter();
     filter.setUuid(uniqueId);
-    List<StockOperationItemDTO> result = getStockManagementService().findStockOperationItems(filter).getData();
+    List<StockOperationItemDTO> result =
+        getStockManagementService().findStockOperationItems(filter).getData();
     return result.isEmpty() ? null : result.get(0);
   }
 
   @Override
-  protected void delete(StockOperationItemDTO delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(StockOperationItemDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     try {
-      getStockManagementService().voidStockOperationItem(delegate.getUuid(), reason,
-          Context.getAuthenticatedUser().getUserId());
-    }
-    catch (StockManagementException exception) {
+      getStockManagementService()
+          .voidStockOperationItem(
+              delegate.getUuid(), reason, Context.getAuthenticatedUser().getUserId());
+    } catch (StockManagementException exception) {
       throw new RestClientException(exception.getMessage());
     }
   }
@@ -69,12 +65,14 @@ public class StockOperationItemResource extends ResourceBase<StockOperationItemD
   }
 
   @Override
-  public void purge(StockOperationItemDTO delegate, RequestContext context) throws ResponseException {
+  public void purge(StockOperationItemDTO delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addProperty("stockItemUuid");
     description.addProperty("stockItemPackagingUOMUuid");
@@ -134,8 +132,9 @@ public class StockOperationItemResource extends ResourceBase<StockOperationItemD
     SimpleObject simpleObject = new SimpleObject();
     simpleObject.add(
         "canUpdateBatchInformation",
-        stockOperationItemDTO.getCanUpdateBatchInformation() == null ? Boolean.FALSE : stockOperationItemDTO
-                .getCanUpdateBatchInformation());
+        stockOperationItemDTO.getCanUpdateBatchInformation() == null
+            ? Boolean.FALSE
+            : stockOperationItemDTO.getCanUpdateBatchInformation());
     return simpleObject;
   }
 
@@ -186,31 +185,40 @@ public class StockOperationItemResource extends ResourceBase<StockOperationItemD
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("stockItemUuid", new StringProperty())
-              .property("stockItemName", new StringProperty())
-              .property("stockItemPackagingUOMUuid", new StringProperty())
-              .property("stockItemPackagingUOMName", new StringProperty())
-              .property("stockItemPackagingUOMFactor", new DecimalProperty())
-              .property("stockBatchUuid", new StringProperty()).property("stockOperationUuid", new StringProperty())
-              .property("batchNo", new StringProperty()).property("expiration", new DateTimeProperty())
-              .property("quantity", new DecimalProperty()).property("quantityReceived", new DecimalProperty())
-              .property("quantityReceivedPackagingUOMUuid", new StringProperty())
-              .property("quantityReceivedPackagingUOMName", new StringProperty())
-              .property("quantityReceivedPackagingUOMFactor", new DecimalProperty())
-              .property("quantityRequested", new DecimalProperty())
-              .property("quantityRequestedPackagingUOMUuid", new StringProperty())
-              .property("quantityRequestedPackagingUOMName", new StringProperty())
-              .property("quantityRequestedPackagingUOMFactor", new DecimalProperty())
-              .property("commonName", new StringProperty()).property("acronym", new StringProperty())
-              .property("purchasePrice", new DecimalProperty()).property("hasExpiration", new BooleanProperty())
-              .property("packagingUnits", new ArrayProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("stockItemUuid", new StringProperty())
+          .property("stockItemName", new StringProperty())
+          .property("stockItemPackagingUOMUuid", new StringProperty())
+          .property("stockItemPackagingUOMName", new StringProperty())
+          .property("stockItemPackagingUOMFactor", new DecimalProperty())
+          .property("stockBatchUuid", new StringProperty())
+          .property("stockOperationUuid", new StringProperty())
+          .property("batchNo", new StringProperty())
+          .property("expiration", new DateTimeProperty())
+          .property("quantity", new DecimalProperty())
+          .property("quantityReceived", new DecimalProperty())
+          .property("quantityReceivedPackagingUOMUuid", new StringProperty())
+          .property("quantityReceivedPackagingUOMName", new StringProperty())
+          .property("quantityReceivedPackagingUOMFactor", new DecimalProperty())
+          .property("quantityRequested", new DecimalProperty())
+          .property("quantityRequestedPackagingUOMUuid", new StringProperty())
+          .property("quantityRequestedPackagingUOMName", new StringProperty())
+          .property("quantityRequestedPackagingUOMFactor", new DecimalProperty())
+          .property("commonName", new StringProperty())
+          .property("acronym", new StringProperty())
+          .property("purchasePrice", new DecimalProperty())
+          .property("hasExpiration", new BooleanProperty())
+          .property("packagingUnits", new ArrayProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
     if (rep instanceof FullRepresentation) {}
 
     if (rep instanceof RefRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("stockItemName", new StringProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("stockItemName", new StringProperty());
     }
 
     return modelImpl;

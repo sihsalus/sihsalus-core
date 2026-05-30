@@ -67,7 +67,7 @@ public class FuaRedirectionController {
             new HttpEntity<>(body, headers),
             String.class);
 
-      return ResponseEntity.status(response.getStatusCode())
+    return ResponseEntity.status(response.getStatusCode())
         .contentType(MediaType.APPLICATION_JSON)
         .body(response.getBody());
   }
@@ -111,14 +111,18 @@ public class FuaRedirectionController {
         return renderError(response.getStatusCode(), remoteUrl, response.getBody());
       }
 
-      return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(sanitizeHtml(response.getBody()));
+      return ResponseEntity.ok()
+          .contentType(MediaType.TEXT_HTML)
+          .body(sanitizeHtml(response.getBody()));
     } catch (HttpStatusCodeException ex) {
       log.error("HTTP error rendering FUAFormat id " + id + " at " + remoteUrl, ex);
       return renderError(ex.getStatusCode(), remoteUrl, ex.getResponseBodyAsString());
     } catch (Exception ex) {
       log.error("Internal error rendering FUAFormat id " + id + " at " + remoteUrl, ex);
       return renderError(
-          HttpStatus.INTERNAL_SERVER_ERROR, remoteUrl, ex.getMessage() == null ? "" : ex.getMessage());
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          remoteUrl,
+          ex.getMessage() == null ? "" : ex.getMessage());
     }
   }
 
@@ -146,11 +150,11 @@ public class FuaRedirectionController {
         .contentType(MediaType.TEXT_HTML)
         .body(
             "<h2>Error renderizando FUAFormat</h2><pre>Status: "
-          + HtmlUtils.htmlEscape(String.valueOf(statusCode))
+                + HtmlUtils.htmlEscape(String.valueOf(statusCode))
                 + "\nURL: "
-          + HtmlUtils.htmlEscape(StringUtils.defaultString(remoteUrl))
+                + HtmlUtils.htmlEscape(StringUtils.defaultString(remoteUrl))
                 + "\n\n"
-          + HtmlUtils.htmlEscape(StringUtils.defaultString(body))
+                + HtmlUtils.htmlEscape(StringUtils.defaultString(body))
                 + "</pre>");
   }
 
@@ -161,7 +165,8 @@ public class FuaRedirectionController {
   }
 
   private String sanitizeHtml(String body) {
-    return StringUtils.defaultString(Jsoup.clean(StringUtils.defaultString(body), Safelist.relaxed()));
+    return StringUtils.defaultString(
+        Jsoup.clean(StringUtils.defaultString(body), Safelist.relaxed()));
   }
 
   private String getFuaGeneratorBaseUrl() {

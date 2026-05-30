@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.emrapi.web.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
@@ -21,20 +23,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 @Controller
 @RequestMapping(value = {"/rest/v1/emrapi/configuration", "/ws/rest/v1/emrapi/configuration"})
 public class EmrApiConfigurationController {
 
-	@Autowired
-	private EmrApiProperties emrApiProperties;
+  @Autowired private EmrApiProperties emrApiProperties;
 
-	@RequestMapping(method = RequestMethod.GET)
-	@ResponseBody
-	public SimpleObject getEmrApiConfiguration(HttpServletRequest request, HttpServletResponse response) {
-		RequestContext context = RestUtil.getRequestContext(request, response, Representation.REF);
-		return (SimpleObject) ConversionUtil.convertToRepresentation(emrApiProperties, context.getRepresentation());
-	}
+  @RequestMapping(method = RequestMethod.GET)
+  @ResponseBody
+  public SimpleObject getEmrApiConfiguration(
+      HttpServletRequest request, HttpServletResponse response) {
+    RequestContext context = RestUtil.getRequestContext(request, response, Representation.REF);
+    return (SimpleObject)
+        ConversionUtil.convertToRepresentation(emrApiProperties, context.getRepresentation());
+  }
 }

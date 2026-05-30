@@ -10,16 +10,19 @@ import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationlink", supportedClass = StockOperationLinkDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationlink",
+    supportedClass = StockOperationLinkDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockOperationLinkResource extends ResourceBase<StockOperationLinkDTO> {
 
   @Override
@@ -28,7 +31,8 @@ public class StockOperationLinkResource extends ResourceBase<StockOperationLinkD
   }
 
   @Override
-  protected void delete(StockOperationLinkDTO delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(StockOperationLinkDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -38,7 +42,8 @@ public class StockOperationLinkResource extends ResourceBase<StockOperationLinkD
     if (StringUtils.isBlank(param)) {
       return emptyResult(context);
     }
-    Result<StockOperationLinkDTO> result = getStockManagementService().findStockOperationLinks(param);
+    Result<StockOperationLinkDTO> result =
+        getStockManagementService().findStockOperationLinks(param);
     return toAlreadyPaged(result, context);
   }
 
@@ -58,7 +63,8 @@ public class StockOperationLinkResource extends ResourceBase<StockOperationLinkD
   }
 
   @Override
-  public void purge(StockOperationLinkDTO delegate, RequestContext context) throws ResponseException {
+  public void purge(StockOperationLinkDTO delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
@@ -89,7 +95,6 @@ public class StockOperationLinkResource extends ResourceBase<StockOperationLinkD
 
     if (rep instanceof RefRepresentation) {
       description.addProperty("uuid");
-
     }
 
     return description;
@@ -99,13 +104,18 @@ public class StockOperationLinkResource extends ResourceBase<StockOperationLinkD
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("parentUuid", new StringProperty())
-              .property("parentOperationNumber", new StringProperty())
-              .property("parentOperationTypeName", new StringProperty())
-              .property("parentStatus", new StringProperty()).property("parentVoided", new BooleanProperty())
-              .property("childUuid", new StringProperty()).property("childOperationNumber", new StringProperty())
-              .property("childOperationTypeName", new StringProperty()).property("childStatus", new StringProperty())
-              .property("childVoided", new BooleanProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("parentUuid", new StringProperty())
+          .property("parentOperationNumber", new StringProperty())
+          .property("parentOperationTypeName", new StringProperty())
+          .property("parentStatus", new StringProperty())
+          .property("parentVoided", new BooleanProperty())
+          .property("childUuid", new StringProperty())
+          .property("childOperationNumber", new StringProperty())
+          .property("childOperationTypeName", new StringProperty())
+          .property("childStatus", new StringProperty())
+          .property("childVoided", new BooleanProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -117,5 +127,4 @@ public class StockOperationLinkResource extends ResourceBase<StockOperationLinkD
 
     return modelImpl;
   }
-
 }

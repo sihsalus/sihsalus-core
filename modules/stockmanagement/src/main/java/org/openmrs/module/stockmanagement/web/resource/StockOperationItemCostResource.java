@@ -4,37 +4,41 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
 import io.swagger.models.properties.StringProperty;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.Arrays;
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationitemcost", supportedClass = StockOperationItemCost.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationitemcost",
+    supportedClass = StockOperationItemCost.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockOperationItemCostResource extends ResourceBase<StockOperationItemCost> {
 
   @Override
   public StockOperationItemCost getByUniqueId(String uniqueId) {
     StockOperationItemSearchFilter filter = new StockOperationItemSearchFilter();
     filter.setUuid(uniqueId);
-    List<StockOperationItemCost> result = getStockManagementService().getStockOperationItemCosts(filter).getData();
+    List<StockOperationItemCost> result =
+        getStockManagementService().getStockOperationItemCosts(filter).getData();
     return result.isEmpty() ? null : result.get(0);
   }
 
   @Override
-  protected void delete(StockOperationItemCost delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(StockOperationItemCost delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -50,7 +54,8 @@ public class StockOperationItemCostResource extends ResourceBase<StockOperationI
     itemSearchFilter.setIncludeStockUnitName(false);
     itemSearchFilter.setIncludePackagingUnitName(true);
     itemSearchFilter.setStockOperationUuids(Arrays.asList(param));
-    Result<StockOperationItemCost> result = getStockManagementService().getStockOperationItemCosts(itemSearchFilter);
+    Result<StockOperationItemCost> result =
+        getStockManagementService().getStockOperationItemCosts(itemSearchFilter);
     return toAlreadyPaged(result, context);
   }
 
@@ -70,7 +75,8 @@ public class StockOperationItemCostResource extends ResourceBase<StockOperationI
   }
 
   @Override
-  public void purge(StockOperationItemCost delegate, RequestContext context) throws ResponseException {
+  public void purge(StockOperationItemCost delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
@@ -89,7 +95,6 @@ public class StockOperationItemCostResource extends ResourceBase<StockOperationI
       description.addProperty("unitCostUOMUuid");
       description.addProperty("unitCostUOMName");
       description.addProperty("totalCost");
-
     }
 
     if (rep instanceof DefaultRepresentation) {
@@ -104,7 +109,6 @@ public class StockOperationItemCostResource extends ResourceBase<StockOperationI
 
     if (rep instanceof RefRepresentation) {
       description.addProperty("uuid");
-
     }
 
     return description;
@@ -114,13 +118,18 @@ public class StockOperationItemCostResource extends ResourceBase<StockOperationI
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("stockItemUuid", new StringProperty())
-              .property("stockItemPackagingUOMUuid", new StringProperty())
-              .property("stockItemPackagingUOMName", new StringProperty())
-              .property("stockBatchUuid", new StringProperty()).property("batchNo", new StringProperty())
-              .property("quantity", new DecimalProperty()).property("unitCost", new DecimalProperty())
-              .property("unitCostUOMUuid", new StringProperty()).property("unitCostUOMName", new StringProperty())
-              .property("totalCost", new DecimalProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("stockItemUuid", new StringProperty())
+          .property("stockItemPackagingUOMUuid", new StringProperty())
+          .property("stockItemPackagingUOMName", new StringProperty())
+          .property("stockBatchUuid", new StringProperty())
+          .property("batchNo", new StringProperty())
+          .property("quantity", new DecimalProperty())
+          .property("unitCost", new DecimalProperty())
+          .property("unitCostUOMUuid", new StringProperty())
+          .property("unitCostUOMName", new StringProperty())
+          .property("totalCost", new DecimalProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -132,5 +141,4 @@ public class StockOperationItemCostResource extends ResourceBase<StockOperationI
 
     return modelImpl;
   }
-
 }

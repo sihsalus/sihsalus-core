@@ -48,8 +48,7 @@ public class FuaController {
   private static final String FORM_VIEW = "/module/fua/pages/addFua";
   private static final String OPENMRS_MSG_ATTR = "openmrs_msg";
   private static final String OPENMRS_ERROR_ATTR = "openmrs_error";
-  private static final String VISIT_REST_URL =
-      "http://localhost:8080/openmrs/ws/rest/v1/visit/";
+  private static final String VISIT_REST_URL = "http://localhost:8080/openmrs/ws/rest/v1/visit/";
 
   protected final Log log = LogFactory.getLog(getClass());
 
@@ -69,7 +68,8 @@ public class FuaController {
   }
 
   @RequestMapping(method = RequestMethod.GET)
-  public String onGet(ModelMap model, @RequestParam(value = "fuaId", required = false) Integer fuaId) {
+  public String onGet(
+      ModelMap model, @RequestParam(value = "fuaId", required = false) Integer fuaId) {
     Fua fua = fuaId != null ? fuaService.getFua(fuaId) : new Fua();
     model.addAttribute("fua", fua);
     model.addAttribute("fuas", fuaService.getAllFuas());
@@ -104,13 +104,19 @@ public class FuaController {
     return "redirect:/module/fua";
   }
 
-  @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(
+      value = "/list",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<Fua> getAllFuas() {
     return fuaService.getAllFuas();
   }
 
-  @RequestMapping(value = "/uuid/{uuid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(
+      value = "/uuid/{uuid}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<?> getFuaByUuid(@PathVariable("uuid") String uuid) {
     Fua fua = fuaService.getFuaByUuid(uuid);
@@ -160,13 +166,19 @@ public class FuaController {
     }
   }
 
-  @RequestMapping(value = "/patient/{patientUuid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(
+      value = "/patient/{patientUuid}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<?> getFuasByPatientUuid(@PathVariable("patientUuid") String patientUuid) {
     return ResponseEntity.ok(fuaService.getFuasByPatientUuid(patientUuid));
   }
 
-  @RequestMapping(value = "/id/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(
+      value = "/id/{id}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<?> getFuaById(@PathVariable("id") Integer id) {
     Fua fua = fuaService.getFuaById(id);
@@ -176,7 +188,10 @@ public class FuaController {
     return ResponseEntity.ok(fua);
   }
 
-  @RequestMapping(value = "/solicitudes", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(
+      value = "/solicitudes",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<?> getSolicitudesFua(
       @RequestParam(value = "status", required = false) String estado,
@@ -187,13 +202,17 @@ public class FuaController {
     try {
       LocalDate fechaInicio = parseDate(fechaInicioStr);
       LocalDate fechaFin = parseDate(fechaFinStr);
-      return ResponseEntity.ok(fuaService.getFuasFiltrados(estado, fechaInicio, fechaFin, page, size));
+      return ResponseEntity.ok(
+          fuaService.getFuasFiltrados(estado, fechaInicio, fechaFin, page, size));
     } catch (Exception ex) {
       return ResponseEntity.badRequest().body("Formato de fecha inválido. Use yyyy-MM-dd");
     }
   }
 
-  @RequestMapping(value = "/generateFromVisit/{visitUuid}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(
+      value = "/generateFromVisit/{visitUuid}",
+      method = RequestMethod.POST,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<?> generateFuaFromVisit(@PathVariable String visitUuid) {
     try {
@@ -244,12 +263,14 @@ public class FuaController {
       @PathVariable Integer fuaId, @RequestBody Map<String, Object> body) {
     try {
       if (!body.containsKey("estadoId")) {
-        return ResponseEntity.badRequest().body("El cuerpo de la solicitud debe incluir 'estadoId'");
+        return ResponseEntity.badRequest()
+            .body("El cuerpo de la solicitud debe incluir 'estadoId'");
       }
 
       Fua fua = fuaService.getFuaById(fuaId);
       if (fua == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("FUA no encontrado con ID: " + fuaId);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("FUA no encontrado con ID: " + fuaId);
       }
 
       fuaVersionService.saveFuaVersion(fua, "Update estado de FUA");
@@ -272,7 +293,8 @@ public class FuaController {
     try {
       Fua fua = fuaService.getFuaByVisitUuid(visitUuid);
       if (fua == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("<h2>No existe FUA para esta visita</h2>");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("<h2>No existe FUA para esta visita</h2>");
       }
       if (StringUtils.isBlank(fua.getFuaGeneratorUuid())) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -281,19 +303,28 @@ public class FuaController {
 
       ResponseEntity<String> response =
           restTemplate.exchange(
-              getFuaGeneratorBaseUrl() + "/ws/FUAFromVisit/" + fua.getFuaGeneratorUuid() + "/render",
+              getFuaGeneratorBaseUrl()
+                  + "/ws/FUAFromVisit/"
+                  + fua.getFuaGeneratorUuid()
+                  + "/render",
               HttpMethod.POST,
               fuaGeneratorEntity(),
               String.class);
 
       if (!response.getStatusCode().is2xxSuccessful()) {
-        return ResponseEntity.status(response.getStatusCode()).body("<h2>Error renderizando FUA</h2>");
+        return ResponseEntity.status(response.getStatusCode())
+            .body("<h2>Error renderizando FUA</h2>");
       }
-      return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(sanitizeHtml(response.getBody()));
+      return ResponseEntity.ok()
+          .contentType(MediaType.TEXT_HTML)
+          .body(sanitizeHtml(response.getBody()));
     } catch (Exception ex) {
       log.error("Error rendering FUA", ex);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body("<h2>Error interno renderizando FUA</h2><pre>" + HtmlUtils.htmlEscape(StringUtils.defaultString(ex.getMessage())) + "</pre>");
+          .body(
+              "<h2>Error interno renderizando FUA</h2><pre>"
+                  + HtmlUtils.htmlEscape(StringUtils.defaultString(ex.getMessage()))
+                  + "</pre>");
     }
   }
 
@@ -302,7 +333,8 @@ public class FuaController {
   }
 
   private String getFuaGeneratorBaseUrl() {
-    String url = Context.getAdministrationService().getGlobalProperty(FuaConfig.FUA_GENERATOR_URL_GP);
+    String url =
+        Context.getAdministrationService().getGlobalProperty(FuaConfig.FUA_GENERATOR_URL_GP);
     if (StringUtils.isBlank(url)) {
       url = FuaConfig.FUA_GENERATOR_URL_DEFAULT;
       log.warn("Global property " + FuaConfig.FUA_GENERATOR_URL_GP + " not set, using " + url);
@@ -315,7 +347,8 @@ public class FuaController {
   }
 
   private String sanitizeHtml(String body) {
-    return StringUtils.defaultString(Jsoup.clean(StringUtils.defaultString(body), Safelist.relaxed()));
+    return StringUtils.defaultString(
+        Jsoup.clean(StringUtils.defaultString(body), Safelist.relaxed()));
   }
 
   private String generarFuadeFuaGenerator(Fua fua) {

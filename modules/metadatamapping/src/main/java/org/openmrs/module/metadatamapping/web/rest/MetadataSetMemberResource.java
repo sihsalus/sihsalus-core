@@ -5,6 +5,8 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
+import java.util.Date;
+import java.util.List;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.metadatamapping.MetadataSet;
 import org.openmrs.module.metadatamapping.MetadataSetMember;
@@ -27,11 +29,13 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.Date;
-import java.util.List;
-
-@SubResource(parent = MetadataSetResource.class, path = "members", supportedClass = MetadataSetMember.class, supportedOpenmrsVersions = { "1.9.* - 9.*" })
-public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSetMember, MetadataSet, MetadataSetResource> {
+@SubResource(
+    parent = MetadataSetResource.class,
+    path = "members",
+    supportedClass = MetadataSetMember.class,
+    supportedOpenmrsVersions = {"1.9.* - 9.*"})
+public class MetadataSetMemberResource
+    extends DelegatingSubResource<MetadataSetMember, MetadataSet, MetadataSetResource> {
 
   @Override
   public MetadataSet getParent(MetadataSetMember instance) {
@@ -44,7 +48,8 @@ public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSet
   }
 
   @Override
-  public PageableResult doGetAll(MetadataSet parent, RequestContext context) throws ResponseException {
+  public PageableResult doGetAll(MetadataSet parent, RequestContext context)
+      throws ResponseException {
     Integer firstResult = context.getStartIndex();
     if (firstResult == null) {
       firstResult = 0;
@@ -61,7 +66,8 @@ public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSet
     }
 
     boolean hasMore = false;
-    List<MetadataSetMember> results = getService().getMetadataSetMembers(parent, firstResult, maxResults + 1, mode);
+    List<MetadataSetMember> results =
+        getService().getMetadataSetMembers(parent, firstResult, maxResults + 1, mode);
     if (results.size() > maxResults) {
       hasMore = true;
       results = results.subList(0, maxResults);
@@ -75,7 +81,8 @@ public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSet
   }
 
   @Override
-  protected void delete(MetadataSetMember delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(MetadataSetMember delegate, String reason, RequestContext context)
+      throws ResponseException {
     if (delegate.isRetired()) {
       return;
     }
@@ -129,8 +136,7 @@ public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSet
   public SimpleObject asRef(MetadataSetMember delegate) throws ConversionException {
     DelegatingResourceDescription rep = new DelegatingResourceDescription();
     rep.addProperty("uuid");
-    if (delegate.isRetired())
-      rep.addProperty("retired");
+    if (delegate.isRetired()) rep.addProperty("retired");
     rep.addSelfLink();
     return convertDelegateToRepresentation(delegate, rep);
   }
@@ -140,7 +146,8 @@ public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSet
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addRequiredProperty("metadataUuid");
     description.addRequiredProperty("metadataClass");
@@ -150,7 +157,8 @@ public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSet
   }
 
   @Override
-  public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addProperty("name");
     description.addProperty("description");
@@ -162,7 +170,8 @@ public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSet
     ModelImpl model = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
       model.property("uuid", new StringProperty().example("uuid"));
-      model.property("metadataSet", new RefProperty("#/definitions/MetadatamappingMetadatasetGetRef"));
+      model.property(
+          "metadataSet", new RefProperty("#/definitions/MetadatamappingMetadatasetGetRef"));
       model.property("metadataClass", new StringProperty());
       model.property("metadataUuid", new StringProperty());
       model.property("name", new StringProperty());
@@ -174,14 +183,18 @@ public class MetadataSetMemberResource extends DelegatingSubResource<MetadataSet
 
   @Override
   public Model getCREATEModel(Representation rep) {
-    return new ModelImpl().property("metadataUuid", new StringProperty())
-            .property("metadataClass", new StringProperty()).property("name", new StringProperty()).property(
-                "description", new StringProperty());
+    return new ModelImpl()
+        .property("metadataUuid", new StringProperty())
+        .property("metadataClass", new StringProperty())
+        .property("name", new StringProperty())
+        .property("description", new StringProperty());
   }
 
   @Override
   public Model getUPDATEModel(Representation rep) {
     ModelImpl model = (ModelImpl) super.getUPDATEModel(rep);
-    return model.property("name", new StringProperty()).property("description", new StringProperty());
+    return model
+        .property("name", new StringProperty())
+        .property("description", new StringProperty());
   }
 }

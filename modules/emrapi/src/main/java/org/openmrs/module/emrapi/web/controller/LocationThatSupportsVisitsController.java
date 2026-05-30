@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.emrapi.web.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.openmrs.Location;
 import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -23,30 +25,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 @Controller
 public class LocationThatSupportsVisitsController {
 
-	@Autowired
-	private AdtService adtService;
+  @Autowired private AdtService adtService;
 
-	@RequestMapping(method = RequestMethod.GET, value = "/rest/v1/emrapi/locationThatSupportsVisits")
-	@ResponseBody
-	public SimpleObject getLocationThatSupportsVisits(HttpServletRequest request, HttpServletResponse response,
-	        @RequestParam(required = true, value = "location") Location location) {
+  @RequestMapping(method = RequestMethod.GET, value = "/rest/v1/emrapi/locationThatSupportsVisits")
+  @ResponseBody
+  public SimpleObject getLocationThatSupportsVisits(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      @RequestParam(required = true, value = "location") Location location) {
 
-		SimpleObject res = new SimpleObject();
+    SimpleObject res = new SimpleObject();
 
-		RequestContext context = RestUtil.getRequestContext(request, response, Representation.DEFAULT);
-		Location visitLocation = adtService.getLocationThatSupportsVisits(location);
+    RequestContext context = RestUtil.getRequestContext(request, response, Representation.DEFAULT);
+    Location visitLocation = adtService.getLocationThatSupportsVisits(location);
 
-		if (visitLocation != null) {
-			res = (SimpleObject) ConversionUtil.convertToRepresentation(visitLocation, context.getRepresentation());
-		}
+    if (visitLocation != null) {
+      res =
+          (SimpleObject)
+              ConversionUtil.convertToRepresentation(visitLocation, context.getRepresentation());
+    }
 
-		return res;
-	}
-
+    return res;
+  }
 }

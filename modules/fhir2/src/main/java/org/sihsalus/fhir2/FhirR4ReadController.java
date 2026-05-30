@@ -204,9 +204,7 @@ public class FhirR4ReadController {
 
   private ResponseEntity<String> patientAccessDenied(String patientUuid) {
     return operationOutcome(
-        403,
-        "Patient access denied: " + patientUuid,
-        OperationOutcome.IssueType.FORBIDDEN);
+        403, "Patient access denied: " + patientUuid, OperationOutcome.IssueType.FORBIDDEN);
   }
 
   private String providerResourceType(IResourceProvider provider) {

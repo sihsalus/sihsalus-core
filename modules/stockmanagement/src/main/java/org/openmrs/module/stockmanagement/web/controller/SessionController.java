@@ -1,18 +1,17 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
- * <p>
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
+ *
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.stockmanagement.web.controller;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
-import org.openmrs.module.stockmanagement.api.dto.PrivilegeScope;
 import org.openmrs.module.stockmanagement.api.dto.SessionInfo;
 import org.openmrs.module.stockmanagement.web.resource.PrivilegeScopeResource;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -26,11 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
-import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Controller that lets a client check the status of their session, and log out. (Authenticating is
@@ -48,10 +42,13 @@ public class SessionController {
     boolean authenticated = Context.isAuthenticated();
     SimpleObject session = new SimpleObject();
     if (authenticated) {
-      StockManagementService stockManagementService = Context.getService(StockManagementService.class);
+      StockManagementService stockManagementService =
+          Context.getService(StockManagementService.class);
       SessionInfo sessionInfo = stockManagementService.getCurrentUserSessionInfo();
-      session.add("privileges", ConversionUtil.convertToRepresentation(sessionInfo.getPrivileges(),
-          Representation.DEFAULT, new PrivilegeScopeResource()));
+      session.add(
+          "privileges",
+          ConversionUtil.convertToRepresentation(
+              sessionInfo.getPrivileges(), Representation.DEFAULT, new PrivilegeScopeResource()));
     }
     return session;
   }

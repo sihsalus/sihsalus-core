@@ -6,17 +6,23 @@ import io.swagger.models.properties.StringProperty;
 import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.annotation.SubResource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@SubResource(parent = UserRoleScopeResource.class, path = "operationtypes", supportedClass = UserRoleScopeOperationTypeDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
-public class UserRoleScopeOperationTypeResource extends SubResourceBase<UserRoleScopeOperationTypeDTO, UserRoleScopeDTO, UserRoleScopeResource> {
+@SubResource(
+    parent = UserRoleScopeResource.class,
+    path = "operationtypes",
+    supportedClass = UserRoleScopeOperationTypeDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
+public class UserRoleScopeOperationTypeResource
+    extends SubResourceBase<
+        UserRoleScopeOperationTypeDTO, UserRoleScopeDTO, UserRoleScopeResource> {
 
   @Override
   public UserRoleScopeOperationTypeDTO getByUniqueId(String uniqueId) {
@@ -24,8 +30,9 @@ public class UserRoleScopeOperationTypeResource extends SubResourceBase<UserRole
   }
 
   @Override
-  protected void delete(UserRoleScopeOperationTypeDTO delegate, String reason, RequestContext context)
-          throws ResponseException {
+  protected void delete(
+      UserRoleScopeOperationTypeDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -40,7 +47,8 @@ public class UserRoleScopeOperationTypeResource extends SubResourceBase<UserRole
   }
 
   @Override
-  public void purge(UserRoleScopeOperationTypeDTO delegate, RequestContext context) throws ResponseException {
+  public void purge(UserRoleScopeOperationTypeDTO delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
@@ -69,8 +77,11 @@ public class UserRoleScopeOperationTypeResource extends SubResourceBase<UserRole
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("userRoleScopeId", new StringProperty())
-              .property("operationTypeName", new StringProperty()).property("operationTypeUuid", new StringProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("userRoleScopeId", new StringProperty())
+          .property("operationTypeName", new StringProperty())
+          .property("operationTypeUuid", new StringProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -89,11 +100,11 @@ public class UserRoleScopeOperationTypeResource extends SubResourceBase<UserRole
   }
 
   @Override
-  public void setParent(UserRoleScopeOperationTypeDTO instance, UserRoleScopeDTO parent) {
-  }
+  public void setParent(UserRoleScopeOperationTypeDTO instance, UserRoleScopeDTO parent) {}
 
   @Override
-  public PageableResult doGetAll(UserRoleScopeDTO parent, RequestContext context) throws ResponseException {
+  public PageableResult doGetAll(UserRoleScopeDTO parent, RequestContext context)
+      throws ResponseException {
     return null;
   }
 }

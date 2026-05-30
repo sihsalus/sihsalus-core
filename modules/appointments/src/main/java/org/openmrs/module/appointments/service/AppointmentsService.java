@@ -97,7 +97,8 @@ public interface AppointmentsService {
   Map<AppointmentConflictType, List<Appointment>> getAppointmentConflicts(Appointment appointment);
 
   @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
-  Map<AppointmentConflictType, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
+  Map<AppointmentConflictType, List<Appointment>> getAppointmentsConflicts(
+      List<Appointment> appointments);
 
   /**
    * Note, this API is introduced to fix potential error of transaction not being atomic. Please see

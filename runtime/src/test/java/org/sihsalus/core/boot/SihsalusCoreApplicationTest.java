@@ -208,8 +208,8 @@ import org.openmrs.module.queue.validators.QueueRoomValidation;
 import org.openmrs.module.queue.validators.QueueValidator;
 import org.openmrs.module.queue.validators.RoomProviderMapValidator;
 import org.openmrs.module.queue.validators.VisitWithQueueEntriesValidator;
-import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
+import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.dataset.DataSetMetaData;
 import org.openmrs.module.reporting.dataset.definition.service.DataSetDefinitionService;
@@ -224,8 +224,8 @@ import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.module.reporting.report.task.ReportingTimerTask;
 import org.openmrs.module.reporting.serializer.ReportingSerializer;
-import org.openmrs.module.reportingrest.web.resource.EvaluatedCohortResource;
 import org.openmrs.module.reportingrest.adhoc.AdHocExportManager;
+import org.openmrs.module.reportingrest.web.resource.EvaluatedCohortResource;
 import org.openmrs.module.serialization.xstream.XStreamSerializer;
 import org.openmrs.module.serialization.xstream.XStreamShortSerializer;
 import org.openmrs.module.sihsalusinterop.api.DyakuSenderService;
@@ -1154,8 +1154,7 @@ class SihsalusCoreApplicationTest {
     try {
       mockMvc
           .perform(
-              get("/rest/v1/patient/{uuid}", patientUuid)
-                  .header("Authorization", ADMIN_BASIC_AUTH))
+              get("/rest/v1/patient/{uuid}", patientUuid).header("Authorization", ADMIN_BASIC_AUTH))
           .andExpect(status().isForbidden());
 
       mockMvc
@@ -1179,7 +1178,8 @@ class SihsalusCoreApplicationTest {
 
             assertThrows(
                 PatientObjectAccessDeniedException.class,
-                () -> PatientObjectAuthorizationService.current().requireCanReadPatient(patientUuid));
+                () ->
+                    PatientObjectAuthorizationService.current().requireCanReadPatient(patientUuid));
 
             AttachmentResource attachmentResource =
                 (AttachmentResource)
@@ -1204,7 +1204,8 @@ class SihsalusCoreApplicationTest {
 
             EvaluatedCohortResource cohortResource =
                 (EvaluatedCohortResource)
-                    Context.getService(RestService.class).getResourceByName("v1/reportingrest/cohort");
+                    Context.getService(RestService.class)
+                        .getResourceByName("v1/reportingrest/cohort");
             EvaluatedCohort cohort =
                 new EvaluatedCohort(
                     new Cohort(Set.of(patient.getPatientId())), null, new EvaluationContext());
@@ -1215,8 +1216,7 @@ class SihsalusCoreApplicationTest {
             batchJob.setDescription("Denied patient stock report");
             batchJob.setParameters(
                 "param.report=DISPENSING_LOGS\nparam.Patient.value=" + patientUuid);
-            BeanPropertyBindingResult errors =
-                new BeanPropertyBindingResult(batchJob, "batchJob");
+            BeanPropertyBindingResult errors = new BeanPropertyBindingResult(batchJob, "batchJob");
             new BatchJobValidator().validate(batchJob, errors);
             assertTrue(errors.hasErrors());
           });

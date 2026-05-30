@@ -412,7 +412,10 @@ public class SihsalusEmrApiConfiguration {
       EmrApiProperties emrApiProperties,
       ObservationTypeMatcher observationTypeMatcher) {
     return new EncounterObservationsMapper(
-        observationMapper, diagnosisMapper, dispositionMapper, emrApiProperties,
+        observationMapper,
+        diagnosisMapper,
+        dispositionMapper,
+        emrApiProperties,
         observationTypeMatcher);
   }
 
@@ -475,8 +478,7 @@ public class SihsalusEmrApiConfiguration {
   }
 
   @Bean
-  OpenMRSOrderMapper openMRSOrderMapper(
-      OrderService orderService, ConceptService conceptService) {
+  OpenMRSOrderMapper openMRSOrderMapper(OrderService orderService, ConceptService conceptService) {
     return new OpenMRSOrderMapper(orderService, conceptService);
   }
 

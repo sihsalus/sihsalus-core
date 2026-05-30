@@ -1,11 +1,10 @@
 package org.openmrs.module.metadatamapping.web.rest;
 
-import java.util.List;
-
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.StringProperty;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.metadatamapping.MetadataSource;
@@ -24,7 +23,13 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + MetadataMappingRestController.METADATA_MAPPING_REST_NAMESPACE + "/source", supportedClass = MetadataSource.class, supportedOpenmrsVersions = { "1.9.* - 9.*" })
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + MetadataMappingRestController.METADATA_MAPPING_REST_NAMESPACE
+            + "/source",
+    supportedClass = MetadataSource.class,
+    supportedOpenmrsVersions = {"1.9.* - 9.*"})
 public class MetadataSourceResource extends MetadataDelegatingCrudResource<MetadataSource> {
 
   public static final String PARAM_SOURCE_NAME = "name";
@@ -80,8 +85,11 @@ public class MetadataSourceResource extends MetadataDelegatingCrudResource<Metad
   public Model getGETModel(Representation rep) {
     ModelImpl model = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      model.property("uuid", new StringProperty().example("uuid")).property("name", new StringProperty()).property(
-          "description", new StringProperty()).property("retired", new BooleanProperty());
+      model
+          .property("uuid", new StringProperty().example("uuid"))
+          .property("name", new StringProperty())
+          .property("description", new StringProperty())
+          .property("retired", new BooleanProperty());
     } else {
       model.property("auditInfo", new StringProperty());
     }
@@ -99,7 +107,8 @@ public class MetadataSourceResource extends MetadataDelegatingCrudResource<Metad
   }
 
   private PageableResult getPageableResult(RequestContext context) {
-    MetadataSourceSearchCriteriaBuilder searchCriteriaBuilder = new MetadataSourceSearchCriteriaBuilder();
+    MetadataSourceSearchCriteriaBuilder searchCriteriaBuilder =
+        new MetadataSourceSearchCriteriaBuilder();
 
     if (context.getIncludeAll()) {
       searchCriteriaBuilder.setIncludeAll(true);
@@ -122,7 +131,8 @@ public class MetadataSourceResource extends MetadataDelegatingCrudResource<Metad
     boolean hasMore = false;
     searchCriteriaBuilder.setFirstResult(firstResult).setMaxResults(maxResults + 1).build();
 
-    List<MetadataSource> metadataSources = getService().getMetadataSources(searchCriteriaBuilder.build());
+    List<MetadataSource> metadataSources =
+        getService().getMetadataSources(searchCriteriaBuilder.build());
     if (metadataSources.size() > maxResults) {
       hasMore = true;
       metadataSources = metadataSources.subList(0, maxResults);

@@ -118,7 +118,8 @@ public class PatientChartCompatibilityController {
 
   private Patient requiredPatient(String patientUuid) {
     if (!patientAuthorization.canReadPatient(patientUuid)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Patient access denied: " + patientUuid);
+      throw new ResponseStatusException(
+          HttpStatus.FORBIDDEN, "Patient access denied: " + patientUuid);
     }
     Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
     if (patient == null) {

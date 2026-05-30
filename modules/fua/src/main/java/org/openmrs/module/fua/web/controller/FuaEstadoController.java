@@ -70,7 +70,10 @@ public class FuaEstadoController {
     return "redirect:/module/fua/estado";
   }
 
-  @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(
+      value = "/list",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<FuaEstado> getAllEstados() {
     return fuaEstadoService.getAllEstados();

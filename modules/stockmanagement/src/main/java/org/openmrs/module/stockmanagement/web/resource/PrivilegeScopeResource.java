@@ -9,16 +9,19 @@ import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/privilegescope", supportedClass = PrivilegeScope.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/privilegescope",
+    supportedClass = PrivilegeScope.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class PrivilegeScopeResource extends ResourceBase<PrivilegeScope> {
 
   @Override
@@ -27,7 +30,8 @@ public class PrivilegeScopeResource extends ResourceBase<PrivilegeScope> {
   }
 
   @Override
-  protected void delete(PrivilegeScope delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(PrivilegeScope delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -87,10 +91,14 @@ public class PrivilegeScopeResource extends ResourceBase<PrivilegeScope> {
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("privilege", new StringProperty()).property("operationTypeUuid", new StringProperty())
-              .property("locationUuid", new StringProperty()).property("partyUuid", new StringProperty())
-              .property("isPermanent", new BooleanProperty()).property("activeFrom", new DateProperty())
-              .property("activeTo", new DateProperty());
+      modelImpl
+          .property("privilege", new StringProperty())
+          .property("operationTypeUuid", new StringProperty())
+          .property("locationUuid", new StringProperty())
+          .property("partyUuid", new StringProperty())
+          .property("isPermanent", new BooleanProperty())
+          .property("activeFrom", new DateProperty())
+          .property("activeTo", new DateProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -100,5 +108,4 @@ public class PrivilegeScopeResource extends ResourceBase<PrivilegeScope> {
 
     return modelImpl;
   }
-
 }

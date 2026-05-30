@@ -3,8 +3,8 @@ package org.sihsalus.fhir2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -93,7 +93,8 @@ class FhirR4ReadControllerTest {
     FhirR4ReadController controller =
         new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new ReadOnlyPatientProvider()));
 
-    ResponseEntity<String> response = controller.search("Patient", searchParameters("_count", "10"));
+    ResponseEntity<String> response =
+        controller.search("Patient", searchParameters("_count", "10"));
 
     assertEquals(405, response.getStatusCode().value());
     assertNotNull(response.getBody());
@@ -104,7 +105,8 @@ class FhirR4ReadControllerTest {
   @Test
   void readsNullResourceAsNotFound() {
     FhirR4ReadController controller =
-        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new NullReturningPatientProvider()));
+        new FhirR4ReadController(
+            FhirContext.forR4Cached(), List.of(new NullReturningPatientProvider()));
 
     ResponseEntity<String> response = controller.read("Patient", "patient-uuid");
 
@@ -117,10 +119,10 @@ class FhirR4ReadControllerTest {
   @Test
   void propagatesRuntimeReadExceptions() {
     FhirR4ReadController controller =
-        new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new ExplodingPatientProvider()));
+        new FhirR4ReadController(
+            FhirContext.forR4Cached(), List.of(new ExplodingPatientProvider()));
 
-    assertThrows(
-        IllegalStateException.class, () -> controller.read("Patient", "patient-uuid"));
+    assertThrows(IllegalStateException.class, () -> controller.read("Patient", "patient-uuid"));
   }
 
   @Test
@@ -128,7 +130,8 @@ class FhirR4ReadControllerTest {
     FhirR4ReadController controller =
         new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
 
-    ResponseEntity<String> response = controller.search("Patient", searchParameters("_count", "-1"));
+    ResponseEntity<String> response =
+        controller.search("Patient", searchParameters("_count", "-1"));
 
     assertEquals(400, response.getStatusCode().value());
     assertNotNull(response.getBody());
@@ -141,7 +144,8 @@ class FhirR4ReadControllerTest {
     FhirR4ReadController controller =
         new FhirR4ReadController(FhirContext.forR4Cached(), List.of(new PatientProvider()));
 
-    ResponseEntity<String> response = controller.search("Patient", searchParameters("_count", "abc"));
+    ResponseEntity<String> response =
+        controller.search("Patient", searchParameters("_count", "abc"));
 
     assertEquals(400, response.getStatusCode().value());
     assertNotNull(response.getBody());
@@ -187,7 +191,8 @@ class FhirR4ReadControllerTest {
             FhirContext.forR4Cached(), List.of(new ExplodingSearchPatientProvider()));
 
     assertThrows(
-        IllegalStateException.class, () -> controller.search("Patient", searchParameters("_count", "10")));
+        IllegalStateException.class,
+        () -> controller.search("Patient", searchParameters("_count", "10")));
   }
 
   @Test

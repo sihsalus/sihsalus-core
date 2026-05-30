@@ -5,6 +5,7 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.StringProperty;
+import java.util.Optional;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.reporting.Report;
 import org.openmrs.module.stockmanagement.api.reporting.ReportGenerator;
@@ -20,19 +21,22 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.Optional;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/report", supportedClass = Report.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/report",
+    supportedClass = Report.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class ReportResource extends ResourceBase<Report> {
 
   @Override
-    public Report getByUniqueId(String uniqueId) {
-         Optional<Report<?>> report = Report.getAllReports().stream().filter(p-> p.getUuid().equals(uniqueId)).findAny();
-        return report.isPresent() ? report.get() : null;
-    }
+  public Report getByUniqueId(String uniqueId) {
+    Optional<Report<?>> report =
+        Report.getAllReports().stream().filter(p -> p.getUuid().equals(uniqueId)).findAny();
+    return report.isPresent() ? report.get() : null;
+  }
 
   @Override
-  protected void delete(Report delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(Report delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -82,9 +86,7 @@ public class ReportResource extends ResourceBase<Report> {
       description.addSelfLink();
     }
 
-    if (rep instanceof RefRepresentation) {
-
-    }
+    if (rep instanceof RefRepresentation) {}
 
     return description;
   }
@@ -93,22 +95,18 @@ public class ReportResource extends ResourceBase<Report> {
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("order", new IntegerProperty()).property("name", new StringProperty())
-              .property("systemName", new StringProperty()).property("parameters", new ArrayProperty());
+      modelImpl
+          .property("order", new IntegerProperty())
+          .property("name", new StringProperty())
+          .property("systemName", new StringProperty())
+          .property("parameters", new ArrayProperty());
     }
-    if (rep instanceof DefaultRepresentation) {
+    if (rep instanceof DefaultRepresentation) {}
 
-    }
+    if (rep instanceof FullRepresentation) {}
 
-    if (rep instanceof FullRepresentation) {
-
-    }
-
-    if (rep instanceof RefRepresentation) {
-
-    }
+    if (rep instanceof RefRepresentation) {}
 
     return modelImpl;
   }
-
 }

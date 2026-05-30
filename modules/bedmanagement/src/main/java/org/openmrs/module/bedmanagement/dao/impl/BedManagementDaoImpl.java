@@ -96,8 +96,7 @@ public class BedManagementDaoImpl implements BedManagementDao {
     Session session = sessionFactory.getCurrentSession();
     return session
         .createQuery(
-            "from BedPatientAssignment bpa " + "where bpa.uuid = :uuid",
-            BedPatientAssignment.class)
+            "from BedPatientAssignment bpa " + "where bpa.uuid = :uuid", BedPatientAssignment.class)
         .setParameter("uuid", uuid)
         .uniqueResult();
   }

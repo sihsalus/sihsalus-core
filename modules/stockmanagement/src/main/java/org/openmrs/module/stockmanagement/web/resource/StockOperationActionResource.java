@@ -10,17 +10,20 @@ import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationaction", supportedClass = StockOperationAction.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationaction",
+    supportedClass = StockOperationAction.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockOperationActionResource extends ResourceBase<StockOperationAction> {
 
   @Override
@@ -34,7 +37,8 @@ public class StockOperationActionResource extends ResourceBase<StockOperationAct
   }
 
   @Override
-  protected void delete(StockOperationAction delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(StockOperationAction delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -77,22 +81,23 @@ public class StockOperationActionResource extends ResourceBase<StockOperationAct
         case DISPATCH:
           getStockManagementService().dispatchStockOperation(stockOperation);
           break;
-        // Receivers not allowed to modiy quntities received
-        //        case QUANTITY_RECEIVED:
-        //          getStockManagementService().stockOperationItemsReceived(stockOperation, delegate.getLineItems());
-        //          break;
+          // Receivers not allowed to modiy quntities received
+          //        case QUANTITY_RECEIVED:
+          //          getStockManagementService().stockOperationItemsReceived(stockOperation,
+          // delegate.getLineItems());
+          //          break;
         default:
           throw new ResourceDoesNotSupportOperationException();
       }
-    }
-    catch (StockManagementException exception) {
+    } catch (StockManagementException exception) {
       throw new RestClientException(exception.getMessage());
     }
     return delegate;
   }
 
   @Override
-  public void purge(StockOperationAction delegate, RequestContext context) throws ResponseException {
+  public void purge(StockOperationAction delegate, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -119,8 +124,11 @@ public class StockOperationActionResource extends ResourceBase<StockOperationAct
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("reason", new StringProperty()).property("name", new StringProperty())
-              .property("uuid", new StringProperty()).property("lineItems", new ArrayProperty());
+      modelImpl
+          .property("reason", new StringProperty())
+          .property("name", new StringProperty())
+          .property("uuid", new StringProperty())
+          .property("lineItems", new ArrayProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -132,7 +140,8 @@ public class StockOperationActionResource extends ResourceBase<StockOperationAct
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addProperty("reason");
     description.addProperty("name");

@@ -278,8 +278,7 @@ public class ReportingRestController extends MainResourceController {
       if (value != null) {
         Object convertedValue = ConversionUtil.convert(value, param.getType());
         requirePatientParameterAccess(param, convertedValue, value);
-        evalContext.addParameterValue(
-            param.getName(), convertedValue);
+        evalContext.addParameterValue(param.getName(), convertedValue);
       } else if (param.isRequired()) {
         throw new IllegalArgumentException("Missing required parameter: " + param.getName());
       }
@@ -287,7 +286,8 @@ public class ReportingRestController extends MainResourceController {
     return evalContext;
   }
 
-  private void requirePatientParameterAccess(Parameter parameter, Object convertedValue, String rawValue) {
+  private void requirePatientParameterAccess(
+      Parameter parameter, Object convertedValue, String rawValue) {
     if (convertedValue instanceof Patient patient) {
       PatientObjectAuthorizationService.current().requireCanReadPatient(patient.getUuid());
       return;

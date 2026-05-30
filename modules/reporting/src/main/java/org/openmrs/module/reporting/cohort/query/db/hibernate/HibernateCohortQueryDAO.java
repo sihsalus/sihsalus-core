@@ -818,8 +818,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
               for (Object object : collection) {
                 openmrsObjects.add((OpenmrsObject) object);
               }
-              query.setParameterList(
-                  paramName, SqlUtils.openmrsObjectIdListHelper(openmrsObjects));
+              query.setParameterList(paramName, SqlUtils.openmrsObjectIdListHelper(openmrsObjects));
             } else {
               List<Object> objects = new ArrayList<>(collection);
               // a List of Strings, Integers?

@@ -156,7 +156,8 @@ public class SqlFileDataSetEvaluator implements DataSetEvaluator {
       String url = connectionProperties.getProperty("connection.url");
       String user = connectionProperties.getProperty("connection.username");
       String password = connectionProperties.getProperty("connection.password");
-      DatabaseUtil.loadDatabaseDriver(url, connectionProperties.getProperty("connection.driver_class"));
+      DatabaseUtil.loadDatabaseDriver(
+          url, connectionProperties.getProperty("connection.driver_class"));
       return DriverManager.getConnection(url, user, password);
     } catch (Exception e) {
       throw new EvaluationException("Unable to create a new connection to the database", e);

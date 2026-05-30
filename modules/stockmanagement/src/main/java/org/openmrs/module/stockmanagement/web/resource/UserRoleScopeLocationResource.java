@@ -7,17 +7,22 @@ import io.swagger.models.properties.StringProperty;
 import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.annotation.SubResource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@SubResource(parent = UserRoleScopeResource.class, path = "locations", supportedClass = UserRoleScopeLocationDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
-public class UserRoleScopeLocationResource extends SubResourceBase<UserRoleScopeLocationDTO, UserRoleScopeDTO, UserRoleScopeResource> {
+@SubResource(
+    parent = UserRoleScopeResource.class,
+    path = "locations",
+    supportedClass = UserRoleScopeLocationDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
+public class UserRoleScopeLocationResource
+    extends SubResourceBase<UserRoleScopeLocationDTO, UserRoleScopeDTO, UserRoleScopeResource> {
 
   @Override
   public UserRoleScopeLocationDTO getByUniqueId(String uniqueId) {
@@ -25,7 +30,8 @@ public class UserRoleScopeLocationResource extends SubResourceBase<UserRoleScope
   }
 
   @Override
-  protected void delete(UserRoleScopeLocationDTO delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(UserRoleScopeLocationDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -40,7 +46,8 @@ public class UserRoleScopeLocationResource extends SubResourceBase<UserRoleScope
   }
 
   @Override
-  public void purge(UserRoleScopeLocationDTO delegate, RequestContext context) throws ResponseException {
+  public void purge(UserRoleScopeLocationDTO delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
@@ -70,9 +77,12 @@ public class UserRoleScopeLocationResource extends SubResourceBase<UserRoleScope
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("userRoleScopeId", new StringProperty())
-              .property("locationUuid", new StringProperty()).property("locationName", new StringProperty())
-              .property("enableDescendants", new BooleanProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("userRoleScopeId", new StringProperty())
+          .property("locationUuid", new StringProperty())
+          .property("locationName", new StringProperty())
+          .property("enableDescendants", new BooleanProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -91,11 +101,11 @@ public class UserRoleScopeLocationResource extends SubResourceBase<UserRoleScope
   }
 
   @Override
-  public void setParent(UserRoleScopeLocationDTO instance, UserRoleScopeDTO parent) {
-  }
+  public void setParent(UserRoleScopeLocationDTO instance, UserRoleScopeDTO parent) {}
 
   @Override
-  public PageableResult doGetAll(UserRoleScopeDTO parent, RequestContext context) throws ResponseException {
+  public PageableResult doGetAll(UserRoleScopeDTO parent, RequestContext context)
+      throws ResponseException {
     return null;
   }
 }

@@ -1,18 +1,22 @@
 /**
- * The contents of this file are subject to the OpenMRS Public License
- * Version 1.0 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://license.openmrs.org
+ * The contents of this file are subject to the OpenMRS Public License Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at http://license.openmrs.org
  *
- * Software distributed under the License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- * License for the specific language governing rights and limitations
- * under the License.
+ * <p>Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+ * ANY KIND, either express or implied. See the License for the specific language governing rights
+ * and limitations under the License.
  *
- * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ * <p>Copyright (C) OpenMRS, LLC. All Rights Reserved.
  */
-package  org.openmrs.module.idgen.rest.resource.handler;
+package org.openmrs.module.idgen.rest.resource.handler;
 
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.BooleanProperty;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.api.context.Context;
@@ -35,19 +39,14 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
+@SubClassHandler(
+    supportedClass = IdentifierPool.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+public class IdentifierPoolResourceHandler
+    extends BaseDelegatingSubclassHandler<IdentifierSource, IdentifierPool>
+    implements DelegatingSubclassHandler<IdentifierSource, IdentifierPool> {
 
-@SubClassHandler(supportedClass = IdentifierPool.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
-public class IdentifierPoolResourceHandler extends BaseDelegatingSubclassHandler<IdentifierSource, IdentifierPool>
-implements DelegatingSubclassHandler<IdentifierSource, IdentifierPool> {
-
-  @Autowired
-  IdentifierSourceService service;
+  @Autowired IdentifierSourceService service;
 
   @Override
   public String getResourceVersion() {
@@ -59,57 +58,59 @@ implements DelegatingSubclassHandler<IdentifierSource, IdentifierPool> {
     return new IdentifierPool();
   }
 
-      @Override
-      public IdentifierPool save(IdentifierPool delegate) {
-            service.saveIdentifierSource(delegate);
-          return delegate;
-      }
+  @Override
+  public IdentifierPool save(IdentifierPool delegate) {
+    service.saveIdentifierSource(delegate);
+    return delegate;
+  }
 
   @Override
   public DelegatingResourceDescription getRepresentationDescription(Representation representation) {
     if (representation instanceof DefaultRepresentation) {
       DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
       representationDescription.addProperty("uuid");
-                representationDescription.addProperty("name");
-                representationDescription.addProperty("identifierType", Representation.DEFAULT);
-                representationDescription.addSelfLink();
-                representationDescription.addProperty("display");
+      representationDescription.addProperty("name");
+      representationDescription.addProperty("identifierType", Representation.DEFAULT);
+      representationDescription.addSelfLink();
+      representationDescription.addProperty("display");
       return representationDescription;
     }
     if (representation instanceof FullRepresentation) {
       DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
       representationDescription.addProperty("uuid");
-          representationDescription.addProperty("name");
-          representationDescription.addProperty("identifierType", Representation.FULL);
-          representationDescription.addProperty("password");
-          representationDescription.addProperty("url");
-          representationDescription.addProperty("user");
-          representationDescription.addProperty("display");
-          representationDescription.addSelfLink();
+      representationDescription.addProperty("name");
+      representationDescription.addProperty("identifierType", Representation.FULL);
+      representationDescription.addProperty("password");
+      representationDescription.addProperty("url");
+      representationDescription.addProperty("user");
+      representationDescription.addProperty("display");
+      representationDescription.addSelfLink();
       return representationDescription;
     }
     if (representation instanceof RefRepresentation) {
       DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
       representationDescription.addProperty("uuid");
-            representationDescription.addProperty("display");
-            representationDescription.addProperty("identifierType", Representation.REF);
-            representationDescription.addSelfLink();
+      representationDescription.addProperty("display");
+      representationDescription.addProperty("identifierType", Representation.REF);
+      representationDescription.addSelfLink();
       return representationDescription;
     }
 
     return null;
   }
 
-
   @PropertyGetter("display")
-    public String getDisplayString(IdentifierPool identifierSource) {
-        return identifierSource.getIdentifierType() + " - "
-                + identifierSource.getName() + " - "
-                + identifierSource.getClass().getName();
-    }
+  public String getDisplayString(IdentifierPool identifierSource) {
+    return identifierSource.getIdentifierType()
+        + " - "
+        + identifierSource.getName()
+        + " - "
+        + identifierSource.getClass().getName();
+  }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
     representationDescription.addProperty("name");
     representationDescription.addProperty("identifierType");
@@ -122,13 +123,14 @@ implements DelegatingSubclassHandler<IdentifierSource, IdentifierPool> {
   }
 
   @Override
-  public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
     representationDescription.addProperty("sequential");
-          representationDescription.addProperty("refillWithScheduledTask");
-          representationDescription.addProperty("source");
-          representationDescription.addProperty("batchSize");
-          representationDescription.addProperty("minPoolSize");
+    representationDescription.addProperty("refillWithScheduledTask");
+    representationDescription.addProperty("source");
+    representationDescription.addProperty("batchSize");
+    representationDescription.addProperty("minPoolSize");
     return representationDescription;
   }
 
@@ -138,8 +140,10 @@ implements DelegatingSubclassHandler<IdentifierSource, IdentifierPool> {
   }
 
   @Override
-  public PageableResult getAllByType(RequestContext context) throws ResourceDoesNotSupportOperationException {
-    List<IdentifierSource> identifierSources = Context.getService(IdentifierSourceService.class).getAllIdentifierSources(false);
+  public PageableResult getAllByType(RequestContext context)
+      throws ResourceDoesNotSupportOperationException {
+    List<IdentifierSource> identifierSources =
+        Context.getService(IdentifierSourceService.class).getAllIdentifierSources(false);
     if (identifierSources == null) {
       return null;
     }
@@ -157,21 +161,21 @@ implements DelegatingSubclassHandler<IdentifierSource, IdentifierPool> {
     ModelImpl model = new ModelImpl();
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
       model
-        .property("uuid", new StringProperty())
-        .property("name", new RefProperty("#/definitions/IdentifierPoolResourceGet"))
-        .property("display", new StringProperty());
+          .property("uuid", new StringProperty())
+          .property("name", new RefProperty("#/definitions/IdentifierPoolResourceGet"))
+          .property("display", new StringProperty());
     }
     if (rep instanceof FullRepresentation) {
       model
-        .property("password", new StringProperty())
-        .property("url", new StringProperty())
-        .property("user", new RefProperty("#/definitions/UserGet"));
+          .property("password", new StringProperty())
+          .property("url", new StringProperty())
+          .property("user", new RefProperty("#/definitions/UserGet"));
     }
     if (rep instanceof RefRepresentation) {
       model
-        .property("uuid", new StringProperty())
-        .property("name", new RefProperty("#/definitions/IdentifierPoolResourceGetRef"))
-        .property("display", new StringProperty());
+          .property("uuid", new StringProperty())
+          .property("name", new RefProperty("#/definitions/IdentifierPoolResourceGetRef"))
+          .property("display", new StringProperty());
     }
     return model;
   }
@@ -179,18 +183,17 @@ implements DelegatingSubclassHandler<IdentifierSource, IdentifierPool> {
   @Override
   public Model getCREATEModel(Representation rep) {
     return new ModelImpl()
-          .property("name", new RefProperty("#/definitions/IdentifierPoolResourceCreate"))
-          .property("identifierType", new RefProperty("#/definitions/IdentifierTypeGet"))
-          .property("sequential", new BooleanProperty())
-          .property("refillWithScheduledTask", new BooleanProperty())
-          .property("source", new RefProperty("#/definitions/IdentifierSourceGet"))
-          .property("batchSize", new IntegerProperty())
-          .property("minPoolSize", new IntegerProperty());
+        .property("name", new RefProperty("#/definitions/IdentifierPoolResourceCreate"))
+        .property("identifierType", new RefProperty("#/definitions/IdentifierTypeGet"))
+        .property("sequential", new BooleanProperty())
+        .property("refillWithScheduledTask", new BooleanProperty())
+        .property("source", new RefProperty("#/definitions/IdentifierSourceGet"))
+        .property("batchSize", new IntegerProperty())
+        .property("minPoolSize", new IntegerProperty());
   }
 
   @Override
   public Model getUPDATEModel(Representation rep) {
-    return getCREATEModel(rep); //FIXME add Impl
+    return getCREATEModel(rep); // FIXME add Impl
   }
-
 }

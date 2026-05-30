@@ -1,5 +1,7 @@
 package org.openmrs.module.stockmanagement.web.resource;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
@@ -8,9 +10,6 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
 import org.springframework.web.client.RestClientException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class ResourceBase<T> extends DelegatingCrudResource<T> {
 
@@ -33,23 +32,20 @@ public abstract class ResourceBase<T> extends DelegatingCrudResource<T> {
 
   protected void invalidRequest(String messageKey, Object... args) {
     if (args != null && args.length > 0)
-      throw new RestClientException(String.format(Context.getMessageSourceService().getMessage(messageKey), args));
-    else
-      throw new RestClientException(Context.getMessageSourceService().getMessage(messageKey));
+      throw new RestClientException(
+          String.format(Context.getMessageSourceService().getMessage(messageKey), args));
+    else throw new RestClientException(Context.getMessageSourceService().getMessage(messageKey));
   }
 
   protected void requirePriviledge(String priviledge) {
     UserContext userContext = Context.getUserContext();
-    if (!userContext.hasPrivilege(priviledge))
-      forbidden();
+    if (!userContext.hasPrivilege(priviledge)) forbidden();
   }
 
   protected String nullIfEmpty(String string) {
-    if (string == null)
-      return null;
+    if (string == null) return null;
     string = string.trim();
-    if (string.isEmpty())
-      return null;
+    if (string.isEmpty()) return null;
     return string;
   }
 
@@ -58,11 +54,11 @@ public abstract class ResourceBase<T> extends DelegatingCrudResource<T> {
   }
 
   protected <E> AlreadyPaged<E> toAlreadyPaged(Result<E> result, RequestContext context) {
-    return new AlreadyPaged<E>(context, result.getData(), result.hasMoreResults(), result.getTotalRecordCount());
+    return new AlreadyPaged<E>(
+        context, result.getData(), result.hasMoreResults(), result.getTotalRecordCount());
   }
 
   protected <E> AlreadyPaged<E> toAlreadyPaged(List<E> result, RequestContext context) {
     return new AlreadyPaged<E>(context, result, false, (long) result.size());
   }
-
 }

@@ -4,10 +4,13 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.StringProperty;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.StockManagementException;
 import org.openmrs.module.stockmanagement.api.dto.*;
-import org.openmrs.module.stockmanagement.api.model.StockOperationType;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -25,26 +28,28 @@ import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOp
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationbatchnumbers", supportedClass = StockOperationBatchNumbersDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
-public class StockOperationBatchNumbersResource extends ResourceBase<StockOperationBatchNumbersDTO> {
+@Resource(
+    name =
+        RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationbatchnumbers",
+    supportedClass = StockOperationBatchNumbersDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
+public class StockOperationBatchNumbersResource
+    extends ResourceBase<StockOperationBatchNumbersDTO> {
 
   @Override
   public StockOperationBatchNumbersDTO getByUniqueId(String uniqueId) {
     StockOperationSearchFilter filter = new StockOperationSearchFilter();
     filter.setStockOperationUuid(uniqueId);
     Result<StockOperationDTO> result = getStockManagementService().findStockOperations(filter);
-    StockOperationDTO stockOperationDTO = result.getData().isEmpty() ? null : result.getData().get(0);
+    StockOperationDTO stockOperationDTO =
+        result.getData().isEmpty() ? null : result.getData().get(0);
     return mapToBatchNumbers(stockOperationDTO);
   }
 
   @Override
-  protected void delete(StockOperationBatchNumbersDTO delegate, String reason, RequestContext context)
-          throws ResponseException {
+  protected void delete(
+      StockOperationBatchNumbersDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -56,24 +61,26 @@ public class StockOperationBatchNumbersResource extends ResourceBase<StockOperat
   @Override
   public StockOperationBatchNumbersDTO save(StockOperationBatchNumbersDTO delegate) {
     try {
-      StockOperationBatchNumbersDTO result = getStockManagementService().saveStockOperationBatchNumbers(delegate);
+      StockOperationBatchNumbersDTO result =
+          getStockManagementService().saveStockOperationBatchNumbers(delegate);
       return result;
-    }
-    catch (StockManagementException exception) {
+    } catch (StockManagementException exception) {
       throw new RestClientException(exception.getMessage());
     }
   }
 
   @Override
-  public void purge(StockOperationBatchNumbersDTO delegate, RequestContext context) throws ResponseException {
+  public void purge(StockOperationBatchNumbersDTO delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
   @PropertyGetter("batchNumbers")
   public List<SimpleObject> getBatchNumbers(StockOperationBatchNumbersDTO instance) {
-    if(instance == null || instance.getBatchNumbers() == null) return null;
+    if (instance == null || instance.getBatchNumbers() == null) return null;
     List<SimpleObject> result = new ArrayList<>();
-    for(StockOperationBatchNumbersDTO.StockOperationItemBatchNumber batchNumber : instance.getBatchNumbers()){
+    for (StockOperationBatchNumbersDTO.StockOperationItemBatchNumber batchNumber :
+        instance.getBatchNumbers()) {
       SimpleObject simpleObject = new SimpleObject();
       simpleObject.add("uuid", batchNumber.getUuid());
       simpleObject.add("batchNo", batchNumber.getBatchNo());
@@ -84,7 +91,8 @@ public class StockOperationBatchNumbersResource extends ResourceBase<StockOperat
   }
 
   @PropertySetter("batchNumbers")
-  public void setBatchNumbers(StockOperationBatchNumbersDTO instance, ArrayList<Map<String, ?>> items) {
+  public void setBatchNumbers(
+      StockOperationBatchNumbersDTO instance, ArrayList<Map<String, ?>> items) {
     if (items == null) {
       instance.setBatchNumbers(null);
       return;
@@ -96,7 +104,8 @@ public class StockOperationBatchNumbersResource extends ResourceBase<StockOperat
 
     instance.setBatchNumbers(new ArrayList<>());
     for (Map<String, ?> item : items) {
-      StockOperationBatchNumbersDTO.StockOperationItemBatchNumber itemDTO = new StockOperationBatchNumbersDTO.StockOperationItemBatchNumber();
+      StockOperationBatchNumbersDTO.StockOperationItemBatchNumber itemDTO =
+          new StockOperationBatchNumbersDTO.StockOperationItemBatchNumber();
       boolean isNew = true;
       if (item.containsKey("uuid") && item.get("uuid") != null) {
         itemDTO.setUuid(item.get("uuid").toString());
@@ -112,7 +121,8 @@ public class StockOperationBatchNumbersResource extends ResourceBase<StockOperat
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addProperty("batchNumbers");
     return description;
@@ -162,15 +172,16 @@ public class StockOperationBatchNumbersResource extends ResourceBase<StockOperat
     return modelImpl;
   }
 
-  private StockOperationBatchNumbersDTO mapToBatchNumbers(StockOperationDTO parent){
-    if(parent == null) return null;
+  private StockOperationBatchNumbersDTO mapToBatchNumbers(StockOperationDTO parent) {
+    if (parent == null) return null;
     StockOperationBatchNumbersDTO batchNumbersDTO = new StockOperationBatchNumbersDTO();
     batchNumbersDTO.setUuid(parent.getUuid());
     batchNumbersDTO.setId(parent.getId());
     batchNumbersDTO.setBatchNumbers(new ArrayList<>());
     if (parent.getStockOperationItems() != null) {
       for (StockOperationItemDTO stockOperationItemDTO : parent.getStockOperationItems()) {
-        StockOperationBatchNumbersDTO.StockOperationItemBatchNumber batchNumber = new StockOperationBatchNumbersDTO.StockOperationItemBatchNumber();
+        StockOperationBatchNumbersDTO.StockOperationItemBatchNumber batchNumber =
+            new StockOperationBatchNumbersDTO.StockOperationItemBatchNumber();
         batchNumber.setId(stockOperationItemDTO.getId());
         batchNumber.setUuid(stockOperationItemDTO.getUuid());
         batchNumber.setBatchNo(stockOperationItemDTO.getBatchNo());
@@ -189,6 +200,6 @@ public class StockOperationBatchNumbersResource extends ResourceBase<StockOperat
   @Override
   protected PageableResult doSearch(RequestContext context) {
     List<StockOperationBatchNumbersDTO> result = new ArrayList<>();
-    return toAlreadyPaged(result,context);
+    return toAlreadyPaged(result, context);
   }
 }

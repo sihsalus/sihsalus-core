@@ -4,25 +4,29 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
 import io.swagger.models.properties.StringProperty;
+import java.math.BigDecimal;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.math.BigDecimal;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationactionlineitem", supportedClass = StockOperationActionLineItem.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
-public class StockOperationActionLineItemResource extends ResourceBase<StockOperationActionLineItem> {
+@Resource(
+    name =
+        RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationactionlineitem",
+    supportedClass = StockOperationActionLineItem.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
+public class StockOperationActionLineItemResource
+    extends ResourceBase<StockOperationActionLineItem> {
 
   @Override
   public StockOperationActionLineItem getByUniqueId(String uniqueId) {
@@ -30,8 +34,9 @@ public class StockOperationActionLineItemResource extends ResourceBase<StockOper
   }
 
   @Override
-  protected void delete(StockOperationActionLineItem delegate, String reason, RequestContext context)
-          throws ResponseException {
+  protected void delete(
+      StockOperationActionLineItem delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -56,7 +61,8 @@ public class StockOperationActionLineItemResource extends ResourceBase<StockOper
   }
 
   @Override
-  public void purge(StockOperationActionLineItem delegate, RequestContext context) throws ResponseException {
+  public void purge(StockOperationActionLineItem delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
@@ -70,7 +76,8 @@ public class StockOperationActionLineItemResource extends ResourceBase<StockOper
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addProperty("uuid");
     description.addProperty("amount");
@@ -111,8 +118,10 @@ public class StockOperationActionLineItemResource extends ResourceBase<StockOper
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("amount", new DecimalProperty())
-              .property("packagingUoMUuId", new StringProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("amount", new DecimalProperty())
+          .property("packagingUoMUuId", new StringProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -124,5 +133,4 @@ public class StockOperationActionLineItemResource extends ResourceBase<StockOper
 
     return modelImpl;
   }
-
 }

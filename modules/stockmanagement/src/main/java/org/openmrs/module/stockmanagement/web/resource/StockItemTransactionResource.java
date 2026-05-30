@@ -4,8 +4,9 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
 import io.swagger.models.properties.StringProperty;
+import java.util.Date;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.dto.*;
@@ -15,31 +16,33 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.Date;
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockitemtransaction", supportedClass = StockItemTransactionDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockitemtransaction",
+    supportedClass = StockItemTransactionDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockItemTransactionResource extends ResourceBase<StockItemTransactionDTO> {
 
   @Override
   public StockItemTransactionDTO getByUniqueId(String uniqueId) {
     StockItemTransactionSearchFilter filter = new StockItemTransactionSearchFilter();
     filter.setUuid(uniqueId);
-    List<StockItemTransactionDTO> result = getStockManagementService().findStockItemTransactions(filter).getData();
+    List<StockItemTransactionDTO> result =
+        getStockManagementService().findStockItemTransactions(filter).getData();
     return result.isEmpty() ? null : result.get(0);
   }
 
   @Override
-  protected void delete(StockItemTransactionDTO delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(StockItemTransactionDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -95,15 +98,16 @@ public class StockItemTransactionResource extends ResourceBase<StockItemTransact
 
     param = context.getParameter("isPatientTransaction");
     if (StringUtils.isNotBlank(param)) {
-      if(param.trim().equalsIgnoreCase("true")) {
+      if (param.trim().equalsIgnoreCase("true")) {
         filter.setIsPatientTransaction(true);
-      } else if(param.trim().equalsIgnoreCase("false")) {
+      } else if (param.trim().equalsIgnoreCase("false")) {
         filter.setIsPatientTransaction(false);
       }
     }
 
     StockManagementService stockManagementService = getStockManagementService();
-    Result<StockItemTransactionDTO> result = stockManagementService.findStockItemTransactions(filter);
+    Result<StockItemTransactionDTO> result =
+        stockManagementService.findStockItemTransactions(filter);
     return toAlreadyPaged(result, context);
   }
 
@@ -123,7 +127,8 @@ public class StockItemTransactionResource extends ResourceBase<StockItemTransact
   }
 
   @Override
-  public void purge(StockItemTransactionDTO delegate, RequestContext context) throws ResponseException {
+  public void purge(StockItemTransactionDTO delegate, RequestContext context)
+      throws ResponseException {
     delete(delegate, null, context);
   }
 
@@ -164,7 +169,6 @@ public class StockItemTransactionResource extends ResourceBase<StockItemTransact
 
     if (rep instanceof RefRepresentation) {
       description.addProperty("uuid");
-
     }
 
     return description;
@@ -173,31 +177,37 @@ public class StockItemTransactionResource extends ResourceBase<StockItemTransact
   @PropertyGetter("isPatientTransaction")
   public boolean getIsPatientTransaction(StockItemTransactionDTO stockItemTransactionDTO) {
     return stockItemTransactionDTO != null
-            && (stockItemTransactionDTO.getPatientId() != null || stockItemTransactionDTO.getOrderId() != null || stockItemTransactionDTO
-                    .getEncounterId() != null);
+        && (stockItemTransactionDTO.getPatientId() != null
+            || stockItemTransactionDTO.getOrderId() != null
+            || stockItemTransactionDTO.getEncounterId() != null);
   }
 
   @Override
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("dateCreated", new DateTimeProperty())
-              .property("partyUuid", new StringProperty()).property("partyName", new StringProperty())
-              .property("isPatientTransaction", new BooleanProperty()).property("quantity", new DecimalProperty())
-              .property("stockBatchUuid", new StringProperty()).property("stockBatchNo", new StringProperty())
-              .property("expiration", new StringProperty()).property("stockItemUuid", new StringProperty())
-              .property("stockOperationUuid", new StringProperty())
-              .property("stockOperationStatus", new StringProperty())
-              .property("stockOperationNumber", new StringProperty())
-              .property("stockOperationTypeName", new StringProperty())
-              .property("stockItemPackagingUOMUuid", new StringProperty())
-              .property("packagingUomName", new StringProperty())
-              .property("packagingUomFactor", new DecimalProperty())
-              .property("operationSourcePartyName", new StringProperty())
-              .property("operationDestinationPartyName", new StringProperty())
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("dateCreated", new DateTimeProperty())
+          .property("partyUuid", new StringProperty())
+          .property("partyName", new StringProperty())
+          .property("isPatientTransaction", new BooleanProperty())
+          .property("quantity", new DecimalProperty())
+          .property("stockBatchUuid", new StringProperty())
+          .property("stockBatchNo", new StringProperty())
+          .property("expiration", new StringProperty())
+          .property("stockItemUuid", new StringProperty())
+          .property("stockOperationUuid", new StringProperty())
+          .property("stockOperationStatus", new StringProperty())
+          .property("stockOperationNumber", new StringProperty())
+          .property("stockOperationTypeName", new StringProperty())
+          .property("stockItemPackagingUOMUuid", new StringProperty())
+          .property("packagingUomName", new StringProperty())
+          .property("packagingUomFactor", new DecimalProperty())
+          .property("operationSourcePartyName", new StringProperty())
+          .property("operationDestinationPartyName", new StringProperty())
           .property("patientId", new IntegerProperty())
-          .property("patientUuid", new StringProperty())
-          ;
+          .property("patientUuid", new StringProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -209,5 +219,4 @@ public class StockItemTransactionResource extends ResourceBase<StockItemTransact
 
     return modelImpl;
   }
-
 }

@@ -33,24 +33,23 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = {"/rest/v1/emrapi/activevisit", "/ws/rest/v1/emrapi/activevisit"})
 public class ActiveVisitController extends BaseRestController {
 
-	@Autowired
-	private AdtService adtService;
+  @Autowired private AdtService adtService;
 
-	@RequestMapping(method = RequestMethod.POST)
-	@ResponseBody
-	@Transactional
-	public SimpleObject ensureActiveVisit(@RequestParam("patient") Patient patient,
-	        @RequestParam("location") Location location) {
+  @RequestMapping(method = RequestMethod.POST)
+  @ResponseBody
+  @Transactional
+  public SimpleObject ensureActiveVisit(
+      @RequestParam("patient") Patient patient, @RequestParam("location") Location location) {
 
-		SimpleObject response = new SimpleObject();
+    SimpleObject response = new SimpleObject();
 
-		Visit visit = adtService.ensureActiveVisit(patient, location);
+    Visit visit = adtService.ensureActiveVisit(patient, location);
 
-		if (visit != null) {
-			response = (SimpleObject) ConversionUtil.convertToRepresentation(visit, Representation.DEFAULT);
-		}
+    if (visit != null) {
+      response =
+          (SimpleObject) ConversionUtil.convertToRepresentation(visit, Representation.DEFAULT);
+    }
 
-		return response;
-	}
-
+    return response;
+  }
 }

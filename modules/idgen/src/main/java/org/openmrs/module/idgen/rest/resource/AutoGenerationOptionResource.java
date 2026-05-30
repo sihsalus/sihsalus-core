@@ -1,20 +1,28 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.idgen.rest.resource;
 
-import org.openmrs.api.context.Context;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.BooleanProperty;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.PatientIdentifierType;
-import org.openmrs.module.idgen.IdentifierSource;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.AutoGenerationOption;
+import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.idgen.web.controller.IdgenRestController;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -27,28 +35,21 @@ import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentat
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
+import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.validation.ValidationException;
 
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
-
-import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
-import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + IdgenRestController.IDGEN_NAMESPACE
-        + "/autogenerationoption", supportedClass = AutoGenerationOption.class, supportedOpenmrsVersions = {"1.9.* - 9.9.*"})
-public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource<AutoGenerationOption> {
+@Resource(
+    name = RestConstants.VERSION_1 + IdgenRestController.IDGEN_NAMESPACE + "/autogenerationoption",
+    supportedClass = AutoGenerationOption.class,
+    supportedOpenmrsVersions = {"1.9.* - 9.9.*"})
+public class AutoGenerationOptionResource
+    extends MetadataDelegatingCrudResource<AutoGenerationOption> {
 
   @Override
   public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
@@ -83,8 +84,11 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
 
   @PropertyGetter("display")
   public String getDisplayString(AutoGenerationOption autoGenerationOption) {
-    return autoGenerationOption.getIdentifierType() + " - " + autoGenerationOption.getSource() + " - "
-            + autoGenerationOption.getLocation();
+    return autoGenerationOption.getIdentifierType()
+        + " - "
+        + autoGenerationOption.getSource()
+        + " - "
+        + autoGenerationOption.getLocation();
   }
 
   @Override
@@ -106,7 +110,8 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
   }
 
   @Override
-  public SimpleObject create(SimpleObject postBody, RequestContext context) throws ResponseException {
+  public SimpleObject create(SimpleObject postBody, RequestContext context)
+      throws ResponseException {
     Object manualEntryEnabled = postBody.get("manualEntryEnabled");
     Object automaticallyEnabled = postBody.get("automaticGenerationEnabled");
     Object sourceUuid = postBody.get("source");
@@ -118,7 +123,8 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
     if (sourceUuid == null || StringUtils.isBlank(sourceUuid.toString())) {
       errors.add("source");
     } else {
-      identifierSource = Context.getService(IdentifierSourceService.class)
+      identifierSource =
+          Context.getService(IdentifierSourceService.class)
               .getIdentifierSourceByUuid(sourceUuid.toString());
       if (identifierSource == null) {
         errors.add("source");
@@ -127,15 +133,15 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
     if (identifierTypeUuid == null || StringUtils.isBlank(identifierTypeUuid.toString())) {
       errors.add("identifierType");
     } else {
-      patientIdentifierType = Context.getPatientService()
-              .getPatientIdentifierTypeByUuid(identifierTypeUuid.toString());
+      patientIdentifierType =
+          Context.getPatientService().getPatientIdentifierTypeByUuid(identifierTypeUuid.toString());
       if (patientIdentifierType == null) {
         errors.add("identifierType");
       }
     }
     if (errors.size() > 0) {
       throw new ValidationException(
-              "The values of the following inputs are missing or invalid : " + errors.toString());
+          "The values of the following inputs are missing or invalid : " + errors.toString());
     }
     Location location = null;
     if (locationUuid != null && StringUtils.isNotBlank(locationUuid.toString())) {
@@ -147,13 +153,15 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
     autoGenerationOption.setManualEntryEnabled(this.parseBoolean(manualEntryEnabled));
     autoGenerationOption.setAutomaticGenerationEnabled(this.parseBoolean(automaticallyEnabled));
     autoGenerationOption.setLocation(location);
-    return (SimpleObject) ConversionUtil.convertToRepresentation(save(autoGenerationOption), Representation.FULL);
+    return (SimpleObject)
+        ConversionUtil.convertToRepresentation(save(autoGenerationOption), Representation.FULL);
   }
 
   @Override
-  public SimpleObject update(String uuid, SimpleObject postBody, RequestContext context) throws ResponseException {
-    AutoGenerationOption autoGenerationOption = Context.getService(IdentifierSourceService.class)
-            .getAutoGenerationOptionByUuid(uuid);
+  public SimpleObject update(String uuid, SimpleObject postBody, RequestContext context)
+      throws ResponseException {
+    AutoGenerationOption autoGenerationOption =
+        Context.getService(IdentifierSourceService.class).getAutoGenerationOptionByUuid(uuid);
     if (autoGenerationOption == null) {
       throw new ObjectNotFoundException();
     }
@@ -163,23 +171,27 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
     Object locationUuid = postBody.get("location");
     IdentifierSource identifierSource = null;
     if (sourceUuid != null && StringUtils.isNotBlank(sourceUuid.toString())) {
-      identifierSource = Context.getService(IdentifierSourceService.class)
+      identifierSource =
+          Context.getService(IdentifierSourceService.class)
               .getIdentifierSourceByUuid(sourceUuid.toString());
     }
     Location location = null;
     if (locationUuid != null && StringUtils.isNotBlank(locationUuid.toString())) {
       location = Context.getLocationService().getLocationByUuid(locationUuid.toString());
     }
-    if (location == null && identifierSource == null && automaticGenerationEnabled == null
-            && manualEntryEnabled == null) {
+    if (location == null
+        && identifierSource == null
+        && automaticGenerationEnabled == null
+        && manualEntryEnabled == null) {
       throw new ResourceDoesNotSupportOperationException(
-              "You must provide at least a location, or a source, or an automaticGenerationEnabled, or a manualEntryEnabled parameter  to update an autoGenerationOption");
+          "You must provide at least a location, or a source, or an automaticGenerationEnabled, or a manualEntryEnabled parameter  to update an autoGenerationOption");
     }
     if (manualEntryEnabled != null) {
       autoGenerationOption.setManualEntryEnabled(this.parseBoolean(manualEntryEnabled));
     }
     if (automaticGenerationEnabled != null) {
-      autoGenerationOption.setAutomaticGenerationEnabled(this.parseBoolean(automaticGenerationEnabled));
+      autoGenerationOption.setAutomaticGenerationEnabled(
+          this.parseBoolean(automaticGenerationEnabled));
     }
     if (identifierSource != null) {
       autoGenerationOption.setSource(identifierSource);
@@ -187,7 +199,8 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
     if (location != null) {
       autoGenerationOption.setLocation(location);
     }
-    return (SimpleObject) ConversionUtil.convertToRepresentation(save(autoGenerationOption), Representation.REF);
+    return (SimpleObject)
+        ConversionUtil.convertToRepresentation(save(autoGenerationOption), Representation.REF);
   }
 
   @Override
@@ -197,29 +210,36 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
 
   @Override
   public AutoGenerationOption save(AutoGenerationOption autoGenerationOption) {
-    return Context.getService(IdentifierSourceService.class).saveAutoGenerationOption(autoGenerationOption);
+    return Context.getService(IdentifierSourceService.class)
+        .saveAutoGenerationOption(autoGenerationOption);
   }
 
   @Override
   public AutoGenerationOption getByUniqueId(String uniqueId) {
-    return Context.getService(IdentifierSourceService.class).getAutoGenerationOptionByUuid(uniqueId);
+    return Context.getService(IdentifierSourceService.class)
+        .getAutoGenerationOptionByUuid(uniqueId);
   }
 
   @Override
-  public void purge(AutoGenerationOption delegate, RequestContext context) throws ResponseException {
+  public void purge(AutoGenerationOption delegate, RequestContext context)
+      throws ResponseException {
     Context.getService(IdentifierSourceService.class).purgeAutoGenerationOption(delegate);
   }
 
   @Override
-  public void delete(AutoGenerationOption delegate, String id, RequestContext context) throws ResponseException {
-    throw new ResourceDoesNotSupportOperationException("Deleting of AutoGenerationOption is not supported");
+  public void delete(AutoGenerationOption delegate, String id, RequestContext context)
+      throws ResponseException {
+    throw new ResourceDoesNotSupportOperationException(
+        "Deleting of AutoGenerationOption is not supported");
   }
 
   @Override
   protected PageableResult doGetAll(RequestContext context) throws ResponseException {
     List<AutoGenerationOption> autoGenerationOptionList = new ArrayList<AutoGenerationOption>();
-    for (PatientIdentifierType patientIdentifierType : Context.getPatientService().getAllPatientIdentifierTypes()) {
-      List<AutoGenerationOption> autoGenerationOptions = Context.getService(IdentifierSourceService.class)
+    for (PatientIdentifierType patientIdentifierType :
+        Context.getPatientService().getAllPatientIdentifierTypes()) {
+      List<AutoGenerationOption> autoGenerationOptions =
+          Context.getService(IdentifierSourceService.class)
               .getAutoGenerationOptions(patientIdentifierType);
       if (autoGenerationOptions != null && autoGenerationOptions.size() > 0) {
         autoGenerationOptionList.addAll(autoGenerationOptions);
@@ -245,22 +265,19 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
     ModelImpl model = ((ModelImpl) super.getGETModel(rep));
 
     if (rep instanceof RefRepresentation) {
-      model
-          .property("uuid", new StringProperty())
-          .property("display", new StringProperty());
+      model.property("uuid", new StringProperty()).property("display", new StringProperty());
     }
     if (!(rep instanceof RefRepresentation)) {
       model
           .property("uuid", new StringProperty())
-              .property("identifierType", new RefProperty("#/definitions/PatientidentifiertypeGet"))
-              .property("location", new RefProperty("#/definitions/LocationGet"))
-              .property("source", new RefProperty("#/definitions/IdgenIdentifiersourceGet"))
-              .property("manualEntryEnabled", new BooleanProperty())
-              .property("automaticGenerationEnabled", new BooleanProperty());
+          .property("identifierType", new RefProperty("#/definitions/PatientidentifiertypeGet"))
+          .property("location", new RefProperty("#/definitions/LocationGet"))
+          .property("source", new RefProperty("#/definitions/IdgenIdentifiersourceGet"))
+          .property("manualEntryEnabled", new BooleanProperty())
+          .property("automaticGenerationEnabled", new BooleanProperty());
     }
     if (rep instanceof DefaultRepresentation) {
-      model
-          .property("full", new StringProperty());
+      model.property("full", new StringProperty());
     }
     return model;
   }
@@ -270,17 +287,17 @@ public class AutoGenerationOptionResource extends MetadataDelegatingCrudResource
     return new ModelImpl()
         .property("identifierType", new RefProperty("#/definitions/PatientidentifiertypeGet"))
         .property("location", new RefProperty("#/definitions/LocationGet"))
-            .property("source", new RefProperty("#/definitions/IdgenIdentifiersourceGet"))
-            .property("manualEntryEnabled", new BooleanProperty())
-            .property("automaticGenerationEnabled", new BooleanProperty());
+        .property("source", new RefProperty("#/definitions/IdgenIdentifiersourceGet"))
+        .property("manualEntryEnabled", new BooleanProperty())
+        .property("automaticGenerationEnabled", new BooleanProperty());
   }
 
   @Override
   public Model getUPDATEModel(Representation rep) {
     return new ModelImpl()
         .property("location", new RefProperty("#/definitions/LocationGet"))
-            .property("source", new RefProperty("#/definitions/IdgenIdentifiersourceGet"))
-            .property("manualEntryEnabled", new BooleanProperty())
-            .property("automaticGenerationEnabled", new BooleanProperty());
+        .property("source", new RefProperty("#/definitions/IdgenIdentifiersourceGet"))
+        .property("manualEntryEnabled", new BooleanProperty())
+        .property("automaticGenerationEnabled", new BooleanProperty());
   }
 }

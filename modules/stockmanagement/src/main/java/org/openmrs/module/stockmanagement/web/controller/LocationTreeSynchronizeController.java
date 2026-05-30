@@ -1,5 +1,7 @@
 package org.openmrs.module.stockmanagement.web.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.tasks.LocationTreeSynchronize;
@@ -9,11 +11,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 @Controller("stockmanagement.LocationTreeSynchronizeController")
-@RequestMapping("/rest/" + RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/locationtreesynchronize")
+@RequestMapping(
+    "/rest/"
+        + RestConstants.VERSION_1
+        + "/"
+        + ModuleConstants.MODULE_ID
+        + "/locationtreesynchronize")
 public class LocationTreeSynchronizeController {
 
   @RequestMapping(method = RequestMethod.POST)
@@ -21,14 +25,19 @@ public class LocationTreeSynchronizeController {
     boolean authenticated = Context.isAuthenticated();
     if (!authenticated) {
       response.setContentType("text/plain");
-      response.getOutputStream().print(
-          Context.getMessageSourceService().getMessage("stockmanagement.stockoperation.authrequired"));
+      response
+          .getOutputStream()
+          .print(
+              Context.getMessageSourceService()
+                  .getMessage("stockmanagement.stockoperation.authrequired"));
       return;
     }
 
     if (!Context.hasPrivilege(PrivilegeConstants.MANAGE_LOCATIONS)) {
       response.setContentType("text/plain");
-      response.getOutputStream().print(Context.getMessageSourceService().getMessage("stockmanagement.notauthorised"));
+      response
+          .getOutputStream()
+          .print(Context.getMessageSourceService().getMessage("stockmanagement.notauthorised"));
       return;
     }
 

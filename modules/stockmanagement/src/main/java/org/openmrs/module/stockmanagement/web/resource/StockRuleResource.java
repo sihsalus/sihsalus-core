@@ -4,6 +4,8 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
 import io.swagger.models.properties.StringProperty;
+import java.math.BigDecimal;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
@@ -15,20 +17,20 @@ import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.math.BigDecimal;
-import java.util.*;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockrule", supportedClass = StockRuleDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockrule",
+    supportedClass = StockRuleDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockRuleResource extends ResourceBase<StockRuleDTO> {
 
   private HashSet<PrivilegeScope> privilegeScopes = null;
@@ -42,7 +44,8 @@ public class StockRuleResource extends ResourceBase<StockRuleDTO> {
   }
 
   @Override
-  protected void delete(StockRuleDTO delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(StockRuleDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     if (reason != null && reason.length() > 250) {
       throw new IllegalRequestException("Parameter reason can not exceed 250 characters");
     }
@@ -58,7 +61,8 @@ public class StockRuleResource extends ResourceBase<StockRuleDTO> {
         stockRulesToDelete.add(id);
       }
     }
-    getStockManagementService().voidStockRules(stockRulesToDelete, reason, Context.getAuthenticatedUser().getId());
+    getStockManagementService()
+        .voidStockRules(stockRulesToDelete, reason, Context.getAuthenticatedUser().getId());
   }
 
   @Override
@@ -112,7 +116,8 @@ public class StockRuleResource extends ResourceBase<StockRuleDTO> {
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addProperty("stockItemUuid");
     description.addProperty("name");
@@ -171,7 +176,6 @@ public class StockRuleResource extends ResourceBase<StockRuleDTO> {
       description.addProperty("creatorFamilyName");
       description.addProperty("enableDescendants");
       description.addProperty("nextActionDate");
-
     }
 
     if (rep instanceof DefaultRepresentation) {
@@ -222,11 +226,20 @@ public class StockRuleResource extends ResourceBase<StockRuleDTO> {
     SimpleObject simpleObject = new SimpleObject();
     simpleObject.add("canView", true);
 
-    if(privilegeScopes == null){
-      privilegeScopes  = getStockManagementService().getPrivilegeScopes(Context.getAuthenticatedUser(), null, null, Arrays.asList(Privileges.TASK_STOCKMANAGEMENT_STOCKITEMS_MUTATE));
+    if (privilegeScopes == null) {
+      privilegeScopes =
+          getStockManagementService()
+              .getPrivilegeScopes(
+                  Context.getAuthenticatedUser(),
+                  null,
+                  null,
+                  Arrays.asList(Privileges.TASK_STOCKMANAGEMENT_STOCKITEMS_MUTATE));
     }
 
-    boolean canEdit = !stockRuleDTO.getVoided() && privilegeScopes.stream().anyMatch(p-> stockRuleDTO.getLocationUuid().equals(p.getLocationUuid()));
+    boolean canEdit =
+        !stockRuleDTO.getVoided()
+            && privilegeScopes.stream()
+                .anyMatch(p -> stockRuleDTO.getLocationUuid().equals(p.getLocationUuid()));
     simpleObject.add("canEdit", canEdit);
     return simpleObject;
   }
@@ -235,18 +248,30 @@ public class StockRuleResource extends ResourceBase<StockRuleDTO> {
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("stockItemUuid", new StringProperty())
-              .property("name", new StringProperty()).property("description", new StringProperty())
-              .property("locationUuid", new StringProperty()).property("locationName", new StringProperty())
-              .property("quantity", new DecimalProperty()).property("stockItemPackagingUOMUuid", new StringProperty())
-              .property("packagingUomName", new StringProperty()).property("enabled", new BooleanProperty())
-              .property("evaluationFrequency", new LongProperty()).property("lastEvaluation", new DateTimeProperty())
-              .property("nextEvaluation", new DateTimeProperty()).property("actionFrequency", new LongProperty())
-              .property("lastActionDate", new DateTimeProperty()).property("alertRole", new StringProperty())
-              .property("mailRole", new StringProperty()).property("creator", new IntegerProperty())
-              .property("dateCreated", new DateTimeProperty()).property("creatorGivenName", new StringProperty())
-              .property("creatorFamilyName", new StringProperty()).property("nextActionDate", new DateTimeProperty())
-              .property("enableDescendants", new BooleanProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("stockItemUuid", new StringProperty())
+          .property("name", new StringProperty())
+          .property("description", new StringProperty())
+          .property("locationUuid", new StringProperty())
+          .property("locationName", new StringProperty())
+          .property("quantity", new DecimalProperty())
+          .property("stockItemPackagingUOMUuid", new StringProperty())
+          .property("packagingUomName", new StringProperty())
+          .property("enabled", new BooleanProperty())
+          .property("evaluationFrequency", new LongProperty())
+          .property("lastEvaluation", new DateTimeProperty())
+          .property("nextEvaluation", new DateTimeProperty())
+          .property("actionFrequency", new LongProperty())
+          .property("lastActionDate", new DateTimeProperty())
+          .property("alertRole", new StringProperty())
+          .property("mailRole", new StringProperty())
+          .property("creator", new IntegerProperty())
+          .property("dateCreated", new DateTimeProperty())
+          .property("creatorGivenName", new StringProperty())
+          .property("creatorFamilyName", new StringProperty())
+          .property("nextActionDate", new DateTimeProperty())
+          .property("enableDescendants", new BooleanProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -258,5 +283,4 @@ public class StockRuleResource extends ResourceBase<StockRuleDTO> {
 
     return modelImpl;
   }
-
 }

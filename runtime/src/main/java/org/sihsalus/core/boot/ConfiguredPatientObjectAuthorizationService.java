@@ -10,10 +10,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component(PatientObjectAuthorizationService.BEAN_NAME)
-final class ConfiguredPatientObjectAuthorizationService implements PatientObjectAuthorizationService {
+final class ConfiguredPatientObjectAuthorizationService
+    implements PatientObjectAuthorizationService {
 
-  static final String DENIED_PATIENT_UUIDS_PROPERTY =
-      "sihsalus.authorization.patient.deniedUuids";
+  static final String DENIED_PATIENT_UUIDS_PROPERTY = "sihsalus.authorization.patient.deniedUuids";
 
   private final JdbcTemplate jdbcTemplate;
 

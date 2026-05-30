@@ -9,16 +9,19 @@ import org.openmrs.module.stockmanagement.api.dto.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/party", supportedClass = PartyDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/party",
+    supportedClass = PartyDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class PartyResource extends ResourceBase<PartyDTO> {
 
   @Override
@@ -27,7 +30,8 @@ public class PartyResource extends ResourceBase<PartyDTO> {
   }
 
   @Override
-  protected void delete(PartyDTO delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(PartyDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -88,9 +92,13 @@ public class PartyResource extends ResourceBase<PartyDTO> {
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("name", new StringProperty())
-              .property("acronym", new StringProperty()).property("locationUuid", new StringProperty())
-              .property("stockSourceUuid", new StringProperty()).property("tags", new ArrayProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("name", new StringProperty())
+          .property("acronym", new StringProperty())
+          .property("locationUuid", new StringProperty())
+          .property("stockSourceUuid", new StringProperty())
+          .property("tags", new ArrayProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -102,5 +110,4 @@ public class PartyResource extends ResourceBase<PartyDTO> {
 
     return modelImpl;
   }
-
 }

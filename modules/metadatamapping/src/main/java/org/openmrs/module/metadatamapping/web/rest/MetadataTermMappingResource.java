@@ -1,19 +1,17 @@
 package org.openmrs.module.metadatamapping.web.rest;
 
-import java.util.Collections;
-import java.util.List;
-
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.metadatamapping.MetadataSource;
 import org.openmrs.module.metadatamapping.MetadataTermMapping;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
-import org.openmrs.module.metadatamapping.api.MetadataTermMappingSearchCriteria;
 import org.openmrs.module.metadatamapping.api.MetadataTermMappingSearchCriteriaBuilder;
 import org.openmrs.module.metadatamapping.web.controller.MetadataMappingRestController;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -30,8 +28,15 @@ import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingC
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + MetadataMappingRestController.METADATA_MAPPING_REST_NAMESPACE + "/termmapping", supportedClass = MetadataTermMapping.class, supportedOpenmrsVersions = { "1.9.* - 9.*" })
-public class MetadataTermMappingResource extends MetadataDelegatingCrudResource<MetadataTermMapping> {
+@Resource(
+    name =
+        RestConstants.VERSION_1
+            + MetadataMappingRestController.METADATA_MAPPING_REST_NAMESPACE
+            + "/termmapping",
+    supportedClass = MetadataTermMapping.class,
+    supportedOpenmrsVersions = {"1.9.* - 9.*"})
+public class MetadataTermMappingResource
+    extends MetadataDelegatingCrudResource<MetadataTermMapping> {
 
   public static final String PARAM_TERM_CODE = "code";
 
@@ -56,7 +61,8 @@ public class MetadataTermMappingResource extends MetadataDelegatingCrudResource<
   }
 
   @Override
-  public Object create(SimpleObject propertiesToCreate, RequestContext context) throws ResponseException {
+  public Object create(SimpleObject propertiesToCreate, RequestContext context)
+      throws ResponseException {
     return super.create(propertiesToCreate, context);
   }
 
@@ -118,7 +124,8 @@ public class MetadataTermMappingResource extends MetadataDelegatingCrudResource<
   }
 
   @Override
-  public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
 
     description.addProperty("code");
@@ -140,7 +147,8 @@ public class MetadataTermMappingResource extends MetadataDelegatingCrudResource<
       model.property("description", new StringProperty());
       model.property("retired", new BooleanProperty());
 
-      model.property("metadataSource", new RefProperty("#/definitions/MetadatamappingSourceGetRef"));
+      model.property(
+          "metadataSource", new RefProperty("#/definitions/MetadatamappingSourceGetRef"));
       model.property("code", new StringProperty());
       model.property("metadataClass", new StringProperty());
       model.property("metadataUuid", new StringProperty());
@@ -182,7 +190,8 @@ public class MetadataTermMappingResource extends MetadataDelegatingCrudResource<
   }
 
   private PageableResult getPageableResult(RequestContext context) {
-    MetadataTermMappingSearchCriteriaBuilder searchCriteriaBuilder = new MetadataTermMappingSearchCriteriaBuilder();
+    MetadataTermMappingSearchCriteriaBuilder searchCriteriaBuilder =
+        new MetadataTermMappingSearchCriteriaBuilder();
 
     if (context.getIncludeAll()) {
       searchCriteriaBuilder.setIncludeAll(true);
@@ -190,14 +199,16 @@ public class MetadataTermMappingResource extends MetadataDelegatingCrudResource<
 
     String metadataSourceNameOrUuid = context.getParameter(PARAM_SOURCE_NAME_OR_UUID);
     if (StringUtils.isNotBlank(metadataSourceNameOrUuid)) {
-      MetadataSource metadataSource = getService().getMetadataSourceByUuid(metadataSourceNameOrUuid);
+      MetadataSource metadataSource =
+          getService().getMetadataSourceByUuid(metadataSourceNameOrUuid);
       if (metadataSource == null) {
         metadataSource = getService().getMetadataSourceByName(metadataSourceNameOrUuid);
       }
 
       if (metadataSource == null) {
         // NOTE: Short circuit to empty search result when given metadata source does not exist.
-        return new AlreadyPaged<MetadataTermMapping>(context, Collections.<MetadataTermMapping> emptyList(), false);
+        return new AlreadyPaged<MetadataTermMapping>(
+            context, Collections.<MetadataTermMapping>emptyList(), false);
       } else {
         searchCriteriaBuilder.setMetadataSource(metadataSource);
       }
@@ -244,7 +255,8 @@ public class MetadataTermMappingResource extends MetadataDelegatingCrudResource<
     boolean hasMore = false;
     searchCriteriaBuilder.setFirstResult(firstResult).setMaxResults(maxResults + 1);
 
-    List<MetadataTermMapping> metadataTermMappings = getService().getMetadataTermMappings(searchCriteriaBuilder.build());
+    List<MetadataTermMapping> metadataTermMappings =
+        getService().getMetadataTermMappings(searchCriteriaBuilder.build());
     if (metadataTermMappings.size() > maxResults) {
       hasMore = true;
       metadataTermMappings = metadataTermMappings.subList(0, maxResults);

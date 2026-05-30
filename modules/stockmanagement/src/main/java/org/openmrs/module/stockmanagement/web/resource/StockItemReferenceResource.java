@@ -3,6 +3,8 @@ package org.openmrs.module.stockmanagement.web.resource;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.StringProperty;
+import java.util.ArrayList;
+import java.util.List;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
@@ -21,10 +23,10 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockitemreference", supportedClass = StockItemReferenceDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockitemreference",
+    supportedClass = StockItemReferenceDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockItemReferenceResource extends ResourceBase<StockItemReferenceDTO> {
 
   @Override
@@ -33,20 +35,23 @@ public class StockItemReferenceResource extends ResourceBase<StockItemReferenceD
   }
 
   @Override
-  protected void delete(StockItemReferenceDTO delegate, String reason, RequestContext context) throws ResponseException {
-    getStockManagementService().voidStockItemReference(delegate.getUuid(), reason,
-        Context.getAuthenticatedUser().getUserId());
+  protected void delete(StockItemReferenceDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
+    getStockManagementService()
+        .voidStockItemReference(
+            delegate.getUuid(), reason, Context.getAuthenticatedUser().getUserId());
   }
 
   @Override
-    protected PageableResult doSearch(RequestContext context) {
-        String param = context.getParameter("stockItemUuid");
-        List<StockItemReferenceDTO> stockItemReferenceDTOS = new ArrayList<>();
-        for (StockItemReference stockItemReference : getStockManagementService().getStockItemReferenceByStockItem(param)) {
-            stockItemReferenceDTOS.add(convertToDTO(stockItemReference));
-        }
-        return toAlreadyPaged(stockItemReferenceDTOS, context);
+  protected PageableResult doSearch(RequestContext context) {
+    String param = context.getParameter("stockItemUuid");
+    List<StockItemReferenceDTO> stockItemReferenceDTOS = new ArrayList<>();
+    for (StockItemReference stockItemReference :
+        getStockManagementService().getStockItemReferenceByStockItem(param)) {
+      stockItemReferenceDTOS.add(convertToDTO(stockItemReference));
     }
+    return toAlreadyPaged(stockItemReferenceDTOS, context);
+  }
 
   @Override
   protected PageableResult doGetAll(RequestContext context) throws ResponseException {
@@ -60,17 +65,20 @@ public class StockItemReferenceResource extends ResourceBase<StockItemReferenceD
 
   @Override
   public StockItemReferenceDTO save(StockItemReferenceDTO delegate) {
-    StockItemReference stockItemReference = getStockManagementService().saveStockItemReference(convertFromDTO(delegate));
+    StockItemReference stockItemReference =
+        getStockManagementService().saveStockItemReference(convertFromDTO(delegate));
     return getByUniqueId(stockItemReference.getUuid());
   }
 
   @Override
-  public void purge(StockItemReferenceDTO delegate, RequestContext context) throws ResponseException {
+  public void purge(StockItemReferenceDTO delegate, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addProperty("referenceCode");
     description.addProperty("stockSourceUuid");
@@ -97,7 +105,6 @@ public class StockItemReferenceResource extends ResourceBase<StockItemReferenceD
       description.addProperty("stockSourceUuid");
       description.addProperty("stockSourceName");
       description.addProperty("stockItemUuid");
-
     }
 
     if (rep instanceof DefaultRepresentation) {
@@ -134,20 +141,24 @@ public class StockItemReferenceResource extends ResourceBase<StockItemReferenceD
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("referenceCode", new StringProperty())
-              .property("stockSourceUuid", new StringProperty()).property("stockSourceName", new StringProperty())
-              .property("stockItemUuid", new StringProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("referenceCode", new StringProperty())
+          .property("stockSourceUuid", new StringProperty())
+          .property("stockSourceName", new StringProperty())
+          .property("stockItemUuid", new StringProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
-    if (rep instanceof FullRepresentation) {
-
-    }
+    if (rep instanceof FullRepresentation) {}
 
     if (rep instanceof RefRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("referenceCode", new StringProperty())
-              .property("stockSourceUuid", new StringProperty()).property("stockSourceName", new StringProperty())
-              .property("stockItemUuid", new StringProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("referenceCode", new StringProperty())
+          .property("stockSourceUuid", new StringProperty())
+          .property("stockSourceName", new StringProperty())
+          .property("stockItemUuid", new StringProperty());
     }
 
     return modelImpl;
@@ -172,19 +183,22 @@ public class StockItemReferenceResource extends ResourceBase<StockItemReferenceD
   }
 
   public StockItemReference convertFromDTO(StockItemReferenceDTO dto) {
-    StockManagementService stockManagementService = Context.getService(StockManagementService.class);
+    StockManagementService stockManagementService =
+        Context.getService(StockManagementService.class);
     if (dto != null) {
-      StockItemReference stockItemReference = stockManagementService.getStockItemReferenceByUuid(dto.getUuid());
+      StockItemReference stockItemReference =
+          stockManagementService.getStockItemReferenceByUuid(dto.getUuid());
       if (stockItemReference == null) {
         stockItemReference = new StockItemReference();
       }
-      stockItemReference.setReferenceSource(stockManagementService.getStockSourceByUuid(dto.getStockSourceUuid()));
-      stockItemReference.setStockItem(stockManagementService.getStockItemByUuid(dto.getStockItemUuid()));
+      stockItemReference.setReferenceSource(
+          stockManagementService.getStockSourceByUuid(dto.getStockSourceUuid()));
+      stockItemReference.setStockItem(
+          stockManagementService.getStockItemByUuid(dto.getStockItemUuid()));
       stockItemReference.setStockReferenceCode(dto.getReferenceCode());
       return stockItemReference;
     } else {
       return null;
     }
   }
-
 }

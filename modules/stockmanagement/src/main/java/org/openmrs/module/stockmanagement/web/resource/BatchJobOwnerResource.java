@@ -18,7 +18,10 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/batchjobowner", supportedClass = BatchJobOwnerDTO.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/batchjobowner",
+    supportedClass = BatchJobOwnerDTO.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class BatchJobOwnerResource extends ResourceBase<BatchJobOwnerDTO> {
 
   @Override
@@ -27,7 +30,8 @@ public class BatchJobOwnerResource extends ResourceBase<BatchJobOwnerDTO> {
   }
 
   @Override
-  protected void delete(BatchJobOwnerDTO delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(BatchJobOwnerDTO delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -66,7 +70,6 @@ public class BatchJobOwnerResource extends ResourceBase<BatchJobOwnerDTO> {
       description.addProperty("dateCreated");
       description.addProperty("uuid");
       description.addProperty("batchJobUuid");
-
     }
 
     if (rep instanceof DefaultRepresentation) {
@@ -79,9 +82,7 @@ public class BatchJobOwnerResource extends ResourceBase<BatchJobOwnerDTO> {
       description.addSelfLink();
     }
 
-    if (rep instanceof RefRepresentation) {
-
-    }
+    if (rep instanceof RefRepresentation) {}
 
     return description;
   }
@@ -90,9 +91,13 @@ public class BatchJobOwnerResource extends ResourceBase<BatchJobOwnerDTO> {
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("ownerUserUuid", new StringProperty()).property("ownerGivenName", new StringProperty())
-              .property("ownerFamilyName", new StringProperty()).property("uuid", new StringProperty())
-              .property("batchJobUuid", new StringProperty()).property("dateCreated", new DateTimeProperty());
+      modelImpl
+          .property("ownerUserUuid", new StringProperty())
+          .property("ownerGivenName", new StringProperty())
+          .property("ownerFamilyName", new StringProperty())
+          .property("uuid", new StringProperty())
+          .property("batchJobUuid", new StringProperty())
+          .property("dateCreated", new DateTimeProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -102,5 +107,4 @@ public class BatchJobOwnerResource extends ResourceBase<BatchJobOwnerDTO> {
 
     return modelImpl;
   }
-
 }

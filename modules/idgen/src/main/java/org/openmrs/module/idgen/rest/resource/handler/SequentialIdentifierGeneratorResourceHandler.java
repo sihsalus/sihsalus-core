@@ -1,8 +1,12 @@
 package org.openmrs.module.idgen.rest.resource.handler;
 
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.LongProperty;
+import io.swagger.models.properties.StringProperty;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
@@ -22,15 +26,12 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubclassH
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.LongProperty;
-import io.swagger.models.properties.StringProperty;
-
-@SubClassHandler(supportedClass = SequentialIdentifierGenerator.class, supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
-public class SequentialIdentifierGeneratorResourceHandler extends BaseDelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGenerator>
-implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGenerator> {
+@SubClassHandler(
+    supportedClass = SequentialIdentifierGenerator.class,
+    supportedOpenmrsVersions = {"1.8.* - 9.9.*"})
+public class SequentialIdentifierGeneratorResourceHandler
+    extends BaseDelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGenerator>
+    implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGenerator> {
 
   @Override
   public String getResourceVersion() {
@@ -62,7 +63,7 @@ implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGener
       representationDescription.addProperty("firstIdentifierBase");
       representationDescription.addProperty("minLength");
       representationDescription.addProperty("maxLength");
-                representationDescription.addProperty("identifierType", Representation.DEFAULT);
+      representationDescription.addProperty("identifierType", Representation.DEFAULT);
       representationDescription.addSelfLink();
       return representationDescription;
     }
@@ -77,7 +78,7 @@ implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGener
       representationDescription.addProperty("firstIdentifierBase");
       representationDescription.addProperty("minLength");
       representationDescription.addProperty("maxLength");
-                representationDescription.addProperty("identifierType", Representation.FULL);
+      representationDescription.addProperty("identifierType", Representation.FULL);
       representationDescription.addSelfLink();
       return representationDescription;
     }
@@ -85,7 +86,7 @@ implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGener
       representationDescription.addProperty("uuid");
       representationDescription.addProperty("display");
       representationDescription.addProperty("baseCharacterSet");
-                representationDescription.addProperty("identifierType", Representation.REF);
+      representationDescription.addProperty("identifierType", Representation.REF);
       representationDescription.addSelfLink();
       return representationDescription;
     }
@@ -94,7 +95,8 @@ implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGener
   }
 
   @Override
-  public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getCreatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
     representationDescription.addProperty("nextSequenceValue");
     representationDescription.addProperty("baseCharacterSet");
@@ -107,7 +109,8 @@ implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGener
   }
 
   @Override
-  public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
+  public DelegatingResourceDescription getUpdatableProperties()
+      throws ResourceDoesNotSupportOperationException {
     DelegatingResourceDescription representationDescription = new DelegatingResourceDescription();
     representationDescription.addProperty("nextSequenceValue");
     representationDescription.addProperty("baseCharacterSet");
@@ -125,12 +128,15 @@ implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGener
   }
 
   @Override
-  public PageableResult getAllByType(RequestContext context) throws ResourceDoesNotSupportOperationException {
-    List<IdentifierSource> identifierSources = Context.getService(IdentifierSourceService.class).getAllIdentifierSources(false);
+  public PageableResult getAllByType(RequestContext context)
+      throws ResourceDoesNotSupportOperationException {
+    List<IdentifierSource> identifierSources =
+        Context.getService(IdentifierSourceService.class).getAllIdentifierSources(false);
     if (identifierSources == null) {
       return null;
     }
-    List<SequentialIdentifierGenerator> sequentialGenerators = new ArrayList<SequentialIdentifierGenerator>();
+    List<SequentialIdentifierGenerator> sequentialGenerators =
+        new ArrayList<SequentialIdentifierGenerator>();
     for (IdentifierSource src : identifierSources) {
       if (src instanceof SequentialIdentifierGenerator) {
         sequentialGenerators.add((SequentialIdentifierGenerator) src);
@@ -144,20 +150,18 @@ implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGener
     ModelImpl model = new ModelImpl();
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
       model
-        .property("baseCharacterSet", new StringProperty())
-        .property("prefix", new StringProperty())
-        .property("suffix", new StringProperty())
-        .property("firstIdentifierBase", new StringProperty())
-        .property("minLength", new IntegerProperty())
-        .property("maxLength", new IntegerProperty());
+          .property("baseCharacterSet", new StringProperty())
+          .property("prefix", new StringProperty())
+          .property("suffix", new StringProperty())
+          .property("firstIdentifierBase", new StringProperty())
+          .property("minLength", new IntegerProperty())
+          .property("maxLength", new IntegerProperty());
     }
     if (rep instanceof FullRepresentation) {
-      model
-        .property("nextSequenceValue", new LongProperty());
+      model.property("nextSequenceValue", new LongProperty());
     }
     if (rep instanceof RefRepresentation) {
-      model
-        .property("baseCharacterSet", new StringProperty());
+      model.property("baseCharacterSet", new StringProperty());
     }
     return model;
   }
@@ -175,11 +179,11 @@ implements DelegatingSubclassHandler<IdentifierSource, SequentialIdentifierGener
   }
 
   @PropertyGetter("display")
-    public String getDisplayString(SequentialIdentifierGenerator identifierSource) {
-        return identifierSource.getIdentifierType() + " - "
-                + identifierSource.getName() + " - "
-                + identifierSource.getClass().getName();
-    }
-
-
+  public String getDisplayString(SequentialIdentifierGenerator identifierSource) {
+    return identifierSource.getIdentifierType()
+        + " - "
+        + identifierSource.getName()
+        + " - "
+        + identifierSource.getClass().getName();
+  }
 }

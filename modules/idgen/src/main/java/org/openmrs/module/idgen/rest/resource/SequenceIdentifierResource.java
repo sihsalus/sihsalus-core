@@ -1,7 +1,6 @@
 package org.openmrs.module.idgen.rest.resource;
 
 import java.util.Arrays;
-
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.Identifier;
 import org.openmrs.module.idgen.IdentifierSource;
@@ -21,8 +20,10 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + IdgenRestController.IDGEN_NAMESPACE
-+ "/nextIdentifier", supportedClass = Identifier.class, supportedOpenmrsVersions = {"1.9.* - 9.9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + IdgenRestController.IDGEN_NAMESPACE + "/nextIdentifier",
+    supportedClass = Identifier.class,
+    supportedOpenmrsVersions = {"1.9.* - 9.9.*"})
 public class SequenceIdentifierResource extends DelegatingCrudResource<Identifier> {
 
   @Override
@@ -41,7 +42,8 @@ public class SequenceIdentifierResource extends DelegatingCrudResource<Identifie
   }
 
   @Override
-  protected void delete(Identifier delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(Identifier delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -53,8 +55,11 @@ public class SequenceIdentifierResource extends DelegatingCrudResource<Identifie
   @Override
   protected PageableResult doSearch(RequestContext context) {
     String src = context.getRequest().getParameter("source");
-    IdentifierSource source = Context.getService(IdentifierSourceService.class).getIdentifierSource(Integer.parseInt(src));
-    String identifierValue = Context.getService(IdentifierSourceService.class).generateIdentifier(source, "comment");
+    IdentifierSource source =
+        Context.getService(IdentifierSourceService.class)
+            .getIdentifierSource(Integer.parseInt(src));
+    String identifierValue =
+        Context.getService(IdentifierSourceService.class).generateIdentifier(source, "comment");
     Identifier id = new Identifier();
     id.setIdentifierValue(identifierValue);
     return new NeedsPaging<Identifier>(Arrays.asList(id), context);

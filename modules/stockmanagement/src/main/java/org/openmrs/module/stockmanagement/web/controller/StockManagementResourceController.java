@@ -1,8 +1,8 @@
 package org.openmrs.module.stockmanagement.web.controller;
 
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
-import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 

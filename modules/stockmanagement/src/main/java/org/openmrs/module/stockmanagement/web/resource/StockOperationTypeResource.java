@@ -4,23 +4,25 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
 import io.swagger.models.properties.StringProperty;
+import java.util.List;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.model.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.List;
-
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationtype", supportedClass = StockOperationType.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockoperationtype",
+    supportedClass = StockOperationType.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockOperationTypeResource extends ResourceBase<StockOperationType> {
 
   @Override
@@ -29,7 +31,8 @@ public class StockOperationTypeResource extends ResourceBase<StockOperationType>
   }
 
   @Override
-  protected void delete(StockOperationType delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(StockOperationType delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -40,7 +43,8 @@ public class StockOperationTypeResource extends ResourceBase<StockOperationType>
 
   @Override
   protected PageableResult doGetAll(RequestContext context) throws ResponseException {
-    List<StockOperationType> operationTypes = getStockManagementService().getAllStockOperationTypes();
+    List<StockOperationType> operationTypes =
+        getStockManagementService().getAllStockOperationTypes();
     return toAlreadyPaged(operationTypes, context);
   }
 
@@ -99,26 +103,26 @@ public class StockOperationTypeResource extends ResourceBase<StockOperationType>
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
       modelImpl
-              .property("uuid", new StringProperty())
-              .property("dateCreated", new DateTimeProperty())
-              .property("dateChanged", new DateTimeProperty())
-              .property("name", new StringProperty())
-              .property("description", new StringProperty())
-              .property("operationType", new StringProperty())
-              .property("hasSource", new BooleanProperty())
-              .property("sourceType", new StringProperty())
-              .property("hasDestination", new BooleanProperty())
-              .property("destinationType", new StringProperty())
-              .property("availableWhenReserved", new BooleanProperty())
-              .property("allowExpiredBatchNumbers", new BooleanProperty())
-              .property("stockOperationTypeLocationScopes",
-                  new ArrayProperty(new RefProperty("#/definitions/StockOperationTypeLocationScopeResourceGet")));
+          .property("uuid", new StringProperty())
+          .property("dateCreated", new DateTimeProperty())
+          .property("dateChanged", new DateTimeProperty())
+          .property("name", new StringProperty())
+          .property("description", new StringProperty())
+          .property("operationType", new StringProperty())
+          .property("hasSource", new BooleanProperty())
+          .property("sourceType", new StringProperty())
+          .property("hasDestination", new BooleanProperty())
+          .property("destinationType", new StringProperty())
+          .property("availableWhenReserved", new BooleanProperty())
+          .property("allowExpiredBatchNumbers", new BooleanProperty())
+          .property(
+              "stockOperationTypeLocationScopes",
+              new ArrayProperty(
+                  new RefProperty("#/definitions/StockOperationTypeLocationScopeResourceGet")));
     }
     if (rep instanceof DefaultRepresentation) {}
 
-    if (rep instanceof FullRepresentation) {
-
-    }
+    if (rep instanceof FullRepresentation) {}
 
     if (rep instanceof RefRepresentation) {
       modelImpl.property("uuid", new StringProperty()).property("name", new StringProperty());

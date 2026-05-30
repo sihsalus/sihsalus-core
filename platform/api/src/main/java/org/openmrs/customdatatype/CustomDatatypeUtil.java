@@ -53,7 +53,8 @@ public class CustomDatatypeUtil {
     try {
       Class<?> dtClass = Context.loadClass(datatypeClassname);
       CustomDatatype<?> ret =
-          Context.getDatatypeService().getDatatype(dtClass.asSubclass(CustomDatatype.class), datatypeConfig);
+          Context.getDatatypeService()
+              .getDatatype(dtClass.asSubclass(CustomDatatype.class), datatypeConfig);
       if (ret == null) {
         throw new CustomDatatypeException("Can't find datatype: " + datatypeClassname);
       }
@@ -225,8 +226,7 @@ public class CustomDatatypeUtil {
     Class<? extends CustomDatatype<?>> datatypeClass =
         (Class<? extends CustomDatatype<?>>) datatype.getClass();
     List<Class<? extends CustomDatatypeHandler<?, ?>>> handlerClasses =
-        Context.getDatatypeService()
-            .getHandlerClasses(datatypeClass);
+        Context.getDatatypeService().getHandlerClasses(datatypeClass);
     return handlerClasses.contains(handler.getClass());
   }
 

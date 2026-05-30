@@ -1,22 +1,19 @@
 /**
- * The contents of this file are subject to the OpenMRS Public License
- * Version 1.0 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://license.openmrs.org
+ * The contents of this file are subject to the OpenMRS Public License Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at http://license.openmrs.org
  *
- * Software distributed under the License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- * License for the specific language governing rights and limitations
- * under the License.
+ * <p>Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+ * ANY KIND, either express or implied. See the License for the specific language governing rights
+ * and limitations under the License.
  *
- * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ * <p>Copyright (C) OpenMRS, LLC. All Rights Reserved.
  */
 package org.openmrs.module.imaging.web.controller.ResponseModel;
 
-import org.openmrs.module.imaging.api.study.DicomStudy;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.openmrs.module.imaging.api.study.DicomStudy;
 
 public class DicomStudyResponse {
 
@@ -48,19 +45,21 @@ public class DicomStudyResponse {
     response.setStudyInstanceUID(study.getStudyInstanceUID());
     response.setLinkStatus(study.getLinkStatus());
     response.setComparisonResult(study.getComparisonResult());
-    response.setMrsPatientUuid(study.getMrsPatient() == null ? null : study.getMrsPatient().getUuid());
+    response.setMrsPatientUuid(
+        study.getMrsPatient() == null ? null : study.getMrsPatient().getUuid());
     response.setOrthancStudyUID(study.getOrthancStudyUID());
     response.setPatientName(study.getPatientName());
     response.setStudyDate(study.getStudyDate());
     response.setStudyDescription(study.getStudyDescription());
     response.setGender(study.getGender());
-    response.setOrthancConfiguration(OrthancConfigurationResponse.createResponse(study.getOrthancConfiguration()));
+    response.setOrthancConfiguration(
+        OrthancConfigurationResponse.createResponse(study.getOrthancConfiguration()));
     return response;
   }
 
   public static List<DicomStudyResponse> createResponse(List<DicomStudy> studies) {
-        return studies.stream().map(DicomStudyResponse::createResponse).collect(Collectors.toList());
-    }
+    return studies.stream().map(DicomStudyResponse::createResponse).collect(Collectors.toList());
+  }
 
   public OrthancConfigurationResponse getOrthancConfiguration() {
     return orthancConfiguration;

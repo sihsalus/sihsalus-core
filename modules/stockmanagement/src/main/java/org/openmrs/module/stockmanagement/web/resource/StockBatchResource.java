@@ -11,16 +11,19 @@ import org.openmrs.module.stockmanagement.api.model.*;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockbatch", supportedClass = StockBatch.class, supportedOpenmrsVersions = {"2.0 - 9.*"})
+@Resource(
+    name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockbatch",
+    supportedClass = StockBatch.class,
+    supportedOpenmrsVersions = {"2.0 - 9.*"})
 public class StockBatchResource extends ResourceBase<StockBatch> {
 
   @Override
@@ -29,7 +32,8 @@ public class StockBatchResource extends ResourceBase<StockBatch> {
   }
 
   @Override
-  protected void delete(StockBatch delegate, String reason, RequestContext context) throws ResponseException {
+  protected void delete(StockBatch delegate, String reason, RequestContext context)
+      throws ResponseException {
     throw new ResourceDoesNotSupportOperationException();
   }
 
@@ -59,7 +63,8 @@ public class StockBatchResource extends ResourceBase<StockBatch> {
     param = context.getParameter("excludeEmptyStock");
     if (StringUtils.isNotBlank(param)) {
       boolean excludeEmptyStock = param.equalsIgnoreCase("true") || param.equalsIgnoreCase("1");
-      filter.setExcludeEmptyStock(excludeEmptyStock && StringUtils.isNotBlank(filter.getLocationUuid()));
+      filter.setExcludeEmptyStock(
+          excludeEmptyStock && StringUtils.isNotBlank(filter.getLocationUuid()));
     }
 
     filter.setIncludeVoided(context.getIncludeAll());
@@ -110,7 +115,6 @@ public class StockBatchResource extends ResourceBase<StockBatch> {
     if (rep instanceof RefRepresentation) {
       description.addProperty("uuid");
       description.addProperty("batchNo");
-
     }
 
     return description;
@@ -120,10 +124,13 @@ public class StockBatchResource extends ResourceBase<StockBatch> {
   public Model getGETModel(Representation rep) {
     ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
     if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-      modelImpl.property("uuid", new StringProperty()).property("batchNo", new StringProperty())
-              .property("expiration", new DateTimeProperty())
-              .property("expiryNotificationDate", new DateTimeProperty())
-              .property("stockItemUuid", new StringProperty()).property("voided", new BooleanProperty());
+      modelImpl
+          .property("uuid", new StringProperty())
+          .property("batchNo", new StringProperty())
+          .property("expiration", new DateTimeProperty())
+          .property("expiryNotificationDate", new DateTimeProperty())
+          .property("stockItemUuid", new StringProperty())
+          .property("voided", new BooleanProperty());
     }
     if (rep instanceof DefaultRepresentation) {}
 
@@ -135,5 +142,4 @@ public class StockBatchResource extends ResourceBase<StockBatch> {
 
     return modelImpl;
   }
-
 }

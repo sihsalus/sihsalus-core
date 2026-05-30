@@ -20,35 +20,37 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 @Handler(supports = InpatientAdmission.class, order = 0)
 public class InpatientAdmissionConverter extends SimpleBeanConverter<InpatientAdmission> {
 
-	@Override
-	public DelegatingResourceDescription getResourceDescription(InpatientAdmission req, Representation representation) {
-		DelegatingResourceDescription ret = super.getResourceDescription(req, representation);
-		if (representation instanceof DefaultRepresentation) {
-			DelegatingResourceDescription rep = new DelegatingResourceDescription();
-			rep.addProperty("visit", Representation.DEFAULT);
-			rep.addProperty("currentInpatientLocation", Representation.REF);
-			rep.addProperty("firstAdmissionOrTransferEncounter", getEncounterRepresentation());
-			rep.addProperty("latestAdmissionOrTransferEncounter", getEncounterRepresentation());
-			rep.addProperty("encounterAssigningToCurrentInpatientLocation", getEncounterRepresentation());
-			rep.addProperty("currentInpatientRequest", getInpatientRequestRepresentation());
-			rep.addProperty("discharged");
-			return rep;
-		} else if (representation instanceof FullRepresentation) {
-			for (String property : ret.getProperties().keySet()) {
-				if (!property.equals("visit")) {
-					ret.addProperty(property, Representation.DEFAULT);
-				}
-			}
-		}
-		return ret;
-	}
+  @Override
+  public DelegatingResourceDescription getResourceDescription(
+      InpatientAdmission req, Representation representation) {
+    DelegatingResourceDescription ret = super.getResourceDescription(req, representation);
+    if (representation instanceof DefaultRepresentation) {
+      DelegatingResourceDescription rep = new DelegatingResourceDescription();
+      rep.addProperty("visit", Representation.DEFAULT);
+      rep.addProperty("currentInpatientLocation", Representation.REF);
+      rep.addProperty("firstAdmissionOrTransferEncounter", getEncounterRepresentation());
+      rep.addProperty("latestAdmissionOrTransferEncounter", getEncounterRepresentation());
+      rep.addProperty("encounterAssigningToCurrentInpatientLocation", getEncounterRepresentation());
+      rep.addProperty("currentInpatientRequest", getInpatientRequestRepresentation());
+      rep.addProperty("discharged");
+      return rep;
+    } else if (representation instanceof FullRepresentation) {
+      for (String property : ret.getProperties().keySet()) {
+        if (!property.equals("visit")) {
+          ret.addProperty(property, Representation.DEFAULT);
+        }
+      }
+    }
+    return ret;
+  }
 
-	public Representation getEncounterRepresentation() {
-		return new CustomRepresentation("uuid,display,encounterDatetime,location:ref,encounterType:ref");
-	}
+  public Representation getEncounterRepresentation() {
+    return new CustomRepresentation(
+        "uuid,display,encounterDatetime,location:ref,encounterType:ref");
+  }
 
-	public Representation getInpatientRequestRepresentation() {
-		return new CustomRepresentation(
-		        "dispositionType,dispositionEncounter:(uuid,display,encounterDatetime),dispositionLocation:ref");
-	}
+  public Representation getInpatientRequestRepresentation() {
+    return new CustomRepresentation(
+        "dispositionType,dispositionEncounter:(uuid,display,encounterDatetime),dispositionLocation:ref");
+  }
 }
