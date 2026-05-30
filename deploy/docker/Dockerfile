@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7
 
 ARG MAVEN_IMAGE=maven:3.9-eclipse-temurin-21
 ARG RUNTIME_IMAGE=eclipse-temurin:21-jre-alpine
@@ -9,7 +9,8 @@ WORKDIR /workspace
 
 COPY . .
 
-RUN mvn --batch-mode --no-transfer-progress -pl runtime -am package -DskipTests
+RUN --mount=type=cache,target=/root/.m2,sharing=locked \
+    mvn --batch-mode --no-transfer-progress -pl runtime -am package -DskipTests
 
 FROM ${RUNTIME_IMAGE}
 

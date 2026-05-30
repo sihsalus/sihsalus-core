@@ -19,7 +19,7 @@ tmp/
 __pycache__/
 *.py[cod]
 
-# Local reference repository clones. Checked-in summaries/manifests live under docs/archive.
+# Local reference repository clones.
 /.dev/reference-sources/
 /reference-sources/
 
