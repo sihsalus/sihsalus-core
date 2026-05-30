@@ -218,6 +218,18 @@ if [[ "$URL" != offline:* ]]; then
     LIQUIBASE_ARGS+=("--driver=$DRIVER")
   fi
 fi
+# A stray `liquibase.properties` on the classpath (carried over from the OpenMRS
+# billing module) hard-codes `driver=com.mysql.jdbc.Driver`. Liquibase loads
+# that as a default, which collides with our PostgreSQL URL. Explicitly pin the
+# driver per JDBC scheme so the classpath default cannot win.
+case "$URL" in
+  jdbc:postgresql:*)
+    LIQUIBASE_ARGS+=("--driver=org.postgresql.Driver")
+    ;;
+  jdbc:mysql:*)
+    LIQUIBASE_ARGS+=("--driver=com.mysql.cj.jdbc.Driver")
+    ;;
+esac
 if [[ -n "$CONTEXTS" ]]; then
   LIQUIBASE_ARGS+=("--contexts=$CONTEXTS")
 fi

@@ -29,3 +29,4 @@ Active documentation lives at the top of this directory. Historical planning not
 ## Archive
 
 - `archive/`: dated audits, completed debt phases, distro review, and migration reference material kept for traceability.
+  - [archive index](archive/README.md): consolidated index of historical docs and retention policy.
