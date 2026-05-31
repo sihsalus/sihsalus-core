@@ -279,9 +279,7 @@ public class GeneralUtils {
           if (limit > 0) {
             try {
               Patient p = ps.getPatient(Integer.valueOf(pId));
-              if (p != null
-                  && !Boolean.TRUE.equals(p.getVoided())
-                  && !p.isPersonVoided()) {
+              if (p != null && !Boolean.TRUE.equals(p.getVoided()) && !p.isPersonVoided()) {
                 lastViewed.add(p);
               }
               if (lastViewed.size() == limit) {

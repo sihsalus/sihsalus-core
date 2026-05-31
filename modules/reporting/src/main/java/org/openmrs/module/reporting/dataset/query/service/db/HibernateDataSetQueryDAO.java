@@ -20,7 +20,6 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.query.Query;
 import org.openmrs.Cohort;
-import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.OpenmrsData;
@@ -34,6 +33,7 @@ import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.Relationship;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.query.IdSet;
 

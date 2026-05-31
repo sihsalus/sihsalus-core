@@ -24,9 +24,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.query.Query;
 import org.openmrs.Cohort;
-import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.Voidable;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.logging.OpenmrsLoggingUtil;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.common.DateUtil;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.common.RangeComparator;
@@ -38,7 +39,6 @@ import org.openmrs.module.reporting.evaluation.context.EncounterEvaluationContex
 import org.openmrs.module.reporting.evaluation.context.ObsEvaluationContext;
 import org.openmrs.module.reporting.evaluation.context.VisitEvaluationContext;
 import org.openmrs.module.reporting.query.IdSet;
-import org.openmrs.logging.OpenmrsLoggingUtil;
 
 /** Helper class for building and executing an HQL query with parameters */
 public class HqlQueryBuilder implements QueryBuilder {

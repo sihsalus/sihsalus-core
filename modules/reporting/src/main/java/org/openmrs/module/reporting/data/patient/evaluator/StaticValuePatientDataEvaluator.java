@@ -10,8 +10,8 @@
 package org.openmrs.module.reporting.data.patient.evaluator;
 
 import org.openmrs.Cohort;
-import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.data.patient.EvaluatedPatientData;

@@ -55,8 +55,7 @@ public abstract class CodedWidget implements Widget {
    * @param value - the value to check against
    */
   public boolean isSelected(Option option, Object value) {
-    return Objects.equals(option.getValue(), value)
-        || Objects.equals(option.getCode(), value);
+    return Objects.equals(option.getValue(), value) || Objects.equals(option.getCode(), value);
   }
 
   /**
