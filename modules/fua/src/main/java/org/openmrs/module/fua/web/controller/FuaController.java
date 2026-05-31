@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.HtmlUtils;
 
 @Controller
 @RequestMapping("/module/fua")
@@ -321,10 +320,7 @@ public class FuaController {
     } catch (Exception ex) {
       log.error("Error rendering FUA", ex);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(
-              "<h2>Error interno renderizando FUA</h2><pre>"
-                  + HtmlUtils.htmlEscape(StringUtils.defaultString(ex.getMessage()))
-                  + "</pre>");
+          .body("<h2>Error interno renderizando FUA</h2>");
     }
   }
 

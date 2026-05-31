@@ -108,7 +108,7 @@ public class FuaRedirectionController {
               String.class);
 
       if (!response.getStatusCode().is2xxSuccessful()) {
-        return renderError(response.getStatusCode(), remoteUrl, response.getBody());
+        return renderError(response.getStatusCode(), response.getBody());
       }
 
       return ResponseEntity.ok()
@@ -116,13 +116,10 @@ public class FuaRedirectionController {
           .body(sanitizeHtml(response.getBody()));
     } catch (HttpStatusCodeException ex) {
       log.error("HTTP error rendering FUAFormat id " + id + " at " + remoteUrl, ex);
-      return renderError(ex.getStatusCode(), remoteUrl, ex.getResponseBodyAsString());
+      return renderError(ex.getStatusCode(), ex.getResponseBodyAsString());
     } catch (Exception ex) {
       log.error("Internal error rendering FUAFormat id " + id + " at " + remoteUrl, ex);
-      return renderError(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          remoteUrl,
-          ex.getMessage() == null ? "" : ex.getMessage());
+      return renderError(HttpStatus.INTERNAL_SERVER_ERROR, "");
     }
   }
 
@@ -145,14 +142,12 @@ public class FuaRedirectionController {
   }
 
   private ResponseEntity<String> renderError(
-      org.springframework.http.HttpStatusCode statusCode, String remoteUrl, String body) {
+      org.springframework.http.HttpStatusCode statusCode, String body) {
     return ResponseEntity.status(statusCode)
         .contentType(MediaType.TEXT_HTML)
         .body(
             "<h2>Error renderizando FUAFormat</h2><pre>Status: "
                 + HtmlUtils.htmlEscape(String.valueOf(statusCode))
-                + "\nURL: "
-                + HtmlUtils.htmlEscape(StringUtils.defaultString(remoteUrl))
                 + "\n\n"
                 + HtmlUtils.htmlEscape(StringUtils.defaultString(body))
                 + "</pre>");
