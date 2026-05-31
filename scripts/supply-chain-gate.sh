@@ -76,6 +76,7 @@ fi
 if [[ "$RUN_DEPENDENCY_CHECK" == 1 ]]; then
   echo "=== Running OWASP Dependency-Check ==="
   "$MAVEN_CMD" -DskipTests -DskipITs \
+    -Dossindex.enabled=false \
     "org.owasp:dependency-check-maven:${DEPENDENCY_CHECK_VERSION}:check"
 fi
 
