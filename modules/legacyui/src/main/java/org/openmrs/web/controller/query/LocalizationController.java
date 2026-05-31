@@ -11,6 +11,7 @@ package org.openmrs.web.controller.query;
 
 import java.util.Locale;
 import org.openmrs.api.context.Context;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class LocalizationController {
 
-  @RequestMapping("/q/message")
+  @RequestMapping(value = "/q/message", produces = MediaType.TEXT_PLAIN_VALUE)
   @ResponseBody
   public String getMessage(
       @RequestParam("key") String key,
