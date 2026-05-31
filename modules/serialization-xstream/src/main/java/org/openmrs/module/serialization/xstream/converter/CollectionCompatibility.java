@@ -17,7 +17,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public interface CollectionCompatibility {
 
-  boolean canConvert(Class type);
+  boolean canConvert(Class<?> type);
 
   void marshal(
       Object source,

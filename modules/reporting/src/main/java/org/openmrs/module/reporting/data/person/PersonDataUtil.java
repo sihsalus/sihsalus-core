@@ -12,6 +12,7 @@ package org.openmrs.module.reporting.data.person;
 import java.util.HashSet;
 import java.util.Set;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.context.PersonEvaluationContext;
@@ -45,11 +46,11 @@ public class PersonDataUtil {
     if (personIds != null) {
       ret = new HashSet<Integer>(personIds.getMemberIds());
       if (patIds != null) {
-        ret.retainAll(patIds.getMemberIds());
+        ret.retainAll(CohortUtil.memberIds(patIds));
       }
     } else {
       if (patIds != null) {
-        ret = new HashSet<Integer>(patIds.getMemberIds());
+        ret = new HashSet<Integer>(CohortUtil.memberIds(patIds));
       }
     }
 

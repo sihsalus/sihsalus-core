@@ -19,10 +19,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.query.Query;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.Voidable;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.reporting.common.DateUtil;
@@ -36,7 +38,7 @@ import org.openmrs.module.reporting.evaluation.context.EncounterEvaluationContex
 import org.openmrs.module.reporting.evaluation.context.ObsEvaluationContext;
 import org.openmrs.module.reporting.evaluation.context.VisitEvaluationContext;
 import org.openmrs.module.reporting.query.IdSet;
-import org.openmrs.util.OpenmrsUtil;
+import org.openmrs.logging.OpenmrsLoggingUtil;
 
 /** Helper class for building and executing an HQL query with parameters */
 public class HqlQueryBuilder implements QueryBuilder {
@@ -174,7 +176,7 @@ public class HqlQueryBuilder implements QueryBuilder {
       } else {
         if (propertyValue instanceof Cohort) {
           Cohort c = (Cohort) propertyValue;
-          whereIdIn(propertyName, c.getMemberIds());
+          whereIdIn(propertyName, CohortUtil.memberIds(c));
         } else if (propertyValue instanceof IdSet) {
           IdSet idSet = (IdSet) propertyValue;
           whereIdIn(propertyName, idSet.getMemberIds());
@@ -226,7 +228,7 @@ public class HqlQueryBuilder implements QueryBuilder {
   public HqlQueryBuilder wherePatientIn(String propertyName, EvaluationContext context) {
     if (context != null) {
       if (context.getBaseCohort() != null) {
-        whereIdIn(propertyName, context.getBaseCohort().getMemberIds());
+        whereIdIn(propertyName, CohortUtil.memberIds(context.getBaseCohort()));
       }
     }
     return this;
@@ -247,7 +249,7 @@ public class HqlQueryBuilder implements QueryBuilder {
       String baseProperty = prepareBaseIdProperty(propertyName, "encounterId");
       if (context.getBaseCohort() != null) {
         String patientProperty = baseProperty + "patient.patientId";
-        whereIdIn(patientProperty, context.getBaseCohort().getMemberIds());
+        whereIdIn(patientProperty, CohortUtil.memberIds(context.getBaseCohort()));
       }
       if (context instanceof EncounterEvaluationContext) {
         EncounterEvaluationContext eec = (EncounterEvaluationContext) context;
@@ -264,7 +266,7 @@ public class HqlQueryBuilder implements QueryBuilder {
       String baseProperty = prepareBaseIdProperty(propertyName, "visitId");
       if (context.getBaseCohort() != null) {
         String patientProperty = baseProperty + "patient.patientId";
-        whereIdIn(patientProperty, context.getBaseCohort().getMemberIds());
+        whereIdIn(patientProperty, CohortUtil.memberIds(context.getBaseCohort()));
       }
       if (context instanceof VisitEvaluationContext) {
         VisitEvaluationContext vec = (VisitEvaluationContext) context;
@@ -281,7 +283,7 @@ public class HqlQueryBuilder implements QueryBuilder {
       String baseProperty = prepareBaseIdProperty(propertyName, "obsId");
       if (context.getBaseCohort() != null) {
         String patientProperty = baseProperty + "personId";
-        whereIdIn(patientProperty, context.getBaseCohort().getMemberIds());
+        whereIdIn(patientProperty, CohortUtil.memberIds(context.getBaseCohort()));
       }
       if (context instanceof ObsEvaluationContext) {
         ObsEvaluationContext oec = (ObsEvaluationContext) context;
@@ -303,7 +305,7 @@ public class HqlQueryBuilder implements QueryBuilder {
         where("1=0");
       } else {
         // Here we build the in clause manually due to some known hibernate performance issues
-        where(propertyName + " in (" + OpenmrsUtil.join(ids, ",") + ")");
+        where(propertyName + " in (" + StringUtils.join(ids, ",") + ")");
       }
     }
     return this;
@@ -463,8 +465,8 @@ public class HqlQueryBuilder implements QueryBuilder {
   public List<Object[]> evaluateToList(DbSessionFactory sessionFactory, EvaluationContext context) {
     // Due to hibernate bug HHH-2166, we need to make sure the HqlSqlWalker logger is not at DEBUG
     // or TRACE level
-    OpenmrsUtil.applyLogLevel("org.hibernate.hql.ast.HqlSqlWalker", "WARN");
-    OpenmrsUtil.applyLogLevel("org.hibernate.hql.internal.ast.HqlSqlWalker", "WARN");
+    OpenmrsLoggingUtil.applyLogLevel("org.hibernate.hql.ast.HqlSqlWalker", "WARN");
+    OpenmrsLoggingUtil.applyLogLevel("org.hibernate.hql.internal.ast.HqlSqlWalker", "WARN");
     EvaluationProfiler profiler = new EvaluationProfiler(context);
     profiler.logBefore("EXECUTING_QUERY", toString());
     List<Object[]> ret = new ArrayList<Object[]>();
@@ -581,7 +583,7 @@ public class HqlQueryBuilder implements QueryBuilder {
       } else if (e.getValue() instanceof Object[]) {
         query.setParameterList(e.getKey(), (Object[]) e.getValue());
       } else if (e.getValue() instanceof Cohort) {
-        query.setParameterList(e.getKey(), ((Cohort) e.getValue()).getMemberIds());
+        query.setParameterList(e.getKey(), CohortUtil.memberIds((Cohort) e.getValue()));
       } else if (e.getValue() instanceof IdSet) {
         query.setParameterList(e.getKey(), ((IdSet) e.getValue()).getMemberIds());
       } else {

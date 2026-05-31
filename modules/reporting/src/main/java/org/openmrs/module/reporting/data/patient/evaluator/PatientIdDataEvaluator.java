@@ -10,6 +10,7 @@
 package org.openmrs.module.reporting.data.patient.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.data.patient.EvaluatedPatientData;
 import org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition;
 import org.openmrs.module.reporting.data.patient.definition.PatientIdDataDefinition;
@@ -35,7 +36,7 @@ public class PatientIdDataEvaluator extends PatientPropertyDataEvaluator {
     if (context.getBaseCohort() == null) {
       return super.evaluate(definition, context);
     }
-    for (Integer pId : context.getBaseCohort().getMemberIds()) {
+    for (Integer pId : CohortUtil.memberIds(context.getBaseCohort())) {
       c.addData(pId, pId);
     }
     return c;

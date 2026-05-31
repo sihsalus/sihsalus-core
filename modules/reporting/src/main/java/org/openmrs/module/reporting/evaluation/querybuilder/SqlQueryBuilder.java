@@ -29,10 +29,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.jdbc.Work;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.reporting.common.ObjectUtil;
@@ -40,7 +43,6 @@ import org.openmrs.module.reporting.dataset.DataSetColumn;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationProfiler;
 import org.openmrs.module.reporting.query.IdSet;
-import org.openmrs.util.OpenmrsUtil;
 
 /** Helper class for building and executing an HQL query with parameters */
 public class SqlQueryBuilder implements QueryBuilder {
@@ -233,14 +235,14 @@ public class SqlQueryBuilder implements QueryBuilder {
       if (parameterValue != null) {
         Set<Integer> memberIds = null;
         if (parameterValue instanceof Cohort) {
-          memberIds = ((Cohort) parameterValue).getMemberIds();
+          memberIds = CohortUtil.memberIds((Cohort) parameterValue);
         }
         if (parameterValue instanceof IdSet) {
           memberIds = ((IdSet) parameterValue).getMemberIds();
         }
         if (memberIds != null) {
           if (queryString.contains(toMatch)) {
-            String idClause = "(" + OpenmrsUtil.join(memberIds, ",") + ")";
+            String idClause = "(" + StringUtils.join(memberIds, ",") + ")";
             queryString = queryString.replace("(" + toMatch + ")", idClause); // where id in (:ids)
             queryString = queryString.replace(toMatch, idClause); // where id in :ids
             addParameter = false;
@@ -298,8 +300,7 @@ public class SqlQueryBuilder implements QueryBuilder {
       }
 
       queryString =
-          org.apache.commons.lang3.StringUtils.replaceOnce(
-              queryString, parameterName, replacementValue.toString());
+          Strings.CS.replaceOnce(queryString, parameterName, replacementValue.toString());
       queryString =
           queryString.replace(" in " + replacementValue, " in (" + replacementValue + ")");
     }
@@ -360,7 +361,7 @@ public class SqlQueryBuilder implements QueryBuilder {
     } else if (value instanceof Object[]) {
       c = Arrays.asList((Object[]) value);
     } else if (value instanceof Cohort) {
-      c = ((Cohort) value).getMemberIds();
+      c = CohortUtil.memberIds((Cohort) value);
     } else if (value instanceof IdSet) {
       c = ((IdSet) value).getMemberIds();
     }

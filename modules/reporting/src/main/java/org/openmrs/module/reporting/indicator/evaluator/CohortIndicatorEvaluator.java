@@ -42,6 +42,7 @@ public class CohortIndicatorEvaluator implements IndicatorEvaluator {
   /**
    * @see IndicatorEvaluator#evaluate(Indicator, EvaluationContext)
    */
+  @SuppressWarnings("deprecation")
   public IndicatorResult evaluate(Indicator indicator, EvaluationContext context)
       throws EvaluationException {
 
@@ -75,7 +76,7 @@ public class CohortIndicatorEvaluator implements IndicatorEvaluator {
         if (baseCohort != null) {
           denominatorCohort = CohortUtil.intersect(denominatorCohort, baseCohort);
         }
-        baseCohort = new Cohort(denominatorCohort.getMemberIds());
+        baseCohort = new Cohort(CohortUtil.memberIds(denominatorCohort));
         result.setDenominatorCohort(denominatorCohort);
       } catch (Exception ex) {
         throw new EvaluationException("denominator", ex);
@@ -108,7 +109,7 @@ public class CohortIndicatorEvaluator implements IndicatorEvaluator {
       }
     }
 
-    // Evaluate Logic Criteria
+    // Legacy CohortIndicator definitions may still carry Logic expressions.
     if (cid.getLogicExpression() != null) {
       try {
         LogicCriteria criteria = Context.getLogicService().parse(cid.getLogicExpression());

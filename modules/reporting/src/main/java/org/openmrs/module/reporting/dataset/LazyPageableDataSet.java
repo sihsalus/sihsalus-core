@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.openmrs.module.reporting.cohort.Cohorts;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.PageableDataSetDefinition;
 import org.openmrs.module.reporting.dataset.definition.evaluator.DataSetEvaluator;
@@ -51,9 +52,9 @@ public class LazyPageableDataSet implements PageableDataSet {
     this.definition = definition;
 
     if (evalContext.getBaseCohort() != null) {
-      cohortPatientIds = new ArrayList<Integer>(evalContext.getBaseCohort().getMemberIds());
+      cohortPatientIds = new ArrayList<Integer>(CohortUtil.memberIds(evalContext.getBaseCohort()));
     } else {
-      cohortPatientIds = new ArrayList<Integer>(Cohorts.allPatients(evalContext).getMemberIds());
+      cohortPatientIds = new ArrayList<Integer>(CohortUtil.memberIds(Cohorts.allPatients(evalContext)));
     }
 
     dataSetMetadata = definition.getDataSetMetadata();

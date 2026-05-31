@@ -20,6 +20,7 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.query.Query;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.OpenmrsData;
@@ -59,7 +60,7 @@ public class HibernateDataSetQueryDAO implements DataSetQueryDAO {
       } else if (e.getValue() instanceof Object[]) {
         q.setParameterList(e.getKey(), (Object[]) e.getValue());
       } else if (e.getValue() instanceof Cohort) {
-        q.setParameterList(e.getKey(), ((Cohort) e.getValue()).getMemberIds());
+        q.setParameterList(e.getKey(), CohortUtil.memberIds((Cohort) e.getValue()));
       } else if (e.getValue() instanceof IdSet) {
         q.setParameterList(e.getKey(), ((IdSet) e.getValue()).getMemberIds());
       } else {
@@ -127,7 +128,7 @@ public class HibernateDataSetQueryDAO implements DataSetQueryDAO {
 
     Query query = sessionFactory.getCurrentSession().createQuery(hql.toString());
     if (hql.toString().contains(":ids") && baseCohort != null) {
-      query.setParameterList("ids", baseCohort.getMemberIds());
+      query.setParameterList("ids", CohortUtil.memberIds(baseCohort));
     }
 
     for (Object o : query.list()) {

@@ -76,7 +76,7 @@ public class AuditInfo {
   }
 
   private void copyRetireableFieldsFrom(Retireable retireable) {
-    this.retired = retireable.isRetired();
+    this.retired = retireable.getRetired();
     this.retiredBy = retireable.getRetiredBy();
     this.dateRetired = retireable.getDateRetired();
     this.retireReason = retireable.getRetireReason();

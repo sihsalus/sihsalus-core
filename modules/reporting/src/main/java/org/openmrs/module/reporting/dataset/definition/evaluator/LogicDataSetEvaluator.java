@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicException;
@@ -27,16 +28,13 @@ import org.openmrs.module.reporting.dataset.DataSetRowList;
 import org.openmrs.module.reporting.dataset.LazyPageableDataSet;
 import org.openmrs.module.reporting.dataset.PageableDataSet;
 import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
-import org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition;
-import org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition.Column;
-import org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition.ColumnFormatter;
 import org.openmrs.module.reporting.dataset.definition.PageableDataSetDefinition;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 
 /** Prepares a {@link LazyPageableDataSet} that will lazily evaluate LogicDataSetDefinitions */
 @Deprecated
 @SuppressWarnings("deprecation")
-@Handler(supports = {LogicDataSetDefinition.class})
+@Handler(supports = {org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition.class})
 public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
 
   /**
@@ -45,11 +43,12 @@ public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
   public PageableDataSet evaluate(
       DataSetDefinition dataSetDefinition, EvaluationContext evalContext)
       throws ReportingException {
-    LogicDataSetDefinition def = (LogicDataSetDefinition) dataSetDefinition;
+    var def =
+        (org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition) dataSetDefinition;
 
     // test the logic expressions in the definition, so if any of them are broken we fail here
     // rather than returning a LazyPageableDataSet that will fail on every partial evaluation
-    for (Column col : def.getColumns()) {
+    for (var col : def.getColumns()) {
       try {
         LogicUtil.parse(col.getLogic());
       } catch (LogicException ex) {
@@ -69,13 +68,9 @@ public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
   public Iterator<DataSetRow> evaluatePartial(
       PageableDataSetDefinition definition, EvaluationContext context, List<Integer> patientIds) {
     LogicService logicService = Context.getLogicService();
-    LogicDataSetDefinition def = (LogicDataSetDefinition) definition;
+    var def =
+        (org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition) definition;
     Cohort cohort = new Cohort(patientIds);
-
-    List<ColumnFormatter> columnFormatters = new ArrayList<ColumnFormatter>();
-    for (Column col : def.getColumns()) {
-      columnFormatters.add(col.getFormatter());
-    }
 
     // Note that we cannot import or reference LogicCriteria in this class because it was
     // changed from a Class to an Interface in OpenMRS 1.6, so building the module while
@@ -86,7 +81,7 @@ public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
 
     // (Map from patientId to one result per column)
     Map<Integer, List<Result>> results = new LinkedHashMap<Integer, List<Result>>();
-    for (Column col : def.getColumns()) {
+    for (var col : def.getColumns()) {
       try {
         // implicitly parse the String to a LogicCriteria in this line
         Map<Integer, Result> temp = logicService.eval(cohort, LogicUtil.parse(col.getLogic()));
@@ -105,7 +100,7 @@ public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
 
     boolean anyColumns = def.getColumns().size() > 0;
     DataSetRowList ret = new DataSetRowList();
-    for (Integer ptId : cohort.getMemberIds()) {
+    for (Integer ptId : CohortUtil.memberIds(cohort)) {
       List<Result> forPatient = results.get(ptId);
       if (forPatient == null && anyColumns) {
         throw new ReportingException(
@@ -117,9 +112,9 @@ public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
       List<Result> patientResults = forPatient;
       DataSetRow row = new DataSetRow();
       for (int i = 0; i < def.getColumns().size(); ++i) {
-        Column col = def.getColumns().get(i);
+        var col = def.getColumns().get(i);
         Result result = patientResults.get(i);
-        row.addColumnValue(col, columnFormatters.get(i).format(result));
+        row.addColumnValue(col, col.getFormatter().format(result));
       }
       ret.add(row);
     }

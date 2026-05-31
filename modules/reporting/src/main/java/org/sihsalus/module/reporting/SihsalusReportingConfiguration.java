@@ -84,6 +84,8 @@ import org.springframework.context.annotation.FilterType;
 @ComponentScan(
     basePackageClasses = ReportingConstants.class,
     includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Handler.class))
+// Static module wiring must still expose deprecated reporting dataset-query services for legacy callers.
+@SuppressWarnings("deprecation")
 public class SihsalusReportingConfiguration {
 
   @Bean

@@ -19,8 +19,8 @@ import org.springframework.validation.Validator;
 /** Validates an IdentifierSource */
 public class IdentifierSourceValidator implements Validator {
 
-  @SuppressWarnings("unchecked")
-  public boolean supports(Class clazz) {
+  @Override
+  public boolean supports(Class<?> clazz) {
     return IdentifierSource.class.isAssignableFrom(clazz);
   }
 

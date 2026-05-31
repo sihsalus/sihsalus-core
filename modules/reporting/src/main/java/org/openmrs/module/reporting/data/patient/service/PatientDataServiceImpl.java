@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.time.StopWatch;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.ReportingConstants;
 import org.openmrs.module.reporting.data.patient.EvaluatedPatientData;
@@ -75,7 +76,7 @@ public class PatientDataServiceImpl extends BaseDefinitionService<PatientDataDef
     if (context.getBaseCohort().size() > 0) {
 
       List<Cohort> batches = new ArrayList<Cohort>();
-      List<Integer> ids = new ArrayList<Integer>(context.getBaseCohort().getMemberIds());
+      List<Integer> ids = new ArrayList<Integer>(CohortUtil.memberIds(context.getBaseCohort()));
       for (int i = 0; i < ids.size(); i += batchSize) {
         batches.add(new Cohort(ids.subList(i, i + Math.min(batchSize, ids.size() - i))));
       }

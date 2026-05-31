@@ -19,9 +19,12 @@ import org.openmrs.Patient;
 import org.openmrs.module.reporting.query.IdSet;
 
 /** A Set of Patient Ids */
+@SuppressWarnings("deprecation")
 public class PatientIdSet extends Cohort implements IdSet<Patient> {
 
   public static final long serialVersionUID = 1L;
+
+  // This adapter intentionally exposes reporting's legacy patient-id set API on top of Cohort.
 
   // ***** CONSTRUCTORS *****
 

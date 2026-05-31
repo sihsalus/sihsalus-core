@@ -143,11 +143,7 @@ public class ReportServiceImpl extends BaseOpenmrsService implements ReportServi
   public ReportRenderer getReportRenderer(String className) {
     try {
       return (ReportRenderer) Context.loadClass(className).getDeclaredConstructor().newInstance();
-    } catch (ClassNotFoundException e) {
-      /* ignore */
-    } catch (IllegalAccessException e) {
-      /* ignore */
-    } catch (InstantiationException e) {
+    } catch (ReflectiveOperationException e) {
       /* ignore */
     }
 
@@ -581,7 +577,8 @@ public class ReportServiceImpl extends BaseOpenmrsService implements ReportServi
               || (request.getStatus() == Status.FAILED && c.getRunOnError())) {
             logReportMessage(request, "Processing Report with " + c.getName() + "...");
             Class<?> processorType = Context.loadClass(c.getProcessorType());
-            ReportProcessor processor = (ReportProcessor) processorType.getDeclaredConstructor().newInstance();
+            ReportProcessor processor =
+                (ReportProcessor) processorType.getDeclaredConstructor().newInstance();
             processor.process(report, c.getConfiguration());
           }
         } catch (Exception e) {

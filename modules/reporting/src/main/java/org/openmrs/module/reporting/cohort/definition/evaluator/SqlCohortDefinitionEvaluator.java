@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import org.openmrs.annotation.Handler;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.SqlCohortDefinition;
 import org.openmrs.module.reporting.common.ObjectUtil;
@@ -56,7 +57,7 @@ public class SqlCohortDefinitionEvaluator implements CohortDefinitionEvaluator {
 
     List<Integer> l = evaluationService.evaluateToList(qb, Integer.class, context);
     if (context.getBaseCohort() != null) {
-      l.retainAll(context.getBaseCohort().getMemberIds());
+      l.retainAll(CohortUtil.memberIds(context.getBaseCohort()));
     }
     ret.setMemberIds(new HashSet<Integer>(l));
 

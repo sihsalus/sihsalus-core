@@ -26,8 +26,8 @@ public class SequentialIdentifierGeneratorValidator extends IdentifierSourceVali
 
   protected static Log log = LogFactory.getLog(SequentialIdentifierGeneratorValidator.class);
 
-  @SuppressWarnings("unchecked")
-  public boolean supports(Class clazz) {
+  @Override
+  public boolean supports(Class<?> clazz) {
     return SequentialIdentifierGenerator.class.isAssignableFrom(clazz);
   }
 
@@ -54,7 +54,8 @@ public class SequentialIdentifierGeneratorValidator extends IdentifierSourceVali
       if (StringUtils.hasText(source.getIdentifierType().getValidator())) {
         try {
           Class<?> validatorClass = Context.loadClass(source.getIdentifierType().getValidator());
-          IdentifierValidator v = (IdentifierValidator) validatorClass.newInstance();
+          IdentifierValidator v =
+              (IdentifierValidator) validatorClass.getDeclaredConstructor().newInstance();
           firstId = v.getValidIdentifier(firstId);
         } catch (UnallowedIdentifierException uie) {
           errors.reject("Invalid identifier. " + uie.getMessage() + "");

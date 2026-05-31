@@ -54,7 +54,7 @@ public class CohortIndicatorAndDimensionResult implements IndicatorResult {
     Cohort ret = null;
     for (Cohort c : getDimensionResults().values()) {
       if (ret == null) {
-        ret = new Cohort(c.getMemberIds());
+        ret = new Cohort(CohortUtil.memberIds(c));
       } else {
         ret = CohortUtil.intersect(ret, c);
       }
@@ -94,7 +94,7 @@ public class CohortIndicatorAndDimensionResult implements IndicatorResult {
     Map<Integer, Number> ret = cohortIndicatorResult.getLogicResults();
     if (ret != null && !getDimensionResults().isEmpty()) {
       ret = new HashMap<Integer, Number>(cohortIndicatorResult.getLogicResults());
-      ret.keySet().retainAll(calculateDimensionCohort().getMemberIds());
+      ret.keySet().retainAll(CohortUtil.memberIds(calculateDimensionCohort()));
     }
     return ret;
   }

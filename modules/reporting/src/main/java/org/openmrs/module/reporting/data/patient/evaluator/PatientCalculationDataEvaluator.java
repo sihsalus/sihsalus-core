@@ -20,6 +20,7 @@ import org.openmrs.calculation.patient.PatientCalculationService;
 import org.openmrs.calculation.result.CalculationResult;
 import org.openmrs.calculation.result.CalculationResultMap;
 import org.openmrs.module.reporting.calculation.PatientDataCalculation;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.data.patient.EvaluatedPatientData;
 import org.openmrs.module.reporting.data.patient.definition.PatientCalculationDataDefinition;
 import org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition;
@@ -63,7 +64,9 @@ public class PatientCalculationDataEvaluator implements PatientDataEvaluator {
     try {
       provider =
           (CalculationProvider)
-              Context.loadClass(registration.getProviderClassName()).getDeclaredConstructor().newInstance();
+              Context.loadClass(registration.getProviderClassName())
+                  .getDeclaredConstructor()
+                  .newInstance();
     } catch (Exception e) {
       throw new EvaluationException(
           "Could not instantiate provider for calculation " + registration.getToken(), e);
@@ -89,7 +92,7 @@ public class PatientCalculationDataEvaluator implements PatientDataEvaluator {
     // evaluate the calculation
     PatientCalculationService service = Context.getService(PatientCalculationService.class);
     CalculationResultMap resultMap =
-        service.evaluate(context.getBaseCohort().getMemberIds(), calculation, context);
+        service.evaluate(CohortUtil.memberIds(context.getBaseCohort()), calculation, context);
 
     // move data into return object
     for (Map.Entry<Integer, CalculationResult> entry : resultMap.entrySet()) {

@@ -89,7 +89,7 @@ public class ProgramWorkflowStateHandler extends OpenmrsMetadataHandler<ProgramW
 
     // Return the appropriate states
     for (ProgramWorkflow w : workflows) {
-      if (!w.isRetired() || includeRetired) {
+      if (!Boolean.TRUE.equals(w.getRetired()) || includeRetired) {
         String pn = (w.getProgram().getName());
         String wn = (w.getName() == null ? w.getConcept().getDisplayString() : w.getName());
         List<ProgramWorkflowState> states =

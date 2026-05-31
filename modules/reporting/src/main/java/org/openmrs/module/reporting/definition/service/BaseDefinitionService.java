@@ -315,11 +315,9 @@ public abstract class BaseDefinitionService<T extends Definition> extends BaseOp
         // remove test patients from the existing baseCohort, and if this results in any changes,
         // clear the cache
         Cohort nonTestPatients = CohortUtil.subtract(context.getBaseCohort(), testPatients);
-        if (!nonTestPatients.getMemberIds().containsAll(context.getBaseCohort().getMemberIds())
-            || !context
-                .getBaseCohort()
-                .getMemberIds()
-                .containsAll(nonTestPatients.getMemberIds())) {
+        if (!CohortUtil.memberIds(nonTestPatients).containsAll(CohortUtil.memberIds(context.getBaseCohort()))
+            || !CohortUtil.memberIds(context.getBaseCohort())
+                .containsAll(CohortUtil.memberIds(nonTestPatients))) {
 
           context.setBaseCohort(nonTestPatients);
           context.clearCache();

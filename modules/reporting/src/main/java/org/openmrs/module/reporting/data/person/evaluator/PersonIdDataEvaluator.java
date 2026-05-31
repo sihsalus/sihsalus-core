@@ -10,6 +10,7 @@
 package org.openmrs.module.reporting.data.person.evaluator;
 
 import org.openmrs.annotation.Handler;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PersonIdDataDefinition;
@@ -35,7 +36,7 @@ public class PersonIdDataEvaluator extends PersonPropertyDataEvaluator {
     if (context.getBaseCohort() == null) {
       return super.evaluate(definition, context);
     }
-    for (Integer pId : context.getBaseCohort().getMemberIds()) {
+    for (Integer pId : CohortUtil.memberIds(context.getBaseCohort())) {
       c.addData(pId, pId);
     }
     return c;

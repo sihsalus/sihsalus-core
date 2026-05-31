@@ -30,20 +30,20 @@ public class CohortUtil {
   protected static Log log = LogFactory.getLog(CohortUtil.class);
 
   public static Cohort intersect(Cohort cohortA, Cohort cohortB) {
-    Set<Integer> ids = new HashSet<Integer>(cohortA.getMemberIds());
-    ids.retainAll(cohortB.getMemberIds());
+    Set<Integer> ids = new HashSet<Integer>(memberIds(cohortA));
+    ids.retainAll(memberIds(cohortB));
     return new Cohort(ids);
   }
 
   public static Cohort union(Cohort cohortA, Cohort cohortB) {
-    Set<Integer> ids = new HashSet<Integer>(cohortA.getMemberIds());
-    ids.addAll(cohortB.getMemberIds());
+    Set<Integer> ids = new HashSet<Integer>(memberIds(cohortA));
+    ids.addAll(memberIds(cohortB));
     return new Cohort(ids);
   }
 
   public static Cohort subtract(Cohort cohortA, Cohort cohortB) {
-    Set<Integer> ids = new HashSet<Integer>(cohortA.getMemberIds());
-    ids.removeAll(cohortB.getMemberIds());
+    Set<Integer> ids = new HashSet<Integer>(memberIds(cohortA));
+    ids.removeAll(memberIds(cohortB));
     return new Cohort(ids);
   }
 
@@ -52,7 +52,7 @@ public class CohortUtil {
     for (Cohort c : cohorts) {
       if (c != null) {
         if (ret == null) {
-          ret = new Cohort(c.getMemberIds());
+          ret = new Cohort(memberIds(c));
         } else {
           ret = CohortUtil.intersect(ret, c);
         }
@@ -69,9 +69,9 @@ public class CohortUtil {
     Cohort limitCohort = new Cohort();
 
     if (cohort != null && !cohort.isEmpty()) {
-      if (cohort.getSize() <= size) return cohort;
+      if (cohort.size() <= size) return cohort;
       int count = 0;
-      for (Integer memberId : cohort.getMemberIds()) {
+      for (Integer memberId : memberIds(cohort)) {
         if (count++ < size) limitCohort.addMember(memberId);
         else break;
       }
@@ -102,17 +102,18 @@ public class CohortUtil {
 
     if (tempCohort != null && !tempCohort.isEmpty()) {
       // Convert patient IDs to a list
-      List<Integer> patientIds = Arrays.asList(tempCohort.getMemberIds().toArray(new Integer[0]));
+      Set<Integer> memberIds = memberIds(tempCohort);
+      List<Integer> patientIds = Arrays.asList(memberIds.toArray(new Integer[0]));
 
       // If the "all patients" cohort is less than or equal to the desired cohort size
       // then we just use the available "all patients" cohort.
-      if (tempCohort.getMemberIds().size() <= cohortSize) {
+      if (memberIds.size() <= cohortSize) {
         randomCohort = tempCohort;
       }
       // Otherwise we create a random cohort
       else {
         for (int i = 0; i < cohortSize; i++) {
-          int randomIndex = random.nextInt(tempCohort.getSize());
+          int randomIndex = random.nextInt(tempCohort.size());
           Integer patientId = patientIds.get(randomIndex);
           // TODO We need to deal with patients that have already been selected
           //  because we don't want duplicates.  This requires special handling
@@ -122,6 +123,12 @@ public class CohortUtil {
       }
     }
     return randomCohort;
+  }
+
+  @SuppressWarnings("deprecation")
+  public static Set<Integer> memberIds(Cohort cohort) {
+    // Reporting cohort algebra is patient-id based; keep the legacy all-member id semantics here.
+    return cohort.getMemberIds();
   }
 
   private static int parseCohortSize(String value) {

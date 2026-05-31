@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
@@ -228,8 +229,9 @@ public class SerializedDefinitionServiceImpl extends BaseOpenmrsService
     // TODO This setting of audit fields can be safely removed after TRUNK-3876 is fixed.
     // check if existing definition
     if (definition.getId() != null) {
-      definition.setChangedBy(Context.getAuthenticatedUser());
-      definition.setDateChanged(new Date());
+      Auditable audit = definition;
+      audit.setChangedBy(Context.getAuthenticatedUser());
+      audit.setDateChanged(new Date());
     } else {
       // new definition
       if (definition.getCreator() == null) {

@@ -10,6 +10,7 @@
 package org.openmrs.module.reporting.data.patient.evaluator;
 
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.annotation.Handler;
 import org.openmrs.module.reporting.cohort.definition.AllPatientsCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
@@ -35,7 +36,7 @@ public class StaticValuePatientDataEvaluator implements PatientDataEvaluator {
     EvaluatedPatientData ret = new EvaluatedPatientData(definition, context);
     StaticValuePatientDataDefinition cd = (StaticValuePatientDataDefinition) definition;
     Cohort cohort = cohortDefinitionService.evaluate(new AllPatientsCohortDefinition(), context);
-    for (Integer pId : cohort.getMemberIds()) {
+    for (Integer pId : CohortUtil.memberIds(cohort)) {
       ret.addData(pId, cd.getStaticValue());
     }
     return ret;

@@ -40,7 +40,9 @@ public class HibernateCollectionConverter implements Converter {
   /**
    * @see com.thoughtworks.xstream.converters.Converter#canConvert(java.lang.Class)
    */
+  @SuppressWarnings("rawtypes")
   public boolean canConvert(Class type) {
+    // XStream still declares ConverterMatcher with raw Class; keep this override signature.
     return collection.canConvert(type);
   }
 

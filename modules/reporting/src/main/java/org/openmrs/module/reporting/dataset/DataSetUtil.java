@@ -10,12 +10,12 @@
 package org.openmrs.module.reporting.dataset;
 
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.IOUtils;
 import org.openmrs.module.reporting.common.ObjectUtil;
 
 /** Utility methods for working with Data Sets */
@@ -68,7 +68,7 @@ public class DataSetUtil {
     }
 
     try {
-      IOUtils.write(output.toString(), out);
+      out.write(output.toString().getBytes(Charset.defaultCharset()));
     } catch (Exception e) {
       throw new RuntimeException("Unable to write dataset to outputstream", e);
     }

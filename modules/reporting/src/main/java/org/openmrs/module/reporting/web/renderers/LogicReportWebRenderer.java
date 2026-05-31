@@ -24,7 +24,10 @@ import org.openmrs.module.reporting.report.renderer.ReportRenderer;
 /**
  * Shows a LogicDataSet from a report in an interactive fashion, letting you page through the
  * patients. (If the logic rules are straightforward, this will be fast enough for interactive use.)
+ *
+ * <p>Legacy logic datasets still back old interactive reporting screens.
  */
+@SuppressWarnings("deprecation")
 @Handler
 public class LogicReportWebRenderer extends AbstractWebReportRenderer {
 

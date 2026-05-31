@@ -11,6 +11,7 @@ package org.openmrs.module.reporting.cohort.definition;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.reporting.common.Localized;
@@ -18,7 +19,6 @@ import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.definition.configuration.ConfigurationProperty;
 import org.openmrs.module.reporting.definition.configuration.ConfigurationPropertyCachingStrategy;
 import org.openmrs.module.reporting.evaluation.caching.Caching;
-import org.openmrs.util.OpenmrsUtil;
 
 /**
  * A {@link CohortDefinition} which queries for patients based on matching on Patient Identifiers
@@ -56,10 +56,10 @@ public class PatientIdentifierCohortDefinition extends BaseCohortDefinition {
   public String toString() {
     StringBuilder sb = new StringBuilder("Patients with identifiers");
     if (typesToMatch != null) {
-      sb.append(" of type " + OpenmrsUtil.join(typesToMatch, " or "));
+      sb.append(" of type " + StringUtils.join(typesToMatch, " or "));
     }
     if (locationsToMatch != null) {
-      sb.append(" at location " + OpenmrsUtil.join(locationsToMatch, " or "));
+      sb.append(" at location " + StringUtils.join(locationsToMatch, " or "));
     }
     if (ObjectUtil.notNull(textToMatch)) {
       sb.append(" matching text " + textToMatch);

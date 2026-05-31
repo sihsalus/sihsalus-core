@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.module.htmlwidgets.web.WidgetConfig;
 
@@ -55,8 +55,8 @@ public abstract class CodedWidget implements Widget {
    * @param value - the value to check against
    */
   public boolean isSelected(Option option, Object value) {
-    return ObjectUtils.equals(option.getValue(), value)
-        || ObjectUtils.equals(option.getCode(), value);
+    return Objects.equals(option.getValue(), value)
+        || Objects.equals(option.getCode(), value);
   }
 
   /**

@@ -17,6 +17,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSet;
 import org.openmrs.Drug;
@@ -336,7 +337,7 @@ public class CohortQueryServiceImpl extends BaseOpenmrsService implements Cohort
     try {
       CohortDefinitionService cds = Context.getService(CohortDefinitionService.class);
       EvaluatedCohort c = cds.evaluate(cohortDefinition, new EvaluationContext());
-      return new Cohort(c.getMemberIds());
+      return new Cohort(CohortUtil.memberIds(c));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

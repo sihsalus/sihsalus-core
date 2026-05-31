@@ -62,7 +62,8 @@ public class RenderingModeType implements CompositeUserType<RenderingMode> {
 
     String argument = values.getValue(1, String.class);
     try {
-      ReportRenderer renderer = (ReportRenderer) rendererClass.getDeclaredConstructor().newInstance();
+      ReportRenderer renderer =
+          (ReportRenderer) rendererClass.getDeclaredConstructor().newInstance();
       return new RenderingMode(renderer, renderer.getClass().getSimpleName(), argument, null);
     } catch (Exception e) {
       throw new HibernateException(

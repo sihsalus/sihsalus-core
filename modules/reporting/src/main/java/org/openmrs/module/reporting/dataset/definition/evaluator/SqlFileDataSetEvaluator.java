@@ -89,7 +89,7 @@ public class SqlFileDataSetEvaluator implements DataSetEvaluator {
       if (!resultData.getErrors().isEmpty()) {
         throw new EvaluationException(
             "Errors occurred during mysql execution: "
-                + OpenmrsUtil.join(resultData.getErrors(), "; "));
+                + StringUtils.join(resultData.getErrors(), "; "));
       }
 
       SimpleDataSetMetaData metaData = new SimpleDataSetMetaData();

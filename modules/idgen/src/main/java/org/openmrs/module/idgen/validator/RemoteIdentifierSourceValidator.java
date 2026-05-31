@@ -19,8 +19,8 @@ import org.springframework.validation.Validator;
 /** Validates an IdentifierSource */
 public class RemoteIdentifierSourceValidator extends IdentifierSourceValidator {
 
-  @SuppressWarnings("unchecked")
-  public boolean supports(Class clazz) {
+  @Override
+  public boolean supports(Class<?> clazz) {
     return RemoteIdentifierSource.class.isAssignableFrom(clazz);
   }
 

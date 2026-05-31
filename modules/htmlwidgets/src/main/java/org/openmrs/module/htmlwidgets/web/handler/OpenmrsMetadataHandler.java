@@ -38,7 +38,7 @@ public abstract class OpenmrsMetadataHandler<T extends OpenmrsMetadata> extends 
     List<Option> retiredMetadata = new ArrayList<Option>();
     for (OpenmrsMetadata m : l) {
       Option o = new Option(m.getId().toString(), m.getName(), null, m);
-      if (m.isRetired()) {
+      if (Boolean.TRUE.equals(m.getRetired())) {
         retiredMetadata.add(o);
       } else {
         widget.addOption(o, config);

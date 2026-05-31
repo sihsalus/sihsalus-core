@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
@@ -50,7 +51,6 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.ReportingConstants;
 import org.openmrs.module.reporting.indicator.IndicatorResult;
 import org.openmrs.util.OpenmrsClassLoader;
-import org.openmrs.util.OpenmrsUtil;
 
 /** Generically useful utility class for working with Objects */
 public class ObjectUtil {
@@ -241,7 +241,7 @@ public class ObjectUtil {
 
   /** Return a String in which the first occurrence of toReplace was replaced with replaceWith */
   public static String replaceFirst(String inputString, String toReplace, String replaceWith) {
-    return StringUtils.replaceOnce(inputString, toReplace, replaceWith);
+    return Strings.CS.replaceOnce(inputString, toReplace, replaceWith);
   }
 
   /** Returns the first non-null value in the passed array */
@@ -554,7 +554,7 @@ public class ObjectUtil {
         return toString((Map) o, nvl(format, ","));
       }
       if (o instanceof Collection) {
-        return OpenmrsUtil.join((Collection) o, nvl(format, ","));
+        return StringUtils.join((Collection) o, nvl(format, ","));
       }
       if (o instanceof Object[]) {
         return toString(nvl(format, ","), (Object[]) o);
@@ -563,7 +563,7 @@ public class ObjectUtil {
         return format(((IndicatorResult) o).getValue(), format, locale);
       }
       if (o instanceof Cohort) {
-        return Integer.toString(((Cohort) o).getSize());
+        return Integer.toString(((Cohort) o).size());
       }
       if (o instanceof Number) {
         return formatNumber((Number) o, format, locale);

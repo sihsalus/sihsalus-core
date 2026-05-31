@@ -1,6 +1,6 @@
 package org.openmrs.module.htmlwidgets.web.html;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 import org.openmrs.api.context.Context;
 
 /** Represents text to display */
@@ -40,7 +40,7 @@ public class Label {
   public boolean equals(Object obj) {
     if (obj != null && obj instanceof Label) {
       Label l = (Label) obj;
-      return ObjectUtils.equals(this.getLabel(), l.getLabel());
+      return Objects.equals(this.getLabel(), l.getLabel());
     }
     return this == obj;
   }

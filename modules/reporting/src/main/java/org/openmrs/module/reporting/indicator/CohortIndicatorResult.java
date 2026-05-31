@@ -62,7 +62,7 @@ public class CohortIndicatorResult implements IndicatorResult {
           if (type == IndicatorType.FRACTION) {
             denominator = CohortUtil.intersect(denominator, filter);
           } else if (type == IndicatorType.LOGIC) {
-            logicVals.keySet().retainAll(filter.getMemberIds());
+            logicVals.keySet().retainAll(CohortUtil.memberIds(filter));
           }
         }
       }
@@ -70,8 +70,8 @@ public class CohortIndicatorResult implements IndicatorResult {
 
     // Return the appropriate result, given the IndicatorType
     if (type == IndicatorType.FRACTION) {
-      int n = numerator.getSize();
-      int d = denominator.getSize();
+      int n = numerator.size();
+      int d = denominator.size();
       return new Fraction(n, d);
     } else if (type == IndicatorType.LOGIC) {
       Class<? extends Aggregator> aggregator =
@@ -81,7 +81,7 @@ public class CohortIndicatorResult implements IndicatorResult {
       }
       return AggregationUtil.aggregate(logicVals.values(), aggregator);
     } else { // Assume IndicatorType.COUNT
-      return numerator.getSize();
+      return numerator.size();
     }
   }
 

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 import org.openmrs.module.htmlwidgets.web.WidgetConfig;
 
 /** This represents a select list widget */
@@ -47,8 +47,8 @@ public class SelectWidget extends CodedWidget {
       // Render Option
       List<Attribute> atts = new ArrayList<Attribute>();
       atts.add(new Attribute("value", option.getCode(), null, null));
-      if (ObjectUtils.equals(option.getValue(), config.getDefaultValue())
-          || ObjectUtils.equals(option.getCode(), config.getDefaultValue())) {
+      if (Objects.equals(option.getValue(), config.getDefaultValue())
+          || Objects.equals(option.getCode(), config.getDefaultValue())) {
         atts.add(new Attribute("selected", "true", null, null));
       }
       HtmlUtil.renderOpenTag(w, "option", atts);

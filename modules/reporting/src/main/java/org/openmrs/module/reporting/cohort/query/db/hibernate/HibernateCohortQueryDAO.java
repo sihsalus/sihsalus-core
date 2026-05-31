@@ -23,6 +23,7 @@ import org.hibernate.CacheMode;
 import org.hibernate.HibernateException;
 import org.hibernate.query.Query;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.Drug;
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
@@ -52,6 +53,8 @@ import org.openmrs.module.reporting.evaluation.parameter.ParameterException;
 import org.openmrs.module.reporting.report.util.ReportUtil;
 import org.openmrs.module.reporting.report.util.SqlUtils;
 
+// This DAO still uses deprecated SqlUtils helpers for legacy SQL cohort query assembly.
+@SuppressWarnings("deprecation")
 public class HibernateCohortQueryDAO implements CohortQueryDAO {
 
   protected static final Log log = LogFactory.getLog(HibernateCohortQueryDAO.class);
@@ -803,7 +806,7 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 
         // Cohort (needs to be first, otherwise it will resolve as OpenmrsObject)
         if (Cohort.class.isAssignableFrom(paramValue.getClass())) {
-          query.setParameterList(paramName, ((Cohort) paramValue).getMemberIds());
+          query.setParameterList(paramName, CohortUtil.memberIds((Cohort) paramValue));
         }
         // OpenmrsObject (e.g. Location)
         else if (OpenmrsObject.class.isAssignableFrom(paramValue.getClass())) {

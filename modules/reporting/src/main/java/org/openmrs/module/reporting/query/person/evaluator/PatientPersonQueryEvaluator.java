@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Handler;
 import org.openmrs.module.reporting.cohort.EvaluatedCohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
@@ -43,7 +44,7 @@ public class PatientPersonQueryEvaluator implements PersonQueryEvaluator {
     PatientPersonQuery query = (PatientPersonQuery) definition;
     EvaluatedCohort c = cohortDefinitionService.evaluate(query.getPatientQuery(), context);
     PersonQueryResult r = new PersonQueryResult(query, context);
-    r.setMemberIds(c.getMemberIds());
+    r.setMemberIds(CohortUtil.memberIds(c));
     return r;
   }
 }

@@ -42,7 +42,7 @@ public class ProgramWorkflowHandler extends OpenmrsMetadataHandler<ProgramWorkfl
     boolean includeRetired = includeRetired(config);
     for (Program p : Context.getProgramWorkflowService().getAllPrograms(includeRetired)) {
       for (ProgramWorkflow w : p.getAllWorkflows()) {
-        if (!w.isRetired() || includeRetired) {
+        if (!Boolean.TRUE.equals(w.getRetired()) || includeRetired) {
           OptionGroup group = new OptionGroup(p.getName(), null);
           String optionName =
               (w.getName() == null ? w.getConcept().getDisplayString() : w.getName());

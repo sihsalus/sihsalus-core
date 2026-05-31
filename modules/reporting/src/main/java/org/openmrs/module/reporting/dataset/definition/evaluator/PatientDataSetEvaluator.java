@@ -97,7 +97,7 @@ public class PatientDataSetEvaluator implements DataSetEvaluator {
       EvaluatedPatientData data =
           Context.getService(PatientDataService.class).evaluate(dataDef, ec);
 
-      for (Integer id : c.getMemberIds()) {
+      for (Integer id : CohortUtil.memberIds(c)) {
         for (DataSetColumn column : cd.getDataSetColumns()) {
           Object val = data.getData().get(id);
           val = DataUtil.convertData(val, dataDef.getConverters());

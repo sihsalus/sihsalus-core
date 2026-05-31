@@ -42,7 +42,7 @@ public class PresenceOrAbsenceCohortDefinitionEvaluator implements CohortDefinit
     ObjectCounter<Integer> counter = new ObjectCounter<Integer>();
     for (Mapped<? extends CohortDefinition> mapped : cd.getCohortsToCheck()) {
       Cohort c = cohortDefinitionService.evaluate(mapped, context);
-      for (Integer pId : c.getMemberIds()) {
+      for (Integer pId : CohortUtil.memberIds(c)) {
         counter.increment(pId);
       }
     }

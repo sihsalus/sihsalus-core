@@ -16,6 +16,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.cohort.Cohorts;
@@ -80,7 +81,7 @@ public class ScriptedCompositionPatientDataDefinitionEvaluator implements Patien
       baseCohort = Cohorts.allPatients(context);
     }
 
-    for (Integer pId : baseCohort.getMemberIds()) { // iterate across all patients
+    for (Integer pId : CohortUtil.memberIds(baseCohort)) { // iterate across all patients
 
       for (Entry<String, EvaluatedPatientData> dataEntry :
           evaluatedContainedDataDefinitions.entrySet()) {

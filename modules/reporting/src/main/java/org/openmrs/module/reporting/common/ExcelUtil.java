@@ -348,7 +348,7 @@ public class ExcelUtil {
 
   public static Font getFont(Cell cell) {
     CellStyle style = cell.getCellStyle();
-    return cell.getSheet().getWorkbook().getFontAt(style.getFontIndexAsInt());
+    return cell.getSheet().getWorkbook().getFontAt(style.getFontIndex());
   }
 
   public static String formatRow(Row row) {

@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.cohort.Cohorts;
@@ -235,7 +236,7 @@ public abstract class BaseObsCohortDefinitionEvaluator implements CohortDefiniti
         Context.getService(EvaluationService.class).evaluateToList(qb, Integer.class, context);
 
     if (doInvert) {
-      Set<Integer> inverted = Cohorts.allPatients(context).getMemberIds();
+      Set<Integer> inverted = CohortUtil.memberIds(Cohorts.allPatients(context));
       inverted.removeAll(ids);
       return new Cohort(inverted);
     } else {

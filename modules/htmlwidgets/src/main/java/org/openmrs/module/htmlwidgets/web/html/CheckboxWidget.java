@@ -5,7 +5,7 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 import org.openmrs.module.htmlwidgets.web.WidgetConfig;
 
 /** This represents one or more Check-boxes */
@@ -25,8 +25,8 @@ public class CheckboxWidget extends CodedWidget {
    */
   @Override
   public boolean isSelected(Option option, Object value) {
-    if (ObjectUtils.equals(option.getValue(), value)
-        || ObjectUtils.equals(option.getCode(), value)) {
+    if (Objects.equals(option.getValue(), value)
+        || Objects.equals(option.getCode(), value)) {
       return true;
     } else if (value instanceof Collection<?>) {
       return ((Collection<?>) value).contains(option.getValue())

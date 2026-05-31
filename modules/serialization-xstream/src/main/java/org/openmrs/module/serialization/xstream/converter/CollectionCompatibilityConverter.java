@@ -30,7 +30,7 @@ import org.hibernate.collection.spi.PersistentCollection;
 public class CollectionCompatibilityConverter implements CollectionCompatibility {
 
   @Override
-  public boolean canConvert(Class type) {
+  public boolean canConvert(Class<?> type) {
     return PersistentCollection.class.isAssignableFrom(type);
   }
 
@@ -41,21 +41,27 @@ public class CollectionCompatibilityConverter implements CollectionCompatibility
       MarshallingContext context,
       ConverterLookup converterLookup) {
 
-    if (source instanceof SortedMap) {
-      source = new TreeMap((SortedMap) source);
-    } else if (source instanceof SortedSet) {
-      source = new TreeSet((SortedSet) source);
-    } else if (source instanceof Map) {
-      source = new HashMap((Map) source);
-    } else if (source instanceof Set) {
-      source = new HashSet((Set) source);
-    } else if (source instanceof List) {
-      source = new ArrayList((Collection) source);
-    } else if (source instanceof Collection) {
-      source = new ArrayList((Collection) source);
-    }
+    source = compatibilityCopy(source);
 
     // delegate the collection to the appropriate converter
     converterLookup.lookupConverterForType(source.getClass()).marshal(source, writer, context);
+  }
+
+  Object compatibilityCopy(Object source) {
+    // Hibernate collection implementations carry session state; copy them to plain JDK collections.
+    if (source instanceof SortedMap<?, ?> sortedMap) {
+      return new TreeMap<>(sortedMap);
+    } else if (source instanceof SortedSet<?> sortedSet) {
+      return new TreeSet<>(sortedSet);
+    } else if (source instanceof Map<?, ?> map) {
+      return new HashMap<>(map);
+    } else if (source instanceof Set<?> set) {
+      return new HashSet<>(set);
+    } else if (source instanceof List<?> list) {
+      return new ArrayList<>(list);
+    } else if (source instanceof Collection<?> collection) {
+      return new ArrayList<>(collection);
+    }
+    return source;
   }
 }

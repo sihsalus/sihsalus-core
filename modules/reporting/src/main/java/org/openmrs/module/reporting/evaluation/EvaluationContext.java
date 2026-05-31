@@ -204,7 +204,7 @@ public class EvaluationContext implements PatientCalculationContext {
     Map<Class<? extends OpenmrsData>, IdSet<?>> ret =
         new LinkedHashMap<Class<? extends OpenmrsData>, IdSet<?>>();
     if (getBaseCohort() != null) {
-      ret.put(Patient.class, new PatientIdSet(getBaseCohort().getMemberIds()));
+      ret.put(Patient.class, new PatientIdSet(CohortUtil.memberIds(getBaseCohort())));
     }
     return ret;
   }

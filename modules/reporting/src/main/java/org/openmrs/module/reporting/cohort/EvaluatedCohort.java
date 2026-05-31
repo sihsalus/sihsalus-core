@@ -46,7 +46,7 @@ public class EvaluatedCohort extends PatientIdSet implements Evaluated<CohortDef
 
   /** Full Constructor */
   public EvaluatedCohort(Cohort c, CohortDefinition definition, EvaluationContext context) {
-    super(c == null ? new HashSet<Integer>() : c.getMemberIds());
+    super(c == null ? new HashSet<Integer>() : CohortUtil.memberIds(c));
     this.definition = definition;
     this.context = context;
   }

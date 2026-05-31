@@ -13,7 +13,6 @@ package org.openmrs.module.htmlwidgets.web.handler;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Role;
 import org.openmrs.User;
@@ -21,6 +20,7 @@ import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.htmlwidgets.web.WidgetConfig;
 import org.openmrs.module.htmlwidgets.web.html.CodedWidget;
+import org.openmrs.module.htmlwidgets.web.html.HtmlUtil;
 import org.openmrs.module.htmlwidgets.web.html.Option;
 
 /** WidgetHandler for Users */
@@ -96,6 +96,6 @@ public class UserHandler extends CodedHandler {
    * @return
    */
   protected String getUserDisplay(User u, WidgetConfig config) {
-    return StringEscapeUtils.escapeHtml4(u.getFamilyName() + ", " + u.getGivenName());
+    return HtmlUtil.escapeHtml(u.getFamilyName() + ", " + u.getGivenName());
   }
 }
