@@ -5,6 +5,7 @@ import static org.openmrs.module.attachments.AttachmentsContext.isMimeTypeHandle
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.module.attachments.AttachmentsConstants;
 
 /**
@@ -195,7 +196,7 @@ public class ValueComplex {
   }
 
   protected static boolean isValidInstructions(String str) {
-    return StringUtils.startsWith(str, AttachmentsConstants.INSTRUCTIONS_PREFIX + ".");
+    return Strings.CS.startsWith(str, AttachmentsConstants.INSTRUCTIONS_PREFIX + ".");
   }
 
   protected static boolean isValidMimeType(String str) {

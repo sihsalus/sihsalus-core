@@ -38,7 +38,7 @@ public class CashPointPropertyEditor extends PropertyEditorSupport {
       setValue(null);
     } else {
       CashPoint cashPoint;
-      if (NumberUtils.isNumber(text)) {
+      if (NumberUtils.isCreatable(text)) {
         cashPoint = service.getCashPoint(Integer.valueOf(text));
       } else {
         cashPoint = service.getCashPointByUuid(text);

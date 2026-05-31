@@ -1484,11 +1484,11 @@ public final class OpenmrsConstants {
     return states;
   }
 
-  public static final Locale SPANISH_LANGUAGE = new Locale("es");
+  public static final Locale SPANISH_LANGUAGE = Locale.of("es");
 
-  public static final Locale PORTUGUESE_LANGUAGE = new Locale("pt");
+  public static final Locale PORTUGUESE_LANGUAGE = Locale.of("pt");
 
-  public static final Locale ITALIAN_LANGUAGE = new Locale("it");
+  public static final Locale ITALIAN_LANGUAGE = Locale.of("it");
 
   /*
    * User property names

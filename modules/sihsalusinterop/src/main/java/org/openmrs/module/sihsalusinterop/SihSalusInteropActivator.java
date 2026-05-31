@@ -151,11 +151,11 @@ public class SihSalusInteropActivator extends BaseModuleActivator {
       throw e;
     } finally {
       // Cerrar recursos de Liquibase
-      if (liquibase != null && liquibase.getDatabase() != null) {
+      if (liquibase != null) {
         try {
-          liquibase.getDatabase().close();
-        } catch (DatabaseException e) {
-          log.warn("Error al cerrar Database de Liquibase", e);
+          liquibase.close();
+        } catch (LiquibaseException e) {
+          log.warn("Error al cerrar Liquibase", e);
         }
       }
 

@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.PersonAddress;
@@ -378,7 +379,7 @@ public class AddressHierarchyAjaxController {
       HttpServletResponse response, Set<String> addresses, String separator) throws IOException {
 
     String delimiter = null;
-    if (!StringUtils.equals(separator, "|")) {
+    if (!Strings.CS.equals(separator, "|")) {
       delimiter = separator;
     }
 
@@ -392,7 +393,7 @@ public class AddressHierarchyAjaxController {
       Iterator<String> i = addresses.iterator();
       if (StringUtils.isNotBlank(delimiter)) {
         while (i.hasNext()) {
-          out.print("{ \"address\": \"" + StringUtils.replace(i.next(), "|", delimiter) + "\" }");
+          out.print("{ \"address\": \"" + Strings.CS.replace(i.next(), "|", delimiter) + "\" }");
           // print comma between entries for all but the last option in the list
           if (i.hasNext()) {
             out.print(",");

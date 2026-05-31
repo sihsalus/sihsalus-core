@@ -38,7 +38,7 @@ public class ProviderPropertyEditor extends PropertyEditorSupport {
       setValue(null);
     } else {
       Provider provider;
-      if (NumberUtils.isNumber(text)) {
+      if (NumberUtils.isCreatable(text)) {
         provider = service.getProvider(Integer.valueOf(text));
       } else {
         provider = service.getProviderByUuid(text);

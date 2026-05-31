@@ -1,6 +1,6 @@
 package org.openmrs.module.addresshierarchy;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 /**
  * This is a list of all the valid address fields on PersonAddress.
@@ -52,7 +52,7 @@ public enum AddressField {
   public static final AddressField getByName(String name) {
 
     for (AddressField field : AddressField.values()) {
-      if (StringUtils.equals(name, field.getName())) {
+      if (Strings.CS.equals(name, field.getName())) {
         return field;
       }
     }

@@ -68,6 +68,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.Cohort;
 import org.openmrs.Concept;
 import org.openmrs.ConceptNumeric;
@@ -1185,7 +1186,7 @@ public class OpenmrsUtil {
    */
   public static boolean stringStartsWith(String str, String[] prefixes) {
     for (String prefix : prefixes) {
-      if (StringUtils.startsWith(str, prefix)) {
+      if (Strings.CS.startsWith(str, prefix)) {
         return true;
       }
     }

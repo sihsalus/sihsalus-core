@@ -10,7 +10,7 @@
 package org.openmrs.module.reporting.dataset;
 
 import java.io.Serializable;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.module.reporting.common.ObjectUtil;
 
 /**
@@ -56,7 +56,7 @@ public class DataSetColumn implements Comparable<DataSetColumn>, Serializable {
   public boolean equals(Object obj) {
     if (obj instanceof DataSetColumn) {
       DataSetColumn col = (DataSetColumn) obj;
-      if (StringUtils.equals(this.getName(), col.getName())) {
+      if (Strings.CS.equals(this.getName(), col.getName())) {
         return true;
       }
     }

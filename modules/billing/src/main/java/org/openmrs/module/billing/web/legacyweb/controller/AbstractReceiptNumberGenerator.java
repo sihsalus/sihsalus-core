@@ -12,6 +12,7 @@ package org.openmrs.module.billing.web.legacyweb.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.IReceiptNumberGenerator;
@@ -72,7 +73,7 @@ public abstract class AbstractReceiptNumberGenerator {
       } else {
         // The configuration page should set the system generator when saved so it is not done here
         String configurationPage = selectedGenerator.getConfigurationPage();
-        if (StringUtils.contains(getReceiptNumberGeneratorUrl(), "2x")) {
+        if (Strings.CS.contains(getReceiptNumberGeneratorUrl(), "2x")) {
           configurationPage += "2x";
         }
         return UrlUtil.redirectUrl(configurationPage);

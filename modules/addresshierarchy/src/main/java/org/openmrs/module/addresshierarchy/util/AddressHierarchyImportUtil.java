@@ -67,12 +67,11 @@ public class AddressHierarchyImportUtil {
     }
 
     // process the file
-    try {
-      // Note that we are using UnicodeInputStream to work around this Java bug:
-      // http://bugs.sun.com/view_bug.do?bug_id=4508058
-      BufferedReader reader =
-          new BufferedReader(
-              new InputStreamReader(new UnicodeInputStream(stream), Charset.forName("UTF-8")));
+    // Note that we are using UnicodeInputStream to work around this Java bug:
+    // http://bugs.sun.com/view_bug.do?bug_id=4508058
+    try (BufferedReader reader =
+        new BufferedReader(
+            new InputStreamReader(new UnicodeInputStream(stream), Charset.forName("UTF-8")))) {
 
       // step through the file line by line
       while ((line = reader.readLine()) != null) {

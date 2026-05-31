@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.Auditable;
 import org.openmrs.Concept;
 import org.openmrs.ConceptAnswer;
@@ -270,7 +271,7 @@ public class Saver {
   }
 
   private void convertConceptDatatypes(OclConcept oclConcept) {
-    if (StringUtils.equalsIgnoreCase("None", oclConcept.getDatatype())) {
+    if (Strings.CI.equals("None", oclConcept.getDatatype())) {
       oclConcept.setDatatype("N/A");
     }
   }

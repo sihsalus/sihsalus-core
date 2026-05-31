@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.Person;
 import org.openmrs.Privilege;
 import org.openmrs.Role;
@@ -608,7 +609,7 @@ public class UserServiceImpl extends BaseOpenmrsService implements UserService, 
   @Transactional(readOnly = true)
   public Integer getCountOfUsers(String name, List<Role> roles, boolean includeRetired) {
     if (name != null) {
-      name = StringUtils.replace(name, ", ", " ");
+      name = Strings.CS.replace(name, ", ", " ");
     }
 
     // if the authenticated role is in the list of searched roles, then all
@@ -630,7 +631,7 @@ public class UserServiceImpl extends BaseOpenmrsService implements UserService, 
       String name, List<Role> roles, boolean includeRetired, Integer start, Integer length)
       throws APIException {
     if (name != null) {
-      name = StringUtils.replace(name, ", ", " ");
+      name = Strings.CS.replace(name, ", ", " ");
     }
 
     if (roles == null) {

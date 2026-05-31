@@ -68,7 +68,7 @@ public class QueueEntrySearchCriteria implements Serializable {
 
   private Date startedOn;
 
-  private Boolean isEnded = null;
+  @Builder.Default private Boolean isEnded = null;
 
   private Date endedOnOrAfter;
 
@@ -76,5 +76,5 @@ public class QueueEntrySearchCriteria implements Serializable {
 
   private Date endedOn;
 
-  private boolean includedVoided = false;
+  @Builder.Default private boolean includedVoided = false;
 }

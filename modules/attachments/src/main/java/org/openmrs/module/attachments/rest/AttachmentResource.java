@@ -24,6 +24,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
@@ -199,7 +200,7 @@ public class AttachmentResource extends DataDelegatingCrudResource<Attachment>
     // Verify Parameters
     if (encounter != null && visit != null) {
       if (encounter.getVisit() == null
-          || !StringUtils.equals(encounter.getVisit().getUuid(), visit.getUuid())) {
+          || !Strings.CS.equals(encounter.getVisit().getUuid(), visit.getUuid())) {
         throw new IllegalRequestException(
             "The specified encounter does not belong to the provided visit, upload aborted.");
       }

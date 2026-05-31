@@ -33,5 +33,5 @@ public class BillableServiceSearch {
 
   private String name;
 
-  private Boolean includeRetired = false;
+  @Builder.Default private Boolean includeRetired = false;
 }

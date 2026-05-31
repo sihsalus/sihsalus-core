@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.Concept;
 import org.openmrs.ConceptAnswer;
 import org.openmrs.Encounter;
@@ -197,7 +198,7 @@ public class EncounterDispositionServiceHelper {
 
   private Obs getMatchingObservation(Set<Obs> existingObservations, String conceptUUID) {
     for (Obs obs : existingObservations) {
-      if (StringUtils.equals(obs.getConcept().getUuid(), conceptUUID)) return obs;
+      if (Strings.CS.equals(obs.getConcept().getUuid(), conceptUUID)) return obs;
     }
     return null;
   }

@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.renderer.ReportRenderer;
@@ -48,7 +48,7 @@ public class ReportDesign extends BaseOpenmrsMetadata {
    */
   public ReportDesignResource getResourceByName(String name) {
     for (ReportDesignResource r : getResources()) {
-      if (StringUtils.equals(r.getName(), name)) {
+      if (Strings.CS.equals(r.getName(), name)) {
         return r;
       }
     }
@@ -63,7 +63,7 @@ public class ReportDesign extends BaseOpenmrsMetadata {
    */
   public ReportDesignResource getResourceByUuid(String uuid) {
     for (ReportDesignResource r : getResources()) {
-      if (StringUtils.equals(r.getUuid(), uuid)) {
+      if (Strings.CS.equals(r.getUuid(), uuid)) {
         return r;
       }
     }

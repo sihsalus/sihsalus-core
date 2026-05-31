@@ -271,9 +271,7 @@ public class BundleBuilderService {
         // Método 1: Intentar getAllergies() en Patient
         java.lang.reflect.Method getAllergies = patient.getClass().getMethod("getAllergies");
         Object result = getAllergies.invoke(patient);
-        if (result instanceof java.util.Collection) {
-          openmrsAllergies = (java.util.Collection<Allergy>) result;
-        }
+        openmrsAllergies = filterInstances(result, Allergy.class);
       } catch (Exception e1) {
         // Método 2: Intentar usar AllergyService
         try {
@@ -284,9 +282,7 @@ public class BundleBuilderService {
             java.lang.reflect.Method getAllergies =
                 allergyService.getClass().getMethod("getAllergies", Patient.class);
             Object result = getAllergies.invoke(allergyService, patient);
-            if (result instanceof java.util.Collection) {
-              openmrsAllergies = (java.util.Collection<Allergy>) result;
-            }
+            openmrsAllergies = filterInstances(result, Allergy.class);
           }
         } catch (Exception e2) {
           log.warn(
@@ -337,9 +333,7 @@ public class BundleBuilderService {
           java.lang.reflect.Method getOrdersByEncounter =
               orderService.getClass().getMethod("getOrdersByEncounter", Encounter.class);
           Object result = getOrdersByEncounter.invoke(orderService, encounter);
-          if (result instanceof java.util.List) {
-            orders = (java.util.List<Order>) result;
-          }
+          orders = filterInstances(result, Order.class);
         } catch (Exception e1) {
           // Intentar método alternativo: getOrders del Patient
           try {
@@ -401,9 +395,7 @@ public class BundleBuilderService {
           java.lang.reflect.Method getOrdersByEncounter =
               orderService.getClass().getMethod("getOrdersByEncounter", Encounter.class);
           Object result = getOrdersByEncounter.invoke(orderService, encounter);
-          if (result instanceof java.util.List) {
-            orders = (java.util.List<Order>) result;
-          }
+          orders = filterInstances(result, Order.class);
         } catch (Exception e1) {
           // Intentar método alternativo: getOrders del Patient
           try {
@@ -511,6 +503,20 @@ public class BundleBuilderService {
     }
 
     return immunizations;
+  }
+
+  private static <T> List<T> filterInstances(Object value, Class<T> type) {
+    List<T> results = new ArrayList<>();
+    if (!(value instanceof java.util.Collection<?>)) {
+      return results;
+    }
+
+    for (Object item : (java.util.Collection<?>) value) {
+      if (type.isInstance(item)) {
+        results.add(type.cast(item));
+      }
+    }
+    return results;
   }
 
   /** Agrega una entrada al Bundle */

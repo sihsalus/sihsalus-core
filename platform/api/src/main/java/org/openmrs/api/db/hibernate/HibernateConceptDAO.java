@@ -2354,7 +2354,7 @@ public class HibernateConceptDAO implements ConceptDAO {
     predicates.add(
         cb.or(
             cb.equal(root.get("locale"), name.getLocale()),
-            cb.equal(root.get("locale"), new Locale(name.getLocale().getLanguage()))));
+            cb.equal(root.get("locale"), Locale.of(name.getLocale().getLanguage()))));
 
     if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
       predicates.add(cb.equal(cb.lower(root.get("name")), name.getName().toLowerCase()));

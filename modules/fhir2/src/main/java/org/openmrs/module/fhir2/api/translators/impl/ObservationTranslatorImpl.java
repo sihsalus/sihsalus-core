@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
@@ -137,7 +137,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
     }
 
     if (observation.getValueText() != null
-        && StringUtils.equals(observation.getComment(), "org.openmrs.Location")) {
+        && Strings.CS.equals(observation.getComment(), "org.openmrs.Location")) {
       obs.addExtension(
           FhirConstants.OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE,
           createLocationReferenceByUuid(observation.getValueText()));

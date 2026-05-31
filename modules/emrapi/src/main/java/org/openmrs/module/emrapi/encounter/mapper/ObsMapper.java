@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.openmrs.Concept;
@@ -169,7 +170,7 @@ public class ObsMapper {
   public Obs getMatchingObservation(Set<Obs> existingObservations, String observationUuid) {
     if (existingObservations == null) return null;
     for (Obs obs : existingObservations) {
-      if (StringUtils.equals(obs.getUuid(), observationUuid)) return obs;
+      if (Strings.CS.equals(obs.getUuid(), observationUuid)) return obs;
     }
     return null;
   }

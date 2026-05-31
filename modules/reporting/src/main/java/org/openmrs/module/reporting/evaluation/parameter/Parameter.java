@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 
 /**
@@ -212,7 +213,7 @@ public class Parameter implements Serializable {
   public boolean equals(Object obj) {
     if (obj != null && obj instanceof Parameter) {
       Parameter p = (Parameter) obj;
-      return StringUtils.equalsIgnoreCase(p.getName(), getName());
+      return Strings.CI.equals(p.getName(), getName());
     }
     return false;
   }

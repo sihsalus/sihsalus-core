@@ -218,7 +218,7 @@ public class StockItemInventoryResource extends ResourceBase<StockItemInventory>
               param = context.getParameter("emptyBatchLocationUuid");
               if (!StringUtils.isBlank(param)) {
                 Location emptyBatchlocation = Context.getLocationService().getLocationByUuid(param);
-                if (location == null) {
+                if (emptyBatchlocation == null) {
                   return emptyResult(context);
                 }
                 Party party = getStockManagementService().getPartyByLocation(emptyBatchlocation);

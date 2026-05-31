@@ -82,7 +82,7 @@ public class PaymentAttributeResource
     String instanceFormat = instance.getAttributeType().getFormat();
     String names = null;
     if (StringUtils.isNotEmpty(instanceFormat)) {
-      if (NumberUtils.isNumber(instance.getValue())) {
+      if (NumberUtils.isCreatable(instance.getValue())) {
         int instanceId = NumberUtils.toInt(instance.getValue(), -1);
         if (instanceId > -1) {
           if (instanceFormat.contains("User")) {

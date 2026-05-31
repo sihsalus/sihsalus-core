@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hibernate.Hibernate;
@@ -1560,7 +1561,7 @@ public class ConceptServiceImpl extends BaseOpenmrsService implements ConceptSer
     try {
       dao.deleteConceptStopWord(conceptStopWordId);
     } catch (DAOException e) {
-      if (StringUtils.contains(e.getMessage(), "Concept Stop Word not found or already deleted")) {
+      if (Strings.CS.contains(e.getMessage(), "Concept Stop Word not found or already deleted")) {
         throw new ConceptStopWordException("ConceptStopWord.error.notfound", e);
       }
       throw new ConceptStopWordException("general.cannot.delete", e);

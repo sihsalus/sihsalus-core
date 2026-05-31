@@ -13,7 +13,6 @@ import org.openmrs.module.addresshierarchy.AddressToEntryMap;
  * links to the tables address_hierarchy_entry, address_hierarchy_level and person_address. This
  * class does the functions of storing and retrieving addresses.
  */
-@SuppressWarnings("unused")
 public interface AddressHierarchyDAO {
 
   /** Returns the number of address hierarchy entries */

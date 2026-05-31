@@ -11,6 +11,7 @@ package org.openmrs.module.emrapi.encounter;
 
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterProvider;
 import org.openmrs.EncounterRole;
@@ -57,9 +58,9 @@ public class EncounterProviderServiceHelper {
   private EncounterProvider findProvider(
       Encounter encounter, String providerUuid, String encounterRoleUuid) {
     for (EncounterProvider encounterProvider : encounter.getEncounterProviders()) {
-      if (StringUtils.equals(encounterProvider.getProvider().getUuid(), providerUuid)
+      if (Strings.CS.equals(encounterProvider.getProvider().getUuid(), providerUuid)
           && (StringUtils.isEmpty(encounterRoleUuid)
-              || (StringUtils.equals(
+              || (Strings.CS.equals(
                   encounterProvider.getEncounterRole().getUuid(), encounterRoleUuid)))) {
         return encounterProvider;
       }

@@ -63,7 +63,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
   // the database
   private Set<ConceptName> updatedConceptNames = new HashSet<>();
 
-  private Locale defaultLocale = new Locale("en");
+  private Locale defaultLocale = Locale.of("en");
 
   private List<Locale> allowedLocales = null;
 
@@ -655,7 +655,7 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
     }
 
     // if it isn't among
-    allowedLocales.add(new Locale("en"));
+    allowedLocales.add(Locale.of("en"));
 
     return allowedLocales.asList();
   }

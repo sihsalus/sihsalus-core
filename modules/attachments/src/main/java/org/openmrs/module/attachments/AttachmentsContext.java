@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
@@ -153,7 +154,7 @@ public class AttachmentsContext {
   public boolean isOneEncounterPerVisit() {
     String flowStr =
         getAdministrationService().getGlobalProperty(AttachmentsConstants.GP_ENCOUNTER_SAVING_FLOW);
-    return StringUtils.equalsIgnoreCase(flowStr, "unique");
+    return Strings.CI.equals(flowStr, "unique");
   }
 
   public Encounter getAttachmentEncounter(Patient patient, Visit visit, Provider provider) {
@@ -167,7 +168,7 @@ public class AttachmentsContext {
     if (visit != null && isOneEncounterPerVisit()) {
       List<Encounter> encounters = visitCompatibility.getNonVoidedEncounters(visit);
       for (Encounter e : encounters) {
-        if (StringUtils.equals(e.getEncounterType().getUuid(), getEncounterType().getUuid())) {
+        if (Strings.CS.equals(e.getEncounterType().getUuid(), getEncounterType().getUuid())) {
           encounter = e;
           saveEncounter = false;
           break;
@@ -434,10 +435,10 @@ public class AttachmentsContext {
    */
   public static ContentFamily getContentFamily(String mimeType) {
     ContentFamily contentFamily = ContentFamily.OTHER;
-    if (StringUtils.equals(mimeType, "application/pdf")) {
+    if (Strings.CS.equals(mimeType, "application/pdf")) {
       contentFamily = ContentFamily.PDF;
     }
-    if (StringUtils.startsWith(mimeType, "image/")) {
+    if (Strings.CS.startsWith(mimeType, "image/")) {
       contentFamily = ContentFamily.IMAGE;
     }
     return contentFamily;

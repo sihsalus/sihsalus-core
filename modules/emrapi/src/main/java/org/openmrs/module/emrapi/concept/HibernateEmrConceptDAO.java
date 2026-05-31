@@ -166,7 +166,7 @@ public class HibernateEmrConceptDAO implements EmrConceptDAO {
 
     Query conceptNameQuery = sessionFactory.getCurrentSession().createQuery(hql.toString());
     if (countrySpecificLocale) {
-      conceptNameQuery.setParameter("locales", List.of(locale, new Locale(locale.getLanguage())));
+      conceptNameQuery.setParameter("locales", List.of(locale, Locale.of(locale.getLanguage())));
     } else {
       conceptNameQuery.setParameter("locale", locale);
     }

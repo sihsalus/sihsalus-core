@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ProviderService;
@@ -88,7 +89,7 @@ public class CashierController {
           URL url = new URL(returnTo);
 
           returnTo = url.getPath();
-          if (StringUtils.startsWith(returnTo, req.getContextPath())) {
+          if (Strings.CS.startsWith(returnTo, req.getContextPath())) {
 
             returnTo = returnTo.substring(req.getContextPath().length());
           }

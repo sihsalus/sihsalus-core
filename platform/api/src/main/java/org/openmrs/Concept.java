@@ -488,7 +488,7 @@ public class Concept extends BaseOpenmrsObject
       // i.e en
       if (!StringUtils.isBlank(currentLocale.getCountry())
           || !StringUtils.isBlank(currentLocale.getVariant())) {
-        Locale broaderLocale = new Locale(currentLocale.getLanguage());
+        Locale broaderLocale = Locale.of(currentLocale.getLanguage());
         ConceptName prefNameInBroaderLoc = getPreferredName(broaderLocale);
         if (prefNameInBroaderLoc != null) {
           return prefNameInBroaderLoc;
@@ -596,7 +596,7 @@ public class Concept extends BaseOpenmrsObject
     }
 
     // if we reach here, there were no matching names, so try to look in the parent locale
-    Locale parent = new Locale(locale.getLanguage());
+    Locale parent = Locale.of(locale.getLanguage());
     if (!parent.equals(locale)) {
       return getName(parent, ofType, havingTag);
     } else {
@@ -632,7 +632,7 @@ public class Concept extends BaseOpenmrsObject
     }
 
     if (!exact) {
-      Locale broaderLocale = new Locale(locale.getLanguage());
+      Locale broaderLocale = Locale.of(locale.getLanguage());
       ConceptName name = getNameInLocale(broaderLocale);
       return name != null ? name : getName();
     }

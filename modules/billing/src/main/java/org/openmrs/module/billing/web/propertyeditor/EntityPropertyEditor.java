@@ -48,7 +48,7 @@ public class EntityPropertyEditor<E extends OpenmrsObject> extends PropertyEdito
       setValue(null);
     } else {
       E entity;
-      if (NumberUtils.isNumber(text)) {
+      if (NumberUtils.isCreatable(text)) {
         entity = service.getById(Integer.valueOf(text));
       } else {
         entity = service.getByUuid(text);

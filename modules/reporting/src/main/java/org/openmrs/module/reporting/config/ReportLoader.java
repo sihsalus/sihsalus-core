@@ -21,6 +21,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
@@ -314,7 +315,7 @@ public class ReportLoader {
       if (design.getPropertyValue(ReportDesignRenderer.FILENAME_BASE_PROPERTY, null) == null) {
         design.addPropertyValue(
             ReportDesignRenderer.FILENAME_BASE_PROPERTY,
-            StringUtils.replace(reportDefinition.getName(), " ", ".").toLowerCase()
+            Strings.CS.replace(reportDefinition.getName(), " ", ".").toLowerCase()
                 + "."
                 + "{{ formatDate request.reportDefinition.parameterMappings.startDate \"yyyyMMdd\" }}."
                 + "{{ formatDate request.reportDefinition.parameterMappings.endDate \"yyyyMMdd\" }}."

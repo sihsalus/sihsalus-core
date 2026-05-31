@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.Cohort;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.reporting.IllegalDatabaseAccessException;
@@ -70,7 +71,7 @@ public class SqlUtils {
         // http://www.javaranch.com/journal/200510/Journal200510.jsp#a2
         String s = query.substring(i, i + 1);
 
-        if (StringUtils.equals(s, ":")
+        if (Strings.CS.equals(s, ":")
             && i + 1 < query.length()
             && Character.isJavaIdentifierStart(query.charAt(i + 1))) {
           // we already make sure that (i + 1) is a valid character, now check the next one after (i

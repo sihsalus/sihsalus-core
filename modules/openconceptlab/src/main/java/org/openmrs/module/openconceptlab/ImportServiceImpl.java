@@ -144,7 +144,7 @@ public class ImportServiceImpl extends BaseOpenmrsService implements ImportServi
           query.setParameter("name", nameToImport.getName());
         }
         query.setParameter("locale", nameToImport.getLocale());
-        query.setParameter("languageLocale", new Locale(nameToImport.getLocale().getLanguage()));
+        query.setParameter("languageLocale", Locale.of(nameToImport.getLocale().getLanguage()));
         List<ConceptName> conceptNames = query.list();
 
         for (ConceptName conceptName : conceptNames) {

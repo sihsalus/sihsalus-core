@@ -332,8 +332,8 @@ public class DyakuSenderServiceImpl extends BaseOpenmrsService implements DyakuS
   }
 
   /**
-   * Obtiene el endpoint por defecto de RENHICE TODO: Esto debería venir de Global Properties de
-   * OpenMRS
+   * Obtiene el endpoint de RENHICE desde Global Properties, usando un valor por defecto como
+   * respaldo.
    */
   private String getDefaultRenhiceEndpoint() {
     try {

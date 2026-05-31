@@ -918,7 +918,7 @@ public class AddressHierarchyServiceImpl implements AddressHierarchyService {
     }
 
     // now create and save the new maps if the Person Address has not been voided
-    if (!address.isVoided()) {
+    if (!Boolean.TRUE.equals(address.getVoided())) {
       maps = createAddressToEntryMapsForPersonAddress(address);
       if (maps != null && !maps.isEmpty()) {
         for (AddressToEntryMap map : maps) {
@@ -938,7 +938,7 @@ public class AddressHierarchyServiceImpl implements AddressHierarchyService {
     Set<PersonAddress> addresses = person.getAddresses();
     if (addresses != null && !addresses.isEmpty()) {
       for (PersonAddress address : addresses) {
-        if (address != null && !address.isVoided()) {
+        if (address != null && !Boolean.TRUE.equals(address.getVoided())) {
           updateAddressToEntryMapsForPersonAddress(address);
         }
       }

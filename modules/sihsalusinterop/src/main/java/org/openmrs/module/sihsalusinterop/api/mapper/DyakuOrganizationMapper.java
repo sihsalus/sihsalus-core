@@ -129,9 +129,10 @@ public class DyakuOrganizationMapper {
     }
 
     // Part Of (DISA o establecimiento padre)
-    // TODO: Mapear si Location tiene parentLocation
     if (location.getParentLocation() != null) {
-      // organization.getPartOf().setReference(...)
+      organization
+          .getPartOf()
+          .setReference("Organization/" + location.getParentLocation().getUuid());
     }
 
     log.info("✓ Organization convertida exitosamente");

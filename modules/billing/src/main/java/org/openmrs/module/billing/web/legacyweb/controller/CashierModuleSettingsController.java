@@ -11,6 +11,7 @@ package org.openmrs.module.billing.web.legacyweb.controller;
 
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.model.Timesheet;
@@ -60,7 +61,7 @@ public class CashierModuleSettingsController {
   public SimpleObject get(@RequestParam("setting") String setting) {
     SimpleObject results = new SimpleObject();
     if (StringUtils.isNotEmpty(setting)) {
-      if (StringUtils.equalsIgnoreCase(setting, TIMESHEET_SETTING)) {
+      if (Strings.CI.equals(setting, TIMESHEET_SETTING)) {
         Context.requirePrivilege(PrivilegeConstants.VIEW_TIMESHEETS);
         results.put("isTimeSheetRequired", TimesheetUtil.isTimesheetRequired());
         Timesheet currentTimesheet = getCurrentTimesheet();
