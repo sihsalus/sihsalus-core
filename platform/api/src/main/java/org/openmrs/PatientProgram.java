@@ -122,7 +122,7 @@ public class PatientProgram extends BaseChangeableOpenmrsData
     target.setProgram(this.getProgram());
     target.setLocation(this.getLocation());
     target.setDateEnrolled(this.getDateEnrolled());
-    target.setDateCompleted(target.getDateCompleted());
+    target.setDateCompleted(this.getDateCompleted());
     Set<PatientState> statesCopy = new HashSet<>();
     if (this.getStates() != null) {
       for (PatientState s : this.getStates()) {
@@ -561,14 +561,13 @@ public class PatientProgram extends BaseChangeableOpenmrsData
           attribute.setOwner(this);
         }
       } else {
-        for (PatientProgramAttribute existing :
-            this.getActiveAttributes(attribute.getAttributeType())) {
-          if (existing.getAttributeType().equals(attribute.getAttributeType())) {
-            if (existing.getId() != null) {
-              existing.setVoided(Boolean.TRUE);
-            } else {
-              this.getAttributes().remove(existing);
-            }
+        List<PatientProgramAttribute> activeAttributes =
+            new ArrayList<>(this.getActiveAttributes(attribute.getAttributeType()));
+        for (PatientProgramAttribute existing : activeAttributes) {
+          if (existing.getId() != null) {
+            existing.setVoided(Boolean.TRUE);
+          } else {
+            this.getAttributes().remove(existing);
           }
         }
 

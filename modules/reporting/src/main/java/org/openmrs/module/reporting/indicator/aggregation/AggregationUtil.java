@@ -57,7 +57,7 @@ public class AggregationUtil {
   public static <T extends Number> List<T> sortNumbers(Collection<T> values, boolean removeNull) {
     List<T> valueList = new ArrayList<T>(values);
     if (removeNull) {
-      values.remove(null);
+      valueList.remove(null);
     }
     Collections.sort(
         valueList,
