@@ -75,8 +75,11 @@ fi
 
 if [[ "$RUN_DEPENDENCY_CHECK" == 1 ]]; then
   echo "=== Running OWASP Dependency-Check ==="
-  "$MAVEN_CMD" -DskipTests -DskipITs \
-    -Dossindex.enabled=false \
+  dep_check_args=(-DskipTests -DskipITs -Dossindex.enabled=false)
+  if [[ -n "${NVD_API_KEY:-}" ]]; then
+    dep_check_args+=("-DnvdApiKey=${NVD_API_KEY}")
+  fi
+  "$MAVEN_CMD" "${dep_check_args[@]}" \
     "org.owasp:dependency-check-maven:${DEPENDENCY_CHECK_VERSION}:check"
 fi
 
