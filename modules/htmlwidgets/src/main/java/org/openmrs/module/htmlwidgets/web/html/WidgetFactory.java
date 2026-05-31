@@ -20,7 +20,7 @@ public class WidgetFactory {
     }
 
     try {
-      return widgetClass.newInstance();
+      return widgetClass.getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       throw new IllegalArgumentException(
           "Unable to get instance of Widget class: " + widgetClass, e);

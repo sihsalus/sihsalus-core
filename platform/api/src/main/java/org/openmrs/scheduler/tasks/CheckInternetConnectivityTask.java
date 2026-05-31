@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Simple implementation to check if we have a connection to the internet. */
+@SuppressWarnings("deprecation")
 public class CheckInternetConnectivityTask extends AbstractTask {
 
   /** Logger */

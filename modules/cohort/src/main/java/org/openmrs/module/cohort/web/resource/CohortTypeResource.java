@@ -29,8 +29,6 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-
-@SuppressWarnings("unused")
 @Resource(
     name = RestConstants.VERSION_1 + CohortMainRestController.COHORT_NAMESPACE + "/cohorttype",
     supportedClass = CohortType.class,

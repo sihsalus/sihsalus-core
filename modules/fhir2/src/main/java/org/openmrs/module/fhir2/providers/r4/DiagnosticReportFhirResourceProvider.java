@@ -110,7 +110,6 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteDiagnosticReport(@IdParam @Nonnull IdType id) {
     service.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();

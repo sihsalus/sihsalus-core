@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Sample implementation of task that shows how to send emails to users/roles via message service.
  */
+@SuppressWarnings("deprecation")
 public class AlertReminderTask extends AbstractTask {
 
   // Logger

@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Transactional
-@Setter(AccessLevel.MODULE)
+@Setter(AccessLevel.PACKAGE)
 public class RoomProviderMapServiceImpl extends BaseOpenmrsService
     implements RoomProviderMapService {
 

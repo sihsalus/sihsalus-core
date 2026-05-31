@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * @since 2.9.x
  */
+@SuppressWarnings("deprecation")
 @Service("schedulerService")
 @Transactional
 public class JobRunrSchedulerService extends BaseOpenmrsService implements SchedulerService {

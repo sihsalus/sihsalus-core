@@ -118,6 +118,7 @@ public class CustomReferenceByIdMarshaller extends TreeMarshaller {
     /**
      * @deprecated since 1.2.1
      */
+    @Deprecated
     public ReferencedImplicitElementException(final String msg) {
       super(msg);
     }

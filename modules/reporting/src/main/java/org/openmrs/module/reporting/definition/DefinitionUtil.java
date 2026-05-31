@@ -160,7 +160,7 @@ public class DefinitionUtil {
     T newInstance = null;
     if (instanceToClone != null) {
       try {
-        newInstance = (T) instanceToClone.getClass().newInstance();
+        newInstance = (T) instanceToClone.getClass().getDeclaredConstructor().newInstance();
         newInstance.setId(instanceToClone.getId());
         newInstance.setUuid(instanceToClone.getUuid());
         newInstance.setName(instanceToClone.getName());

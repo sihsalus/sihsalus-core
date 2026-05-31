@@ -12,6 +12,7 @@ package org.openmrs.module.webservices.helper;
 import java.util.List;
 import org.openmrs.scheduler.TaskDefinition;
 
+@SuppressWarnings("deprecation")
 public class TaskAction {
 
   public enum Action {

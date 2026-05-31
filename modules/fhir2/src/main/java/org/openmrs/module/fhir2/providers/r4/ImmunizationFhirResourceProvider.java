@@ -68,13 +68,11 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createImmunization(@ResourceParam Immunization newImmunization) {
     return FhirProviderUtils.buildCreate(immunizationService.create(newImmunization));
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateImmunization(
       @IdParam IdType id, @ResourceParam Immunization existingImmunization) {
     if (id == null || id.getIdPart() == null) {
@@ -88,7 +86,6 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
   }
 
   @Patch
-  @SuppressWarnings("unused")
   public MethodOutcome patchImmunization(
       @IdParam IdType id,
       PatchTypeEnum patchType,
@@ -105,14 +102,12 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteImmunization(@IdParam @Nonnull IdType id) {
     immunizationService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchImmunizations(
       @OptionalParam(
               name = Immunization.SP_PATIENT,

@@ -40,7 +40,7 @@ public class AttributeValueConverter implements DataConverter {
     String value = (String) original;
     if (value != null) {
       try {
-        Object o = getDataType().newInstance();
+        Object o = getDataType().getDeclaredConstructor().newInstance();
         if (o instanceof Attributable) {
           Attributable<?> attr = (Attributable<?>) o;
           return attr.hydrate(value);

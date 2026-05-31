@@ -12,20 +12,17 @@ import org.openmrs.module.addresshierarchy.AddressHierarchyConstants;
 import org.openmrs.module.addresshierarchy.util.AddressHierarchyUtil;
 import org.openmrs.scheduler.tasks.AbstractTask;
 
+@SuppressWarnings("deprecation")
 public class AddressToEntryMapsUpdaterTask extends AbstractTask {
 
   private static Log log = LogFactory.getLog(AddressToEntryMapsUpdaterTask.class);
-
-  // TODO: are these tasks thread safe?
-
-  private GlobalProperty lastStartTimeGlobalProp = null;
-
-  private Date lastStartTime = null;
 
   @Override
   public void execute() {
     Context.openSession();
     log.info("Starting update of AddressToEntryMaps... ");
+    GlobalProperty lastStartTimeGlobalProp = null;
+    Date lastStartTime = null;
     try {
 
       // get the last time this task started (which we are storing in a global property)
@@ -59,8 +56,6 @@ public class AddressToEntryMapsUpdaterTask extends AbstractTask {
       throw new APIException(t);
     } finally {
       Context.closeSession();
-      lastStartTime = null;
-      lastStartTimeGlobalProp = null;
     }
   }
 }

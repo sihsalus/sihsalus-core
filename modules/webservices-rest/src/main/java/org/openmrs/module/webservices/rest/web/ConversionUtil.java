@@ -564,7 +564,7 @@ public class ConversionUtil {
     }
     if (delegate instanceof Voidable) {
       Voidable voidable = (Voidable) delegate;
-      if (voidable.isVoided()) {
+      if (Boolean.TRUE.equals(voidable.getVoided())) {
         ret.put(
             "voidedBy", getPropertyWithRepresentation(voidable, "voidedBy", Representation.REF));
         ret.put(

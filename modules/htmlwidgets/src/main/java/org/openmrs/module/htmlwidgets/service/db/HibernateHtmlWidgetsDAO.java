@@ -63,9 +63,8 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
    * @see HtmlWidgetsService#getObject(OpenmrsObject, Integer)
    */
   @Override
-  @SuppressWarnings("unchecked")
   public <T extends OpenmrsObject> T getObject(Class<T> type, Integer id) {
-    return (T) currentSession().get(type, id);
+    return currentSession().find(type, id);
   }
 
   /**

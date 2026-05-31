@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  * @deprecated since 2.9.x use {@link TaskHandler} instead.
  */
 @Deprecated
+@SuppressWarnings("deprecation")
 public abstract class AbstractTask implements Task {
 
   // Logger

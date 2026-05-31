@@ -41,7 +41,7 @@ public class EncounterDomainWrapper implements DomainWrapper {
 
         @Override
         public boolean evaluate(Object o) {
-          return !((Encounter) o).isVoided();
+          return !Boolean.TRUE.equals(((Encounter) o).getVoided());
         }
       };
 
@@ -106,7 +106,7 @@ public class EncounterDomainWrapper implements DomainWrapper {
     // TODO for now we just return the first non-voided provider as the primary provider; we should
     // improve this
     for (EncounterProvider provider : encounter.getEncounterProviders()) {
-      if (!provider.isVoided()) {
+      if (!Boolean.TRUE.equals(provider.getVoided())) {
         return provider.getProvider();
       }
     }
@@ -263,7 +263,7 @@ public class EncounterDomainWrapper implements DomainWrapper {
   }
 
   private void allObsRecursion(Set<Obs> allObs, Obs obs) {
-    if (!obs.isVoided()) {
+    if (!Boolean.TRUE.equals(obs.getVoided())) {
       allObs.add(obs);
       if (obs.hasGroupMembers()) {
         for (Obs child : obs.getGroupMembers()) {

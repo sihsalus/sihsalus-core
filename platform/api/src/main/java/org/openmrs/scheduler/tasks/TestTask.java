@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Implementation of a simple task that throws an exception every 10 executions. */
+@SuppressWarnings("deprecation")
 public class TestTask extends AbstractTask {
 
   private static int executionCount = 0;

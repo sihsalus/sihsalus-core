@@ -15,6 +15,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
 /**
  * @see org.openmrs.module.emrapi.adt.AdtService#closeInactiveVisits()
  */
+@SuppressWarnings("deprecation")
 public class CloseStaleVisitsTask extends AbstractTask {
 
   @Override

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.MutationQuery;
 import org.openmrs.Patient;
 import org.openmrs.module.queue.api.dao.QueueEntryDao;
 import org.openmrs.module.queue.api.search.QueueEntrySearchCriteria;
@@ -127,7 +128,7 @@ public class QueueEntryDaoImpl extends AbstractBaseQueueDaoImpl<QueueEntry>
       jpql.append("AND qe.dateChanged = :expectedDateChanged");
     }
 
-    jakarta.persistence.Query query = session.createQuery(jpql.toString());
+    MutationQuery query = session.createMutationQuery(jpql.toString());
     query.setParameter("endedAt", endedAt);
     query.setParameter("id", queueEntry.getQueueEntryId());
     if (expectedDateChanged != null) {

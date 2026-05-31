@@ -653,7 +653,7 @@ public class RestUtil implements GlobalPropertyListener {
   public static <D extends OpenmrsData, C extends Collection<D>> Set<D> removeVoidedData(C input) {
     Set<D> data = new LinkedHashSet<D>();
     for (D d : input) {
-      if (!d.isVoided()) {
+      if (!Boolean.TRUE.equals(d.getVoided())) {
         data.add(d);
       }
     }

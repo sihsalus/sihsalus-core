@@ -22,6 +22,7 @@ import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 
 /** A report definition type */
+@SuppressWarnings("removal")
 public class ReportDefinitionType implements UserType<ReportDefinition> {
 
   /**

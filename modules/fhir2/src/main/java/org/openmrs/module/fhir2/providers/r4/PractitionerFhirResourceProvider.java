@@ -65,7 +65,6 @@ public class PractitionerFhirResourceProvider extends BaseUpsertFhirResourceProv
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Practitioner getPractitionerById(@IdParam @Nonnull IdType id) {
     Practitioner practitioner = practitionerService.get(id.getIdPart());
     if (practitioner == null) {
@@ -113,7 +112,6 @@ public class PractitionerFhirResourceProvider extends BaseUpsertFhirResourceProv
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deletePractitioner(@IdParam @Nonnull IdType id) {
     practitionerService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();

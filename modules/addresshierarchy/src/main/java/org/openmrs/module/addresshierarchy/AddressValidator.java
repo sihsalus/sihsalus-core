@@ -18,11 +18,6 @@ public class AddressValidator {
 
   protected final Log log = LogFactory.getLog(getClass());
 
-  // TODO: need make this generic--confirm that is it being used?
-  // TODO: this also can be derived from the AddressHiearchyType "mapping" ?
-  // TODO: will have to use the reflection utility function I plan to create to fetch address
-  // component by reflection
-
   public boolean isAddressStructured(PersonAddress pa) {
 
     AddressHierarchyService ahs =

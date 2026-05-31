@@ -69,13 +69,11 @@ public class GroupFhirResourceProvider implements IResourceProvider {
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createGroup(@ResourceParam Group group) {
     return FhirProviderUtils.buildCreate(groupService.create(group));
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateGroup(@IdParam IdType id, @ResourceParam Group group) {
     if (id == null || id.getIdPart() == null) {
       throw new InvalidRequestException("id must be specified to update");
@@ -87,7 +85,6 @@ public class GroupFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteGroup(@IdParam @Nonnull IdType id) {
     groupService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();
@@ -104,7 +101,6 @@ public class GroupFhirResourceProvider implements IResourceProvider {
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchForGroups(
       @OptionalParam(
               name = Group.SP_MANAGING_ENTITY,

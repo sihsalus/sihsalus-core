@@ -229,7 +229,7 @@ public abstract class BaseImplementerConfiguredDefinitionLibrary<T extends Defin
    */
   protected T sqlDefinition(String sql) {
     try {
-      T definition = sqlDefinitionClass.newInstance();
+      T definition = sqlDefinitionClass.getDeclaredConstructor().newInstance();
       PropertyUtils.setProperty(definition, sqlDefinitionProperty, sql);
       return definition;
     } catch (Exception ex) {

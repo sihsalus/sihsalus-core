@@ -48,7 +48,6 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 /** REST resource for Queue Entries */
 @Slf4j
-@SuppressWarnings("unused")
 @Resource(
     name = RestConstants.VERSION_1 + "/queue-entry",
     supportedClass = QueueEntry.class,

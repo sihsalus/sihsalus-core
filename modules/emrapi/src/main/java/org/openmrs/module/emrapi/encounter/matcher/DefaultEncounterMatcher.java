@@ -32,7 +32,7 @@ public class DefaultEncounterMatcher implements BaseEncounterMatcher {
 
     if (visit.getEncounters() != null) {
       for (Encounter encounter : visit.getEncounters()) {
-        if (!encounter.isVoided()
+        if (!Boolean.TRUE.equals(encounter.getVoided())
             && (encounter.getUuid().equals(encounterUuid)
                 || encounter.getEncounterType().equals(encounterType))) {
           return encounter;

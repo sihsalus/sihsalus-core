@@ -64,7 +64,6 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchRelatedPerson(
       @OptionalParam(name = RelatedPerson.SP_NAME) StringAndListParam name,
       @OptionalParam(name = RelatedPerson.SP_GENDER) TokenAndListParam gender,

@@ -21,8 +21,6 @@ import org.openmrs.module.cohort.CohortMember;
 import org.openmrs.module.cohort.CohortMemberAttribute;
 import org.openmrs.module.cohort.CohortMemberAttributeType;
 import org.springframework.transaction.annotation.Transactional;
-
-@SuppressWarnings("unused")
 public interface CohortMemberService extends OpenmrsService {
 
   @Transactional(readOnly = true)

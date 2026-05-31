@@ -42,8 +42,6 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.IllegalPropertyException;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-
-@SuppressWarnings("unused")
 @Resource(
     name = RestConstants.VERSION_1 + CohortMainRestController.COHORT_NAMESPACE + "/cohortmember",
     supportedClass = CohortMember.class,

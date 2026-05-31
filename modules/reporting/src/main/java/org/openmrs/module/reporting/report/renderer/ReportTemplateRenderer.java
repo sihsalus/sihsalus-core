@@ -261,7 +261,7 @@ public abstract class ReportTemplateRenderer extends ReportDesignRenderer {
       translationLocale = ReportingConstants.GLOBAL_PROPERTY_DEFAULT_LOCALE();
     } else {
       try {
-        translationLocale = new Locale(translationLocaleProperty);
+        translationLocale = Locale.of(translationLocaleProperty);
       } catch (Exception e) {
         log.warn("Unable to create locale using design property: " + translationLocaleProperty);
       }

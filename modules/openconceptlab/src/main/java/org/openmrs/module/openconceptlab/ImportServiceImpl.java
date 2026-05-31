@@ -115,7 +115,7 @@ public class ImportServiceImpl extends BaseOpenmrsService implements ImportServi
     while (it.hasNext()) {
       ConceptName nameToImport = it.next();
 
-      if (nameToImport.isVoided()) {
+      if (Boolean.TRUE.equals(nameToImport.getVoided())) {
         continue;
       }
 

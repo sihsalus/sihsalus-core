@@ -67,7 +67,6 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
   }
 
   @Read
-  @SuppressWarnings("unused")
   public AllergyIntolerance getAllergyIntoleranceByUuid(@IdParam @Nonnull IdType id) {
     AllergyIntolerance allergy = fhirAllergyIntoleranceService.get(id.getIdPart());
     if (allergy == null) {
@@ -77,7 +76,6 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchForAllergies(
       @OptionalParam(
               name = AllergyIntolerance.SP_PATIENT,
@@ -135,13 +133,11 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createAllergy(@ResourceParam AllergyIntolerance allergy) {
     return FhirProviderUtils.buildCreate(fhirAllergyIntoleranceService.create(allergy));
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateAllergy(
       @IdParam IdType id, @ResourceParam AllergyIntolerance allergy) {
     if (id == null || id.getIdPart() == null) {
@@ -172,7 +168,6 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteAllergy(@IdParam @Nonnull IdType id) {
     fhirAllergyIntoleranceService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();

@@ -62,7 +62,6 @@ public class MedicationFhirResourceProvider extends BaseUpsertFhirResourceProvid
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Medication getMedicationByUuid(@IdParam @Nonnull IdType id) {
     Medication medication = fhirMedicationService.get(id.getIdPart());
     if (medication == null) {
@@ -72,7 +71,6 @@ public class MedicationFhirResourceProvider extends BaseUpsertFhirResourceProvid
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createMedication(@ResourceParam Medication medication) {
     return FhirProviderUtils.buildCreate(fhirMedicationService.create(medication));
   }
@@ -108,14 +106,12 @@ public class MedicationFhirResourceProvider extends BaseUpsertFhirResourceProvid
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteMedication(@IdParam @Nonnull IdType id) {
     fhirMedicationService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchForMedication(
       @OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
       @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @since 2.7.0
  */
+@SuppressWarnings("deprecation")
 public class AutoRetireUsersTask extends AbstractTask {
 
   private static final Logger log = LoggerFactory.getLogger(AutoRetireUsersTask.class);

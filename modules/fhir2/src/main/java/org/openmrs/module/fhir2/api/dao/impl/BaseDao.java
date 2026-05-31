@@ -164,7 +164,6 @@ public abstract class BaseDao {
    * @param <T> any type
    * @return a stream containing the same objects as the iterable
    */
-  @SuppressWarnings("unused")
   protected static <T> Stream<T> parallelStream(Iterable<T> iterable) {
     return parallelStream(iterable.iterator());
   }
@@ -188,7 +187,6 @@ public abstract class BaseDao {
    * @param <T> any type
    * @return a stream containing the same objects as the iterable
    */
-  @SuppressWarnings("unused")
   protected static <T> Stream<T> stream(Iterable<T> iterable) {
     return stream(iterable.iterator());
   }
@@ -424,7 +422,6 @@ public abstract class BaseDao {
    * @param <U> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
    * @return the resulting criterion, which is the intersection of all the parameters
    */
-  @SuppressWarnings("unused")
   protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType>
       Optional<Predicate> handleAndListParamBy(
           CriteriaBuilder criteriaBuilder,

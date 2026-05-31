@@ -341,7 +341,7 @@ public class PatientProgram extends BaseChangeableOpenmrsData
     HashMap<ProgramWorkflow, PatientState> map = new HashMap<>();
 
     for (PatientState state : getSortedStates()) {
-      if (!state.isVoided()) {
+      if (!Boolean.TRUE.equals(state.getVoided())) {
         ProgramWorkflow workflow = state.getState().getProgramWorkflow();
         map.put(workflow, state);
       }
@@ -370,7 +370,7 @@ public class PatientProgram extends BaseChangeableOpenmrsData
     List<PatientState> ret = new ArrayList<>();
     for (PatientState st : getSortedStates()) {
       if (st.getState().getProgramWorkflow().equals(programWorkflow)
-          && (includeVoided || !st.getVoided())) {
+          && (includeVoided || !Boolean.TRUE.equals(st.getVoided()))) {
         ret.add(st);
       }
     }
@@ -505,7 +505,7 @@ public class PatientProgram extends BaseChangeableOpenmrsData
 
     if (this.getAttributes() != null) {
       for (PatientProgramAttribute attr : this.getAttributes()) {
-        if (!attr.isVoided()) {
+        if (!Boolean.TRUE.equals(attr.getVoided())) {
           ret.add(attr);
         }
       }
@@ -520,7 +520,8 @@ public class PatientProgram extends BaseChangeableOpenmrsData
 
     if (this.getAttributes() != null) {
       for (PatientProgramAttribute attr : this.getAttributes()) {
-        if (attr.getAttributeType().equals(ofType) && !attr.isVoided()) {
+        if (attr.getAttributeType().equals(ofType)
+            && !Boolean.TRUE.equals(attr.getVoided())) {
           ret.add(attr);
         }
       }

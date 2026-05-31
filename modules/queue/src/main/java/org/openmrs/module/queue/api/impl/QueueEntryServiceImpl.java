@@ -23,6 +23,7 @@ import java.util.Optional;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Changeable;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Visit;
@@ -120,7 +121,7 @@ public class QueueEntryServiceImpl extends BaseOpenmrsService implements QueueEn
     }
 
     // Capture the dateChanged for optimistic locking
-    Date expectedDateChanged = currentState.getDateChanged();
+    Date expectedDateChanged = ((Changeable) currentState).getDateChanged();
 
     // Round the transition date to whole seconds so the value persisted as the old entry's
     // ended_at is byte-for-byte identical to the new entry's started_at; the underlying
@@ -179,7 +180,7 @@ public class QueueEntryServiceImpl extends BaseOpenmrsService implements QueueEn
     }
 
     // Capture the dateChanged for optimistic locking before re-opening the previous entry
-    Date expectedDateChanged = prevQueueEntry.getDateChanged();
+    Date expectedDateChanged = ((Changeable) prevQueueEntry).getDateChanged();
 
     // Re-open the previous entry using optimistic locking
     prevQueueEntry.setEndedAt(null);

@@ -48,7 +48,7 @@ public class GroovyHelper {
   public Object parseClassFromFileAndNewInstance(File file) {
     Class loadedClass = parseClassFromFile(file);
     try {
-      return loadedClass.newInstance();
+      return loadedClass.getDeclaredConstructor().newInstance();
     } catch (Exception ex) {
       throw new RuntimeException("Error instantiating class: " + loadedClass, ex);
     }

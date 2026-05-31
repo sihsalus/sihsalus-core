@@ -248,6 +248,6 @@ public class OrderTemplatesResource extends DelegatingCrudResource<OrderTemplate
     OrderTemplateCriteriaBuilder builder = new OrderTemplateCriteriaBuilder();
     builder.setDrug(drug).setConcept(concept);
     List<OrderTemplate> orderTemplates = getService().getOrderTemplateByCriteria(builder.build());
-    return new NeedsPaging(orderTemplates, requestContext);
+    return new NeedsPaging<OrderTemplate>(orderTemplates, requestContext);
   }
 }

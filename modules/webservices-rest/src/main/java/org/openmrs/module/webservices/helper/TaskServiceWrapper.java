@@ -15,6 +15,7 @@ import org.openmrs.scheduler.SchedulerException;
 import org.openmrs.scheduler.TaskDefinition;
 
 /** Wrapping the required task information between related resource and SchedulerService */
+@SuppressWarnings("deprecation")
 public class TaskServiceWrapper {
 
   public TaskDefinition getTaskById(Integer id) {

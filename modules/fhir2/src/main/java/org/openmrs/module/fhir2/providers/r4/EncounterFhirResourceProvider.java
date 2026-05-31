@@ -84,13 +84,11 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createEncounter(@ResourceParam Encounter encounter) {
     return FhirProviderUtils.buildCreate(encounterService.create(encounter));
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateEncounter(@IdParam IdType id, @ResourceParam Encounter encounter) {
     if (id == null || id.getIdPart() == null) {
       throw new InvalidRequestException("id must be specified to update");
@@ -100,7 +98,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
   }
 
   @Patch
-  @SuppressWarnings("unused")
   public MethodOutcome patchEncounter(
       @IdParam IdType id,
       PatchTypeEnum patchType,
@@ -116,7 +113,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteEncounter(@IdParam @Nonnull IdType id) {
     encounterService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();

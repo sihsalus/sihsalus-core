@@ -106,7 +106,7 @@ public class ObsGroupDiagnosisService {
 
   public List<Diagnosis> getPrimaryDiagnoses(Encounter encounter) {
     List<Diagnosis> diagnoses = null;
-    if (encounter != null && !encounter.isVoided()) {
+    if (encounter != null && !Boolean.TRUE.equals(encounter.getVoided())) {
       DiagnosisMetadata diagnosisMetadata = emrApiProperties.getDiagnosisMetadata();
       diagnoses = new ArrayList<Diagnosis>();
       for (Obs obs : encounter.getObsAtTopLevel(false)) {
@@ -127,7 +127,7 @@ public class ObsGroupDiagnosisService {
 
   public boolean hasDiagnosis(Encounter encounter, Diagnosis diagnosis) {
     boolean hasDiagnosis = false;
-    if (encounter != null && !encounter.isVoided()) {
+    if (encounter != null && !Boolean.TRUE.equals(encounter.getVoided())) {
       DiagnosisMetadata diagnosisMetadata = emrApiProperties.getDiagnosisMetadata();
       for (Obs obs : encounter.getObsAtTopLevel(false)) {
         if (diagnosisMetadata.isDiagnosis(obs)) {

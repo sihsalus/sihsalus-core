@@ -31,7 +31,7 @@ import org.openmrs.module.queue.api.dao.BaseQueueDao;
 
 @Slf4j
 @Getter
-@Setter(AccessLevel.MODULE)
+@Setter(AccessLevel.PACKAGE)
 @SuppressWarnings("unchecked")
 public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable>
     implements BaseQueueDao<Q> {
@@ -53,7 +53,7 @@ public class AbstractBaseQueueDaoImpl<Q extends OpenmrsObject & Auditable>
 
   @Override
   public Optional<Q> get(int id) {
-    return Optional.ofNullable((Q) getCurrentSession().get(this.clazz, id));
+    return Optional.ofNullable(getCurrentSession().find(this.clazz, id));
   }
 
   @Override

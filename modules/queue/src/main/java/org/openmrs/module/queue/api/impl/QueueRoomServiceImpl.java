@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Transactional
-@Setter(AccessLevel.MODULE)
+@Setter(AccessLevel.PACKAGE)
 public class QueueRoomServiceImpl extends BaseOpenmrsService implements QueueRoomService {
 
   private QueueRoomDao dao;

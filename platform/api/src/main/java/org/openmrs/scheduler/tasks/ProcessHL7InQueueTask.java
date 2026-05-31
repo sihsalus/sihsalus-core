@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  * @version 1.1 1.1 - made processor static to ensure only one HL7 processor runs
  */
+@SuppressWarnings("deprecation")
 public class ProcessHL7InQueueTask extends AbstractTask {
 
   // Logger

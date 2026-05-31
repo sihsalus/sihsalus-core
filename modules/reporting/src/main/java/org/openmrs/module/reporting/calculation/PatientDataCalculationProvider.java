@@ -42,7 +42,7 @@ public class PatientDataCalculationProvider implements CalculationProvider {
     try {
       Class<? extends DataDefinition> clazz =
           (Class<? extends DataDefinition>) Context.loadClass(calculationName);
-      DataDefinition dd = clazz.newInstance();
+      DataDefinition dd = clazz.getDeclaredConstructor().newInstance();
       for (Property p : DefinitionUtil.getConfigurationProperties(dd)) {
         Class<? extends Collection<?>> collectionType = null;
         Class<?> fieldType = p.getField().getType();

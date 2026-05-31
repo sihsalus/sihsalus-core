@@ -186,7 +186,7 @@ public class ReportLoader {
         } else if (parameterType == Date.class) {
           return new SimpleDateFormat("yyyy-MM-dd").parse(stringVal);
         } else if (parameterType == Locale.class) {
-          return new Locale(stringVal);
+          return Locale.of(stringVal);
         } else {
           throw new IllegalStateException(
               "Unable to parse parameter values of type " + parameterType);

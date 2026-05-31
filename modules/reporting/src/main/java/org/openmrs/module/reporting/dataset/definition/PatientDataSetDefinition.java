@@ -107,7 +107,7 @@ public class PatientDataSetDefinition extends RowPerObjectDataSetDefinition {
     // Ensure that the DSD being passed in supports a Patient ID column.  If so, we can join against
     // it
     try {
-      RowPerObjectDataSetDefinition def = dataSetDefinition.getClass().newInstance();
+      RowPerObjectDataSetDefinition def = dataSetDefinition.getClass().getDeclaredConstructor().newInstance();
       def.addColumn("Patient ID", new PatientIdDataDefinition(), null);
     } catch (Exception e) {
       throw new IllegalArgumentException(

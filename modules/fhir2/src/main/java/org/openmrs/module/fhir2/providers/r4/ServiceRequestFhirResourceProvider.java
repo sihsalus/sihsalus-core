@@ -59,7 +59,6 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public ServiceRequest getServiceRequestById(@IdParam @Nonnull IdType id) {
     ServiceRequest serviceRequest = serviceRequestService.get(id.getIdPart());
 
@@ -74,8 +73,6 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
   public MethodOutcome createServiceRequest(@ResourceParam ServiceRequest serviceRequest) {
     return FhirProviderUtils.buildCreate(serviceRequestService.create(serviceRequest));
   }
-
-  @SuppressWarnings("unused")
   public MethodOutcome updateServiceRequest(
       @IdParam IdType id, @ResourceParam ServiceRequest serviceRequest) {
     if (id == null || id.getIdPart() == null) {
@@ -87,8 +84,6 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
     return FhirProviderUtils.buildUpdate(
         serviceRequestService.update(id.getIdPart(), serviceRequest));
   }
-
-  @SuppressWarnings("unused")
   public OperationOutcome deleteServiceRequest(@IdParam @Nonnull IdType id) {
     serviceRequestService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();

@@ -57,7 +57,6 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public RelatedPerson getRelatedPersonById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.RelatedPerson relatedPerson = relatedPersonService.get(id.getIdPart());
     if (relatedPerson == null) {
@@ -67,7 +66,6 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchRelatedPerson(
       @OptionalParam(name = RelatedPerson.SP_NAME) StringAndListParam name,
       @OptionalParam(name = RelatedPerson.SP_GENDER) TokenAndListParam gender,

@@ -66,7 +66,6 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Practitioner getPractitionerById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.Practitioner practitioner = practitionerService.get(id.getIdPart());
     if (practitioner == null) {
@@ -86,7 +85,6 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updatePractitioner(
       @IdParam IdType id, @ResourceParam Practitioner practitioner) {
     if (id == null || id.getIdPart() == null) {
@@ -104,7 +102,6 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deletePractitioner(@IdParam @Nonnull IdType id) {
     practitionerService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR3();

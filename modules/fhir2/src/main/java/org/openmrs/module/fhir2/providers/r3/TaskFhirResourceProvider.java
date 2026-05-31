@@ -73,7 +73,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createTask(@ResourceParam Task newTask) {
     return FhirProviderUtils.buildCreate(
         TaskVersionConverter.convertTask(
@@ -81,7 +80,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
     return FhirProviderUtils.buildUpdate(
         TaskVersionConverter.convertTask(

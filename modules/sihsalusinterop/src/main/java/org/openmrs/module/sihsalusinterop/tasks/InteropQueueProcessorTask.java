@@ -26,6 +26,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
  *
  * <p>Hospital Santa Clotilde - SIH.SALUS Team
  */
+@SuppressWarnings("deprecation")
 public class InteropQueueProcessorTask extends AbstractTask {
 
   private static final Log log = LogFactory.getLog(InteropQueueProcessorTask.class);

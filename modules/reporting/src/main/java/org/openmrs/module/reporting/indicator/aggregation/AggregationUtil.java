@@ -39,7 +39,7 @@ public class AggregationUtil {
     }
 
     try {
-      a = aggregator.newInstance();
+      a = aggregator.getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       throw new APIException("Unable to instantiate aggregator " + aggregator, e);
     }

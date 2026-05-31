@@ -62,7 +62,6 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Medication getMedicationById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.Medication medication = medicationService.get(id.getIdPart());
     if (medication == null) {
@@ -73,7 +72,6 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createMedication(@ResourceParam Medication medication) {
     return FhirProviderUtils.buildCreate(
         VersionConvertorFactory_30_40.convertResource(
@@ -83,7 +81,6 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateMedication(@IdParam IdType id, @ResourceParam Medication medication) {
     if (id != null) {
       medication.setId(id.getIdPart());
@@ -98,14 +95,12 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteMedication(@IdParam @Nonnull IdType id) {
     medicationService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR3();
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchForMedication(
       @OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
       @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,

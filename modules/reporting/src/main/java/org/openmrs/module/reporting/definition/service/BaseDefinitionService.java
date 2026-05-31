@@ -166,7 +166,7 @@ public abstract class BaseDefinitionService<T extends Definition> extends BaseOp
     if (ret == null) {
       if (type != null) {
         try {
-          ret = type.newInstance();
+          ret = type.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
           log.error("Exception occurred while instantiating definition of type " + type, e);
           throw new IllegalArgumentException(

@@ -66,7 +66,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
   }
 
   @Read
-  @SuppressWarnings("unused")
   public MedicationRequest getMedicationRequestByUuid(@IdParam @Nonnull IdType id) {
     MedicationRequest medicationRequest = fhirMedicationRequestService.get(id.getIdPart());
     if (medicationRequest == null) {
@@ -101,7 +100,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchForMedicationRequests(
       @OptionalParam(
               name = MedicationRequest.SP_PATIENT,

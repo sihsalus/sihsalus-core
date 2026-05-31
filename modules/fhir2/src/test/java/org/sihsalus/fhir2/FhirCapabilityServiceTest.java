@@ -42,13 +42,11 @@ class FhirCapabilityServiceTest {
     }
 
     @Read
-    @SuppressWarnings("unused")
     public Patient read(@IdParam IdType id) {
       return new Patient();
     }
 
     @Create
-    @SuppressWarnings("unused")
     public Patient create(Patient patient) {
       return patient;
     }

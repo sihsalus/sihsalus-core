@@ -71,7 +71,6 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Observation getObservationById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.Observation observation = observationService.get(id.getIdPart());
     if (observation == null) {

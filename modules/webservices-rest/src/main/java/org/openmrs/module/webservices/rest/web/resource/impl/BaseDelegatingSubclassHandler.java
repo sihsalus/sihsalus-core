@@ -139,7 +139,9 @@ public abstract class BaseDelegatingSubclassHandler<Superclass, Subclass extends
     rep.addProperty("uuid");
     rep.addProperty("display");
     if (delegate instanceof OpenmrsData) {
-      if (((OpenmrsData) delegate).isVoided()) rep.addProperty("voided");
+      if (Boolean.TRUE.equals(((OpenmrsData) delegate).getVoided())) {
+        rep.addProperty("voided");
+      }
     } else if (delegate instanceof OpenmrsMetadata && ((OpenmrsMetadata) delegate).isRetired()) {
       rep.addProperty("retired");
     }

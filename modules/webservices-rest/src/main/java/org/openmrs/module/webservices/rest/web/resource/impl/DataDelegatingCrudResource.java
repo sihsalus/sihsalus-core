@@ -29,7 +29,7 @@ public abstract class DataDelegatingCrudResource<T extends OpenmrsData>
     DelegatingResourceDescription description = new DelegatingResourceDescription();
     description.addProperty("uuid");
     description.addProperty("display");
-    if (delegate.isVoided()) description.addProperty("voided");
+    if (Boolean.TRUE.equals(delegate.getVoided())) description.addProperty("voided");
     description.addSelfLink();
     return convertDelegateToRepresentation(delegate, description);
   }
@@ -39,7 +39,7 @@ public abstract class DataDelegatingCrudResource<T extends OpenmrsData>
     SimpleObject ret = new SimpleObject();
     ret.put("uuid", delegate.getUuid());
     ret.put("display", delegate.toString());
-    ret.put("voided", delegate.isVoided());
+    ret.put("voided", delegate.getVoided());
     ret.put("links", "[ All Data resources need to define their representations ]");
     return ret;
   }

@@ -77,7 +77,6 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createCondition(@ResourceParam Condition newCondition) {
     org.hl7.fhir.r4.model.Condition created =
         conditionService.create(

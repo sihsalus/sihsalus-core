@@ -62,7 +62,6 @@ import org.springframework.stereotype.Component;
 
 @Component("observationFhirR4ResourceProvider")
 @R4Provider
-@SuppressWarnings("unused")
 public class ObservationFhirResourceProvider implements IResourceProvider {
 
   @Getter(PROTECTED)
@@ -89,7 +88,6 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateObservation(
       @IdParam IdType id, @ResourceParam Observation observation) {
     if (id == null || id.getIdPart() == null) {

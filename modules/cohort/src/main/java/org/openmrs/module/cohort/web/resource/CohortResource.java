@@ -48,7 +48,6 @@ import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOp
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 @Slf4j
-@SuppressWarnings("unused")
 @Resource(
     name = RestConstants.VERSION_1 + CohortMainRestController.COHORT_NAMESPACE + "/cohort",
     supportedClass = CohortM.class,

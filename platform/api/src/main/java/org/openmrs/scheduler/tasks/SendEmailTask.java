@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Implementation of the stateful task that sends an email. */
+@SuppressWarnings("deprecation")
 public class SendEmailTask extends AbstractTask {
 
   // Logger

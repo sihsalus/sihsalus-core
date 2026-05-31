@@ -283,7 +283,6 @@ class FhirR4ReadControllerTest {
     }
 
     @Read
-    @SuppressWarnings("unused")
     public Patient read(@IdParam IdType id) {
       Patient patient = new Patient();
       patient.setId(id.getIdPart());
@@ -291,7 +290,6 @@ class FhirR4ReadControllerTest {
     }
 
     @Search
-    @SuppressWarnings("unused")
     public IBundleProvider search() {
       Patient patient = new Patient();
       patient.setId("patient-search-uuid");
@@ -307,7 +305,6 @@ class FhirR4ReadControllerTest {
     }
 
     @Search
-    @SuppressWarnings("unused")
     public IBundleProvider search() {
       Patient patient = new Patient();
       patient.setId("patient-search-uuid");
@@ -323,7 +320,6 @@ class FhirR4ReadControllerTest {
     }
 
     @Read
-    @SuppressWarnings("unused")
     public Patient read(@IdParam IdType id) {
       Patient patient = new Patient();
       patient.setId(id.getIdPart());
@@ -366,7 +362,6 @@ class FhirR4ReadControllerTest {
     }
 
     @Search
-    @SuppressWarnings("unused")
     public IBundleProvider search() {
       Location loginLocation = new Location();
       loginLocation.setId("login-location");
@@ -394,7 +389,6 @@ class FhirR4ReadControllerTest {
     }
 
     @Search
-    @SuppressWarnings("unused")
     public IBundleProvider search(
         @OptionalParam(name = Observation.SP_SUBJECT) ReferenceAndListParam patientReference,
         @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code,

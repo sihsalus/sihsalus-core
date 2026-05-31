@@ -58,7 +58,7 @@ public class ImplementationConfiguredCalculationProvider implements CalculationP
     if (file.exists()) {
       try {
         Class clazz = groovyClassLoader.parseClass(file);
-        Object instance = clazz.newInstance();
+        Object instance = clazz.getDeclaredConstructor().newInstance();
         Calculation calculation = (Calculation) instance;
         autowireCapableBeanFactory.autowireBean(calculation);
         calculations.put(calculationNameFor(file), calculation);

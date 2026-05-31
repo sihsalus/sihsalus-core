@@ -34,6 +34,4 @@ public class AddressHierarchyConstants {
 
   /* Configuration domain for the Address Hierarchy */
   public static final String ADDRESS_HIERARCHY_DOMAIN = "addresshierarchy";
-
-  // TODO: add some other global property that are currently directly referenced within the code
 }

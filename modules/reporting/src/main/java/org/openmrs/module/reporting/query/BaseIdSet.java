@@ -125,7 +125,7 @@ public abstract class BaseIdSet<T extends OpenmrsObject> implements IdSet<T> {
   @SuppressWarnings("unchecked")
   public BaseIdSet<T> clone() {
     try {
-      BaseIdSet<T> ret = this.getClass().newInstance();
+      BaseIdSet<T> ret = this.getClass().getDeclaredConstructor().newInstance();
       ret.setMemberIds(new HashSet<Integer>(getMemberIds()));
       return ret;
     } catch (Exception e) {

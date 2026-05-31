@@ -62,7 +62,8 @@ public class CalculationUtil {
     CalculationProvider calculationProvider = null;
     try {
       Class<?> providerClass = Context.loadClass(providerClassName);
-      calculationProvider = (CalculationProvider) providerClass.newInstance();
+      calculationProvider =
+          (CalculationProvider) providerClass.getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       String msg = "Unable to instantiate CalculationProvider:" + providerClassName;
       throw new InvalidCalculationException(msg, e);

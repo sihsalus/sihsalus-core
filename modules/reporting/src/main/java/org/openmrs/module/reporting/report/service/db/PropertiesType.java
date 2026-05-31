@@ -25,6 +25,7 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
 
 /** A report definition type */
+@SuppressWarnings("removal")
 public class PropertiesType implements UserType<Properties> {
 
   /**

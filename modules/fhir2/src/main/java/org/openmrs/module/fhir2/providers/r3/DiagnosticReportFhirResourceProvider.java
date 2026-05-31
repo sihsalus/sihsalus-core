@@ -65,7 +65,6 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public DiagnosticReport getDiagnosticReportById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport =
         diagnosticReportService.get(id.getIdPart());
@@ -78,7 +77,6 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport diagnosticReport) {
     return FhirProviderUtils.buildCreate(
         VersionConvertorFactory_30_40.convertResource(
@@ -88,7 +86,6 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateDiagnosticReport(
       @IdParam IdType id, @ResourceParam DiagnosticReport diagnosticReport) {
     String idPart = null;
@@ -106,7 +103,6 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteDiagnosticReport(@IdParam @Nonnull IdType id) {
     diagnosticReportService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR3();

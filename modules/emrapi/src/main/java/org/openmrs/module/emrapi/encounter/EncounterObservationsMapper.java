@@ -49,7 +49,7 @@ public class EncounterObservationsMapper {
           observationTypeMatcher.getObservationType(obs);
       switch (observationType) {
         case DIAGNOSIS:
-          if (!obs.isVoided()) {
+          if (!Boolean.TRUE.equals(obs.getVoided())) {
             encounterTransaction.addDiagnosis(diagnosisMapper.map(obs, getDiagnosisMetadata()));
           }
           break;

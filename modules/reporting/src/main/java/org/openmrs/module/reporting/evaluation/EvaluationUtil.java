@@ -405,7 +405,7 @@ public class EvaluationUtil {
     Caching caching = definition.getClass().getAnnotation(Caching.class);
     if (caching != null && caching.strategy() != NoCachingStrategy.class) {
       try {
-        CachingStrategy strategy = caching.strategy().newInstance();
+        CachingStrategy strategy = caching.strategy().getDeclaredConstructor().newInstance();
         cacheKey = strategy.getCacheKey(definition, context);
       } catch (Exception e) {
         log.warn("An error occurred while attempting to access the cache.", e);

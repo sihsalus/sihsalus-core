@@ -25,7 +25,7 @@ import org.openmrs.module.queue.model.Queue;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@Setter(AccessLevel.MODULE)
+@Setter(AccessLevel.PACKAGE)
 public class QueueServiceImpl extends BaseOpenmrsService implements QueueService {
 
   private QueueDao dao;

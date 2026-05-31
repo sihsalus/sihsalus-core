@@ -62,7 +62,7 @@ public class HibernateUtil {
     } catch (Exception ex) {
       // use reflection to do: return new TypeResolver().heuristicType(name, parameters);
       try {
-        Object typeResolver = Context.loadClass("org.hibernate.type.TypeResolver").newInstance();
+        Object typeResolver = Context.loadClass("org.hibernate.type.TypeResolver").getDeclaredConstructor().newInstance();
         Method method =
             typeResolver.getClass().getMethod("heuristicType", String.class, Properties.class);
         return (Type) method.invoke(typeResolver, name, parameters);

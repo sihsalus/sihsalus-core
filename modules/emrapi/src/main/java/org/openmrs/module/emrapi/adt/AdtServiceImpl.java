@@ -326,7 +326,7 @@ public class AdtServiceImpl extends BaseOpenmrsService implements AdtService {
     Encounter latest = null;
     while (iterator.hasNext()) {
       Encounter candidate = iterator.next();
-      if (!candidate.isVoided()) {
+      if (!Boolean.TRUE.equals(candidate.getVoided())) {
         if (latest == null
             || OpenmrsUtil.compare(candidate.getEncounterDatetime(), latest.getEncounterDatetime())
                 > 0) {
@@ -678,9 +678,10 @@ public class AdtServiceImpl extends BaseOpenmrsService implements AdtService {
     // if the non-preferred patient has any visits that overlap with visits of the preferred
     // patient, we need to merge them together
     for (Visit losing : notPreferredVisits) {
-      if (!losing.isVoided()) {
+      if (!Boolean.TRUE.equals(losing.getVoided())) {
         for (Visit winning : preferredVisits) {
-          if (!winning.isVoided() && visitsOverlap(losing, winning)) {
+          if (!Boolean.TRUE.equals(winning.getVoided())
+              && visitsOverlap(losing, winning)) {
             mergeVisits(winning, losing);
             break;
           }
@@ -702,10 +703,11 @@ public class AdtServiceImpl extends BaseOpenmrsService implements AdtService {
         });
     for (int i = 0; i < preferredVisits.size(); ++i) {
       Visit visit = preferredVisits.get(i);
-      if (!visit.isVoided()) {
+      if (!Boolean.TRUE.equals(visit.getVoided())) {
         for (int j = i + 1; j < preferredVisits.size(); ++j) {
           Visit candidate = preferredVisits.get(j);
-          if (!candidate.isVoided() && visitsOverlap(visit, candidate)) {
+          if (!Boolean.TRUE.equals(candidate.getVoided())
+              && visitsOverlap(visit, candidate)) {
             mergeVisits(visit, candidate);
           }
         }

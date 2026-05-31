@@ -260,7 +260,7 @@ public class ReportingConstants implements GlobalPropertyListener {
     String propertyValue = getPropertyValueAsString(propertyName);
     if (StringUtils.hasText(propertyValue)) {
       try {
-        return new Locale(propertyValue);
+        return Locale.of(propertyValue);
       } catch (Exception e) {
         log.warn(
             "Invalid setting <"

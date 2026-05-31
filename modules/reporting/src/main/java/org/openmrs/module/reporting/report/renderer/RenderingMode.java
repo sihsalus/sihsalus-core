@@ -56,7 +56,7 @@ public class RenderingMode implements Comparable<RenderingMode> {
         String[] split = descriptor.split("!", 2);
         Class<? extends ReportRenderer> rendererType =
             (Class<? extends ReportRenderer>) Context.loadClass(split[0]);
-        setRenderer(rendererType.newInstance());
+        setRenderer(rendererType.getDeclaredConstructor().newInstance());
         setArgument(split.length == 2 ? split[1] : "");
         setLabel(rendererType.getSimpleName());
       }

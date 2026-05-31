@@ -78,7 +78,6 @@ public class PatientFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Patient getPatientById(@IdParam @Nonnull IdType id) {
     Patient patient = patientService.get(id.getIdPart());
     if (patient == null) {
@@ -93,7 +92,6 @@ public class PatientFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updatePatient(@IdParam IdType id, @ResourceParam Patient patient) {
     if (id == null || id.getIdPart() == null) {
       throw new InvalidRequestException("id must be specified to update");
@@ -105,7 +103,6 @@ public class PatientFhirResourceProvider implements IResourceProvider {
   }
 
   @Patch
-  @SuppressWarnings("unused")
   public MethodOutcome patchPatient(
       @IdParam IdType id,
       PatchTypeEnum patchType,
@@ -120,14 +117,12 @@ public class PatientFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deletePatient(@IdParam @Nonnull IdType id) {
     patientService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchPatients(
       @OptionalParam(name = Patient.SP_NAME) StringAndListParam name,
       @OptionalParam(name = Patient.SP_GIVEN) StringAndListParam given,
@@ -183,7 +178,6 @@ public class PatientFhirResourceProvider implements IResourceProvider {
   }
 
   @Search(queryName = "openmrsPatients")
-  @SuppressWarnings("unused")
   public IBundleProvider searchOpenmrsPatients(
       @OptionalParam(name = "q") StringAndListParam query,
       @OptionalParam(name = Patient.SP_GENDER) TokenAndListParam gender,

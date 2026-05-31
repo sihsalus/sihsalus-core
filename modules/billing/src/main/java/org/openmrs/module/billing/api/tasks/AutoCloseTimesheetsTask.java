@@ -16,6 +16,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
 
 /** A scheduled task that automatically closes all open timesheets */
 @Slf4j
+@SuppressWarnings("deprecation")
 public class AutoCloseTimesheetsTask extends AbstractTask {
 
   @Override

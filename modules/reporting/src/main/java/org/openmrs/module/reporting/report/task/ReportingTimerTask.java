@@ -45,7 +45,7 @@ public class ReportingTimerTask extends TimerTask {
   public void createAndRunTask() {
     try {
       log.info("Running reporting task: " + getTaskClass().getSimpleName());
-      task = getTaskClass().newInstance();
+      task = getTaskClass().getDeclaredConstructor().newInstance();
       task.setScheduledExecutionTime(System.currentTimeMillis());
       task.setSessionFactory(sessionFactory);
       StaticModuleTaskRunner.runInBackground(daemonToken, task);

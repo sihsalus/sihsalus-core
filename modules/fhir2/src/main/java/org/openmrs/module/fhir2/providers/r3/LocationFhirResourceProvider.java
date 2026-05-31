@@ -66,7 +66,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Location getLocationById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.Location location = locationService.get(id.getIdPart());
     if (location == null) {
@@ -86,7 +85,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateLocation(@IdParam IdType id, @ResourceParam Location location) {
     if (id == null || id.getIdPart() == null) {
       throw new InvalidRequestException("id must be specified to update");
@@ -103,7 +101,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteLocation(@IdParam @Nonnull IdType id) {
     locationService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR3();

@@ -33,6 +33,7 @@ public class LogicUtil {
    * @see http://tickets.openmrs.org/browse/LOGIC-53
    * @param logic
    */
+  @SuppressWarnings("removal")
   public static LogicCriteria parse(final String logic) throws LogicException {
     // these need to be final so we can refer to them from the thread
     // therefore they must be arrays so they can be final but have the value they're holding change

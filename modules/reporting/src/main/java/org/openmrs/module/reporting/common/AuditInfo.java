@@ -69,7 +69,7 @@ public class AuditInfo {
   }
 
   private void copyVoidableFieldsFrom(Voidable voidable) {
-    this.voided = voidable.isVoided();
+    this.voided = voidable.getVoided();
     this.voidedBy = voidable.getVoidedBy();
     this.dateVoided = voidable.getDateVoided();
     this.voidReason = voidable.getVoidReason();

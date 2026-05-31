@@ -64,7 +64,6 @@ public class PersonFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Person getPersonById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.Person person = personService.get(id.getIdPart());
     if (person == null) {
@@ -84,7 +83,6 @@ public class PersonFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updatePerson(@IdParam IdType id, @ResourceParam Person person) {
     if (id == null || id.getIdPart() == null) {
       throw new InvalidRequestException("id must be specified to update");
@@ -101,14 +99,12 @@ public class PersonFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deletePerson(@IdParam @Nonnull IdType id) {
     personService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR3();
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchPeople(
       @OptionalParam(name = Person.SP_NAME) StringAndListParam name,
       @OptionalParam(name = Person.SP_GENDER) TokenAndListParam gender,

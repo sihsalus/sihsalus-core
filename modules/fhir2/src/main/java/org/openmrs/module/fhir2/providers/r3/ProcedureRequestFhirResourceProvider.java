@@ -62,7 +62,6 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public ProcedureRequest getProcedureRequestById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.ServiceRequest serviceRequest = serviceRequestService.get(id.getIdPart());
     if (serviceRequest == null) {

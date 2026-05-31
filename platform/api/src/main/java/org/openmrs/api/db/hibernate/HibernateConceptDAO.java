@@ -2243,13 +2243,13 @@ public class HibernateConceptDAO implements ConceptDAO {
     Join<ConceptName, Concept> conceptJoin = root.join("concept");
 
     Locale locale = Context.getLocale();
-    Locale language = new Locale(locale.getLanguage() + "%");
+    String language = locale.getLanguage() + "%";
     List<Predicate> predicates = new ArrayList<>();
 
     predicates.add(
         cb.or(
             cb.equal(root.get("locale"), locale),
-            cb.like(root.get("locale").as(String.class), language.toString())));
+            cb.like(root.get("locale").as(String.class), language)));
     if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
       predicates.add(cb.like(cb.lower(root.get("name")), name.toLowerCase()));
     } else {

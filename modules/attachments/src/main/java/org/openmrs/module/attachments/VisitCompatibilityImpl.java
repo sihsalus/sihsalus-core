@@ -18,7 +18,7 @@ public class VisitCompatibilityImpl implements VisitCompatibility {
     Set<Encounter> allEncounters = visit.getEncounters();
     if (allEncounters != null) {
       for (Encounter encounter : allEncounters) {
-        if (!encounter.isVoided()) {
+        if (!Boolean.TRUE.equals(encounter.getVoided())) {
           nonVoidedEncounters.add(encounter);
         }
       }

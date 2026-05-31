@@ -38,8 +38,6 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-
-@SuppressWarnings("unused")
 @Resource(
     name = RestConstants.VERSION_1 + "/queue-room-provider",
     supportedClass = RoomProviderMap.class,

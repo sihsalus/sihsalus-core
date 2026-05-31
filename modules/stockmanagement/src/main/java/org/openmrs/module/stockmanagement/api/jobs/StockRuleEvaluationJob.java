@@ -26,6 +26,7 @@ import org.openmrs.notification.Alert;
 import org.openmrs.notification.Template;
 import org.openmrs.scheduler.tasks.AbstractTask;
 
+@SuppressWarnings("deprecation")
 public class StockRuleEvaluationJob extends AbstractTask {
 
   private static final AtomicBoolean isAlreadyRunning = new AtomicBoolean(false);

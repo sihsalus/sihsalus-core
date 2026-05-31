@@ -37,7 +37,7 @@ public class ClasspathCalculationProvider implements CalculationProvider {
     Calculation calculation = null;
     try {
       Class<?> c = Context.loadClass(calculationName);
-      calculation = (Calculation) c.newInstance();
+      calculation = (Calculation) c.getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       throw new APIException(
           "Unable to load Calculation class with name '" + calculationName + "'");

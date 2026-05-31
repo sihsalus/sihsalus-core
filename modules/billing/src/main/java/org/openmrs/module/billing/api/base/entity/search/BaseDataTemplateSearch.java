@@ -73,7 +73,7 @@ public class BaseDataTemplateSearch<T extends OpenmrsData> extends BaseAuditable
       if (!includeVoided) {
         criteria.add(BillingRestrictions.eq("voided", false));
       }
-    } else if (t.isVoided() != null) {
+    } else if (t.getVoided() != null) {
       criteria.add(BillingRestrictions.eq("voided", t.getVoided()));
     }
 

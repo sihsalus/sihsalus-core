@@ -26,7 +26,6 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9.BaseAttributeCrudResource1_9;
 
 @Slf4j
-@SuppressWarnings("unused")
 @SubResource(
     parent = CohortResource.class,
     path = "attribute",

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Implementation of a task that writes "Hello World" to a log file. */
+@SuppressWarnings("deprecation")
 public class HelloWorldTask extends AbstractTask {
 
   private static final Logger log = LoggerFactory.getLogger(HelloWorldTask.class);

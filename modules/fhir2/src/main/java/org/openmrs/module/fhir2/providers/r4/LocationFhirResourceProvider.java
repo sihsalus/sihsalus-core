@@ -65,7 +65,6 @@ public class LocationFhirResourceProvider extends BaseUpsertFhirResourceProvider
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Location getLocationById(@IdParam @Nonnull IdType id) {
     Location location = fhirLocationService.get(id.getIdPart());
     if (location == null) {
@@ -106,7 +105,6 @@ public class LocationFhirResourceProvider extends BaseUpsertFhirResourceProvider
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteLocation(@IdParam @Nonnull IdType id) {
     fhirLocationService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();

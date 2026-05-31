@@ -68,7 +68,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
   }
 
   @Read
-  @SuppressWarnings("unused")
   public MedicationRequest getMedicationRequestById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.MedicationRequest medicationRequest =
         medicationRequestService.get(id.getIdPart());
@@ -105,7 +104,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
   }
 
   @Search
-  @SuppressWarnings("unused")
   public IBundleProvider searchForMedicationRequests(
       @OptionalParam(
               name = MedicationRequest.SP_PATIENT,

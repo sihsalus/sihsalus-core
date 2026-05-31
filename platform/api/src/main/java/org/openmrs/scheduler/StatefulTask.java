@@ -18,6 +18,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
  * @deprecated since 2.9.x use {@link TaskHandler}
  */
 @Deprecated
+@SuppressWarnings("deprecation")
 public abstract class StatefulTask extends AbstractTask {
 
   // Private context that provides some state

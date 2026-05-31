@@ -81,7 +81,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
   }
 
   @Read
-  @SuppressWarnings("unused")
   public Encounter getEncounterById(@IdParam @Nonnull IdType id) {
     org.hl7.fhir.r4.model.Encounter encounter = encounterService.get(id.getIdPart());
     if (encounter == null) {
@@ -92,7 +91,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
   }
 
   @Create
-  @SuppressWarnings("unused")
   public MethodOutcome createEncounter(@ResourceParam Encounter encounter) {
     return FhirProviderUtils.buildCreate(
         VersionConvertorFactory_30_40.convertResource(
@@ -102,7 +100,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
   }
 
   @Update
-  @SuppressWarnings("unused")
   public MethodOutcome updateEncounter(@IdParam IdType id, @ResourceParam Encounter encounter) {
     if (id == null || id.getIdPart() == null) {
       throw new InvalidRequestException("id must be specified to update");
@@ -119,7 +116,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
   }
 
   @Delete
-  @SuppressWarnings("unused")
   public OperationOutcome deleteEncounter(@IdParam @Nonnull IdType id) {
     encounterService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR3();

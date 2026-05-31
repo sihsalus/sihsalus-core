@@ -13,6 +13,7 @@ import org.openmrs.scheduler.tasks.AbstractTask;
  * <p>Se ejecuta automáticamente cada 5 minutos para enviar mensajes pendientes. Hospital Santa
  * Clotilde - SIH.SALUS
  */
+@SuppressWarnings("deprecation")
 public class QueueProcessorTask extends AbstractTask {
 
   private static final Log log = LogFactory.getLog(QueueProcessorTask.class);
