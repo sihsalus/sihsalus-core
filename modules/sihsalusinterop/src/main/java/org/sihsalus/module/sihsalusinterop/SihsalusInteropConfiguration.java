@@ -1,6 +1,7 @@
 package org.sihsalus.module.sihsalusinterop;
 
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,8 +77,8 @@ public class SihsalusInteropConfiguration {
       serviceContext.addAdvice(EncounterService.class, new EncounterSavedAdvice());
       sihsalusInteropTaskScheduler.scheduleAtFixedRate(
           SihsalusInteropConfiguration::processInteropQueue,
-          new Date(System.currentTimeMillis() + QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS),
-          QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS);
+          Instant.now().plusMillis(QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS),
+          Duration.ofMillis(QUEUE_PROCESSOR_REPEAT_INTERVAL_MILLIS));
     };
   }
 

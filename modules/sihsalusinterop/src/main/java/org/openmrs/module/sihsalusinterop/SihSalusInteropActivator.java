@@ -171,6 +171,7 @@ public class SihSalusInteropActivator extends BaseModuleActivator {
   }
 
   /** Registra el scheduler para procesar la cola automáticamente cada 5 minutos */
+  @SuppressWarnings("deprecation")
   private void registerScheduler() throws SchedulerException {
     // Usar método sin importar el tipo específico del servicio
     Object schedulerService = Context.getSchedulerService();
@@ -232,6 +233,7 @@ public class SihSalusInteropActivator extends BaseModuleActivator {
    * Registra el advice para interceptar saveEncounter del EncounterService Esto permite detectar
    * automáticamente cuando se guarda un Encounter y construir el Bundle FHIR correspondiente.
    */
+  @SuppressWarnings("deprecation")
   private void registerEncounterSavedAdvice() {
     try {
       // Verificar que el EncounterService esté disponible
