@@ -67,6 +67,8 @@ jobs:
         run: ./scripts/check.sh fast
 
       - name: Run dependency scan and SBOM gate
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: ./scripts/check.sh security
 
       - name: Upload Maven diagnostics on failure
