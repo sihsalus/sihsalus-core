@@ -77,7 +77,7 @@ if [[ "$RUN_DEPENDENCY_CHECK" == 1 ]]; then
   echo "=== Running OWASP Dependency-Check ==="
   dep_check_args=(
     -DskipTests -DskipITs
-    -DossindexAnalyzerEnabled=false
+    -DossIndexAnalyzerEnabled=false
     "-DdataDirectory=${HOME}/.dependency-check/data"
   )
   if [[ -n "${NVD_API_KEY:-}" ]]; then
