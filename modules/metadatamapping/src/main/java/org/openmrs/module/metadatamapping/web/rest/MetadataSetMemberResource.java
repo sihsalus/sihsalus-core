@@ -83,7 +83,7 @@ public class MetadataSetMemberResource
   @Override
   protected void delete(MetadataSetMember delegate, String reason, RequestContext context)
       throws ResponseException {
-    if (delegate.isRetired()) {
+    if (Boolean.TRUE.equals(delegate.getRetired())) {
       return;
     }
     delegate.setRetired(true);
@@ -136,7 +136,7 @@ public class MetadataSetMemberResource
   public SimpleObject asRef(MetadataSetMember delegate) throws ConversionException {
     DelegatingResourceDescription rep = new DelegatingResourceDescription();
     rep.addProperty("uuid");
-    if (delegate.isRetired()) rep.addProperty("retired");
+    if (Boolean.TRUE.equals(delegate.getRetired())) rep.addProperty("retired");
     rep.addSelfLink();
     return convertDelegateToRepresentation(delegate, rep);
   }

@@ -36,7 +36,7 @@ public class ConceptAdapter {
       conceptService.saveConceptReferenceTerm(term);
     }
 
-    term.setRetired(concept.isRetired());
+    term.setRetired(concept.getRetired());
 
     final ConceptMap map = new ConceptMap();
     map.setConceptReferenceTerm(term);
@@ -73,7 +73,7 @@ public class ConceptAdapter {
     if (hasMapping(concept, source, code)) {
       final ConceptService conceptService = Context.getConceptService();
       ConceptReferenceTerm term = conceptService.getConceptReferenceTermByCode(code, source);
-      if (!term.isRetired()) {
+      if (!Boolean.TRUE.equals(term.getRetired())) {
         conceptService.retireConceptReferenceTerm(
             term, "Retired with concept: " + concept.getUuid());
       }
@@ -84,7 +84,7 @@ public class ConceptAdapter {
     if (hasMapping(concept, source, code)) {
       final ConceptService conceptService = Context.getConceptService();
       ConceptReferenceTerm term = conceptService.getConceptReferenceTermByCode(code, source);
-      if (term.isRetired()) {
+      if (Boolean.TRUE.equals(term.getRetired())) {
         conceptService.unretireConceptReferenceTerm(term);
       }
     }

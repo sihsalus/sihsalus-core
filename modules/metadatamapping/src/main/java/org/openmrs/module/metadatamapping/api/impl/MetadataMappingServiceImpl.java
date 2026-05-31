@@ -211,7 +211,7 @@ public class MetadataMappingServiceImpl extends BaseOpenmrsService
     while (true) {
       for (Concept concept : concepts) {
         addLocalMappingToConcept(concept);
-        if (concept.isRetired()) {
+        if (Boolean.TRUE.equals(concept.getRetired())) {
           markLocalMappingRetiredInConcept(concept);
         }
       }
@@ -370,6 +370,7 @@ public class MetadataMappingServiceImpl extends BaseOpenmrsService
   }
 
   @Override
+  @Deprecated
   @Transactional(readOnly = true)
   public List<MetadataSource> getMetadataSources(boolean includeRetired) {
     return dao.getMetadataSources(
