@@ -122,8 +122,8 @@ run_fast() {
   fi
 
   run_whitespace_check
-  echo "=== Maven verify: -Pci,quality ==="
-  "$MAVEN_CMD" "${maven_args[@]}" verify
+  echo "=== Maven install: -Pci,quality ==="
+  "$MAVEN_CMD" "${maven_args[@]}" install
 }
 
 run_format() {

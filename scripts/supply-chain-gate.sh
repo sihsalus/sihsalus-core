@@ -76,6 +76,7 @@ fi
 if [[ "$RUN_DEPENDENCY_CHECK" == 1 ]]; then
   echo "=== Running OWASP Dependency-Check ==="
   dep_check_args=(
+    --no-snapshot-updates
     -DskipTests -DskipITs
     -DossindexAnalyzerEnabled=false
     "-DdataDirectory=${HOME}/.dependency-check/data"
