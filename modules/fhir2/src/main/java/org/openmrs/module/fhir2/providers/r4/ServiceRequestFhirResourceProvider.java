@@ -73,6 +73,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
   public MethodOutcome createServiceRequest(@ResourceParam ServiceRequest serviceRequest) {
     return FhirProviderUtils.buildCreate(serviceRequestService.create(serviceRequest));
   }
+
   public MethodOutcome updateServiceRequest(
       @IdParam IdType id, @ResourceParam ServiceRequest serviceRequest) {
     if (id == null || id.getIdPart() == null) {
@@ -84,6 +85,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
     return FhirProviderUtils.buildUpdate(
         serviceRequestService.update(id.getIdPart(), serviceRequest));
   }
+
   public OperationOutcome deleteServiceRequest(@IdParam @Nonnull IdType id) {
     serviceRequestService.delete(id.getIdPart());
     return FhirProviderUtils.buildDeleteR4();

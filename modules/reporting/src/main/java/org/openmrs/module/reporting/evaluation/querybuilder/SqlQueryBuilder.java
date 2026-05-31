@@ -35,9 +35,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.jdbc.Work;
 import org.openmrs.Cohort;
-import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.common.ObjectUtil;
 import org.openmrs.module.reporting.dataset.DataSetColumn;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -299,8 +299,7 @@ public class SqlQueryBuilder implements QueryBuilder {
         }
       }
 
-      queryString =
-          Strings.CS.replaceOnce(queryString, parameterName, replacementValue.toString());
+      queryString = Strings.CS.replaceOnce(queryString, parameterName, replacementValue.toString());
       queryString =
           queryString.replace(" in " + replacementValue, " in (" + replacementValue + ")");
     }

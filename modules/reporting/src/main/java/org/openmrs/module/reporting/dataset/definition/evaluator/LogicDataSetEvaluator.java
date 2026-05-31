@@ -15,13 +15,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.Cohort;
-import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicException;
 import org.openmrs.logic.LogicService;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.reporting.ReportingException;
+import org.openmrs.module.reporting.cohort.CohortUtil;
 import org.openmrs.module.reporting.common.LogicUtil;
 import org.openmrs.module.reporting.dataset.DataSetRow;
 import org.openmrs.module.reporting.dataset.DataSetRowList;
@@ -68,8 +68,7 @@ public class LogicDataSetEvaluator implements LazyPageableDataSetEvaluator {
   public Iterator<DataSetRow> evaluatePartial(
       PageableDataSetDefinition definition, EvaluationContext context, List<Integer> patientIds) {
     LogicService logicService = Context.getLogicService();
-    var def =
-        (org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition) definition;
+    var def = (org.openmrs.module.reporting.dataset.definition.LogicDataSetDefinition) definition;
     Cohort cohort = new Cohort(patientIds);
 
     // Note that we cannot import or reference LogicCriteria in this class because it was

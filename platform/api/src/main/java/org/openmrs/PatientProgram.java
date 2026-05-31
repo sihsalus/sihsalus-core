@@ -520,8 +520,7 @@ public class PatientProgram extends BaseChangeableOpenmrsData
 
     if (this.getAttributes() != null) {
       for (PatientProgramAttribute attr : this.getAttributes()) {
-        if (attr.getAttributeType().equals(ofType)
-            && !Boolean.TRUE.equals(attr.getVoided())) {
+        if (attr.getAttributeType().equals(ofType) && !Boolean.TRUE.equals(attr.getVoided())) {
           ret.add(attr);
         }
       }

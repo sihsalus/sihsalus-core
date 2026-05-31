@@ -25,8 +25,7 @@ public class CheckboxWidget extends CodedWidget {
    */
   @Override
   public boolean isSelected(Option option, Object value) {
-    if (Objects.equals(option.getValue(), value)
-        || Objects.equals(option.getCode(), value)) {
+    if (Objects.equals(option.getValue(), value) || Objects.equals(option.getCode(), value)) {
       return true;
     } else if (value instanceof Collection<?>) {
       return ((Collection<?>) value).contains(option.getValue())

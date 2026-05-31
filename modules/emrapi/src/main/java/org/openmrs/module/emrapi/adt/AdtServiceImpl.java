@@ -680,8 +680,7 @@ public class AdtServiceImpl extends BaseOpenmrsService implements AdtService {
     for (Visit losing : notPreferredVisits) {
       if (!Boolean.TRUE.equals(losing.getVoided())) {
         for (Visit winning : preferredVisits) {
-          if (!Boolean.TRUE.equals(winning.getVoided())
-              && visitsOverlap(losing, winning)) {
+          if (!Boolean.TRUE.equals(winning.getVoided()) && visitsOverlap(losing, winning)) {
             mergeVisits(winning, losing);
             break;
           }
@@ -706,8 +705,7 @@ public class AdtServiceImpl extends BaseOpenmrsService implements AdtService {
       if (!Boolean.TRUE.equals(visit.getVoided())) {
         for (int j = i + 1; j < preferredVisits.size(); ++j) {
           Visit candidate = preferredVisits.get(j);
-          if (!Boolean.TRUE.equals(candidate.getVoided())
-              && visitsOverlap(visit, candidate)) {
+          if (!Boolean.TRUE.equals(candidate.getVoided()) && visitsOverlap(visit, candidate)) {
             mergeVisits(visit, candidate);
           }
         }
