@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -108,6 +110,48 @@ class StaticModuleCatalogTest {
         reactorModules,
         catalogIds,
         "Maven reactor modules/* must exactly match StaticModuleCatalog ids");
+  }
+
+  /**
+   * Cross-checks the catalog against the runtime assembly: every catalog module must be declared as
+   * a Maven dependency in {@code runtime/pom.xml}. The dependency's artifactId is read from each
+   * module's own {@code modules/<id>/pom.xml} (rather than assuming a naming convention). This
+   * catches the "added a module to the catalog but forgot the runtime dependency" drift — which
+   * would leave the module's configuration bean off the classpath and silently unwired.
+   */
+  @Test
+  void everyCatalogModuleIsDeclaredAsRuntimeDependency() throws IOException {
+    Path rootPom = locateRootPom();
+    assumeTrue(rootPom != null, "root pom.xml with <module>modules/...</module> not found");
+
+    Path root = rootPom.getParent();
+    Path runtimePom = root.resolve("runtime").resolve("pom.xml");
+    assumeTrue(Files.isRegularFile(runtimePom), "runtime/pom.xml not found");
+    String runtimeDependencies = Files.readString(runtimePom);
+
+    List<String> missing = new ArrayList<>();
+    for (SihsalusModuleDescriptor module : StaticModuleCatalog.modules()) {
+      Path modulePom = root.resolve("modules").resolve(module.id()).resolve("pom.xml");
+      assumeTrue(Files.isRegularFile(modulePom), "modules/" + module.id() + "/pom.xml not found");
+
+      String artifactId = ownArtifactId(Files.readString(modulePom));
+      assertNotNull(artifactId, "could not read artifactId for module " + module.id());
+
+      if (!runtimeDependencies.contains("<artifactId>" + artifactId + "</artifactId>")) {
+        missing.add(module.id() + " (" + artifactId + ")");
+      }
+    }
+
+    assertTrue(
+        missing.isEmpty(),
+        "catalog modules with no matching dependency in runtime/pom.xml: " + missing);
+  }
+
+  /** Returns the project's own artifactId, ignoring the {@code <parent>} coordinates. */
+  private static String ownArtifactId(String pom) {
+    String withoutParent = pom.replaceAll("(?s)<parent>.*?</parent>", "");
+    Matcher matcher = Pattern.compile("<artifactId>([^<]+)</artifactId>").matcher(withoutParent);
+    return matcher.find() ? matcher.group(1).trim() : null;
   }
 
   private static Path locateRootPom() throws IOException {
