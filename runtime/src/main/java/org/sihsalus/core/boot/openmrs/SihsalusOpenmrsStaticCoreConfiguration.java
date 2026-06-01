@@ -131,6 +131,27 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
     return new DbSessionFactory(sessionFactory);
   }
 
+  /** Marker type produced by {@link #openmrsRuntimeReady()}. */
+  public static final class OpenmrsRuntimeReady {}
+
+  /**
+   * Marker bean signalling that the OpenMRS runtime is fully bootstrapped: the database schema
+   * (Liquibase) has been applied and the Hibernate {@link SessionFactory} and {@link
+   * ServiceContext} are wired. Any bean whose constructor or init method performs database access
+   * or {@code Context.*} calls must declare {@code @DependsOn("openmrsRuntimeReady")} so it is
+   * never instantiated before the schema and services exist.
+   *
+   * <p>This makes startup ordering explicit instead of relying on the incidental component-scan
+   * order. Without it, a schema-touching bean (e.g. {@code reportingSerializer}) could be created
+   * before Liquibase ran, failing context startup with "Table ... not found (this database is
+   * empty)".
+   */
+  @Bean
+  OpenmrsRuntimeReady openmrsRuntimeReady(
+      SpringLiquibase liquibase, SessionFactory sessionFactory, ServiceContext serviceContext) {
+    return new OpenmrsRuntimeReady();
+  }
+
   @Bean
   GlobalLocaleList globalLocaleList() {
     return new GlobalLocaleList();
