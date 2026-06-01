@@ -32,7 +32,8 @@ ENV OPENMRS_APPLICATION_DATA_DIRECTORY=/openmrs/data \
     SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE=30s \
     SIHSALUS_DATASOURCE_CONNECTION_TIMEOUT=30000 \
     SIHSALUS_DATASOURCE_VALIDATION_TIMEOUT=5000 \
-    JAVA_OPTS=""
+    JAVA_OPTS="" \
+    SIHSALUS_BOOTSTRAP_PROBE_PORT=18080
 
 RUN mkdir -p /openmrs/data /opt/sihsalus/reference-sources \
     && chown -R sihsalus:sihsalus /openmrs /opt/sihsalus
@@ -47,7 +48,7 @@ USER sihsalus
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=10s --timeout=5s --start-period=5m --retries=12 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=45m --retries=60 \
   CMD sh -c 'curl --fail --max-time 5 "http://localhost:${SERVER_PORT:-8080}${SERVER_SERVLET_CONTEXT_PATH:-}/actuator/health/readiness" || exit 1'
 
 ENTRYPOINT ["/sbin/tini", "--", "/opt/sihsalus/entrypoint.sh"]
