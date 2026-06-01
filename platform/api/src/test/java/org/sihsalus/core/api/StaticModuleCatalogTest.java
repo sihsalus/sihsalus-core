@@ -116,7 +116,7 @@ class StaticModuleCatalogTest {
    * Cross-checks the catalog against the runtime assembly: every catalog module must be declared as
    * a Maven dependency in {@code runtime/pom.xml}. The dependency's artifactId is read from each
    * module's own {@code modules/<id>/pom.xml} (rather than assuming a naming convention). This
-   * catches the "added a module to the catalog but forgot the runtime dependency" drift — which
+   * catches the "added a module to the catalog but forgot the runtime dependency" drift, which
    * would leave the module's configuration bean off the classpath and silently unwired.
    */
   @Test
@@ -126,18 +126,24 @@ class StaticModuleCatalogTest {
 
     Path root = rootPom.getParent();
     Path runtimePom = root.resolve("runtime").resolve("pom.xml");
-    assumeTrue(Files.isRegularFile(runtimePom), "runtime/pom.xml not found");
-    String runtimeDependencies = Files.readString(runtimePom);
+    assertTrue(Files.isRegularFile(runtimePom), "runtime/pom.xml not found at " + runtimePom);
+
+    Set<String> runtimeArtifactIds = topLevelDependencyArtifactIds(Files.readString(runtimePom));
+    assertFalse(
+        runtimeArtifactIds.isEmpty(),
+        "no top-level <dependencies> entries found in runtime/pom.xml");
 
     List<String> missing = new ArrayList<>();
     for (SihsalusModuleDescriptor module : StaticModuleCatalog.modules()) {
       Path modulePom = root.resolve("modules").resolve(module.id()).resolve("pom.xml");
-      assumeTrue(Files.isRegularFile(modulePom), "modules/" + module.id() + "/pom.xml not found");
+      assertTrue(
+          Files.isRegularFile(modulePom),
+          "modules/" + module.id() + "/pom.xml not found at " + modulePom);
 
       String artifactId = ownArtifactId(Files.readString(modulePom));
       assertNotNull(artifactId, "could not read artifactId for module " + module.id());
 
-      if (!runtimeDependencies.contains("<artifactId>" + artifactId + "</artifactId>")) {
+      if (!runtimeArtifactIds.contains(artifactId)) {
         missing.add(module.id() + " (" + artifactId + ")");
       }
     }
@@ -145,6 +151,31 @@ class StaticModuleCatalogTest {
     assertTrue(
         missing.isEmpty(),
         "catalog modules with no matching dependency in runtime/pom.xml: " + missing);
+  }
+
+  /**
+   * Returns the artifactIds declared inside the project's top-level {@code <dependencies>} block.
+   * Strips {@code <dependencyManagement>}, {@code <build>}, and per-dependency {@code <exclusions>}
+   * so that nested {@code <artifactId>} tags (parent coordinates, excluded transitive deps, plugin
+   * coordinates, etc.) do not leak into the result.
+   */
+  private static Set<String> topLevelDependencyArtifactIds(String pom) {
+    String trimmed =
+        pom.replaceAll("(?s)<dependencyManagement>.*?</dependencyManagement>", "")
+            .replaceAll("(?s)<build>.*?</build>", "");
+    Set<String> ids = new HashSet<>();
+    Matcher depsBlock = Pattern.compile("(?s)<dependencies>(.*?)</dependencies>").matcher(trimmed);
+    while (depsBlock.find()) {
+      String content = depsBlock.group(1).replaceAll("(?s)<exclusions>.*?</exclusions>", "");
+      Matcher dep = Pattern.compile("(?s)<dependency>(.*?)</dependency>").matcher(content);
+      while (dep.find()) {
+        Matcher aid = Pattern.compile("<artifactId>([^<]+)</artifactId>").matcher(dep.group(1));
+        if (aid.find()) {
+          ids.add(aid.group(1).trim());
+        }
+      }
+    }
+    return ids;
   }
 
   /** Returns the project's own artifactId, ignoring the {@code <parent>} coordinates. */
