@@ -18,7 +18,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Date;
@@ -63,22 +62,19 @@ public class FormResource extends BaseOpenmrsObject
   @Column(name = "name", length = 255, nullable = true)
   private String name;
 
-  @Lob
-  @Column(name = "value_reference", length = 65535, nullable = true)
+  @Column(name = "value_reference", nullable = true, columnDefinition = "text")
   private String valueReference;
 
   @Column(name = "datatype", length = 255)
   private String datatypeClassname;
 
-  @Lob
-  @Column(name = "datatype_config", length = 65535)
+  @Column(name = "datatype_config", columnDefinition = "text")
   private String datatypeConfig;
 
   @Column(name = "preferred_handler", length = 255)
   private String preferredHandlerClassname;
 
-  @Lob
-  @Column(name = "handler_config", length = 65535)
+  @Column(name = "handler_config", columnDefinition = "text")
   private String handlerConfig;
 
   private transient boolean dirty = false;
