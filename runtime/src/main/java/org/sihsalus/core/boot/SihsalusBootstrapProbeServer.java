@@ -39,11 +39,13 @@ final class SihsalusBootstrapProbeServer implements AutoCloseable {
     try {
       InetSocketAddress address = new InetSocketAddress(InetAddress.getLoopbackAddress(), port);
       HttpServer server = HttpServer.create(address, 0);
-      ExecutorService executor = Executors.newSingleThreadExecutor(task -> {
-        Thread thread = new Thread(task, "sihsalus-bootstrap-probe");
-        thread.setDaemon(true);
-        return thread;
-      });
+      ExecutorService executor =
+          Executors.newSingleThreadExecutor(
+              task -> {
+                Thread thread = new Thread(task, "sihsalus-bootstrap-probe");
+                thread.setDaemon(true);
+                return thread;
+              });
 
       SihsalusBootstrapProbeServer probeServer = new SihsalusBootstrapProbeServer(server, executor);
       server.createContext("/livez", probeServer::handleLiveness);
@@ -78,7 +80,10 @@ final class SihsalusBootstrapProbeServer implements AutoCloseable {
 
   private void handleLiveness(HttpExchange exchange) throws IOException {
     if (startupFailure == null) {
-      writeJson(exchange, 200, "{\"status\":\"UP\",\"phase\":\"" + phase() + "\",\"startedAt\":\"" + startedAt + "\"}");
+      writeJson(
+          exchange,
+          200,
+          "{\"status\":\"UP\",\"phase\":\"" + phase() + "\",\"startedAt\":\"" + startedAt + "\"}");
       return;
     }
     writeJson(exchange, 500, "{\"status\":\"DOWN\",\"phase\":\"failed\"}");
@@ -96,7 +101,8 @@ final class SihsalusBootstrapProbeServer implements AutoCloseable {
     return ready ? "ready" : "starting";
   }
 
-  private static void writeJson(HttpExchange exchange, int statusCode, String body) throws IOException {
+  private static void writeJson(HttpExchange exchange, int statusCode, String body)
+      throws IOException {
     byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
     exchange.getResponseHeaders().set("Content-Type", "application/json");
     exchange.sendResponseHeaders(statusCode, bytes.length);
