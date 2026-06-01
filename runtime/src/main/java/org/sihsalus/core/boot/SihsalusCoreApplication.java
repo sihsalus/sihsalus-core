@@ -15,7 +15,8 @@ public class SihsalusCoreApplication {
   public static void main(String[] args) {
     SihsalusBootstrapProbeServer bootstrapProbe = SihsalusBootstrapProbeServer.start();
     try {
-      ConfigurableApplicationContext context = SpringApplication.run(SihsalusCoreApplication.class, args);
+      ConfigurableApplicationContext context =
+          SpringApplication.run(SihsalusCoreApplication.class, args);
       bootstrapProbe.markReady();
       context.addApplicationListener((ContextClosedEvent event) -> bootstrapProbe.close());
     } catch (RuntimeException | Error ex) {

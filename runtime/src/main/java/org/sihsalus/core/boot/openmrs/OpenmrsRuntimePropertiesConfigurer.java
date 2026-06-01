@@ -89,7 +89,8 @@ final class OpenmrsRuntimePropertiesConfigurer
     copyOptionalOpenmrsRuntimeProperty(
         properties,
         PROPS_EXCLUDE + ".addresshierarchy",
-        normalizeAddressHierarchyExclude(sihsalus.getInitializer().getExclude().getAddresshierarchy()),
+        normalizeAddressHierarchyExclude(
+            sihsalus.getInitializer().getExclude().getAddresshierarchy()),
         "sihsalus.initializer.exclude.addresshierarchy",
         "SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY",
         PROPS_EXCLUDE + ".addresshierarchy",
