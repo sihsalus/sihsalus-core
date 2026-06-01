@@ -41,6 +41,7 @@ import org.openmrs.logging.LoggingConfigurationGlobalPropertyListener;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.notification.AlertService;
 import org.openmrs.notification.MessageService;
+import org.openmrs.scheduler.LegacyTask;
 import org.openmrs.scheduler.SchedulerService;
 import org.openmrs.util.ConfigUtil;
 import org.openmrs.util.HttpClient;
@@ -77,7 +78,8 @@ import org.springframework.core.io.ClassPathResource;
       "org.openmrs.notification.impl",
       "org.openmrs.obs.handler",
       "org.openmrs.patient.impl",
-      "org.openmrs.scheduler",
+      "org.openmrs.scheduler.db.hibernate",
+      "org.openmrs.scheduler.jobrunr",
       "org.openmrs.serialization",
       "org.openmrs.validator"
     },
@@ -184,6 +186,18 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
   @Bean
   HttpClient implementationIdHttpClient() throws MalformedURLException {
     return new HttpClient("https://implementation.openmrs.org");
+  }
+
+  /**
+   * Registers the {@code TaskHandler<TaskDefinition>} that runs legacy scheduled tasks. It lives in
+   * {@code org.openmrs.scheduler}, which is not part of the component-scan base packages above, so it
+   * must be declared explicitly. Without it {@code JobRequestHandlerAdapter} finds no handler and
+   * every JobRunr legacy job fails with "No handler found for org.openmrs.scheduler.TaskDefinition".
+   * Registered as an isolated, dependency-free bean to avoid perturbing context startup ordering.
+   */
+  @Bean
+  LegacyTask legacyTask() {
+    return new LegacyTask();
   }
 
   @Bean(name = "serviceContext", destroyMethod = "destroyInstance")
