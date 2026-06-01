@@ -89,7 +89,7 @@ final class OpenmrsRuntimePropertiesConfigurer
     copyOptionalOpenmrsRuntimeProperty(
         properties,
         PROPS_EXCLUDE + ".addresshierarchy",
-        sihsalus.getInitializer().getExclude().getAddresshierarchy(),
+        normalizeAddressHierarchyExclude(sihsalus.getInitializer().getExclude().getAddresshierarchy()),
         "sihsalus.initializer.exclude.addresshierarchy",
         "SIHSALUS_INITIALIZER_EXCLUDE_ADDRESSHIERARCHY",
         PROPS_EXCLUDE + ".addresshierarchy",
@@ -100,6 +100,20 @@ final class OpenmrsRuntimePropertiesConfigurer
     Context.setRuntimeProperties(properties);
     // Reset cached authentication config so it is rebuilt from the updated runtime properties.
     AuthenticationConfig.setConfig(null);
+  }
+
+  private static String normalizeAddressHierarchyExclude(String value) {
+    if (value == null) {
+      return null;
+    }
+    String normalized = value.trim();
+    if ("true".equalsIgnoreCase(normalized)) {
+      return "**/*.xml";
+    }
+    if ("false".equalsIgnoreCase(normalized)) {
+      return "";
+    }
+    return value;
   }
 
   private SihsalusRuntimeProperties sihsalusRuntimeProperties() {
