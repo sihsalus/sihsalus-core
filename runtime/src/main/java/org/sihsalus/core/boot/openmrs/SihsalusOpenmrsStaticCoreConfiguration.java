@@ -190,10 +190,11 @@ public class SihsalusOpenmrsStaticCoreConfiguration {
 
   /**
    * Registers the {@code TaskHandler<TaskDefinition>} that runs legacy scheduled tasks. It lives in
-   * {@code org.openmrs.scheduler}, which is not part of the component-scan base packages above, so it
-   * must be declared explicitly. Without it {@code JobRequestHandlerAdapter} finds no handler and
-   * every JobRunr legacy job fails with "No handler found for org.openmrs.scheduler.TaskDefinition".
-   * Registered as an isolated, dependency-free bean to avoid perturbing context startup ordering.
+   * {@code org.openmrs.scheduler}, which is not part of the component-scan base packages above, so
+   * it must be declared explicitly. Without it {@code JobRequestHandlerAdapter} finds no handler
+   * and every JobRunr legacy job fails with "No handler found for
+   * org.openmrs.scheduler.TaskDefinition". Registered as an isolated, dependency-free bean to avoid
+   * perturbing context startup ordering.
    */
   @Bean
   LegacyTask legacyTask() {
