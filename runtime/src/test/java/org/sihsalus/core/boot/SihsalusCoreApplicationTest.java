@@ -257,6 +257,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -336,6 +337,34 @@ class SihsalusCoreApplicationTest {
    * fails because {@code JobRequestHandlerAdapter} resolves no matching handler. Asserting the
    * adapter bean exists is not enough — the handler it delegates to must be on the context too.
    */
+  /**
+   * Guards the explicit startup-ordering gate: beans whose init performs database / {@code
+   * Context.*} access must declare {@code @DependsOn("openmrsRuntimeReady")} so they are never
+   * created before Liquibase has applied the schema. Without it, context startup intermittently
+   * failed with "Table global_property not found (this database is empty)" depending on
+   * bean-instantiation order.
+   */
+  @Test
+  void schemaDependentBeansDependOnRuntimeReadyMarker() {
+    assertTrue(
+        applicationContext.containsBean("openmrsRuntimeReady"),
+        "openmrsRuntimeReady marker bean must exist to gate schema-dependent beans");
+
+    String[] dependsOn =
+        ((ConfigurableApplicationContext) applicationContext)
+            .getBeanFactory()
+            .getBeanDefinition("reportingSerializer")
+            .getDependsOn();
+
+    assertNotNull(dependsOn, "reportingSerializer must declare a dependsOn");
+    assertTrue(
+        Arrays.asList(dependsOn).contains("openmrsRuntimeReady"),
+        () ->
+            "reportingSerializer must @DependsOn openmrsRuntimeReady so it is created after the "
+                + "schema is ready; was "
+                + Arrays.toString(dependsOn));
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   void legacyTaskHandlerIsRegisteredForSchedulerJobs() {

@@ -78,6 +78,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.FilterType;
 
 @Configuration
@@ -102,7 +103,10 @@ public class SihsalusReportingConfiguration {
     };
   }
 
+  // The ReportingSerializer constructor performs Context.* / global_property access, so it must not
+  // be instantiated before the schema and OpenMRS runtime are ready. See openmrsRuntimeReady.
   @Bean
+  @DependsOn("openmrsRuntimeReady")
   ReportingSerializer reportingSerializer() throws Exception {
     return new ReportingSerializer();
   }
