@@ -55,7 +55,7 @@ public class BaseDataTemplateSearch<T extends OpenmrsData> extends BaseAuditable
     this.voidReasonComparisonType = voidReasonComparisonType;
   }
 
-  public boolean getIncludeVoided() {
+  public Boolean getIncludeVoided() {
     return includeVoided;
   }
 

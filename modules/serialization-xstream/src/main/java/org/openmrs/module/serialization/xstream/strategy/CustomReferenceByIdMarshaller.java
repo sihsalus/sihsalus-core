@@ -146,7 +146,7 @@ public class CustomReferenceByIdMarshaller extends TreeMarshaller {
          * For example, if the item's class is "org.openmrs.Person$$EnhancerByCGLIB$$..." and its actual class is "org.openmrs.User",
          * we will need to add "resolves-to" to show the actual type of this proxy
          */
-        if (this.isCGlibEhanced(item)) {
+        if (this.isCGlibEnhanced(item)) {
           // through "callWriteReplace(Object)" of "SerializationMethodInvoker", we can get the
           // actual type of a proxy
           SerializationMethodInvoker serializationMethodInvoker = new SerializationMethodInvoker();
@@ -188,7 +188,7 @@ public class CustomReferenceByIdMarshaller extends TreeMarshaller {
     }
   }
 
-  private boolean isCGlibEhanced(Object obj) {
+  private boolean isCGlibEnhanced(Object obj) {
     String className = obj.getClass().getName();
     if (className.indexOf(marker) != -1) return true;
     else return false;

@@ -76,7 +76,7 @@ public class LogicUtil {
       parser.stop();
     }
 
-    // if an error was singalled, we throw it
+    // if an error was signalled, we throw it
     if (exceptionHolder[0] != null) {
       if (exceptionHolder[0] instanceof LogicException) throw (LogicException) exceptionHolder[0];
       else throw new LogicException(exceptionHolder[0]);
