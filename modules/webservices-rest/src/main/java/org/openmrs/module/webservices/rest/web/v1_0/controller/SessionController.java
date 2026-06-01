@@ -57,6 +57,16 @@ public class SessionController {
     response.put("locale", Context.getLocale().toString());
     response.put("allowedLocales", localeSpecifications());
 
+    Location sessionLocation = Context.getUserContext().getLocation();
+    if (sessionLocation != null) {
+      Map<String, Object> locationMap = new LinkedHashMap<>();
+      locationMap.put("uuid", sessionLocation.getUuid());
+      locationMap.put("display", sessionLocation.getName());
+      response.put("sessionLocation", locationMap);
+    } else {
+      response.put("sessionLocation", null);
+    }
+
     User authenticatedUser = Context.getAuthenticatedUser();
     if (authenticatedUser != null) {
       response.put("sessionId", request.getSession(true).getId());
@@ -76,6 +86,7 @@ public class SessionController {
     return response;
   }
 
+<<<<<<< Updated upstream
   private Location resolveLocation(Object value) {
     String identifier = locationIdentifier(value);
     if (identifier == null) {

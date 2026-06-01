@@ -83,7 +83,9 @@ public class AuthorizationFilter implements Filter {
 
     if (request instanceof HttpServletRequest) {
       HttpServletRequest httpRequest = (HttpServletRequest) request;
-      if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
+      if (httpRequest.getRequestedSessionId() != null
+          && !httpRequest.isRequestedSessionIdValid()
+          && !isSessionResource(httpRequest)) {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Session timed out");
         return;
