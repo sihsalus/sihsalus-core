@@ -15,79 +15,6 @@ import org.springframework.stereotype.Component;
 @Component
 final class StaticModuleRuntimeInspector {
 
-  private static final Map<String, String> CONFIGURATION_BEANS =
-      Map.ofEntries(
-          Map.entry("initializer", "sihsalusInitializerConfiguration"),
-          Map.entry("fhir2", "fhir2Configuration"),
-          Map.entry("webservices-rest", "systemRestConfiguration"),
-          Map.entry("authentication", "sihsalusAuthenticationConfiguration"),
-          Map.entry("oauth2login", "sihsalusOAuth2LoginConfiguration"),
-          Map.entry("idgen", "sihsalusIdgenConfiguration"),
-          Map.entry("addresshierarchy", "sihsalusAddressHierarchyConfiguration"),
-          Map.entry("emrapi", "sihsalusEmrApiConfiguration"),
-          Map.entry("o3forms", "sihsalusO3FormsConfiguration"),
-          Map.entry("reporting", "sihsalusReportingConfiguration"),
-          Map.entry("billing", "sihsalusBillingConfiguration"),
-          Map.entry("stockmanagement", "sihsalusStockManagementConfiguration"),
-          Map.entry("datafilter", "sihsalusDataFilterConfiguration"),
-          Map.entry("fua", "sihsalusFuaConfiguration"),
-          Map.entry("imaging", "sihsalusImagingConfiguration"),
-          Map.entry("attachments", "sihsalusAttachmentsConfiguration"),
-          Map.entry("patientdocuments", "sihsalusPatientDocumentsConfiguration"),
-          Map.entry("cohort", "sihsalusCohortConfiguration"),
-          Map.entry("queue", "sihsalusQueueConfiguration"),
-          Map.entry("appointments", "sihsalusAppointmentsConfiguration"),
-          Map.entry("teleconsultation", "sihsalusTeleconsultationConfiguration"),
-          Map.entry("bedmanagement", "sihsalusBedManagementConfiguration"),
-          Map.entry("metadatamapping", "sihsalusMetadataMappingConfiguration"),
-          Map.entry("openconceptlab", "sihsalusOpenConceptLabConfiguration"),
-          Map.entry("sihsalusinterop", "sihsalusInteropConfiguration"),
-          Map.entry("event", "sihsalusEventConfiguration"),
-          Map.entry("calculation", "sihsalusCalculationConfiguration"),
-          Map.entry("htmlwidgets", "sihsalusHtmlWidgetsConfiguration"),
-          Map.entry("reportingrest", "sihsalusReportingRestConfiguration"),
-          Map.entry("serialization-xstream", "sihsalusSerializationXstreamConfiguration"),
-          Map.entry("ordertemplates", "sihsalusOrderTemplatesConfiguration"),
-          Map.entry("patientflags", "sihsalusPatientFlagsConfiguration"),
-          Map.entry("legacyui", "sihsalusLegacyUiConfiguration"));
-
-  private static final Map<String, String> LIQUIBASE_FILES =
-      Map.ofEntries(
-          Map.entry("fhir2", "org/openmrs/module/fhir2/liquibase.xml"),
-          Map.entry("idgen", "org/openmrs/module/idgen/liquibase.xml"),
-          Map.entry("addresshierarchy", "org/openmrs/module/addresshierarchy/liquibase.xml"),
-          Map.entry("metadatamapping", "org/openmrs/module/metadatamapping/liquibase.xml"),
-          Map.entry("o3forms", "org/openmrs/module/o3forms/liquibase.xml"),
-          Map.entry("calculation", "org/openmrs/calculation/liquibase.xml"),
-          Map.entry("emrapi", "org/openmrs/module/emrapi/liquibase.xml"),
-          Map.entry("attachments", "org/openmrs/module/attachments/liquibase.xml"),
-          Map.entry("cohort", "org/openmrs/module/cohort/liquibase.xml"),
-          Map.entry("queue", "org/openmrs/module/queue/liquibase.xml"),
-          Map.entry("appointments", "org/openmrs/module/appointments/liquibase.xml"),
-          Map.entry("bedmanagement", "org/openmrs/module/bedmanagement/liquibase.xml"),
-          Map.entry("openconceptlab", "org/openmrs/module/openconceptlab/liquibase.xml"),
-          Map.entry("teleconsultation", "org/bahmni/module/teleconsultation/liquibase.xml"),
-          Map.entry("sihsalusinterop", "org/openmrs/module/sihsalusinterop/liquibase.xml"),
-          Map.entry("reporting", "org/openmrs/module/reporting/liquibase.xml"),
-          Map.entry("stockmanagement", "org/openmrs/module/stockmanagement/liquibase.xml"),
-          Map.entry("datafilter", "org/openmrs/module/datafilter/liquibase.xml"),
-          Map.entry("billing", "org/openmrs/module/billing/liquibase.xml"),
-          Map.entry("fua", "org/openmrs/module/fua/liquibase.xml"),
-          Map.entry("imaging", "org/openmrs/module/imaging/liquibase.xml"),
-          Map.entry("patientdocuments", "org/openmrs/module/patientdocuments/liquibase.xml"),
-          Map.entry("ordertemplates", "org/openmrs/module/ordertemplates/liquibase.xml"),
-          Map.entry("patientflags", "org/openmrs/module/patientflags/liquibase.xml"),
-          Map.entry("legacyui", "org/openmrs/module/legacyui/liquibase.xml"));
-
-  private static final Map<String, String> SCHEDULER_CLASS_PREFIXES =
-      Map.ofEntries(
-          Map.entry("addresshierarchy", "org.openmrs.module.addresshierarchy."),
-          Map.entry("appointments", "org.openmrs.module.appointments."),
-          Map.entry("billing", "org.openmrs.module.billing."),
-          Map.entry("queue", "org.openmrs.module.queue."),
-          Map.entry("sihsalusinterop", "org.openmrs.module.sihsalusinterop."),
-          Map.entry("stockmanagement", "org.openmrs.module.stockmanagement."));
-
   private final ApplicationContext applicationContext;
 
   private final JdbcTemplate jdbcTemplate;
@@ -111,15 +38,15 @@ final class StaticModuleRuntimeInspector {
     String moduleId = module.id();
     boolean configured =
         environment.getProperty("sihsalus.modules." + moduleId + ".enabled", Boolean.class, true);
-    boolean springRegistered = springRegistered(moduleId);
-    boolean databaseManaged = LIQUIBASE_FILES.containsKey(moduleId);
-    boolean databaseMigrated = databaseManaged && databaseMigrated(moduleId);
-    int activeScheduledTasks = activeScheduledTasks(moduleId);
+    boolean springRegistered = springRegistered(module);
+    boolean databaseManaged = module.isDatabaseManaged();
+    boolean databaseMigrated = databaseManaged && databaseMigrated(module);
+    int activeScheduledTasks = activeScheduledTasks(module);
 
     Map<String, Object> details = new LinkedHashMap<>();
     details.put("lifecycle", lifecycle(configured, springRegistered));
-    details.put("configurationBean", CONFIGURATION_BEANS.getOrDefault(moduleId, ""));
-    details.put("legacySchedulerControlled", SCHEDULER_CLASS_PREFIXES.containsKey(moduleId));
+    details.put("configurationBean", module.configBean() == null ? "" : module.configBean());
+    details.put("legacySchedulerControlled", module.hasLegacyScheduler());
     addContentDetails(moduleId, details);
 
     return new StaticModuleRuntimeState(
@@ -133,26 +60,26 @@ final class StaticModuleRuntimeInspector {
         details);
   }
 
-  private boolean springRegistered(String moduleId) {
-    String beanName = CONFIGURATION_BEANS.get(moduleId);
+  private boolean springRegistered(SihsalusModuleDescriptor module) {
+    String beanName = module.configBean();
     return beanName != null && applicationContext.containsBean(beanName);
   }
 
-  private boolean databaseMigrated(String moduleId) {
+  private boolean databaseMigrated(SihsalusModuleDescriptor module) {
     try {
       Integer count =
           jdbcTemplate.queryForObject(
               "select count(*) from liquibasechangelog where filename = ?",
               Integer.class,
-              LIQUIBASE_FILES.get(moduleId));
+              module.liquibaseFile());
       return count != null && count > 0;
     } catch (DataAccessException e) {
       return false;
     }
   }
 
-  private int activeScheduledTasks(String moduleId) {
-    String classPrefix = SCHEDULER_CLASS_PREFIXES.get(moduleId);
+  private int activeScheduledTasks(SihsalusModuleDescriptor module) {
+    String classPrefix = module.schedulerPrefix();
     if (classPrefix == null) {
       return 0;
     }
