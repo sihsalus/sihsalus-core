@@ -77,8 +77,7 @@ import org.springframework.core.io.ClassPathResource;
       "org.openmrs.notification.impl",
       "org.openmrs.obs.handler",
       "org.openmrs.patient.impl",
-      "org.openmrs.scheduler.db.hibernate",
-      "org.openmrs.scheduler.jobrunr",
+      "org.openmrs.scheduler",
       "org.openmrs.serialization",
       "org.openmrs.validator"
     },

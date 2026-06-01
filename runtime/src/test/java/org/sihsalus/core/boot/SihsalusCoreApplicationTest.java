@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -243,6 +244,8 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.module.webservices.rest.web.resource.api.Converter;
 import org.openmrs.scheduler.SchedulerService;
+import org.openmrs.scheduler.TaskDefinition;
+import org.openmrs.scheduler.TaskHandler;
 import org.openmrs.util.HandlerUtil;
 import org.openmrs.util.PrivilegeConstants;
 import org.sihsalus.core.api.StaticModuleTaskRunner;
@@ -254,6 +257,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -323,6 +327,38 @@ class SihsalusCoreApplicationTest {
     assertTrue(applicationContext.containsBean("schedulerService"));
     assertTrue(applicationContext.containsBean("jobRequestHandlerAdapter"));
     assertTrue(applicationContext.containsBean("storageProvider"));
+  }
+
+  /**
+   * Regression test for the "No handler found for org.openmrs.scheduler.TaskDefinition" failure:
+   * the static-runtime component scan must register a {@link TaskHandler} able to process legacy
+   * {@link TaskDefinition} jobs (i.e. {@code LegacyTask}). Without it, every JobRunr legacy job
+   * fails because {@code JobRequestHandlerAdapter} resolves no matching handler. Asserting the
+   * adapter bean exists is not enough — the handler it delegates to must be on the context too.
+   */
+  @SuppressWarnings("unchecked")
+  @Test
+  void legacyTaskHandlerIsRegisteredForSchedulerJobs() {
+    Map<String, TaskHandler> handlers = applicationContext.getBeansOfType(TaskHandler.class);
+    assertFalse(
+        handlers.isEmpty(),
+        "No TaskHandler beans registered; JobRunr legacy scheduler jobs cannot run");
+
+    boolean handlesLegacyTaskDefinition =
+        handlers.values().stream()
+            .map(
+                handler ->
+                    GenericTypeResolver.resolveTypeArgument(handler.getClass(), TaskHandler.class))
+            .anyMatch(
+                genericType ->
+                    genericType != null && genericType.isAssignableFrom(TaskDefinition.class));
+
+    assertTrue(
+        handlesLegacyTaskDefinition,
+        () ->
+            "No TaskHandler<TaskDefinition> (LegacyTask) registered; legacy scheduled tasks would "
+                + "fail with 'No handler found for org.openmrs.scheduler.TaskDefinition'. Handlers: "
+                + handlers.keySet());
   }
 
   @Test

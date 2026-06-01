@@ -86,7 +86,6 @@ public class SessionController {
     return response;
   }
 
-<<<<<<< Updated upstream
   private Location resolveLocation(Object value) {
     String identifier = locationIdentifier(value);
     if (identifier == null) {
