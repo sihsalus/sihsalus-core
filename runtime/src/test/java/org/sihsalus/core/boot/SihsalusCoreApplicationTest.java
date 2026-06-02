@@ -40,6 +40,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Cohort;
+import org.openmrs.Concept;
+import org.openmrs.ConceptAnswer;
+import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.OpenmrsObject;
@@ -52,6 +55,7 @@ import org.openmrs.UserSessionListener;
 import org.openmrs.Visit;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.UserContext;
@@ -247,6 +251,7 @@ import org.openmrs.scheduler.SchedulerService;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.scheduler.TaskHandler;
 import org.openmrs.util.HandlerUtil;
+import org.openmrs.util.OpenmrsConstants;
 import org.openmrs.util.PrivilegeConstants;
 import org.sihsalus.core.api.StaticModuleTaskRunner;
 import org.sihsalus.core.api.authorization.PatientObjectAccessDeniedException;
@@ -575,6 +580,54 @@ class SihsalusCoreApplicationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.authenticated").value(true))
         .andExpect(jsonPath("$.sessionLocation.uuid").value(location.getUuid()));
+  }
+
+  @Test
+  void addressTemplateEndpointIsExposedForPatientRegistration() throws Exception {
+    runWithAuthenticatedOpenmrsSession(
+        () ->
+            Context.getAdministrationService()
+                .setGlobalProperty(
+                    OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE,
+                    OpenmrsConstants.DEFAULT_ADDRESS_TEMPLATE));
+
+    mockMvc
+        .perform(get("/rest/v1/addresstemplate").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.results").isArray())
+        .andExpect(jsonPath("$.results[0].nameMappings").exists());
+  }
+
+  @Test
+  void conceptEndpointExposesCodedAnswers() throws Exception {
+    Concept answer = new Concept();
+    answer.setUuid(UUID.randomUUID().toString());
+    Concept question = new Concept();
+    question.setUuid(UUID.randomUUID().toString());
+
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          ConceptService conceptService = Context.getConceptService();
+          answer.addName(
+              new ConceptName("Compatibility answer " + UUID.randomUUID(), Locale.ENGLISH));
+          answer.setConceptClass(conceptService.getConceptClassByName("Misc"));
+          answer.setDatatype(conceptService.getConceptDatatypeByName("N/A"));
+          conceptService.saveConcept(answer);
+
+          question.addName(
+              new ConceptName("Compatibility question " + UUID.randomUUID(), Locale.ENGLISH));
+          question.setConceptClass(conceptService.getConceptClassByName("Question"));
+          question.setDatatype(conceptService.getConceptDatatypeByName("Coded"));
+          question.addAnswer(new ConceptAnswer(answer));
+          conceptService.saveConcept(question);
+        });
+
+    mockMvc
+        .perform(
+            get("/rest/v1/concept/" + question.getUuid()).header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.answers").isArray())
+        .andExpect(jsonPath("$.answers[0].uuid").value(answer.getUuid()));
   }
 
   @Test
