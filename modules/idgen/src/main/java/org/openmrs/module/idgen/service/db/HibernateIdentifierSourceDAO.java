@@ -361,6 +361,9 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
    */
   @Override
   public Long getSequenceValue(SequentialIdentifierGenerator generator) {
+    // Do not pass a result class here: Hibernate 6 rejects abstract Number (no
+    // single-arg constructor) and concrete numeric types (Long/Integer) are not
+    // portable across the JDBC drivers we run against.
     Object val =
         sessionFactory
             .getHibernateSessionFactory()
