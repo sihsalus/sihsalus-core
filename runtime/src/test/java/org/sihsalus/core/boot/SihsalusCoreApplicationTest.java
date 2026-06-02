@@ -459,6 +459,18 @@ class SihsalusCoreApplicationTest {
   }
 
   @Test
+  void restResourcePathsTolerateTrailingSlash() throws Exception {
+    // Spring Boot 3 dropped trailing-slash path matching, but the reference SPA still posts to
+    // /ws/rest/v1/patient/ (and similar) with a trailing slash. Both forms must resolve.
+    mockMvc
+        .perform(get("/ws/rest/v1/location").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk());
+    mockMvc
+        .perform(get("/ws/rest/v1/location/").header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk());
+  }
+
+  @Test
   void restAuthorizationChallengeCanBeSuppressedForBrowserClients() throws Exception {
     mockMvc
         .perform(get("/api/system/info").header("Disable-WWW-Authenticate", "true"))
