@@ -127,10 +127,6 @@ public class BaseIdentifierSourceService extends BaseOpenmrsService
     if (identifierSource.getCreator() == null) {
       identifierSource.setCreator(u);
     }
-    if (identifierSource.getId() != null) {
-      identifierSource.setChangedBy(u);
-      identifierSource.setDateChanged(today);
-    }
     return dao.saveIdentifierSource(identifierSource);
   }
 

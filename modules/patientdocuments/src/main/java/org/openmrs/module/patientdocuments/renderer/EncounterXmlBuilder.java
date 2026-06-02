@@ -276,7 +276,7 @@ public class EncounterXmlBuilder {
       Map<String, List<Obs>> obsMap = buildObsMap(encounter);
 
       xml.append("<pages>");
-      List<Map<String, Object>> pages = schema.get("pages");
+      List<Map<String, Object>> pages = getMapList(schema, "pages");
       if (pages != null) {
         for (Map<String, Object> page : pages) {
           xml.append(renderPage(page, obsMap, locale));
@@ -301,6 +301,39 @@ public class EncounterXmlBuilder {
     return obsMap;
   }
 
+  private List<Map<String, Object>> getMapList(Map<String, Object> source, String key) {
+    return asMapList(source.get(key));
+  }
+
+  private List<Map<String, Object>> asMapList(Object value) {
+    if (!(value instanceof List<?> values)) {
+      return null;
+    }
+
+    List<Map<String, Object>> maps = new ArrayList<>();
+    for (Object item : values) {
+      Map<String, Object> map = asStringObjectMap(item);
+      if (map != null) {
+        maps.add(map);
+      }
+    }
+    return maps;
+  }
+
+  private Map<String, Object> asStringObjectMap(Object value) {
+    if (!(value instanceof Map<?, ?> source)) {
+      return null;
+    }
+
+    Map<String, Object> result = new HashMap<>();
+    for (Map.Entry<?, ?> entry : source.entrySet()) {
+      if (entry.getKey() instanceof String key) {
+        result.put(key, entry.getValue());
+      }
+    }
+    return result;
+  }
+
   private String renderPage(
       Map<String, Object> page, Map<String, List<Obs>> obsMap, Locale locale) {
     StringBuilder xml = new StringBuilder();
@@ -309,7 +342,7 @@ public class EncounterXmlBuilder {
 
     xml.append("<page label=\"").append(escape(localizedLabel)).append("\">");
 
-    List<Map<String, Object>> sections = (List<Map<String, Object>>) page.get("sections");
+    List<Map<String, Object>> sections = getMapList(page, "sections");
     if (sections != null) {
       for (Map<String, Object> section : sections) {
         xml.append(renderSection(section, obsMap, locale));
@@ -328,8 +361,7 @@ public class EncounterXmlBuilder {
 
     xml.append("<section label=\"").append(escape(localizedLabel)).append("\">");
 
-    List<Map<String, Object>> questions =
-        (List<Map<String, Object>>) section.get(QUESTIONS_SECTION);
+    List<Map<String, Object>> questions = getMapList(section, QUESTIONS_SECTION);
     if (questions != null) {
       for (Map<String, Object> question : questions) {
         xml.append(renderQuestion(question, obsMap, locale));
@@ -396,8 +428,7 @@ public class EncounterXmlBuilder {
   private String renderSubQuestions(
       Map<String, Object> question, Map<String, List<Obs>> obsMap, Locale locale) {
     StringBuilder sb = new StringBuilder();
-    List<Map<String, Object>> subQuestions =
-        (List<Map<String, Object>>) question.get(QUESTIONS_SECTION);
+    List<Map<String, Object>> subQuestions = getMapList(question, QUESTIONS_SECTION);
     if (subQuestions != null) {
       for (Map<String, Object> subQuestion : subQuestions) {
         sb.append(renderQuestion(subQuestion, obsMap, locale));
@@ -416,13 +447,13 @@ public class EncounterXmlBuilder {
     if (!question.containsKey(QUESTION_OPTIONS_SECTION)) {
       return null;
     }
-    Map<String, Object> options = (Map<String, Object>) question.get(QUESTION_OPTIONS_SECTION);
-    return (String) options.get("concept");
+    Map<String, Object> options = asStringObjectMap(question.get(QUESTION_OPTIONS_SECTION));
+    return options == null ? null : (String) options.get("concept");
   }
 
   private String formatValueAsText(Object value) {
-    if (value instanceof List) {
-      return String.join("\n", (List<String>) value);
+    if (value instanceof List<?> values) {
+      return values.stream().map(String::valueOf).collect(Collectors.joining("\n"));
     }
     return value != null ? value.toString() : "";
   }

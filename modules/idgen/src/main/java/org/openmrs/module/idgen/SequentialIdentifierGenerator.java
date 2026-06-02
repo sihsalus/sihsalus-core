@@ -113,7 +113,7 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
     if (getIdentifierType() != null && StringUtils.isNotEmpty(getIdentifierType().getValidator())) {
       try {
         Class<?> c = Context.loadClass(getIdentifierType().getValidator());
-        IdentifierValidator v = (IdentifierValidator) c.newInstance();
+        IdentifierValidator v = (IdentifierValidator) c.getDeclaredConstructor().newInstance();
         identifier = v.getValidIdentifier(identifier);
       } catch (Exception e) {
         throw new RuntimeException(

@@ -13,6 +13,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openmrs.module.patientdocuments.reports.PatientIdStickerReportManager.DATASET_KEY_STICKER_FIELDS;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -70,6 +71,9 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
 
   private static final String DEFAULT_LOGO_CLASSPATH =
       "web/module/resources/openmrs_logo_white_large.png";
+
+  private static final TypeReference<Map<String, Object>> PATIENT_DATA_TYPE =
+      new TypeReference<>() {};
 
   private MessageSourceService mss;
 
@@ -456,26 +460,27 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
         if (jsonData != null) {
           try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> patientData = mapper.readValue(jsonData, Map.class);
+            Map<String, Object> patientData = mapper.readValue(jsonData, PATIENT_DATA_TYPE);
 
             // Process identifiers
-            List<Map<String, Object>> identifiers =
-                (List<Map<String, Object>>) patientData.get("identifiers");
+            List<Map<String, Object>> identifiers = getMapList(patientData, "identifiers");
             String barcodeValue = null;
-            for (Map<String, Object> identifier : identifiers) {
-              boolean isPreferred = (boolean) identifier.get("preferred");
-              String identifierValue = (String) identifier.get("identifier");
-              String identifierTypeUuid = (String) identifier.get("identifierTypeUuid");
+            if (identifiers != null) {
+              for (Map<String, Object> identifier : identifiers) {
+                boolean isPreferred = Boolean.TRUE.equals(identifier.get("preferred"));
+                String identifierValue = stringValue(identifier.get("identifier"));
+                String identifierTypeUuid = stringValue(identifier.get("identifierTypeUuid"));
 
-              if (isPreferred
-                  && shouldIncludeColumn("patientdocuments.patientIdSticker.fields.identifier")) {
-                barcodeValue = identifierValue;
-                addField(doc, fields, patientIdKey, identifierValue);
-              } else if (secondaryIdTypeUuid != null
-                  && secondaryIdTypeUuid.equals(identifierTypeUuid)
-                  && shouldIncludeColumn(
-                      "patientdocuments.patientIdSticker.fields.secondaryIdentifier")) {
-                addField(doc, fields, patientSecondaryIdKey, identifierValue);
+                if (isPreferred
+                    && shouldIncludeColumn("patientdocuments.patientIdSticker.fields.identifier")) {
+                  barcodeValue = identifierValue;
+                  addField(doc, fields, patientIdKey, identifierValue);
+                } else if (secondaryIdTypeUuid != null
+                    && secondaryIdTypeUuid.equals(identifierTypeUuid)
+                    && shouldIncludeColumn(
+                        "patientdocuments.patientIdSticker.fields.secondaryIdentifier")) {
+                  addField(doc, fields, patientSecondaryIdKey, identifierValue);
+                }
               }
             }
 
@@ -517,17 +522,16 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
 
             // Process address
             if (shouldIncludeColumn("patientdocuments.patientIdSticker.fields.fulladdress")) {
-              List<Map<String, String>> addressData =
-                  (List<Map<String, String>>) patientData.get("addresses");
+              List<Map<String, Object>> addressData = getMapList(patientData, "addresses");
               if (addressData != null && !addressData.isEmpty()) {
-                Map<String, String> preferredAddress = addressData.get(0);
+                Map<String, Object> preferredAddress = addressData.get(0);
                 StringBuilder address = new StringBuilder();
-                appendIfNotNull(address, preferredAddress.get("address1"));
-                appendIfNotNull(address, preferredAddress.get("address2"));
-                appendIfNotNull(address, preferredAddress.get("cityVillage"));
-                appendIfNotNull(address, preferredAddress.get("stateProvince"));
-                appendIfNotNull(address, preferredAddress.get("country"));
-                appendIfNotNull(address, preferredAddress.get("postalCode"));
+                appendIfNotNull(address, stringValue(preferredAddress.get("address1")));
+                appendIfNotNull(address, stringValue(preferredAddress.get("address2")));
+                appendIfNotNull(address, stringValue(preferredAddress.get("cityVillage")));
+                appendIfNotNull(address, stringValue(preferredAddress.get("stateProvince")));
+                appendIfNotNull(address, stringValue(preferredAddress.get("country")));
+                appendIfNotNull(address, stringValue(preferredAddress.get("postalCode")));
 
                 if (address.length() > 0) {
                   addField(doc, fields, addressKey, address.toString().trim());
@@ -550,6 +554,36 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
         }
       }
     }
+  }
+
+  private List<Map<String, Object>> getMapList(Map<String, Object> source, String key) {
+    Object value = source.get(key);
+    if (!(value instanceof List<?> values)) {
+      return null;
+    }
+
+    return values.stream()
+        .map(this::asStringObjectMap)
+        .filter(item -> item != null)
+        .toList();
+  }
+
+  private Map<String, Object> asStringObjectMap(Object value) {
+    if (!(value instanceof Map<?, ?> source)) {
+      return null;
+    }
+
+    Map<String, Object> result = new HashMap<>();
+    for (Map.Entry<?, ?> entry : source.entrySet()) {
+      if (entry.getKey() instanceof String key) {
+        result.put(key, entry.getValue());
+      }
+    }
+    return result;
+  }
+
+  private String stringValue(Object value) {
+    return value == null ? null : value.toString();
   }
 
   private void addField(Document doc, Element fields, String label, String value) {
