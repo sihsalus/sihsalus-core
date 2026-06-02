@@ -1424,8 +1424,9 @@ public class HibernateConceptDAO implements ConceptDAO {
         sessionFactory
             .getCurrentSession()
             .createNativeQuery(
-                "select datatype.* from concept_datatype datatype, concept concept where "
-                    + "datatype.concept_datatype_id = concept.datatype_id and concept.concept_id=:conceptId",
+                "select datatype.* from concept_datatype datatype, concept concept where"
+                    + " datatype.concept_datatype_id = concept.datatype_id and"
+                    + " concept.concept_id=:conceptId",
                 ConceptDatatype.class);
     sql.setParameter("conceptId", concept.getConceptId());
 

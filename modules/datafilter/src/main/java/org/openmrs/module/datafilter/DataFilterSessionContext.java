@@ -17,6 +17,7 @@ public final class DataFilterSessionContext {
 
   public static void reset() {
     log.debug(
-        "Data filter session reset requested; Hibernate 7 runtime filters are not wired in static mode.");
+        "Data filter session reset requested; Hibernate 7 runtime filters are not wired in static"
+            + " mode.");
   }
 }

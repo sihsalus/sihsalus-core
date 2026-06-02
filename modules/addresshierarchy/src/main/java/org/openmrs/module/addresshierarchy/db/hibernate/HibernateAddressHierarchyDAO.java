@@ -47,7 +47,8 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
     Long count =
         getCurrentSession()
             .createQuery(
-                "select count(entry) from AddressHierarchyEntry entry where entry.level.levelId = :levelId",
+                "select count(entry) from AddressHierarchyEntry entry where entry.level.levelId ="
+                    + " :levelId",
                 Long.class)
             .setParameter("levelId", level.getId())
             .getSingleResult();
@@ -362,25 +363,32 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
   @Deprecated
   public int getUnstructuredCount(int page) {
     String invalidAddressCount =
-        "select count(*) "
-            + " from person_address "
-            + " left join patient_identifier on patient_identifier.patient_id = person_address.person_id "
-            + " left join patient_program on patient_program.patient_id = person_address.person_id "
-            + " left join patient_state on patient_program.patient_program_id = patient_state.patient_program_id "
-            + " left join program_workflow_state on patient_state.state = program_workflow_state.program_workflow_state_id "
-            + " left join concept_name on concept_name.concept_id = program_workflow_state.concept_id "
-            + " left join person_name on person_name.person_id = person_address.person_id "
-            + " where person_address.voided = false AND "
-            + " patient_identifier.preferred = true AND "
-            + " person_name.preferred = true AND "
-            + " patient_program.voided = false AND "
-            + " patient_program.date_completed is null AND "
-            + " (person_address.country not in (select name from address_hierarchy where type_id = 1) "
-            + " OR person_address.state_province not in (select name from address_hierarchy where type_id = 2 and parent_id in (select address_hierarchy_id from address_hierarchy where name = person_address.country and type_id = 1)) "
-            + " OR person_address.county_district not in (select name from address_hierarchy where type_id = 3 and parent_id in (select address_hierarchy_id from address_hierarchy where name = person_address.state_province and type_id = 2))"
-            + " OR person_address.city_village not in (select name from address_hierarchy where type_id = 4 and parent_id in (select address_hierarchy_id from address_hierarchy where name = person_address.county_district and type_id = 3))"
-            + " OR person_address.neighborhood_cell not in (select name from address_hierarchy where type_id = 5 and parent_id in (select address_hierarchy_id from address_hierarchy where name = person_address.city_village and type_id = 4))"
-            + " OR person_address.address1 not in (select name from address_hierarchy where type_id = 6 and parent_id in (select address_hierarchy_id from address_hierarchy where name = person_address.neighborhood_cell and type_id = 5)))";
+        "select count(*)  from person_address  left join patient_identifier on"
+            + " patient_identifier.patient_id = person_address.person_id  left join patient_program"
+            + " on patient_program.patient_id = person_address.person_id  left join patient_state"
+            + " on patient_program.patient_program_id = patient_state.patient_program_id  left join"
+            + " program_workflow_state on patient_state.state ="
+            + " program_workflow_state.program_workflow_state_id  left join concept_name on"
+            + " concept_name.concept_id = program_workflow_state.concept_id  left join person_name"
+            + " on person_name.person_id = person_address.person_id  where person_address.voided ="
+            + " false AND  patient_identifier.preferred = true AND  person_name.preferred = true"
+            + " AND  patient_program.voided = false AND  patient_program.date_completed is null AND"
+            + "  (person_address.country not in (select name from address_hierarchy where type_id ="
+            + " 1)  OR person_address.state_province not in (select name from address_hierarchy"
+            + " where type_id = 2 and parent_id in (select address_hierarchy_id from"
+            + " address_hierarchy where name = person_address.country and type_id = 1))  OR"
+            + " person_address.county_district not in (select name from address_hierarchy where"
+            + " type_id = 3 and parent_id in (select address_hierarchy_id from address_hierarchy"
+            + " where name = person_address.state_province and type_id = 2)) OR"
+            + " person_address.city_village not in (select name from address_hierarchy where"
+            + " type_id = 4 and parent_id in (select address_hierarchy_id from address_hierarchy"
+            + " where name = person_address.county_district and type_id = 3)) OR"
+            + " person_address.neighborhood_cell not in (select name from address_hierarchy where"
+            + " type_id = 5 and parent_id in (select address_hierarchy_id from address_hierarchy"
+            + " where name = person_address.city_village and type_id = 4)) OR"
+            + " person_address.address1 not in (select name from address_hierarchy where type_id ="
+            + " 6 and parent_id in (select address_hierarchy_id from address_hierarchy where name ="
+            + " person_address.neighborhood_cell and type_id = 5)))";
 
     Object result = getCurrentSession().createNativeQuery(invalidAddressCount).getSingleResult();
     return result instanceof Number number ? number.intValue() : 0;
@@ -392,19 +400,18 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
   public List<Object[]> findUnstructuredAddresses(int page, int locationId) {
     int startIndex = page > 0 ? page * 100 - 100 : 0;
     String cellUmu =
-        "select x.state_province, x.county_district, x.city_village, x.neighborhood_cell, "
-            + "x.address1, pi.patient_id, pi.identifier, location.name "
-            + "from (select identifier, location_id, patient_id, patient_identifier_id from patient_identifier where preferred = true) pi "
-            + "left join (select address1, state_province, county_district, city_village, neighborhood_cell, "
-            + "date_created, person_id, person_address_id from person_address pa "
-            + "left join address_hierarchy on pa.address1 = address_hierarchy.name "
-            + "inner join address_hierarchy ah2 on pa.neighborhood_cell = ah2.name "
-            + "and address_hierarchy.parent_id = ah2.address_hierarchy_id "
-            + "and ah2.type_id = (select location_attribute_type_id from address_hierarchy_type where name = 'Cell') "
-            + "where voided = false) x on pi.patient_id = x.person_id "
-            + "inner join location on location.location_id = pi.location_id "
-            + "where location.location_id = :locationId and x.person_id is null "
-            + "order by x.date_created desc";
+        "select x.state_province, x.county_district, x.city_village, x.neighborhood_cell,"
+            + " x.address1, pi.patient_id, pi.identifier, location.name from (select identifier,"
+            + " location_id, patient_id, patient_identifier_id from patient_identifier where"
+            + " preferred = true) pi left join (select address1, state_province, county_district,"
+            + " city_village, neighborhood_cell, date_created, person_id, person_address_id from"
+            + " person_address pa left join address_hierarchy on pa.address1 ="
+            + " address_hierarchy.name inner join address_hierarchy ah2 on pa.neighborhood_cell ="
+            + " ah2.name and address_hierarchy.parent_id = ah2.address_hierarchy_id and ah2.type_id"
+            + " = (select location_attribute_type_id from address_hierarchy_type where name ="
+            + " 'Cell') where voided = false) x on pi.patient_id = x.person_id inner join location"
+            + " on location.location_id = pi.location_id where location.location_id = :locationId"
+            + " and x.person_id is null order by x.date_created desc";
 
     NativeQuery<?> query = getCurrentSession().createNativeQuery(cellUmu);
     query.setParameter("locationId", locationId);
@@ -418,12 +425,13 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
   @SuppressWarnings("unchecked")
   public List<Object[]> getLocationAddressBreakdown(int locationId) {
     String locationBreakdown =
-        "select pa.county_district, pa.city_village, count(*) "
-            + "from (select identifier, location_id, patient_id, patient_identifier_id from patient_identifier where preferred = true) pi "
-            + "inner join location on location.location_id = pi.location_id and location.location_id = :locationId "
-            + "inner join (select country, state_province, county_district, city_village, person_id "
-            + "from person_address where voided = false and preferred = true) pa on pi.patient_id = pa.person_id "
-            + "group by pa.country, pa.state_province, pa.county_district, pa.city_village";
+        "select pa.county_district, pa.city_village, count(*) from (select identifier, location_id,"
+            + " patient_id, patient_identifier_id from patient_identifier where preferred = true)"
+            + " pi inner join location on location.location_id = pi.location_id and"
+            + " location.location_id = :locationId inner join (select country, state_province,"
+            + " county_district, city_village, person_id from person_address where voided = false"
+            + " and preferred = true) pa on pi.patient_id = pa.person_id group by pa.country,"
+            + " pa.state_province, pa.county_district, pa.city_village";
 
     return (List<Object[]>)
         getCurrentSession()
@@ -438,9 +446,10 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
   public List<Object[]> getAllAddresses(int page) {
     int startIndex = page > 0 ? page * 400 - 400 : 0;
     String allAddresses =
-        "select * from (select max(date_created), patient_id from patient_program group by patient_id) pp "
-            + "inner join person_address on pp.patient_id = person_address.person_id "
-            + "where person_address.voided = false order by person_address.date_created desc";
+        "select * from (select max(date_created), patient_id from patient_program group by"
+            + " patient_id) pp inner join person_address on pp.patient_id ="
+            + " person_address.person_id where person_address.voided = false order by"
+            + " person_address.date_created desc";
 
     NativeQuery<?> query = getCurrentSession().createNativeQuery(allAddresses);
     query.setMaxResults(100);
@@ -453,7 +462,8 @@ public class HibernateAddressHierarchyDAO implements AddressHierarchyDAO {
       AddressHierarchyLevel level, String name, int limit) {
     return getCurrentSession()
         .createQuery(
-            "from AddressHierarchyEntry entry where entry.level.levelId = :levelId and lower(entry.name) like :name",
+            "from AddressHierarchyEntry entry where entry.level.levelId = :levelId and"
+                + " lower(entry.name) like :name",
             AddressHierarchyEntry.class)
         .setParameter("levelId", level.getId())
         .setParameter("name", likePattern(name))

@@ -660,7 +660,8 @@ public class Result extends ArrayList<Result> {
       return this.get(0).toObject();
     }
     throw new LogicException(
-        "This result represents more than one result, you cannot call toObject on multiple results");
+        "This result represents more than one result, you cannot call toObject on multiple"
+            + " results");
   }
 
   /**

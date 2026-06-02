@@ -41,7 +41,9 @@ public class LogEntrySearchHandler implements SearchHandler {
           "1.8.* - 9.9.*",
           Arrays.asList(
               new SearchQuery.Builder(
-                      "Allows you to find log of ID Generation Activities by Source Name, Identifier contents,Generated Date Range,Comment contents and User who generated the log entry")
+                      "Allows you to find log of ID Generation Activities by Source Name,"
+                          + " Identifier contents,Generated Date Range,Comment contents and User"
+                          + " who generated the log entry")
                   .withOptionalParameters(
                       "source", "identifier", "fromDate", "toDate", "comment", "generatedBy")
                   .build()));

@@ -115,7 +115,8 @@ public class MetadataMappingServiceImpl extends BaseOpenmrsService
       throw new APIException(
           "Local concept source is not set in the "
               + MetadataMapping.GP_LOCAL_SOURCE_UUID
-              + " global property. Call createLocalConceptSourceFromImplementationId to have it set automatically.");
+              + " global property. Call createLocalConceptSourceFromImplementationId to have it set"
+              + " automatically.");
     } else {
       final ConceptSource source = conceptService.getConceptSourceByUuid(sourceUuid);
 

@@ -113,7 +113,8 @@ public class UpdateUserTask implements Runnable {
       new NullAwareBeanUtilsBean().copyProperties(user, openmrsUser);
     } catch (IllegalAccessException | InvocationTargetException e) {
       log.error(
-          "Something went wrong when copying attributes from the user info to the OpenMRS user, the OpenMRS user might not have been updated properly.",
+          "Something went wrong when copying attributes from the user info to the OpenMRS user, the"
+              + " OpenMRS user might not have been updated properly.",
           e);
     }
 

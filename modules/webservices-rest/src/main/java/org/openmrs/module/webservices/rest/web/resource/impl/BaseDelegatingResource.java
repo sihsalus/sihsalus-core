@@ -176,7 +176,8 @@ public abstract class BaseDelegatingResource<T> extends BaseDelegatingConverter<
         throw new IllegalStateException(
             "Could not determine type information. Make sure that "
                 + handlerClass.getName()
-                + " explicitly says implements DelegatingSubclassHandler<...>. It is not sufficient to just extend a base class that implements this.");
+                + " explicitly says implements DelegatingSubclassHandler<...>. It is not sufficient"
+                + " to just extend a base class that implements this.");
       }
       Resource resourceForHandler =
           Context.getService(RestService.class).getResourceBySupportedClass(forDelegateClass);
@@ -194,7 +195,8 @@ public abstract class BaseDelegatingResource<T> extends BaseDelegatingConverter<
           log.warn(
               "SubclassHandler "
                   + handlerClass.getName()
-                  + " does not have a @SubClassHandler annotation. This can cause conflicts in resolving handlers for your subclass.");
+                  + " does not have a @SubClassHandler annotation. This can cause conflicts in"
+                  + " resolving handlers for your subclass.");
         }
       }
     }

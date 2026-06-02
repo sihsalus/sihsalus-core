@@ -329,10 +329,23 @@ public class SystemRestConfiguration {
         return "/rest";
       }
       if (pathWithoutContext.startsWith("/ws/rest/")) {
-        return pathWithoutContext.substring("/ws".length());
+        return stripRestTrailingSlash(pathWithoutContext.substring("/ws".length()));
       }
 
-      return pathWithoutContext;
+      return stripRestTrailingSlash(pathWithoutContext);
+    }
+
+    /**
+     * Spring 6 / Boot 3 dropped trailing-slash path matching, but OpenMRS REST clients (notably the
+     * reference SPA's patient create, {@code POST /ws/rest/v1/patient/}) still send a trailing
+     * slash. Trim a single trailing slash on {@code /rest} paths so they keep matching the {@code
+     * {resource}} request mappings instead of 404ing.
+     */
+    private static String stripRestTrailingSlash(String path) {
+      if (path.startsWith("/rest") && path.endsWith("/") && path.length() > "/rest".length()) {
+        return path.substring(0, path.length() - 1);
+      }
+      return path;
     }
 
     private static String effectiveContextPath(HttpServletRequest request) {

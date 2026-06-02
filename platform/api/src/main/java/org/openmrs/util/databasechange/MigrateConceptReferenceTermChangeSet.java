@@ -110,9 +110,9 @@ public class MigrateConceptReferenceTermChangeSet implements CustomTaskChange {
                   + " concept_reference_term_id = ? where concept_map_id = ?");
       insertTerm =
           connection.prepareStatement(
-              "insert into concept_reference_term"
-                  + " (concept_reference_term_id, uuid, concept_source_id, code, creator, date_created, description)"
-                  + " values (?, ?, ?, ?, ?, ?, ?)");
+              "insert into concept_reference_term (concept_reference_term_id, uuid,"
+                  + " concept_source_id, code, creator, date_created, description) values (?, ?, ?,"
+                  + " ?, ?, ?, ?)");
       updateMapType =
           connection.prepareStatement(
               "update concept_reference_map set"

@@ -316,11 +316,10 @@ public class ReportLoader {
         design.addPropertyValue(
             ReportDesignRenderer.FILENAME_BASE_PROPERTY,
             Strings.CS.replace(reportDefinition.getName(), " ", ".").toLowerCase()
-                + "."
-                + "{{ formatDate request.reportDefinition.parameterMappings.startDate \"yyyyMMdd\" }}."
-                + "{{ formatDate request.reportDefinition.parameterMappings.endDate \"yyyyMMdd\" }}."
-                + "{{ formatDate request.evaluateStartDatetime \"yyyyMMdd\" }}."
-                + "{{ formatDate request.evaluateStartDatetime \"HHmm\" }}");
+                + ".{{ formatDate request.reportDefinition.parameterMappings.startDate \"yyyyMMdd\""
+                + " }}.{{ formatDate request.reportDefinition.parameterMappings.endDate"
+                + " \"yyyyMMdd\" }}.{{ formatDate request.evaluateStartDatetime \"yyyyMMdd\" }}.{{"
+                + " formatDate request.evaluateStartDatetime \"HHmm\" }}");
       }
 
       if (designDescriptor.getProcessors() != null) {

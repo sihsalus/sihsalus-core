@@ -361,9 +361,9 @@ class SihsalusBillingAuditIntegrationTest {
 
     String stockItemUuid = UUID.randomUUID().toString();
     jdbcTemplate.update(
-        "insert into stockmgmt_stock_item "
-            + "(stock_item_id, has_expiration, common_name, is_drug, creator, date_created, voided, uuid) "
-            + "values (?, false, ?, false, ?, current_timestamp, false, ?)",
+        "insert into stockmgmt_stock_item (stock_item_id, has_expiration, common_name, is_drug,"
+            + " creator, date_created, voided, uuid) values (?, false, ?, false, ?,"
+            + " current_timestamp, false, ?)",
         itemId,
         "Audit stock item " + stockItemUuid,
         adminUserId,
@@ -375,9 +375,9 @@ class SihsalusBillingAuditIntegrationTest {
     Integer patientId = nextId("person", "person_id");
     String personUuid = UUID.randomUUID().toString();
     jdbcTemplate.update(
-        "insert into person "
-            + "(person_id, gender, birthdate, birthdate_estimated, dead, creator, date_created, voided, uuid) "
-            + "values (?, 'M', current_date, false, false, ?, current_timestamp, false, ?)",
+        "insert into person (person_id, gender, birthdate, birthdate_estimated, dead, creator,"
+            + " date_created, voided, uuid) values (?, 'M', current_date, false, false, ?,"
+            + " current_timestamp, false, ?)",
         patientId,
         adminUserId,
         personUuid);
@@ -387,9 +387,8 @@ class SihsalusBillingAuditIntegrationTest {
         patientId,
         adminUserId);
     jdbcTemplate.update(
-        "insert into person_name "
-            + "(person_id, preferred, given_name, family_name, creator, date_created, voided, uuid) "
-            + "values (?, true, ?, ?, ?, current_timestamp, false, ?)",
+        "insert into person_name (person_id, preferred, given_name, family_name, creator,"
+            + " date_created, voided, uuid) values (?, true, ?, ?, ?, current_timestamp, false, ?)",
         patientId,
         "Billing",
         "Audit",

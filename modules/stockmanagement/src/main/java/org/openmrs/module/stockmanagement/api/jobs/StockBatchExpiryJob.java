@@ -394,11 +394,13 @@ public class StockBatchExpiryJob extends AbstractTask {
         if (partyDTO == null) continue;
         if (locationCount > 0) {
           stringBuilder.append(
-              "<tr><td colspan='9' style='padding: 0.25rem;height:5px;border-bottom:0;'></td></tr>");
+              "<tr><td colspan='9' style='padding:"
+                  + " 0.25rem;height:5px;border-bottom:0;'></td></tr>");
         }
         stringBuilder.append(
             String.format(
-                "<tr><td colspan='9' style='padding: 0.5rem 0.5rem 0.5rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;'>Location: <b>%1s</b></td></tr>",
+                "<tr><td colspan='9' style='padding: 0.5rem 0.5rem 0.5rem 0.5rem; font-size:"
+                    + " 95%%;border-bottom:solid 1px grey;'>Location: <b>%1s</b></td></tr>",
                 partyDTO.getName()));
         // Stock items inventory
         int stockItemsCount = 0;
@@ -407,7 +409,9 @@ public class StockBatchExpiryJob extends AbstractTask {
           stringBuilder.append("<tr>");
           stringBuilder.append(
               String.format(
-                  "<td  rowspan='%1$s' colspan='3'  valign='top' style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;'>%2$s</td>",
+                  "<td  rowspan='%1$s' colspan='3'  valign='top' style='padding: 0.2rem 0.5rem"
+                      + " 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px"
+                      + " grey;border-right:solid 1px grey;'>%2$s</td>",
                   stockItem.getValue().size(),
                   stockItemNames.getOrDefault(stockItem.getKey().getValue2(), "")));
 
@@ -422,23 +426,31 @@ public class StockBatchExpiryJob extends AbstractTask {
             if (stockBatchDTO == null) continue;
 
             stringBuilder.append(
-                "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid 1px grey;'>&nbsp;&nbsp;&nbsp;</td>");
+                "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                    + " 95%;border-bottom:solid 1px grey;'>&nbsp;&nbsp;&nbsp;</td>");
             stringBuilder.append(
                 String.format(
-                    "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;text-align:right;'>%1s</td>",
+                    "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                        + " 95%%;border-bottom:solid 1px grey;border-right:solid 1px"
+                        + " grey;text-align:right;'>%1s</td>",
                     stockBatchDTO.getBatchNo()));
             stringBuilder.append(
-                "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid 1px grey;'>&nbsp;&nbsp;&nbsp;</td>");
+                "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                    + " 95%;border-bottom:solid 1px grey;'>&nbsp;&nbsp;&nbsp;</td>");
             stringBuilder.append(
                 String.format(
-                    "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;text-align:right;'>%1$s %2$s</td>",
+                    "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                        + " 95%%;border-bottom:solid 1px grey;border-right:solid 1px"
+                        + " grey;text-align:right;'>%1$s %2$s</td>",
                     NumberFormatUtil.qtyDisplayFormat(batchNumber.getQuantity()),
                     batchNumber.getQuantityUoM()));
             stringBuilder.append(
-                "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid 1px grey;'>&nbsp;&nbsp;&nbsp;</td>");
+                "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                    + " 95%;border-bottom:solid 1px grey;'>&nbsp;&nbsp;&nbsp;</td>");
             stringBuilder.append(
                 String.format(
-                    "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;text-align:right;'>%1s</td>",
+                    "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                        + " 95%%;border-bottom:solid 1px grey;text-align:right;'>%1s</td>",
                     DateUtil.formatDDMMMyyyy(stockBatchDTO.getExpiration())));
 
             if (isAfterRow) {

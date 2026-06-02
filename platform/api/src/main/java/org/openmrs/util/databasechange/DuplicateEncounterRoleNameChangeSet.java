@@ -82,7 +82,8 @@ public class DuplicateEncounterRoleNameChangeSet implements CustomTaskChange {
       stmt = connection.createStatement();
       rs =
           stmt.executeQuery(
-              "SELECT * FROM encounter_role INNER JOIN (SELECT name FROM encounter_role GROUP BY name HAVING count(name) > 1) dup ON encounter_role.name = dup.name");
+              "SELECT * FROM encounter_role INNER JOIN (SELECT name FROM encounter_role GROUP BY"
+                  + " name HAVING count(name) > 1) dup ON encounter_role.name = dup.name");
 
       Integer id;
       String name;
@@ -138,7 +139,8 @@ public class DuplicateEncounterRoleNameChangeSet implements CustomTaskChange {
 
           pStmt =
               connection.prepareStatement(
-                  "update encounter_role set name = ?, changed_by = ?, date_changed = ? where encounter_role_id = ?");
+                  "update encounter_role set name = ?, changed_by = ?, date_changed = ? where"
+                      + " encounter_role_id = ?");
           pStmt.setString(1, newName);
           pStmt.setInt(2, DatabaseUpdater.getAuthenticatedUserId());
 
@@ -191,7 +193,8 @@ public class DuplicateEncounterRoleNameChangeSet implements CustomTaskChange {
           stmt.close();
         } catch (SQLException e) {
           log.warn(
-              "Failed to close the select statement used to identify duplicate EncounterRole object names");
+              "Failed to close the select statement used to identify duplicate EncounterRole object"
+                  + " names");
         }
       }
 
@@ -201,7 +204,8 @@ public class DuplicateEncounterRoleNameChangeSet implements CustomTaskChange {
 
         } catch (SQLException e) {
           log.warn(
-              "Failed to close the prepared statement used to update duplicate EncounterRole object names");
+              "Failed to close the prepared statement used to update duplicate EncounterRole object"
+                  + " names");
         }
       }
     }

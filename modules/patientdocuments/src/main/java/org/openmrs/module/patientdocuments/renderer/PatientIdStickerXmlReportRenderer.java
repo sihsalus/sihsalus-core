@@ -69,6 +69,8 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
   private static final Logger log =
       LoggerFactory.getLogger(PatientIdStickerXmlReportRenderer.class);
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   private static final String DEFAULT_LOGO_CLASSPATH =
       "web/module/resources/openmrs_logo_white_large.png";
 
@@ -170,7 +172,7 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
     String stickerWidth =
         getInitializerService().getValueFromKey("report.patientIdSticker.size.width");
     rootElement.setAttribute("sticker-height", isNotBlank(stickerHeight) ? stickerHeight : "297mm");
-    rootElement.setAttribute("sticker-width", isNotBlank(stickerWidth) ? stickerWidth : "297mm");
+    rootElement.setAttribute("sticker-width", isNotBlank(stickerWidth) ? stickerWidth : "210mm");
   }
 
   private void configureFontSettings(Element rootElement) {
@@ -211,7 +213,7 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
     Element templatePIDElement = doc.createElement("patientIdSticker");
 
     // Set Label names to use in template layouts
-    MessageSourceService messageSourceService = Context.getMessageSourceService();
+    MessageSourceService messageSourceService = getMessageSourceService();
     String patientIdKey =
         messageSourceService.getMessage("patientdocuments.patientIdSticker.fields.identifier");
     String patientSecondaryIdKey =
@@ -376,7 +378,7 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
 
       return resolvedLogoRealPath.toFile();
     } catch (IllegalArgumentException e) {
-      log.error("Invalid logo path: " + logoUrlPath, e);
+      log.error("Invalid logo path: {}", logoUrlPath, e);
       return null;
     } catch (IOException e) {
       log.error("Failed to access logo file: {}", logoUrlPath, e);
@@ -432,7 +434,7 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
       Element fields = doc.createElement("fields");
       templatePIDElement.appendChild(fields);
 
-      MessageSourceService messageSourceService = Context.getMessageSourceService();
+      MessageSourceService messageSourceService = getMessageSourceService();
       String patientIdKey =
           messageSourceService.getMessage("patientdocuments.patientIdSticker.fields.identifier");
       String patientSecondaryIdKey =
@@ -453,14 +455,16 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
       String secondaryIdTypeUuid =
           getInitializerService()
               .getValueFromKey("report.patientIdSticker.fields.identifier.secondary.type");
+      Boolean isBarcodeEnabled =
+          getInitializerService().getBooleanFromKey("report.patientIdSticker.barcode");
+      String barcodeValueToRender = null;
 
       for (DataSetRow row : dataSet) {
         String jsonData = (String) row.getColumnValue("patientData");
 
         if (jsonData != null) {
           try {
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> patientData = mapper.readValue(jsonData, PATIENT_DATA_TYPE);
+            Map<String, Object> patientData = OBJECT_MAPPER.readValue(jsonData, PATIENT_DATA_TYPE);
 
             // Process identifiers
             List<Map<String, Object>> identifiers = getMapList(patientData, "identifiers");
@@ -539,19 +543,22 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
               }
             }
 
-            // Add barcode if enabled
-            Boolean isBarcodeEnabled =
-                getInitializerService().getBooleanFromKey("report.patientIdSticker.barcode");
-            if (barcodeValue != null && Boolean.TRUE.equals(isBarcodeEnabled)) {
-              Element barcode = doc.createElement("barcode");
-              barcode.setAttribute("barcodeValue", barcodeValue);
-              templatePIDElement.appendChild(barcode);
+            if (barcodeValueToRender == null
+                && barcodeValue != null
+                && Boolean.TRUE.equals(isBarcodeEnabled)) {
+              barcodeValueToRender = barcodeValue;
             }
 
           } catch (Exception e) {
             throw new RenderingException("Error processing patient JSON data", e);
           }
         }
+      }
+
+      if (barcodeValueToRender != null) {
+        Element barcode = doc.createElement("barcode");
+        barcode.setAttribute("barcodeValue", barcodeValueToRender);
+        templatePIDElement.appendChild(barcode);
       }
     }
   }

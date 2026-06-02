@@ -180,7 +180,8 @@ public class SihSalusInteropActivator extends BaseModuleActivator {
       log.warn(
           "SchedulerService no disponible. El procesamiento automático de cola no se activará.");
       log.warn(
-          "NOTA: Puedes registrar manualmente la tarea desde la interfaz de administración de OpenMRS");
+          "NOTA: Puedes registrar manualmente la tarea desde la interfaz de administración de"
+              + " OpenMRS");
       return;
     }
 
@@ -225,7 +226,8 @@ public class SihSalusInteropActivator extends BaseModuleActivator {
     } catch (Exception e) {
       log.warn("No se pudo registrar el scheduler automáticamente. Error: " + e.getMessage());
       log.warn(
-          "Puedes registrar manualmente la tarea 'QueueProcessorTask' desde la interfaz de administración de OpenMRS");
+          "Puedes registrar manualmente la tarea 'QueueProcessorTask' desde la interfaz de"
+              + " administración de OpenMRS");
     }
   }
 
@@ -257,7 +259,8 @@ public class SihSalusInteropActivator extends BaseModuleActivator {
       log.error("Error al registrar EncounterSavedAdvice: " + e.getMessage(), e);
       // No lanzar excepción para no impedir el arranque del módulo
       log.warn(
-          "El advice no se registró, pero el módulo continuará funcionando. La detección automática de Encounter no estará activa.");
+          "El advice no se registró, pero el módulo continuará funcionando. La detección automática"
+              + " de Encounter no estará activa.");
     }
   }
 }

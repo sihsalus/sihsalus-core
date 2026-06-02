@@ -184,7 +184,8 @@ public class AutoGenerationOptionResource
         && automaticGenerationEnabled == null
         && manualEntryEnabled == null) {
       throw new ResourceDoesNotSupportOperationException(
-          "You must provide at least a location, or a source, or an automaticGenerationEnabled, or a manualEntryEnabled parameter  to update an autoGenerationOption");
+          "You must provide at least a location, or a source, or an automaticGenerationEnabled, or"
+              + " a manualEntryEnabled parameter  to update an autoGenerationOption");
     }
     if (manualEntryEnabled != null) {
       autoGenerationOption.setManualEntryEnabled(this.parseBoolean(manualEntryEnabled));

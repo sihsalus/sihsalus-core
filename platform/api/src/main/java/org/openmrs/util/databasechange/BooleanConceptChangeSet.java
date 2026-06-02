@@ -142,7 +142,9 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
       conceptId++;
       updateStatement =
           connection.prepareStatement(
-              "INSERT INTO concept (concept_id, short_name, description, datatype_id, class_id, retired, is_set, creator, date_created, uuid) VALUES (?, '', '', 4, 11, FALSE, FALSE, 1, NOW(), ?)");
+              "INSERT INTO concept (concept_id, short_name, description, datatype_id, class_id,"
+                  + " retired, is_set, creator, date_created, uuid) VALUES (?, '', '', 4, 11,"
+                  + " FALSE, FALSE, 1, NOW(), ?)");
       updateStatement.setInt(1, conceptId);
       updateStatement.setString(2, UUID.randomUUID().toString());
       updateStatement.executeUpdate();
@@ -156,7 +158,8 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
           conceptNameId++;
           updateStatement =
               connection.prepareStatement(
-                  "INSERT INTO concept_name (concept_name_id, concept_id, locale, name, creator, date_created, uuid) VALUES (?, ?, ?, ?, 1, NOW(), ?)");
+                  "INSERT INTO concept_name (concept_name_id, concept_id, locale, name, creator,"
+                      + " date_created, uuid) VALUES (?, ?, ?, ?, 1, NOW(), ?)");
           updateStatement.setInt(1, conceptNameId);
           updateStatement.setInt(2, conceptId);
           updateStatement.setString(3, locale);
@@ -170,7 +173,8 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
           if (!preferredDoneAlready && "en".equals(locale)) {
             updateStatement =
                 connection.prepareStatement(
-                    "INSERT INTO concept_name_tag_map (concept_name_id, concept_name_tag_id) VALUES (?, 4)");
+                    "INSERT INTO concept_name_tag_map (concept_name_id, concept_name_tag_id) VALUES"
+                        + " (?, 4)");
             updateStatement.setInt(1, conceptNameId);
             updateStatement.executeUpdate();
             updateStatement.close();
@@ -179,7 +183,8 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
 
           updateStatement =
               connection.prepareStatement(
-                  "INSERT INTO concept_word (concept_id, word, locale, concept_name_id) VALUES (?, ?, ?, ?)");
+                  "INSERT INTO concept_word (concept_id, word, locale, concept_name_id) VALUES (?,"
+                      + " ?, ?, ?)");
           updateStatement.setInt(1, conceptId);
           updateStatement.setString(2, name);
           updateStatement.setString(3, locale);
@@ -215,14 +220,16 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
       /* replace value_numerical boolean values by coded boolean values */
       updateStatement =
           connection.prepareStatement(
-              "UPDATE obs SET value_coded = ?, value_numeric = NULL WHERE value_numeric != 0 AND concept_id IN (SELECT concept_id FROM concept WHERE datatype_id = 10)");
+              "UPDATE obs SET value_coded = ?, value_numeric = NULL WHERE value_numeric != 0 AND"
+                  + " concept_id IN (SELECT concept_id FROM concept WHERE datatype_id = 10)");
       updateStatement.setInt(1, trueConceptId);
       updateStatement.executeUpdate();
       updateStatement.close();
 
       updateStatement =
           connection.prepareStatement(
-              "UPDATE obs SET value_coded = ?, value_numeric = NULL WHERE value_numeric = 0 AND concept_id IN (SELECT concept_id FROM concept WHERE datatype_id = 10)");
+              "UPDATE obs SET value_coded = ?, value_numeric = NULL WHERE value_numeric = 0 AND"
+                  + " concept_id IN (SELECT concept_id FROM concept WHERE datatype_id = 10)");
       updateStatement.setInt(1, falseConceptId);
       updateStatement.executeUpdate();
     } catch (DatabaseException | SQLException e) {
@@ -260,7 +267,8 @@ public class BooleanConceptChangeSet implements CustomTaskChange {
     try {
       updateStatement =
           connection.prepareStatement(
-              "INSERT INTO global_property (property, property_value, description, uuid) VALUES (?, ?, ?, ?)");
+              "INSERT INTO global_property (property, property_value, description, uuid) VALUES (?,"
+                  + " ?, ?, ?)");
       updateStatement.setString(1, OpenmrsConstants.GLOBAL_PROPERTY_TRUE_CONCEPT);
       updateStatement.setInt(2, trueConceptId);
       updateStatement.setString(3, "Concept id of the concept defining the TRUE boolean concept");

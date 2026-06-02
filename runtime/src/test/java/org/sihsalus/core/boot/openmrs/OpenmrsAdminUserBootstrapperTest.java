@@ -129,7 +129,8 @@ final class OpenmrsAdminUserBootstrapperTest {
 
   private void insertAdminUser(String username, String password, String salt) {
     jdbcTemplate.update(
-        "insert into users (user_id, system_id, username, password, salt, retired) values (?, ?, ?, ?, ?, ?)",
+        "insert into users (user_id, system_id, username, password, salt, retired) values (?, ?, ?,"
+            + " ?, ?, ?)",
         1,
         "admin",
         username,

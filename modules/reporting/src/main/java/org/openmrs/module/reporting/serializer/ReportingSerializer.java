@@ -152,7 +152,8 @@ public class ReportingSerializer extends XStreamShortSerializer {
       log.info("XStream security initialized on ReportingSerializer");
     } catch (NoSuchMethodException ignored) {
       log.debug(
-          "Not setting up XStream Security as no initXStream method found on SimpleXStreamSerializer");
+          "Not setting up XStream Security as no initXStream method found on"
+              + " SimpleXStreamSerializer");
     } catch (Exception e) {
       throw new SerializationException(
           "Failed to set up XStream Security on Reporting Serializer", e);

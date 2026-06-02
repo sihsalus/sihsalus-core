@@ -73,7 +73,8 @@ public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet>
     return (Timesheet)
         getRepository()
             .createQuery(
-                "FROM Timesheet WHERE cashier = :cashier AND clockOut IS NULL ORDER BY clockIn DESC")
+                "FROM Timesheet WHERE cashier = :cashier AND clockOut IS NULL ORDER BY clockIn"
+                    + " DESC")
             .setParameter("cashier", cashier)
             .setMaxResults(1)
             .uniqueResult();

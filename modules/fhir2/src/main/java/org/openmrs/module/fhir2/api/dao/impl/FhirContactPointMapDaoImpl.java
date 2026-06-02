@@ -69,7 +69,8 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
     return criteriaContext
         .getEntityManager()
         .createQuery(
-            "from FhirContactPointMap fcp where fcp.attributeTypeDomain = 'person' and fcp.attributeTypeId = :attribute_type_id",
+            "from FhirContactPointMap fcp where fcp.attributeTypeDomain = 'person' and"
+                + " fcp.attributeTypeId = :attribute_type_id",
             FhirContactPointMap.class)
         .setParameter("attribute_type_id", attributeType.getId())
         .getResultList()
@@ -111,7 +112,8 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
     return criteriaContext
         .getEntityManager()
         .createQuery(
-            "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id",
+            "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain"
+                + " and fcp.attributeTypeId = :attribute_type_id",
             FhirContactPointMap.class)
         .setParameter("attribute_type_domain", attributeTypeDomain)
         .setParameter("attribute_type_id", attributeType.getId())
@@ -131,7 +133,8 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
         criteriaContext
             .getEntityManager()
             .createQuery(
-                "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id",
+                "from FhirContactPointMap fcp where fcp.attributeTypeDomain ="
+                    + " :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id",
                 FhirContactPointMap.class)
             .setParameter("attribute_type_domain", contactPointMap.getAttributeTypeDomain())
             .setParameter("attribute_type_id", contactPointMap.getAttributeTypeId())

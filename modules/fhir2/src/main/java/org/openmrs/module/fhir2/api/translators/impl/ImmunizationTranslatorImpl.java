@@ -170,7 +170,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
     Provider provider = null;
     if (performers.size() > 1) {
       throw createImmunizationRequestValidationError(
-          "More than one performer was specified. Only a single performer is currently supported for each immunization.");
+          "More than one performer was specified. Only a single performer is currently supported"
+              + " for each immunization.");
     } else if (performers.size() == 1) {
       ImmunizationPerformerComponent performer = performers.get(0);
       if (performer != null && performer.hasActor()) {
@@ -275,7 +276,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
             .orElseThrow(
                 () ->
                     createImmunizationRequestValidationError(
-                        "Could not find a valid coding could be identified for this immunization."));
+                        "Could not find a valid coding could be identified for this"
+                            + " immunization."));
 
     {
       Obs obs = members.get(CIEL_984);

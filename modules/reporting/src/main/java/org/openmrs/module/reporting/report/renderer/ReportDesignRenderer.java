@@ -87,7 +87,8 @@ public abstract class ReportDesignRenderer extends AbstractReportRenderer {
     String template =
         d.getPropertyValue(
             FILENAME_BASE_PROPERTY,
-            "{{request.reportDefinition.parameterizable.name}}_{{formatDate request.evaluateStartDatetime \"yyyy-MM-dd_HH:mm:ss\"}}");
+            "{{request.reportDefinition.parameterizable.name}}_{{formatDate"
+                + " request.evaluateStartDatetime \"yyyy-MM-dd_HH:mm:ss\"}}");
 
     Map templateModel = new HashMap();
     templateModel.put("request", request);

@@ -2023,7 +2023,8 @@ public class OpenmrsUtil {
     } catch (Exception ex) {
       log.info("Got an error while attempting to load the runtime properties", ex);
       log.warn(
-          "Unable to find a runtime properties file. Initial setup is needed. View the webapp to run the setup wizard.");
+          "Unable to find a runtime properties file. Initial setup is needed. View the webapp to"
+              + " run the setup wizard.");
       return null;
     }
   }

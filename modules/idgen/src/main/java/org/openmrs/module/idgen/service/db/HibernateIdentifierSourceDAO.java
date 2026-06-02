@@ -90,7 +90,8 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
   public List<PooledIdentifier> getAvailableIdentifiers(IdentifierPool pool, int quantity) {
     Query<PooledIdentifier> query =
         query(
-            "from PooledIdentifier identifier where identifier.dateUsed is null and identifier.pool = :pool"
+            "from PooledIdentifier identifier where identifier.dateUsed is null and identifier.pool"
+                + " = :pool"
                 + (pool.isSequential()
                     ? " order by identifier.identifier"
                     : " order by identifier.uuid"),
@@ -318,7 +319,8 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
       PatientIdentifierType patientIdentifierType) {
     Query<IdentifierSource> query =
         query(
-            "from IdentifierSource source where source.identifierType = :type and source.retired = false",
+            "from IdentifierSource source where source.identifierType = :type and source.retired ="
+                + " false",
             IdentifierSource.class);
     query.setParameter("type", patientIdentifierType);
     return query.getResultList();

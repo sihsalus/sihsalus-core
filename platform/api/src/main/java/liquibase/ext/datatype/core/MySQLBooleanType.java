@@ -38,7 +38,8 @@ public class MySQLBooleanType extends BooleanType {
     }
 
     log.debug(
-        "delegating the choice of boolean type for database '{}' to super class of MySQLBooleanType",
+        "delegating the choice of boolean type for database '{}' to super class of"
+            + " MySQLBooleanType",
         database.getDatabaseProductName());
 
     return super.toDatabaseDataType(database);
