@@ -50,10 +50,10 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
   protected static final Logger log = LoggerFactory.getLogger(SimpleXStreamSerializer.class);
 
   /**
-   * Inert JDK value containers used by serialized OpenMRS documents such as layout/address templates
-   * ({@link java.util.Properties} name/size mappings and {@link java.util.ArrayList} line formats).
-   * They are whitelisted as concrete types (never as hierarchies) so the deny-by-default posture is
-   * preserved while legitimate documents can still deserialize.
+   * Inert JDK value containers used by serialized OpenMRS documents such as layout/address
+   * templates ({@link java.util.Properties} name/size mappings and {@link java.util.ArrayList} line
+   * formats). They are whitelisted as concrete types (never as hierarchies) so the deny-by-default
+   * posture is preserved while legitimate documents can still deserialize.
    */
   private static final Class<?>[] SERIALIZER_ALLOWED_VALUE_TYPES =
       new Class<?>[] {
