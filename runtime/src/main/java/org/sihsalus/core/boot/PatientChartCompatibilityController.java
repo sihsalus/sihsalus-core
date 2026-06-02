@@ -21,6 +21,8 @@ import org.openmrs.PatientProgram;
 import org.openmrs.Program;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
+import org.openmrs.layout.address.AddressSupport;
+import org.openmrs.layout.address.AddressTemplate;
 import org.openmrs.module.metadatamapping.MetadataTermMapping;
 import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.metadatamapping.api.MetadataTermMappingSearchCriteriaBuilder;
@@ -105,6 +107,15 @@ public class PatientChartCompatibilityController {
             .toList();
 
     return results(results);
+  }
+
+  @GetMapping("/rest/v1/addresstemplate")
+  Map<String, Object> addressTemplates() {
+    List<AddressTemplate> templates = AddressSupport.getInstance().getAddressTemplate();
+    if (templates == null) {
+      return results(List.of());
+    }
+    return results(templates.stream().map(this::addressTemplate).toList());
   }
 
   @GetMapping("/rest/v1/concept/{uuid}")
@@ -245,6 +256,27 @@ public class PatientChartCompatibilityController {
     response.put("set", Boolean.TRUE.equals(concept.getSet()));
     response.put(
         "setMembers", concept.getSetMembers(false).stream().map(this::conceptMember).toList());
+    response.put(
+        "answers",
+        concept.getAnswers(false).stream()
+            .map(answer -> reference(answer.getAnswerConcept()))
+            .filter(value -> value != null)
+            .toList());
+    return response;
+  }
+
+  private Map<String, Object> addressTemplate(AddressTemplate template) {
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("displayName", template.getDisplayName());
+    response.put("codeName", template.getCodeName());
+    response.put("country", template.getCountry());
+    response.put("lines", template.getLines());
+    response.put("lineByLineFormat", template.getLineByLineFormat());
+    response.put("nameMappings", template.getNameMappings());
+    response.put("sizeMappings", template.getSizeMappings());
+    response.put("elementDefaults", template.getElementDefaults());
+    response.put("elementRegex", template.getElementRegex());
+    response.put("requiredElements", template.getRequiredElements());
     return response;
   }
 

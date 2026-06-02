@@ -49,6 +49,26 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
 
   protected static final Logger log = LoggerFactory.getLogger(SimpleXStreamSerializer.class);
 
+  /**
+   * Inert JDK value containers used by serialized OpenMRS documents such as layout/address
+   * templates ({@link java.util.Properties} name/size mappings and {@link java.util.ArrayList} line
+   * formats). They are whitelisted as concrete types (never as hierarchies) so the deny-by-default
+   * posture is preserved while legitimate documents can still deserialize.
+   */
+  private static final Class<?>[] SERIALIZER_ALLOWED_VALUE_TYPES =
+      new Class<?>[] {
+        java.util.Properties.class,
+        java.util.Hashtable.class,
+        java.util.HashMap.class,
+        java.util.LinkedHashMap.class,
+        java.util.TreeMap.class,
+        java.util.ArrayList.class,
+        java.util.LinkedList.class,
+        java.util.HashSet.class,
+        java.util.LinkedHashSet.class,
+        java.util.TreeSet.class
+      };
+
   private volatile XStream xstream;
 
   private final XStream customXStream;
@@ -117,6 +137,7 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
     newXStream.addPermission(NullPermission.NULL);
     newXStream.addPermission(PrimitiveTypePermission.PRIMITIVES);
     newXStream.allowTypes(new Class[] {String.class});
+    newXStream.allowTypes(SERIALIZER_ALLOWED_VALUE_TYPES);
     allowConfiguredTypes(newXStream, adminService);
     return newXStream;
   }
@@ -133,6 +154,7 @@ public class SimpleXStreamSerializer implements OpenmrsSerializer {
     newXStream.addPermission(NullPermission.NULL);
     newXStream.addPermission(PrimitiveTypePermission.PRIMITIVES);
     newXStream.allowTypes(new Class[] {String.class});
+    newXStream.allowTypes(SERIALIZER_ALLOWED_VALUE_TYPES);
   }
 
   /**

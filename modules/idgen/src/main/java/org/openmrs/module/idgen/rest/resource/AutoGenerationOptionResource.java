@@ -42,7 +42,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-import org.openmrs.module.webservices.validation.ValidationException;
+import org.openmrs.api.ValidationException;
 
 @Resource(
     name = RestConstants.VERSION_1 + IdgenRestController.IDGEN_NAMESPACE + "/autogenerationoption",

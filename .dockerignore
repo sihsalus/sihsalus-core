@@ -6,6 +6,7 @@ deploy/compose.yml
 .idea
 .vscode
 *.iml
+.trivycache
 
 **/target
 target
@@ -22,6 +23,7 @@ ${openmrs:applicationDirectory}
 
 reference-sources
 .dev/reference-sources/.DS_Store
+.dev/reference-sources/sihsalus-frontend
 .dev/reference-sources/openmrs-distro-modules
 .dev/reference-sources/openmrs-module-datafilter
 .dev/reference-sources/sihsalus-content/.git

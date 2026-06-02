@@ -35,11 +35,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Cohort;
+import org.openmrs.Concept;
+import org.openmrs.ConceptAnswer;
+import org.openmrs.ConceptName;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.OpenmrsObject;
@@ -52,6 +56,7 @@ import org.openmrs.UserSessionListener;
 import org.openmrs.Visit;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.UserContext;
@@ -247,6 +252,7 @@ import org.openmrs.scheduler.SchedulerService;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.scheduler.TaskHandler;
 import org.openmrs.util.HandlerUtil;
+import org.openmrs.util.OpenmrsConstants;
 import org.openmrs.util.PrivilegeConstants;
 import org.sihsalus.core.api.StaticModuleTaskRunner;
 import org.sihsalus.core.api.authorization.PatientObjectAccessDeniedException;
@@ -575,6 +581,100 @@ class SihsalusCoreApplicationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.authenticated").value(true))
         .andExpect(jsonPath("$.sessionLocation.uuid").value(location.getUuid()));
+  }
+
+  @Test
+  void addressTemplateEndpointIsExposedForPatientRegistration() throws Exception {
+    String addressTemplateXml =
+        "<org.openmrs.layout.address.AddressTemplate>"
+            + "<nameMappings class=\"properties\">"
+            + "<property name=\"cityVillage\" value=\"Location.cityVillage\"/>"
+            + "<property name=\"country\" value=\"Location.country\"/>"
+            + "</nameMappings>"
+            + "<sizeMappings class=\"properties\">"
+            + "<property name=\"cityVillage\" value=\"40\"/>"
+            + "<property name=\"country\" value=\"40\"/>"
+            + "</sizeMappings>"
+            + "<lineByLineFormat>"
+            + "<string>cityVillage country</string>"
+            + "</lineByLineFormat>"
+            + "<requiredElements/>"
+            + "</org.openmrs.layout.address.AddressTemplate>";
+
+    AtomicReference<String> previousAddressTemplate = new AtomicReference<>();
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          previousAddressTemplate.set(
+              Context.getAdministrationService()
+                  .getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE));
+          Context.getAdministrationService()
+              .setGlobalProperty(
+                  OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE, addressTemplateXml);
+        });
+
+    try {
+      mockMvc
+          .perform(get("/ws/rest/v1/addresstemplate").header("Authorization", ADMIN_BASIC_AUTH))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.results").isArray())
+          .andExpect(jsonPath("$.results[0].nameMappings").exists());
+    } finally {
+      runWithAuthenticatedOpenmrsSession(
+          () ->
+              Context.getAdministrationService()
+                  .setGlobalProperty(
+                      OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE,
+                      previousAddressTemplate.get() == null ? "" : previousAddressTemplate.get()));
+    }
+  }
+
+  @Test
+  void conceptEndpointExposesCodedAnswers() throws Exception {
+    Concept answer = new Concept();
+    answer.setUuid(UUID.randomUUID().toString());
+    Concept question = new Concept();
+    question.setUuid(UUID.randomUUID().toString());
+
+    runWithAuthenticatedOpenmrsSession(
+        () -> {
+          ConceptService conceptService = Context.getConceptService();
+          Date now = new Date();
+          User creator = Context.getAuthenticatedUser();
+
+          ConceptName answerName =
+              new ConceptName("Compatibility answer " + UUID.randomUUID(), Locale.ENGLISH);
+          answerName.setCreator(creator);
+          answerName.setDateCreated(now);
+          answer.addName(answerName);
+          answer.setConceptClass(conceptService.getConceptClassByName("Misc"));
+          answer.setDatatype(conceptService.getConceptDatatypeByName("N/A"));
+          answer.setCreator(creator);
+          answer.setDateCreated(now);
+          conceptService.saveConcept(answer);
+
+          ConceptName questionName =
+              new ConceptName("Compatibility question " + UUID.randomUUID(), Locale.ENGLISH);
+          questionName.setCreator(creator);
+          questionName.setDateCreated(now);
+          question.addName(questionName);
+          question.setConceptClass(conceptService.getConceptClassByName("Question"));
+          question.setDatatype(conceptService.getConceptDatatypeByName("Coded"));
+          ConceptAnswer conceptAnswer = new ConceptAnswer(answer);
+          conceptAnswer.setCreator(creator);
+          conceptAnswer.setDateCreated(now);
+          question.addAnswer(conceptAnswer);
+          question.setCreator(creator);
+          question.setDateCreated(now);
+          conceptService.saveConcept(question);
+        });
+
+    mockMvc
+        .perform(
+            get("/ws/rest/v1/concept/" + question.getUuid())
+                .header("Authorization", ADMIN_BASIC_AUTH))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.answers").isArray())
+        .andExpect(jsonPath("$.answers[0].uuid").value(answer.getUuid()));
   }
 
   @Test

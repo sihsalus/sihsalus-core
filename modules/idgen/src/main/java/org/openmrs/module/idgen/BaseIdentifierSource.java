@@ -182,6 +182,8 @@ public abstract class BaseIdentifierSource extends IdentifierSource {
   /**
    * @return the changedBy
    */
+  @Override
+  @Deprecated
   public User getChangedBy() {
     return changedBy;
   }
@@ -189,6 +191,8 @@ public abstract class BaseIdentifierSource extends IdentifierSource {
   /**
    * @param changedBy the changedBy to set
    */
+  @Override
+  @Deprecated
   public void setChangedBy(User changedBy) {
     this.changedBy = changedBy;
   }
@@ -196,6 +200,8 @@ public abstract class BaseIdentifierSource extends IdentifierSource {
   /**
    * @return the dateChanged
    */
+  @Override
+  @Deprecated
   public Date getDateChanged() {
     return dateChanged;
   }
@@ -203,6 +209,8 @@ public abstract class BaseIdentifierSource extends IdentifierSource {
   /**
    * @param dateChanged the dateChanged to set
    */
+  @Override
+  @Deprecated
   public void setDateChanged(Date dateChanged) {
     this.dateChanged = dateChanged;
   }
@@ -217,6 +225,8 @@ public abstract class BaseIdentifierSource extends IdentifierSource {
   /**
    * @return the retired
    */
+  @Override
+  @Deprecated
   @JsonIgnore
   public Boolean isRetired() {
     return retired;
