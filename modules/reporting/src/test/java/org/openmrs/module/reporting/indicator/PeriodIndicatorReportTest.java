@@ -1,16 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.indicator;
 
 import org.junit.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Location;
@@ -30,93 +29,93 @@ import org.openmrs.module.reporting.report.definition.service.ReportDefinitionSe
 import org.openmrs.test.BaseContextSensitiveTest;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
-
 public class PeriodIndicatorReportTest extends BaseModuleContextSensitiveTest {
 
-	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-	/**
-	 * Run this before each unit test in this class. The "@Before" method in
-	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 *
-	 * @throws Exception
-	 */
-	@Before
-	public void setup() throws Exception {
-		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-	}
+  /**
+   * Run this before each unit test in this class. The "@Before" method in {@link
+   * BaseContextSensitiveTest} is run right before this method.
+   *
+   * @throws Exception
+   */
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-	@Test
-	public void shouldEvaluteIndicatorForLocation() throws Exception {
+  @Test
+  public void shouldEvaluteIndicatorForLocation() throws Exception {
 
-		PeriodIndicatorReportDefinition report = new PeriodIndicatorReportDefinition();
-		report.setupDataSetDefinition();
+    PeriodIndicatorReportDefinition report = new PeriodIndicatorReportDefinition();
+    report.setupDataSetDefinition();
 
-		GenderCohortDefinition males = new GenderCohortDefinition();
-		males.setName("Males");
-		males.setMaleIncluded(true);
+    GenderCohortDefinition males = new GenderCohortDefinition();
+    males.setName("Males");
+    males.setMaleIncluded(true);
 
-		EncounterCohortDefinition atSite = new EncounterCohortDefinition();
-		atSite.setName("At Site");
-		atSite.addParameter(new Parameter("locationList", "List of Locations", Location.class));
+    EncounterCohortDefinition atSite = new EncounterCohortDefinition();
+    atSite.setName("At Site");
+    atSite.addParameter(new Parameter("locationList", "List of Locations", Location.class));
 
-		CohortIndicator numberOfMales = new CohortIndicator("Males");
-		numberOfMales.addParameter(ReportingConstants.START_DATE_PARAMETER);
-		numberOfMales.addParameter(ReportingConstants.END_DATE_PARAMETER);
-		numberOfMales.addParameter(ReportingConstants.LOCATION_PARAMETER);
-		numberOfMales.setCohortDefinition(males, "");
-		numberOfMales.setLocationFilter(atSite, "locationList=${location}");
-		report.addIndicator("1.A", "Number of Males", numberOfMales);
+    CohortIndicator numberOfMales = new CohortIndicator("Males");
+    numberOfMales.addParameter(ReportingConstants.START_DATE_PARAMETER);
+    numberOfMales.addParameter(ReportingConstants.END_DATE_PARAMETER);
+    numberOfMales.addParameter(ReportingConstants.LOCATION_PARAMETER);
+    numberOfMales.setCohortDefinition(males, "");
+    numberOfMales.setLocationFilter(atSite, "locationList=${location}");
+    report.addIndicator("1.A", "Number of Males", numberOfMales);
 
-		ReportDefinitionService rs = Context.getService(ReportDefinitionService.class);
-		EvaluationContext context = new EvaluationContext();
-		context.addParameterValue("location", Context.getLocationService().getLocation(2));
-		ReportData data = rs.evaluate(report, context);
-		DataSet ds = data.getDataSets().values().iterator().next();
-		IndicatorResult ir = (IndicatorResult) ds.iterator().next().getColumnValue("1.A");
-		Assert.assertEquals(1, ir.getValue().intValue());
-	}
+    ReportDefinitionService rs = Context.getService(ReportDefinitionService.class);
+    EvaluationContext context = new EvaluationContext();
+    context.addParameterValue("location", Context.getLocationService().getLocation(2));
+    ReportData data = rs.evaluate(report, context);
+    DataSet ds = data.getDataSets().values().iterator().next();
+    IndicatorResult ir = (IndicatorResult) ds.iterator().next().getColumnValue("1.A");
+    Assert.assertEquals(1, ir.getValue().intValue());
+  }
 
-	@Test
-	public void shouldEvaluteFractionalIndicators() throws Exception {
+  @Test
+  public void shouldEvaluteFractionalIndicators() throws Exception {
 
-		PeriodIndicatorReportDefinition report = new PeriodIndicatorReportDefinition();
-		report.setupDataSetDefinition();
+    PeriodIndicatorReportDefinition report = new PeriodIndicatorReportDefinition();
+    report.setupDataSetDefinition();
 
-		GenderCohortDefinition males = new GenderCohortDefinition();
-		males.setName("Males");
-		males.setMaleIncluded(true);
+    GenderCohortDefinition males = new GenderCohortDefinition();
+    males.setName("Males");
+    males.setMaleIncluded(true);
 
-		GenderCohortDefinition all = new GenderCohortDefinition();
-		all.setName("All");
-		all.setMaleIncluded(true);
-		all.setFemaleIncluded(true);
-		all.setUnknownGenderIncluded(true);
+    GenderCohortDefinition all = new GenderCohortDefinition();
+    all.setName("All");
+    all.setMaleIncluded(true);
+    all.setFemaleIncluded(true);
+    all.setUnknownGenderIncluded(true);
 
-		EncounterCohortDefinition atSite = new EncounterCohortDefinition();
-		atSite.setName("At Site");
-		atSite.addParameter(new Parameter("locationList", "List of Locations", Location.class));
+    EncounterCohortDefinition atSite = new EncounterCohortDefinition();
+    atSite.setName("At Site");
+    atSite.addParameter(new Parameter("locationList", "List of Locations", Location.class));
 
-		CohortIndicator percentMales = new CohortIndicator("Males");
-		percentMales.setType(IndicatorType.FRACTION);
-		percentMales.addParameter(ReportingConstants.START_DATE_PARAMETER);
-		percentMales.addParameter(ReportingConstants.END_DATE_PARAMETER);
-		percentMales.addParameter(ReportingConstants.LOCATION_PARAMETER);
-		percentMales.setCohortDefinition(males, "");
-		percentMales.setDenominator(all, "");
-		percentMales.setLocationFilter(atSite, "locationList=${location}");
-		report.addIndicator("1.A", "Percent of Males", percentMales);
+    CohortIndicator percentMales = new CohortIndicator("Males");
+    percentMales.setType(IndicatorType.FRACTION);
+    percentMales.addParameter(ReportingConstants.START_DATE_PARAMETER);
+    percentMales.addParameter(ReportingConstants.END_DATE_PARAMETER);
+    percentMales.addParameter(ReportingConstants.LOCATION_PARAMETER);
+    percentMales.setCohortDefinition(males, "");
+    percentMales.setDenominator(all, "");
+    percentMales.setLocationFilter(atSite, "locationList=${location}");
+    report.addIndicator("1.A", "Percent of Males", percentMales);
 
-		ReportDefinitionService rs = Context.getService(ReportDefinitionService.class);
-		EvaluationContext context = new EvaluationContext();
-		context.addParameterValue("location", Context.getLocationService().getLocation(2));
-		ReportData data = rs.evaluate(report, context);
-		DataSet ds = data.getDataSets().values().iterator().next();
-		IndicatorResult ir = (IndicatorResult) ds.iterator().next().getColumnValue("1.A");
-		Fraction fraction = (Fraction) ir.getValue();
-		Assert.assertEquals(1, fraction.getNumerator());
-		Assert.assertEquals(6, fraction.getDenominator());
-	}
+    ReportDefinitionService rs = Context.getService(ReportDefinitionService.class);
+    EvaluationContext context = new EvaluationContext();
+    context.addParameterValue("location", Context.getLocationService().getLocation(2));
+    ReportData data = rs.evaluate(report, context);
+    DataSet ds = data.getDataSets().values().iterator().next();
+    IndicatorResult ir = (IndicatorResult) ds.iterator().next().getColumnValue("1.A");
+    Fraction fraction = (Fraction) ir.getValue();
+    Assert.assertEquals(1, fraction.getNumerator());
+    Assert.assertEquals(6, fraction.getDenominator());
+  }
 }

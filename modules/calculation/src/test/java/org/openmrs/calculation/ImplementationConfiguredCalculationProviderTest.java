@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
-
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
@@ -17,35 +16,34 @@ import org.openmrs.calculation.result.SimpleResult;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ImplementationConfiguredCalculationProviderTest extends BaseModuleContextSensitiveTest {
+public class ImplementationConfiguredCalculationProviderTest
+    extends BaseModuleContextSensitiveTest {
 
-	@Autowired
-	ImplementationConfiguredCalculationProvider provider;
+  @Autowired ImplementationConfiguredCalculationProvider provider;
 
-	@Autowired
-	PatientCalculationService service;
+  @Autowired PatientCalculationService service;
 
-	@Before
-	public void setUp() throws Exception {
-		File groovyDef = new File(getClass().getClassLoader().getResource("implconfig/weight.groovy").getPath());
-		provider.setDirectory(groovyDef.getParentFile());
-		provider.clearCache();
-	}
+  @Before
+  public void setUp() throws Exception {
+    File groovyDef =
+        new File(getClass().getClassLoader().getResource("implconfig/weight.groovy").getPath());
+    provider.setDirectory(groovyDef.getParentFile());
+    provider.clearCache();
+  }
 
-	@Test
-	public void testLoadingCalculation() throws Exception {
-		PatientCalculation calculation = (PatientCalculation) provider.getCalculation("weight", null);
-		CalculationResult result = service.evaluate(7, calculation);
-		assertThat(result, IsInstanceOf.instanceOf(SimpleResult.class));
-		assertThat(result.getValue(), Is.<Object>is(61.0));
-		assertThat(provider.getCalculations().size(), is(1));
-	}
+  @Test
+  public void testLoadingCalculation() throws Exception {
+    PatientCalculation calculation = (PatientCalculation) provider.getCalculation("weight", null);
+    CalculationResult result = service.evaluate(7, calculation);
+    assertThat(result, IsInstanceOf.instanceOf(SimpleResult.class));
+    assertThat(result.getValue(), Is.<Object>is(61.0));
+    assertThat(provider.getCalculations().size(), is(1));
+  }
 
-	@Test
-	public void testMissingCalculation() throws Exception {
-		PatientCalculation calculation = (PatientCalculation) provider.getCalculation("missing", null);
-		assertNull(calculation);
-		assertThat(provider.getCalculations().size(), is(0));
-	}
-
+  @Test
+  public void testMissingCalculation() throws Exception {
+    PatientCalculation calculation = (PatientCalculation) provider.getCalculation("missing", null);
+    assertNull(calculation);
+    assertThat(provider.getCalculations().size(), is(0));
+  }
 }

@@ -34,7 +34,7 @@ public class MockTaskServiceWrapper extends TaskServiceWrapper {
   public TaskDefinition getTaskById(Integer id) {
     TaskDefinition taskFound = null;
     for (TaskDefinition taskDef : registeredTasks) {
-      if (id == taskDef.getId()) {
+      if (id != null && id.equals(taskDef.getId())) {
         taskFound = taskDef;
         break;
       }

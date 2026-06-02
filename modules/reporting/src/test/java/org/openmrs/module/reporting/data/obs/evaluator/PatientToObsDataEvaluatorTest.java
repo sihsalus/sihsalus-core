@@ -1,14 +1,19 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.obs.evaluator;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,90 +34,89 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 public class PatientToObsDataEvaluatorTest extends BaseModuleContextSensitiveTest {
 
-    protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-    protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-    @Autowired
-    PatientService patientService;
+  @Autowired PatientService patientService;
 
-    @Autowired @Qualifier("reportingObsDataService")
-    ObsDataService obsDataService;
+  @Autowired
+  @Qualifier("reportingObsDataService")
+  ObsDataService obsDataService;
 
-    /**
-     * Run this before each unit test in this class. The "@Before" method in
-     * {@link org.openmrs.test.BaseContextSensitiveTest} is run right before this method.
-     *
-     * @throws Exception
-     */
-    @Before
-    public void setup() throws Exception {
-        executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-    }
+  /**
+   * Run this before each unit test in this class. The "@Before" method in {@link
+   * org.openmrs.test.BaseContextSensitiveTest} is run right before this method.
+   *
+   * @throws Exception
+   */
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-    @Test
-    public void evaluate_shouldReturnPatientDataForEachObsInThePassedContext() throws Exception {
+  @Test
+  public void evaluate_shouldReturnPatientDataForEachObsInThePassedContext() throws Exception {
 
-        PatientIdentifierType pit = patientService.getPatientIdentifierType(2);
-        PatientIdentifierDataDefinition pidd = new PatientIdentifierDataDefinition();
-        pidd.setIncludeFirstNonNullOnly(true);
-        pidd.addType(pit);
+    PatientIdentifierType pit = patientService.getPatientIdentifierType(2);
+    PatientIdentifierDataDefinition pidd = new PatientIdentifierDataDefinition();
+    pidd.setIncludeFirstNonNullOnly(true);
+    pidd.addType(pit);
 
-        PatientToObsDataDefinition d = new PatientToObsDataDefinition(pidd);
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet(20, 26));
-        EvaluatedObsData od = Context.getService(ObsDataService.class).evaluate(d, context);
+    PatientToObsDataDefinition d = new PatientToObsDataDefinition(pidd);
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet(20, 26));
+    EvaluatedObsData od = Context.getService(ObsDataService.class).evaluate(d, context);
 
-        assertThat(od.getData().size(), is(2));
-        assertThat((PatientIdentifier) od.getData().get(20), is(patientService.getPatient(21).getPatientIdentifier(pit)));
-        assertThat((PatientIdentifier) od.getData().get(26), is(patientService.getPatient(22).getPatientIdentifier(pit)));
+    assertThat(od.getData().size(), is(2));
+    assertThat(
+        (PatientIdentifier) od.getData().get(20),
+        is(patientService.getPatient(21).getPatientIdentifier(pit)));
+    assertThat(
+        (PatientIdentifier) od.getData().get(26),
+        is(patientService.getPatient(22).getPatientIdentifier(pit)));
+  }
 
-    }
+  @Test
+  public void evaluate_shouldReturnEmptySetIfInputObsIdSetIsEmpty() throws Exception {
 
-    @Test
-    public void evaluate_shouldReturnEmptySetIfInputObsIdSetIsEmpty() throws Exception {
+    PatientIdentifierType pit = patientService.getPatientIdentifierType(2);
+    PatientIdentifierDataDefinition pidd = new PatientIdentifierDataDefinition();
+    pidd.setIncludeFirstNonNullOnly(true);
+    pidd.addType(pit);
 
-        PatientIdentifierType pit = patientService.getPatientIdentifierType(2);
-        PatientIdentifierDataDefinition pidd = new PatientIdentifierDataDefinition();
-        pidd.setIncludeFirstNonNullOnly(true);
-        pidd.addType(pit);
+    PatientToObsDataDefinition d = new PatientToObsDataDefinition(pidd);
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet());
+    EvaluatedObsData od = Context.getService(ObsDataService.class).evaluate(d, context);
 
-        PatientToObsDataDefinition d = new PatientToObsDataDefinition(pidd);
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet());
-        EvaluatedObsData od = Context.getService(ObsDataService.class).evaluate(d, context);
+    assertThat(od.getData().size(), is(0));
+  }
 
-        assertThat(od.getData().size(), is(0));
-    }
+  @Test
+  public void evaluate_shouldProperlyPassParametersThroughToNestedDefinition() throws Exception {
 
-    @Test
-    public void evaluate_shouldProperlyPassParametersThroughToNestedDefinition() throws Exception {
+    PatientToObsDataDefinition dataDef = new PatientToObsDataDefinition();
 
-        PatientToObsDataDefinition dataDef = new PatientToObsDataDefinition();
+    PatientIdentifierDataDefinition pidd = new PatientIdentifierDataDefinition();
+    pidd.setIncludeFirstNonNullOnly(true);
+    pidd.addParameter(
+        new Parameter("types", "Types", PatientIdentifierType.class, List.class, null, null));
 
-        PatientIdentifierDataDefinition pidd = new PatientIdentifierDataDefinition();
-        pidd.setIncludeFirstNonNullOnly(true);
-        pidd.addParameter(new Parameter("types", "Types", PatientIdentifierType.class, List.class, null, null));
+    dataDef.setJoinedDefinition(pidd);
 
-        dataDef.setJoinedDefinition(pidd);
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    PatientIdentifierType pit = patientService.getPatientIdentifierType(1);
+    context.addParameterValue("types", Arrays.asList(pit));
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        PatientIdentifierType pit = patientService.getPatientIdentifierType(1);
-        context.addParameterValue("types", Arrays.asList(pit));
+    context.setBaseObs(new ObsIdSet(6));
 
-        context.setBaseObs(new ObsIdSet(6));
+    ObsData data = obsDataService.evaluate(dataDef, context);
 
-        ObsData data = obsDataService.evaluate(dataDef, context);
-
-        PatientIdentifier id1 = (PatientIdentifier) data.getData().get(6);
-        Assert.assertEquals("6TS-4", id1.getIdentifier());
-    }
+    PatientIdentifier id1 = (PatientIdentifier) data.getData().get(6);
+    Assert.assertEquals("6TS-4", id1.getIdentifier());
+  }
 }

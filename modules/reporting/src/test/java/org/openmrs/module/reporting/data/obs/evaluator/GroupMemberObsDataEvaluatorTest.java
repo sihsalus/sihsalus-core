@@ -1,14 +1,21 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.obs.evaluator;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
+import java.util.List;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,158 +35,155 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.List;
-
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 public class GroupMemberObsDataEvaluatorTest extends BaseModuleContextSensitiveTest {
 
-    protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-    protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-    @Autowired
-    ObsDataService obsDataService;
+  @Autowired ObsDataService obsDataService;
 
-    @Autowired
-    TestDataManager data;
+  @Autowired TestDataManager data;
 
-    @Autowired
-    @Qualifier("conceptService")
-    ConceptService conceptService;
+  @Autowired
+  @Qualifier("conceptService")
+  ConceptService conceptService;
 
-    @Before
-    public void setup() throws Exception {
-        executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-    }
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-    @Test
-    public void testEvaluateForSingleObs() throws Exception {
+  @Test
+  public void testEvaluateForSingleObs() throws Exception {
 
-        Concept weight = conceptService.getConcept(5089);
-        Concept cd4 = conceptService.getConcept(5497);
-        Concept groupConcept = conceptService.getConcept(10001);
+    Concept weight = conceptService.getConcept(5089);
+    Concept cd4 = conceptService.getConcept(5497);
+    Concept groupConcept = conceptService.getConcept(10001);
 
-        // create an obs with a few members
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient).save();
-        Obs obsMember1 = data.obs().concept(weight).value(60).encounter(enc).get();
-        Obs obsMember2 = data.obs().concept(cd4).value(350).encounter(enc).get();
-        Obs obsGroup = data.obs().concept(groupConcept).encounter(enc)
-                .member(obsMember1).member(obsMember2).save();
+    // create an obs with a few members
+    Patient patient = data.randomPatient().save();
+    Encounter enc = data.randomEncounter().patient(patient).save();
+    Obs obsMember1 = data.obs().concept(weight).value(60).encounter(enc).get();
+    Obs obsMember2 = data.obs().concept(cd4).value(350).encounter(enc).get();
+    Obs obsGroup =
+        data.obs()
+            .concept(groupConcept)
+            .encounter(enc)
+            .member(obsMember1)
+            .member(obsMember2)
+            .save();
 
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet(obsGroup.getId()));
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet(obsGroup.getId()));
+    GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
+    def.setQuestion(weight);
+    def.setSingleObs(true);
+    EvaluatedObsData results = obsDataService.evaluate(def, context);
 
-        GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
-        def.setQuestion(weight);
-        def.setSingleObs(true);
-        EvaluatedObsData results = obsDataService.evaluate(def, context);
+    assertThat(results.getData().size(), is(1));
+    assertThat((Obs) results.getData().get(obsGroup.getId()), is(obsMember1));
+  }
 
-        assertThat(results.getData().size(), is(1));
-        assertThat((Obs) results.getData().get(obsGroup.getId()), is(obsMember1));
+  @Test
+  public void testEvaluateForMultipleObs() throws Exception {
 
-    }
+    Concept weight = conceptService.getConcept(5089);
+    Concept groupConcept = conceptService.getConcept(10001);
 
-    @Test
-    public void testEvaluateForMultipleObs() throws Exception {
+    // create an obs with a few members
+    Patient patient = data.randomPatient().save();
+    Encounter enc = data.randomEncounter().patient(patient).save();
+    Obs obsMember1 = data.obs().concept(weight).value(60).encounter(enc).get();
+    Obs obsMember2 = data.obs().concept(weight).value(62).encounter(enc).get();
+    Obs obsGroup =
+        data.obs()
+            .concept(groupConcept)
+            .encounter(enc)
+            .member(obsMember1)
+            .member(obsMember2)
+            .save();
 
-        Concept weight = conceptService.getConcept(5089);
-        Concept groupConcept = conceptService.getConcept(10001);
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet(obsGroup.getId()));
 
-        // create an obs with a few members
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient).save();
-        Obs obsMember1 = data.obs().concept(weight).value(60).encounter(enc).get();
-        Obs obsMember2 = data.obs().concept(weight).value(62).encounter(enc).get();
-        Obs obsGroup = data.obs().concept(groupConcept).encounter(enc)
-                .member(obsMember1).member(obsMember2).save();
+    GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
+    def.setQuestion(weight);
+    def.setSingleObs(false);
+    EvaluatedObsData results = obsDataService.evaluate(def, context);
 
+    assertThat(results.getData().size(), is(1));
+    assertThat(((List<Obs>) results.getData().get(obsGroup.getId())).size(), is(2));
+    assertThat(
+        ((List<Obs>) results.getData().get(obsGroup.getId())),
+        containsInAnyOrder(obsMember1, obsMember2));
+  }
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet(obsGroup.getId()));
+  @Test
+  @Ignore // Ignoring this test for now, since in 1.9 the ObsValidator doesn't allow empty obs
+  // groups to be saved
+  public void testMakeSureEmptySingleEntryEvenIfNoMatchingObsInGroup() throws Exception {
 
-        GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
-        def.setQuestion(weight);
-        def.setSingleObs(false);
-        EvaluatedObsData results = obsDataService.evaluate(def, context);
+    Concept groupConcept = conceptService.getConcept(10001);
+    Concept weight = conceptService.getConcept(5089);
 
-        assertThat(results.getData().size(), is(1));
-        assertThat(((List<Obs>) results.getData().get(obsGroup.getId())).size(), is(2));
-        assertThat(((List<Obs>) results.getData().get(obsGroup.getId())),
-                containsInAnyOrder(obsMember1, obsMember2));
+    // create an obs group with no members
+    Patient patient = data.randomPatient().save();
+    Encounter enc = data.randomEncounter().patient(patient).save();
+    Obs obsGroup = data.obs().concept(groupConcept).encounter(enc).save();
 
-    }
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet(obsGroup.getId()));
 
-    @Test
-	@Ignore // Ignoring this test for now, since in 1.9 the ObsValidator doesn't allow empty obs groups to be saved
-    public void testMakeSureEmptySingleEntryEvenIfNoMatchingObsInGroup() throws Exception {
+    GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
+    def.setQuestion(weight);
+    def.setSingleObs(true); // single obs format
+    EvaluatedObsData results = obsDataService.evaluate(def, context);
 
-        Concept groupConcept = conceptService.getConcept(10001);
-        Concept weight = conceptService.getConcept(5089);
+    assertThat(results.getData().size(), is(1));
+    assertThat(results.getData().get(obsGroup.getId()), nullValue());
+  }
 
-        // create an obs group with no members
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient).save();
-        Obs obsGroup = data.obs().concept(groupConcept).encounter(enc).save();
+  @Test
+  @Ignore // Ignoring this test for now, since in 1.9 the ObsValidator doesn't allow empty obs
+  // groups to be saved
+  public void testMakeSureEmptyListEntryEvenIfNoMatchingObsInGroup() throws Exception {
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet(obsGroup.getId()));
+    Concept groupConcept = conceptService.getConcept(10001);
+    Concept weight = conceptService.getConcept(5089);
 
-        GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
-        def.setQuestion(weight);
-        def.setSingleObs(true);  // single obs format
-        EvaluatedObsData results = obsDataService.evaluate(def, context);
+    // create an obs group with no members
+    Patient patient = data.randomPatient().save();
+    Encounter enc = data.randomEncounter().patient(patient).save();
+    Obs obsGroup = data.obs().concept(groupConcept).encounter(enc).save();
 
-        assertThat(results.getData().size(), is(1));
-        assertThat(results.getData().get(obsGroup.getId()), nullValue());
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet(obsGroup.getId()));
 
-    }
+    GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
+    def.setQuestion(weight);
+    def.setSingleObs(false); // not single obs format
+    EvaluatedObsData results = obsDataService.evaluate(def, context);
 
-    @Test
-	@Ignore // Ignoring this test for now, since in 1.9 the ObsValidator doesn't allow empty obs groups to be saved
-	public void testMakeSureEmptyListEntryEvenIfNoMatchingObsInGroup() throws Exception {
+    assertThat(results.getData().size(), is(1));
+    assertThat(results.getData().get(obsGroup.getId()), instanceOf(List.class));
+    assertThat(((List<Obs>) results.getData().get(obsGroup.getId())).size(), is(0));
+  }
 
-        Concept groupConcept = conceptService.getConcept(10001);
-        Concept weight = conceptService.getConcept(5089);
+  @Test
+  public void testMakeSureWorksIfBaseObsContextIsEmptyList() throws Exception {
 
-        // create an obs group with no members
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient).save();
-        Obs obsGroup = data.obs().concept(groupConcept).encounter(enc).save();
+    Concept weight = conceptService.getConcept(5089);
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet(obsGroup.getId()));
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet());
 
-        GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
-        def.setQuestion(weight);
-        def.setSingleObs(false);  // not single obs format
-        EvaluatedObsData results = obsDataService.evaluate(def, context);
+    GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
+    def.setQuestion(weight);
+    EvaluatedObsData results = obsDataService.evaluate(def, context);
 
-        assertThat(results.getData().size(), is(1));
-        assertThat(results.getData().get(obsGroup.getId()), instanceOf(List.class));
-        assertThat(((List<Obs>) results.getData().get(obsGroup.getId())).size(), is(0));
-
-    }
-
-    @Test
-    public void testMakeSureWorksIfBaseObsContextIsEmptyList() throws Exception {
-
-        Concept weight = conceptService.getConcept(5089);
-
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet());
-
-        GroupMemberObsDataDefinition def = new GroupMemberObsDataDefinition();
-        def.setQuestion(weight);
-        EvaluatedObsData results = obsDataService.evaluate(def, context);
-
-        assertThat(results.getData().size(), is(0));
-    }
-
+    assertThat(results.getData().size(), is(0));
+  }
 }

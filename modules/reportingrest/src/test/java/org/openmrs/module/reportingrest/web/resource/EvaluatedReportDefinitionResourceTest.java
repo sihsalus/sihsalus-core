@@ -1,5 +1,11 @@
 package org.openmrs.module.reportingrest.web.resource;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThrows;
+
+import java.util.Collection;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.SerializationService;
@@ -14,97 +20,101 @@ import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
-import java.util.Date;
+public class EvaluatedReportDefinitionResourceTest
+    extends BaseEvaluatedResourceTest<EvaluatedReportDefinitionResource, ReportData> {
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThrows;
+  public static final String UUID = "d9c79890-7ea9-41b1-a068-b5b99ca3d593";
 
-public class EvaluatedReportDefinitionResourceTest extends BaseEvaluatedResourceTest<EvaluatedReportDefinitionResource, ReportData> {
+  @Autowired private ReportDefinitionService reportDefinitionService;
 
-    public static final String UUID = "d9c79890-7ea9-41b1-a068-b5b99ca3d593";
+  @Autowired private SerializationService serializationService;
 
-    @Autowired
-    private ReportDefinitionService reportDefinitionService;
+  @Before
+  public void setUp() throws Exception {
 
-    @Autowired
-    private SerializationService serializationService;
+    SqlDataSetDefinition dsd1 = new SqlDataSetDefinition();
+    dsd1.setName("Not everyone");
+    dsd1.setDescription("via SQL");
+    dsd1.setSqlQuery(
+        "select person_id, birthdate from person where voided = 0 and birthdate >= :bornAfter and birthdate < :bornBefore");
+    dsd1.addParameter(new Parameter("bornAfter", "Born after", Date.class));
+    dsd1.addParameter(new Parameter("bornBefore", "Born before", Date.class));
 
-    @Before
-    public void setUp() throws Exception {
+    SqlDataSetDefinition dsd2 = new SqlDataSetDefinition();
+    dsd2.setName("For fun");
+    dsd2.setDescription("another SQL query");
+    dsd2.setSqlQuery("select person_id from person where voided = 0");
 
-        SqlDataSetDefinition dsd1 = new SqlDataSetDefinition();
-        dsd1.setName("Not everyone");
-        dsd1.setDescription("via SQL");
-        dsd1.setSqlQuery("select person_id, birthdate from person where voided = 0 and birthdate >= :bornAfter and birthdate < :bornBefore");
-        dsd1.addParameter(new Parameter("bornAfter", "Born after", Date.class));
-        dsd1.addParameter(new Parameter("bornBefore", "Born before", Date.class));
+    ReportDefinition reportDefinition = new ReportDefinition();
+    reportDefinition.setName("Report definition");
+    reportDefinition.setUuid(UUID);
+    reportDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
+    reportDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
+    reportDefinition.addDataSetDefinition(
+        "dsd1",
+        dsd1,
+        ParameterizableUtil.createParameterMappings(
+            "bornAfter=${startDate},bornBefore=${endDate}"));
+    reportDefinition.addDataSetDefinition(
+        "dsd2", dsd2, ParameterizableUtil.createParameterMappings(""));
 
-        SqlDataSetDefinition dsd2 = new SqlDataSetDefinition();
-        dsd2.setName("For fun");
-        dsd2.setDescription("another SQL query");
-        dsd2.setSqlQuery("select person_id from person where voided = 0");
+    reportDefinitionService.saveDefinition(reportDefinition);
+  }
 
-        ReportDefinition reportDefinition = new ReportDefinition();
-        reportDefinition.setName("Report definition");
-        reportDefinition.setUuid(UUID);
-        reportDefinition.addParameter(new Parameter("startDate", "Start Date", Date.class));
-        reportDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
-        reportDefinition.addDataSetDefinition("dsd1", dsd1, ParameterizableUtil.createParameterMappings("bornAfter=${startDate},bornBefore=${endDate}"));
-        reportDefinition.addDataSetDefinition("dsd2", dsd2, ParameterizableUtil.createParameterMappings(""));
+  @Test
+  public void testEvaluatingUsingGet() throws Exception {
+    SimpleObject response =
+        (SimpleObject)
+            getResource()
+                .retrieve(
+                    UUID, buildRequestContext("startDate", "1975-01-01", "endDate", "1976-12-31"));
+    assertThat(((Collection) response.get("dataSets")).size(), is(2));
+    assertThat(((Collection) path(response, "dataSets", 0, "rows")).size(), is(3));
+    assertThat((String) path(response, "dataSets", 0, "definition", "name"), is("Not everyone"));
+    assertThat((String) path(response, "dataSets", 1, "definition", "name"), is("For fun"));
+  }
 
-        reportDefinitionService.saveDefinition(reportDefinition);
-    }
+  @Test
+  public void testEvaluatingUsingPost() throws Exception {
+    SimpleObject postBody =
+        new SimpleObject().add("startDate", "1975-01-01").add("endDate", "1976-12-31");
+    SimpleObject response =
+        (SimpleObject) getResource().update(UUID, postBody, buildRequestContext());
+    assertThat(((Collection) response.get("dataSets")).size(), is(2));
+    assertThat(((Collection) path(response, "dataSets", 0, "rows")).size(), is(3));
+    assertThat((String) path(response, "dataSets", 0, "definition", "name"), is("Not everyone"));
+    assertThat((String) path(response, "dataSets", 1, "definition", "name"), is("For fun"));
+  }
 
-    @Test
-    public void testEvaluatingUsingGet() throws Exception {
-        SimpleObject response = (SimpleObject) getResource().retrieve(UUID, buildRequestContext("startDate", "1975-01-01", "endDate", "1976-12-31"));
-        assertThat(((Collection) response.get("dataSets")).size(), is(2));
-        assertThat(((Collection) path(response, "dataSets", 0, "rows")).size(), is(3));
-        assertThat((String) path(response, "dataSets", 0, "definition", "name"), is("Not everyone"));
-        assertThat((String) path(response, "dataSets", 1, "definition", "name"), is("For fun"));
-    }
+  /**
+   * @verifies throw ObjectNotFoundException if resource does not exist
+   */
+  @Test
+  public void retrieve_shouldThrowObjectNotFoundExceptionIfResourceDoesNotExist() throws Exception {
+    assertThrows(
+        ObjectNotFoundException.class,
+        () ->
+            getResource()
+                .retrieve(
+                    "not-existing",
+                    buildRequestContext("startDate", "1975-01-01", "endDate", "1976-12-31")));
+  }
 
-    @Test
-    public void testEvaluatingUsingPost() throws Exception {
-        SimpleObject postBody = new SimpleObject()
-                .add("startDate", "1975-01-01")
-                .add("endDate", "1976-12-31");
-        SimpleObject response = (SimpleObject) getResource().update(UUID, postBody, buildRequestContext());
-        assertThat(((Collection) response.get("dataSets")).size(), is(2));
-        assertThat(((Collection) path(response, "dataSets", 0, "rows")).size(), is(3));
-        assertThat((String) path(response, "dataSets", 0, "definition", "name"), is("Not everyone"));
-        assertThat((String) path(response, "dataSets", 1, "definition", "name"), is("For fun"));
-    }
+  @Test
+  public void testEvaluatedSerializedXml() throws Exception {
+    ReportDefinition reportDefinition = reportDefinitionService.getDefinitionByUuid(UUID);
+    String xml =
+        serializationService.getSerializer(ReportingSerializer.class).serialize(reportDefinition);
+    SimpleObject postBody =
+        new SimpleObject()
+            .add("serializedXml", xml)
+            .add("startDate", "1975-01-01")
+            .add("endDate", "1976-12-31");
 
-	/**
-	 * @verifies throw ObjectNotFoundException if resource does not exist
-	 */
-	@Test
-	public void retrieve_shouldThrowObjectNotFoundExceptionIfResourceDoesNotExist() throws Exception {
-		assertThrows(ObjectNotFoundException.class, () ->
-                getResource().retrieve(
-                        "not-existing",
-                        buildRequestContext("startDate", "1975-01-01", "endDate", "1976-12-31")
-                )
-        );
-	}
-
-    @Test
-    public void testEvaluatedSerializedXml() throws Exception {
-        ReportDefinition reportDefinition = reportDefinitionService.getDefinitionByUuid(UUID);
-        String xml = serializationService.getSerializer(ReportingSerializer.class).serialize(reportDefinition);
-        SimpleObject postBody = new SimpleObject()
-                .add("serializedXml", xml)
-                .add("startDate", "1975-01-01")
-                .add("endDate", "1976-12-31");
-
-        SimpleObject response = (SimpleObject) getResource().create(postBody, buildRequestContext());
-        assertThat(((Collection) response.get("dataSets")).size(), is(2));
-        assertThat(((Collection) path(response, "dataSets", 0, "rows")).size(), is(3));
-        assertThat((String) path(response, "dataSets", 0, "definition", "name"), is("Not everyone"));
-        assertThat((String) path(response, "dataSets", 1, "definition", "name"), is("For fun"));
-    }
-
+    SimpleObject response = (SimpleObject) getResource().create(postBody, buildRequestContext());
+    assertThat(((Collection) response.get("dataSets")).size(), is(2));
+    assertThat(((Collection) path(response, "dataSets", 0, "rows")).size(), is(3));
+    assertThat((String) path(response, "dataSets", 0, "definition", "name"), is("Not everyone"));
+    assertThat((String) path(response, "dataSets", 1, "definition", "name"), is("For fun"));
+  }
 }

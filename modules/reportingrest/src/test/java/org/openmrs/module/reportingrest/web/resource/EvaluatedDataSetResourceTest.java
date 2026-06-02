@@ -14,6 +14,12 @@
 
 package org.openmrs.module.reportingrest.web.resource;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Cohort;
@@ -37,121 +43,121 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+/** */
+public class EvaluatedDataSetResourceTest
+    extends BaseEvaluatedResourceTest<EvaluatedDataSetResource, DataSet> {
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+  DataSetDefinitionService dataSetDefinitionService;
 
-/**
- *
- */
-public class EvaluatedDataSetResourceTest extends BaseEvaluatedResourceTest<EvaluatedDataSetResource, DataSet> {
+  CohortDefinitionService cohortDefinitionService;
 
-    DataSetDefinitionService dataSetDefinitionService;
+  @Autowired LocationService locationService;
 
-    CohortDefinitionService cohortDefinitionService;
+  public static final String UUID_FOR_PARAMS_DSD = "uuid-for-params-dsd";
 
-    @Autowired
-    LocationService locationService;
+  @Before
+  public void setUp() throws Exception {
+    executeDataSet("DataSetDefinitionTest.xml");
+    dataSetDefinitionService = DefinitionContext.getDataSetDefinitionService();
+    cohortDefinitionService = DefinitionContext.getCohortDefinitionService();
+  }
 
-    public static final String UUID_FOR_PARAMS_DSD = "uuid-for-params-dsd";
+  @Test
+  public void testEvaluatingDsdWithNoParameters() throws Exception {
+    SimpleObject response =
+        (SimpleObject)
+            getResource().retrieve("d9c79890-7ea9-41b1-a068-b5b99ca3d593", buildRequestContext());
+    assertThat((String) path(response, "metadata", "columns", 0, "name"), is("PATIENT_ID"));
+    List rows = (List) response.get("rows");
+    assertThat(rows.size(), is(5));
+    Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
+    assertThat((Integer) firstRow.get("PATIENT_ID"), is(6));
+  }
 
-    @Before
-    public void setUp() throws Exception {
-        executeDataSet("DataSetDefinitionTest.xml");
-        dataSetDefinitionService = DefinitionContext.getDataSetDefinitionService();
-        cohortDefinitionService = DefinitionContext.getCohortDefinitionService();
+  @Test
+  public void testEvaluatingDsdWithParametersUsingGet() throws Exception {
+    saveDsdWithParams();
+
+    RequestContext context =
+        buildRequestContext("param1", "these are words, that we won't use", "param2", "1995-01-01");
+    SimpleObject response = (SimpleObject) getResource().retrieve(UUID_FOR_PARAMS_DSD, context);
+
+    List rows = (List) response.get("rows");
+    assertThat(rows.size(), is(1));
+    Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
+    assertThat((Integer) firstRow.get("PERSON_ID"), is(43));
+  }
+
+  @Test
+  public void testEvaluatingDsdWithParametersUsingPost() throws Exception {
+    saveDsdWithParams();
+
+    RequestContext context = buildRequestContext();
+    SimpleObject postBody =
+        new SimpleObject()
+            .add("param1", "these are words, that we won't use")
+            .add("param2", "1995-01-10");
+    SimpleObject response =
+        (SimpleObject) getResource().update(UUID_FOR_PARAMS_DSD, postBody, context);
+
+    List rows = (List) response.get("rows");
+    assertThat(rows.size(), is(1));
+    Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
+    assertThat((Integer) firstRow.get("PERSON_ID"), is(43));
+  }
+
+  private void saveDsdWithParams() {
+    SqlDataSetDefinition dsd = new SqlDataSetDefinition();
+    dsd.setName("Not everyone");
+    dsd.setDescription("via SQL");
+    dsd.setSqlQuery(
+        "select person_id, birthdate from person where voided = 0 and birthdate > :param2");
+    dsd.addParameter(new Parameter("param1", "param 1", String.class));
+    dsd.addParameter(new Parameter("param2", "param 2", Date.class));
+    dsd.setUuid(UUID_FOR_PARAMS_DSD);
+    dataSetDefinitionService.saveDefinition(dsd);
+  }
+
+  @Test
+  public void testEvaluatingDsdFromSerializedXml() throws Exception {
+    String xml =
+        "<org.openmrs.module.reporting.dataset.definition.SqlDataSetDefinition>"
+            + "<parameters/>"
+            + "<sqlQuery>select patient_id from patient where year(date_created) = 2006</sqlQuery>"
+            + "</org.openmrs.module.reporting.dataset.definition.SqlDataSetDefinition>";
+    SimpleObject response =
+        (SimpleObject)
+            getResource()
+                .create(new SimpleObject().add("serializedXml", xml), buildRequestContext());
+
+    assertThat((String) path(response, "metadata", "columns", 0, "name"), is("PATIENT_ID"));
+    List rows = (List) response.get("rows");
+    assertThat(rows.size(), is(5));
+    Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
+    assertThat((Integer) firstRow.get("PATIENT_ID"), is(6));
+  }
+
+  @Test
+  public void shouldConvertMapDataSetWithEvaluatedCohorts() throws Exception {
+    EncounterCohortDefinition ecd = new EncounterCohortDefinition();
+    ecd.addLocation(locationService.getLocation(2));
+    EvaluatedCohort cohort = cohortDefinitionService.evaluate(ecd, new EvaluationContext());
+
+    MapDataSet mapDataSet = new MapDataSet(new SqlDataSetDefinition(), new EvaluationContext());
+    mapDataSet.addData(new DataSetColumn("cohort", "Cohort", Cohort.class), cohort);
+
+    SimpleObject simple = getResource().asRepresentation(mapDataSet, Representation.DEFAULT);
+    String json = toJson(simple);
+    System.out.println(json);
+  }
+
+  private <T extends Parameterizable> Mapped<T> map(T parameterizable, String mappings) {
+    if (parameterizable == null) {
+      throw new NullPointerException("Programming error: missing parameterizable");
     }
-
-    @Test
-    public void testEvaluatingDsdWithNoParameters() throws Exception {
-        SimpleObject response = (SimpleObject) getResource().retrieve("d9c79890-7ea9-41b1-a068-b5b99ca3d593", buildRequestContext());
-        assertThat((String) path(response, "metadata", "columns", 0, "name"), is("PATIENT_ID"));
-        List rows = (List) response.get("rows");
-        assertThat(rows.size(), is(5));
-        Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
-        assertThat((Integer) firstRow.get("PATIENT_ID"), is(6));
+    if (mappings == null) {
+      mappings = ""; // probably not necessary, just to be safe
     }
-
-    @Test
-    public void testEvaluatingDsdWithParametersUsingGet() throws Exception {
-        saveDsdWithParams();
-
-        RequestContext context = buildRequestContext("param1", "these are words, that we won't use", "param2", "1995-01-01");
-        SimpleObject response = (SimpleObject) getResource().retrieve(UUID_FOR_PARAMS_DSD, context);
-
-        List rows = (List) response.get("rows");
-        assertThat(rows.size(), is(1));
-        Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
-        assertThat((Integer) firstRow.get("PERSON_ID"), is(43));
-    }
-
-    @Test
-    public void testEvaluatingDsdWithParametersUsingPost() throws Exception {
-        saveDsdWithParams();
-
-        RequestContext context = buildRequestContext();
-        SimpleObject postBody = new SimpleObject()
-                .add("param1", "these are words, that we won't use")
-                .add("param2", "1995-01-10");
-        SimpleObject response = (SimpleObject) getResource().update(UUID_FOR_PARAMS_DSD, postBody, context);
-
-        List rows = (List) response.get("rows");
-        assertThat(rows.size(), is(1));
-        Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
-        assertThat((Integer) firstRow.get("PERSON_ID"), is(43));
-    }
-
-    private void saveDsdWithParams() {
-        SqlDataSetDefinition dsd = new SqlDataSetDefinition();
-        dsd.setName("Not everyone");
-        dsd.setDescription("via SQL");
-        dsd.setSqlQuery("select person_id, birthdate from person where voided = 0 and birthdate > :param2");
-        dsd.addParameter(new Parameter("param1", "param 1", String.class));
-        dsd.addParameter(new Parameter("param2", "param 2", Date.class));
-        dsd.setUuid(UUID_FOR_PARAMS_DSD);
-        dataSetDefinitionService.saveDefinition(dsd);
-    }
-
-    @Test
-    public void testEvaluatingDsdFromSerializedXml() throws Exception {
-        String xml = "<org.openmrs.module.reporting.dataset.definition.SqlDataSetDefinition>" +
-                "<parameters/>" +
-                "<sqlQuery>select patient_id from patient where year(date_created) = 2006</sqlQuery>" +
-                "</org.openmrs.module.reporting.dataset.definition.SqlDataSetDefinition>";
-        SimpleObject response = (SimpleObject) getResource().create(new SimpleObject().add("serializedXml", xml), buildRequestContext());
-
-        assertThat((String) path(response, "metadata", "columns", 0, "name"), is("PATIENT_ID"));
-        List rows = (List) response.get("rows");
-        assertThat(rows.size(), is(5));
-        Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
-        assertThat((Integer) firstRow.get("PATIENT_ID"), is(6));
-    }
-
-    @Test
-    public void shouldConvertMapDataSetWithEvaluatedCohorts() throws Exception {
-        EncounterCohortDefinition ecd = new EncounterCohortDefinition();
-        ecd.addLocation(locationService.getLocation(2));
-        EvaluatedCohort cohort = cohortDefinitionService.evaluate(ecd, new EvaluationContext());
-
-        MapDataSet mapDataSet = new MapDataSet(new SqlDataSetDefinition(), new EvaluationContext());
-        mapDataSet.addData(new DataSetColumn("cohort", "Cohort", Cohort.class), cohort);
-
-        SimpleObject simple = getResource().asRepresentation(mapDataSet, Representation.DEFAULT);
-        String json = toJson(simple);
-        System.out.println(json);
-    }
-
-    private <T extends Parameterizable> Mapped<T> map(T parameterizable, String mappings) {
-        if (parameterizable == null) {
-            throw new NullPointerException("Programming error: missing parameterizable");
-        }
-        if (mappings == null) {
-            mappings = ""; // probably not necessary, just to be safe
-        }
-        return new Mapped<T>(parameterizable, ParameterizableUtil.createParameterMappings(mappings));
-    }
-
+    return new Mapped<T>(parameterizable, ParameterizableUtil.createParameterMappings(mappings));
+  }
 }

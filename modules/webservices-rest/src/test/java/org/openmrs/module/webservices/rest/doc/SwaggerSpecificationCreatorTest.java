@@ -155,7 +155,7 @@ public class SwaggerSpecificationCreatorTest extends BaseModuleWebContextSensiti
   private boolean ensureCountsEqual(
       Map<String, Integer> beforeCounts, Map<String, Integer> afterCounts) {
     for (String key : beforeCounts.keySet()) {
-      if (beforeCounts.get(key) != afterCounts.get(key)) {
+      if (!beforeCounts.get(key).equals(afterCounts.get(key))) {
         System.err.println(
             "The "
                 + key

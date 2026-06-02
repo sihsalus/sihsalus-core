@@ -14,6 +14,12 @@
 
 package org.openmrs.module.reportingrest.web.resource;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+
+import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.util.List;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.api.context.Context;
@@ -24,76 +30,70 @@ import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.util.List;
+/** */
+public abstract class BaseEvaluatedResourceTest<R extends EvaluatedResource<T>, T extends Evaluated>
+    extends BaseModuleWebContextSensitiveTest {
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
+  private R resource;
 
-/**
- *
- */
-public abstract class BaseEvaluatedResourceTest<R extends EvaluatedResource<T>, T extends Evaluated> extends BaseModuleWebContextSensitiveTest {
+  /**
+   * Instantiates EvaluatedResource.
+   *
+   * @return the new resource
+   */
+  public R newResource() {
+    ParameterizedType t = (ParameterizedType) getClass().getGenericSuperclass();
+    @SuppressWarnings("unchecked")
+    Class<T> clazz = (Class<T>) t.getActualTypeArguments()[1];
+    return (R) Context.getService(RestService.class).getResourceBySupportedClass(clazz);
+  }
 
-    private R resource;
-
-    /**
-     * Instantiates EvaluatedResource.
-     *
-     * @return the new resource
-     */
-    public R newResource() {
-        ParameterizedType t = (ParameterizedType) getClass().getGenericSuperclass();
-        @SuppressWarnings("unchecked")
-        Class<T> clazz = (Class<T>) t.getActualTypeArguments()[1];
-        return (R) Context.getService(RestService.class).getResourceBySupportedClass(clazz);
+  /**
+   * Returns an instantiated resource.
+   *
+   * @return the resource
+   */
+  public R getResource() {
+    if (resource == null) {
+      resource = newResource();
     }
+    assertThat(resource, notNullValue());
+    return resource;
+  }
 
-    /**
-     * Returns an instantiated resource.
-     *
-     * @return the resource
-     */
-    public R getResource() {
-        if (resource == null) {
-            resource = newResource();
-        }
-        assertThat(resource, notNullValue());
-        return resource;
+  protected RequestContext buildRequestContext(String... paramNamesAndValues) {
+    if (paramNamesAndValues.length % 2 != 0) {
+      throw new IllegalArgumentException("paramNamesAndValues must contain name/value pairs");
     }
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    for (int i = 0; i < paramNamesAndValues.length; i += 2) {
+      request.addParameter(paramNamesAndValues[i], paramNamesAndValues[i + 1]);
+    }
+    RequestContext context = new RequestContext();
+    context.setRequest(request);
+    return context;
+  }
 
-    protected RequestContext buildRequestContext(String... paramNamesAndValues) {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        for (int i = 0; i < paramNamesAndValues.length; i += 2) {
-            request.addParameter(paramNamesAndValues[i], paramNamesAndValues[i + 1]);
-        }
-        RequestContext context = new RequestContext();
-        context.setRequest(request);
-        return context;
+  protected Object path(Object object, Object... path) throws Exception {
+    for (int i = 0; i < path.length; ++i) {
+      if (path[i] instanceof String) {
+        object = PropertyUtils.getProperty(object, (String) path[i]);
+      } else if (path[i] instanceof Integer) {
+        object = ((List) object).get((Integer) path[i]);
+      }
     }
+    return object;
+  }
 
-    protected Object path(Object object, Object... path) throws Exception {
-        for (int i = 0; i < path.length; ++i) {
-            if (path[i] instanceof String) {
-                object = PropertyUtils.getProperty(object, (String) path[i]);
-            } else if (path[i] instanceof Integer) {
-                object = ((List) object).get((Integer) path[i]);
-            }
-        }
-        return object;
-    }
+  protected String toJson(Object object) throws IOException {
+    return new ObjectMapper().writeValueAsString(object);
+  }
 
-    protected String toJson(Object object) throws IOException {
-        return new ObjectMapper().writeValueAsString(object);
+  protected boolean hasLink(Object obj, String rel, String uriEndsWith) throws Exception {
+    List<Hyperlink> links = (List<Hyperlink>) path(obj, "links");
+    for (Hyperlink link : links) {
+      if (link.getRel().equals(rel) && link.getUri().endsWith(uriEndsWith)) return true;
     }
-
-    protected boolean hasLink(Object obj, String rel, String uriEndsWith) throws Exception {
-	    List<Hyperlink> links = (List<Hyperlink>) path(obj, "links");
-	    for (Hyperlink link : links) {
-		if (link.getRel().equals(rel) && link.getUri().endsWith(uriEndsWith))
-			return true;
-	    }
-	    return false;
-    }
+    return false;
+  }
 }

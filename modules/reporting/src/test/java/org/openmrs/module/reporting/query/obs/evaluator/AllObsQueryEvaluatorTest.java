@@ -1,13 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.query.obs.evaluator;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,90 +26,84 @@ import org.openmrs.module.reporting.query.obs.service.ObsQueryService;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-
 public class AllObsQueryEvaluatorTest extends BaseModuleContextSensitiveTest {
 
-    protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-    protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-    @Autowired
-    ObsQueryService obsQueryService;
+  @Autowired ObsQueryService obsQueryService;
 
-    @Before
-    public void setup() throws Exception {
-        executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-    }
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-    @Test
-    public void testEvaluate() throws Exception {
-        Cohort baseCohort = new Cohort();
-        baseCohort.addMember(20);
+  @Test
+  public void testEvaluate() throws Exception {
+    Cohort baseCohort = new Cohort();
+    baseCohort.addMember(20);
 
-        EvaluationContext context = new EvaluationContext();
-        context.setBaseCohort(baseCohort);
+    EvaluationContext context = new EvaluationContext();
+    context.setBaseCohort(baseCohort);
 
-        AllObsQuery query = new AllObsQuery();
+    AllObsQuery query = new AllObsQuery();
 
-        ObsQueryResult result = obsQueryService.evaluate(query, context);
-        assertThat(result, ReportingMatchers.hasExactlyIds(17, 18, 19));
-    }
+    ObsQueryResult result = obsQueryService.evaluate(query, context);
+    assertThat(result, ReportingMatchers.hasExactlyIds(17, 18, 19));
+  }
 
-    @Test
-    public void testEvaluateInObsContext() throws Exception {
+  @Test
+  public void testEvaluateInObsContext() throws Exception {
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet(7,9));
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet(7, 9));
 
-        AllObsQuery query = new AllObsQuery();
+    AllObsQuery query = new AllObsQuery();
 
-        ObsQueryResult result = obsQueryService.evaluate(query, context);
-        assertThat(result, ReportingMatchers.hasExactlyIds(7,9));
-    }
+    ObsQueryResult result = obsQueryService.evaluate(query, context);
+    assertThat(result, ReportingMatchers.hasExactlyIds(7, 9));
+  }
 
-    @Test
-    public void voidTestEvaluateInPatientAndObsContext() throws Exception {
+  @Test
+  public void voidTestEvaluateInPatientAndObsContext() throws Exception {
 
-        Cohort baseCohort = new Cohort();
-        baseCohort.addMember(20);
+    Cohort baseCohort = new Cohort();
+    baseCohort.addMember(20);
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseCohort(baseCohort);
-        context.setBaseObs(new ObsIdSet(7,18));
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseCohort(baseCohort);
+    context.setBaseObs(new ObsIdSet(7, 18));
 
-        AllObsQuery query = new AllObsQuery();
+    AllObsQuery query = new AllObsQuery();
 
-        ObsQueryResult result = obsQueryService.evaluate(query, context);
-        assertThat(result, ReportingMatchers.hasExactlyIds(18));
+    ObsQueryResult result = obsQueryService.evaluate(query, context);
+    assertThat(result, ReportingMatchers.hasExactlyIds(18));
+  }
 
-    }
+  @Test
+  public void testEvaluateWithEmptyCohort() throws Exception {
+    Cohort baseCohort = new Cohort();
 
-    @Test
-    public void testEvaluateWithEmptyCohort() throws Exception {
-        Cohort baseCohort = new Cohort();
+    EvaluationContext context = new EvaluationContext();
+    context.setBaseCohort(baseCohort);
 
-        EvaluationContext context = new EvaluationContext();
-        context.setBaseCohort(baseCohort);
+    AllObsQuery query = new AllObsQuery();
 
-        AllObsQuery query = new AllObsQuery();
+    ObsQueryResult result = obsQueryService.evaluate(query, context);
+    assertThat(result.getSize(), is(0));
+  }
 
-        ObsQueryResult result = obsQueryService.evaluate(query, context);
-        assertThat(result.getSize(), is(0));
-    }
+  @Test
+  public void testEvaluateInObsContextWithEmptySet() throws Exception {
 
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet());
 
-    @Test
-    public void testEvaluateInObsContextWithEmptySet() throws Exception {
+    AllObsQuery query = new AllObsQuery();
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet());
-
-        AllObsQuery query = new AllObsQuery();
-
-        ObsQueryResult result = obsQueryService.evaluate(query, context);
-        assertThat(result.getSize(), is(0));
-    }
-
+    ObsQueryResult result = obsQueryService.evaluate(query, context);
+    assertThat(result.getSize(), is(0));
+  }
 }

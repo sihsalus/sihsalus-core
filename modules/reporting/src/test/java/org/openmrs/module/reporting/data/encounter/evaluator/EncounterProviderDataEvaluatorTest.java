@@ -1,21 +1,26 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.encounter.evaluator;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
+
+import java.util.Date;
+import java.util.List;
 import org.junit.Test;
 import org.openmrs.Cohort;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
-import org.openmrs.User;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.contrib.testdata.TestDataManager;
@@ -30,220 +35,212 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.Date;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
-
 public class EncounterProviderDataEvaluatorTest extends BaseModuleContextSensitiveTest {
 
+  @Autowired private TestDataManager data;
 
-    @Autowired
-    private TestDataManager data;
+  @Autowired
+  @Qualifier("encounterService")
+  private EncounterService encounterService;
 
-    @Autowired
-    @Qualifier("encounterService")
-    private EncounterService encounterService;
+  @Autowired
+  @Qualifier("providerService")
+  private ProviderService providerService;
 
-    @Autowired
-    @Qualifier("providerService")
-    private ProviderService providerService;
+  @Autowired private EncounterDataService encounterDataService;
 
-    @Autowired
-    private EncounterDataService encounterDataService;
+  @Test
+  public void shouldReturnEncounterProviderForEncounter() throws Exception {
 
-    @Test
-    public void shouldReturnEncounterProviderForEncounter() throws Exception {
+    EncounterRole role = encounterService.getEncounterRole(1);
+    Provider provider = saveRandomProvider();
 
-        EncounterRole role = encounterService.getEncounterRole(1);
-        Provider provider = saveRandomProvider();
+    Patient patient = data.randomPatient().save();
+    Encounter enc =
+        data.randomEncounter()
+            .patient(patient)
+            .encounterDatetime(new Date())
+            .provider(role, provider)
+            .save();
 
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient)
-                .encounterDatetime(new Date())
-                .provider(role, provider)
-                .save();
+    EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
+    d.setEncounterRole(role);
 
-        EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
-        d.setEncounterRole(role);
+    EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
+    encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
 
-        EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
-        encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
+    EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
 
-        EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
+    assertThat(ed.getData().size(), is(1));
+    assertThat((Provider) ed.getData().get(enc.getId()), is(provider));
+  }
 
-        assertThat(ed.getData().size(), is(1));
-        assertThat((Provider) ed.getData().get(enc.getId()), is(provider));
+  @Test
+  public void shouldReturnEncounterProvidersForEncounter() throws Exception {
 
-    }
+    EncounterRole role1 = encounterService.getEncounterRole(1);
+    EncounterRole role2 = new EncounterRole();
+    role2.setName("some role");
+    encounterService.saveEncounterRole(role2);
 
-    @Test
-    public void shouldReturnEncounterProvidersForEncounter() throws Exception {
+    Provider provider1 = saveRandomProvider();
+    Provider provider2 = saveRandomProvider();
+    Provider provider3 = saveRandomProvider();
 
-        EncounterRole role1 = encounterService.getEncounterRole(1);
-        EncounterRole role2 = new EncounterRole();
-        role2.setName("some role");
-        encounterService.saveEncounterRole(role2);
+    Patient patient = data.randomPatient().save();
+    Encounter enc =
+        data.randomEncounter()
+            .patient(patient)
+            .encounterDatetime(new Date())
+            .provider(role1, provider1)
+            .provider(role2, provider2)
+            .provider(role1, provider3)
+            .save();
 
-        Provider provider1 = saveRandomProvider();
-        Provider provider2 = saveRandomProvider();
-        Provider provider3 = saveRandomProvider();
+    EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
+    d.setEncounterRole(role1);
+    d.setSingleProvider(false);
 
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient)
-                .encounterDatetime(new Date())
-                .provider(role1, provider1)
-                .provider(role2, provider2)
-                .provider(role1, provider3)
-                .save();
+    EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
+    encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
 
-        EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
-        d.setEncounterRole(role1);
-        d.setSingleProvider(false);
+    EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
 
-        EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
-        encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
+    assertThat(ed.getData().size(), is(1));
+    assertThat(
+        (List<Provider>) ed.getData().get(enc.getId()), containsInAnyOrder(provider1, provider3));
+  }
 
-        EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
+  @Test
+  public void shouldReturnAllEncounterProvidersForEncounterIfNoRoleSpecified() throws Exception {
 
-        assertThat(ed.getData().size(), is(1));
-        assertThat((List<Provider>) ed.getData().get(enc.getId()),
-                containsInAnyOrder(provider1, provider3));
+    EncounterRole role1 = encounterService.getEncounterRole(1);
+    EncounterRole role2 = new EncounterRole();
+    role2.setName("some role");
+    encounterService.saveEncounterRole(role2);
 
-    }
+    Provider provider1 = saveRandomProvider();
+    Provider provider2 = saveRandomProvider();
+    Provider provider3 = saveRandomProvider();
 
-    @Test
-    public void shouldReturnAllEncounterProvidersForEncounterIfNoRoleSpecified() throws Exception {
+    Patient patient = data.randomPatient().save();
+    Encounter enc =
+        data.randomEncounter()
+            .patient(patient)
+            .encounterDatetime(new Date())
+            .provider(role1, provider1)
+            .provider(role2, provider2)
+            .provider(role1, provider3)
+            .save();
 
-        EncounterRole role1 = encounterService.getEncounterRole(1);
-        EncounterRole role2 = new EncounterRole();
-        role2.setName("some role");
-        encounterService.saveEncounterRole(role2);
+    EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
+    d.setSingleProvider(false);
 
-        Provider provider1 = saveRandomProvider();
-        Provider provider2 = saveRandomProvider();
-        Provider provider3 = saveRandomProvider();
+    EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
+    encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
 
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient)
-                .encounterDatetime(new Date())
-                .provider(role1, provider1)
-                .provider(role2, provider2)
-                .provider(role1, provider3)
-                .save();
+    EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
 
-        EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
-        d.setSingleProvider(false);
+    assertThat(ed.getData().size(), is(1));
+    assertThat(
+        (List<Provider>) ed.getData().get(enc.getId()),
+        containsInAnyOrder(provider1, provider2, provider3));
+  }
 
-        EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
-        encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
+  @Test
+  public void shouldIgnoredVoidedEncounterProviders() throws Exception {
 
-        EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
+    EncounterRole role1 = encounterService.getEncounterRole(1);
+    EncounterRole role2 = new EncounterRole();
+    role2.setName("some role");
+    encounterService.saveEncounterRole(role2);
 
-        assertThat(ed.getData().size(), is(1));
-        assertThat((List<Provider>) ed.getData().get(enc.getId()),
-                containsInAnyOrder(provider1, provider2, provider3));
+    Provider provider1 = saveRandomProvider();
+    Provider provider2 = saveRandomProvider();
+    Provider provider3 = saveRandomProvider();
 
-    }
+    Patient patient = data.randomPatient().save();
+    Encounter enc =
+        data.randomEncounter()
+            .patient(patient)
+            .encounterDatetime(new Date())
+            .provider(role1, provider1)
+            .provider(role2, provider2)
+            .provider(role1, provider3)
+            .save();
 
+    // void a provider
+    enc.removeProvider(role1, provider3);
+    encounterService.saveEncounter(enc);
 
-    @Test
-    public void shouldIgnoredVoidedEncounterProviders() throws Exception {
+    EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
+    d.setEncounterRole(role1);
+    d.setSingleProvider(false);
 
-        EncounterRole role1 = encounterService.getEncounterRole(1);
-        EncounterRole role2 = new EncounterRole();
-        role2.setName("some role");
-        encounterService.saveEncounterRole(role2);
+    EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
+    encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
 
-        Provider provider1 = saveRandomProvider();
-        Provider provider2 = saveRandomProvider();
-        Provider provider3 = saveRandomProvider();
+    EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
 
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient)
-                .encounterDatetime(new Date())
-                .provider(role1, provider1)
-                .provider(role2, provider2)
-                .provider(role1, provider3)
-                .save();
+    assertThat(ed.getData().size(), is(1));
+    assertThat((List<Provider>) ed.getData().get(enc.getId()), containsInAnyOrder(provider1));
+  }
 
-        // void a provider
-        enc.removeProvider(role1, provider3);
-        encounterService.saveEncounter(enc);
+  @Test(expected = EvaluationException.class)
+  public void shouldFailIfEncounterRoleParameterSetToAnotherType() throws Exception {
 
-        EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
-        d.setEncounterRole(role1);
-        d.setSingleProvider(false);
+    EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
+    d.setEncounterRole(new EncounterRole());
+    d.setSingleProvider(false);
 
-        EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
-        encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
+    EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
+    EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
+  }
 
-        EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
+  @Test
+  public void shouldReturnEncounterProviderForEncounterWhenInPatientContext() throws Exception {
 
-        assertThat(ed.getData().size(), is(1));
-        assertThat((List<Provider>) ed.getData().get(enc.getId()),
-                containsInAnyOrder(provider1));
+    EncounterRole role = encounterService.getEncounterRole(1);
+    Provider provider = saveRandomProvider();
 
-    }
+    Patient patient = data.randomPatient().save();
+    Encounter enc =
+        data.randomEncounter()
+            .patient(patient)
+            .encounterDatetime(new Date())
+            .provider(role, provider)
+            .save();
 
-    @Test(expected = EvaluationException.class)
-    public void shouldFailIfEncounterRoleParameterSetToAnotherType() throws Exception {
+    EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
+    d.setEncounterRole(role);
 
-        EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
-        d.setEncounterRole(new EncounterRole());
-        d.setSingleProvider(false);
+    EvaluationContext context = new EvaluationContext();
+    context.setBaseCohort(new Cohort(patient.getId().toString()));
 
-        EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
-        EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
+    EvaluatedEncounterData ed = encounterDataService.evaluate(d, context);
 
-    }
+    assertThat(ed.getData().size(), is(1));
+    assertThat((Provider) ed.getData().get(enc.getId()), is(provider));
+  }
 
-    @Test
-    public void shouldReturnEncounterProviderForEncounterWhenInPatientContext() throws Exception {
+  @Test
+  public void shouldReturnEmptySetIfInputSetEmpty() throws Exception {
 
-        EncounterRole role = encounterService.getEncounterRole(1);
-        Provider provider = saveRandomProvider();
+    EncounterRole role = encounterService.getEncounterRole(1);
 
-        Patient patient = data.randomPatient().save();
-        Encounter enc = data.randomEncounter().patient(patient)
-                .encounterDatetime(new Date())
-                .provider(role, provider)
-                .save();
+    EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
+    d.setEncounterRole(role);
 
-        EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
-        d.setEncounterRole(role);
+    EvaluationContext context = new EvaluationContext();
+    context.setBaseCohort(new Cohort());
 
-        EvaluationContext context = new EvaluationContext();
-        context.setBaseCohort(new Cohort(patient.getId().toString()));
+    EvaluatedEncounterData ed = encounterDataService.evaluate(d, context);
 
-        EvaluatedEncounterData ed = encounterDataService.evaluate(d, context);
+    assertThat(ed.getData().size(), is(0));
+  }
 
-        assertThat(ed.getData().size(), is(1));
-        assertThat((Provider) ed.getData().get(enc.getId()), is(provider));
-
-    }
-
-    @Test
-    public void shouldReturnEmptySetIfInputSetEmpty() throws Exception {
-
-        EncounterRole role = encounterService.getEncounterRole(1);
-
-        EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
-        d.setEncounterRole(role);
-
-        EvaluationContext context = new EvaluationContext();
-        context.setBaseCohort(new Cohort());
-
-        EvaluatedEncounterData ed = encounterDataService.evaluate(d, context);
-
-        assertThat(ed.getData().size(), is(0));
-    }
-
-    private Provider saveRandomProvider() {
-        Patient p = data.randomPatient().save();
-        return data.randomProvider().person(p).save();
-    }
-
+  private Provider saveRandomProvider() {
+    Patient p = data.randomPatient().save();
+    return data.randomProvider().person(p).save();
+  }
 }

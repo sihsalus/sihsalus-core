@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.obs.evaluator;
 
@@ -33,71 +33,72 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 public class PersonToObsEvaluatorTest extends BaseModuleContextSensitiveTest {
 
-    protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-    protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-    @Autowired
-    PersonService personService;
+  @Autowired PersonService personService;
 
-    @Autowired @Qualifier("reportingObsDataService")
-    ObsDataService obsDataService;
+  @Autowired
+  @Qualifier("reportingObsDataService")
+  ObsDataService obsDataService;
 
-    /**
-     * Run this before each unit test in this class. The "@Before" method in
-     * {@link org.openmrs.test.BaseContextSensitiveTest} is run right before this method.
-     *
-     * @throws Exception
-     */
-    @Before
-    public void setup() throws Exception {
-        executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-    }
+  /**
+   * Run this before each unit test in this class. The "@Before" method in {@link
+   * org.openmrs.test.BaseContextSensitiveTest} is run right before this method.
+   *
+   * @throws Exception
+   */
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-    @Test
-    public void evaluate_shouldReturnPersonDataByForEachObsInContext() throws Exception {
-        PersonToObsDataDefinition d = new PersonToObsDataDefinition(new BirthdateDataDefinition());
+  @Test
+  public void evaluate_shouldReturnPersonDataByForEachObsInContext() throws Exception {
+    PersonToObsDataDefinition d = new PersonToObsDataDefinition(new BirthdateDataDefinition());
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet(20, 27));
-        EvaluatedObsData ed = Context.getService(ObsDataService.class).evaluate(d, context);
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet(20, 27));
+    EvaluatedObsData ed = Context.getService(ObsDataService.class).evaluate(d, context);
 
-        Assert.assertEquals(2, ed.getData().size());
-        BirthdateConverter c = new BirthdateConverter("yyyy-MM-dd");
-        Assert.assertEquals("1959-06-08", c.convert(ed.getData().get(20)));
-        Assert.assertEquals("1997-07-08", c.convert(ed.getData().get(27)));
+    Assert.assertEquals(2, ed.getData().size());
+    BirthdateConverter c = new BirthdateConverter("yyyy-MM-dd");
+    Assert.assertEquals("1959-06-08", c.convert(ed.getData().get(20)));
+    Assert.assertEquals("1997-07-08", c.convert(ed.getData().get(27)));
+  }
 
-    }
+  @Test
+  public void evaluate_shouldEmptySetIfObsSetEmtpy() throws Exception {
+    PersonToObsDataDefinition d = new PersonToObsDataDefinition(new BirthdateDataDefinition());
 
-    @Test
-    public void evaluate_shouldEmptySetIfObsSetEmtpy() throws Exception {
-        PersonToObsDataDefinition d = new PersonToObsDataDefinition(new BirthdateDataDefinition());
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    context.setBaseObs(new ObsIdSet());
+    EvaluatedObsData ed = Context.getService(ObsDataService.class).evaluate(d, context);
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        context.setBaseObs(new ObsIdSet());
-        EvaluatedObsData ed = Context.getService(ObsDataService.class).evaluate(d, context);
+    Assert.assertEquals(0, ed.getData().size());
+  }
 
-        Assert.assertEquals(0, ed.getData().size());
-    }
+  @Test
+  public void evaluate_shouldProperlyPassParametersThroughToNestedDefinition() throws Exception {
 
-    @Test
-    public void evaluate_shouldProperlyPassParametersThroughToNestedDefinition() throws Exception {
+    PersonToObsDataDefinition dataDef = new PersonToObsDataDefinition();
 
-        PersonToObsDataDefinition dataDef = new PersonToObsDataDefinition();
+    PersonAttributeDataDefinition personAttributeDef = new PersonAttributeDataDefinition();
+    personAttributeDef.addParameter(
+        new Parameter("personAttributeType", "Attribute", String.class));
+    dataDef.setJoinedDefinition(personAttributeDef);
 
-        PersonAttributeDataDefinition personAttributeDef = new PersonAttributeDataDefinition();
-        personAttributeDef.addParameter(new Parameter("personAttributeType", "Attribute", String.class));
-        dataDef.setJoinedDefinition(personAttributeDef);
+    ObsEvaluationContext context = new ObsEvaluationContext();
+    PersonAttributeType birthplaceType = personService.getPersonAttributeTypeByName("Birthplace");
+    context.addParameterValue("personAttributeType", birthplaceType);
 
-        ObsEvaluationContext context = new ObsEvaluationContext();
-        PersonAttributeType birthplaceType = personService.getPersonAttributeTypeByName("Birthplace");
-        context.addParameterValue("personAttributeType", birthplaceType);
+    context.setBaseObs(new ObsIdSet(6));
 
-        context.setBaseObs(new ObsIdSet(6));
+    ObsData data = obsDataService.evaluate(dataDef, context);
 
-        ObsData data = obsDataService.evaluate(dataDef, context);
-
-        PersonAttribute att1 = (PersonAttribute) data.getData().get(6);
-        Assert.assertEquals("Paris, France", att1.getValue());
-    }
+    PersonAttribute att1 = (PersonAttribute) data.getData().get(6);
+    Assert.assertEquals("Paris, France", att1.getValue());
+  }
 }

@@ -14,6 +14,11 @@
 
 package org.openmrs.module.reportingrest.web.resource;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hamcrest.BaseMatcher;
@@ -31,78 +36,76 @@ import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.assertTrue;
-
-/**
- *
- */
+/** */
 public class DefinitionLibraryResourceTest extends BaseModuleWebContextSensitiveTest {
 
-    private DefinitionLibraryResource resource;
+  private DefinitionLibraryResource resource;
 
-    @Before
-    public void setUp() throws Exception {
-        RestService restService = Context.getService(RestService.class);
-        resource = (DefinitionLibraryResource) restService.getResourceByName(RestConstants.VERSION_1 + "/reportingrest/definitionlibrary");
+  @Before
+  public void setUp() throws Exception {
+    RestService restService = Context.getService(RestService.class);
+    resource =
+        (DefinitionLibraryResource)
+            restService.getResourceByName(
+                RestConstants.VERSION_1 + "/reportingrest/definitionlibrary");
+  }
+
+  @Test
+  public void testListByType() throws Exception {
+    RequestContext context = buildRequestContext("q", "patientData");
+    SimpleObject result = resource.search(context);
+    assertThat(result.get("results"), notNullValue());
+
+    String json = new ObjectMapper().writeValueAsString(result);
+    assertTrue(json.contains(BuiltInPatientDataLibrary.PREFIX + "patientId"));
+
+    Matcher<?> elementMatcher = hasProperty("key", BuiltInPatientDataLibrary.PREFIX + "patientId");
+    boolean found = false;
+    for (Object item : (List<Object>) result.get("results")) {
+      if (elementMatcher.matches(item)) {
+        found = true;
+      }
     }
+    assertTrue(found);
+  }
 
-    @Test
-    public void testListByType() throws Exception {
-        RequestContext context = buildRequestContext("q", "patientData");
-        SimpleObject result = resource.search(context);
-        assertThat(result.get("results"), notNullValue());
+  @Test
+  public void testRetrieveOne() throws Exception {
+    Object o =
+        resource.retrieve(BuiltInPatientDataLibrary.PREFIX + "patientId", buildRequestContext());
+    assertTrue(o instanceof PatientIdDataDefinition);
+  }
 
-        String json = new ObjectMapper().writeValueAsString(result);
-        assertTrue(json.contains(BuiltInPatientDataLibrary.PREFIX + "patientId"));
-
-        Matcher<?> elementMatcher = hasProperty("key", BuiltInPatientDataLibrary.PREFIX + "patientId");
-        boolean found = false;
-        for (Object item : (List<Object>) result.get("results")) {
-            if (elementMatcher.matches(item)) {
-                found = true;
-            }
+  private Matcher<?> hasProperty(final String name, final Object expectedValue) {
+    return new BaseMatcher<Object>() {
+      @Override
+      public boolean matches(Object o) {
+        Object actualValue;
+        try {
+          actualValue = PropertyUtils.getProperty(o, name);
+        } catch (Exception e) {
+          return false;
         }
-        assertTrue(found);
+        return actualValue == null ? (expectedValue == null) : actualValue.equals(expectedValue);
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendValue(name + " = " + expectedValue);
+      }
+    };
+  }
+
+  private RequestContext buildRequestContext(String... paramNamesAndValues) {
+    if (paramNamesAndValues.length % 2 != 0) {
+      throw new IllegalArgumentException("paramNamesAndValues must contain name/value pairs");
     }
-
-    @Test
-    public void testRetrieveOne() throws Exception {
-        Object o = resource.retrieve(BuiltInPatientDataLibrary.PREFIX + "patientId", buildRequestContext());
-        assertTrue(o instanceof PatientIdDataDefinition);
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    for (int i = 0; i < paramNamesAndValues.length; i += 2) {
+      request.addParameter(paramNamesAndValues[i], paramNamesAndValues[i + 1]);
     }
-
-    private Matcher<?> hasProperty(final String name, final Object expectedValue) {
-        return new BaseMatcher<Object>() {
-            @Override
-            public boolean matches(Object o) {
-                Object actualValue;
-                try {
-                    actualValue = PropertyUtils.getProperty(o, name);
-                } catch (Exception e) {
-                    return false;
-                }
-                return actualValue == null ? (expectedValue == null) : actualValue.equals(expectedValue);
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendValue(name + " = " + expectedValue);
-            }
-        };
-    }
-
-    private RequestContext buildRequestContext(String... paramNamesAndValues) {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        for (int i = 0; i < paramNamesAndValues.length; i += 2) {
-            request.addParameter(paramNamesAndValues[i], paramNamesAndValues[i + 1]);
-        }
-        RequestContext context = new RequestContext();
-        context.setRequest(request);
-        return context;
-    }
-
+    RequestContext context = new RequestContext();
+    context.setRequest(request);
+    return context;
+  }
 }

@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.cohort.definition.evaluator;
 
@@ -15,7 +15,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Cohort;
-import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.ConditionalParameterCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.GenderCohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.library.BuiltInCohortDefinitionLibrary;
@@ -28,57 +27,62 @@ import org.openmrs.test.BaseContextSensitiveTest;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * Tests the OptionalParameterCohortDefinition
- */
-public class ConditionalParameterCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
+/** Tests the OptionalParameterCohortDefinition */
+public class ConditionalParameterCohortDefinitionEvaluatorTest
+    extends BaseModuleContextSensitiveTest {
 
-	protected final Log log = LogFactory.getLog(getClass());
-	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected final Log log = LogFactory.getLog(getClass());
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-	@Autowired
-	CohortDefinitionService cohortDefinitionService;
+  @Autowired CohortDefinitionService cohortDefinitionService;
 
-	@Autowired
-	BuiltInCohortDefinitionLibrary builtInCohortDefinitionLibrary;
+  @Autowired BuiltInCohortDefinitionLibrary builtInCohortDefinitionLibrary;
 
-	/**
-	 * Run this before each unit test in this class. The "@Before" method in
-	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 */
-	@Before
-	public void setup() throws Exception {
-		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-	}
+  /**
+   * Run this before each unit test in this class. The "@Before" method in {@link
+   * BaseContextSensitiveTest} is run right before this method.
+   */
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-	/**
-	 * @see {@link OptionalParameterCohortDefinitionEvaluator#evaluate(CohortDefinition, EvaluationContext)}
-	 */
-	@Test
-	public void evaluate_shouldSupportIntegerParameter() throws Exception {
+  /**
+   * @see {@link OptionalParameterCohortDefinitionEvaluator#evaluate(CohortDefinition,
+   *     EvaluationContext)}
+   */
+  @Test
+  public void evaluate_shouldSupportIntegerParameter() throws Exception {
 
-		Cohort females = cohortDefinitionService.evaluate(builtInCohortDefinitionLibrary.getFemales(), new EvaluationContext());
-		Cohort males = cohortDefinitionService.evaluate(builtInCohortDefinitionLibrary.getMales(), new EvaluationContext());
+    Cohort females =
+        cohortDefinitionService.evaluate(
+            builtInCohortDefinitionLibrary.getFemales(), new EvaluationContext());
+    Cohort males =
+        cohortDefinitionService.evaluate(
+            builtInCohortDefinitionLibrary.getMales(), new EvaluationContext());
 
-		GenderCohortDefinition gender = new GenderCohortDefinition();
-		gender.addParameter(new Parameter("gender", "Gender", String.class));
+    GenderCohortDefinition gender = new GenderCohortDefinition();
+    gender.addParameter(new Parameter("gender", "Gender", String.class));
 
-		ConditionalParameterCohortDefinition cd = new ConditionalParameterCohortDefinition();
-		cd.setParameterToCheck("gender");
-		cd.addConditionalCohortDefinition("M", Mapped.mapStraightThrough(builtInCohortDefinitionLibrary.getMales()));
-		cd.addConditionalCohortDefinition("F", Mapped.mapStraightThrough(builtInCohortDefinitionLibrary.getFemales()));
+    ConditionalParameterCohortDefinition cd = new ConditionalParameterCohortDefinition();
+    cd.setParameterToCheck("gender");
+    cd.addConditionalCohortDefinition(
+        "M", Mapped.mapStraightThrough(builtInCohortDefinitionLibrary.getMales()));
+    cd.addConditionalCohortDefinition(
+        "F", Mapped.mapStraightThrough(builtInCohortDefinitionLibrary.getFemales()));
 
-		EvaluationContext context = new EvaluationContext();
+    EvaluationContext context = new EvaluationContext();
 
-		context.addParameterValue("gender", "M");
-		Cohort test1 = cohortDefinitionService.evaluate(cd, context);
-		Assert.assertEquals(males.getSize(), test1.getSize());
-		Assert.assertTrue(males.getMemberIds().containsAll(test1.getMemberIds()));
+    context.addParameterValue("gender", "M");
+    Cohort test1 = cohortDefinitionService.evaluate(cd, context);
+    Assert.assertEquals(males.getSize(), test1.getSize());
+    Assert.assertTrue(males.getMemberIds().containsAll(test1.getMemberIds()));
 
-		context.addParameterValue("gender", "F");
-		Cohort test2 = cohortDefinitionService.evaluate(cd, context);
-		Assert.assertEquals(females.getSize(), test2.getSize());
-		Assert.assertTrue(females.getMemberIds().containsAll(test2.getMemberIds()));
-	}
+    context.addParameterValue("gender", "F");
+    Cohort test2 = cohortDefinitionService.evaluate(cd, context);
+    Assert.assertEquals(females.getSize(), test2.getSize());
+    Assert.assertTrue(females.getMemberIds().containsAll(test2.getMemberIds()));
+  }
 }

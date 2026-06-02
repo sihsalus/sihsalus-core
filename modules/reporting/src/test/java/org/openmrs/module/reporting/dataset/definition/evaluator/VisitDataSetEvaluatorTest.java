@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.dataset.definition.evaluator;
 
@@ -25,41 +25,40 @@ import org.openmrs.module.reporting.dataset.definition.service.DataSetDefinition
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
-/**
- * Test the VisitDataSetDefinition
- */
+/** Test the VisitDataSetDefinition */
 public class VisitDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
 
-    protected Log log = LogFactory.getLog(getClass());
+  protected Log log = LogFactory.getLog(getClass());
 
-    protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-    protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-    /**
-     * Run this before each unit test in this class. The "@Before" method in
-     * {@link org.openmrs.test.BaseContextSensitiveTest} is run right before this method.
-     *
-     * @throws Exception
-     */
-    @Before
-    public void setup() throws Exception {
-        executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-    }
+  /**
+   * Run this before each unit test in this class. The "@Before" method in {@link
+   * org.openmrs.test.BaseContextSensitiveTest} is run right before this method.
+   *
+   * @throws Exception
+   */
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-    @Test
-    public void evaluate_shouldEvaluateDataSetDefinition() throws Exception {
+  @Test
+  public void evaluate_shouldEvaluateDataSetDefinition() throws Exception {
 
-        EvaluationContext context = new EvaluationContext();
+    EvaluationContext context = new EvaluationContext();
 
-        VisitDataSetDefinition d = new VisitDataSetDefinition();
+    VisitDataSetDefinition d = new VisitDataSetDefinition();
 
-        d.addColumn("VISIT ID", new VisitIdDataDefinition(), null);	// Test a basic encounter data item
-        d.addColumn("EMR ID", new PatientIdDataDefinition(), null); 			// Test a basic patient data item
-        d.addColumn("BIRTHDATE", new BirthdateDataDefinition(), null); 		// Test a basic person data item
+    d.addColumn("VISIT ID", new VisitIdDataDefinition(), null); // Test a basic encounter data item
+    d.addColumn("EMR ID", new PatientIdDataDefinition(), null); // Test a basic patient data item
+    d.addColumn("BIRTHDATE", new BirthdateDataDefinition(), null); // Test a basic person data item
 
-        DataSet dataset = Context.getService(DataSetDefinitionService.class).evaluate(d, context);
+    DataSet dataset = Context.getService(DataSetDefinitionService.class).evaluate(d, context);
 
-        DataSetUtil.printDataSet(dataset, System.out);
-    }
+    DataSetUtil.printDataSet(dataset, System.out);
+  }
 }

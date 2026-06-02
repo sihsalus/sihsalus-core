@@ -1,14 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.dataset.definition.evaluator;
 
+import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -31,53 +32,61 @@ import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.test.BaseContextSensitiveTest;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
-import java.util.Date;
-
-/**
- * Test the EncounterDataSetDefinition
- */
+/** Test the EncounterDataSetDefinition */
 public class EncounterDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
 
-	protected Log log = LogFactory.getLog(getClass());
+  protected Log log = LogFactory.getLog(getClass());
 
-	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-	/**
-	 * Run this before each unit test in this class. The "@Before" method in
-	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 *
-	 * @throws Exception
-	 */
-	@Before
-	public void setup() throws Exception {
-		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-	}
+  /**
+   * Run this before each unit test in this class. The "@Before" method in {@link
+   * BaseContextSensitiveTest} is run right before this method.
+   *
+   * @throws Exception
+   */
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-	@Test
-	public void evaluate_shouldEvaluateDataSetDefinition() throws Exception {
+  @Test
+  public void evaluate_shouldEvaluateDataSetDefinition() throws Exception {
 
-		EvaluationContext context = new EvaluationContext();
-		context.addParameterValue("startDate", DateUtil.getDateTime(2010, 1, 1));
-		context.addParameterValue("endDate", DateUtil.getDateTime(2010, 12, 31));
+    EvaluationContext context = new EvaluationContext();
+    context.addParameterValue("startDate", DateUtil.getDateTime(2010, 1, 1));
+    context.addParameterValue("endDate", DateUtil.getDateTime(2010, 12, 31));
 
-		EncounterDataSetDefinition d = new EncounterDataSetDefinition();
-		d.addParameter(new Parameter("startDate", "Start Date", Date.class));
-		d.addParameter(new Parameter("endDate", "End Date", Date.class));
+    EncounterDataSetDefinition d = new EncounterDataSetDefinition();
+    d.addParameter(new Parameter("startDate", "Start Date", Date.class));
+    d.addParameter(new Parameter("endDate", "End Date", Date.class));
 
-		d.addColumn("ENCOUNTER ID", new EncounterIdDataDefinition(), null);	// Test a basic encounter data item
-		d.addColumn("EMR ID", new PatientIdDataDefinition(), null); 			// Test a basic patient data item
-		d.addColumn("BIRTHDATE", new BirthdateDataDefinition(), null); 		// Test a basic person data item
-		d.addColumn("ENCOUNTER DATE", new EncounterDatetimeDataDefinition(), null, new DateConverter("dd/MMM/yyyy"));  // Test a column with a converter
+    d.addColumn(
+        "ENCOUNTER ID", new EncounterIdDataDefinition(), null); // Test a basic encounter data item
+    d.addColumn("EMR ID", new PatientIdDataDefinition(), null); // Test a basic patient data item
+    d.addColumn("BIRTHDATE", new BirthdateDataDefinition(), null); // Test a basic person data item
+    d.addColumn(
+        "ENCOUNTER DATE",
+        new EncounterDatetimeDataDefinition(),
+        null,
+        new DateConverter("dd/MMM/yyyy")); // Test a column with a converter
 
-		AgeDataDefinition ageOnDateData = new AgeDataDefinition();
-		ageOnDateData.addParameter(new Parameter("effectiveDate", "Effective Date", Date.class));
+    AgeDataDefinition ageOnDateData = new AgeDataDefinition();
+    ageOnDateData.addParameter(new Parameter("effectiveDate", "Effective Date", Date.class));
 
-		d.addColumn("Age At Start", ageOnDateData, "effectiveDate=${startDate}"); // Test a column with a parameter
-		d.addColumn("Age At End", ageOnDateData, "effectiveDate=${endDate}");  // Test a column with a different parameter mapping
+    d.addColumn(
+        "Age At Start",
+        ageOnDateData,
+        "effectiveDate=${startDate}"); // Test a column with a parameter
+    d.addColumn(
+        "Age At End",
+        ageOnDateData,
+        "effectiveDate=${endDate}"); // Test a column with a different parameter mapping
 
-		DataSet dataset = Context.getService(DataSetDefinitionService.class).evaluate(d, context);
-		DataSetUtil.printDataSet(dataset, System.out);
-	}
+    DataSet dataset = Context.getService(DataSetDefinitionService.class).evaluate(d, context);
+    DataSetUtil.printDataSet(dataset, System.out);
+  }
 }

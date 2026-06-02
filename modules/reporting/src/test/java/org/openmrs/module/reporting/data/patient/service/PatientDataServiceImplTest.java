@@ -1,14 +1,19 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.patient.service;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
+
+import java.util.Collections;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,175 +39,186 @@ import org.openmrs.test.BaseContextSensitiveTest;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-
-/**
- * Test the PatientDataServiceImpl
- */
+/** Test the PatientDataServiceImpl */
 public class PatientDataServiceImplTest extends BaseModuleContextSensitiveTest {
 
-    protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-    public static final String TEST_PATIENT_ATTR_TYPE_UUID = "test-patient-attr-type-uuid";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  public static final String TEST_PATIENT_ATTR_TYPE_UUID = "test-patient-attr-type-uuid";
 
-    @Autowired
-    private AllDefinitionLibraries libraries;
+  @Autowired private AllDefinitionLibraries libraries;
 
-	/**
-	 * Run this before each unit test in this class. The "@Before" method in
-	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 *
-	 * @throws Exception
-	 */
-	@BeforeEach
-	public void setup() throws Exception {
-		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-	}
+  /**
+   * Run this before each unit test in this class. The "@Before" method in {@link
+   * BaseContextSensitiveTest} is run right before this method.
+   *
+   * @throws Exception
+   */
+  @BeforeEach
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+  }
 
-	/**
-	 * @see PatientDataServiceImpl#evaluate(org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition, org.openmrs.module.reporting.evaluation.EvaluationContext)
-	 * @verifies evaluate a patient query
-	 */
-	@Test
-	public void evaluate_shouldEvaluateAnPatientData() throws Exception {
-		PatientDataDefinition definition = new PatientIdDataDefinition();
-		PatientData data = Context.getService(PatientDataService.class).evaluate(definition, new EvaluationContext());
-		Assert.assertNotNull(data);
-	}
+  /**
+   * @see
+   *     PatientDataServiceImpl#evaluate(org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition,
+   *     org.openmrs.module.reporting.evaluation.EvaluationContext)
+   * @verifies evaluate a patient query
+   */
+  @Test
+  public void evaluate_shouldEvaluateAnPatientData() throws Exception {
+    PatientDataDefinition definition = new PatientIdDataDefinition();
+    PatientData data =
+        Context.getService(PatientDataService.class).evaluate(definition, new EvaluationContext());
+    Assert.assertNotNull(data);
+  }
 
-	/**
-	 * @see PatientDataServiceImpl#saveDefinition(org.openmrs.module.reporting.evaluation.Definition)
-	 * @verifies save a patient query
-	 */
-	@Test
-	public void saveDefinition_shouldSaveAnPatientData() throws Exception {
-		PatientDataDefinition definition = new PatientIdDataDefinition();
-		definition.setName("All Patient Ids");
-		definition = Context.getService(PatientDataService.class).saveDefinition(definition);
-		Assert.assertNotNull(definition.getId());
-		Assert.assertNotNull(definition.getUuid());
-		PatientDataDefinition loadedDefinition = Context.getService(PatientDataService.class).getDefinitionByUuid(definition.getUuid());
-		Assert.assertEquals(definition, loadedDefinition);
-	}
+  /**
+   * @see PatientDataServiceImpl#saveDefinition(org.openmrs.module.reporting.evaluation.Definition)
+   * @verifies save a patient query
+   */
+  @Test
+  public void saveDefinition_shouldSaveAnPatientData() throws Exception {
+    PatientDataDefinition definition = new PatientIdDataDefinition();
+    definition.setName("All Patient Ids");
+    definition = Context.getService(PatientDataService.class).saveDefinition(definition);
+    Assert.assertNotNull(definition.getId());
+    Assert.assertNotNull(definition.getUuid());
+    PatientDataDefinition loadedDefinition =
+        Context.getService(PatientDataService.class).getDefinitionByUuid(definition.getUuid());
+    Assert.assertEquals(definition, loadedDefinition);
+  }
 
-	/**
-	 * @see PatientDataServiceImpl#evaluate(org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition, org.openmrs.module.reporting.evaluation.EvaluationContext)
-	 * @verifies evaluate a patient query
-	 */
-	@Test
-	public void evaluate_shouldPerformABatchedEvaluation() throws Exception {
-		TestUtil.updateGlobalProperty("reporting.dataEvaluationBatchSize", "1");
-		PatientDataDefinition definition = new PatientIdDataDefinition();
-		EvaluationContext context = new EvaluationContext();
-		context.setBaseCohort(new Cohort("2,6,7,8"));
+  /**
+   * @see
+   *     PatientDataServiceImpl#evaluate(org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition,
+   *     org.openmrs.module.reporting.evaluation.EvaluationContext)
+   * @verifies evaluate a patient query
+   */
+  @Test
+  public void evaluate_shouldPerformABatchedEvaluation() throws Exception {
+    TestUtil.updateGlobalProperty("reporting.dataEvaluationBatchSize", "1");
+    PatientDataDefinition definition = new PatientIdDataDefinition();
+    EvaluationContext context = new EvaluationContext();
+    context.setBaseCohort(new Cohort("2,6,7,8"));
 
-		PatientData data = Context.getService(PatientDataService.class).evaluate(definition, context);
-		TestUtil.assertCollectionsEqual(context.getBaseCohort().getMemberIds(), data.getData().values());
-	}
+    PatientData data = Context.getService(PatientDataService.class).evaluate(definition, context);
+    TestUtil.assertCollectionsEqual(
+        context.getBaseCohort().getMemberIds(), data.getData().values());
+  }
 
-    @Test
-    public void evaluate_shouldRemoveTestPatientsFromExistingBaseCohort() throws Exception {
-        // mark a couple patients as test patients
-        PersonAttributeType testAttributeType = setUpTestPatientPersonAttribute(2, 7);
-        CohortDefinition testPatientCohortDefinition = setUpTestPatientCohortDefinition(testAttributeType);
-        TestUtil.updateGlobalProperty(ReportingConstants.GLOBAL_PROPERTY_TEST_PATIENTS_COHORT_DEFINITION, testPatientCohortDefinition.getUuid());
+  @Test
+  public void evaluate_shouldRemoveTestPatientsFromExistingBaseCohort() throws Exception {
+    // mark a couple patients as test patients
+    PersonAttributeType testAttributeType = setUpTestPatientPersonAttribute(2, 7);
+    CohortDefinition testPatientCohortDefinition =
+        setUpTestPatientCohortDefinition(testAttributeType);
+    TestUtil.updateGlobalProperty(
+        ReportingConstants.GLOBAL_PROPERTY_TEST_PATIENTS_COHORT_DEFINITION,
+        testPatientCohortDefinition.getUuid());
 
-        EvaluationContext context = new EvaluationContext();
-        context.setBaseCohort(new Cohort("2,6,7,8"));
+    EvaluationContext context = new EvaluationContext();
+    context.setBaseCohort(new Cohort("2,6,7,8"));
 
-        PatientData data = Context.getService(PatientDataService.class).evaluate(new PatientIdDataDefinition(), context);
-        assertThat(data.getData().get(2), nullValue());
-        assertThat((Integer) data.getData().get(6), is(6));
-        assertThat(data.getData().get(7), nullValue());
-        assertThat((Integer) data.getData().get(8), is(8));
+    PatientData data =
+        Context.getService(PatientDataService.class)
+            .evaluate(new PatientIdDataDefinition(), context);
+    assertThat(data.getData().get(2), nullValue());
+    assertThat((Integer) data.getData().get(6), is(6));
+    assertThat(data.getData().get(7), nullValue());
+    assertThat((Integer) data.getData().get(8), is(8));
+  }
+
+  @Test
+  public void evaluate_shouldRemoveTestPatientsWhenNoBaseCohortSpecified() throws Exception {
+    // mark a couple patients as test patients
+    PersonAttributeType testAttributeType = setUpTestPatientPersonAttribute(2, 7);
+    CohortDefinition testPatientCohortDefinition =
+        setUpTestPatientCohortDefinition(testAttributeType);
+    TestUtil.updateGlobalProperty(
+        ReportingConstants.GLOBAL_PROPERTY_TEST_PATIENTS_COHORT_DEFINITION,
+        testPatientCohortDefinition.getUuid());
+
+    EvaluationContext context = new EvaluationContext();
+
+    PatientData data =
+        Context.getService(PatientDataService.class)
+            .evaluate(new PatientIdDataDefinition(), context);
+    assertThat(data.getData().get(2), nullValue());
+    assertThat(data.getData().get(7), nullValue());
+  }
+
+  @Test
+  public void evaluate_shouldRemoveTestPatientsUsingLibraryDefinition() throws Exception {
+    // mark a couple patients as test patients
+    PersonAttributeType testAttributeType = setUpTestPatientPersonAttribute(2, 7);
+    TestPatientCohortDefinitionLibrary library = new TestPatientCohortDefinitionLibrary();
+
+    libraries.addLibrary(library);
+    TestUtil.updateGlobalProperty(
+        ReportingConstants.GLOBAL_PROPERTY_TEST_PATIENTS_COHORT_DEFINITION,
+        "library:patientDataServiceImplTest.testPatients");
+
+    EvaluationContext context = new EvaluationContext();
+
+    PatientData data =
+        Context.getService(PatientDataService.class)
+            .evaluate(new PatientIdDataDefinition(), context);
+    assertThat(data.getData().get(2), nullValue());
+    assertThat(data.getData().get(7), nullValue());
+
+    libraries.removeLibrary(library);
+  }
+
+  private CohortDefinition setUpTestPatientCohortDefinition(PersonAttributeType testAttributeType) {
+    PersonAttributeCohortDefinition cohortDefinition = new PersonAttributeCohortDefinition();
+    cohortDefinition.setName("Test Patients");
+    cohortDefinition.setAttributeType(testAttributeType);
+    cohortDefinition.setValues(Collections.singletonList("true"));
+    Context.getService(CohortDefinitionService.class).saveDefinition(cohortDefinition);
+    return cohortDefinition;
+  }
+
+  private PersonAttributeType setUpTestPatientPersonAttribute(Integer... testPatientIds) {
+    PersonAttributeType pat = new PersonAttributeType();
+    pat.setName("Test Patient");
+    pat.setDescription("Not a real patient");
+    pat.setFormat("java.lang.Boolean");
+    pat.setUuid(TEST_PATIENT_ATTR_TYPE_UUID);
+
+    Context.getPersonService().savePersonAttributeType(pat);
+
+    PatientService patientService = Context.getPatientService();
+    for (Integer patientId : testPatientIds) {
+      Patient patient = patientService.getPatient(patientId);
+      patient.addAttribute(new PersonAttribute(pat, "true"));
+      patientService.savePatient(patient);
     }
 
-    @Test
-    public void evaluate_shouldRemoveTestPatientsWhenNoBaseCohortSpecified() throws Exception {
-        // mark a couple patients as test patients
-        PersonAttributeType testAttributeType = setUpTestPatientPersonAttribute(2, 7);
-        CohortDefinition testPatientCohortDefinition = setUpTestPatientCohortDefinition(testAttributeType);
-        TestUtil.updateGlobalProperty(ReportingConstants.GLOBAL_PROPERTY_TEST_PATIENTS_COHORT_DEFINITION, testPatientCohortDefinition.getUuid());
+    return pat;
+  }
 
-        EvaluationContext context = new EvaluationContext();
+  public class TestPatientCohortDefinitionLibrary extends BaseDefinitionLibrary<CohortDefinition> {
 
-        PatientData data = Context.getService(PatientDataService.class).evaluate(new PatientIdDataDefinition(), context);
-        assertThat(data.getData().get(2), nullValue());
-        assertThat(data.getData().get(7), nullValue());
+    @Override
+    public Class<? super CohortDefinition> getDefinitionType() {
+      return CohortDefinition.class;
     }
 
-    @Test
-    public void evaluate_shouldRemoveTestPatientsUsingLibraryDefinition() throws Exception {
-        // mark a couple patients as test patients
-        PersonAttributeType testAttributeType = setUpTestPatientPersonAttribute(2, 7);
-        TestPatientCohortDefinitionLibrary library = new TestPatientCohortDefinitionLibrary();
-
-        libraries.addLibrary(library);
-        TestUtil.updateGlobalProperty(ReportingConstants.GLOBAL_PROPERTY_TEST_PATIENTS_COHORT_DEFINITION,
-                "library:patientDataServiceImplTest.testPatients");
-
-        EvaluationContext context = new EvaluationContext();
-
-        PatientData data = Context.getService(PatientDataService.class).evaluate(new PatientIdDataDefinition(), context);
-        assertThat(data.getData().get(2), nullValue());
-        assertThat(data.getData().get(7), nullValue());
-
-        libraries.removeLibrary(library);
+    @Override
+    public String getKeyPrefix() {
+      return "patientDataServiceImplTest.";
     }
 
-    private CohortDefinition setUpTestPatientCohortDefinition(PersonAttributeType testAttributeType) {
-        PersonAttributeCohortDefinition cohortDefinition = new PersonAttributeCohortDefinition();
-        cohortDefinition.setName("Test Patients");
-        cohortDefinition.setAttributeType(testAttributeType);
-        cohortDefinition.setValues(Collections.singletonList("true"));
-        Context.getService(CohortDefinitionService.class).saveDefinition(cohortDefinition);
-        return cohortDefinition;
+    @DocumentedDefinition("testPatients")
+    public CohortDefinition getTestPatients() {
+      PersonAttributeCohortDefinition cohortDefinition = new PersonAttributeCohortDefinition();
+      cohortDefinition.setAttributeType(
+          Context.getPersonService().getPersonAttributeTypeByUuid(TEST_PATIENT_ATTR_TYPE_UUID));
+      cohortDefinition.setValues(Collections.singletonList("true"));
+      return cohortDefinition;
     }
-
-    private PersonAttributeType setUpTestPatientPersonAttribute(Integer... testPatientIds) {
-        PersonAttributeType pat = new PersonAttributeType();
-        pat.setName("Test Patient");
-        pat.setDescription("Not a real patient");
-        pat.setFormat("java.lang.Boolean");
-        pat.setUuid(TEST_PATIENT_ATTR_TYPE_UUID);
-
-        Context.getPersonService().savePersonAttributeType(pat);
-
-        PatientService patientService = Context.getPatientService();
-        for (Integer patientId : testPatientIds) {
-            Patient patient = patientService.getPatient(patientId);
-            patient.addAttribute(new PersonAttribute(pat, "true"));
-            patientService.savePatient(patient);
-        }
-
-        return pat;
-    }
-
-    public class TestPatientCohortDefinitionLibrary extends BaseDefinitionLibrary<CohortDefinition> {
-
-        @Override
-        public Class<? super CohortDefinition> getDefinitionType() {
-            return CohortDefinition.class;
-        }
-
-        @Override
-        public String getKeyPrefix() {
-            return "patientDataServiceImplTest.";
-        }
-
-        @DocumentedDefinition("testPatients")
-        public CohortDefinition getTestPatients() {
-            PersonAttributeCohortDefinition cohortDefinition = new PersonAttributeCohortDefinition();
-            cohortDefinition.setAttributeType(Context.getPersonService().getPersonAttributeTypeByUuid(TEST_PATIENT_ATTR_TYPE_UUID));
-            cohortDefinition.setValues(Collections.singletonList("true"));
-            return cohortDefinition;
-        }
-
-    }
-
+  }
 }

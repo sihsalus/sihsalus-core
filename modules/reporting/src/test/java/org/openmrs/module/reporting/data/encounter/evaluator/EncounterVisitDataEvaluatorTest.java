@@ -1,13 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.encounter.evaluator;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,41 +24,39 @@ import org.openmrs.module.reporting.evaluation.context.EncounterEvaluationContex
 import org.openmrs.module.reporting.query.encounter.EncounterIdSet;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 public class EncounterVisitDataEvaluatorTest extends BaseModuleContextSensitiveTest {
 
-    protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
+  protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 
-    protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
+  protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
-    protected static final String XML_ENCOUNTER_VISIT_TEST_DATASET = "EncounterVisitTestDataset.xml";
+  protected static final String XML_ENCOUNTER_VISIT_TEST_DATASET = "EncounterVisitTestDataset.xml";
 
-    /**
-     * Run this before each unit test in this class. The "@Before" method in
-     * {@link org.openmrs.test.BaseContextSensitiveTest} is run right before this method.
-     *
-     * @throws Exception
-     */
-    @Before
-    public void setup() throws Exception {
-        executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-        executeDataSet(XML_DATASET_PATH + XML_ENCOUNTER_VISIT_TEST_DATASET);
-    }
+  /**
+   * Run this before each unit test in this class. The "@Before" method in {@link
+   * org.openmrs.test.BaseContextSensitiveTest} is run right before this method.
+   *
+   * @throws Exception
+   */
+  @Before
+  public void setup() throws Exception {
+    executeDataSet(
+        XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
+    executeDataSet(XML_DATASET_PATH + XML_ENCOUNTER_VISIT_TEST_DATASET);
+  }
 
-    @Test
-    public void evaluate_shouldReturnEncounterVisitsGivenAnEncounterEvaluationContext() throws Exception {
+  @Test
+  public void evaluate_shouldReturnEncounterVisitsGivenAnEncounterEvaluationContext()
+      throws Exception {
 
-        EncounterVisitDataDefinition d = new EncounterVisitDataDefinition();
-        EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
-        encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(61, 62));
+    EncounterVisitDataDefinition d = new EncounterVisitDataDefinition();
+    EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
+    encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(61, 62));
 
-        EvaluatedEncounterData ed = Context.getService(EncounterDataService.class).evaluate(d, encounterEvaluationContext);
-        assertThat(ed.getData().size(), is(2));
-        assertThat(((Visit) ed.getData().get(61)).getId(), is(1));
-        assertThat(((Visit) ed.getData().get(62)).getId(), is(2));
-    }
-
-
+    EvaluatedEncounterData ed =
+        Context.getService(EncounterDataService.class).evaluate(d, encounterEvaluationContext);
+    assertThat(ed.getData().size(), is(2));
+    assertThat(((Visit) ed.getData().get(61)).getId(), is(1));
+    assertThat(((Visit) ed.getData().get(62)).getId(), is(2));
+  }
 }

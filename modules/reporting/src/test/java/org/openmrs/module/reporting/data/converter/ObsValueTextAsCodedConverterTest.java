@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.reporting.data.converter;
 
@@ -24,39 +24,39 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 public class ObsValueTextAsCodedConverterTest extends BaseModuleContextSensitiveTest {
 
-    @Autowired
-    @Qualifier("locationService")
-    private LocationService locationService;
+  @Autowired
+  @Qualifier("locationService")
+  private LocationService locationService;
 
-    @Test
-    public void shouldReturnLocationForObs() {
+  @Test
+  public void shouldReturnLocationForObs() {
 
-        Location expectedLocation = locationService.getLocation(2);
-        Obs obs = new Obs();
-        obs.setValueText("2");
+    Location expectedLocation = locationService.getLocation(2);
+    Obs obs = new Obs();
+    obs.setValueText("2");
 
-        DataConverter converter = new ObsValueTextAsCodedConverter<Location>(Location.class);
+    DataConverter converter = new ObsValueTextAsCodedConverter<Location>(Location.class);
 
-        assertThat((Location) converter.convert(obs), is(expectedLocation));
-    }
+    assertThat((Location) converter.convert(obs), is(expectedLocation));
+  }
 
-    @Test
-    public void shouldReturnNullIfValueTextEmpty() {
+  @Test
+  public void shouldReturnNullIfValueTextEmpty() {
 
-        Obs obs = new Obs();
-        obs.setValueText("");
+    Obs obs = new Obs();
+    obs.setValueText("");
 
-        DataConverter converter = new ObsValueTextAsCodedConverter<Location>(Location.class);
+    DataConverter converter = new ObsValueTextAsCodedConverter<Location>(Location.class);
 
-        assertNull(converter.convert(obs));
-    }
+    assertNull(converter.convert(obs));
+  }
 
-    // TODO we can remove test below once we support other OpenmrsObjects
+  // TODO we can remove test below once we support other OpenmrsObjects
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldFailIfTypeOtherThanLocation() {
-        ObsValueTextAsCodedConverter converter = new ObsValueTextAsCodedConverter<Patient>(Patient.class);
-        converter.convert(new Obs());
-    }
-
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldFailIfTypeOtherThanLocation() {
+    ObsValueTextAsCodedConverter converter =
+        new ObsValueTextAsCodedConverter<Patient>(Patient.class);
+    converter.convert(new Obs());
+  }
 }
