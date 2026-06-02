@@ -1,18 +1,17 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.web.dwr;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -23,115 +22,135 @@ import org.openmrs.api.context.Context;
 import org.openmrs.test.Verifies;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
-/**
- * Test the methods in {@link DWRPatientsServiceTest}
- */
+/** Test the methods in {@link DWRPatientsServiceTest} */
 public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 
-	/**
-	 * @see DWRPatientService#findPatients(String,boolean)
-	 */
-	// ignoring this test until we refactor person/patient/user
-	@Disabled
-	@Test
-	@Verifies(value = "should get results for patients that have edited themselves", method = "findPatients(String,null)")
-	public void findPatients_shouldGetResultsForPatientsThatHaveEditedThemselves() throws Exception {
-		executeDataSet("org/openmrs/web/dwr/include/DWRPatientService-patientisauser.xml");
-		DWRPatientService dwrService = new DWRPatientService();
-		Collection<Object> resultObjects = dwrService.findPatients("Other", false);
-		Assertions.assertEquals(1, resultObjects.size());
-	}
+  /**
+   * @see DWRPatientService#findPatients(String,boolean)
+   */
+  // ignoring this test until we refactor person/patient/user
+  @Disabled
+  @Test
+  @Verifies(
+      value = "should get results for patients that have edited themselves",
+      method = "findPatients(String,null)")
+  public void findPatients_shouldGetResultsForPatientsThatHaveEditedThemselves() throws Exception {
+    executeDataSet("org/openmrs/web/dwr/include/DWRPatientService-patientisauser.xml");
+    DWRPatientService dwrService = new DWRPatientService();
+    Collection<Object> resultObjects = dwrService.findPatients("Other", false);
+    Assertions.assertEquals(1, resultObjects.size());
+  }
 
-	/**
-	 * @see DWRPatientService#findPatients(String,null)
-	 */
-	// ignoring this test until we refactor person/patient/user
-	@Disabled
-	@Test
-	@Verifies(value = "should logged in user should load their own patient object", method = "findPatients(String,null)")
-	public void findPatients_shouldLoggedInUserShouldLoadTheirOwnPatientObject() throws Exception {
-		executeDataSet("org/openmrs/web/dwr/include/DWRPatientService-patientisauser.xml");
-		DWRPatientService dwrService = new DWRPatientService();
-		Collection<Object> resultObjects = dwrService.findPatients("Super", false);
-		Assertions.assertEquals(1, resultObjects.size());
-	}
+  /**
+   * @see DWRPatientService#findPatients(String,null)
+   */
+  // ignoring this test until we refactor person/patient/user
+  @Disabled
+  @Test
+  @Verifies(
+      value = "should logged in user should load their own patient object",
+      method = "findPatients(String,null)")
+  public void findPatients_shouldLoggedInUserShouldLoadTheirOwnPatientObject() throws Exception {
+    executeDataSet("org/openmrs/web/dwr/include/DWRPatientService-patientisauser.xml");
+    DWRPatientService dwrService = new DWRPatientService();
+    Collection<Object> resultObjects = dwrService.findPatients("Super", false);
+    Assertions.assertEquals(1, resultObjects.size());
+  }
 
-	/**
-	 * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
-	 */
-	@Test
-	@Verifies(value = "should not signal for a new search if it is not the first ajax call", method = "findCountAndPatients(String,Integer,Integer,null)")
-	public void findCountAndPatients_shouldNotSignalForANewSearchIfItIsNotTheFirstAjaxCall() throws Exception {
-		DWRPatientService dwrService = new DWRPatientService();
-		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Joht", 1, 10, true);
-		Assertions.assertEquals(0, resultObjects.get("count"));
-		Assertions.assertNull(resultObjects.get("searchAgain"));
-		Assertions.assertNull(resultObjects.get("notification"));
-	}
+  /**
+   * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
+   */
+  @Test
+  @Verifies(
+      value = "should not signal for a new search if it is not the first ajax call",
+      method = "findCountAndPatients(String,Integer,Integer,null)")
+  public void findCountAndPatients_shouldNotSignalForANewSearchIfItIsNotTheFirstAjaxCall()
+      throws Exception {
+    DWRPatientService dwrService = new DWRPatientService();
+    Map<String, Object> resultObjects = dwrService.findCountAndPatients("Joht", 1, 10, true);
+    Assertions.assertEquals(0, resultObjects.get("count"));
+    Assertions.assertNull(resultObjects.get("searchAgain"));
+    Assertions.assertNull(resultObjects.get("notification"));
+  }
 
-	/**
-	 * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
-	 */
-	@Test
-	@Verifies(value = "should not signal for a new search if the new search value has no matches", method = "findCountAndPatients(String,Integer,Integer,null)")
-	public void findCountAndPatients_shouldNotSignalForANewSearchIfTheNewSearchValueHasNoMatches() throws Exception {
-		DWRPatientService dwrService = new DWRPatientService();
-		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Jopt", 0, 10, true);
-		Assertions.assertEquals(0, resultObjects.get("count"));
-		Assertions.assertNull(resultObjects.get("searchAgain"));
-		Assertions.assertNull(resultObjects.get("notification"));
-	}
+  /**
+   * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
+   */
+  @Test
+  @Verifies(
+      value = "should not signal for a new search if the new search value has no matches",
+      method = "findCountAndPatients(String,Integer,Integer,null)")
+  public void findCountAndPatients_shouldNotSignalForANewSearchIfTheNewSearchValueHasNoMatches()
+      throws Exception {
+    DWRPatientService dwrService = new DWRPatientService();
+    Map<String, Object> resultObjects = dwrService.findCountAndPatients("Jopt", 0, 10, true);
+    Assertions.assertEquals(0, resultObjects.get("count"));
+    Assertions.assertNull(resultObjects.get("searchAgain"));
+    Assertions.assertNull(resultObjects.get("notification"));
+  }
 
-	/**
-	 * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
-	 */
-	@Test
-	@Verifies(value = "should signal for a new search if the new search value has matches and is a first call", method = "findCountAndPatients(String,Integer,Integer,null)")
-	public void findCountAndPatients_shouldSignalForANewSearchIfTheNewSearchValueHasMatchesAndIsAFirstCall()
-	        throws Exception {
-		DWRPatientService dwrService = new DWRPatientService();
-		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Joht", 0, 10, true);
-		Assertions.assertEquals(0, resultObjects.get("count"));
-		Assertions.assertEquals("Joh", resultObjects.get("searchAgain"));
-		Assertions.assertNotNull(resultObjects.get("notification"));
-	}
+  /**
+   * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
+   */
+  @Test
+  @Verifies(
+      value =
+          "should signal for a new search if the new search value has matches and is a first call",
+      method = "findCountAndPatients(String,Integer,Integer,null)")
+  public void
+      findCountAndPatients_shouldSignalForANewSearchIfTheNewSearchValueHasMatchesAndIsAFirstCall()
+          throws Exception {
+    DWRPatientService dwrService = new DWRPatientService();
+    Map<String, Object> resultObjects = dwrService.findCountAndPatients("Joht", 0, 10, true);
+    Assertions.assertEquals(0, resultObjects.get("count"));
+    Assertions.assertEquals("Joh", resultObjects.get("searchAgain"));
+    Assertions.assertNotNull(resultObjects.get("notification"));
+  }
 
-	/**
-	 * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
-	 */
-	@Test
-	@Verifies(value = "should match patient with identifiers that contain no digit", method = "findCountAndPatients(String,Integer,Integer,null)")
-	public void findCountAndPatients_shouldMatchPatientWithIdentifiersThatContainNoDigit() throws Exception {
-		PatientService ps = Context.getPatientService();
-		final String identifier = "XYZ";
-		//should have no patient with this identifiers
-		Assertions.assertEquals(0, ps.getCountOfPatients(identifier).intValue());
+  /**
+   * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
+   */
+  @Test
+  @Verifies(
+      value = "should match patient with identifiers that contain no digit",
+      method = "findCountAndPatients(String,Integer,Integer,null)")
+  public void findCountAndPatients_shouldMatchPatientWithIdentifiersThatContainNoDigit()
+      throws Exception {
+    PatientService ps = Context.getPatientService();
+    final String identifier = "XYZ";
+    // should have no patient with this identifiers
+    Assertions.assertEquals(0, ps.getCountOfPatients(identifier).intValue());
 
-		Patient patient = ps.getPatient(2);
-		PatientIdentifier pId = new PatientIdentifier(identifier, ps.getPatientIdentifierType(5), Context
-		        .getLocationService().getLocation(1));
-		patient.addIdentifier(pId);
-		ps.savePatient(patient);
-		updateSearchIndex();
+    Patient patient = ps.getPatient(2);
+    PatientIdentifier pId =
+        new PatientIdentifier(
+            identifier,
+            ps.getPatientIdentifierType(5),
+            Context.getLocationService().getLocation(1));
+    patient.addIdentifier(pId);
+    ps.savePatient(patient);
+    updateSearchIndex();
 
-		//Let's do this in a case insensitive way
-		Map<String, Object> resultObjects = new DWRPatientService().findCountAndPatients(identifier.toLowerCase(), 0, null,
-		    true);
-		Assertions.assertEquals(1, resultObjects.get("count"));
-		Assertions.assertEquals(1, ((List<?>) resultObjects.get("objectList")).size());
-	}
+    // Let's do this in a case insensitive way
+    Map<String, Object> resultObjects =
+        new DWRPatientService().findCountAndPatients(identifier.toLowerCase(), 0, null, true);
+    Assertions.assertEquals(1, resultObjects.get("count"));
+    Assertions.assertEquals(1, ((List<?>) resultObjects.get("objectList")).size());
+  }
 
-	/**
-	 * @see DWRPatientService#findPatientsByIdentifier(String,Integer,Integer,null)
-	 */
-	@Test
-	@Verifies(value = "should get patients for given identifiers", method = "findPatientsByIdentifier(String[])")
-	public void findPatientsByIdentifier_shouldGetResultsForPatientsForGivenIdentifiers() throws Exception {
-		executeDataSet("org/openmrs/web/dwr/include/DWRPatientService-findByIdentifier.xml");
-		DWRPatientService dwrService = new DWRPatientService();
-		Collection<Object> resultObjects = dwrService
-		        .findPatientsByIdentifier(new String[] { "Identifier1", "Identifier2" });
-		Assertions.assertEquals(2, resultObjects.size());
-	}
-
+  /**
+   * @see DWRPatientService#findPatientsByIdentifier(String,Integer,Integer,null)
+   */
+  @Test
+  @Verifies(
+      value = "should get patients for given identifiers",
+      method = "findPatientsByIdentifier(String[])")
+  public void findPatientsByIdentifier_shouldGetResultsForPatientsForGivenIdentifiers()
+      throws Exception {
+    executeDataSet("org/openmrs/web/dwr/include/DWRPatientService-findByIdentifier.xml");
+    DWRPatientService dwrService = new DWRPatientService();
+    Collection<Object> resultObjects =
+        dwrService.findPatientsByIdentifier(new String[] {"Identifier1", "Identifier2"});
+    Assertions.assertEquals(2, resultObjects.size());
+  }
 }

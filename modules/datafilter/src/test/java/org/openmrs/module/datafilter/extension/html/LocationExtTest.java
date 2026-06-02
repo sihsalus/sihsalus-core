@@ -1,20 +1,23 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.datafilter.extension.html;
+
+import static org.junit.Assert.assertTrue;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,76 +34,76 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 @PrepareForTest(Context.class)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*" })
+@PowerMockIgnore({"javax.management.*"})
 public class LocationExtTest {
 
-	private LocationExt locationExt;
+  private LocationExt locationExt;
 
-	@Mock
-	private LocationService locationService;
+  @Mock private LocationService locationService;
 
-	@Mock
-	private UserService userService;
+  @Mock private UserService userService;
 
-	@Mock
-	private DataFilterService dataFilterService;
+  @Mock private DataFilterService dataFilterService;
 
-	@Before
-	public void setUp() {
-		initMocks(this);
-		PowerMockito.mockStatic(Context.class);
+  @Before
+  public void setUp() {
+    initMocks(this);
+    PowerMockito.mockStatic(Context.class);
 
-		locationExt = new LocationExt();
-		when(Context.getLocationService()).thenReturn(locationService);
-		when(Context.getUserService()).thenReturn(userService);
-		when(Context.getRegisteredComponents(DataFilterService.class)).thenReturn(Arrays.asList(dataFilterService));
+    locationExt = new LocationExt();
+    when(Context.getLocationService()).thenReturn(locationService);
+    when(Context.getUserService()).thenReturn(userService);
+    when(Context.getRegisteredComponents(DataFilterService.class))
+        .thenReturn(Arrays.asList(dataFilterService));
 
-		List<Location> locationList = Arrays.asList(getLocationMock("l1"), getLocationMock("l2"));
-		when(locationService.getAllLocations()).thenReturn(locationList);
-	}
+    List<Location> locationList = Arrays.asList(getLocationMock("l1"), getLocationMock("l2"));
+    when(locationService.getAllLocations()).thenReturn(locationList);
+  }
 
-	@Test
-	public void shouldGenerateContentWithNoSelectedLocationsWhenUserHasNoLocationsMapped() {
-		locationExt.setParameterMap(new HashMap<>());
-		String content = locationExt.getOverrideContent("");
-		assertTrue(content.contains("<input type='checkbox' name='locationStrings' id='locationStrings.l1' value='l1'>"));
-		assertTrue(content.contains("<input type='checkbox' name='locationStrings' id='locationStrings.l2' value='l2'>"));
-	}
+  @Test
+  public void shouldGenerateContentWithNoSelectedLocationsWhenUserHasNoLocationsMapped() {
+    locationExt.setParameterMap(new HashMap<>());
+    String content = locationExt.getOverrideContent("");
+    assertTrue(
+        content.contains(
+            "<input type='checkbox' name='locationStrings' id='locationStrings.l1' value='l1'>"));
+    assertTrue(
+        content.contains(
+            "<input type='checkbox' name='locationStrings' id='locationStrings.l2' value='l2'>"));
+  }
 
-	@Test
-	public void shouldGenerateContentWithCheckedUserLocations() {
-		Map<String, String> parameterMap = new HashMap<>();
-		parameterMap.put("userId", "1");
-		locationExt.setParameterMap(parameterMap);
-		User user = new User(1);
-		when(userService.getUser(1)).thenReturn(user);
+  @Test
+  public void shouldGenerateContentWithCheckedUserLocations() {
+    Map<String, String> parameterMap = new HashMap<>();
+    parameterMap.put("userId", "1");
+    locationExt.setParameterMap(parameterMap);
+    User user = new User(1);
+    when(userService.getUser(1)).thenReturn(user);
 
-		EntityBasisMap entityBasisMap = new EntityBasisMap();
-		entityBasisMap.setEntityIdentifier("1");
-		entityBasisMap.setBasisIdentifier("2");
+    EntityBasisMap entityBasisMap = new EntityBasisMap();
+    entityBasisMap.setEntityIdentifier("1");
+    entityBasisMap.setBasisIdentifier("2");
 
-		when(dataFilterService.getEntityBasisMaps(user, Location.class.getName()))
-		        .thenReturn(Collections.singletonList(entityBasisMap));
-		when(locationService.getLocation(2)).thenReturn(getLocationMock("l2"));
+    when(dataFilterService.getEntityBasisMaps(user, Location.class.getName()))
+        .thenReturn(Collections.singletonList(entityBasisMap));
+    when(locationService.getLocation(2)).thenReturn(getLocationMock("l2"));
 
-		String content = locationExt.getOverrideContent("");
+    String content = locationExt.getOverrideContent("");
 
-		assertTrue(content.contains("<input type='checkbox' name='locationStrings' id='locationStrings.l1' value='l1'>"));
-		assertTrue(
-		    content.contains("<input type='checkbox' name='locationStrings' id='locationStrings.l2' value='l2' checked>"));
-		;
-	}
+    assertTrue(
+        content.contains(
+            "<input type='checkbox' name='locationStrings' id='locationStrings.l1' value='l1'>"));
+    assertTrue(
+        content.contains(
+            "<input type='checkbox' name='locationStrings' id='locationStrings.l2' value='l2' checked>"));
+    ;
+  }
 
-	private Location getLocationMock(String locationName) {
-		Location location = new Location(Integer.parseInt(locationName.substring(1)));
-		location.setName(locationName);
-		return location;
-	}
-
+  private Location getLocationMock(String locationName) {
+    Location location = new Location(Integer.parseInt(locationName.substring(1)));
+    location.setName(locationName);
+    return location;
+  }
 }

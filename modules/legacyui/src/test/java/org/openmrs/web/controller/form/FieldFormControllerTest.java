@@ -1,17 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.web.controller.form;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Field;
@@ -24,85 +23,88 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-/**
- * Tests the {@link FieldFormController} class.
- */
+/** Tests the {@link FieldFormController} class. */
 public class FieldFormControllerTest extends BaseModuleWebContextSensitiveTest {
 
-	/**
-	 * @see FieldFormController#formBackingObject(HttpServletRequest)
-	 */
-	// @Transactional annotation needed because the parent class is @Transactional and so screws propagates to this readOnly test
-	@Transactional(readOnly = true)
-	@Test
-	@Verifies(value = "should get field", method = "formBackingObject(HttpServletRequest)")
-	public void formBackingObject_shouldGetField() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
-		request.setParameter("fieldId", "1");
+  /**
+   * @see FieldFormController#formBackingObject(HttpServletRequest)
+   */
+  // @Transactional annotation needed because the parent class is @Transactional and so screws
+  // propagates to this readOnly test
+  @Transactional(readOnly = true)
+  @Test
+  @Verifies(value = "should get field", method = "formBackingObject(HttpServletRequest)")
+  public void formBackingObject_shouldGetField() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
+    request.setParameter("fieldId", "1");
 
-		HttpServletResponse response = new MockHttpServletResponse();
+    HttpServletResponse response = new MockHttpServletResponse();
 
-		FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
+    FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
 
-		ModelAndView modelAndView = controller.handleRequest(request, response);
+    ModelAndView modelAndView = controller.handleRequest(request, response);
 
-		// make sure there is a "userId" filled in on the concept
-		Field command = (Field) modelAndView.getModel().get("field");
-		Assertions.assertNotNull(command.getFieldId());
-	}
+    // make sure there is a "userId" filled in on the concept
+    Field command = (Field) modelAndView.getModel().get("field");
+    Assertions.assertNotNull(command.getFieldId());
+  }
 
-	/**
-	 * @see FieldFormController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
-	 */
-	@Test
-	@Verifies(value = "should not fail on field answers", method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
-	public void onSubmit_shouldNotFailOnFieldAnswers() throws Exception {
-		final String FIELD_ID = "1";
+  /**
+   * @see FieldFormController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
+   */
+  @Test
+  @Verifies(
+      value = "should not fail on field answers",
+      method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
+  public void onSubmit_shouldNotFailOnFieldAnswers() throws Exception {
+    final String FIELD_ID = "1";
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
-		request.setParameter("fieldId", FIELD_ID);
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
+    request.setParameter("fieldId", FIELD_ID);
 
-		HttpServletResponse response = new MockHttpServletResponse();
-		FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
-		controller.handleRequest(request, response);
+    HttpServletResponse response = new MockHttpServletResponse();
+    FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
+    controller.handleRequest(request, response);
 
-		Context.closeSession();
-		Context.openSession();
-		authenticate();
+    Context.closeSession();
+    Context.openSession();
+    authenticate();
 
-		request = new MockHttpServletRequest("POST", "");
-		response = new MockHttpServletResponse();
-		request.setParameter("fieldId", FIELD_ID);
-		request.setParameter("name", "Some concept");
-		request.setParameter("description", "This is a test field");
-		request.setParameter("fieldTypeId", "1");
-		request.setParameter("name", "Some concept");
-		request.setParameter("conceptId", "3");
-		request.setParameter("action", "save");
+    request = new MockHttpServletRequest("POST", "");
+    response = new MockHttpServletResponse();
+    request.setParameter("fieldId", FIELD_ID);
+    request.setParameter("name", "Some concept");
+    request.setParameter("description", "This is a test field");
+    request.setParameter("fieldTypeId", "1");
+    request.setParameter("name", "Some concept");
+    request.setParameter("conceptId", "3");
+    request.setParameter("action", "save");
 
-		controller.handleRequest(request, response);
-	}
+    controller.handleRequest(request, response);
+  }
 
-	@Test
-	@Verifies(value = "should purge field", method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
-	public void onSubmit_shouldPurgeField() throws Exception {
-		final String FIELD_ID = "1";
+  @Test
+  @Verifies(
+      value = "should purge field",
+      method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
+  public void onSubmit_shouldPurgeField() throws Exception {
+    final String FIELD_ID = "1";
 
-		HttpServletResponse response = new MockHttpServletResponse();
-		FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
+    HttpServletResponse response = new MockHttpServletResponse();
+    FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
 
-		MockHttpServletRequest request = new MockHttpServletRequest("POST", "");
-		response = new MockHttpServletResponse();
-		request.setParameter("fieldId", FIELD_ID);
-		request.setParameter("name", "Some concept");
-		request.setParameter("description", "This is a test field");
-		request.setParameter("fieldTypeId", "1");
-		request.setParameter("name", "Some concept");
-		request.setParameter("conceptId", "3");
-		request.setParameter("action", Context.getMessageSourceService().getMessage("general.delete"));
+    MockHttpServletRequest request = new MockHttpServletRequest("POST", "");
+    response = new MockHttpServletResponse();
+    request.setParameter("fieldId", FIELD_ID);
+    request.setParameter("name", "Some concept");
+    request.setParameter("description", "This is a test field");
+    request.setParameter("fieldTypeId", "1");
+    request.setParameter("name", "Some concept");
+    request.setParameter("conceptId", "3");
+    request.setParameter("action", Context.getMessageSourceService().getMessage("general.delete"));
 
-		controller.handleRequest(request, response);
+    controller.handleRequest(request, response);
 
-		Assertions.assertNull(Context.getFormService().getField(Integer.valueOf(FIELD_ID)));
-	}
+    Assertions.assertNull(Context.getFormService().getField(Integer.valueOf(FIELD_ID)));
+  }
 }

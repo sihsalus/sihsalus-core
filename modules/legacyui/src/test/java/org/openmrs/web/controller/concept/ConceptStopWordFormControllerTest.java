@@ -1,18 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.web.controller.concept;
 
-import java.util.Locale;
-
 import jakarta.servlet.http.HttpSession;
-
+import java.util.Locale;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmrs.ConceptStopWord;
@@ -23,54 +21,58 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 
-/**
- * Tests the {@link ConceptStopWordFormController}
- */
+/** Tests the {@link ConceptStopWordFormController} */
 public class ConceptStopWordFormControllerTest extends BaseModuleWebContextSensitiveTest {
 
-	/**
-	 * @see {@link ConceptStopWordFormController#handleSubmission(HttpSession, ConceptStopWordFormBackingObject, org.springframework.validation.BindingResult)
+  /**
+   * @see {@link ConceptStopWordFormController#handleSubmission(HttpSession, ConceptStopWordFormBackingObject, org.springframework.validation.BindingResult)
+   *
+   */
+  @Test
+  @Verifies(
+      value = "should add new ConceptStopWord",
+      method = "handleSubmission(HttpSession, ConceptStopWordFormBackingObject, BindingResult)")
+  public void handleSubmission_shouldAddNewConceptStopWord() throws Exception {
+    ConceptStopWordFormController controller =
+        (ConceptStopWordFormController) applicationContext.getBean("conceptStopWordFormController");
 
-	 */
-	@Test
-	@Verifies(value = "should add new ConceptStopWord", method = "handleSubmission(HttpSession, ConceptStopWordFormBackingObject, BindingResult)")
-	public void handleSubmission_shouldAddNewConceptStopWord() throws Exception {
-		ConceptStopWordFormController controller = (ConceptStopWordFormController) applicationContext
-		        .getBean("conceptStopWordFormController");
+    HttpSession mockSession = new MockHttpSession();
 
-		HttpSession mockSession = new MockHttpSession();
+    mockSession.setAttribute("value", "As");
+    BindException errors = new BindException(new ConceptStopWord("As", Locale.ENGLISH), "value");
 
-		mockSession.setAttribute("value", "As");
-		BindException errors = new BindException(new ConceptStopWord("As", Locale.ENGLISH), "value");
+    controller.handleSubmission(mockSession, new ConceptStopWord("As", Locale.ENGLISH), errors);
 
-		controller.handleSubmission(mockSession, new ConceptStopWord("As", Locale.ENGLISH), errors);
+    Assertions.assertEquals(
+        "ConceptStopWord.saved", mockSession.getAttribute(WebConstants.OPENMRS_MSG_ATTR));
+    Assertions.assertNull(mockSession.getAttribute(WebConstants.OPENMRS_ERROR_ATTR));
+  }
 
-		Assertions.assertEquals("ConceptStopWord.saved", mockSession.getAttribute(WebConstants.OPENMRS_MSG_ATTR));
-		Assertions.assertNull(mockSession.getAttribute(WebConstants.OPENMRS_ERROR_ATTR));
-	}
+  /**
+   * @see {@link ConceptStopWordFormController#handleSubmission(HttpSession, ConceptStopWordFormBackingObject, org.springframework.validation.BindingResult)
+   *
+   */
+  @Test
+  @Verifies(
+      value = "should return error message for an empty ConceptStopWord",
+      method = "handleSubmission(HttpSession, ConceptStopWordFormBackingObject, BindingResult)")
+  public void handleSubmission_shouldReturnErrorMessageForAnEmptyConceptStopWord()
+      throws Exception {
+    ConceptStopWordFormController controller =
+        (ConceptStopWordFormController) applicationContext.getBean("conceptStopWordFormController");
 
-	/**
-	 * @see {@link ConceptStopWordFormController#handleSubmission(HttpSession, ConceptStopWordFormBackingObject, org.springframework.validation.BindingResult)
+    HttpSession mockSession = new MockHttpSession();
 
-	 */
-	@Test
-	@Verifies(value = "should return error message for an empty ConceptStopWord", method = "handleSubmission(HttpSession, ConceptStopWordFormBackingObject, BindingResult)")
-	public void handleSubmission_shouldReturnErrorMessageForAnEmptyConceptStopWord() throws Exception {
-		ConceptStopWordFormController controller = (ConceptStopWordFormController) applicationContext
-		        .getBean("conceptStopWordFormController");
+    ConceptStopWord conceptStopWord = new ConceptStopWord("", Locale.CANADA);
 
-		HttpSession mockSession = new MockHttpSession();
+    mockSession.setAttribute("value", conceptStopWord.getValue());
+    BindException errors = new BindException(conceptStopWord, "value");
 
-		ConceptStopWord conceptStopWord = new ConceptStopWord("", Locale.CANADA);
+    controller.handleSubmission(mockSession, conceptStopWord, errors);
+    ObjectError objectError = (ObjectError) errors.getAllErrors().get(0);
 
-		mockSession.setAttribute("value", conceptStopWord.getValue());
-		BindException errors = new BindException(conceptStopWord, "value");
-
-		controller.handleSubmission(mockSession, conceptStopWord, errors);
-		ObjectError objectError = (ObjectError) errors.getAllErrors().get(0);
-
-		Assertions.assertTrue(errors.hasErrors());
-		Assertions.assertEquals(1, errors.getErrorCount());
-		Assertions.assertEquals("ConceptStopWord.error.value.empty", objectError.getCode());
-	}
+    Assertions.assertTrue(errors.hasErrors());
+    Assertions.assertEquals(1, errors.getErrorCount());
+    Assertions.assertEquals("ConceptStopWord.error.value.empty", objectError.getCode());
+  }
 }
