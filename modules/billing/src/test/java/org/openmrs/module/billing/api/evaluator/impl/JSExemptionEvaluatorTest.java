@@ -22,14 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSExemptionEvaluatorTest {
-	
+
 	private JSExemptionEvaluator evaluator;
-	
+
 	@BeforeEach
 	public void setup() {
 		evaluator = new JSExemptionEvaluator();
 	}
-	
+
 	/**
 	 * @see JSExemptionEvaluator#getSupportedType()
 	 */
@@ -37,7 +37,7 @@ public class JSExemptionEvaluatorTest {
 	public void getSupportedType_shouldReturnJavaScript() {
 		assertEquals(ScriptType.JAVASCRIPT, evaluator.getSupportedType());
 	}
-	
+
 	/**
 	 * @see JSExemptionEvaluator#evaluate(String, Map)
 	 */
@@ -46,7 +46,7 @@ public class JSExemptionEvaluatorTest {
 		boolean result = evaluator.evaluate("true", null);
 		assertTrue(result);
 	}
-	
+
 	/**
 	 * @see JSExemptionEvaluator#evaluate(String, Map)
 	 */
@@ -55,7 +55,7 @@ public class JSExemptionEvaluatorTest {
 		boolean result = evaluator.evaluate("false", null);
 		assertFalse(result);
 	}
-	
+
 	/**
 	 * @see JSExemptionEvaluator#evaluate(String, Map)
 	 */
@@ -63,11 +63,11 @@ public class JSExemptionEvaluatorTest {
 	public void evaluate_shouldEvaluateSimpleComparison() {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("age", 10);
-		
+
 		boolean result = evaluator.evaluate("age < 18", variables);
 		assertTrue(result);
 	}
-	
+
 	/**
 	 * @see JSExemptionEvaluator#evaluate(String, Map)
 	 */
@@ -75,11 +75,11 @@ public class JSExemptionEvaluatorTest {
 	public void evaluate_shouldReturnFalseWhenComparisonFails() {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("age", 25);
-		
+
 		boolean result = evaluator.evaluate("age < 18", variables);
 		assertFalse(result);
 	}
-	
+
 	/**
 	 * @see JSExemptionEvaluator#evaluate(String, Map)
 	 */
@@ -88,11 +88,11 @@ public class JSExemptionEvaluatorTest {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("age", 5);
 		variables.put("hasInsurance", false);
-		
+
 		boolean result = evaluator.evaluate("age < 18 && !hasInsurance", variables);
 		assertTrue(result);
 	}
-	
+
 	/**
 	 * @see JSExemptionEvaluator#evaluate(String, Map)
 	 */
@@ -101,7 +101,7 @@ public class JSExemptionEvaluatorTest {
 		boolean result = evaluator.evaluate("null", null);
 		assertFalse(result);
 	}
-	
+
 	/**
 	 * @see JSExemptionEvaluator#evaluate(String, Map)
 	 */

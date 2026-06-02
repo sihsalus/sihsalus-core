@@ -33,14 +33,14 @@ import java.util.Properties;
 
 @SkipBaseSetup
 public class SqlFileDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
 	@Autowired
     PersonService personService;
-	
+
 	@Before
 	public void setup() throws Exception {
         initializeInMemoryDatabase();

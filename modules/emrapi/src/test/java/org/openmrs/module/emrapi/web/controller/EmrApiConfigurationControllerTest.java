@@ -38,26 +38,26 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	MockHttpServletRequest request;
-	
+
 	MockHttpServletResponse response;
-	
+
 	@Autowired
 	EmrApiProperties emrApiProperties;
-	
+
 	@Autowired
 	EmrApiConfigurationController emrApiConfigurationController;
-	
+
 	@Autowired
 	MetadataMappingService metadataMappingService;
-	
+
 	@Autowired
 	ConceptService conceptService;
-	
+
 	@Autowired
 	DispositionService dispositionService;
-	
+
 	@Before
 	public void setUp() {
 		executeDataSet("baseTestDataset.xml");
@@ -65,7 +65,7 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
 	}
-	
+
 	@Test
 	public void shouldGetAsJson() throws Exception {
 		request.addParameter("v", "full");
@@ -73,7 +73,7 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 		String jsonString = new ObjectMapper().writeValueAsString(config);
 		Assert.assertTrue(jsonString.contains("unknownLocation"));
 	}
-	
+
 	@Test
 	public void shouldGetDefaultRepresentation() {
 		SimpleObject config = emrApiConfigurationController.getEmrApiConfiguration(request, response);
@@ -85,7 +85,7 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 		assertThat(unknownLocation.keySet(), containsInAnyOrder("uuid", "display", "links"));
 		assertEquals("Unknown Location", unknownLocation.get("display"));
 	}
-	
+
 	@Test
 	public void shouldGetFullRepresentation() {
 		request.addParameter("v", "full");
@@ -101,7 +101,7 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 		}
 		assertEquals("Unknown Location", unknownLocation.get("display"));
 	}
-	
+
 	@Test
 	public void shouldGetCustomRepresentation() {
 		request.addParameter("v", "custom:(unknownLocation:(display),admissionEncounterType:full)");
@@ -113,7 +113,7 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 		assertEquals("06087111-222-11e3-9c1a-0800200c9a66", mapNode(config, "admissionEncounterType").get("uuid"));
 		assertEquals("Admission", mapNode(config, "admissionEncounterType").get("name"));
 	}
-	
+
 	@Test
 	public void shouldGetDispositions() {
 		request.addParameter("v", "custom:(dispositions)");
@@ -148,7 +148,7 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 			}
 		}
 	}
-	
+
 	@Test
 	public void shouldGetDispositionDescriptor() {
 		ContextSensitiveMetadataTestUtils.setupDispositionDescriptor(conceptService, dispositionService);
@@ -163,7 +163,7 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 		    equalTo("Internal Transfer Location"));
 		assertThat(mapNode(descriptor, "dateOfDeathConcept", "name").get("name"), equalTo("Date of Death"));
 	}
-	
+
 	@Test
 	public void shouldGetDiagnosisMetadata() {
 		ContextSensitiveMetadataTestUtils.setupDiagnosisMetadata(conceptService, emrApiProperties);
@@ -177,7 +177,7 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 		assertThat(mapNode(dm, "diagnosisOrderConcept", "name").get("name"), equalTo("Diagnosis order"));
 		assertThat(mapNode(dm, "diagnosisCertaintyConcept", "name").get("name"), equalTo("Diagnosis certainty"));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> mapNode(Map<String, Object> o, String... keys) {
 		Map<String, Object> ret = o;
@@ -186,12 +186,12 @@ public class EmrApiConfigurationControllerTest extends BaseModuleWebContextSensi
 		}
 		return ret;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private List<Map<String, Object>> listNode(Map<String, Object> o, String key) {
 		return (List<Map<String, Object>>) o.get(key);
 	}
-	
+
 	private void printAsJson(Object o) {
 		try {
 			System.out.println(new ObjectMapper().writeValueAsString(o));

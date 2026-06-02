@@ -36,41 +36,41 @@ import static org.mockito.MockitoAnnotations.initMocks;
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "javax.management.*" })
 public class SubmissionFilterTest {
-	
+
 	@Mock
 	private FilterChain filterChain;
-	
+
 	private MockHttpServletRequest httpServletRequest;
-	
+
 	private MockHttpServletResponse httpServletResponse;
-	
+
 	@Mock
 	private UserFormSubmissionHandler handler;
-	
+
 	private SubmissionFilter submissionFilter;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		initMocks(this);
 		httpServletRequest = new MockHttpServletRequest();
 		httpServletResponse = new MockHttpServletResponse();
-		
+
 		PowerMockito.mockStatic(Context.class);
 		submissionFilter = new SubmissionFilter();
 	}
-	
+
 	@Test
 	public void doFilterToThrowExceptionWhenErrorOnHandleRequest() throws Exception {
 		when(Context.getRegisteredComponent("userFormSubmissionHandler", UserFormSubmissionHandler.class))
 		        .thenReturn(handler);
-		
+
 		doThrow(new IOException()).when(handler).handle(httpServletRequest, httpServletResponse, filterChain);
-		
+
 		submissionFilter.doFilter(httpServletRequest, httpServletResponse, filterChain);
 		Assert.assertEquals("Error while processing user form",
 		    httpServletRequest.getSession().getAttribute(WebConstants.OPENMRS_ERROR_ATTR));
 	}
-	
+
 	@Test
 	public void doFilterToThrowExceptionWhenRegisteredComponentIsNotPresent() {
 		submissionFilter.doFilter(httpServletRequest, httpServletResponse, filterChain);

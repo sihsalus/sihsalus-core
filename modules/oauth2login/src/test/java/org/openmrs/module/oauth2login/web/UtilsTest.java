@@ -37,18 +37,18 @@ import org.springframework.web.util.UriComponents;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Context.class, PropertyUtils.class })
 public class UtilsTest {
-	
+
 	private static final String BASE_URL = "http://localhost:8081/auth/realms/demo/protocol/openid-connect/logout?";
-	
+
 	private static final String PARAM_TOKEN = "id_token_hint";
-	
+
 	protected static final String PARAM_POST_LOGOUT_URL = "post_logout_redirect_uri";
-	
+
 	@BeforeClass
 	public static void setUp() {
 		OAuth2IntegrationTest.initPathInSystemProperties("Keycloak");
 	}
-	
+
 	@Test
 	public void getPostLogoutRedirectUrl_redirectToLogoutURL() throws Exception {
 		final String idToken = "myToken";
@@ -57,33 +57,33 @@ public class UtilsTest {
 		user.setUserProperty(OAuth2LoginConstants.USER_PROP_ID_TOKEN, idToken);
 		Mockito.when(Context.getAuthenticatedUser()).thenReturn(user);
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		String redirect = Utils.getPostLogoutRedirectUrl(request);
-		
+
 		assertEquals(redirect, BASE_URL + "id_token_hint=" + idToken);
 	}
-	
+
 	@Test
 	public void getPostLogoutRedirectUrl_shouldNotSetIdTokenIfUserIsNotAuthenticated() throws Exception {
 		PowerMockito.mockStatic(Context.class);
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		String redirect = Utils.getPostLogoutRedirectUrl(request);
-		
+
 		assertEquals(redirect, BASE_URL + "client_id=openmrs");
 	}
-	
+
 	@Test
 	public void getPostLogoutRedirectUrl_shouldNotSetIdTokenIfNoneIsSetForTheUser() throws Exception {
 		PowerMockito.mockStatic(Context.class);
 		Mockito.when(Context.getAuthenticatedUser()).thenReturn(new User());
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		String redirect = Utils.getPostLogoutRedirectUrl(request);
-		
+
 		assertEquals(redirect, BASE_URL + "client_id=openmrs");
 	}
-	
+
 	@Test
 	public void encodeUrl_shouldEncodeThePostLogoutUrl() {
 		final String baseLogoutUrl = "https://idp.com";
@@ -91,9 +91,9 @@ public class UtilsTest {
 		final String postLogoutUrl = "http://openmrs.org";
 		String logoutUrl = baseLogoutUrl + "?" + PARAM_TOKEN + "=" + token + "&" + PARAM_POST_LOGOUT_URL + "="
 		        + postLogoutUrl;
-		
+
 		logoutUrl = Utils.encodeUrl(logoutUrl);
-		
+
 		UriComponents logoutUrlComponents = fromUriString(logoutUrl).build();
 		assertEquals("https", logoutUrlComponents.getScheme());
 		assertEquals("idp.com", logoutUrlComponents.getHost());
@@ -103,7 +103,7 @@ public class UtilsTest {
 		assertEquals(token, logoutUrlComponents.getQueryParams().getFirst(PARAM_TOKEN));
 		assertEquals("http%3A%2F%2Fopenmrs.org", logoutUrlComponents.getQueryParams().getFirst(PARAM_POST_LOGOUT_URL));
 	}
-	
+
 	@Test
 	public void encodeUrl_shouldEncodeAPostLogoutUrlWithPortAndPathAndOneParameter() throws Exception {
 		final String logoutPath = "/realm";
@@ -113,9 +113,9 @@ public class UtilsTest {
 		final String postLogoutUrl = "http://openmrs.org:8081" + postLogoutPath + "?p=my+v";
 		String logoutUrl = baseLogoutUrl + "?" + PARAM_TOKEN + "=" + token + "&" + PARAM_POST_LOGOUT_URL + "="
 		        + postLogoutUrl;
-		
+
 		logoutUrl = Utils.encodeUrl(logoutUrl);
-		
+
 		UriComponents logoutUrlComponents = fromUriString(logoutUrl).build();
 		assertEquals("https", logoutUrlComponents.getScheme());
 		assertEquals("idp.com", logoutUrlComponents.getHost());
@@ -131,7 +131,7 @@ public class UtilsTest {
 		assertEquals(postLogoutPath, postLogoutUrlComponents.getPath());
 		assertEquals("p=my+v", postLogoutUrlComponents.getQuery());
 	}
-	
+
 	@Test
 	public void encodeUrl_shouldEncodeAPostLogoutUrlThatIsARelativePath() {
 		final String baseLogoutUrl = "https://idp.com";
@@ -139,9 +139,9 @@ public class UtilsTest {
 		final String postLogoutUrl = "/spa";
 		String logoutUrl = baseLogoutUrl + "?" + PARAM_TOKEN + "=" + token + "&" + PARAM_POST_LOGOUT_URL + "="
 		        + postLogoutUrl;
-		
+
 		logoutUrl = Utils.encodeUrl(logoutUrl);
-		
+
 		UriComponents logoutUrlComponents = fromUriString(logoutUrl).build();
 		assertEquals("https", logoutUrlComponents.getScheme());
 		assertEquals("idp.com", logoutUrlComponents.getHost());
@@ -149,7 +149,7 @@ public class UtilsTest {
 		assertEquals(token, logoutUrlComponents.getQueryParams().getFirst(PARAM_TOKEN));
 		assertEquals("%2Fspa", logoutUrlComponents.getQueryParams().getFirst(PARAM_POST_LOGOUT_URL));
 	}
-	
+
 	@Test
 	public void encodeUrl_shouldEncodeAPostLogoutUrlThatIsARelativePathWithOneParameter() {
 		final String baseLogoutUrl = "https://idp.com";
@@ -157,9 +157,9 @@ public class UtilsTest {
 		final String postLogoutUrl = "/spa?p1=my+v";
 		String logoutUrl = baseLogoutUrl + "?" + PARAM_TOKEN + "=" + token + "&" + PARAM_POST_LOGOUT_URL + "="
 		        + postLogoutUrl;
-		
+
 		logoutUrl = Utils.encodeUrl(logoutUrl);
-		
+
 		UriComponents logoutUrlComponents = fromUriString(logoutUrl).build();
 		assertEquals("https", logoutUrlComponents.getScheme());
 		assertEquals("idp.com", logoutUrlComponents.getHost());
@@ -167,7 +167,7 @@ public class UtilsTest {
 		assertEquals(token, logoutUrlComponents.getQueryParams().getFirst(PARAM_TOKEN));
 		assertEquals("%2Fspa%3Fp1%3Dmy%2Bv", logoutUrlComponents.getQueryParams().getFirst(PARAM_POST_LOGOUT_URL));
 	}
-	
+
 	@Test
 	public void getPostLogoutRedirectUrl_shouldEncodeTheUrl() throws Exception {
 		final String postLogoutUrl = "http://openmrs.org";
@@ -179,14 +179,14 @@ public class UtilsTest {
 		Path path = Paths.get("/test");
 		PowerMockito.when(PropertyUtils.getOAuth2PropertiesPath()).thenReturn(path);
 		PowerMockito.when(PropertyUtils.getProperties(path)).thenReturn(props);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		String redirect = Utils.getPostLogoutRedirectUrl(request);
-		
+
 		assertEquals("https://idp.com?" + PARAM_POST_LOGOUT_URL + "=http%3A%2F%2Fopenmrs.org", redirect);
 	}
-	
+
 	@Test
 	public void getPostLogoutRedirectUrl_shouldNotEncodeTheUrlIfDisabled() throws Exception {
 		final String postLogoutUrl = "http://openmrs.org";
@@ -199,12 +199,12 @@ public class UtilsTest {
 		Path path = Paths.get("/test");
 		PowerMockito.when(PropertyUtils.getOAuth2PropertiesPath()).thenReturn(path);
 		PowerMockito.when(PropertyUtils.getProperties(path)).thenReturn(props);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		String redirect = Utils.getPostLogoutRedirectUrl(request);
-		
+
 		assertEquals(logoutUrl, redirect);
 	}
-	
+
 }

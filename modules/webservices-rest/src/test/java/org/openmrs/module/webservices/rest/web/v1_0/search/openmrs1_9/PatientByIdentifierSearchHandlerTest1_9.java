@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.List;
 
 public class PatientByIdentifierSearchHandlerTest1_9 extends MainResourceControllerTest {
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -30,7 +30,7 @@ public class PatientByIdentifierSearchHandlerTest1_9 extends MainResourceControl
 	public String getURI() {
 		return "patient";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -38,7 +38,7 @@ public class PatientByIdentifierSearchHandlerTest1_9 extends MainResourceControl
 	public long getAllCount() {
 		return Context.getPatientService().getAllPatients(false).size();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -56,36 +56,36 @@ public class PatientByIdentifierSearchHandlerTest1_9 extends MainResourceControl
 	public void getSearchConfig_shouldReturnPatientByIdentifier() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("identifier", "7TU-8");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Object> hits = (List<Object>) result.get("results");
 		Assertions.assertEquals(Context.getPatientService().getPatient(8).getUuid(),
 		    PropertyUtils.getProperty(hits.get(0), "uuid"));
 	}
-	
+
 	@Test
 	public void getSearchConfig_shouldReturnPatientByIdentifier_matchExact() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("identifier", "7TU-8");
 		req.addParameter("searchType", "exact");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Object> hits = (List<Object>) result.get("results");
 		Assertions.assertEquals(Context.getPatientService().getPatient(8).getUuid(),
 		    PropertyUtils.getProperty(hits.get(0), "uuid"));
 	}
-	
+
 	@Test
 	public void getSearchConfig_shouldReturnPatientByIdentifier_matchStart() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("identifier", "7T");
 		req.addParameter("searchType", "start");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Object> hits = (List<Object>) result.get("results");
 		Assertions.assertEquals(1, hits.size());
 	}
-	
+
 	/**
 	 * Same as previous test, but invokes the patientByIdentifier SearchHandler
 	 * explicitly via the URI
@@ -96,7 +96,7 @@ public class PatientByIdentifierSearchHandlerTest1_9 extends MainResourceControl
 		MockHttpServletRequest req = request(RequestMethod.GET, searchHandlerURI);
 		req.addParameter("identifier", "7T");
 		req.addParameter("searchType", "start");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Object> hits = (List<Object>) result.get("results");
 		Assertions.assertEquals(1, hits.size());

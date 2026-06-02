@@ -28,16 +28,16 @@ import org.openmrs.test.Verifies;
 import java.util.Set;
 
 public class BirthAndDeathCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link BirthAndDeathCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -54,7 +54,7 @@ public class BirthAndDeathCohortDefinitionEvaluatorTest extends BaseModuleContex
 		Assert.assertTrue(cohort.contains(21));
 		Assert.assertTrue(cohort.contains(22));
 	}
-	
+
 	/**
 	 * @see {@link BirthAndDeathCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -68,7 +68,7 @@ public class BirthAndDeathCohortDefinitionEvaluatorTest extends BaseModuleContex
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(20));
 	}
-	
+
 	/**
 	 * @see {@link BirthAndDeathCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -84,7 +84,7 @@ public class BirthAndDeathCohortDefinitionEvaluatorTest extends BaseModuleContex
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(20));
 	}
-	
+
 	/**
 	 * @see {@link BirthAndDeathCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -97,13 +97,13 @@ public class BirthAndDeathCohortDefinitionEvaluatorTest extends BaseModuleContex
 		patient.setBirthdate(DateUtil.getDateTime(1999, 8, 23, 11, 0, 0, 0));
 		patient.getAttribute(8).setValue("value"); //1.9 is not happy with empty values
 		ps.savePatient(patient);
-		
+
 		BirthAndDeathCohortDefinition cd = new BirthAndDeathCohortDefinition();
 		cd.setBornOnOrBefore(DateUtil.getDateTime(1999, 8, 23));
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(cohort.contains(patientId));
 	}
-	
+
 	/**
 	 * @see {@link BirthAndDeathCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -117,13 +117,13 @@ public class BirthAndDeathCohortDefinitionEvaluatorTest extends BaseModuleContex
 		patient.setDeathDate(DateUtil.getDateTime(2005, 12, 31, 11, 0, 0, 0));
 		patient.setCauseOfDeath(new Concept(3));
 		ps.savePatient(patient);
-		
+
 		BirthAndDeathCohortDefinition cd = new BirthAndDeathCohortDefinition();
 		cd.setDiedOnOrBefore(DateUtil.getDateTime(2005, 12, 31));
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(cohort.contains(patientId));
 	}
-	
+
 	/**
 	 * @see {@link BirthAndDeathCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -136,13 +136,13 @@ public class BirthAndDeathCohortDefinitionEvaluatorTest extends BaseModuleContex
 		patient.setBirthdate(DateUtil.getDateTime(1999, 8, 23));
 		patient.getAttribute(8).setValue("value"); //1.9 is not happy with empty values
 		ps.savePatient(patient);
-		
+
 		BirthAndDeathCohortDefinition cd = new BirthAndDeathCohortDefinition();
 		cd.setBornOnOrAfter(DateUtil.getDateTime(1999, 8, 23, 11, 0, 0, 0));
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(cohort.contains(patientId));
 	}
-	
+
 	/**
 	 * @see {@link BirthAndDeathCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -156,7 +156,7 @@ public class BirthAndDeathCohortDefinitionEvaluatorTest extends BaseModuleContex
 		patient.setDeathDate(DateUtil.getDateTime(2005, 12, 31));
 		patient.setCauseOfDeath(new Concept(3));
 		ps.savePatient(patient);
-		
+
 		BirthAndDeathCohortDefinition cd = new BirthAndDeathCohortDefinition();
 		cd.setDiedOnOrAfter(DateUtil.getDateTime(2005, 12, 31, 11, 0, 0, 0));
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);

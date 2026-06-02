@@ -39,29 +39,29 @@ import org.openmrs.util.OpenmrsUtil;
  * purposes
  */
 public class AgeCalculation extends PatientAtATimeCalculation {
-	
+
 	/**
 	 * Stores pre-processed birth date data for the input cohort
 	 */
 	public class BirthdateData extends HashMap<Integer, Date> implements EvaluationInstanceData {
-		
+
 		private static final long serialVersionUID = 1L;
 	}
-	
+
 	/**
 	 * Default {@link Constructor}
 	 */
 	public AgeCalculation() {
 		addParameterDefinition(new SimpleParameterDefinition("units", "java.lang.String", "Units Of Age", false));
 	}
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientAtATimeCalculation#preprocess(java.util.Collection, java.util.Map, org.openmrs.calculation.patient.PatientCalculationContext)
 	 */
 	@Override
 	public EvaluationInstanceData preprocess(Collection<Integer> cohort, Map<String, Object> parameterValues,
 	                                         PatientCalculationContext context) {
-		
+
 		BirthdateData data = new BirthdateData();
 		if (cohort != null && !cohort.isEmpty()) {
 			StringBuilder q = new StringBuilder();
@@ -79,7 +79,7 @@ public class AgeCalculation extends PatientAtATimeCalculation {
 		}
 		return data;
 	}
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientAtATimeCalculation#evaluateForPatient(EvaluationInstanceData,
 	 *      Integer, Map, PatientCalculationContext)

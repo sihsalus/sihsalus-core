@@ -35,13 +35,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
 public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	public static final String REPORT_REQUEST_UUID = "9b220525-9830-4dc3-9dae-43aac15b317e";
 	public static final String REPORT_DEFINITION_UUID = "d9c79890-7ea9-41b1-a068-b5b99ca3d593";
 	public static final String REPORT_DEFINITION_UUID_TWO = "d9c79890-7ea9-41b1-a068-b5b99ca3d595";
 	public static final String COHORT_DEFINITION_UUID = "d9c79890-7ea9-41b1-a068-b5b99ca3d594";
 	public static final String RENDERER_MODE_UUID = "49cf7248-d27c-11ef-a287-0242ac120002";
-	
+
 	public static final String REPORT_DEFINITION_JSON = "{"
 			+ "\"parameterizable\":{"
 			+ "   \"uuid\":\"" + REPORT_DEFINITION_UUID + "\""
@@ -50,7 +50,7 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 			+ "   \"endDate\":\"2017-01-31\","
 			+ "   \"startDate\":\"2017-01-01\"}"
 			+ "}";
-	
+
 	public static final String REPORT_DEFINITION_JSON_TWO = "{"
 			+ "\"parameterizable\":{"
 			+ "   \"uuid\":\"" + REPORT_DEFINITION_UUID_TWO + "\""
@@ -66,7 +66,7 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 				+ "\"argument\":\"" + RENDERER_MODE_UUID + "\","
 				+ "\"sortWeight\":1000"
 			+ "}";
-	
+
 	@Autowired
 	private ReportDefinitionService reportDefinitionService;
 
@@ -75,7 +75,7 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 
 	@Autowired
 	private CohortDefinitionService cohortDefinitionService;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		SqlDataSetDefinition dsd1 = new SqlDataSetDefinition();
@@ -84,12 +84,12 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 		dsd1.setSqlQuery("select person_id, birthdate from person where voided = 0 and birthdate >= :bornAfter and birthdate < :bornBefore");
 		dsd1.addParameter(new Parameter("bornAfter", "Born after", Date.class));
 		dsd1.addParameter(new Parameter("bornBefore", "Born before", Date.class));
-		
+
 		SqlDataSetDefinition dsd2 = new SqlDataSetDefinition();
 		dsd2.setName("For fun");
 		dsd2.setDescription("another SQL query");
 		dsd2.setSqlQuery("select person_id from person where voided = 0");
-		
+
 		ReportDefinition reportDefinition = new ReportDefinition();
 		reportDefinition.setName("Report definition");
 		reportDefinition.setUuid(REPORT_DEFINITION_UUID);
@@ -97,7 +97,7 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 		reportDefinition.addParameter(new Parameter("endDate", "End Date", Date.class));
 		reportDefinition.addDataSetDefinition("dsd1", dsd1, ParameterizableUtil.createParameterMappings("bornAfter=${startDate},bornBefore=${endDate}"));
 		reportDefinition.addDataSetDefinition("dsd2", dsd2, ParameterizableUtil.createParameterMappings(""));
-		
+
 		reportDefinitionService.saveDefinition(reportDefinition);
 
 		ReportDesign reportDesign = new ReportDesign();
@@ -110,7 +110,7 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 
 		executeDataSet("ReportRequestTest.xml");
 	}
-	
+
 	private ReportRequestResource getResource() {
 		return (ReportRequestResource) Context.getService(RestService.class).getResourceBySupportedClass(ReportRequest.class);
 	}
@@ -212,7 +212,7 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 		assertEquals("org.openmrs.module.reporting.report.renderer.CsvReportRenderer!" + RENDERER_MODE_UUID,
 				request.getRenderingMode().toString());
 	}
-	
+
 	@Test
 	public void testGetOne() throws Exception {
 		ReportRequest request = getResource().getByUniqueId(REPORT_REQUEST_UUID);
@@ -220,7 +220,7 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 		assertThat(request.getStatus(), is(ReportRequest.Status.SAVED));
 		assertThat(request.getReportDefinition().getParameterizable().getUuid(), is(REPORT_DEFINITION_UUID));
 	}
-	
+
 	@Test
 	public void testSearchByReportDefinition() throws Exception {
 		SimpleObject search = getResource().search(buildRequestContext("reportDefinition", REPORT_DEFINITION_UUID));
@@ -228,7 +228,7 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
 		assertThat(results.size(), is(1));
 		assertThat((String) results.get(0).get("uuid"), is(REPORT_REQUEST_UUID));
 	}
-	
+
 	protected RequestContext buildRequestContext(String... paramNamesAndValues) {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		for (int i = 0; i < paramNamesAndValues.length; i += 2) {

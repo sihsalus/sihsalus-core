@@ -34,9 +34,9 @@ import org.openmrs.calculation.result.ObsResult;
  * Calculation for most recent obs, this calculation also evaluates itself
  */
 public class MostRecentObsCalculation extends BaseCalculation implements ConfigurableCalculation, PatientCalculation {
-	
+
 	private Concept whichConcept;
-	
+
 	/**
 	 * @see Calculation#setConfiguration(String)
 	 */
@@ -50,13 +50,13 @@ public class MostRecentObsCalculation extends BaseCalculation implements Configu
 			throw new InvalidCalculationException(this, configuration);
 		}
 	}
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(java.util.Collection, java.util.Map, org.openmrs.calculation.patient.PatientCalculationContext)
 	 */
 	@Override
 	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
-		
+
 		CalculationResultMap results = new CalculationResultMap();
 		Map<Integer, List<Obs>> patientObs = getObservations(new Cohort(cohort), whichConcept);
 		for (Integer pId : patientObs.keySet()) {
@@ -70,7 +70,7 @@ public class MostRecentObsCalculation extends BaseCalculation implements Configu
 		}
 		return results;
 	}
-	
+
 	/**
 	 * @return the whichConcept
 	 */

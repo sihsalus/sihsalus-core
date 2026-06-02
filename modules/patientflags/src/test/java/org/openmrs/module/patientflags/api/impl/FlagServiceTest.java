@@ -49,7 +49,7 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 		flagService = Context.getService(FlagService.class);
 		authenticate();
 	}
-	
+
 	/**
 	 * Tests of the generateFlagsForPatient(Patient patient) method
 	 */
@@ -67,7 +67,7 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 		List<Flag> flags = flagService.generateFlagsForPatient(patient, context);
 		assertFalse(flags.isEmpty());
 	}
-	
+
 	/**
 	 * Tests of the getFlaggedPatients(Flag flag) method
 	 */
@@ -85,7 +85,7 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 		Cohort cohort = flagService.getFlaggedPatients(flag, context);
 		assertFalse(cohort.isEmpty());
 	}
-	
+
 	/**
 	 * Tests of the getFlaggedPatients(List<Flag> flags) method
 	 */
@@ -103,8 +103,8 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 		Cohort cohort = flagService.getFlaggedPatients(flags, context);
 		assertFalse(cohort.isEmpty());
 	}
-	
-	
+
+
 	/**
 	 * Tests of methods the save and retrieve flag prioritiess
 	 */
@@ -112,7 +112,7 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 	public void savePriority_shouldSaveNewPriority() {
 		Priority priority = new Priority("High", "style='background-color:red'", 1);
 		flagService.savePriority(priority);
-		
+
 		// get newly saved priority by it's name
 		Priority savedPriority = flagService.getPriorityByName("High");
 		assertNotNull(savedPriority);
@@ -195,23 +195,23 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 
 		// get newly saved flag
 		Flag savedFlag = flagService.getFlagByName("test");
-  		assertEquals(flag.getName(), savedFlag.getName());
+		assertEquals(flag.getName(), savedFlag.getName());
 	}
-	
+
 	@Test
 	public void saveFlag_shouldUpdateFlag() {
 		Flag flag = flagService.getFlag(1);
 		flag.setName("Drug allergy");
-		
+
 		// save this updated flag
 		flagService.saveFlag(flag);
-		
+
 		// get flag again
 		Flag updatedFlag = flagService.getFlag(1);
 		// confirm that the name has been changed again
 		assertEquals("Drug allergy", updatedFlag.getName());
 	}
-	
+
 	@Test
 	public void getAllFlags_shouldGetAllFlags() {
 		List<Flag> flags = flagService.getAllFlags();
@@ -222,7 +222,7 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 	public void removeFlag_shouldRemoveFlag() {
 		Flag flag = flagService.getFlag(2);
 		flagService.purgeFlag(flag.getFlagId());
-		
+
 		// fetch flags again
 		Flag removedFlag = flagService.getFlag(2);
 
@@ -328,13 +328,13 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 		Tag retiredTag = flagService.getTag(1);
 		assertTrue(retiredTag.getRetired());
 	}
-	
+
 	/*
 	 * Tests of flag filtering
 	 */
-	
+
 	// TODO: add tests of actual filters here
-	
+
 	@Test
 	public void getFlagsByFilter_shouldAcceptNullParameter() {
 		Context.getService(FlagService.class).getFlagsByFilter(null);
@@ -438,7 +438,7 @@ public class FlagServiceTest extends BaseModuleContextSensitiveTest {
 		// create & save priority to use
 		Priority priority = new Priority("test", "test", 1);
 		flagService.savePriority(priority);
-		
+
 		// now create the flag
 		Flag flag = new Flag("test", "test", "test");
 		flag.setPriority(priority);

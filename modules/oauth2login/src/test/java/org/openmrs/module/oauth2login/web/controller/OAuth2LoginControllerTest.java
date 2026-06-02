@@ -37,27 +37,27 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Context.class })
 public class OAuth2LoginControllerTest {
-	
+
 	@Mock
 	private OAuth2RestOperations mockTemplate;
-	
+
 	@Mock
 	private OAuth2AccessToken mockAccessToken;
-	
+
 	@Mock
 	private ProviderService mockProviderService;
-	
+
 	@Mock
 	private PersonService mockPersonService;
-	
+
 	@Mock
 	private UserService mockUserService;
-	
+
 	@Mock
 	private AdministrationService mockAdminService;
-	
+
 	private OAuth2LoginController controller;
-	
+
 	@Test
 	public void login_shouldStoreTheIdTokenAsAUserProperty() {
 		final String idToken = "myToken";
@@ -80,10 +80,10 @@ public class OAuth2LoginControllerTest {
 		Whitebox.setInternalState(controller, "personService", mockPersonService);
 		Whitebox.setInternalState(controller, "userService", mockUserService);
 		Mockito.when(Context.getAdministrationService()).thenReturn(mockAdminService);
-		
+
 		controller.login();
-		
+
 		Assert.assertEquals(idToken, user.getUserProperty(OAuth2LoginConstants.USER_PROP_ID_TOKEN));
 	}
-	
+
 }

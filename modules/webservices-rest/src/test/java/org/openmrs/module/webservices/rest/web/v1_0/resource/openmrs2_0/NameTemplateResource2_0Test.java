@@ -24,19 +24,19 @@ public class NameTemplateResource2_0Test extends BaseDelegatingResourceTest<Name
 		Context.getAdministrationService().setGlobalProperty(GLOBAL_PROPERTY_LAYOUT_NAME_FORMAT, PERSON_NAME_FORMAT_SHORT);
 		return NameSupport.getInstance().getDefaultLayoutTemplate();
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		/* NameTemplate resource handles all representations identically */
 		validateDefaultRepresentation();
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		/* NameTemplate resource handles all representations identically */
 		validateDefaultRepresentation();
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		assertPropEquals("codeName", getObject().getCodeName());
@@ -51,12 +51,12 @@ public class NameTemplateResource2_0Test extends BaseDelegatingResourceTest<Name
 		assertPropEquals("elementRegexFormats", getObject().getElementRegexFormats());
 		assertPropEquals("requiredElements", getObject().getRequiredElements());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return null;
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return "codeName";

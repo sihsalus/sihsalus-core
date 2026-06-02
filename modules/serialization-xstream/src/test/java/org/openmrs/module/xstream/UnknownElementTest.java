@@ -26,7 +26,7 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * Test class that tests how serialization handles unknown elements
  */
 public class UnknownElementTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * This test is meant to ensure that if a serialized object contains unknown elements (for example, if
 	 * it's class implementation has changed since serialization), that an exception will be thrown when trying
@@ -36,11 +36,11 @@ public class UnknownElementTest extends BaseModuleContextSensitiveTest {
 	@Test(expected=ConversionException.class)
 	public void shouldThrowExceptionIfUnknownElementExists() throws Exception {
 		OpenmrsSerializer serializer = Context.getSerializationService().getSerializer(XStreamShortSerializer.class);
-		
+
 		EncounterType original = Context.getEncounterService().getEncounterType(1);
 		String xml = serializer.serialize(original);
 		Assert.assertTrue(xml.contains("<description>"));
-		
+
 		// Test unknown element names
 		xml = xml.replace("description>", "descr>");
 		serializer.deserialize(xml, EncounterType.class);

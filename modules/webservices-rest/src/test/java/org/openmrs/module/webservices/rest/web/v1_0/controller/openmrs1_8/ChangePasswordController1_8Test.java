@@ -31,13 +31,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class ChangePasswordController1_8Test extends RestControllerTestUtils {
-	
+
 	private static final String PASSWORD_URI = "password";
-	
+
 	@Autowired
 	@Qualifier("userService")
 	private UserService service;
-	
+
 	@Test
 	public void updateUser_shouldUpdateTheUserPassword() throws Exception {
 		User user = service.getUserByUuid(RestTestConstants1_8.USER_UUID);
@@ -45,7 +45,7 @@ public class ChangePasswordController1_8Test extends RestControllerTestUtils {
 		assertNotEquals(user, Context.getAuthenticatedUser());
 		final String username = user.getUsername();
 		final String newPassword = "SomeOtherPassword123";
-		
+
 		ContextAuthenticationException exception = null;
 		try {
 			Context.authenticate(username, newPassword);
@@ -55,14 +55,14 @@ public class ChangePasswordController1_8Test extends RestControllerTestUtils {
 		}
 		assertNotNull(exception);
 		assertEquals("Invalid username and/or password: " + username, exception.getMessage());
-		
+
 		handle(newPostRequest("password" + "/" + user.getUuid(), "{\"newPassword\":\"" + newPassword + "\"}"));
 		Context.logout();
-		
+
 		Context.authenticate(username, newPassword);
 		assertEquals(user, Context.getAuthenticatedUser());
 	}
-	
+
 	@Test
 	public void testChangeUsersOwnPassword() throws Exception {
 		setUpUser("butch");
@@ -74,41 +74,41 @@ public class ChangePasswordController1_8Test extends RestControllerTestUtils {
 				+ "," + "\"oldPassword\":\"" + oldPassword + "\"}"));
 		assertEquals(200, response.getStatus());
 	}
-	
+
 	@Test
 	public void testChangeUsersOwnPasswordWithOutAuthentication() throws Exception {
 		// we log out, so there is no authenticated user
 		Context.logout();
 		String oldPassword = "SomeOtherPassword123";
 		String newPassword = "newPassword9";
-		
+
 		APIAuthenticationException ex = assertThrows(APIAuthenticationException.class, () -> {
-		
+
 			handle(newPostRequest(PASSWORD_URI, "{\"newPassword\":\"" + newPassword + "\"" + "," + "\"oldPassword\":\""
 			        + oldPassword + "\"}"));
 		});
 		assertThat(ex.getMessage(), containsString("Must be authenticated to change your own password"));
 	}
-	
+
 	@Test
 	public void testChangeUsersOwnPasswordWithIncorrectOldPassword() throws Exception {
 		setUpUser("butch");
-		
+
 		String wrongOldPassword = "WrongPassword";
 		String newPassword = "newPassword9";
-		
+
 		assertThrows(ValidationException.class, () -> {
-		
+
 			handle(newPostRequest(PASSWORD_URI, "{\"newPassword\":\"" + newPassword + "\"" + "," + "\"oldPassword\":\""
 			        + wrongOldPassword + "\"}"));
 		});
 	}
-	
+
 	@Test
 	public void testUserChangeOtherUsersPassword() throws Exception {
 		Context.checkCoreDataset();
 		User authenticatedUser = setUpUser("daemon");
-		
+
 		Role role = new Role("Privileged Role");
 
 		try {
@@ -121,49 +121,49 @@ public class ChangePasswordController1_8Test extends RestControllerTestUtils {
 		authenticatedUser.addRole(role);
 
 		String newPassword = "newTest9453!#$";
-		
+
 		MockHttpServletResponse response = handle(newPostRequest(PASSWORD_URI + "/" + RestTestConstants1_8.USER_UUID,
 		    "{\"newPassword\":\"" + newPassword + "\"}"));
-		
+
 		assertEquals(200, response.getStatus());
 	}
-	
+
 	@Test
 	public void testUserChangeOtherUsersPasswordWithOutPrivilege() throws Exception {
 		setUpUser("daemon");
-		
+
 		String newPassword = "newPassword9";
-		
+
 		assertThrows(APIAuthenticationException.class, () -> {
-		
+
 			handle(newPostRequest(PASSWORD_URI + "/" + RestTestConstants1_8.USER_UUID, "{\"newPassword\":\"" + newPassword
 			        + "\"}"));
-		
+
 		});
 	}
-	
+
 	@Test
 	public void testThrowExceptionIfUserIsNotAvailable() throws Exception {
 		setUpUser("daemon");
-		
+
 		String newPassword = "newPassword9";
-		
+
 		assertThrows(NullPointerException.class, () -> {
-		
+
 			handle(newPostRequest(PASSWORD_URI + "/" + "someRandomUserUuid", "{\"newPassword\":\"" + newPassword + "\"}"));
 		});
 	}
-	
+
 	private User setUpUser(String userName) {
 		User user = service.getUserByUsername(userName);
 		final String newPassword = "SomeOtherPassword123";
-		
+
 		service.changePassword(user, newPassword);
-		
+
 		Context.logout();
-		
+
 		Context.authenticate(userName, newPassword);
 		return Context.getAuthenticatedUser();
 	}
-	
+
 }

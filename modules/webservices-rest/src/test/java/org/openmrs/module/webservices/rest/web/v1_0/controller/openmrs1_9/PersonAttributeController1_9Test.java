@@ -36,16 +36,16 @@ import static org.hamcrest.Matchers.not;
  * Tests functionality of {@link PersonAttributeController}.
  */
 public class PersonAttributeController1_9Test extends MainResourceControllerTest {
-	
+
 	String personUuid = RestTestConstants1_8.PERSON_UUID;
-	
+
 	private PersonService service;
 
 	@BeforeEach
 	public void before() throws Exception {
 		this.service = Context.getPersonService();
 	}
-	
+
 	@Test
 	public void shouldAddAttributeToPerson() throws Exception {
 		int before = service.getPersonByUuid(personUuid).getAttributes().size();
@@ -54,38 +54,38 @@ public class PersonAttributeController1_9Test extends MainResourceControllerTest
 		int after = service.getPersonByUuid(personUuid).getAttributes().size();
 		assertThat(after, is(before + 1));
 	}
-	
+
 	@Test
 	public void shouldAddConceptAttributeToPerson() throws Exception {
 		executeDataSet("personAttributeTypeWithConcept.xml");
-		
+
 		int before = service.getPersonByUuid(personUuid).getAttributes().size();
-		
+
 		String json = "{ \"hydratedObject\":\"f102c80f-1yz9-4da3-bb88-8122ce8868dd\", \"attributeType\":\"55e6ce9e-25bf-11e3-a013-3c0754156a5d\"}";
 		handle(newPostRequest(getURI(), json));
-		
+
 		Set<PersonAttribute> attributes = service.getPersonByUuid(personUuid).getAttributes();
 		int after = attributes.size();
 		assertThat(after, is(before + 1));
-		
+
 		assertThat(getLastPersonAttribute(attributes).getValue(), is("102"));
 	}
-	
+
 	@Test
 	public void shouldRenderHydratedAttributable() throws Exception {
 		executeDataSet("personAttributeTypeWithConcept.xml");
-		
+
 		String json = "{ \"hydratedObject\":\"f102c80f-1yz9-4da3-bb88-8122ce8868dd\", \"attributeType\":\"55e6ce9e-25bf-11e3-a013-3c0754156a5d\"}";
 		String postResponse = handle(newPostRequest(getURI(), json)).getContentAsString();
 		SimpleObject postResponseObject = new ObjectMapper().readValue(postResponse, SimpleObject.class);
-		
+
 		String getResponse = handle(
 		    newGetRequest(getURI() + "/" + postResponseObject.get("uuid"), new Parameter("v", "full"))).getContentAsString();
 		SimpleObject getResponseObject = new ObjectMapper().readValue(getResponse, SimpleObject.class);
-		
+
 		assertThat(getResponseObject.get("hydratedObject"), not(is(nullValue())));
 	}
-	
+
 	private PersonAttribute getLastPersonAttribute(Set<PersonAttribute> attributes) {
 		PersonAttribute personAttribute = null;
 		Iterator<PersonAttribute> iterator = attributes.iterator();
@@ -94,51 +94,51 @@ public class PersonAttributeController1_9Test extends MainResourceControllerTest
 		}
 		return personAttribute;
 	}
-	
+
 	@Test
 	public void shouldEditAttribute() throws Exception {
 		String json = "{ \"attributeType\":\"54fc8400-1683-4d71-a1ac-98d40836ff7c\" }";
-		
+
 		PersonAttribute personAttribute = service.getPersonAttributeByUuid(getUuid());
 		assertThat(personAttribute.getAttributeType().getName(), is("Birthplace"));
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
-		
+
 		personAttribute = service.getPersonAttributeByUuid(getUuid());
 		assertThat(personAttribute.getAttributeType().getName(), is("Birthplace"));
 	}
-	
+
 	@Test
 	public void shouldVoidAttribute() throws Exception {
 		PersonAttribute personAttribute = service.getPersonAttributeByUuid(getUuid());
 		assertThat(personAttribute.isVoided(), is(false));
-		
+
 		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("reason", "unit test")));
-		
+
 		personAttribute = service.getPersonAttributeByUuid(getUuid());
 		assertThat(personAttribute.isVoided(), is(true));
 		assertThat(personAttribute.getVoidReason(), is("unit test"));
 	}
-	
+
 	@Test
 	public void shouldPurgeAttribute() throws Exception {
 		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("purge", "")));
-		
+
 		assertThat(service.getPersonAttributeByUuid(getUuid()), nullValue());
 	}
-	
+
 	@Test
 	public void shouldSupportLocationPersonAttribute() throws Exception {
 		String personAttributeTypeJson = "{\"name\": \"location\", \"description\": \"Points to a location\", \"format\": \"org.openmrs.Location\"}";
 		SimpleObject personAttributeType = deserialize(handle(newPostRequest("personattributetype", personAttributeTypeJson)));
 		String personAttributeTypeUuid = (String) personAttributeType.get("uuid");
 		assertThat(personAttributeTypeUuid, is(notNullValue()));
-		
+
 		String personAttributeJson = "{ \"attributeType\":\"" + personAttributeTypeUuid + "\", \"value\":\"1\"}"; //We should be able to pass UUID, see RESTWS-398
 		SimpleObject personAttribute = deserialize(handle(newPostRequest(getURI(), personAttributeJson)));
-		
+
 		Map<String, Object> value = (Map<String, Object>) personAttribute.get("value");
-		
+
 		assertThat(value.get("uuid"), is(notNullValue()));
 		assertThat((String) value.get("display"), is("Unknown Location"));
 		assertThat(value.get("links"), is(notNullValue()));
@@ -163,7 +163,7 @@ public class PersonAttributeController1_9Test extends MainResourceControllerTest
 		assertThat((String) value.get("display"), is("Unknown Location"));
 		assertThat(value.get("links"), is(notNullValue()));
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -171,7 +171,7 @@ public class PersonAttributeController1_9Test extends MainResourceControllerTest
 	public String getURI() {
 		return "person/" + RestTestConstants1_8.PERSON_UUID + "/attribute";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -179,7 +179,7 @@ public class PersonAttributeController1_9Test extends MainResourceControllerTest
 	public String getUuid() {
 		return RestTestConstants1_8.PERSON_ATTRIBUTE_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */

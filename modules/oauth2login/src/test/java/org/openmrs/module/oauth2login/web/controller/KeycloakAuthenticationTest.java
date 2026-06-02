@@ -13,12 +13,12 @@ import org.junit.Assert;
 import org.openmrs.User;
 
 public class KeycloakAuthenticationTest extends OAuth2IntegrationTest {
-	
+
 	@Override
 	protected String getAppDataDirName() {
 		return "Keycloak";
 	}
-	
+
 	@Override
 	protected String getUserInfoJson() {
 		return "{\n" + "  \"sub\": \"4e3074d6-5e9f-4707-84f1-ccb2aa2ab3bc\",\n" + "  \"email_verified\": true,\n"
@@ -26,7 +26,7 @@ public class KeycloakAuthenticationTest extends OAuth2IntegrationTest {
 		        + "  \"given_name\": \"Tommy\",\n" + "  \"family_name\": \"Atkins\",\n"
 		        + "  \"email\": \"tatkins@example.com\",\n" + "  \"roles\": [\"Provider\", \"B0gùs Rol3 N@m3\"]\n" + "}";
 	}
-	
+
 	@Override
 	protected void assertAuthenticatedUser(User user) {
 		Assert.assertEquals("tatkins", user.getUsername());
@@ -36,10 +36,10 @@ public class KeycloakAuthenticationTest extends OAuth2IntegrationTest {
 		Assert.assertEquals("tatkins@example.com", user.getEmail());
 		assertThatProviderAccountIsActivated(user);
 	}
-	
+
 	@Override
 	protected String[] roleNamesToAssert() {
 		return new String[] { "Provider" };
 	}
-	
+
 }

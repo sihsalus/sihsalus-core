@@ -34,67 +34,67 @@ import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirConceptSourceDaoImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private static final String CONCEPT_SOURCE_FHIR_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirConceptSourceDaoImplTest_initial_data.xml";
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Autowired
 	private ConceptService conceptService;
-	
+
 	private FhirConceptSourceDaoImpl fhirConceptSourceDao;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(CONCEPT_SOURCE_FHIR_DATA);
-		
+
 		fhirConceptSourceDao = new FhirConceptSourceDaoImpl();
 		fhirConceptSourceDao.setSessionFactory(sessionFactory);
 	}
-	
+
 	@Test
 	public void getFhirConceptSources_shouldReturnAllSources() {
 		Collection<FhirConceptSource> result = fhirConceptSourceDao.getFhirConceptSources();
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, not(empty()));
 		assertThat(result, hasItem(hasProperty("name", equalTo("LOINC"))));
 		assertThat(result, hasItem(hasProperty("name", equalTo("CIEL"))));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByConceptSourceName_shouldReturnSourceForName() {
 		Optional<FhirConceptSource> result = fhirConceptSourceDao.getFhirConceptSourceByConceptSourceName("LOINC");
-		
+
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get().getConceptSource().getName(), equalTo("LOINC"));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByConceptSourceName_shouldReturnEmptyOptionalForMissingSourceName() {
 		Optional<FhirConceptSource> result = fhirConceptSourceDao
 		        .getFhirConceptSourceByConceptSourceName("Not a real source");
-		
+
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByUrl_shouldReturnSourceForUrl() {
 		Optional<FhirConceptSource> result = fhirConceptSourceDao
 		        .getFhirConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		
+
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get().getUrl(), equalTo(FhirTestConstants.LOINC_SYSTEM_URL));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByUrl_shouldReturnEmptyOptionalForMissingUrl() {
 		Optional<FhirConceptSource> result = fhirConceptSourceDao.getFhirConceptSourceByUrl("https://www.example.com");
-		
+
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByConceptSource_shouldReturnSourceWherePresent() {
 		ConceptSource conceptSource = conceptService.getConceptSourceByName("LOINC");
@@ -104,7 +104,7 @@ public class FhirConceptSourceDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get().getUrl(), equalTo(FhirTestConstants.LOINC_SYSTEM_URL));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByConceptSource_shouldReturnEmptyOptionalWhereNoFhirConceptSourceExists() {
 		ConceptSource conceptSource = conceptService.getConceptSourceByName("SNOMED CT");
@@ -112,30 +112,30 @@ public class FhirConceptSourceDaoImplTest extends BaseFhirContextSensitiveTest {
 		Optional<FhirConceptSource> result = fhirConceptSourceDao.getFhirConceptSourceByConceptSource(conceptSource);
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void getConceptSourceByHl7Code_shouldReturnSourceForHl7Code() {
 		Optional<ConceptSource> result = fhirConceptSourceDao.getConceptSourceByHl7Code("SCT");
-		
+
 		assertThat(result, not(OptionalMatchers.empty()));
-		
+
 		assertThat(result, contains(hasProperty("name", equalTo("SNOMED CT"))));
 	}
-	
+
 	@Test
 	public void getConceptSourceByHl7Code_shouldReturnNonRetiredOverRetiredSourceForHl7Code() {
 		Optional<ConceptSource> result = fhirConceptSourceDao.getConceptSourceByHl7Code("I10");
-		
+
 		assertThat(result, not(OptionalMatchers.empty()));
 		assertThat(result, contains(hasProperty("name", equalTo("ICD-10"))));
 		assertThat(result, contains(hasProperty("uuid", equalTo("75f5b378-5065-11de-80cb-001e378eb67e"))));
 		assertThat(result, contains(hasProperty("retired", equalTo(false))));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByHl7Code_shouldReturnNullForMissingSourceName() {
 		Optional<ConceptSource> result = fhirConceptSourceDao.getConceptSourceByHl7Code("SNOMED CT");
-		
+
 		assertThat(result, OptionalMatchers.empty());
 	}
 }

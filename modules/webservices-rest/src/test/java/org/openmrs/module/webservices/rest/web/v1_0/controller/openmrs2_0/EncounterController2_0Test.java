@@ -30,26 +30,26 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EncounterController2_0Test extends MainResourceControllerTest {
-	
+
 	public static final String CURRENT_TIMEZONE = Calendar.getInstance().getTimeZone().getDisplayName(true, TimeZone.SHORT);
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet("EncountersForDifferentTypesWithObservations.xml");
 	}
-	
+
 	@Test
 	public void shouldGetEncountersByEncounterTypeAndPatient() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("s", "default"), new Parameter(
 		        "patient", "41c6b35e-c093-11e3-be87-005056821db0"), new Parameter("encounterType",
 		        "ff7397ea-c090-11e3-be87-005056821db0"))));
-		
+
 		List<?> encounters = result.get("results");
 		Assertions.assertEquals(1, encounters.size());
 		String encounterUuid = (String) PropertyUtils.getProperty(encounters.get(0), "uuid");
 		Assertions.assertEquals("62967e68-96bb-11e0-8d6b-9b9415a91465", encounterUuid);
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetAll()
 	 */
@@ -60,20 +60,20 @@ public class EncounterController2_0Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Test
 	public void shouldReturnEncounterAsComplexCustomRepresentation() throws Exception {
 		final String customRep = "custom:(uuid,display,patient:(uuid,display),location:(name,tags:(display)))";
-		
+
 		final String encounterUuid = "62967e68-96bb-11e0-8d6b-9b9415a91465";
 		final String encounterDisplay = "sample encounter a 01/08/2008";
 		final String patientUuid = "41c6b35e-c093-11e3-be87-005056821db0";
 		final String patientDisplay = "";
 		final String locationName = "Unknown Location";
-		
+
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("patient",
 		        "41c6b35e-c093-11e3-be87-005056821db0"), new Parameter("v", customRep))));
-		
+
 		assertEquals(2, Util.getResultsSize(result));
 		List<?> encounters = result.get("results");
 		assertEquals(encounterUuid, PropertyUtils.getProperty(encounters.get(0), "uuid"));
@@ -82,7 +82,7 @@ public class EncounterController2_0Test extends MainResourceControllerTest {
 		assertEquals(patientDisplay, PropertyUtils.getProperty(Util.getResultsList(result).get(0), "patient.display"));
 		assertEquals(locationName, PropertyUtils.getProperty(Util.getResultsList(result).get(0), "location.name"));
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -90,7 +90,7 @@ public class EncounterController2_0Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "encounter";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -98,7 +98,7 @@ public class EncounterController2_0Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_8.ENCOUNTER_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */

@@ -23,7 +23,7 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ObsController1_11Test extends MainResourceControllerTest {
-	
+
 	@Test
 	public void shouldCreateAnObsWithFormFieldNamespaceAndFormFieldPath() throws Exception {
 		long originalCount = getAllCount();
@@ -34,7 +34,7 @@ public class ObsController1_11Test extends MainResourceControllerTest {
 		obs.add("value", 180.0);
 		obs.add("formFieldNamespace", "ohri-forms");
 		obs.add("formFieldPath", "some-path");
-		
+
 		String json = new ObjectMapper().writeValueAsString(obs);
 		SimpleObject ret = deserialize(handle(newPostRequest(getURI(), json)));
 		assertEquals("ohri-forms", Util.getByPath(ret, "formFieldNamespace"));
@@ -56,7 +56,7 @@ public class ObsController1_11Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return Context.getObsService().getObservationCount(null, true);
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetAll()
 	 */

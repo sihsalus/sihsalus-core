@@ -42,55 +42,55 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class MedicationRequestSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTest {
-	
+
 	public static final String PATIENT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5"; // patient 2 in test dataset
-	
+
 	public static final String MEDICATION_REQUEST_UUID = "dfca4077-493c-496b-8312-856ee5d1cc26"; // order 2 in the test database;
-	
+
 	@Autowired
 	private MedicationRequestTranslator translator;
-	
+
 	@Autowired
 	private FhirMedicationRequestDao dao;
-	
+
 	@Autowired
 	private SearchQueryInclude<MedicationRequest> searchQueryInclude;
-	
+
 	@Autowired
 	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator, SearchQueryInclude<MedicationRequest>> searchQuery;
-	
+
 	@Before
 	public void setup() {
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
-	
+
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-	
+
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(0, 9);
 	}
-	
+
 	@Test
 	public void searchForMedicationRequest_shouldReturnMedicationRequestByPatientUuidAndRevIncludeAssociatedMedicationDispense() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_UUID)));
-		
+
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("MedicationDispense:prescription", true));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
-		
+
 		IBundleProvider results = search(theParams);
-		
+
 		assertThat(results, notNullValue());
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(7));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID)))); // order 2
@@ -102,5 +102,5 @@ public class MedicationRequestSearchQueryImpl2_6Test extends BaseModuleContextSe
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("b75c5c9e-b66c-11ec-8065-0242ac110002")))); // medication dispense 1 from Medication dispense dataset (see above)
 		// note that discontinue orders, #22 and #44 are *not* included, see: https://issues.openmrs.org/browse/FM2-532
 	}
-	
+
 }

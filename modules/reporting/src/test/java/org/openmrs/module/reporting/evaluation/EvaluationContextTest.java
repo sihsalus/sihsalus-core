@@ -23,9 +23,9 @@ import static org.junit.Assert.assertEquals;
  * Tests for the EvaluationContext expression parsing
  */
 public class EvaluationContextTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:S");
-	
+
 	@Test
 	public void shouldEvaluateExpression() throws Exception {
 
@@ -63,7 +63,7 @@ public class EvaluationContextTest extends BaseModuleContextSensitiveTest {
 		assertEquals(evaluate("${report.gender}"), "male");
 		assertEquals(evaluate("report.gender"), "report.gender");
 		assertEquals(evaluate("hello ${report.gender} person"), "hello male person");
-		assertEquals(evaluate("From ${report.d1|yyyy-MM-dd} to ${report.d1+3w|yyyy-MM-dd} for ${report.gender}s"), 
+		assertEquals(evaluate("From ${report.d1|yyyy-MM-dd} to ${report.d1+3w|yyyy-MM-dd} for ${report.gender}s"),
 							   "From 2007-01-10 to 2007-01-31 for males");
 	}
 
@@ -94,7 +94,7 @@ public class EvaluationContextTest extends BaseModuleContextSensitiveTest {
 
 	@Test
 	public void shouldEvaluatePredefinedParameters() throws Exception {
-		
+
 		EvaluationContext context = new EvaluationContext(df.parse("2007-01-17 10:30:17:123"));
 
 		assertEquals(evaluate("${now}", context), context.getEvaluationDate());
@@ -116,7 +116,7 @@ public class EvaluationContextTest extends BaseModuleContextSensitiveTest {
 		assertEquals("reportDate", parseParameter("reportDate"));
 		assertEquals("startDate", parseParameter("startDate"));
 	}
-	
+
 	/**
 	 * Helper method to evaluate an expression
 	 * @param context
@@ -131,7 +131,7 @@ public class EvaluationContextTest extends BaseModuleContextSensitiveTest {
 		context.addParameterValue("report.testInt", 7);
 		return EvaluationUtil.evaluateExpression(expression, context);
 	}
-	
+
 	/**
 	 * Helper method to evaluate an expression
 	 * @param expression

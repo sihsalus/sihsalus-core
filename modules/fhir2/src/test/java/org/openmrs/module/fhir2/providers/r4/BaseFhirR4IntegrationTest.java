@@ -33,31 +33,31 @@ import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U extends DomainResource> extends BaseFhirIntegrationTest<T, U> {
-	
+
 	private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
-	
+
 	@Override
 	public String getServletName() {
 		return "fhir2Servlet";
 	}
-	
+
 	@Override
 	public FhirContext getFhirContext() {
 		return FHIR_CONTEXT;
 	}
-	
+
 	@Override
 	public FhirRestServlet getRestfulServer() {
 		return new FhirRestServlet();
 	}
-	
+
 	@Before
 	@Override
 	public void setup() throws Exception {
 		getFhirContext().registerCustomType(GroupMember.class);
 		super.setup();
 	}
-	
+
 	@Override
 	public void describeOperationOutcome(Description mismatchDescription, IBaseOperationOutcome baseOperationOutcome) {
 		if (baseOperationOutcome instanceof OperationOutcome) {
@@ -70,12 +70,12 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 			}
 		}
 	}
-	
+
 	@Override
 	public Class<? extends IBaseOperationOutcome> getOperationOutcomeClass() {
 		return OperationOutcome.class;
 	}
-	
+
 	@Override
 	public U removeNarrativeAndContained(U item) {
 		@SuppressWarnings("unchecked")
@@ -84,68 +84,68 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 		newItem.setContained(null);
 		return newItem;
 	}
-	
+
 	@Override
 	public Bundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (Bundle) super.readBundleResponse(response);
 	}
-	
+
 	@Override
 	public OperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (OperationOutcome) super.readOperationOutcome(response);
 	}
-	
+
 	public static Matcher<Bundle.BundleEntryComponent> hasResource(Matcher<?> matcher) {
 		return new HasResourceMatcher(matcher);
 	}
-	
+
 	private static class HasResourceMatcher extends TypeSafeMatcher<Bundle.BundleEntryComponent> {
-		
+
 		private final Matcher<?> matcher;
-		
+
 		public HasResourceMatcher(Matcher<?> matcher) {
 			this.matcher = matcher;
 		}
-		
+
 		@Override
 		protected boolean matchesSafely(Bundle.BundleEntryComponent item) {
 			return matcher.matches(item.getResource());
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("a bundle component with a resource that ").appendDescriptionOf(matcher);
 		}
-		
+
 		@Override
 		protected void describeMismatchSafely(Bundle.BundleEntryComponent item, Description mismatchDescription) {
 			matcher.describeMismatch(item.getResource(), mismatchDescription);
 		}
 	}
-	
+
 	protected static Matcher<List<Bundle.BundleEntryComponent>> isSortedAndWithinMax(Integer max) {
 		return new IsSortedAndWithinMax(max);
 	}
-	
+
 	private static class IsSortedAndWithinMax extends TypeSafeDiagnosingMatcher<List<Bundle.BundleEntryComponent>> {
-		
+
 		private int max;
-		
+
 		IsSortedAndWithinMax(int max) {
 			this.max = max;
 		}
-		
+
 		@Override
 		protected boolean matchesSafely(List<Bundle.BundleEntryComponent> entries, Description mismatchDescription) {
 			List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
 			        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-			
+
 			Set<String> codeList = new HashSet<>();
-			
+
 			for (int var = 0; var < observations.size(); var++) {
 				Observation currentObservation = observations.get(var);
 				String currentConcept = currentObservation.getCode().getCodingFirstRep().getCode();
-				
+
 				//check if Bundle is returned grouped code wise
 				// if an observation arrives whose concept wise list is already created, then that means this observation is
 				//out of place
@@ -156,19 +156,19 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 					return false;
 				}
 				codeList.add(currentConcept);
-				
+
 				String currentDateTimeType = currentObservation.getEffectiveDateTimeType().toString();
-				
+
 				int distinctObsDateTime = 1;
-				
+
 				if (var == observations.size() - 1) {
 					return true;
 				}
-				
+
 				Observation nextObservation = observations.get(var + 1);
 				String nextConcept = nextObservation.getCode().getCodingFirstRep().getCode();
 				String nextDateTimeType = nextObservation.getEffectiveDateTimeType().toString();
-				
+
 				while (nextConcept.equals(currentConcept)) {
 					//if nextDatetime is greater than currentDateTime, then the list is not sorted in decreasing order, which was required
 					if (currentDateTimeType.compareTo(nextDateTimeType) < 0) {
@@ -177,12 +177,12 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 						        .appendValue(currentDateTimeType);
 						return false;
 					}
-					
+
 					if (!currentDateTimeType.equals(nextDateTimeType)) {
 						distinctObsDateTime++;
 					}
 					var++;
-					
+
 					if (var + 1 == observations.size()) {
 						//if count of distinct obsDatetime is within max
 						if (distinctObsDateTime <= max) {
@@ -194,14 +194,14 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 						        .appendText(" distinct observation times");
 						return false;
 					}
-					
+
 					nextObservation = observations.get(var + 1);
 					nextConcept = nextObservation.getCode().getCodingFirstRep().getCode();
-					
+
 					currentDateTimeType = nextDateTimeType;
 					nextDateTimeType = nextObservation.getEffectiveDateTimeType().toString();
 				}
-				
+
 				if (distinctObsDateTime > max) {
 					mismatchDescription.appendText("Expected upto ").appendValue(max)
 					        .appendText(" distinct observation times in each concept group, but group with concept ")
@@ -210,33 +210,33 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 					return false;
 				}
 			}
-			
+
 			return true;
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("Result is grouped by concept and sorted from most recent to oldest with up to ")
 			        .appendValue(max).appendText(" distinct observation times");
 		}
 	}
-	
+
 	protected static Matcher<List<Bundle.BundleEntryComponent>> hasCorrectResources(Integer resourceCount,
 	        Set<String> validResources) {
 		return new HasCorrectResources(resourceCount, validResources);
 	}
-	
+
 	private static class HasCorrectResources extends TypeSafeDiagnosingMatcher<List<Bundle.BundleEntryComponent>> {
-		
+
 		private int resourcesCount;
-		
+
 		private Set<String> validResources;
-		
+
 		HasCorrectResources(int resourcesCount, Set<String> validResources) {
 			this.resourcesCount = resourcesCount;
 			this.validResources = validResources;
 		}
-		
+
 		@Override
 		protected boolean matchesSafely(List<Bundle.BundleEntryComponent> entries, Description mismatchDescription) {
 			int count = 0;
@@ -248,7 +248,7 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 					return false;
 				}
 			}
-			
+
 			if (entries.size() < resourcesCount) {
 				if (count != entries.size()) {
 					mismatchDescription.appendText("Expected ").appendValue(entries.size())
@@ -257,7 +257,7 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 				}
 				return true;
 			}
-			
+
 			if (count != resourcesCount) {
 				mismatchDescription.appendText("Expected ").appendValue(resourcesCount)
 				        .appendText(" resources, but result has ").appendValue(count).appendText(" resources.");
@@ -265,7 +265,7 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 			}
 			return true;
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("Result all valid resources.");

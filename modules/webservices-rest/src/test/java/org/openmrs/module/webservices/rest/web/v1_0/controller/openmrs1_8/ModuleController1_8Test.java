@@ -39,69 +39,69 @@ import org.springframework.web.bind.annotation.RequestMethod;
  *
  */
 public class ModuleController1_8Test extends MainResourceControllerTest {
-	
+
 	@Autowired
 	RestService restService;
-	
+
 	private Module atlasModule = new Module("Atlas Module", "atlas", "name", "author", "description", "version", "");
-	
+
 	private Module conceptLabModule = new Module("Open Concept Lab Module", "openconceptlab", "name", "author",
 	        "description", "version", "");
-	
+
 	private Module mockModuleToLoad = new Module("MockModule", "mockModule", "name", "author", "description", "version", "");
-	
+
 	MockModuleFactoryWrapper mockModuleFactory = new MockModuleFactoryWrapper();
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		mockModuleFactory.loadedModules.add(atlasModule);
 		mockModuleFactory.loadedModules.add(conceptLabModule);
-		
+
 		ModuleResource1_8 resource = (ModuleResource1_8) restService.getResourceBySupportedClass(Module.class);
 		resource.setModuleFactoryWrapper(mockModuleFactory);
 	}
-	
+
 	@Test
 	public void shouldGetAllModules() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
 		List<Object> results = Util.getResultsList(result);
-		
+
 		Assertions.assertNotNull(result);
 		Assertions.assertEquals(getAllCount(), results.size());
 	}
-	
+
 	@Test
 	public void shouldGetModuleByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(result.get("description"));
 	}
-	
+
 	@Test
 	public void shouldIncludeIfModuleIsStarted() throws Exception {
 		SimpleObject result = deserialize(handle(request(RequestMethod.GET, getURI() + "/" + getUuid())));
 		assertThat((Boolean) PropertyUtils.getProperty(result, "started"), is(false));
 	}
-	
+
 	@Test
 	public void shouldIncludeAuthorToFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter("v", "full");
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "author"));
 	}
-	
+
 	@Test
 	public void shouldIncludeVersionToDefaultRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "version"));
 	}
-	
+
 	@Test
 	public void shouldIncludeAllPropertiesForFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
@@ -116,7 +116,7 @@ public class ModuleController1_8Test extends MainResourceControllerTest {
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "version"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "started"));
 	}
-	
+
 	@Test
 	public void shouldIncludeAllPropertiesForDefaultRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
@@ -128,7 +128,7 @@ public class ModuleController1_8Test extends MainResourceControllerTest {
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "version"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "started"));
 	}
-	
+
 	@Test
 	public void shouldIncludeAllPropertiesForRefRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
@@ -137,7 +137,7 @@ public class ModuleController1_8Test extends MainResourceControllerTest {
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "display"));
 	}
-	
+
 	@Test
 	public void shouldRejectUploadWhenWebAdminDisabled() throws Exception {
 		mockModuleFactory.webAdminEnabled = false;
@@ -163,34 +163,34 @@ public class ModuleController1_8Test extends MainResourceControllerTest {
 		final String moduleFile = "org/openmrs/module/webservices/rest/include/mockModule.omod";
 		byte[] fileData = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(moduleFile));
 		MockMultipartFile toUpload = new MockMultipartFile("file", "mockModule.omod", "archive/zip", fileData);
-		
+
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		request.setRequestURI(getBaseRestURI() + getURI());
 		request.setMethod(RequestMethod.POST.name());
 		request.addHeader("Content-Type", "multipart/form-data");
-		
+
 		request.addFile(toUpload);
-		
+
 		mockModuleFactory.loadModuleMock = mockModuleToLoad;
-		
+
 		MockHttpServletResponse response = handle(request);
 		assertThat(mockModuleFactory.loadedModules, hasItem(mockModuleToLoad));
 		assertThat(mockModuleFactory.startedModules, hasItem(mockModuleToLoad));
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "module";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return "atlas";
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return mockModuleFactory.loadedModules.size();
 	}
-	
+
 }

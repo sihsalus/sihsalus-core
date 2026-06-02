@@ -15,19 +15,19 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ConceptDescriptionResource1_9Test extends BaseDelegatingResourceTest<ConceptDescriptionResource1_9, ConceptDescription> {
-	
+
 	@Override
 	public ConceptDescription newObject() {
 		return Context.getConceptService().getConceptDescriptionByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
 		assertPropEquals("description", getObject().getDescription());
 		assertPropEquals("locale", getObject().getLocale());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -35,15 +35,15 @@ public class ConceptDescriptionResource1_9Test extends BaseDelegatingResourceTes
 		assertPropEquals("locale", getObject().getLocale());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Drug used for pain relief, fever, and antiplatelet actions.";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.CONCEPT_DESCRIPTION_UUID;
 	}
-	
+
 }

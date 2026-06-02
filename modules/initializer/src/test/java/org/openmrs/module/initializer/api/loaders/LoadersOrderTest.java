@@ -27,28 +27,28 @@ import org.openmrs.module.initializer.Domain;
 import org.openmrs.module.initializer.DomainBaseModuleContextSensitive_2_3_Test;
 
 public class LoadersOrderTest extends DomainBaseModuleContextSensitive_2_3_Test {
-	
+
 	@Test
 	public void getLoaders_shouldBeUnequivocallyOrdered() {
 		Loader previousLoader = null;
-		
+
 		List<Loader> loaders = applicationContext.getBeansOfType(Loader.class).values().stream().sorted()
 		        .collect(Collectors.toList());
-		
+
 		for (Loader loader : loaders) {
 			if (previousLoader == null) {
 				previousLoader = loader;
 				continue;
 			}
-			
+
 			previousLoader = assertLoaderOrder(previousLoader, loader);
 		}
-		
+
 		List<Loader> runtimeLoaders = getService().getLoaders();
 		assertThat(runtimeLoaders, everyItem(hasExpectedDomain()));
 		assertThat(runtimeLoaders, coversAllDomains());
 	}
-	
+
 	private Loader assertLoaderOrder(Loader previousLoader, Loader currentLoader) {
 		assertThat("Expected " + currentLoader + " to have an order value greater than " + previousLoader
 		        + " but the current loader order is " + currentLoader.getOrder() + " and the previous loader had order "
@@ -56,17 +56,17 @@ public class LoadersOrderTest extends DomainBaseModuleContextSensitive_2_3_Test 
 		    currentLoader.getOrder(), greaterThan(previousLoader.getOrder()));
 		return currentLoader;
 	}
-	
+
 	private static Matcher<List<Loader>> coversAllDomains() {
 		return new AllDomainsMatcher();
 	}
-	
+
 	private static Matcher<Loader> hasExpectedDomain() {
 		return new ExpectedDomainMatcher();
 	}
-	
+
 	private static class AllDomainsMatcher extends TypeSafeDiagnosingMatcher<List<Loader>> {
-		
+
 		@Override
 		protected boolean matchesSafely(List<Loader> loaders, Description mismatchDescription) {
 			Set<String> exclude = new HashSet<>();
@@ -77,7 +77,7 @@ public class LoadersOrderTest extends DomainBaseModuleContextSensitive_2_3_Test 
 			exclude.add(Domain.FLAGS.getName());
 			exclude.add(Domain.FLAG_PRIORITIES.getName());
 			exclude.add(Domain.FLAG_TAGS.getName());
-			
+
 			boolean result = true;
 			Set<String> loaderDomains = loaders.stream().map(Loader::getDomainName).collect(Collectors.toSet());
 			for (Domain domain : Domain.values()) {
@@ -90,18 +90,18 @@ public class LoadersOrderTest extends DomainBaseModuleContextSensitive_2_3_Test 
 					result = false;
 				}
 			}
-			
+
 			return result;
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
-			
+
 		}
 	}
-	
+
 	private static class ExpectedDomainMatcher extends TypeSafeDiagnosingMatcher<Loader> {
-		
+
 		@Override
 		protected boolean matchesSafely(Loader item, Description mismatchDescription) {
 			try {
@@ -113,10 +113,10 @@ public class LoadersOrderTest extends DomainBaseModuleContextSensitive_2_3_Test 
 				        .appendText(" that is not a recognised domain name");
 				return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("the domain is a valid domain");

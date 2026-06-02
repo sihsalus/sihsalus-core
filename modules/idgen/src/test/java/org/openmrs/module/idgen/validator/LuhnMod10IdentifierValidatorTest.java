@@ -6,14 +6,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class LuhnMod10IdentifierValidatorTest {
-	
+
 	LuhnMod10IdentifierValidator validator;
-	
+
 	@Before
 	public void beforeEachTest() {
 		validator = new LuhnMod10IdentifierValidator();
 	}
-	
+
 	/**
 	 * @see LuhnMod10IdentifierValidator
 	 */

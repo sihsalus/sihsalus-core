@@ -29,32 +29,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class CohortAttributeGenericDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String COHORT_ATTRIBUTE_INITIAL_TEST_DATA_XML = "org/openmrs/module/cohort/api/hibernate/db/CohortAttributeDaoTest_initialTestData.xml";
-	
+
 	private static final String VOIDED_COHORT_ATTRIBUTE_UUID = "ddadadd8-8034-4a28-9441-2eb2e7679e10";
-	
+
 	private static final String COHORT_ATTRIBUTE_UUID = "99ada908-8034-4a28-9441-2eb2e8979e32";
-	
+
 	private static final int COHORT_ATTRIBUTE_ID = 2;
-	
+
 	private static final String VOIDED_COHORT_ATTRIBUTE = "Test cohort attribute";
-	
+
 	private static final String UN_VOIDED_COHORT_ATTRIBUTE = "System generated patient";
-	
+
 	private static final int TEST_COHORT_ATTRIBUTE_ID = 200;
-	
+
 	private static final String COHORT_ATTRIBUTE_VALUE = "cohortAttribute";
-	
+
 	@Autowired
 	@Qualifier("cohortAttributeDao")
 	private GenericDao<CohortAttribute> dao;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(COHORT_ATTRIBUTE_INITIAL_TEST_DATA_XML);
 	}
-	
+
 	@Test
 	public void getByUuid_shouldReturnCohortAttribute() {
 		CohortAttribute cohortAttribute = dao.get(COHORT_ATTRIBUTE_UUID);
@@ -62,13 +62,13 @@ public class CohortAttributeGenericDaoTest extends BaseModuleContextSensitiveTes
 		assertThat(cohortAttribute.getCohortAttributeId(), equalTo(COHORT_ATTRIBUTE_ID));
 		assertThat(cohortAttribute.getUuid(), equalTo(COHORT_ATTRIBUTE_UUID));
 	}
-	
+
 	@Test
 	public void getByUuid_shouldReturnNullForVoidedCohortAttribute() {
 		CohortAttribute cohortAttribute = dao.get(VOIDED_COHORT_ATTRIBUTE_UUID);
 		assertThat(cohortAttribute, nullValue());
 	}
-	
+
 	@Test
 	public void shouldCreateNewCohortAttribute() {
 		CohortAttribute cohortAttribute = dao.createOrUpdate(TestDataUtils.COHORT_ATTRIBUTE());
@@ -77,7 +77,7 @@ public class CohortAttributeGenericDaoTest extends BaseModuleContextSensitiveTes
 		assertThat(cohortAttribute.getCohortAttributeId(), equalTo(TEST_COHORT_ATTRIBUTE_ID));
 		assertThat(cohortAttribute.getValue(), equalTo(COHORT_ATTRIBUTE_VALUE));
 	}
-	
+
 	@Test
 	public void shouldFindMatchingVoidedCohortAttributes() {
 		Collection<CohortAttribute> results = dao.findBy(PropValue.builder().property("valueReference")
@@ -87,7 +87,7 @@ public class CohortAttributeGenericDaoTest extends BaseModuleContextSensitiveTes
 		assertThat(results, not(Matchers.empty()));
 		assertThat(results, Matchers.hasSize(equalTo(1)));
 	}
-	
+
 	@Test
 	public void shouldFindMatchingUnVoidedCohortAttributes() {
 		Collection<CohortAttribute> results = dao.findBy(PropValue.builder().property("valueReference")

@@ -19,14 +19,14 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
 public class RestServiceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private RestService service;
-	
+
 	@BeforeEach
 	public void beforeEachTest() {
 		service = Context.getService(RestService.class);
 	}
-	
+
 	/**
 	 * @see RestService#getRepresentation(String)
 	 * @verifies get ref representation when specified
@@ -35,7 +35,7 @@ public class RestServiceTest extends BaseModuleWebContextSensitiveTest {
 	public void getRepresentation_shouldGetRefRepresentationWhenSpecified() throws Exception {
 		Assertions.assertEquals(Representation.REF, service.getRepresentation(RestConstants.REPRESENTATION_REF));
 	}
-	
+
 	/**
 	 * @see RestService#getRepresentation(String)
 	 * @verifies get default representation when specified
@@ -44,7 +44,7 @@ public class RestServiceTest extends BaseModuleWebContextSensitiveTest {
 	public void getRepresentation_shouldGetDefaultRepresentationWhenSpecified() throws Exception {
 		Assertions.assertEquals(Representation.DEFAULT, service.getRepresentation(RestConstants.REPRESENTATION_DEFAULT));
 	}
-	
+
 	/**
 	 * @see RestService#getRepresentation(String)
 	 * @verifies get full representation when specified
@@ -53,7 +53,7 @@ public class RestServiceTest extends BaseModuleWebContextSensitiveTest {
 	public void getRepresentation_shouldGetFullRepresentationWhenSpecified() throws Exception {
 		Assertions.assertEquals(Representation.FULL, service.getRepresentation(RestConstants.REPRESENTATION_FULL));
 	}
-	
+
 	/**
 	 * @see RestService#getRepresentation(String)
 	 * @verifies get a named representation when specified

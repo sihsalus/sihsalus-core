@@ -40,25 +40,25 @@ public class PersonAttributeResource1_8Test extends BaseModuleWebContextSensitiv
 	public static final String PERSON_ATTRIBUTE_JSON_WITHOUT_UUID = "{\"value\": \"Bangalore\", \"uuid\": \"\", \"attributeType\": { \"uuid\": \"54fc8400-1683-4d71-a1ac-98d40836ff7c\" }}";
 
 	private SimpleObject personAttributeSimpleObject = new SimpleObject();
-	
+
 	private PersonAttributeResource1_8 resource;
 
 	@Autowired
 	private ConceptService conceptService;
-	
+
 	@Autowired
 	private PersonService personService;
-	
+
 	@Autowired
 	private LocationService locationService;
-	
+
 	@BeforeEach
 	public void beforeEachTests() throws Exception {
 		personAttributeSimpleObject.putAll(new ObjectMapper().readValue(PERSON_ATTRIBUTE_JSON, HashMap.class));
 		resource = (PersonAttributeResource1_8) Context.getService(RestService.class).getResourceBySupportedClass(
 		    PersonAttribute.class);
 	}
-	
+
 	@Test
 	public void shouldCreatePersonAttribute() throws Exception {
 		SimpleObject created = (SimpleObject) resource.create("da7f524f-27ce-4bb2-86d6-6d1d05312bd5",
@@ -141,7 +141,7 @@ public class PersonAttributeResource1_8Test extends BaseModuleWebContextSensitiv
 
 		assertThat(displayString, equalToIgnoringCase("A Value"));
 	}
-	
+
 	@Test
 	public void setValue_shouldSetProperAttributableIdIfFound() {
 		PersonAttributeType type = new PersonAttributeType();
@@ -151,18 +151,18 @@ public class PersonAttributeResource1_8Test extends BaseModuleWebContextSensitiv
 		type.setSortWeight(5.5);
 		type.setSearchable(false);
 		type = personService.savePersonAttributeType(type);
-		
+
 		//Get the first location in from the list
 		Location location = locationService.getAllLocations().get(0);
-		
+
 		PersonAttribute attribute = new PersonAttribute(type, null);
 		attribute.setAttributeType(type);
 		Assertions.assertNull(attribute.getValue());
-		
+
 		resource.setValue(attribute, location.getUuid());
 		Assertions.assertEquals(location.getId().toString(), attribute.getValue());
 	}
-	
+
 	@Test
 	public void setValue_shouldSetPassedValueIfCouldNotBeConvertedToAttributable() throws ClassNotFoundException {
 		PersonAttributeType type = new PersonAttributeType();
@@ -172,29 +172,29 @@ public class PersonAttributeResource1_8Test extends BaseModuleWebContextSensitiv
 		type.setSortWeight(5.5);
 		type.setSearchable(false);
 		type = personService.savePersonAttributeType(type);
-		
+
 		String nonExistenceLocationUuid = "this-uuid-does-not-exist-of-course";
 		PersonAttribute attribute = new PersonAttribute(type, null);
-		
+
 		Assertions.assertNull(attribute.getValue());
 		Assertions.assertTrue(Attributable.class.isAssignableFrom(Context.loadClass(type.getFormat())));
-		
+
 		resource.setValue(attribute, nonExistenceLocationUuid);
-		
+
 		Assertions.assertEquals(nonExistenceLocationUuid, attribute.getValue());
 	}
-	
+
 	@Test
 	public void setValue_shouldSetThePassedValueForNonAttributableClasses() throws ClassNotFoundException {
 		PersonAttributeType type = personService.getPersonAttributeTypeByName("Race");
 		PersonAttribute attribute = new PersonAttribute(type, null);
-		
+
 		Assertions.assertNull(attribute.getValue());
 		Assertions.assertEquals("java.lang.String", type.getFormat());
 		Assertions.assertFalse(Attributable.class.isAssignableFrom(Context.loadClass(type.getFormat())));
-		
+
 		resource.setValue(attribute, "arab");
-		
+
 		Assertions.assertEquals("arab", attribute.getValue());
 	}
 }

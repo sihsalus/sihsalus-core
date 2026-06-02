@@ -30,10 +30,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore({ "javax.management.*" })
 @PrepareForTest(DataFilterSessionContext.class)
 public class DataFilterWebFilterTest {
-	
+
 	@Mock
 	private FilterChain filterChain;
-	
+
 	@Test
 	public void doFilter_shouldAlwaysResetTheFiltersOnTheCurrentThread() throws Exception {
 		mockStatic(DataFilterSessionContext.class);
@@ -43,11 +43,11 @@ public class DataFilterWebFilterTest {
 				wasCalled.set(true);
 				return null;
 			}).when(DataFilterSessionContext.class, "reset");
-			
+
 			new DataFilterWebFilter().doFilter(null, null, filterChain);
-			
+
 			assertTrue(wasCalled.get());
 		}
 	}
-	
+
 }

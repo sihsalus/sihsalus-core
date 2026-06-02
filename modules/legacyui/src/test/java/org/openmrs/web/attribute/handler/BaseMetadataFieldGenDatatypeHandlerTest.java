@@ -22,9 +22,9 @@ import org.openmrs.customdatatype.CustomDatatype;
 import org.openmrs.customdatatype.datatype.MockLocationDatatype;
 
 public class BaseMetadataFieldGenDatatypeHandlerTest {
-	
+
 	private BaseMetadataFieldGenDatatypeHandler handler = new MockLocationFieldGenDatatypeHandler();
-	
+
 	/**
 	 * @verifies return the name
 	 * @see BaseMetadataFieldGenDatatypeHandler#toHtml(org.openmrs.customdatatype.CustomDatatype,
@@ -36,14 +36,14 @@ public class BaseMetadataFieldGenDatatypeHandlerTest {
 		final String locationName = "some name";
 		Location expectedLocation = new Location();
 		expectedLocation.setName(locationName);
-		
+
 		MockLocationDatatype datatype = mock(MockLocationDatatype.class);
 		when(datatype.deserialize(eq(locationUuid))).thenReturn(expectedLocation);
 		when(datatype.getTextSummary(any(String.class))).thenCallRealMethod();
 		when(datatype.doGetTextSummary(any(Location.class))).thenCallRealMethod();
 		assertEquals(locationName, handler.toHtml(datatype, locationUuid));
 	}
-	
+
 	/**
 	 * @verifies use the name in the html summary instance
 	 * @see BaseMetadataFieldGenDatatypeHandler#toHtmlSummary(org.openmrs.customdatatype.CustomDatatype,
@@ -55,7 +55,7 @@ public class BaseMetadataFieldGenDatatypeHandlerTest {
 		final String locationName = "some name";
 		Location expectedLocation = new Location();
 		expectedLocation.setName(locationName);
-		
+
 		MockLocationDatatype datatype = mock(MockLocationDatatype.class);
 		when(datatype.deserialize(eq(locationUuid))).thenReturn(expectedLocation);
 		when(datatype.getTextSummary(any(String.class))).thenCallRealMethod();

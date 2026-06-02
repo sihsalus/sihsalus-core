@@ -22,7 +22,7 @@ import org.openmrs.test.Verifies;
  * Tests the ClasspathCalculationProvider
  */
 public class ClasspathCalculationProviderTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see ClasspathCalculationProvider#getCalculation(String,String)
 	 * @verifies retrieve a configured configurable calculation with a valid configuration string
@@ -34,7 +34,7 @@ public class ClasspathCalculationProviderTest extends BaseModuleContextSensitive
 		Calculation c = p.getCalculation(MostRecentObsCalculation.class.getName(), "5089");
 		Assert.assertNotNull(c);
 	}
-	
+
 	/**
 	 * @see ClasspathCalculationProvider#getCalculation(String,String)
 	 * @verifies retrieve a non configurable calculation with a null configuration string
@@ -45,7 +45,7 @@ public class ClasspathCalculationProviderTest extends BaseModuleContextSensitive
 		Calculation c = p.getCalculation(AgeCalculation.class.getName(), null);
 		Assert.assertNotNull(c);
 	}
-	
+
 	/**
 	 * @see ClasspathCalculationProvider#getCalculation(String,String)
 	 * @verifies throw an exception if a configurable calculation is passed an illegal configuration
@@ -56,7 +56,7 @@ public class ClasspathCalculationProviderTest extends BaseModuleContextSensitive
 		ClasspathCalculationProvider p = new ClasspathCalculationProvider();
 		p.getCalculation(MostRecentObsCalculation.class.getName(), "5o89");
 	}
-	
+
 	/**
 	 * @see ClasspathCalculationProvider#getCalculation(String,String)
 	 * @verifies throw an exception if a non configurable calculation is passed a configuration
@@ -68,7 +68,7 @@ public class ClasspathCalculationProviderTest extends BaseModuleContextSensitive
 		ClasspathCalculationProvider p = new ClasspathCalculationProvider();
 		p.getCalculation(AgeCalculation.class.getName(), "something");
 	}
-	
+
 	/**
 	 * @see {@link ClasspathCalculationProvider#getCalculation(String,String)}
 	 */

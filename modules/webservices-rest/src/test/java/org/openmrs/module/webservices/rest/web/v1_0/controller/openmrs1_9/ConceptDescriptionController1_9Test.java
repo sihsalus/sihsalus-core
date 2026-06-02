@@ -27,13 +27,13 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.ConceptDescriptionResource1_8;
 
 public class ConceptDescriptionController1_9Test extends MainResourceControllerTest {
-	
+
 	String conceptUuid = "b055abd8-a420-4a11-8b98-02ee170a7b54";
-	
+
 	String descriptionUuid = "be3321b3-c1c7-4339-aaca-1b60db12e1df";
-	
+
 	private ConceptService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -41,7 +41,7 @@ public class ConceptDescriptionController1_9Test extends MainResourceControllerT
 	public String getURI() {
 		return "concept/" + conceptUuid + "/description";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -49,7 +49,7 @@ public class ConceptDescriptionController1_9Test extends MainResourceControllerT
 	public String getUuid() {
 		return descriptionUuid;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -57,12 +57,12 @@ public class ConceptDescriptionController1_9Test extends MainResourceControllerT
 	public long getAllCount() {
 		return service.getConceptByUuid(conceptUuid).getDescriptions().size();
 	}
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		this.service = Context.getConceptService();
 	}
-	
+
 	/**
 	 * @See {@link ConceptDescriptionResource1_8#create(String, SimpleObject, org.openmrs.module.webservices.rest.web.RequestContext)}
 	 * @throws Exception
@@ -71,13 +71,13 @@ public class ConceptDescriptionController1_9Test extends MainResourceControllerT
 	public void shouldAddADescriptionToConcept() throws Exception {
 		int before = service.getConceptByUuid(conceptUuid).getDescriptions().size();
 		String json = "{ \"description\":\"New Description\", \"locale\":\"fr\"}";
-		
+
 		handle(newPostRequest(getURI(), json));
-		
+
 		int after = service.getConceptByUuid(conceptUuid).getDescriptions().size();
 		Assertions.assertEquals(before + 1, after);
 	}
-	
+
 	/**
 	 * @See {@link ConceptDescriptionResource1_8#doGetAll(Concept, org.openmrs.module.webservices.rest.web.RequestContext)}
 	 * @throws Exception
@@ -91,18 +91,18 @@ public class ConceptDescriptionController1_9Test extends MainResourceControllerT
 		Context.getConceptService().saveConcept(testConcept);
 		Assertions.assertNotNull(testDescription.getConceptDescriptionId());
 		Assertions.assertEquals(2, testConcept.getDescriptions().size());
-		
+
 		SimpleObject response = deserialize(handle(newGetRequest(getURI())));
-		
+
 		List<Object> resultsList = Util.getResultsList(response);
 		Assertions.assertEquals(2, resultsList.size());
 		List<Object> descriptions = Arrays.asList(PropertyUtils.getProperty(resultsList.get(0), "description"),
 		    PropertyUtils.getProperty(resultsList.get(1), "description"));
-		
+
 		Assertions.assertTrue(descriptions.contains("Affirmative"));
 		Assertions.assertTrue(descriptions.contains("another description"));
 	}
-	
+
 	/**
 	 * @See {@link ConceptDescriptionResource1_8#update(String, String, SimpleObject, org.openmrs.module.webservices.rest.web.RequestContext)}
 	 * @throws Exception
@@ -111,32 +111,32 @@ public class ConceptDescriptionController1_9Test extends MainResourceControllerT
 	public void shouldEditAConceptDescription() throws Exception {
 		ConceptDescription conceptDescription = service.getConceptDescriptionByUuid(descriptionUuid);
 		Assertions.assertEquals("Affirmative", conceptDescription.getDescription());
-		
+
 		String json = "{ \"description\":\"NEW TEST DESCRIPTION\"}";
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
-		
+
 		//should have created a new one with the new description
 		Assertions.assertTrue(PropertyUtils.getProperty(conceptDescription, "description").equals("NEW TEST DESCRIPTION"));
 	}
-	
+
 	/**
 	 * This tests that delete always delegates to
 	 * {@link ConceptDescriptionResource1_8#purge(ConceptDescription, org.openmrs.module.webservices.rest.web.RequestContext)}
 	 * since descriptions are not retirable/voidable
-	 * 
+	 *
 	 * @see {@link ConceptDescriptionResource1_8#delete(ConceptDescription, String, org.openmrs.module.webservices.rest.web.RequestContext)}
 	 * @throws Exception
 	 */
 	@Test
 	public void shouldDeleteAConceptDescription() throws Exception {
 		int before = service.getConceptByUuid(conceptUuid).getDescriptions().size();
-		
+
 		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("reason", "testing")));
-		
+
 		int after = service.getConceptByUuid(conceptUuid).getDescriptions().size();
 		Assertions.assertEquals(before - 1, after);
 	}
-	
+
 	/**
 	 * @See {@link ConceptDescriptionResource1_8#purge(ConceptDescription, org.openmrs.module.webservices.rest.web.RequestContext)}
 	 * @throws Exception
@@ -144,11 +144,11 @@ public class ConceptDescriptionController1_9Test extends MainResourceControllerT
 	@Test
 	public void shouldPurgeAConceptDescription() throws Exception {
 		int before = service.getConceptByUuid(conceptUuid).getDescriptions().size();
-		
+
 		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("purge", "")));
-		
+
 		int after = service.getConceptByUuid(conceptUuid).getDescriptions().size();
 		Assertions.assertEquals(before - 1, after);
 	}
-	
+
 }

@@ -18,13 +18,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class OldDiagnosisBuilder {
-	
+
 	private DiagnosisMetadata dmd;
-	
+
 	public OldDiagnosisBuilder(DiagnosisMetadata diagnosisMetadata) {
 		this.dmd = diagnosisMetadata;
 	}
-	
+
 	public ObsBuilder buildDiagnosis(Patient patient, String dateYmd, Diagnosis.Order order, Diagnosis.Certainty certainty,
 	        Object diagnosis, Encounter encounter) {
 		ObsBuilder builder = new ObsBuilder().setPerson(patient).setEncounter(encounter).setObsDatetime(parseYmd(dateYmd))
@@ -39,7 +39,7 @@ public class OldDiagnosisBuilder {
 		}
 		return builder;
 	}
-	
+
 	private Date parseYmd(String ymd) {
 		try {
 			return new SimpleDateFormat("yyyy-MM-dd").parse(ymd);

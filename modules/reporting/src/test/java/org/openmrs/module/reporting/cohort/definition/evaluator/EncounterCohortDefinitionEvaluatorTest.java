@@ -40,18 +40,18 @@ import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 @SkipBaseSetup
 public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		initializeInMemoryDatabase();
 		authenticate();
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -69,7 +69,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(c.contains(23));
 		Assert.assertTrue(c.contains(24));
 	}
-	
+
 	/**
 	 * @see {@link EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -88,7 +88,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(c.contains(21));
 		Assert.assertTrue(c.contains(23));
 	}
-	
+
 	/**
 	 * @see {@link EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -109,14 +109,14 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(c.contains(21));
 		Assert.assertTrue(c.contains(23));
 	}
-	
+
 	/**
 	 * @see {@link EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
 	@Test
 	@Verifies(value = "should return correct patients when creation date parameters are set", method = "evaluate(CohortDefinition,EvaluationContext)")
 	public void evaluate_shouldReturnCorrectPatientsWhenCreationDateParametersAreSet() throws Exception {
-		
+
 		// If parameter dates have no time components, they should return all encounters on that date
 		{
 			EncounterCohortDefinition cd = new EncounterCohortDefinition();
@@ -125,7 +125,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 			Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 			Assert.assertEquals(6, c.size());
 		}
-		
+
 		// If parameter dates do have time components, they should return all encounters between the specific datetimes
 		{
 			EncounterCohortDefinition cd = new EncounterCohortDefinition();
@@ -135,16 +135,16 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 			Assert.assertEquals(3, c.size());
 		}
 	}
-	
+
 	/**
 	 * @see {@link EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
 	@Test
 	@Verifies(value = "should return correct patients when time qualifier parameters are set", method = "evaluate(CohortDefinition,EvaluationContext)")
 	public void evaluate_shouldReturnCorrectPatientsWhenTimeQualifierParametersAreSet() throws Exception {
-		
+
 		EvaluationContext context = new EvaluationContext();
-		
+
 		// None specified use case
 		{
 			EncounterCohortDefinition cd = new EncounterCohortDefinition();
@@ -153,7 +153,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 			cd.setOnOrBefore(DateUtil.getDateTime(2009, 8, 31));
 			Assert.assertEquals(3, DefinitionContext.getCohortDefinitionService().evaluate(cd, context).size());
 		}
-		
+
 		// Any use case
 		{
 			EncounterCohortDefinition cd = new EncounterCohortDefinition();
@@ -163,7 +163,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 			cd.setOnOrBefore(DateUtil.getDateTime(2009, 8, 31));
 			Assert.assertEquals(3, DefinitionContext.getCohortDefinitionService().evaluate(cd, context).size());
 		}
-		
+
 		// First use case
 		{
 			EncounterCohortDefinition cd = new EncounterCohortDefinition();
@@ -181,7 +181,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 			cd.setOnOrBefore(DateUtil.getDateTime(2009, 9, 30));
 			Assert.assertEquals(2, DefinitionContext.getCohortDefinitionService().evaluate(cd, context).size());
 		}
-		
+
 		// Last use case
 		{
 			EncounterCohortDefinition cd = new EncounterCohortDefinition();
@@ -200,7 +200,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 			Assert.assertEquals(2, DefinitionContext.getCohortDefinitionService().evaluate(cd, context).size());
 		}
 	}
-	
+
 	/**
 	 * @see EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)
 	 * @verifies return correct patients when provider parameters are set
@@ -212,7 +212,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		cd.addProvider(new Person(2));
 		Assert.assertEquals(2, DefinitionContext.getCohortDefinitionService().evaluate(cd, new EvaluationContext()).size());
 	}
-	
+
 	/**
 	 * @see {@link EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -220,11 +220,11 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 	@Test
 	@Verifies(value = "should not return voided patients", method = "evaluate(CohortDefinition,EvaluationContext)")
 	public void evaluate_shouldNotReturnVoidedPatients() throws Exception {
-		
+
 		Patient patient = Context.getPatientService().getPatient(7);
 		Context.getPatientService().voidPatient(patient, "testing");
 		Context.flushSession();
-		
+
 		EncounterCohortDefinition cd = new EncounterCohortDefinition();
 		cd.setEncounterTypeList(new ArrayList<EncounterType>()); // this is a regression test for a NPE on empty lists
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
@@ -236,7 +236,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(c.contains(23));
 		Assert.assertTrue(c.contains(24));
 	}
-	
+
 	/**
 	 * @see {@link EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -250,13 +250,13 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		enc.setEncounterDatetime(DateUtil.getDateTime(2005, 8, 1, 11, 0, 0, 0));
 		es.saveEncounter(enc);
 		Context.flushSession();//because the query will compare with the value in the DB
-		
+
 		EncounterCohortDefinition cd = new EncounterCohortDefinition();
 		cd.setOnOrBefore(DateUtil.getDateTime(2005, 8, 1));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(patientId));
 	}
-	
+
 	/**
 	 * @see {@link EncounterCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -269,7 +269,7 @@ public class EncounterCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Encounter enc = es.getEncounter(13);
 		final Integer patientId = 7;
 		Assert.assertEquals(patientId, enc.getPatient().getPatientId());
-		
+
 		EncounterCohortDefinition cd = new EncounterCohortDefinition();
 		cd.setCreatedOnOrBefore(DateUtil.getDateTime(2005, 8, 1));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);

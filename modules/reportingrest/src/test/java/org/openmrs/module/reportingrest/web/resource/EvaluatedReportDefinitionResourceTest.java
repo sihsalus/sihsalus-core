@@ -65,7 +65,7 @@ public class EvaluatedReportDefinitionResourceTest extends BaseEvaluatedResource
         assertThat((String) path(response, "dataSets", 0, "definition", "name"), is("Not everyone"));
         assertThat((String) path(response, "dataSets", 1, "definition", "name"), is("For fun"));
     }
-    
+
     @Test
     public void testEvaluatingUsingPost() throws Exception {
         SimpleObject postBody = new SimpleObject()

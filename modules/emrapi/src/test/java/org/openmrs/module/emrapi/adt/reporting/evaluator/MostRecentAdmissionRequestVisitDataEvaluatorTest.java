@@ -46,33 +46,33 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 public class MostRecentAdmissionRequestVisitDataEvaluatorTest extends BaseReportingTest {
-	
+
 	@Autowired
 	private VisitDataService visitDataService;
-	
+
 	@Autowired
 	private ConceptService conceptService;
-	
+
 	@Autowired
 	private DispositionService dispositionService;
-	
+
 	@Autowired
 	private TestDataManager testDataManager;
-	
+
 	@Autowired
 	private EmrApiProperties emrApiProperties;
-	
+
 	@Autowired
 	private EmrConceptService emrConceptService;
-	
+
 	private DispositionDescriptor dispositionDescriptor;
-	
+
 	private DiagnosisMetadata diagnosisMetadata;
-	
+
 	MostRecentAdmissionRequestVisitDataDefinition def;
-	
+
 	VisitEvaluationContext context;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("baseTestDataset.xml");
@@ -85,27 +85,27 @@ public class MostRecentAdmissionRequestVisitDataEvaluatorTest extends BaseReport
 		Context.getAdministrationService().setGlobalProperty(EmrApiConstants.GP_USE_LEGACY_DIAGNOSIS_SERVICE, "true");
 		Context.flushSession();
 	}
-	
+
 	@Test
 	public void shouldReturnMostRecentAdmissionRequestForVisit() throws Exception {
-		
+
 		EncounterRole encounterRole = testDataManager.getEncounterService().getEncounterRole(1);
 		Patient patient = testDataManager.randomPatient().birthdate("1980-01-01").save();
-		
+
 		Concept firstCodedDiagnosisConcept = conceptService.getConcept(3);
 		Concept secondCodedDiagnosisConcept = conceptService.getConcept(4);
-		
+
 		Provider mostRecentProvider = testDataManager.randomProvider().save();
 		Location mostRecentLocation = testDataManager.getLocationService().getLocation(1);
 		Date mostRecentDate = new DateTime(2014, 1, 1, 12, 0, 0).toDate();
-		
+
 		Provider otherProvider = testDataManager.randomProvider().save();
 		Location otherLocation = testDataManager.getLocationService().getLocation(2);
 		Date otherDate = new DateTime(2014, 1, 1, 11, 0, 0).toDate();
-		
+
 		Location mostRecentAdmissionLocation = testDataManager.getLocationService().getLocation(3);
 		Location otherAdmissionLocation = testDataManager.getLocationService().getLocation(1);
-		
+
 		// a visit with two visit note encounter with dispo = ADMIT and some diagnoses
 		Visit visit = testDataManager.visit().patient(patient).visitType(emrApiProperties.getAtFacilityVisitType())
 		        .started(otherDate).save();
@@ -137,7 +137,7 @@ public class MostRecentAdmissionRequestVisitDataEvaluatorTest extends BaseReport
 		                        .value("Primary", "org.openmrs.module.emrapi").get())
 		                .get())
 		        .save();
-		
+
 		Encounter encounter2 = testDataManager.encounter().patient(patient).encounterDatetime(otherDate)
 		        .encounterType(emrApiProperties.getVisitNoteEncounterType()).provider(encounterRole, otherProvider)
 		        .location(otherLocation).visit(visit)
@@ -154,11 +154,11 @@ public class MostRecentAdmissionRequestVisitDataEvaluatorTest extends BaseReport
 		                        .get())
 		                .get())
 		        .save();
-		
+
 		new VisitIdSet(visit.getId());
-		
+
 		EvaluatedVisitData data = visitDataService.evaluate(def, context);
-		
+
 		assertThat(data.getData().size(), is(1));
 		assertThat((Date) ((Map<String, Object>) data.getData().get(visit.getId())).get("datetime"), is(mostRecentDate));
 		assertThat((Provider) ((Map<String, Object>) data.getData().get(visit.getId())).get("provider"),
@@ -167,21 +167,21 @@ public class MostRecentAdmissionRequestVisitDataEvaluatorTest extends BaseReport
 		    is(mostRecentLocation));
 		assertThat((Location) ((Map<String, Object>) data.getData().get(visit.getId())).get("toLocation"),
 		    is(mostRecentAdmissionLocation));
-		
+
 		List<Diagnosis> diagnoses = (List<Diagnosis>) ((Map<String, Object>) data.getData().get(visit.getId()))
 		        .get("diagnoses");
 		assertThat(diagnoses.size(), is(2));
-		
+
 		// hacky work-around for the fact the diagnoses could come back in either order
 		if (diagnoses.get(0).getDiagnosis().getCodedAnswer() != null) {
 			assertThat(diagnoses.get(0).getDiagnosis().getCodedAnswer(), is(firstCodedDiagnosisConcept));
 			assertThat(diagnoses.get(1).getDiagnosis().getNonCodedAnswer(), is("some diagnosis"));
-			
+
 		} else {
 			assertThat(diagnoses.get(1).getDiagnosis().getCodedAnswer(), is(firstCodedDiagnosisConcept));
 			assertThat(diagnoses.get(0).getDiagnosis().getNonCodedAnswer(), is("some diagnosis"));
 		}
-		
+
 	}
-	
+
 }

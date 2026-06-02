@@ -27,113 +27,113 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.jupiter.MainResou
 import org.springframework.context.annotation.Description;
 
 public class CohortMemberResourceControllerTest extends MainResourceControllerTest {
-	
+
 	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-	
+
 	private CohortM cohort;
-	
+
 	private Patient patient;
-	
+
 	@Override
 	public String getURI() {
 		return "cohortm/cohortmember";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return null;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	@BeforeEach
 	public void setUp() {
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		cohort = createMinimalCohort();
-		
+
 		Location location = Context.getLocationService().saveLocation(createMinimalLocation());
 		PatientIdentifierType patientIdentifierType = Context.getPatientService()
 		        .savePatientIdentifierType(createMinimalPatientIdentifierType());
 		patient = createMinimalPatient(location, patientIdentifierType);
 		Context.getPatientService().savePatient(patient);
 	}
-	
+
 	@Test
 	@Description("Verifies if a new CohortMember can be successfully created and saved")
 	public void shouldCreateNewCohortMember() throws Exception {
 		Context.getService(CohortService.class).saveCohortM(cohort);
-		
+
 		String json = String.format(
 		    "{ \"cohort\": \"%s\", \"patient\":\"%s\", \"startDate\":\"2023-08-22T01:00:00.000+0000\" }", cohort.getUuid(),
 		    patient.getUuid());
-		
+
 		assertEquals(0, Context.getService(CohortMemberService.class).findAllCohortMembers().size());
-		
+
 		handle(newPostRequest(getURI(), json));
-		
+
 		Collection<CohortMember> cohortMembers = Context.getService(CohortMemberService.class).findAllCohortMembers();
 		assertEquals(1, cohortMembers.size());
-		
+
 		CohortMember cohortMember = cohortMembers.iterator().next();
 		assertEquals(cohort.getUuid(), cohortMember.getCohort().getUuid());
 		assertEquals(patient.getUuid(), cohortMember.getPatient().getUuid());
 		assertNotNull(cohortMember.getStartDate());
 		assertNull(cohortMember.getEndDate());
 	}
-	
+
 	@Test
 	@Description("Verifies if an existing CohortMember can be successfully updated")
 	public void shouldUpdateExistingCohortMember() throws Exception {
 		CohortMember cohortMember = createMinimalCohortMember();
 		cohort.addMemberships(cohortMember);
-		
+
 		Context.getService(CohortService.class).saveCohortM(cohort);
 		Context.getService(CohortMemberService.class).saveCohortMember(cohortMember);
-		
+
 		String json = String.format(
 		    "{ \"cohort\": \"%s\", \"patient\":\"%s\", \"startDate\":\"2023-08-22T01:00:00.000+0000\", \"endDate\":\"2023-09-22T01:00:00.000+0000\" }",
 		    cohort.getUuid(), patient.getUuid());
-		
+
 		assertEquals(1, Context.getService(CohortMemberService.class).findAllCohortMembers().size());
 		assertNull(cohortMember.getEndDate());
-		
+
 		handle(newPostRequest(getURI(), json));
-		
+
 		Collection<CohortMember> cohortMembers = Context.getService(CohortMemberService.class).findAllCohortMembers();
 		assertEquals(1, cohortMembers.size());
-		
+
 		CohortMember updatedCohortMember = cohortMembers.iterator().next();
 		assertNotNull(updatedCohortMember.getEndDate());
 		assertEquals(cohortMember.getEndDate(), updatedCohortMember.getEndDate());
 	}
-	
+
 	@Test
 	@Description("Verifies if an existing CohortMember's endDate can be updated")
 	public void shouldUpdateEndDateOnACohortMember() throws Exception {
 		CohortMember cohortMember = createMinimalCohortMember();
 		cohort.addMemberships(cohortMember);
-		
+
 		Context.getService(CohortService.class).saveCohortM(cohort);
 		Context.getService(CohortMemberService.class).saveCohortMember(cohortMember);
-		
+
 		String expectedEndDate = "2023-08-22T01:00:00.000+0000";
 		String json = String.format("{ \"endDate\": \"%s\" }", expectedEndDate);
-		
+
 		assertNull(cohortMember.getEndDate());
-		
+
 		handle(newPostRequest(getURI() + "/" + cohortMember.getUuid(), json));
-		
+
 		Collection<CohortMember> cohortMembers = Context.getService(CohortMemberService.class).findAllCohortMembers();
-		
+
 		CohortMember updatedCohortMember = cohortMembers.iterator().next();
 		assertEquals(cohortMember.getUuid(), updatedCohortMember.getUuid());
 		assertNotNull(updatedCohortMember.getEndDate());
 		assertEquals(sdf.parse(expectedEndDate), updatedCohortMember.getEndDate());
 	}
-	
+
 	private CohortM createMinimalCohort() {
 		CohortM cohort = new CohortM();
 		cohort.setName("sample cohort");
@@ -141,43 +141,43 @@ public class CohortMemberResourceControllerTest extends MainResourceControllerTe
 		cohort.setDescription("sample cohort");
 		return cohort;
 	}
-	
+
 	private Patient createMinimalPatient(Location location, PatientIdentifierType patientIdentifierType) {
 		Patient patient = new Patient();
 		patient.setUuid(UUID.randomUUID().toString());
-		
+
 		PersonName pName = new PersonName();
 		pName.setGivenName("John");
 		pName.setMiddleName("A.");
 		pName.setFamilyName("Doe");
-		
+
 		patient.addName(pName);
 		patient.setGender("M");
-		
+
 		PatientIdentifier patientIdentifier = new PatientIdentifier();
 		patientIdentifier.setIdentifier("123456");
 		patientIdentifier.setLocation(location);
 		patientIdentifier.setIdentifierType(patientIdentifierType);
-		
+
 		patient.addIdentifier(patientIdentifier);
-		
+
 		return patient;
 	}
-	
+
 	private Location createMinimalLocation() {
 		Location location = new Location();
 		location.setName("Sample Location");
 		location.setDescription("Sample Location Description");
 		return location;
 	}
-	
+
 	private PatientIdentifierType createMinimalPatientIdentifierType() {
 		PatientIdentifierType identifierType = new PatientIdentifierType();
 		identifierType.setName("Sample Identifier Type");
 		identifierType.setDescription("Sample Identifier Type Description");
 		return identifierType;
 	}
-	
+
 	private CohortMember createMinimalCohortMember() {
 		CohortMember cohortMember = new CohortMember();
 		cohortMember.setCohort(cohort);
@@ -185,24 +185,24 @@ public class CohortMemberResourceControllerTest extends MainResourceControllerTe
 		cohortMember.setStartDate(Date.from(Instant.now()));
 		return cohortMember;
 	}
-	
+
 	@Override
 	public void shouldGetDefaultByUuid() {
-		
+
 	}
-	
+
 	@Override
 	public void shouldGetFullByUuid() {
-		
+
 	}
-	
+
 	@Override
 	public void shouldGetRefByUuid() {
-		
+
 	}
-	
+
 	@Override
 	public void shouldGetAll() {
-		
+
 	}
 }

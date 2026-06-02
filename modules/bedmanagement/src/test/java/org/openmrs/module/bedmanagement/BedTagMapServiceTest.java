@@ -15,23 +15,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class BedTagMapServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	private String privilegedUser;
-	
+
 	private String privilegedUserPassword;
-	
+
 	private String normalUser;
-	
+
 	private String normalUserPassword;
-	
+
 	private Bed bedFifteen;
-	
+
 	private BedTag isolationBedTag;
-	
+
 	private BedTagMap bedTagMap;
-	
+
 	private BedTagMapService bedTagMapService;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		privilegedUser = "edit-tags-user";
@@ -46,82 +46,82 @@ public class BedTagMapServiceTest extends BaseModuleContextSensitiveTest {
 		bedTagMap.setBed(bedFifteen);
 		bedTagMapService = Context.getService(BedTagMapService.class);
 	}
-	
+
 	@Test
 	public void shouldAssignTheBedTagToBedIfTheUserHasTheGetTagsEditTagsAndGetBedsPrivileges() {
 		Context.authenticate(privilegedUser, privilegedUserPassword);
 		BedTagMap savedBedTagMap = bedTagMapService.save(bedTagMap);
-		
+
 		assertNotNull(savedBedTagMap);
 		assertNotNull(savedBedTagMap.getId());
 		assertEquals(isolationBedTag, savedBedTagMap.getBedTag());
 		assertEquals(bedFifteen, savedBedTagMap.getBed());
 	}
-	
+
 	@Test(expected = APIAuthenticationException.class)
 	public void shouldThrowAuthenticationExceptionIfTheUserDoesNotHaveTheGetTagsEditTagsAndGetBedsPrivileges() {
 		Context.authenticate(normalUser, normalUserPassword);
 		bedTagMapService.save(bedTagMap);
 	}
-	
+
 	@Test
 	public void shouldUnAssignTheBedTagFromTheBedIfTheUserHasTheGetTagsEditTagsAndGetBedsPrivileges() {
 		Context.authenticate(privilegedUser, privilegedUserPassword);
 		bedTagMapService.delete(bedTagMap, "Need beds in general ward");
 	}
-	
+
 	@Test(expected = APIAuthenticationException.class)
 	public void shouldThrowAuthenticationExceptionIfTheUserDoesNotHaveTheGetTagsEditTagsAndGetBedsPrivilegesWhileDeletingTheBedTagMap() {
 		Context.authenticate(normalUser, normalUserPassword);
 		bedTagMapService.delete(bedTagMap, "Need beds in general ward");
 	}
-	
+
 	@Test
 	public void shouldGetBedTagMapByUuidIfTheUserHasTheGetTagsAndGetBedsPrivileges() {
 		Context.authenticate(privilegedUser, privilegedUserPassword);
 		BedTag oxygenBedTag = bedTagMapService.getBedTagByUuid("5580cddd-c290-66c8-8d3a-96dc33d199f1");
 		BedTagMap bedElevenWithOxygenTag = bedTagMapService.getBedTagMapByUuid("5580cddd-c290-66c8-8d3a-96dc33d199f4");
-		
+
 		assertNotNull(bedElevenWithOxygenTag);
 		assertNotNull(bedElevenWithOxygenTag.getId());
 		assertEquals(oxygenBedTag, bedElevenWithOxygenTag.getBedTag());
 		assertEquals(bedFifteen, bedElevenWithOxygenTag.getBed());
 	}
-	
+
 	@Test(expected = APIAuthenticationException.class)
 	public void shouldThrowAuthenticationExceptionIfTheUserDoesNotHaveTheGetTagsAndGetBedsPrivilegesWhileGettingTheBedTagMapUsingUuid() {
 		Context.authenticate(normalUser, normalUserPassword);
 		bedTagMapService.getBedTagMapByUuid("5580cddd-c290-66c8-8d3a-96dc33d199f4");
 	}
-	
+
 	@Test
 	public void shouldGetBedTagMapWithBedAndTagIfTheUserHasTheGetTagsAndGetBedsPrivileges() {
 		Context.authenticate(privilegedUser, privilegedUserPassword);
 		BedTag oxygenBedTag = bedTagMapService.getBedTagByUuid("5580cddd-c290-66c8-8d3a-96dc33d199f1");
 		BedTagMap bedTagMapWithBedAndTag = bedTagMapService.getBedTagMapWithBedAndTag(bedFifteen, oxygenBedTag);
-		
+
 		assertNotNull(bedTagMapWithBedAndTag);
 		assertNotNull(bedTagMapWithBedAndTag.getId());
 		assertEquals(oxygenBedTag, bedTagMapWithBedAndTag.getBedTag());
 		assertEquals(bedFifteen, bedTagMapWithBedAndTag.getBed());
 	}
-	
+
 	@Test(expected = APIAuthenticationException.class)
 	public void shouldThrowAuthenticationExceptionIfTheUserDoesNotHaveTheGetTagsAndGetBedsPrivilegesWhileGettingTheBedTagMapUsingBedAndBedTag() {
 		Context.authenticate(normalUser, normalUserPassword);
 		BedTag oxygenBedTag = bedTagMapService.getBedTagByUuid("5580cddd-c290-66c8-8d3a-96dc33d199f1");
 		bedTagMapService.getBedTagMapWithBedAndTag(bedFifteen, oxygenBedTag);
 	}
-	
+
 	@Test
 	public void shouldGetBedTagByUuidIfTheUserHasTheGetTagsAndGetBedsPrivileges() throws Exception {
 		Context.authenticate(privilegedUser, privilegedUserPassword);
 		BedTag oxygenBedTag = bedTagMapService.getBedTagByUuid("5580cddd-c290-66c8-8d3a-96dc33d199f1");
-		
+
 		assertNotNull(oxygenBedTag);
 		assertEquals("Oxygen", oxygenBedTag.getName());
 	}
-	
+
 	@Test(expected = APIAuthenticationException.class)
 	public void shouldThrowAuthenticationExceptionIfTheUserDoesNotHaveTheGetTagsAndGetBedsPrivilegesWhileGettingBedTagByUuid()
 	        throws Exception {

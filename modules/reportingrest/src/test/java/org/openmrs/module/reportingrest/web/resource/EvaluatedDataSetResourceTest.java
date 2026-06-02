@@ -55,9 +55,9 @@ public class EvaluatedDataSetResourceTest extends BaseEvaluatedResourceTest<Eval
 
     @Autowired
     LocationService locationService;
-    
+
     public static final String UUID_FOR_PARAMS_DSD = "uuid-for-params-dsd";
-    
+
     @Before
     public void setUp() throws Exception {
         executeDataSet("DataSetDefinitionTest.xml");
@@ -87,23 +87,23 @@ public class EvaluatedDataSetResourceTest extends BaseEvaluatedResourceTest<Eval
         Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
         assertThat((Integer) firstRow.get("PERSON_ID"), is(43));
     }
-    
+
     @Test
     public void testEvaluatingDsdWithParametersUsingPost() throws Exception {
         saveDsdWithParams();
-        
+
         RequestContext context = buildRequestContext();
         SimpleObject postBody = new SimpleObject()
                 .add("param1", "these are words, that we won't use")
                 .add("param2", "1995-01-10");
         SimpleObject response = (SimpleObject) getResource().update(UUID_FOR_PARAMS_DSD, postBody, context);
-        
+
         List rows = (List) response.get("rows");
         assertThat(rows.size(), is(1));
         Map<String, Object> firstRow = (Map<String, Object>) rows.get(0);
         assertThat((Integer) firstRow.get("PERSON_ID"), is(43));
     }
-    
+
     private void saveDsdWithParams() {
         SqlDataSetDefinition dsd = new SqlDataSetDefinition();
         dsd.setName("Not everyone");

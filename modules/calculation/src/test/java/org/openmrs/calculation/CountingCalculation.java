@@ -27,7 +27,7 @@ import org.openmrs.calculation.result.SimpleResult;
  * necessarily having a patient matching every single memberId in the passed in cohort
  */
 public class CountingCalculation extends BaseCalculation implements PatientCalculation {
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(java.util.Collection, java.util.Map, org.openmrs.calculation.patient.PatientCalculationContext)
 	 */
@@ -36,8 +36,8 @@ public class CountingCalculation extends BaseCalculation implements PatientCalcu
 		CalculationResultMap results = new CalculationResultMap();
 		for (Integer patientId : cohort)
 			results.put(patientId, new SimpleResult(patientId, this));
-		
+
 		return results;
 	}
-	
+
 }

@@ -26,12 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public class CohortResource2_1WebTest extends MainResourceControllerTest {
-	
+
 	public static final String COHORT_NAME = "A cohort";
-	
+
 	@Autowired
 	private CohortService cohortService;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		Cohort cohort = new Cohort();
@@ -42,14 +42,14 @@ public class CohortResource2_1WebTest extends MainResourceControllerTest {
 		cohort.setUuid(RestTestConstants2_1.COHORT_UUID);
 		cohortService.saveCohort(cohort);
 	}
-	
+
 	@Test
 	public void shouldVoid() throws Exception {
 		MockHttpServletRequest request = newDeleteRequest(getURI() + "/" + getUuid());
 		handle(request);
 		assertTrue(cohortService.getCohortByUuid(RestTestConstants2_1.COHORT_UUID).getVoided());
 	}
-	
+
 	@Test
 	public void shouldPurge() throws Exception {
 		MockHttpServletRequest request = newDeleteRequest(getURI() + "/" + getUuid());
@@ -57,7 +57,7 @@ public class CohortResource2_1WebTest extends MainResourceControllerTest {
 		handle(request);
 		assertNull(cohortService.getCohortByUuid(RestTestConstants2_1.COHORT_UUID));
 	}
-	
+
 	@Test
 	public void shouldEdit() throws Exception {
 		String newDescription = "New description";
@@ -67,20 +67,20 @@ public class CohortResource2_1WebTest extends MainResourceControllerTest {
 		assertThat((String) result.get("description"), is(newDescription));
 		assertThat(cohortService.getCohortByUuid(RestTestConstants2_1.COHORT_UUID).getDescription(), is(newDescription));
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "cohort";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants2_1.COHORT_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 1;
 	}
-	
+
 }

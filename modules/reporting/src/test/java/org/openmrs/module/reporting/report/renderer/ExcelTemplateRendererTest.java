@@ -54,54 +54,54 @@ public class ExcelTemplateRendererTest extends BaseModuleContextSensitiveTest {
 
 	@Test
 	public void shouldRenderToExcelTemplate() throws Exception {
-		
+
 		// We first set up a report with 2 indicators, numbered 1 and 2
-		
+
 		GenderCohortDefinition males = new GenderCohortDefinition();
 		males.setName("Males");
 		males.setMaleIncluded(true);
-		
+
 		GenderCohortDefinition females = new GenderCohortDefinition();
 		females.setName("Females");
 		females.setFemaleIncluded(true);
-		
+
 		ReportDefinition report = new ReportDefinition();
 		report.setName("Test Report");
 		report.addParameter(new Parameter("programState", "Which program state?", ProgramWorkflowState.class));
-		
+
 		CohortCrossTabDataSetDefinition genderDsd = new CohortCrossTabDataSetDefinition();
 		genderDsd.addColumn("males", males, null);
 		genderDsd.addColumn("females", females, null);
 		report.addDataSetDefinition("genders", genderDsd, null);
-		
+
 		SimplePatientDataSetDefinition allPatients = new SimplePatientDataSetDefinition("allPatients", "");
 		allPatients.addPatientProperty("patientId");
 		allPatients.addPatientProperty("gender");
 		allPatients.addPatientProperty("birthdate");
 		report.addDataSetDefinition("allPatients", allPatients, null);
-		
+
 		SqlDataSetDefinition femaleDetails = new SqlDataSetDefinition();
 		femaleDetails.setName("femaleDetails");
 		femaleDetails.setSqlQuery("select p.patient_id, n.gender, n.birthdate from patient p, person n where p.patient_id = n.person_id and n.gender = 'F'");
 		report.addDataSetDefinition("femalePatients", femaleDetails, null);
-		
+
 		SqlDataSetDefinition maleDetails = new SqlDataSetDefinition();
 		maleDetails.setName("maleDetails");
 		maleDetails.setSqlQuery("select p.patient_id, n.gender, n.birthdate from patient p, person n where p.patient_id = n.person_id and n.gender = 'M'");
 		report.addDataSetDefinition("malePatients", maleDetails, null);
-		
+
 		// Next, we set up the ReportDesign and ReportDesignResource files for the renderer
-		
+
 		final ReportDesign design = new ReportDesign();
 		design.setName("TestDesign");
 		design.setReportDefinition(report);
 		design.setRendererType(ExcelTemplateRenderer.class);
-		
+
 		Properties props = new Properties();
 		props.put("repeatingSections", "sheet:1,row:6-8,dataset:allPatients | sheet:2,column:4,dataset:malePatients | sheet:3,dataset:allPatients");
 
 		design.setProperties(props);
-		
+
 		ReportDesignResource resource = new ReportDesignResource();
 		resource.setName("template.xls");
 		InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream("org/openmrs/module/reporting/report/renderer/ExcelTemplateRendererTest.xls");
@@ -110,15 +110,15 @@ public class ExcelTemplateRendererTest extends BaseModuleContextSensitiveTest {
 		design.addResource(resource);
 
 		// For now, we need this little magic to simulate what would happen if this were all stored in the database via the UI
-		
+
 		ExcelTemplateRenderer renderer = new ExcelTemplateRenderer() {
 			public ReportDesign getDesign(String argument) {
 				return design;
 			}
 		};
-		
+
 		// We construct an EvaluationContext (in this case the parameters aren't used, but included here for reference)
-		
+
 		EvaluationContext context = new EvaluationContext();
 		context.addParameterValue("programState", Context.getProgramWorkflowService().getStateByUuid("92584cdc-6a20-4c84-a659-e035e45d36b0"));
 		ReportDefinitionService rs = Context.getService(ReportDefinitionService.class);

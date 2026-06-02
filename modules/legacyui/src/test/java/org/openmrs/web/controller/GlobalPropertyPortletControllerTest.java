@@ -26,7 +26,7 @@ import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public class GlobalPropertyPortletControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see GlobalPropertyPortletController#populateModel(HttpServletRequest,Map)
 	 */
@@ -38,14 +38,14 @@ public class GlobalPropertyPortletControllerTest extends BaseModuleWebContextSen
 		GlobalPropertyPortletController portletController = new GlobalPropertyPortletController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		Map<String, Object> model = new HashMap<String, Object>();
-		
+
 		//when
 		String excludePrefix = "file.started;file.mandatory";
 		model.put("excludePrefix", excludePrefix);
 		GlobalProperty[] globalProperties = { new GlobalProperty("file.started", ""),
 		        new GlobalProperty("file.mandatory", ""), new GlobalProperty("file.other", "") };
 		Context.getAdministrationService().saveGlobalProperties(Arrays.asList(globalProperties));
-		
+
 		//then
 		portletController.populateModel(request, model);
 		List<GlobalProperty> properties = (List<GlobalProperty>) model.get("properties");
@@ -53,7 +53,7 @@ public class GlobalPropertyPortletControllerTest extends BaseModuleWebContextSen
 		Assertions.assertFalse(properties.contains(globalProperties[1]));
 		Assertions.assertTrue(properties.contains(globalProperties[2]));
 	}
-	
+
 	/**
 	 * @see GlobalPropertyPortletController#setupModelForModule(Map)
 	 */
@@ -63,18 +63,18 @@ public class GlobalPropertyPortletControllerTest extends BaseModuleWebContextSen
 		//given
 		GlobalPropertyPortletController portletController = new GlobalPropertyPortletController();
 		Map<String, Object> model = new HashMap<String, Object>();
-		
+
 		//when
 		String forModule = "file";
 		model.put("forModule", forModule);
-		
+
 		//then
 		portletController.setupModelForModule(model);
 		Assertions.assertEquals(forModule + ".", model.get("propertyPrefix"));
 		Assertions.assertEquals("true", model.get("hidePrefix"));
 		Assertions.assertEquals(forModule + ".started;" + forModule + ".mandatory", model.get("excludePrefix"));
 	}
-	
+
 	/**
 	 * @see GlobalPropertyPortletController#setupModelForModule(Map)
 	 */
@@ -84,16 +84,16 @@ public class GlobalPropertyPortletControllerTest extends BaseModuleWebContextSen
 		//given
 		GlobalPropertyPortletController portletController = new GlobalPropertyPortletController();
 		Map<String, Object> model = new HashMap<String, Object>();
-		
+
 		//when
-		
+
 		//then
 		portletController.setupModelForModule(model);
 		Assertions.assertNull(model.get("propertyPrefix"));
 		Assertions.assertNull(model.get("hidePrefix"));
 		Assertions.assertNull(model.get("excludePrefix"));
 	}
-	
+
 	/**
 	 * @see GlobalPropertyPortletController#setupModelForModule(Map)
 	 */
@@ -103,13 +103,13 @@ public class GlobalPropertyPortletControllerTest extends BaseModuleWebContextSen
 		//given
 		GlobalPropertyPortletController portletController = new GlobalPropertyPortletController();
 		Map<String, Object> model = new HashMap<String, Object>();
-		
+
 		//when
 		String forModule = "file";
 		String excludePrefix = "file.custom";
 		model.put("forModule", forModule);
 		model.put("excludePrefix", excludePrefix);
-		
+
 		//then
 		portletController.setupModelForModule(model);
 		Assertions.assertEquals(excludePrefix + ";" + forModule + ".started;" + forModule + ".mandatory",

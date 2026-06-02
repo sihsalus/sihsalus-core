@@ -27,15 +27,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class CohortQueryServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -56,7 +56,7 @@ public class CohortQueryServiceTest extends BaseModuleContextSensitiveTest {
 	private void assertCohort(Cohort cohort, Integer... memberIds) {
 	    Assert.assertEquals("Cohort was supposed to be: " + Arrays.asList(memberIds) + " but was instead: " + cohort.getCommaSeparatedPatientIds(), memberIds.length, cohort.size());
 	    for (Integer memberId : memberIds)
-	    	Assert.assertTrue("Cohort does not contain patient " + memberId, cohort.contains(memberId));
+		Assert.assertTrue("Cohort does not contain patient " + memberId, cohort.contains(memberId));
     }
 
 }

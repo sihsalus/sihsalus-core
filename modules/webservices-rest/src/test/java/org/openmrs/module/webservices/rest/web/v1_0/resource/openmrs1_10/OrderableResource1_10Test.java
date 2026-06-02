@@ -16,23 +16,23 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_10;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class OrderableResource1_10Test extends BaseDelegatingResourceTest<OrderableResource1_10, ConceptSearchResult> {
-	
+
 	@Override
 	public ConceptSearchResult newObject() {
 		Concept concept = Context.getConceptService().getConceptByUuid(getUuidProperty());
 		return new ConceptSearchResult("COUGH SYRUP", concept, concept.getName(), 12d);
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "COUGH SYRUP";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_10.COUGH_SYRUP_UUID;
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		assertPropEquals("display", getDisplayProperty());
@@ -44,7 +44,7 @@ public class OrderableResource1_10Test extends BaseDelegatingResourceTest<Ordera
 		assertPropNotPresent("word");
 		assertPropNotPresent("transientWeight");
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		assertPropEquals("display", getDisplayProperty());
@@ -56,7 +56,7 @@ public class OrderableResource1_10Test extends BaseDelegatingResourceTest<Ordera
 		assertPropNotPresent("word");
 		assertPropNotPresent("transientWeight");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		assertPropEquals("display", getDisplayProperty());

@@ -20,104 +20,104 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class ForwardingFilterTest {
-	
+
 	private ForwardingFilter filter;
-	
+
 	@Before
 	public void setup() {
 		filter = new ForwardingFilter();
 	}
-	
+
 	@Test
 	public void shouldRedirectForR4() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setRequestURI("/ws/fhir2/R4/Person");
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		filter.doFilter(request, response, new MockFilterChain());
-		
+
 		assertThat(response.getForwardedUrl(), notNullValue());
 		assertThat(response.getForwardedUrl(), equalTo("/ms/fhir2Servlet/Person"));
 	}
-	
+
 	@Test
 	public void shouldRedirectForR3() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setRequestURI("/ws/fhir2/R3/Person");
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		filter.doFilter(request, response, new MockFilterChain());
-		
+
 		assertThat(response.getForwardedUrl(), notNullValue());
 		assertThat(response.getForwardedUrl(), equalTo("/ms/fhir2R3Servlet/Person"));
 	}
-	
+
 	@Test
 	public void shouldReturn404WhenUsedWithoutVersion() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setRequestURI("/ws/fhir2/Person");
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		filter.doFilter(request, response, new MockFilterChain());
-		
+
 		assertThat(response.getStatus(), equalTo(404));
 	}
-	
+
 	@Test
 	public void shouldReturn404WhenUsedWithInvalidVersion() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setRequestURI("/ws/fhir2/R27/Person");
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		filter.doFilter(request, response, new MockFilterChain());
-		
+
 		assertThat(response.getStatus(), equalTo(404));
 	}
-	
+
 	@Test
 	public void shouldReturn404WhenUsedWithEmptyVersion() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setRequestURI("/ws/fhir2//Person");
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		filter.doFilter(request, response, new MockFilterChain());
-		
+
 		assertThat(response.getStatus(), equalTo(404));
 	}
-	
+
 	@Test
 	public void shouldReturn404WhenUsedWithoutPath() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setRequestURI("/ws/fhir2");
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		filter.doFilter(request, response, new MockFilterChain());
-		
+
 		assertThat(response.getStatus(), equalTo(404));
 	}
-	
+
 	@Test
 	public void shouldReturn404WhenUsedWithoutPathAndUrlEndsWithSlash() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setRequestURI("/ws/fhir2/");
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		filter.doFilter(request, response, new MockFilterChain());
-		
+
 		assertThat(response.getStatus(), equalTo(404));
 	}
 }

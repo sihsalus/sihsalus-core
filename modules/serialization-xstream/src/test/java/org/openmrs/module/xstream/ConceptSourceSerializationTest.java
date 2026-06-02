@@ -30,10 +30,10 @@ import static org.junit.Assert.assertFalse;
  * Test class that tests the serialization and deserialization of a conceptSource
  */
 public class ConceptSourceSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a conceptSource and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -43,11 +43,11 @@ public class ConceptSourceSerializationTest extends BaseModuleContextSensitiveTe
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptSourceSerializationTest.xml");
 		authenticate();
-		
+
 		ConceptSource cs = Context.getConceptService().getConceptSource(1);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(cs, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("14ea70c7-fe49-46ae-9957-8a678c82d1d8", "/conceptSource/@uuid", xmlOutput);
@@ -60,10 +60,10 @@ public class ConceptSourceSerializationTest extends BaseModuleContextSensitiveTe
 		XMLAssert.assertXpathEvaluatesTo(sdf.format(cs.getDateCreated()), "/conceptSource/dateCreated", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("false", "/conceptSource/@retired", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -123,10 +123,10 @@ public class ConceptSourceSerializationTest extends BaseModuleContextSensitiveTe
 		xmlBuilder.append("  </creator>\n");
 		xmlBuilder.append("  <dateCreated class=\"sql-timestamp\" id=\"16\">2006-01-20 00:00:00 CST</dateCreated>\n");
 		xmlBuilder.append("</conceptSource>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		ConceptSource cs = Context.getSerializationService().deserialize(xmlBuilder.toString(), ConceptSource.class,
 		    XStreamSerializer.class);
 		assertEquals("14ea70c7-fe49-46ae-9957-8a678c82d1d8", cs.getUuid());

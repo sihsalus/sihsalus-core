@@ -10,8 +10,8 @@
 package org.openmrs.module.webservices.rest.web.v1_0;
 
 public class RestTestConstants2_5 {
-	
+
 	public static final String ORDER_ATTRIBUTE_DATA_SET = "OrderAttributeTypeResourceTestDataset.xml";
-	
+
 	public static final String ORDER_ATTRIBUTE_TYPE_UUID = "cfc96e8e-1234-4c44-aaaa-abcdef123456";
 }

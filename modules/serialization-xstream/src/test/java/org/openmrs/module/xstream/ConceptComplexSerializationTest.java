@@ -30,10 +30,10 @@ import static org.junit.Assert.assertFalse;
  * Test class that tests the serialization and deserialization of a conceptComplex
  */
 public class ConceptComplexSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a conceptComplex and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -43,11 +43,11 @@ public class ConceptComplexSerializationTest extends BaseModuleContextSensitiveT
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptComplexSerializationTest.xml");
 		authenticate();
-		
+
 		ConceptComplex cc = Context.getConceptService().getConceptComplex(3);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(cc, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("0cbe2ed3-cd5f-4f46-9459-26127c9265ab", "/conceptComplex/@uuid", xmlOutput);
@@ -65,10 +65,10 @@ public class ConceptComplexSerializationTest extends BaseModuleContextSensitiveT
 		XMLAssert.assertXpathExists("/conceptComplex/conceptMappings/conceptMap[conceptMapId=1]", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("test purpose", "/conceptComplex/handler", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test

@@ -8,10 +8,10 @@ import org.openmrs.User;
 import org.openmrs.module.oauth2login.authscheme.UpdateUserTask.NullAwareBeanUtilsBean;
 
 public class NullAwareBeanUtilsBeanTest {
-	
+
 	@Test
 	public void copyProperties_shouldCopyOnlyNonNullProperties() throws Exception {
-		
+
 		// setup
 		User orig = new User();
 		orig.setEmail(null);
@@ -22,7 +22,7 @@ public class NullAwareBeanUtilsBeanTest {
 			p.addName(new PersonName("Jean", "J", "Doe"));
 			orig.setPerson(p);
 		}
-		
+
 		User dest = new User();
 		dest.setEmail("psmith@acme.com");
 		{
@@ -32,10 +32,10 @@ public class NullAwareBeanUtilsBeanTest {
 			p.addName(new PersonName("Jane", null, "Doe"));
 			dest.setPerson(p);
 		}
-		
+
 		// replay
 		new NullAwareBeanUtilsBean().copyProperties(dest, orig);
-		
+
 		// verify
 		Assert.assertEquals("psmith@acme.com", dest.getEmail());
 		Assert.assertEquals("n/a", dest.getPerson().getGender());

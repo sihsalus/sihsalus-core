@@ -16,17 +16,17 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.openmrs.module.webservices.rest.web.v1_0.RestTestConstants2_0;
 
 public class ConceptAttributeTypeResource2_0Test extends BaseDelegatingResourceTest<ConceptAttributeTypeResource2_0, ConceptAttributeType> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants2_0.CONCEPT_ATTRIBUTE_DATA_SET);
 	}
-	
+
 	@Override
 	public ConceptAttributeType newObject() {
 		return Context.getConceptService().getConceptAttributeTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -38,7 +38,7 @@ public class ConceptAttributeTypeResource2_0Test extends BaseDelegatingResourceT
 		assertPropEquals("preferredHandlerClassname", getObject().getPreferredHandlerClassname());
 		assertPropEquals("retired", getObject().getRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -53,12 +53,12 @@ public class ConceptAttributeTypeResource2_0Test extends BaseDelegatingResourceT
 		assertPropEquals("retired", getObject().getRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Joining Date";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_0.CONCEPT_ATTRIBUTE_TYPE_UUID;

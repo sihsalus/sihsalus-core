@@ -27,11 +27,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Consists of unit tests for the PatientFormController
- * 
+ *
  * @see PatientFormController
  */
 public class PatientFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see PatientFormController#onSubmit(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse, Object,
@@ -40,23 +40,23 @@ public class PatientFormControllerTest extends BaseModuleWebContextSensitiveTest
 	@Test
 	@Verifies(value = "void patient when void reason is not empty", method = "onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)")
 	public void onSubmit_shouldVoidPatientWhenVoidReasonIsNotEmpty() throws Exception {
-		
+
 		Patient p = Context.getPatientService().getPatient(2);
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
-		
+
 		PatientFormController controller = (PatientFormController) applicationContext.getBean("patientForm");
 		controller.setApplicationContext(applicationContext);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "");
 		request.setParameter("action", "Patient.void");
 		request.setParameter("voidReason", "some reason");
 		BindException errors = new BindException(p, "patient");
 		ModelAndView modelAndview = controller.onSubmit(request, response, p, errors);
-		
+
 		Assertions.assertTrue(p.isVoided());
 	}
-	
+
 	/**
 	 * @see PatientFormController#onSubmit(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse, Object,
@@ -66,18 +66,18 @@ public class PatientFormControllerTest extends BaseModuleWebContextSensitiveTest
 	@Verifies(value = "not void patient when void reason is empty", method = "onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)")
 	public void onSubmit_shouldNotVoidPatientWhenVoidReasonIsEmpty() throws Exception {
 		Patient p = Context.getPatientService().getPatient(2);
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
-		
+
 		PatientFormController controller = (PatientFormController) applicationContext.getBean("patientForm");
 		controller.setApplicationContext(applicationContext);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "");
 		request.setParameter("action", "Patient.void");
 		request.setParameter("voidReason", "");
 		BindException errors = new BindException(p, "patient");
 		ModelAndView modelAndview = controller.onSubmit(request, response, p, errors);
-		
+
 		Assertions.assertTrue(!p.isVoided());
 		String tmp = request.getSession().getAttribute(WebConstants.OPENMRS_ERROR_ATTR).toString();
 		Assertions.assertEquals(tmp, "Patient.error.void.reasonEmpty");

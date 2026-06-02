@@ -17,7 +17,7 @@ import org.openmrs.module.reporting.data.converter.PropertyConverter;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class PropertyConverterTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see PropertyConverter#convert(Object)
 	 * @verifies convert an Object into it's property whose name is the configured format

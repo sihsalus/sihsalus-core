@@ -29,39 +29,39 @@ import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientReferenceTranslatorImplTest {
-	
+
 	private static final String PATIENT_UUID = "12345-abcde-12345";
-	
+
 	@Mock
 	private FhirPatientDao dao;
-	
+
 	private PatientReferenceTranslatorImpl patientReferenceTranslator;
-	
+
 	@Before
 	public void setup() {
 		patientReferenceTranslator = new PatientReferenceTranslatorImpl();
 		patientReferenceTranslator.setPatientDao(dao);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertEncounterToReference() {
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
-		
+
 		Reference result = patientReferenceTranslator.toFhirResource(patient);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.PATIENT));
 		assertThat(getReferenceId(result).orElse(null), equalTo(PATIENT_UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfEncounterNull() {
 		Reference result = patientReferenceTranslator.toFhirResource(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldConvertReferenceToEncounter() {
 		Reference patientReference = new Reference().setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID)
@@ -69,44 +69,44 @@ public class PatientReferenceTranslatorImplTest {
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		when(dao.get(PATIENT_UUID)).thenReturn(patient);
-		
+
 		Patient result = patientReferenceTranslator.toOpenmrsType(patientReference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(PATIENT_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
 		Patient result = patientReferenceTranslator.toOpenmrsType(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfEncounterHasNoIdentifier() {
 		Reference patientReference = new Reference().setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID)
 		        .setType(FhirConstants.PATIENT);
-		
+
 		Patient result = patientReferenceTranslator.toOpenmrsType(patientReference);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfEncounterIdentifierHasNoValue() {
 		Reference patientReference = new Reference().setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID)
 		        .setType(FhirConstants.PATIENT).setIdentifier(new Identifier());
-		
+
 		Patient result = patientReferenceTranslator.toOpenmrsType(patientReference);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsntForEncounter() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + PATIENT_UUID).setType("Unknown");
-		
+
 		patientReferenceTranslator.toOpenmrsType(reference);
 	}
 }

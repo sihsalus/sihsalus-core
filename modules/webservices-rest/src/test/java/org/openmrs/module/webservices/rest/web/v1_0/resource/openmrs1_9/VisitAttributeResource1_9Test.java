@@ -24,17 +24,17 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
  * Contains tests for the {@link VisitAttributeResource1_9}
  */
 public class VisitAttributeResource1_9Test extends BaseDelegatingResourceTest<VisitAttributeResource1_9, VisitAttribute> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_9.TEST_DATASET);
 	}
-	
+
 	@Override
 	public VisitAttribute newObject() {
 		return Context.getVisitService().getVisitAttributeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -42,7 +42,7 @@ public class VisitAttributeResource1_9Test extends BaseDelegatingResourceTest<Vi
 		assertPropPresent("attributeType");
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -51,7 +51,7 @@ public class VisitAttributeResource1_9Test extends BaseDelegatingResourceTest<Vi
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		try {
@@ -62,7 +62,7 @@ public class VisitAttributeResource1_9Test extends BaseDelegatingResourceTest<Vi
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_9.VISIT_ATTRIBUTE_UUID;

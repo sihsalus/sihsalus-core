@@ -82,45 +82,45 @@ import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 
 @ExtendWith(MockitoExtension.class)
 public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, QueueEntryResource> {
-	
+
 	private static final String QUEUE_ENTRY_UUID = "6hje567a-fca0-11e5-9e59-08002719a7";
-	
+
 	private QueueEntryResource resource;
-	
+
 	private QueueEntry queueEntry;
-	
+
 	@Mock
 	private QueueService queueService;
-	
+
 	@Mock
 	private QueueEntryService queueEntryService;
-	
+
 	@Mock
 	private QueueRoomService queueRoomService;
-	
+
 	@Mock
 	private RoomProviderMapService roomProviderMapService;
-	
+
 	@Mock
 	private ConceptService conceptService;
-	
+
 	@Mock
 	private LocationService locationService;
-	
+
 	@Mock
 	private PatientService patientService;
-	
+
 	@Mock
 	private QueueServicesWrapper queueServicesWrapper;
-	
+
 	RequestContext requestContext;
-	
+
 	HttpServletRequest request;
-	
+
 	Map<String, String[]> parameterMap;
-	
+
 	ArgumentCaptor<QueueEntrySearchCriteria> queueEntryArgumentCaptor;
-	
+
 	@BeforeEach
 	public void prepareMocks() {
 		setRestUtil(mockStatic(RestUtil.class));
@@ -132,23 +132,23 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		lenient().when(queueServicesWrapper.getConceptService()).thenReturn(conceptService);
 		lenient().when(queueServicesWrapper.getLocationService()).thenReturn(locationService);
 		lenient().when(queueServicesWrapper.getPatientService()).thenReturn(patientService);
-		
+
 		//By pass authentication
 		getContext().when(Context::isAuthenticated).thenReturn(true);
-		
+
 		getContext().when(() -> Context.getRegisteredComponents(QueueServicesWrapper.class))
 		        .thenReturn(Collections.singletonList(queueServicesWrapper));
-		
+
 		QueueEntrySearchCriteriaParser searchCriteriaParser = new QueueEntrySearchCriteriaParser(queueServicesWrapper);
 		getContext().when(() -> Context.getRegisteredComponents(QueueEntrySearchCriteriaParser.class))
 		        .thenReturn(Collections.singletonList(searchCriteriaParser));
-		
+
 		resource = new QueueEntryResource();
 		setResource(resource);
 		queueEntry = new QueueEntry();
 		queueEntry.setUuid(QUEUE_ENTRY_UUID);
 		setObject(queueEntry);
-		
+
 		requestContext = mock(RequestContext.class);
 		request = mock(HttpServletRequest.class);
 		lenient().when(requestContext.getRequest()).thenReturn(request);
@@ -156,40 +156,40 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		lenient().when(request.getParameterMap()).thenReturn(parameterMap);
 		queueEntryArgumentCaptor = ArgumentCaptor.forClass(QueueEntrySearchCriteria.class);
 	}
-	
+
 	@Test
 	public void shouldReturnDefaultRepresentation() {
 		verifyDefaultRepresentation("uuid", "queue", "status", "visit", "priority", "priorityComment", "sortWeight",
 		    "patient", "locationWaitingFor", "providerWaitingFor", "startedAt", "endedAt", "display");
 	}
-	
+
 	@Test
 	public void shouldReturnFullRepresentation() {
 		verifyFullRepresentation("queue", "status", "priority", "priorityComment", "sortWeight", "patient",
 		    "locationWaitingFor", "providerWaitingFor", "startedAt", "endedAt", "display", "uuid", "display", "auditInfo");
 	}
-	
+
 	@Test
 	public void shouldReturnNullForCustomRepresentation() {
 		CustomRepresentation customRepresentation = new CustomRepresentation("custom-representation");
 		assertThat(getResource().getRepresentationDescription(customRepresentation), is(nullValue()));
 	}
-	
+
 	@Test
 	public void shouldNOTReturnNullForDefaultRepresentation() {
 		assertThat(getResource().getRepresentationDescription(new DefaultRepresentation()), is(notNullValue()));
 	}
-	
+
 	@Test
 	public void shouldNOTReturnNullForFullRepresentation() {
 		assertThat(getResource().getRepresentationDescription(new FullRepresentation()), is(notNullValue()));
 	}
-	
+
 	@Test
 	public void shouldNOTReturnNullForRefRepresentation() {
 		assertThat(getResource().getRepresentationDescription(new RefRepresentation()), is(notNullValue()));
 	}
-	
+
 	@Test
 	public void shouldGetResourceByUniqueUuid() {
 		when(queueEntryService.getQueueEntryByUuid(QUEUE_ENTRY_UUID)).thenReturn(Optional.of(queueEntry));
@@ -197,7 +197,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(QUEUE_ENTRY_UUID));
 	}
-	
+
 	@Test
 	public void shouldCreateNewResource() {
 		when(queueEntryService.saveQueueEntry(getObject())).thenReturn(getObject());
@@ -205,7 +205,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(newlyCreatedObject, notNullValue());
 		assertThat(newlyCreatedObject.getUuid(), is(QUEUE_ENTRY_UUID));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByQueue() {
 		List<Queue> vals = Arrays.asList(new Queue(), new Queue());
@@ -218,7 +218,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(criteria.getQueues(), hasSize(2));
 		assertThat(criteria.getQueues(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByLocation() {
 		List<Location> vals = Arrays.asList(new Location(), new Location());
@@ -231,7 +231,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(criteria.getLocations(), hasSize(2));
 		assertThat(criteria.getLocations(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByService() {
 		List<Concept> vals = Arrays.asList(new Concept(), new Concept());
@@ -244,7 +244,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(criteria.getServices(), hasSize(2));
 		assertThat(criteria.getServices(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByPatient() {
 		Patient val = new Patient();
@@ -256,7 +256,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getPatient(), notNullValue());
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByVisit() {
 		Visit val = new Visit();
@@ -268,7 +268,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getVisit(), notNullValue());
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByHasVisitTrue() {
 		parameterMap.put(SEARCH_PARAM_HAS_VISIT, new String[] { "true" });
@@ -277,7 +277,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getHasVisit(), equalTo(true));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByHasVisitFalse() {
 		parameterMap.put(SEARCH_PARAM_HAS_VISIT, new String[] { "false" });
@@ -286,7 +286,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getHasVisit(), equalTo(false));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByPriority() {
 		List<Concept> vals = Arrays.asList(new Concept(), new Concept());
@@ -299,7 +299,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(criteria.getPriorities(), hasSize(2));
 		assertThat(criteria.getPriorities(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByStatus() {
 		List<Concept> vals = Arrays.asList(new Concept(), new Concept());
@@ -312,7 +312,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(criteria.getStatuses(), hasSize(2));
 		assertThat(criteria.getStatuses(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByLocationWaitingFor() {
 		List<Location> vals = Arrays.asList(new Location(), new Location());
@@ -325,7 +325,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(criteria.getLocationsWaitingFor(), hasSize(2));
 		assertThat(criteria.getLocationsWaitingFor(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByProviderWaitingFor() {
 		List<Provider> vals = Arrays.asList(new Provider(), new Provider());
@@ -338,7 +338,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(criteria.getProvidersWaitingFor(), hasSize(2));
 		assertThat(criteria.getProvidersWaitingFor(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByQueueComingFrom() {
 		List<Queue> vals = Arrays.asList(new Queue(), new Queue());
@@ -351,7 +351,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		assertThat(criteria.getQueuesComingFrom(), hasSize(2));
 		assertThat(criteria.getQueuesComingFrom(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByStartedOnOrAfter() {
 		String dateStr = "2023-09-10 11:12:13";
@@ -361,7 +361,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getStartedOnOrAfter(), equalTo(QueueUtils.parseDate(dateStr)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByStartedOnOrBefore() {
 		String dateStr = "2023-09-10 11:12:13";
@@ -371,7 +371,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getStartedOnOrBefore(), equalTo(QueueUtils.parseDate(dateStr)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByEndedOnOrAfter() {
 		String dateStr = "2023-09-10 11:12:13";
@@ -381,7 +381,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getEndedOnOrAfter(), equalTo(QueueUtils.parseDate(dateStr)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByEndedOnOrBefore() {
 		String dateStr = "2023-09-10 11:12:13";
@@ -391,7 +391,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getEndedOnOrBefore(), equalTo(QueueUtils.parseDate(dateStr)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByIsEndedTrue() {
 		parameterMap.put(SEARCH_PARAM_IS_ENDED, new String[] { "true" });
@@ -400,7 +400,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getIsEnded(), equalTo(true));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByIsEndedFalse() {
 		parameterMap.put(SEARCH_PARAM_IS_ENDED, new String[] { "false" });
@@ -409,7 +409,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.getIsEnded(), equalTo(false));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByIncludeVoidedTrue() {
 		parameterMap.put(SEARCH_PARAM_INCLUDE_VOIDED, new String[] { "true" });
@@ -418,7 +418,7 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.isIncludedVoided(), equalTo(true));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByIncludeVoidedFalse() {
 		parameterMap.put(SEARCH_PARAM_INCLUDE_VOIDED, new String[] { "false" });
@@ -427,12 +427,12 @@ public class QueueEntryResourceTest extends BaseQueueResourceTest<QueueEntry, Qu
 		QueueEntrySearchCriteria criteria = queueEntryArgumentCaptor.getValue();
 		assertThat(criteria.isIncludedVoided(), equalTo(false));
 	}
-	
+
 	@Test
 	public void shouldInstantiateNewDelegate() {
 		assertThat(getResource().newDelegate(), notNullValue());
 	}
-	
+
 	@Test
 	public void verifyResourceVersion() {
 		assertThat(getResource().getResourceVersion(), is("2.3"));

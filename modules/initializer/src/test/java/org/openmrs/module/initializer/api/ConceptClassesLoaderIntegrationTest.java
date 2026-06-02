@@ -19,19 +19,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class ConceptClassesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService service;
-	
+
 	@Autowired
 	private ConceptClassesLoader loader;
-	
+
 	@Test
 	public void load_shouldLoadConceptClassesAccordingToCsvFiles() {
-		
+
 		loader.load();
-		
+
 		{ // created with uuid and description
 			ConceptClass c = service.getConceptClassByName("Medical supply");
 			Assert.assertNotNull(c);

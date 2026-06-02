@@ -23,16 +23,16 @@ public class PrivilegedDataConverterTest extends BaseModuleContextSensitiveTest 
 
     public static final String INPUT = "input";
     public static final String REPLACEMENT = "****";
-    
+
     public static final String HAS_PRIV = "A privilege I have";
     public static final String DOES_NOT_HAVE_PRIV = "A privilege I do not have";
-    
+
     @BeforeEach
     public void setUp() throws Exception {
         initializeInMemoryDatabase();
         executeDataSet("org/openmrs/module/reporting/include/PrivilegeTest.xml");
     }
-    
+
     @Test
     public void testConvertWithPrivilege() {
         try {

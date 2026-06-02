@@ -25,7 +25,7 @@ import org.springframework.validation.Errors;
  * Tests methods on the {@link CohortDefinitionValidator} class.
  */
 public class ProgramEnrollmentCohortDefinitionValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -34,13 +34,13 @@ public class ProgramEnrollmentCohortDefinitionValidatorTest extends BaseModuleCo
 	public void validate_shouldFailValidationIfProgramsIsNull() throws Exception {
 		ProgramEnrollmentCohortDefinition programEnrollmentCohortDefinition = new ProgramEnrollmentCohortDefinition();
 		programEnrollmentCohortDefinition.setPrograms(null);
-		
+
 		Errors errors = new BindException(programEnrollmentCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(programEnrollmentCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -49,13 +49,13 @@ public class ProgramEnrollmentCohortDefinitionValidatorTest extends BaseModuleCo
 	public void validate_shouldFailValidationIfProgramsIsEmpty() throws Exception {
 		ProgramEnrollmentCohortDefinition programEnrollmentCohortDefinition = new ProgramEnrollmentCohortDefinition();
 		programEnrollmentCohortDefinition.setPrograms(new ArrayList<Program>());
-		
+
 		Errors errors = new BindException(programEnrollmentCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(programEnrollmentCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -64,14 +64,14 @@ public class ProgramEnrollmentCohortDefinitionValidatorTest extends BaseModuleCo
 	public void validate_shouldPassValidationIfAllFieldsAreCorrect() throws Exception {
 		List<Program> programs = new ArrayList<Program>();
 		programs.add(new Program());
-		
+
 		ProgramEnrollmentCohortDefinition programEnrollmentCohortDefinition = new ProgramEnrollmentCohortDefinition();
 		programEnrollmentCohortDefinition.setName("Test CD");
 		programEnrollmentCohortDefinition.setPrograms(programs);
-		
+
 		Errors errors = new BindException(programEnrollmentCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(programEnrollmentCohortDefinition, errors);
-		
+
 		Assert.assertFalse(errors.hasErrors());
 	}
 }

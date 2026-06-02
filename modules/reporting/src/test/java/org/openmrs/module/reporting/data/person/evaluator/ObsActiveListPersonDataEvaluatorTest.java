@@ -38,66 +38,66 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * Tests ObsActiveListPersonDataEvaluator
  */
 public class ObsActiveListPersonDataEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-		
+
 		// 2 added, none removed
 		saveObs(7, "2012-01-01", 10001, 792);
 		saveObs(7, "2012-02-01", 10001, 88);
-		
+
 		// 2 added, both removed
 		saveObs(20, "2012-01-01", 10001, 792);
 		saveObs(20, "2012-02-01", 10001, 88);
 		saveObs(20, "2012-03-01", 10002, 792);
 		saveObs(20, "2012-04-01", 10002, 88);
-		
+
 		// 2 added, both removed, one re-added
 		saveObs(21, "2012-01-01", 10001, 792);
 		saveObs(21, "2012-02-01", 10001, 88);
 		saveObs(21, "2012-03-01", 10002, 792);
 		saveObs(21, "2012-04-01", 10002, 88);
-		saveObs(21, "2012-04-01", 10001, 792);	
+		saveObs(21, "2012-04-01", 10001, 792);
 	}
-	
+
 	/**
 	 * @see ObsActiveListPersonDataEvaluator#evaluate(PersonDataDefinition,EvaluationContext)
 	 * @verifies return the obs that match the passed definition configuration
 	 */
 	@Test
 	public void evaluate_shouldReturnAllProblemLists() throws Exception {
-		
+
 		EvaluationContext context = new EvaluationContext();
 		context.setBaseCohort(new Cohort("7,20,21,22"));
-		
+
 		ObsActiveListPersonDataDefinition d = new ObsActiveListPersonDataDefinition();
-		
+
 		List<Concept> problemsAdded = new ArrayList<Concept>();
 		problemsAdded.add(Context.getConceptService().getConcept(10001));
 		d.setStartingConcepts(problemsAdded);
-		
+
 		List<Concept> problemsResolved = new ArrayList<Concept>();
 		problemsResolved.add(Context.getConceptService().getConcept(10002));
 		d.setEndingConcepts(problemsResolved);
-		
+
 		EvaluatedPersonData pd = Context.getService(PersonDataService.class).evaluate(d, context);
 		checkList(pd, 7, 792, 88);
 		checkList(pd, 20);
 		checkList(pd, 21, 792);
 		Assert.assertNull(pd.getData().get(22));
 	}
-	
+
 	private void saveObs(Integer personId, String dateStr, Integer question, Integer answer) {
 		Person p = Context.getPersonService().getPerson(personId);
 		Date d = DateUtil.parseDate(dateStr, "yyyy-MM-dd");
@@ -108,7 +108,7 @@ public class ObsActiveListPersonDataEvaluatorTest extends BaseModuleContextSensi
 		o.setValueCoded(a);
 		Context.getObsService().saveObs(o, "Test");
 	}
-	
+
 	private void checkList(EvaluatedPersonData pd, Integer patientId, Integer...problemIds) {
 		Object o = pd.getData().get(patientId);
 		ObsActiveList l = (ObsActiveList)o;

@@ -24,12 +24,12 @@ import static org.mockito.Mockito.when;
  * This kind of test case can be used to quickly trial the parsing routines on test CSVs
  */
 public class MappingsConceptLineProcessorTest {
-	
+
 	private ConceptService cs = mock(ConceptService.class);
-	
+
 	@Before
 	public void setup() {
-		
+
 		/*
 		 * fetching a concept map type by uuid returns same-as if that uuid specified, null otherwise
 		 */
@@ -44,7 +44,7 @@ public class MappingsConceptLineProcessorTest {
 			}
 			return mapType;
 		});
-		
+
 		/*
 		 * fetching a concept map type by name returns a concept map type with that name
 		 * if the map type is "same-as", set the uuid for this map type
@@ -59,7 +59,7 @@ public class MappingsConceptLineProcessorTest {
 			mapType.setName(name);
 			return mapType;
 		});
-		
+
 		/*
 		 * fetching a concept source by name returns a concept source with its name set
 		 * as the source string that was requested
@@ -72,18 +72,18 @@ public class MappingsConceptLineProcessorTest {
 			return source;
 		});
 	}
-	
+
 	@Test
 	public void fill_shouldParseSameAsMappings() {
-		
+
 		// Setup
 		String[] headerLine = { "Same as mappings" };
 		String[] line = { "cambodia:123; foo:456" };
-		
+
 		// Replay
 		MappingsConceptLineProcessor p = new MappingsConceptLineProcessor(cs);
 		Concept c = p.fill(new Concept(), new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Collection<ConceptMap> mappings = c.getConceptMappings();
 		Assert.assertEquals(2, mappings.size());
@@ -96,19 +96,19 @@ public class MappingsConceptLineProcessorTest {
 		Assert.assertTrue(names.contains("cambodia:123"));
 		Assert.assertTrue(names.contains("foo:456"));
 	}
-	
+
 	@Test
 	public void fill_shouldParseMappingsForTypeAndSourceInHeader() {
-		
+
 		// Setup
 		String[] headerLine = { "mappings|same-as|cambodia", "mappings|broader-than|foo", "mappings|related-to",
 		        "mappings|same-as|pih|code", "mappings|same-as|pih|name" };
 		String[] line = { "123", "456", "cambodia:789; foo:abc", "5089", "weight" };
-		
+
 		// Replay
 		MappingsConceptLineProcessor p = new MappingsConceptLineProcessor(cs);
 		Concept c = p.fill(new Concept(), new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Collection<ConceptMap> mappings = c.getConceptMappings();
 		Assert.assertEquals(6, mappings.size());
@@ -126,28 +126,28 @@ public class MappingsConceptLineProcessorTest {
 		Assert.assertTrue(names.contains("same-as:pih:5089"));
 		Assert.assertTrue(names.contains("same-as:pih:weight"));
 	}
-	
+
 	@Test
 	public void fill_shouldHandleNoSameAsMappings() {
-		
+
 		// Setup
 		String[] headerLine = { "Same as mappings" };
 		String[] line = { null };
-		
+
 		// Replay
 		MappingsConceptLineProcessor p = new MappingsConceptLineProcessor(cs);
 		Concept c = p.fill(new Concept(), new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Assert.assertTrue(CollectionUtils.isEmpty(c.getConceptMappings()));
 	}
-	
+
 	public void getConcept_shouldHandleMissingHeaders() {
-		
+
 		// Setup
 		String[] headerLine = {};
 		String[] line = {};
-		
+
 		// Replay
 		MappingsConceptLineProcessor p = new MappingsConceptLineProcessor(cs);
 		Concept c = p.fill(new Concept(), new CsvLine(headerLine, line));

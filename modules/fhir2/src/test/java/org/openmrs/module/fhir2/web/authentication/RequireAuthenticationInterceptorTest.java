@@ -21,62 +21,62 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class RequireAuthenticationInterceptorTest {
-	
+
 	private MockHttpServletRequest request;
-	
+
 	private MockHttpServletResponse response;
-	
+
 	@Before
 	public void setup() throws ServletException {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
 	}
-	
+
 	@Test
 	public void ensureUserAuthenticated_shouldReturnTrueGivenWellKnownUri() throws Exception {
 		// setup
 		request.setRequestURI("/.well-known");
-		
+
 		// replay and verify
 		RequireAuthenticationInterceptor interceptor = getInterceptorForTesting(true);
 		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
 	}
-	
+
 	@Test
 	public void ensureUserAuthenticated_shouldReturnTrueGivenMetadataUri() throws Exception {
 		// setup
 		request.setRequestURI("/metadata");
-		
+
 		// replay and verify
 		RequireAuthenticationInterceptor interceptor = getInterceptorForTesting(true);
 		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
 	}
-	
+
 	@Test
 	public void ensureUserAuthenticated_shouldReturnFalseGivenUserIsNotAuthenticated() throws Exception {
 		// setup
 		request.setRequestURI("/ws/fhir2/R4/Someresource");
-		
+
 		// replay and verify
 		RequireAuthenticationInterceptor interceptor = getInterceptorForTesting(false);
 		assertThat(interceptor.ensureUserAuthenticated(request, response), is(false));
 		assertThat(response.getErrorMessage(), is("Not authenticated"));
 		assertThat(response.getStatus(), is(HttpServletResponse.SC_UNAUTHORIZED));
 	}
-	
+
 	@Test
 	public void ensureUserAuthenticated_shouldReturnTrueGivenUserIsAuthenticated() throws Exception {
 		// setup
 		request.setRequestURI("/ws/fhir2/R4/Someresource");
-		
+
 		// replay and verify
 		RequireAuthenticationInterceptor interceptor = getInterceptorForTesting(true);
 		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
 	}
-	
+
 	public RequireAuthenticationInterceptor getInterceptorForTesting(boolean isUserAuthenticated) {
 		return new RequireAuthenticationInterceptor() {
-			
+
 			@Override
 			protected boolean isAuthenticated() {
 				return isUserAuthenticated;

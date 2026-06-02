@@ -30,10 +30,10 @@ import static org.junit.Assert.assertFalse;
  * Test class that tests the serialization and deserialization of a PersonAttribute
  */
 public class PersonAttributeSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a person attribute and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -44,9 +44,9 @@ public class PersonAttributeSerializationTest extends BaseModuleContextSensitive
 		executeDataSet("org/openmrs/module/xstream/include/PersonAttributeSerializationTest.xml");
 		authenticate();
 		PersonAttribute pa = Context.getPersonService().getPersonAttribute(1);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(pa, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("1", "/personAttribute/personAttributeId", xmlOutput);
@@ -57,10 +57,10 @@ public class PersonAttributeSerializationTest extends BaseModuleContextSensitive
 		XMLAssert.assertXpathEvaluatesTo("501", "/personAttribute/person/personId", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("1", "/personAttribute/attributeType/personAttributeTypeId", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -127,10 +127,10 @@ public class PersonAttributeSerializationTest extends BaseModuleContextSensitive
 		xmlBuilder.append("  </attributeType>\n");
 		xmlBuilder.append("  <value></value>\n");
 		xmlBuilder.append("</personAttribute>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		PersonAttribute pa = Context.getSerializationService().deserialize(xmlBuilder.toString(), PersonAttribute.class,
 		    XStreamSerializer.class);
 		assertEquals(1, pa.getPersonAttributeId().intValue());

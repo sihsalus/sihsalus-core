@@ -49,10 +49,10 @@ public class ConvertedEncounterDataEvaluatorTest extends BaseModuleContextSensit
 	@Test
 	@SuppressWarnings("unchecked")
 	public void evaluate_shouldReturnConvertedData() throws Exception {
-		
+
 		EvaluationContext context = new EvaluationContext();
 		context.setBaseCohort(new Cohort("7"));
-		
+
 		EncounterDatetimeDataDefinition d = new EncounterDatetimeDataDefinition();
 
 		ConvertedEncounterDataDefinition cd = new ConvertedEncounterDataDefinition();
@@ -60,9 +60,9 @@ public class ConvertedEncounterDataEvaluatorTest extends BaseModuleContextSensit
 
 		ObjectFormatter converter = new ObjectFormatter("yyyy-MM-dd");
 		cd.addConverter(converter);
-		
+
 		EvaluatedEncounterData data = Context.getService(EncounterDataService.class).evaluate(cd, context);
-		
+
 		Object o = data.getData().get(3);
 		Assert.assertEquals("2008-08-01", o);
 	}

@@ -11,25 +11,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class PrivilegesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("userService")
 	private UserService us;
-	
+
 	@Autowired
 	private PrivilegesLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadPrivilegesAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// privilege created
 		{
 			Privilege p = us.getPrivilege("Add People");

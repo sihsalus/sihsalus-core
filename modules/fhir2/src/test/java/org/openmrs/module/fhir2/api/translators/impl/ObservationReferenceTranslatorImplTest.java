@@ -29,76 +29,76 @@ import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationReferenceTranslatorImplTest {
-	
+
 	private static final String UUID = "94d336e5-ca34-48d1-be15-5b6cb7c92c5e";
-	
+
 	@Mock
 	private FhirObservationDao dao;
-	
+
 	private ObservationReferenceTranslatorImpl observationReferenceTranslator;
-	
+
 	@Before
 	public void setup() {
 		observationReferenceTranslator = new ObservationReferenceTranslatorImpl();
 		observationReferenceTranslator.setObservationDao(dao);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertObsToReference() {
 		Obs obs = new Obs();
 		obs.setUuid(UUID);
-		
+
 		Reference result = observationReferenceTranslator.toFhirResource(obs);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(getReferenceId(result).orElse(null), equalTo(UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfObservationNull() {
 		Reference result = observationReferenceTranslator.toFhirResource(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldConvertReferenceToObs() {
 		Reference observationReference = new Reference().setReference(FhirConstants.OBSERVATION + "/" + UUID)
 		        .setType(FhirConstants.OBSERVATION).setIdentifier(new Identifier().setValue(UUID));
-		
+
 		Obs obs = new Obs();
 		obs.setUuid(UUID);
-		
+
 		when(dao.get(UUID)).thenReturn(obs);
-		
+
 		Obs result = observationReferenceTranslator.toOpenmrsType(observationReference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
 		Obs result = observationReferenceTranslator.toOpenmrsType(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldErrorIfReferenceNotObsType() {
 		Reference otherReference = new Reference().setType(FhirConstants.PATIENT)
 		        .setReference(FhirConstants.PATIENT + "/" + UUID);
-		
+
 		observationReferenceTranslator.toOpenmrsType(otherReference);
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceMissingUuid() {
 		Reference observationReference = new Reference().setType(FhirConstants.OBSERVATION);
-		
+
 		Obs result = observationReferenceTranslator.toOpenmrsType(observationReference);
-		
+
 		assertThat(result, nullValue());
 	}
 }

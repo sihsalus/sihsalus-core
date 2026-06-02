@@ -23,7 +23,7 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 @Resource(name = RestConstants.VERSION_1 + "/genericChild", supportedClass = GenericChild.class, supportedOpenmrsVersions = {
         "1.9.* - 9.*" })
 public class GenericChildResource extends DelegatingCrudResource<GenericChild> {
-	
+
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
@@ -31,59 +31,59 @@ public class GenericChildResource extends DelegatingCrudResource<GenericChild> {
 		description.addProperty("value");
 		description.addSelfLink();
 		description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
-		
+
 		return description;
 	}
-	
+
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("value");
-		
+
 		return description;
 	}
-	
+
 	@Override
 	public Model getGETModel(Representation rep) {
 		return ((ModelImpl) super.getGETModel(rep))
 		        .property("uuid", new StringProperty())
 		        .property("value", new StringProperty());
 	}
-	
+
 	@Override
 	public Model getCREATEModel(Representation rep) {
 		return new ModelImpl()
 		        .property("value", new StringProperty());
 	}
-	
+
 	@Override
 	public Model getUPDATEModel(Representation rep) {
 		return new ModelImpl();
 	}
-	
+
 	@Override
 	public GenericChild newDelegate() {
 		return new GenericChild();
 	}
-	
+
 	@Override
 	public GenericChild save(GenericChild child) {
 		return child;
 	}
-	
+
 	@Override
 	public GenericChild getByUniqueId(String uuid) {
 		return null;
 	}
-	
+
 	@Override
 	public void delete(GenericChild visit, String reason, RequestContext context) throws ResponseException {
 	}
-	
+
 	@Override
 	public void purge(GenericChild visit, RequestContext context) throws ResponseException {
 	}
-	
+
 	@Override
 	public String getResourceVersion() {
 		return "1.9";

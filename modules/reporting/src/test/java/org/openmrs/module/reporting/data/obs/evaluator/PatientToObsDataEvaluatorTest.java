@@ -65,7 +65,7 @@ public class PatientToObsDataEvaluatorTest extends BaseModuleContextSensitiveTes
         PatientIdentifierDataDefinition pidd = new PatientIdentifierDataDefinition();
         pidd.setIncludeFirstNonNullOnly(true);
         pidd.addType(pit);
-        
+
         PatientToObsDataDefinition d = new PatientToObsDataDefinition(pidd);
         ObsEvaluationContext context = new ObsEvaluationContext();
         context.setBaseObs(new ObsIdSet(20, 26));

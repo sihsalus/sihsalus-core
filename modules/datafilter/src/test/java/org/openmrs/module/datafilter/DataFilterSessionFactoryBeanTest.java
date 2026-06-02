@@ -50,50 +50,50 @@ import org.springframework.core.io.Resource;
 @PowerMockIgnore({ "javax.management.*" })
 @PrepareForTest({ Util.class, OpenmrsClassLoader.class })
 public class DataFilterSessionFactoryBeanTest {
-	
+
 	@Mock
 	private Logger mockLogger;
-	
+
 	@Mock
 	private OpenmrsClassLoader mockClassLoader;
-	
+
 	private DataFilterSessionFactoryBean sessionFactoryBean;
-	
+
 	private static class Module1Entity {}
-	
+
 	private static class UnfilteredModule1Entity {}
-	
+
 	private static class Module2Entity {}
-	
+
 	private AutoCloseable mocksClosable = null;
-	
+
 	@Before
 	public void setup() {
 		sessionFactoryBean = new DataFilterSessionFactoryBean();
-		
+
 		mocksClosable = MockitoAnnotations.openMocks(this);
 		mockStatic(Util.class);
 		mockStatic(OpenmrsClassLoader.class);
 		Whitebox.setInternalState(DataFilterSessionFactoryBean.class, Logger.class, mockLogger);
 	}
-	
+
 	@After
 	public void tearDown() throws Exception {
 		if (mocksClosable != null) {
 			mocksClosable.close();
 		}
 	}
-	
+
 	@Test
 	public void setMappingResources_shouldDoNothingIfNoModuleFilterRegistrationsAreFound() {
 		when(mockLogger.isDebugEnabled()).thenReturn(true);
 		when(Util.getClassFiltersMap()).thenReturn(Collections.emptyMap());
-		
+
 		sessionFactoryBean.setMappingResources();
-		
+
 		verify(mockLogger, times(1)).debug("No registered filters found for hbm files");
 	}
-	
+
 	@Test
 	public void setMappingResources_shouldRegisterModuleFilters() throws Exception {
 		final String module1EntityHbmFile = "Module1Entity.hbm.xml";
@@ -130,9 +130,9 @@ public class DataFilterSessionFactoryBeanTest {
 		        .thenReturn(newModule1EntityHbmFile);
 		when(Util.createNewMappingFile(eq(module2EntityHbmFile), anyList(), any(File.class)))
 		        .thenReturn(newModule2EntityHbmFile);
-		
+
 		sessionFactoryBean.setMappingResources(mappingResources.toArray(new String[] {}));
-		
+
 		Resource[] mappingLocations = Whitebox.getInternalState(sessionFactoryBean, "mappingLocations");
 		assertEquals(2, mappingLocations.length);
 		assertNotNull(Stream.of(mappingLocations)
@@ -142,5 +142,5 @@ public class DataFilterSessionFactoryBeanTest {
 		assertEquals(1, mappingResources.size());
 		assertEquals(module1UnFilteredEntityHbmFile, mappingResources.iterator().next());
 	}
-	
+
 }

@@ -24,22 +24,22 @@ import org.openmrs.module.webservices.rest.web.v1_0.RestTestConstants2_4;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.LocationResource1_8;
 
 public class LocationResource1_9Test extends BaseDelegatingResourceTest<LocationResource1_9, Location> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_9.TEST_DATASET);
 	}
-	
+
 	@Override
 	public Location newObject() {
 		return Context.getLocationService().getLocationByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		super.validateRefRepresentation();
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -64,7 +64,7 @@ public class LocationResource1_9Test extends BaseDelegatingResourceTest<Location
 		assertPropPresent("childLocations");
 		assertPropEquals("retired", getObject().isRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -90,12 +90,12 @@ public class LocationResource1_9Test extends BaseDelegatingResourceTest<Location
 		assertPropEquals("retired", getObject().isRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Xanadu";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_4.LOCATION_UUID;

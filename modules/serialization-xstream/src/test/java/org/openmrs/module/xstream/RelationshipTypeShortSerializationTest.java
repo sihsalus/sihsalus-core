@@ -27,21 +27,21 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a relationshipType
  */
 public class RelationshipTypeShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldRelationshipTypeShortSerialization() throws Exception {
-		
+
 		//prepare the necessary data
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/RelationshipTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		Relationship r = Context.getPersonService().getRelationship(1);
 		String xmlOutput = Context.getSerializationService().serialize(r, XStreamShortSerializer.class);
 		//should only serialize "uuid"
@@ -50,25 +50,25 @@ public class RelationshipTypeShortSerializationTest extends BaseModuleContextSen
 		//with short serialization, the "relationship" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/relationship/relationshipType/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldRelationshipTypeShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "RelationshipTypeShortSerializationTest.xml" here 
+		 * We also need to use the "RelationshipTypeShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/RelationshipTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<relationship id=\"1\" uuid=\"c18717dd-5d78-4a0e-84fc-ee62c5f0676a\" voided=\"false\">\n");
@@ -79,7 +79,7 @@ public class RelationshipTypeShortSerializationTest extends BaseModuleContextSen
 		xmlBuilder.append("  <relationshipType id=\"5\" uuid=\"6d9002ea-a96b-4889-af78-82d48c57a110\"/>\n");
 		xmlBuilder.append("  <personB id=\"6\" uuid=\"da7f524f-27ce-4bb2-86d6-6d1d05312bd5\"/>\n");
 		xmlBuilder.append("</relationship>\n");
-		
+
 		Relationship r = Context.getSerializationService().deserialize(xmlBuilder.toString(), Relationship.class,
 		    XStreamShortSerializer.class);
 		assertEquals("6d9002ea-a96b-4889-af78-82d48c57a110", r.getRelationshipType().getUuid());

@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public class LocationAttributeTypeController1_9Test extends MainResourceControllerTest {
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -35,7 +35,7 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 	public String getURI() {
 		return "locationattributetype";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -43,7 +43,7 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 	public String getUuid() {
 		return RestTestConstants1_9.LOCATION_ATTRIBUTE_TYPE_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -51,12 +51,12 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 	public long getAllCount() {
 		return Context.getLocationService().getAllLocationAttributeTypes().size();
 	}
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_9.TEST_DATASET);
 	}
-	
+
 	/**
 	 * @see LocationAttributeTypeController#createLocationAttributeType(SimpleObject,WebRequest)
 	 * @verifies create a new LocationAttributeType
@@ -65,12 +65,12 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 	public void createLocationAttributeType_shouldCreateANewLocationAttributeType() throws Exception {
 		int before = Context.getLocationService().getAllLocationAttributeTypes().size();
 		String json = "{ \"name\":\"Some attributeType\",\"description\":\"Attribute Type for location\",\"datatypeClassname\":\"org.openmrs.customdatatype.datatype.FreeTextDatatype\"}";
-		
+
 		handle(newPostRequest(getURI(), json));
-		
+
 		Assertions.assertEquals(before + 1, Context.getLocationService().getAllLocationAttributeTypes().size());
 	}
-	
+
 	/**
 	 * @see LocationAttributeTypeController#updateLocationAttributeType(LocationAttributeType,SimpleObject,WebRequest)
 	 * @verifies change a property on a location
@@ -78,12 +78,12 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 	@Test
 	public void updateLocationAttributeType_shouldChangeAPropertyOnALocationAttributeType() throws Exception {
 		String json = "{\"description\":\"Updated description\"}";
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
-		
+
 		Assertions.assertEquals("Updated description", Context.getLocationService().getLocationAttributeType(1).getDescription());
 	}
-	
+
 	/**
 	 * @see LocationAttributeTypeController#retireLocationAttributeType(LocationAttributeType,String,WebRequest)
 	 * @verifies void a location attribute type
@@ -92,16 +92,16 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 	public void retireLocationAttributeType_shouldRetireALocationAttributeType() throws Exception {
 		LocationAttributeType locationAttributeType = Context.getLocationService().getLocationAttributeType(1);
 		Assertions.assertFalse(locationAttributeType.isRetired());
-		
+
 		MockHttpServletRequest request = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
 		request.addParameter("reason", "test");
 		handle(request);
-		
+
 		locationAttributeType = Context.getLocationService().getLocationAttributeType(1);
 		Assertions.assertTrue(locationAttributeType.isRetired());
 		Assertions.assertEquals("test", locationAttributeType.getRetireReason());
 	}
-	
+
 	/**
 	 * @see LocationAttributeTypeController#findLocationAttributeTypes(String,WebRequest,HttpServletResponse)
 	 * @verifies return no results if there are no matching location(s)
@@ -109,10 +109,10 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 	@Test
 	public void findLocationAttributeTypes_shouldReturnNoResultsIfThereAreNoMatchingLocations() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("q", "zzzznotype"))));
-		
+
 		Assertions.assertEquals(0, Util.getResultsSize(result));
 	}
-	
+
 	/**
 	 * @see LocationAttributeTypeController#findLocationAttributeTypes(String,WebRequest,HttpServletResponse)
 	 * @verifies find matching location attribute types
@@ -120,9 +120,9 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 	@Test
 	public void findLocationAttributeTypes_shouldFindMatchingLocationAttributeTypes() throws Exception {
 		SimpleObject response = deserialize(handle(newGetRequest(getURI(), new Parameter("q", "Audit"))));
-		
+
 		List<Object> results = Util.getResultsList(response);
-		
+
 		Assertions.assertEquals(1, results.size());
 		Util.log("Found " + results.size() + " LocationAttributeType(s)", results);
 		Object result = results.get(0);
@@ -130,5 +130,5 @@ public class LocationAttributeTypeController1_9Test extends MainResourceControll
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "links"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "display"));
 	}
-	
+
 }

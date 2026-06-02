@@ -16,17 +16,17 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
  *
  */
 public class ModuleResource1_8Test extends BaseDelegatingResourceTest<ModuleResource1_8, Module> {
-	
+
 	@Override
 	public Module newObject() {
 		return new Module("Atlas Module", "atlas", "name", "author", "description", "version", "");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Atlas Module";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return "atlas";

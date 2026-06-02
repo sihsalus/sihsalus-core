@@ -30,87 +30,87 @@ import java.sql.ResultSet;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class ClobDatatypeStorageControllerTest extends MainResourceControllerTest {
-	
+
 	private DatatypeService datatypeService;
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		datatypeService = Context.getDatatypeService();
 		executeDataSet(RestTestConstants1_9.FORM_RESOURCE_DATA_SET);
 	}
-	
+
 	@Test
 	public void shouldAcceptAndStoreClobDataViaPost() throws Exception {
 		long before = getAllCount();
-		
+
 		byte[] fileData = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
 		    RestTestConstants1_9.TEST_RESOURCE_FILE));
-		
+
 		MockMultipartFile toUpload = new MockMultipartFile("file", "formresource.txt", "text/plain", fileData);
-		
+
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		request.setRequestURI(getBaseRestURI() + getURI());
 		request.setMethod(RequestMethod.POST.name());
 		request.addHeader("Content-Type", "multipart/form-data");
-		
+
 		request.addFile(toUpload);
-		
+
 		MockHttpServletResponse response = handle(request);
-		
+
 		Assertions.assertEquals(HttpServletResponse.SC_CREATED, response.getStatus());
 		Assertions.assertEquals(before + 1, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldReturnClobDataAsFileByUuid() throws Exception {
 		ClobDatatypeStorage clob = datatypeService
 		        .getClobDatatypeStorageByUuid(RestTestConstants1_9.CLOBDATATYPESTORAGE_RESOURCE_UUID);
-		
+
 		Assertions.assertNotNull(clob);
 		int size = clob.getValue().getBytes().length;
 		MockHttpServletResponse response = handle(newGetRequest(getURI() + "/"
 		        + RestTestConstants1_9.CLOBDATATYPESTORAGE_RESOURCE_UUID));
-		
+
 		Assertions.assertEquals(size, response.getContentAsByteArray().length);
 	}
-	
+
 	@Test
 	public void shouldDeleteAnExistingClobData() throws Exception {
 		ClobDatatypeStorage clob = datatypeService
 		        .getClobDatatypeStorageByUuid(RestTestConstants1_9.CLOBDATATYPESTORAGE_RESOURCE_UUID);
-		
+
 		Assertions.assertNotNull(clob);
-		
+
 		MockHttpServletResponse response = handle(newDeleteRequest(getURI() + "/"
 		        + RestTestConstants1_9.CLOBDATATYPESTORAGE_RESOURCE_UUID));
-		
+
 		clob = datatypeService.getClobDatatypeStorageByUuid(RestTestConstants1_9.CLOBDATATYPESTORAGE_RESOURCE_UUID);
-		
+
 		Assertions.assertNull(clob);
 		Assertions.assertEquals(HttpServletResponse.SC_OK, response.getStatus());
 	}
-	
+
 	@Test
 	public void shouldReturnHTTP404ForNonExistenceClobdata() throws Exception {
 		MockHttpServletResponse response = handle(newGetRequest(getURI() + "/non-existence-uuid"));
 		Assertions.assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "clobdata";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_9.CLOBDATATYPESTORAGE_RESOURCE_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		try {
 			Connection connection = getConnection();
-			
+
 			ResultSet resultSet = connection.prepareStatement("select count('id') from clob_datatype_storage")
 			        .executeQuery();
 			if (resultSet.next()) {
@@ -122,28 +122,28 @@ public class ClobDatatypeStorageControllerTest extends MainResourceControllerTes
 		}
 		return -1;
 	}
-	
+
 	@Override
 	@Disabled
 	public void shouldGetRefByUuid() throws Exception {
-		
+
 	}
-	
+
 	@Override
 	@Disabled
 	public void shouldGetDefaultByUuid() throws Exception {
-		
+
 	}
-	
+
 	@Override
 	@Disabled
 	public void shouldGetFullByUuid() throws Exception {
-		
+
 	}
-	
+
 	@Override
 	@Disabled
 	public void shouldGetAll() throws Exception {
-		
+
 	}
 }

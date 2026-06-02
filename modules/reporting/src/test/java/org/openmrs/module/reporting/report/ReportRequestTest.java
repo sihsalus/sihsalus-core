@@ -19,10 +19,10 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 
 public class ReportRequestTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see {@link ReportRequest#compareTo(ReportRequest)}
-	 * 
+	 *
 	 */
 	@Test
 	@Verifies(value = "should compare by priority", method = "compareTo(ReportRequest)")
@@ -34,10 +34,10 @@ public class ReportRequestTest extends BaseModuleContextSensitiveTest {
 		Assert.assertTrue(comparator.compare(first, second) > 0);
 		Assert.assertTrue(comparator.compare(second, first) < 0);
 	}
-	
+
 	/**
 	 * @see {@link ReportRequest#compareTo(ReportRequest)}
-	 * 
+	 *
 	 */
 	@Test
 	@Verifies(value = "should compare by request date when priority is the same", method = "compareTo(ReportRequest)")

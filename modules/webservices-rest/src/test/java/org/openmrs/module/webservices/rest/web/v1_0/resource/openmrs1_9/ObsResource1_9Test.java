@@ -41,17 +41,17 @@ import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs2_1.ObsResou
 import org.openmrs.util.OpenmrsConstants;
 
 public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_1, Obs> {
-	
+
 	public static final String BOOLEAN_CONCEPT_UUID = "0dde1358-7fcf-4341-a330-f119241a46e8";
-	
+
 	private Concept trueConcept;
-	
+
 	private Concept falseConcept;
-	
+
 	private enum ObsType {
 		CODED, COMPLEX, DATETIME, DRUG, NUMERIC, TEXT
 	}
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		GlobalProperty trueConceptGlobalProperty = new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_TRUE_CONCEPT, "7",
@@ -66,14 +66,14 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		falseConcept = Context.getConceptService().getConcept(
 		    Integer.parseInt(Context.getAdministrationService().getGlobalProperty(
 		        OpenmrsConstants.GLOBAL_PROPERTY_FALSE_CONCEPT)));
-		
+
 	}
-	
+
 	@Override
 	public Obs newObject() {
 		return Context.getObsService().getObsByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -90,7 +90,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		assertPropPresent("encounter");
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -108,21 +108,21 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "WEIGHT (KG): 50.0";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.OBS_UUID;
 	}
-	
+
 	@Test
 	public void asRepresentation_shouldReturnProperlyEncodedValues() throws Exception {
 		Obs obs = new Obs();
-		
+
 		// coded
 		Concept concept = Context.getConceptService().getConceptByUuid("a09ab2c5-878e-4905-b25d-5784167d0216");
 		clearAndSetValue(obs, ObsType.CODED, concept);
@@ -130,7 +130,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		Assertions.assertTrue(rep.keySet().contains("value"));
 		rep = (SimpleObject) rep.get("value");
 		Assertions.assertEquals(concept.getUuid(), rep.get("uuid"), "coded");
-		
+
 		// drug
 		Drug drug = Context.getConceptService().getDrugByUuid("3cfcf118-931c-46f7-8ff6-7b876f0d4202");
 		clearAndSetValue(obs, ObsType.DRUG, drug);
@@ -138,23 +138,23 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		Assertions.assertTrue(rep.keySet().contains("value"));
 		rep = (SimpleObject) rep.get("value");
 		Assertions.assertEquals(drug.getUuid(), rep.get("uuid"), "drug");
-		
+
 		// string-based (complex, text)
 		String test = "whoa";
 		clearAndSetValue(obs, ObsType.COMPLEX, test);
 		rep = getResource().asRepresentation(obs, Representation.DEFAULT);
 		Assertions.assertEquals(test, rep.get("value"), "complex");
-		
+
 		clearAndSetValue(obs, ObsType.TEXT, test);
 		rep = getResource().asRepresentation(obs, Representation.DEFAULT);
 		Assertions.assertEquals(test, rep.get("value"), "text");
-		
+
 		// numeric
 		Double number = Double.MAX_VALUE;
 		clearAndSetValue(obs, ObsType.NUMERIC, number);
 		rep = getResource().asRepresentation(obs, Representation.DEFAULT);
 		Assertions.assertEquals(number, rep.get("value"), "numeric");
-		
+
 		// location
 		Location location = Context.getLocationService().getLocation(2);
 		clearAndSetValue(obs, ObsType.TEXT, location.getId().toString());
@@ -164,7 +164,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		rep = (SimpleObject) rep.get("value");
 		Assertions.assertEquals(location.getUuid(), rep.get("uuid"), "location");
 		;
-		
+
 		// location referenced by uuid
 		location = Context.getLocationService().getLocation(2);
 		clearAndSetValue(obs, ObsType.TEXT, location.getUuid());
@@ -173,7 +173,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		Assertions.assertTrue(rep.keySet().contains("value"));
 		rep = (SimpleObject) rep.get("value");
 		Assertions.assertEquals(location.getUuid(), rep.get("uuid"), "location");
-		
+
 		// location that doesn't exist shouldn't cause error, just return null
 		clearAndSetValue(obs, ObsType.TEXT, "20000");
 		obs.setComment("org.openmrs.Location");
@@ -212,32 +212,32 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		executeDataSet("obsWithGroupMembers.xml");
 		ObsResource2_1 resource = getResource();
 		Obs groupMemberParent = resource.getByUniqueId("47f18998-96cc-11e0-8d6b-9b9415a91423");
-		
+
 		Set<Obs> groupMembersBefore = groupMemberParent.getGroupMembers();
 		Set<Obs> groupMembersAfter = (Set<Obs>) ObsResource2_1.getGroupMembers(resource
 		        .getByUniqueId("5117f5d4-96cc-11e0-8d6b-9b9415a91433"));
-		
+
 		ObsResource2_1.setGroupMembers(groupMemberParent, groupMembersAfter);
 		assertNotEquals(groupMembersBefore, groupMemberParent.getGroupMembers());
 		assertEquals(groupMembersAfter, groupMemberParent.getGroupMembers());
 	}
-	
+
 	@Test
 	public void getGroupMembers_shouldReturnAllGroupMembers() throws Exception {
 		executeDataSet("obsWithGroupMembers.xml");
-		
+
 		ObsResource2_1 resource = getResource();
-		
+
 		Set<Obs> groupMembers1 = (Set<Obs>) ObsResource2_1.getGroupMembers(resource
 		        .getByUniqueId("47f18998-96cc-11e0-8d6b-9b9415a91423"));
 		assertEquals(1, groupMembers1.size());
-		
+
 		Set<Obs> groupMembers2 = (Set<Obs>) ObsResource2_1.getGroupMembers(resource
 		        .getByUniqueId("5117f5d4-96cc-11e0-8d6b-9b9415a91433"));
 		assertEquals(2, groupMembers2.size());
-		
+
 	}
-	
+
 	@Test
 	public void setValue_shouldReturnUuidForConceptTrue() throws Exception {
 		Obs obs = new Obs();
@@ -245,7 +245,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		ObsResource2_1.setValue(obs, trueConcept);
 		assertEquals(trueConcept, new ObsResource2_1().getValue(obs));
 	}
-	
+
 	@Test
 	public void setValue_shouldReturnDrug() throws Exception {
 		Obs obs = new Obs();
@@ -304,7 +304,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		ObsResource2_1.setValue(obs, falseConcept);
 		assertEquals(falseConcept, new ObsResource2_1().getValue(obs));
 	}
-	
+
 	@Test
 	public void setValue_shouldThrowExceptionOnUnexpectedValue() throws Exception {
 		assertThrows(ConversionException.class, () -> {
@@ -313,7 +313,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 			ObsResource2_1.setValue(obs, "unexpected");
 		});
 	}
-	
+
 	@Test
 	public void setValue_shouldReturnUuidForPrimitiveTrue() throws Exception {
 		Obs obs = new Obs();
@@ -321,7 +321,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		ObsResource2_1.setValue(obs, true);
 		assertEquals(trueConcept, new ObsResource2_1().getValue(obs));
 	}
-	
+
 	@Test
 	public void setValue_shouldReturnUuidForPrimitiveFalse() throws Exception {
 		Obs obs = new Obs();
@@ -329,7 +329,7 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		ObsResource2_1.setValue(obs, false);
 		assertEquals(falseConcept, new ObsResource2_1().getValue(obs));
 	}
-	
+
 	@Test
 	public void getPreviousVersions_shouldReturnEmptyListWhenNoPreviousVersionExists() {
 		Obs obs = new Obs();
@@ -359,18 +359,18 @@ public class ObsResource1_9Test extends BaseDelegatingResourceTest<ObsResource2_
 		obs.setValueNumeric(type.equals(ObsType.NUMERIC) ? (Double) value : null);
 		obs.setValueText(type.equals(ObsType.TEXT) ? (String) value : null);
 	}
-	
+
 	@Test
 	public void setConvertedProperties_shouldAllowAnyPropertyOrder() throws Exception {
 		ObsResource2_1 resource = getResource();
 		Obs obs = new Obs();
-		
+
 		Map<String, Object> propertyMap = new HashMap<String, Object>();
 		propertyMap.put("value", 10.0);
 		propertyMap.put("person", RestTestConstants1_8.PERSON_UUID);
 		propertyMap.put("concept", "c607c80f-1ea9-4da3-bb88-6276ce8868dd");
 		propertyMap.put("obsDatetime", "2013-12-09T00:00:00.000+0100");
-		
+
 		resource.setConvertedProperties(obs, propertyMap, resource.getUpdatableProperties(), false);
 		org.springframework.util.Assert.isTrue(((Double) new ObsResource2_1().getValue(obs)) == 10.0, "Expected obs value to be 10.0");
 	}

@@ -40,21 +40,21 @@ import static org.openmrs.util.OpenmrsConstants.PERSON_NAME_FORMAT_SHORT;
 import static org.openmrs.util.OpenmrsConstants.PERSON_NAME_FORMAT_LONG;
 
 public class NameTemplateController2_0Test extends RestControllerTestUtils {
-	
+
 	private static final String SHORT_NAMETEMPLATE_RESOURCE = "nameTemplateShort.json";
-	
+
 	private static final String LONG_NAMETEMPLATE_RESOURCE = "nameTemplateLong.json";
-	
+
 	private static final String UNKNOWN_NAMETEMPLATE = "foo";
-	
+
 	private static final int NAME_TEMPLATES_COUNT = 5;
-	
+
 	private String originalNametemplate = null;
-	
+
 	public String getURI() {
 		return "nametemplate";
 	}
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		// save a backup of the current global property value for name layout,
@@ -63,7 +63,7 @@ public class NameTemplateController2_0Test extends RestControllerTestUtils {
 		originalNametemplate = service.getGlobalProperty(GLOBAL_PROPERTY_LAYOUT_NAME_FORMAT);
 		service.setGlobalProperty(GLOBAL_PROPERTY_LAYOUT_NAME_FORMAT, PERSON_NAME_FORMAT_SHORT);
 	}
-	
+
 	@AfterEach
 	public void after() throws Exception {
 		if (!StringUtils.isEmpty(originalNametemplate)) {
@@ -72,7 +72,7 @@ public class NameTemplateController2_0Test extends RestControllerTestUtils {
 			service.setGlobalProperty(GLOBAL_PROPERTY_LAYOUT_NAME_FORMAT, originalNametemplate);
 		}
 	}
-	
+
 	@Test
 	public void shouldGetAll() throws Exception {
 		MockHttpServletRequest req = newGetRequest(getURI());
@@ -86,27 +86,27 @@ public class NameTemplateController2_0Test extends RestControllerTestUtils {
 		assertThat(result.get("results"), hasItem(defaultNameTemplateResource));
 		assertThat(result.get("results"), hasItem(alternateNameTemplateResource));
 	}
-	
+
 	@Test
 	public void shouldGetGlobalNameTemplate() throws Exception {
 		MockHttpServletRequest req = newGetRequest(getURI() + "/" + GLOBAL_PROPERTY_LAYOUT_NAME_FORMAT);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		SimpleObject expectedResult = withResourceVersion(parseNameTemplateResource(SHORT_NAMETEMPLATE_RESOURCE));
-		
+
 		assertThat(result, is(expectedResult));
 	}
-	
+
 	@Test
 	public void shouldGetNameTemplateByCodename() throws Exception {
 		MockHttpServletRequest req = newGetRequest(getURI() + "/" + PERSON_NAME_FORMAT_LONG);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		SimpleObject expectedResult = withResourceVersion(parseNameTemplateResource(LONG_NAMETEMPLATE_RESOURCE));
-		
+
 		assertThat(result, is(expectedResult));
 	}
-	
+
 	@Test
 	public void shouldReturnNotFoundForUnknownCodename() throws Exception {
 		MockHttpServletRequest req = newGetRequest(getURI() + "/" + UNKNOWN_NAMETEMPLATE);
@@ -114,7 +114,7 @@ public class NameTemplateController2_0Test extends RestControllerTestUtils {
 			MockHttpServletResponse result = handle(req);
 		});
 	}
-	
+
 	private static SimpleObject parseNameTemplateResource(String resourceName) throws IOException {
 		String json;
 		try (InputStream inputStream = NameTemplateController2_0Test.class.getClassLoader()
@@ -123,7 +123,7 @@ public class NameTemplateController2_0Test extends RestControllerTestUtils {
 		}
 		return SimpleObject.parseJson(json);
 	}
-	
+
 	private static SimpleObject withResourceVersion(SimpleObject so) {
 		return so.add("resourceVersion", RestConstants2_0.RESOURCE_VERSION);
 	}

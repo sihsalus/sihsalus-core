@@ -17,13 +17,13 @@ import org.openmrs.api.context.Context;
 import org.openmrs.util.PrivilegeConstants;
 
 public class ProviderAttributeUserInfoTest extends OAuth2IntegrationTest {
-	
+
 	@Override
 	protected String getAppDataDirName() {
 		// represents any IdP that allows to pass on the provider attribute as part of the user info JSON
 		return "anyidp";
 	}
-	
+
 	@Override
 	protected String getUserInfoJson() {
 		return "{\n" + "  \"sub\": \"4e3074d6-5e9f-4707-84f1-ccb2aa2ab3bc\",\n" + "  \"email_verified\": true,\n"
@@ -32,7 +32,7 @@ public class ProviderAttributeUserInfoTest extends OAuth2IntegrationTest {
 		        + "  \"email\": \"tatkins@example.com\",\n" + "  \"roles\": [\"Provider\", \"B0gùs Rol3 N@m3\"]\n"
 		        + ", \"provider\": \"false\"}";
 	}
-	
+
 	@Override
 	protected void assertAuthenticatedUser(User user) {
 		Assert.assertEquals("tatkins", user.getUsername());
@@ -42,42 +42,42 @@ public class ProviderAttributeUserInfoTest extends OAuth2IntegrationTest {
 		Assert.assertEquals("tatkins@example.com", user.getEmail());
 		assertThatProviderAccountIsDeactivated(user);
 	}
-	
+
 	@Test
 	public void authenticationWithProviderSetAsFalse_shouldDeactivateProviderAccount() throws Exception {
 		// setup provider account on user to authenticate
 		{
 			Context.addProxyPrivilege(PrivilegeConstants.GET_USERS);
 			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_PROVIDERS);
-			
+
 			User user = Context.getUserService().getUserByUsername("tatkins");
-			
+
 			Provider provider = new Provider();
 			provider.setPerson(user.getPerson());
 			provider.setIdentifier(user.getSystemId());
 			provider.setCreator(Context.getUserService().getUserByUsername("daemon"));
 			Context.getProviderService().saveProvider(provider);
-			
+
 			Context.removeProxyPrivilege(PrivilegeConstants.GET_USERS);
 			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_PROVIDERS);
-			
+
 			// pre-verif
 			Assert.assertFalse(Context.isAuthenticated());
 			assertThatProviderAccountIsActivated(user);
 		}
-		
+
 		// replay
 		controller.login();
-		
+
 		// verif
 		User user = Context.getAuthenticatedUser();
 		Assert.assertNotNull(user);
 		assertAuthenticatedUser(user);
 	}
-	
+
 	@Override
 	protected String[] roleNamesToAssert() {
 		return new String[] { "Provider" };
 	}
-	
+
 }

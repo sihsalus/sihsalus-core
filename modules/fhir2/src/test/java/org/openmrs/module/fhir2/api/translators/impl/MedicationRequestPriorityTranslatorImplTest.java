@@ -24,14 +24,14 @@ import org.openmrs.Order;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestPriorityTranslatorImplTest {
-	
+
 	private MedicationRequestPriorityTranslatorImpl medicationRequestPriorityTranslator;
-	
+
 	@Before
 	public void setup() {
 		medicationRequestPriorityTranslator = new MedicationRequestPriorityTranslatorImpl();
 	}
-	
+
 	@Test
 	public void shouldTranslateToFhirRoutinePriority() {
 		MedicationRequest.MedicationRequestPriority priority = medicationRequestPriorityTranslator
@@ -39,7 +39,7 @@ public class MedicationRequestPriorityTranslatorImplTest {
 		assertThat(priority, notNullValue());
 		assertThat(priority, equalTo(MedicationRequest.MedicationRequestPriority.ROUTINE));
 	}
-	
+
 	@Test
 	public void shouldTranslateToFhirStatPriority() {
 		MedicationRequest.MedicationRequestPriority priority = medicationRequestPriorityTranslator
@@ -47,7 +47,7 @@ public class MedicationRequestPriorityTranslatorImplTest {
 		assertThat(priority, notNullValue());
 		assertThat(priority, equalTo(MedicationRequest.MedicationRequestPriority.STAT));
 	}
-	
+
 	@Test
 	public void shouldTranslateOnScheduledDateToFhirRoutinePriority() {
 		MedicationRequest.MedicationRequestPriority priority = medicationRequestPriorityTranslator
@@ -55,7 +55,7 @@ public class MedicationRequestPriorityTranslatorImplTest {
 		assertThat(priority, notNullValue());
 		assertThat(priority, equalTo(MedicationRequest.MedicationRequestPriority.ROUTINE));
 	}
-	
+
 	@Test
 	public void shouldTranslateToRoutineUrgency() {
 		DrugOrder.Urgency urgency = medicationRequestPriorityTranslator
@@ -63,7 +63,7 @@ public class MedicationRequestPriorityTranslatorImplTest {
 		assertThat(urgency, notNullValue());
 		assertThat(urgency, equalTo(DrugOrder.Urgency.ROUTINE));
 	}
-	
+
 	@Test
 	public void shouldTranslateToOnStatUrgency() {
 		DrugOrder.Urgency urgency = medicationRequestPriorityTranslator
@@ -71,25 +71,25 @@ public class MedicationRequestPriorityTranslatorImplTest {
 		assertThat(urgency, notNullValue());
 		assertThat(urgency, equalTo(DrugOrder.Urgency.STAT));
 	}
-	
+
 	@Test
 	public void toOpenMrsType_shouldTranslateAsapToNull() {
 		DrugOrder.Urgency urgency = medicationRequestPriorityTranslator
 		        .toOpenmrsType(MedicationRequest.MedicationRequestPriority.ASAP);
 		assertThat(urgency, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenMrsType_shouldTranslateToNull() {
 		DrugOrder.Urgency urgency = medicationRequestPriorityTranslator
 		        .toOpenmrsType(MedicationRequest.MedicationRequestPriority.NULL);
 		assertThat(urgency, nullValue());
 	}
-	
+
 	@Test(expected = NullPointerException.class)
 	public void toFhirResource_shouldThrowNullPointerException() {
 		MedicationRequest.MedicationRequestPriority priority = medicationRequestPriorityTranslator.toFhirResource(null);
 		assertThat(priority, nullValue());
 	}
-	
+
 }

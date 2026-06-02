@@ -27,21 +27,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class PersonAttributeTypesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("personService")
 	private PersonService ps;
-	
+
 	private int conceptForeignKey = 0;
-	
+
 	@Autowired
 	private PersonAttributeTypesLoader loader;
-	
+
 	@Before
 	public void setup() {
-		
+
 		ConceptService cs = Context.getConceptService();
-		
+
 		// Creating a privilege
 		{
 			Context.getUserService().savePrivilege(new Privilege("Edit:PAT", ""));
@@ -72,7 +72,7 @@ public class PersonAttributeTypesLoaderIntegrationTest extends DomainBaseModuleC
 			c.setConceptClass(cs.getConceptClassByName("Question"));
 			c.setDatatype(cs.getConceptDatatypeByName("Coded"));
 			c = cs.saveConcept(c);
-			
+
 			PersonAttributeType pat = new PersonAttributeType();
 			pat.setUuid("bd1adb89-ba65-40ad-8eb9-21751281432f");
 			pat.setName("PAT_CHANGE_FOREIGNKEY");
@@ -89,13 +89,13 @@ public class PersonAttributeTypesLoaderIntegrationTest extends DomainBaseModuleC
 			ps.savePersonAttributeType(pat);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verif fetch by name
 		{
 			PersonAttributeType pat = ps.getPersonAttributeTypeByName("PAT_NO_UUID");

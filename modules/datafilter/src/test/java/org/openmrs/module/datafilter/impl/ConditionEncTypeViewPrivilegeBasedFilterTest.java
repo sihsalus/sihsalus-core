@@ -27,19 +27,19 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ConditionEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivilegeBasedFilterTest {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "privilegedEncounters.xml");
 	}
-	
+
 	protected List<Condition> getConditions() {
 		return sessionFactory.getCurrentSession().createCriteria(Condition.class).list();
 	}
-	
+
 	@Test
 	public void getCondition_shouldIncludeConditionsLinkedToEncountersThatRequireAPrivilegeAndTheUserHasIt() {
 		reloginAs("dyorke", "test");
@@ -50,7 +50,7 @@ public class ConditionEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		Condition condition = conditions.iterator().next();
 		assertEquals(1005, condition.getId().longValue());
 		assertNull(condition.getEncounter());
-		
+
 		DataFilterTestUtils.addPrivilege(PRIV_MANAGE_CHEMO_PATIENTS);
 		expCount = 2;
 		conditions = getConditions();
@@ -58,7 +58,7 @@ public class ConditionEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertTrue(TestUtil.containsId(conditions, 1004));
 		assertTrue(TestUtil.containsId(conditions, 1005));
 	}
-	
+
 	@Test
 	public void getCondition_shouldReturnAllConditionsIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -67,7 +67,7 @@ public class ConditionEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertTrue(TestUtil.containsId(conditions, 1004));
 		assertTrue(TestUtil.containsId(conditions, 1005));
 	}
-	
+
 	@Test
 	public void getCondition_shouldReturnAllConditionsIfEncTypeViewPrivFilteringIsDisabled() {
 		DataFilterTestUtils.disableEncTypeViewPrivilegeFiltering();
@@ -76,5 +76,5 @@ public class ConditionEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertTrue(TestUtil.containsId(conditions, 1004));
 		assertTrue(TestUtil.containsId(conditions, 1005));
 	}
-	
+
 }

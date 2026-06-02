@@ -68,7 +68,7 @@ public class FhirFlagServiceImplTest {
     Flag fhirFlag;
 
     PatientFlag patientFlag;
-    
+
     @Mock
     private PatientFlagTranslator patientFlagTranslator;
 
@@ -78,13 +78,13 @@ public class FhirFlagServiceImplTest {
 
     @Mock
     private FhirFlagDao fhirFlagDao;
-    
+
     @Mock
     private SearchQueryInclude<Flag> searchQueryInclude;
-    
+
     @Mock
     private SearchQuery<PatientFlag, Flag, FhirFlagDao, PatientFlagTranslator, SearchQueryInclude<Flag>> searchQuery;
-    
+
     private FhirFlagServiceImpl fhirFlagService;
 
     /**

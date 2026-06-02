@@ -43,33 +43,33 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	ConceptService conceptService;
-	
+
 	@Autowired
 	EncounterService encounterService;
-	
+
 	@Autowired
 	EmrApiProperties emrApiProperties;
-	
+
 	@Autowired
 	PatientService patientService;
-	
+
 	@Autowired
 	ObsGroupDiagnosisService diagnosisService;
-	
+
 	@Autowired
 	TestDataManager testDataManager;
-	
+
 	DiagnosisMetadata dmd;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		dmd = ContextSensitiveMetadataTestUtils.setupDiagnosisMetadata(conceptService, emrApiProperties);
-		
+
 	}
-	
+
 	private Date parseYmd(String ymd) {
 		try {
 			return new SimpleDateFormat("yyyy-MM-dd").parse(ymd);
@@ -78,7 +78,7 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	private ObsBuilder buildDiagnosis(Patient patient, String dateYmd, Diagnosis.Order order, Diagnosis.Certainty certainty,
 	        Object diagnosis) {
 		ObsBuilder builder = new ObsBuilder().setPerson(patient).setObsDatetime(parseYmd(dateYmd))
@@ -93,14 +93,14 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 		}
 		return builder;
 	}
-	
+
 	private Obs createDiagnosisObs() {
 		Patient patient = patientService.getPatient(2);
 		ObsBuilder obsBuilder = buildDiagnosis(patient, "2013-01-02", Diagnosis.Order.PRIMARY, Diagnosis.Certainty.PRESUMED,
 		    "non-coded pain").save();
 		return obsBuilder.get();
 	}
-	
+
 	private Obs getObs(Obs groupObs, Concept concept) {
 		Set<Obs> groupMembers = groupObs.getGroupMembers();
 		Obs obs = null;
@@ -115,7 +115,7 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 		}
 		return obs;
 	}
-	
+
 	@Test
 	public void codeNonCodedDiagnosis() {
 		//create an ObsGroup with a non-coded diagnosis
@@ -130,19 +130,19 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 		//verify the obs is a coded diagnosis now
 		assertThat(codedObs.getConcept(), is(dmd.getCodedDiagnosisConcept()));
 		assertThat(codedObs.getValueCoded(), is(malaria));
-		
+
 		//verify the old that contained the non-coded diagnosis was voided
 		nonCodedObs = obsService.getObs(nonCodedObs.getId());
 		assertThat(nonCodedObs.getVoided(), is(true));
 		*/
 	}
-	
+
 	@Test
 	public void getDiagnosesShouldReturnEmptyListIfNone() {
 		Patient patient = patientService.getPatient(2);
 		assertThat(diagnosisService.getDiagnoses(patient, new Date()), is(empty()));
 	}
-	
+
 	@Test
 	public void getDiagnosesShouldReturnDiagnosesAfterDate() {
 		Patient patient = patientService.getPatient(2);
@@ -150,15 +150,15 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 		    "non-coded pain").save().get();
 		buildDiagnosis(patient, "2013-08-10", Diagnosis.Order.PRIMARY, Diagnosis.Certainty.PRESUMED, "non-coded disease")
 		        .save();
-		
+
 		List<Diagnosis> diagnoses = diagnosisService.getDiagnoses(patient, parseYmd("2013-09-01"));
 		assertThat(diagnoses, contains(hasObs(obs)));
 	}
-	
+
 	@Test
 	public void getDiagnosesShouldReturnDiagnosesInReverseChronologicalOrder() {
 		Patient patient = patientService.getPatient(2);
-		
+
 		// don't create them in the "right" order
 		Obs expectedSecondObs = buildDiagnosis(patient, "2013-08-10", Diagnosis.Order.PRIMARY, Diagnosis.Certainty.PRESUMED,
 		    "non-coded allergy").save().get();
@@ -166,14 +166,14 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 		    "non-coded disease").save().get();
 		Obs expectedFirstObs = buildDiagnosis(patient, "2013-09-10", Diagnosis.Order.PRIMARY, Diagnosis.Certainty.PRESUMED,
 		    "non-coded pain").save().get();
-		
+
 		List<Diagnosis> diagnoses = diagnosisService.getDiagnoses(patient, parseYmd("2001-09-01"));
 		assertThat(diagnoses.size(), is(3));
 		assertThat(diagnoses.get(0).getExistingObs(), is(expectedFirstObs));
 		assertThat(diagnoses.get(1).getExistingObs(), is(expectedSecondObs));
 		assertThat(diagnoses.get(2).getExistingObs(), is(expectedThirdObs));
 	}
-	
+
 	@Test
 	public void getUniqueDiagnosesShouldReturnNoTextDuplicates() {
 		Patient patient = patientService.getPatient(2);
@@ -181,12 +181,12 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 		    "non-coded pain").save().get();
 		Obs mostRecentObs = buildDiagnosis(patient, "2013-09-10", Diagnosis.Order.PRIMARY, Diagnosis.Certainty.PRESUMED,
 		    "non-coded pain").save().get();
-		
+
 		List<Diagnosis> diagnoses = diagnosisService.getUniqueDiagnoses(patient, parseYmd("2013-01-01"));
 		assertThat(diagnoses.size(), is(1));
 		assertThat(diagnoses.get(0).getExistingObs(), is(mostRecentObs));
 	}
-	
+
 	@Test
 	public void getUniqueDiagnosesShouldReturnNoCodedDuplicates() {
 		Patient patient = patientService.getPatient(2);
@@ -195,12 +195,12 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 		        .save().get();
 		Obs mostRecentObs = buildDiagnosis(patient, "2013-09-10", Diagnosis.Order.PRIMARY, Diagnosis.Certainty.PRESUMED,
 		    malaria).save().get();
-		
+
 		List<Diagnosis> diagnoses = diagnosisService.getUniqueDiagnoses(patient, parseYmd("2013-01-01"));
 		assertThat(diagnoses.size(), is(1));
 		assertThat(diagnoses.get(0).getExistingObs(), is(mostRecentObs));
 	}
-	
+
 	@Test
 	public void getDiagnoses_shouldReturnDiagnosesMappedToCoreDiagnosesByVisit() {
 		Patient patient = patientService.getPatient(2);
@@ -230,10 +230,10 @@ public class ObsGroupDiagnosisServiceComponentTest extends BaseModuleContextSens
 		assertThat(diagnoses.get(1).getCertainty(), is(ConditionVerificationStatus.PROVISIONAL));
 		assertThat(diagnoses.get(1).getRank(), is(2));
 	}
-	
+
 	public static Matcher<Diagnosis> hasObs(final Obs obs) {
 		return new FeatureMatcher<Diagnosis, Obs>(is(obs), "obs", "obs") {
-			
+
 			@Override
 			protected Obs featureValueOf(Diagnosis actual) {
 				return actual.getExistingObs();

@@ -32,22 +32,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * ProgramEnrollmentsForPatientDataEvaluator test cases
  */
 public class ProgramEnrollmentsForPatientDataEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see ProgramEnrollmentsForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return patient programs that are active on a given date
@@ -59,7 +59,7 @@ public class ProgramEnrollmentsForPatientDataEvaluatorTest extends BaseModuleCon
 
 		ProgramEnrollmentsForPatientDataDefinition def = new ProgramEnrollmentsForPatientDataDefinition();
 		def.setProgram(Context.getProgramWorkflowService().getProgram(1));
-		
+
 		def.setActiveOnDate(DateUtil.getDateTime(2008, 8, 4));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(2, pd.getData().size());
@@ -67,7 +67,7 @@ public class ProgramEnrollmentsForPatientDataEvaluatorTest extends BaseModuleCon
 		Assert.assertEquals("2008-08-01", DateUtil.formatDate(pp.getDateEnrolled(), "yyyy-MM-dd"));
 		Assert.assertEquals("2009-02-10", DateUtil.formatDate(pp.getDateCompleted(), "yyyy-MM-dd"));
 	}
-	
+
 	/**
 	 * @see ProgramEnrollmentsForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return patient programs started on or after a given date
@@ -80,7 +80,7 @@ public class ProgramEnrollmentsForPatientDataEvaluatorTest extends BaseModuleCon
 
 		ProgramEnrollmentsForPatientDataDefinition def = new ProgramEnrollmentsForPatientDataDefinition();
 		def.setProgram(Context.getProgramWorkflowService().getProgram(1));
-		
+
 		def.setEnrolledOnOrAfter(DateUtil.getDateTime(2008, 8, 1));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(2, ((List)pd.getData().get(2)).size());
@@ -102,7 +102,7 @@ public class ProgramEnrollmentsForPatientDataEvaluatorTest extends BaseModuleCon
 
 		ProgramEnrollmentsForPatientDataDefinition def = new ProgramEnrollmentsForPatientDataDefinition();
 		def.setProgram(Context.getProgramWorkflowService().getProgram(1));
-		
+
 		def.setEnrolledOnOrBefore(DateUtil.getDateTime(2010, 3, 10));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(2, ((List)pd.getData().get(2)).size());
@@ -110,12 +110,12 @@ public class ProgramEnrollmentsForPatientDataEvaluatorTest extends BaseModuleCon
 		def.setEnrolledOnOrBefore(DateUtil.getDateTime(2009, 3, 10));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(1, ((List)pd.getData().get(2)).size());
-		
+
 		def.setEnrolledOnOrBefore(DateUtil.getDateTime(2008, 3, 10));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertNull(pd.getData().get(2));
 	}
-	
+
 	/**
 	 * @see ProgramEnrollmentsForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return patient programs completed on or after a given date
@@ -128,11 +128,11 @@ public class ProgramEnrollmentsForPatientDataEvaluatorTest extends BaseModuleCon
 
 		ProgramEnrollmentsForPatientDataDefinition def = new ProgramEnrollmentsForPatientDataDefinition();
 		def.setProgram(Context.getProgramWorkflowService().getProgram(1));
-		
+
 		def.setCompletedOnOrAfter(DateUtil.getDateTime(2009, 2, 10));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(1, ((List)pd.getData().get(2)).size());
-		
+
 		def.setCompletedOnOrAfter(DateUtil.getDateTime(2010, 2, 10));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertNull(pd.getData().get(2));
@@ -150,16 +150,16 @@ public class ProgramEnrollmentsForPatientDataEvaluatorTest extends BaseModuleCon
 
 		ProgramEnrollmentsForPatientDataDefinition def = new ProgramEnrollmentsForPatientDataDefinition();
 		def.setProgram(Context.getProgramWorkflowService().getProgram(1));
-		
+
 		def.setCompletedOnOrBefore(DateUtil.getDateTime(2009, 2, 10));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(1, ((List)pd.getData().get(2)).size());
-		
+
 		def.setCompletedOnOrBefore(DateUtil.getDateTime(2008, 2, 10));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertNull(pd.getData().get(2));
 	}
-	
+
 	/**
 	 * @see ProgramEnrollmentsForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return the first patient program by enrollment date

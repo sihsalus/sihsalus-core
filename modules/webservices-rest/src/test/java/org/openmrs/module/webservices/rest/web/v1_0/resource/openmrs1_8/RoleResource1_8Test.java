@@ -15,13 +15,13 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class RoleResource1_8Test extends BaseDelegatingResourceTest<RoleResource1_8, Role> {
-	
+
 	@Override
 	public Role newObject() {
 		Role role = Context.getUserService().getRoleByUuid(getUuidProperty());
 		return role;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -29,7 +29,7 @@ public class RoleResource1_8Test extends BaseDelegatingResourceTest<RoleResource
 		assertPropPresent("inheritedRoles");
 		assertPropEquals("retired", getObject().getRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -38,12 +38,12 @@ public class RoleResource1_8Test extends BaseDelegatingResourceTest<RoleResource
 		assertPropPresent("allInheritedRoles");
 		assertPropEquals("retired", getObject().getRetired());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Provider";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.ROLE_UUID;

@@ -38,10 +38,10 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class ReportingSerializerTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see {@link ReportingSerializer#ReportingSerializer()}
-	 * 
+	 *
 	 */
 	@Test
 	@Verifies(value = "should serialize a cohort definition", method = "ReportingSerializer()")
@@ -52,10 +52,10 @@ public class ReportingSerializerTest extends BaseModuleContextSensitiveTest {
 		String xml = new ReportingSerializer().serialize(cd);
 		Assert.assertNotNull(xml);
 	}
-	
+
 	/**
 	 * @see {@link ReportingSerializer#ReportingSerializer()}
-	 * 
+	 *
 	 */
 	@Test
 	@Verifies(value = "should serialize workflow state by uuid", method = "ReportingSerializer()")
@@ -72,7 +72,7 @@ public class ReportingSerializerTest extends BaseModuleContextSensitiveTest {
 
 	/**
      * @see {@link ReportingSerializer#ReportingSerializer()}
-     * 
+     *
      */
     @Test
     @Verifies(value = "should serialize an indicator that contains an unsaved cohort definition", method = "ReportingSerializer()")
@@ -81,11 +81,11 @@ public class ReportingSerializerTest extends BaseModuleContextSensitiveTest {
 		GenderCohortDefinition males = new GenderCohortDefinition();
 		males.setUuid(UUID.randomUUID().toString());
 		males.setMaleIncluded(true);
-		
+
 		CohortIndicator numMales = CohortIndicator.newCountIndicator("numMales", new Mapped<CohortDefinition>(males, null), null);
-		
+
 		ReportingSerializer s = new ReportingSerializer();
-		
+
 		String serialization = s.serialize(numMales);
 		CohortIndicator hydrated = s.deserialize(serialization, CohortIndicator.class);
 		Assert.assertNotNull(hydrated.getCohortDefinition());
@@ -93,31 +93,31 @@ public class ReportingSerializerTest extends BaseModuleContextSensitiveTest {
 		Assert.assertTrue(((GenderCohortDefinition)hydrated.getCohortDefinition().getParameterizable()).getMaleIncluded());
 		Assert.assertFalse(((GenderCohortDefinition)hydrated.getCohortDefinition().getParameterizable()).getFemaleIncluded());
     }
-    
+
 	/**
      * @see {@link ReportingSerializer#ReportingSerializer()}
-     * 
+     *
      */
     @Test
     @Verifies(value = "should serialize an indicator that contains a persisted cohort definition", method = "ReportingSerializer()")
     public void ReportingSerializer_shouldSerializeAnIndicatorThatContainsAPersistedCohortDefinition() throws Exception {
-    	AgeCohortDefinition age = new AgeCohortDefinition();
+	AgeCohortDefinition age = new AgeCohortDefinition();
 		age.addParameter(new Parameter("onDate", "On Date", Date.class));
 		age.setMaxAge(15);
 		age.setName("Age on Date");
 		Context.getService(CohortDefinitionService.class).saveDefinition(age);
-		
+
 		CohortIndicator ind = new CohortIndicator();
 		ind.setCohortDefinition(age, ParameterizableUtil.createParameterMappings("onDate=07/08/2009"));
 		ind.setName("Age on some random date");
-		
+
 		String xml = new ReportingSerializer().serialize(ind);
-		
+
 		// now edit the age cohort definition to make sure the indicator has a reference to it, and not a copy
 		CohortDefinition reloaded = Context.getService(CohortDefinitionService.class).getDefinitionByUuid(age.getUuid());
 		reloaded.setName("Name has changed");
 		Context.getService(CohortDefinitionService.class).saveDefinition(reloaded);
-		
+
 		Indicator out = new ReportingSerializer().deserialize(xml, Indicator.class);
 		Assert.assertTrue(out instanceof CohortIndicator);
 		Assert.assertEquals("Age on some random date", out.getName());

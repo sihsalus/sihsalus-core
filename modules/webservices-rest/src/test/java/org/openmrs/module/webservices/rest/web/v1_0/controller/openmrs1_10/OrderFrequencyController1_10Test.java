@@ -39,17 +39,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * {@link org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_10.OrderFrequencyResource1_10}
  */
 public class OrderFrequencyController1_10Test extends MainResourceControllerTest {
-	
+
 	private OrderService service;
-	
+
 	private ConceptService conceptService;
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getOrderService();
 		this.conceptService = Context.getConceptService();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -57,7 +57,7 @@ public class OrderFrequencyController1_10Test extends MainResourceControllerTest
 	public String getURI() {
 		return "orderfrequency";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -65,7 +65,7 @@ public class OrderFrequencyController1_10Test extends MainResourceControllerTest
 	public String getUuid() {
 		return RestTestConstants1_10.ORDER_FREQUENCY_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -73,11 +73,11 @@ public class OrderFrequencyController1_10Test extends MainResourceControllerTest
 	public long getAllCount() {
 		return service.getOrderFrequencies(false).size();
 	}
-	
+
 	@Test
 	public void shouldGetAnOrderFrequencyByUuid() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI() + "/" + getUuid())));
-		
+
 		OrderFrequency expectedOrderFrequency = service.getOrderFrequencyByUuid(getUuid());
 		assertEquals(expectedOrderFrequency.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(expectedOrderFrequency.getName(), PropertyUtils.getProperty(result, "name"));
@@ -86,32 +86,32 @@ public class OrderFrequencyController1_10Test extends MainResourceControllerTest
 		assertEquals(expectedOrderFrequency.isRetired(), PropertyUtils.getProperty(result, "retired"));
 		assertNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	@Test
 	public void shouldListAllOrderFrequencys() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI())));
-		
+
 		assertNotNull(result);
 		assertEquals(getAllCount(), Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldListAllOrderFrequencysIncludingRetiredOnesIfIncludeAllIsSetToTrue() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("includeAll", "true"))));
-		
+
 		assertNotNull(result);
 		assertEquals(service.getOrderFrequencies(true).size(), Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	@Test
 	public void shouldSearchAndReturnAListOfOrderFrequencysMatchingTheQueryString() throws Exception {
 		executeDataSet("org/openmrs/api/include/OrderServiceTest-otherOrderFrequencies.xml");
@@ -121,7 +121,7 @@ public class OrderFrequencyController1_10Test extends MainResourceControllerTest
 		assertEquals(1, Util.getResultsSize(result));
 		assertEquals("78090760-7c39-11e3-baa7-0800200c9a66",
 		    PropertyUtils.getProperty(Util.getResultsList(result).get(0), "uuid"));
-		
+
 		req.removeAllParameters();
 		req.addParameter("q", "ce");
 		result = deserialize(handle(req));
@@ -130,11 +130,11 @@ public class OrderFrequencyController1_10Test extends MainResourceControllerTest
 		        PropertyUtils.getProperty(Util.getResultsList(result).get(0), "uuid").toString(),
 		        PropertyUtils.getProperty(Util.getResultsList(result).get(1), "uuid").toString(),
 		        PropertyUtils.getProperty(Util.getResultsList(result).get(2), "uuid").toString() });
-		
+
 		String[] expectedUuids = new String[] { "68090760-7c39-11e3-baa7-0800200c9a66",
 		        "78090760-7c39-11e3-baa7-0800200c9a66", "88090760-7c39-11e3-baa7-0800200c9a66" };
 		assertThat(uuids, hasItems(expectedUuids));
-		
+
 		//should include retired ones if includeAll is set to true
 		req.removeAllParameters();
 		req.addParameter("q", "ce");
@@ -146,32 +146,32 @@ public class OrderFrequencyController1_10Test extends MainResourceControllerTest
 		        PropertyUtils.getProperty(Util.getResultsList(result).get(1), "uuid").toString(),
 		        PropertyUtils.getProperty(Util.getResultsList(result).get(2), "uuid").toString(),
 		        PropertyUtils.getProperty(Util.getResultsList(result).get(3), "uuid").toString() });
-		
+
 		expectedUuids = new String[] { "68090760-7c39-11e3-baa7-0800200c9a66", "78090760-7c39-11e3-baa7-0800200c9a66",
 		        "88090760-7c39-11e3-baa7-0800200c9a66", "99090760-7c39-11e3-baa7-0800200c9a66" };
 		assertThat(uuids, hasItems(expectedUuids));
 	}
-	
+
 	@Test
 	public void shouldCreateAnOrderFrequency() throws Exception {
 		String json = "{ \"names\": [{\"name\":\"Frequency test\", \"locale\":\"en\", \"conceptNameType\":\""
 		        + ConceptNameType.FULLY_SPECIFIED
 		        + "\"}], \"datatype\":\"8d4a4488-c2cc-11de-8d13-0010c6dffd0f\", \"conceptClass\":\"Frequency\" }";
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, "concept");
 		req.setContent(json.getBytes());
-		
+
 		Object newConcept = deserialize(handle(req));
 		String conceptUuid = (String) PropertyUtils.getProperty(newConcept, "uuid");
 		assertNotNull(conceptUuid);
-		
+
 		int originalOrderFrequencyCount = service.getOrderFrequencies(false).size();
-		
+
 		json = "{\"frequencyPerDay\":5.0,\"concept\":\"" + conceptUuid + "\"}";
 		MockHttpServletRequest req2 = request(RequestMethod.POST, getURI());
 		req2.setContent(json.getBytes());
 		Object newOrderFrequency = deserialize(handle(req2));
-		
+
 		assertNotNull(PropertyUtils.getProperty(newOrderFrequency, "uuid"));
 		assertEquals("Frequency test", PropertyUtils.getProperty(newOrderFrequency, "name"));
 		assertEquals(5.0, PropertyUtils.getProperty(newOrderFrequency, "frequencyPerDay"));

@@ -20,24 +20,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class LocationTagsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("locationService")
 	private LocationService service;
-	
+
 	@Autowired
 	private LocationTagsLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadLocationTagsAccordingToCsvFiles() {
-		
+
 		loader.load();
-		
+
 		{ // created without uuid or description
 			LocationTag tag = service.getLocationTagByName("Sparse");
 			Assert.assertNotNull(tag);

@@ -25,55 +25,55 @@ import org.openmrs.Visit;
 import org.openmrs.module.queue.model.QueueEntry;
 
 public class AutoCloseVisitQueueEntryTaskTest {
-	
+
 	final List<QueueEntry> queueEntries = new ArrayList<>();
-	
+
 	class TestAutoCloseVisitEntryTask extends AutoCloseVisitQueueEntryTask {
-		
+
 		@Override
 		protected List<QueueEntry> getActiveVisitQueueEntries() {
 			return queueEntries.stream().filter(e -> e.getEndedAt() == null).collect(Collectors.toList());
 		}
-		
+
 		@Override
 		protected void saveQueueEntry(QueueEntry queueEntry) {
 			// Do nothing
 		}
 	}
-	
+
 	@Test
 	public void shouldAutoCloseVisitQueueEntriesIfVisitIsClosed() throws Exception {
-		
+
 		Visit visit1 = new Visit();
 		visit1.setStartDatetime(getDate("2020-01-01 10:00"));
 		QueueEntry queueEntry1 = new QueueEntry();
 		queueEntry1.setStartedAt(getDate("2020-01-01 10:10"));
 		queueEntry1.setVisit(visit1);
 		queueEntries.add(queueEntry1);
-		
+
 		Visit visit2 = new Visit();
 		visit2.setStartDatetime(getDate("2021-01-01 10:00"));
 		QueueEntry queueEntry2 = new QueueEntry();
 		queueEntry2.setStartedAt(getDate("2021-01-01 10:20"));
 		queueEntry2.setVisit(visit2);
 		queueEntries.add(queueEntry2);
-		
+
 		TestAutoCloseVisitEntryTask task = new TestAutoCloseVisitEntryTask();
 		task.run();
 		assertThat(queueEntry1.getEndedAt(), nullValue());
 		assertThat(queueEntry2.getEndedAt(), nullValue());
-		
+
 		visit1.setStopDatetime(getDate("2020-01-01 23:15"));
 		task.run();
 		assertThat(queueEntry1.getEndedAt(), equalTo(visit1.getStopDatetime()));
 		assertThat(queueEntry2.getEndedAt(), nullValue());
-		
+
 		visit2.setStopDatetime(getDate("2021-01-05 11:30"));
 		task.run();
 		assertThat(queueEntry1.getEndedAt(), equalTo(visit1.getStopDatetime()));
 		assertThat(queueEntry2.getEndedAt(), equalTo(visit2.getStopDatetime()));
 	}
-	
+
 	Date getDate(String dateStr) throws Exception {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		return df.parse(dateStr);

@@ -27,31 +27,31 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 public class LivingPatientSearchHandler1_11Test extends MainResourceControllerTest {
-	
+
 	private PatientService patientService;
-	
+
 	@BeforeEach
 	public void init() throws Exception {
 		patientService = Context.getPatientService();
 		executeDataSet(RestTestConstants1_11.LIVING_PATIENT_SEARCH_DATASET);
 		updateSearchIndex();
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "patient";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_11.PATIENT_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return patientService.getAllPatients().size();
 	}
-	
+
 	@Test
 	public void shouldNotReturnPatientsIfQParamValueIsEmpty() throws Exception {
 		Assertions.assertEquals(8, getAllCount());
@@ -61,7 +61,7 @@ public class LivingPatientSearchHandler1_11Test extends MainResourceControllerTe
 		List<Object> patients = result.get("results");
 		Assertions.assertEquals(0, patients.size());
 	}
-	
+
 	@Test
 	public void shouldNotReturnPatientsIfQParamIsNotSet() throws Exception {
 		Assertions.assertEquals(8, getAllCount());
@@ -71,7 +71,7 @@ public class LivingPatientSearchHandler1_11Test extends MainResourceControllerTe
 		List<Object> patients = result.get("results");
 		Assertions.assertEquals(0, patients.size());
 	}
-	
+
 	@Test
 	public void shouldReturnBothDeadAndLivingPatientsIfIncludeDeadIsSetToTrue() throws Exception {
 		Patient patient = patientService.getPatientByUuid(getUuid());
@@ -86,7 +86,7 @@ public class LivingPatientSearchHandler1_11Test extends MainResourceControllerTe
 		List<Object> patients = result.get("results");
 		Assertions.assertEquals(4, patients.size());
 	}
-	
+
 	@Test
 	public void shouldReturnOnlyLivingPatientsBydefaultIfIncludeDeadIsNotSet() throws Exception {
 		patientService.getPatientByUuid(getUuid()).setDead(true);
@@ -97,7 +97,7 @@ public class LivingPatientSearchHandler1_11Test extends MainResourceControllerTe
 		List<Object> patients = result.get("results");
 		Assertions.assertEquals(3, patients.size());
 	}
-	
+
 	@Test
 	public void shouldReturnOnlyLivingPatientsOnWrongIncludeDeadParamValue() throws Exception {
 		patientService.getPatientByUuid(getUuid()).setDead(true);
@@ -109,7 +109,7 @@ public class LivingPatientSearchHandler1_11Test extends MainResourceControllerTe
 		List<Object> patients = result.get("results");
 		Assertions.assertEquals(3, patients.size());
 	}
-	
+
 	@Test
 	public void shouldReturnOnlyLivingPatientsIfIncludeDeadParamIsSetToFalse() throws Exception {
 		patientService.getPatientByUuid(getUuid()).setDead(true);
@@ -121,7 +121,7 @@ public class LivingPatientSearchHandler1_11Test extends MainResourceControllerTe
 		List<Object> patients = result.get("results");
 		Assertions.assertEquals(3, patients.size());
 	}
-	
+
 	@Test
 	public void shouldNotReturnPatientsIfNoPatientMatchesQParam() throws Exception {
 		patientService.getPatientByUuid(getUuid()).setDead(true);
@@ -133,7 +133,7 @@ public class LivingPatientSearchHandler1_11Test extends MainResourceControllerTe
 		List<Object> patients = result.get("results");
 		Assertions.assertEquals(0, patients.size());
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetAll() throws Exception {

@@ -32,56 +32,56 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(Context.class)
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class LocationAttributeLineProcessorTest {
-	
+
 	private LocationService ls;
-	
+
 	private LocationAttributeLineProcessor processor;
-	
+
 	private static String PHONE_ATT_TYPE_UUID = "fb803f59-a1a8-4da9-969a-4a18df3241fe";
-	
+
 	private static String EMAIL_ATT_TYPE_NAME = "Facility Email";
-	
+
 	@Before
 	public void setup() {
 		PowerMockito.mockStatic(Context.class);
 		DatatypeService datatypeService = mock(DatatypeService.class);
 		when(Context.getDatatypeService()).thenReturn(datatypeService);
-		
+
 		when(datatypeService.getDatatype(any(Class.class), anyString())).thenReturn(new FreeTextDatatype());
-		
+
 		when(Context.getRuntimeProperties()).thenReturn(new Properties());
-		
+
 		ls = mock(LocationService.class);
 		processor = new LocationAttributeLineProcessor(ls);
-		
+
 		LocationAttributeType phoneAttrType = new LocationAttributeType();
 		phoneAttrType.setName("Facility Phone");
 		phoneAttrType.setMinOccurs(0);
 		phoneAttrType.setMaxOccurs(1);
 		phoneAttrType.setUuid(PHONE_ATT_TYPE_UUID);
 		phoneAttrType.setDatatypeClassname("org.openmrs.customdatatype.datatype.FreeTextDatatype");
-		
+
 		LocationAttributeType emailAttrType = new LocationAttributeType();
 		emailAttrType.setName("EMAIL_ATT_TYPE_NAME");
 		emailAttrType.setMinOccurs(0);
 		emailAttrType.setMaxOccurs(1);
 		emailAttrType.setDatatypeClassname("org.openmrs.customdatatype.datatype.FreeTextDatatype");
-		
+
 		when(ls.getLocationAttributeTypeByUuid(PHONE_ATT_TYPE_UUID)).thenReturn(phoneAttrType);
 		when(ls.getLocationAttributeTypeByUuid(EMAIL_ATT_TYPE_NAME)).thenReturn(null);
 		when(ls.getLocationAttributeTypeByName(EMAIL_ATT_TYPE_NAME)).thenReturn(emailAttrType);
 	}
-	
+
 	@Test
 	public void fill_shouldParseLocationAttributes() {
 		// Setup
 		String[] headerLine = { HEADER_ATTRIBUTE_PREFIX + PHONE_ATT_TYPE_UUID,
 		        HEADER_ATTRIBUTE_PREFIX + EMAIL_ATT_TYPE_NAME };
 		String[] line = { "+1 206 555 0100", "jdoe@example.com" };
-		
+
 		// Replay
 		Location loc = processor.fill(new Location(), new CsvLine(headerLine, line));
-		
+
 		// Verify
 		Collection<LocationAttribute> attributes = loc.getActiveAttributes();
 		Assert.assertEquals(2, attributes.size());
@@ -90,7 +90,7 @@ public class LocationAttributeLineProcessorTest {
 		Assert.assertTrue("Must have attribute jdoe@example.com",
 		    attributes.removeIf(a -> a.getValue().equals("jdoe@example.com")));
 	}
-	
+
 	@Test
 	public void fill_shouldLeaveUnspecifiedAttributesIntact() {
 		// Setup
@@ -101,10 +101,10 @@ public class LocationAttributeLineProcessorTest {
 		la.setAttributeType(ls.getLocationAttributeTypeByName(EMAIL_ATT_TYPE_NAME));
 		la.setValue("janedoe@example.com");
 		loc.addAttribute(la);
-		
+
 		// Replay
 		loc = processor.fill(loc, new CsvLine(headerLine, line));
-		
+
 		// Verify
 		Collection<LocationAttribute> attributes = loc.getActiveAttributes();
 		Assert.assertEquals(2, attributes.size());
@@ -113,7 +113,7 @@ public class LocationAttributeLineProcessorTest {
 		Assert.assertTrue("Must have attribute janedoe@example.com",
 		    attributes.removeIf(a -> a.getValue().equals("janedoe@example.com")));
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void fill_shouldFailIfAttributeTypeDoesNotExistAndAttributeValueIsNotBlank() {
 		// Setup
@@ -121,9 +121,9 @@ public class LocationAttributeLineProcessorTest {
 		        HEADER_ATTRIBUTE_PREFIX + EMAIL_ATT_TYPE_NAME };
 		String[] line = { "+1 206 555 0100", "jdoe@example.com" };
 		when(ls.getLocationAttributeTypeByName(EMAIL_ATT_TYPE_NAME)).thenReturn(null);
-		
+
 		// Replay
 		processor.fill(new Location(), new CsvLine(headerLine, line));
 	}
-	
+
 }

@@ -17,32 +17,32 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class AllergyIntoleranceCriticalityTranslatorImplTest {
-	
+
 	private AllergyIntoleranceCriticalityTranslatorImpl criticalityTranslator;
-	
+
 	@Before
 	public void setup() {
 		criticalityTranslator = new AllergyIntoleranceCriticalityTranslatorImpl();
 	}
-	
+
 	@Test
 	public void shouldTranslateSEVERESeverityToHIGHCriticality() {
 		assertThat(criticalityTranslator.toFhirResource(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceCriticality.HIGH));
 	}
-	
+
 	@Test
 	public void shouldTranslateMILDSeverityToLOWCriticality() {
 		assertThat(criticalityTranslator.toFhirResource(AllergyIntolerance.AllergyIntoleranceSeverity.MILD),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceCriticality.LOW));
 	}
-	
+
 	@Test
 	public void shouldTranslateMODERATESeverityToUNABLETOACCESSCriticality() {
 		assertThat(criticalityTranslator.toFhirResource(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceCriticality.UNABLETOASSESS));
 	}
-	
+
 	@Test
 	public void shouldTranslateNULLSeverityToUNABLETOACCESSCriticality() {
 		assertThat(criticalityTranslator.toFhirResource(AllergyIntolerance.AllergyIntoleranceSeverity.NULL),

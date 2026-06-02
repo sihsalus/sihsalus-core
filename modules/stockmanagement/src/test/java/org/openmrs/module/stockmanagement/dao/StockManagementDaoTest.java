@@ -33,14 +33,14 @@ import java.math.BigDecimal;
  * rolled back by the end of each test method.
  */
 public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	DbSessionFactory sessionFactory;
-	
+
 	private StockManagementDao daoInstance;
-	
+
 	private static EntityUtil entityUtil;
-	
+
 	private StockManagementDao dao() {
 		if (daoInstance == null) {
 			daoInstance = new StockManagementDao();
@@ -48,13 +48,13 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		}
 		return daoInstance;
 	}
-	
+
 	@Before
 	public void setup() throws Exception {
 		initializeInMemoryDatabase();
 		executeDataSet(EntityUtil.STOCK_OPERATION_TYPE_DATA_SET);
 	}
-	
+
 	private EntityUtil eu() {
 		if (entityUtil == null) {
 			Drug drug = Context.getConceptService().getDrug(3);
@@ -67,19 +67,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		}
 		return entityUtil;
 	}
-	
+
 	@Test
 	public void saveLocationTree_shouldSaveAllProperties() {
 		//Given
 		LocationTree locationTree = eu().newLocationTree(dao());
-		
+
 		//When
 		dao().saveLocationTree(locationTree);
-		
+
 		//Let's clean up the cache to be sure getLocationTreeByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		LocationTree savedLocationTree = dao().getLocationTreeByUuid(locationTree.getUuid());
 		assertThat(savedLocationTree, hasProperty("uuid", is(locationTree.getUuid())));
@@ -87,19 +87,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedLocationTree, hasProperty("childLocationId", is(locationTree.getChildLocationId())));
 		assertThat(savedLocationTree, hasProperty("depth", is(locationTree.getDepth())));
 	}
-	
+
 	@Test
 	public void saveStockItemTransaction_shouldSaveAllProperties() {
 		//Given
 		StockItemTransaction stockItemTransaction = eu().newStockItemTransaction(dao());
-		
+
 		//When
 		dao().saveStockItemTransaction(stockItemTransaction);
-		
+
 		//Let's clean up the cache to be sure getStockItemTransactionByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockItemTransaction savedStockItemTransaction = dao().getStockItemTransactionByUuid(stockItemTransaction.getUuid());
 		assertThat(savedStockItemTransaction, hasProperty("uuid", is(stockItemTransaction.getUuid())));
@@ -114,19 +114,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockItemTransaction,
 		    hasProperty("stockItemPackagingUOM", is(stockItemTransaction.getStockItemPackagingUOM())));
 	}
-	
+
 	@Test
 	public void saveStockItemPackagingUOM_shouldSaveAllProperties() {
 		//Given
 		StockItemPackagingUOM stockItemPackagingUOM = eu().newStockItemPackagingUOM(dao());
-		
+
 		//When
 		dao().saveStockItemPackagingUOM(stockItemPackagingUOM);
-		
+
 		//Let's clean up the cache to be sure getStockItemPackagingUOMByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockItemPackagingUOM savedStockItemPackagingUOM = dao().getStockItemPackagingUOMByUuid(
 		    stockItemPackagingUOM.getUuid());
@@ -143,19 +143,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockItemPackagingUOM, hasProperty("packagingUom", is(stockItemPackagingUOM.getPackagingUom())));
 		assertThat(savedStockItemPackagingUOM, hasProperty("stockItem", is(stockItemPackagingUOM.getStockItem())));
 	}
-	
+
 	@Test
 	public void saveUserRoleScopeOperationType_shouldSaveAllProperties() {
 		//Given
 		UserRoleScopeOperationType userRoleScopeOperationType = eu().newUserRoleScopeOperationType(dao());
-		
+
 		//When
 		dao().saveUserRoleScopeOperationType(userRoleScopeOperationType);
-		
+
 		//Let's clean up the cache to be sure getUserRoleScopeOperationTypeByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		UserRoleScopeOperationType savedUserRoleScopeOperationType = dao().getUserRoleScopeOperationTypeByUuid(
 		    userRoleScopeOperationType.getUuid());
@@ -177,19 +177,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedUserRoleScopeOperationType,
 		    hasProperty("stockOperationType", is(userRoleScopeOperationType.getStockOperationType())));
 	}
-	
+
 	@Test
 	public void saveStockOperationType_shouldSaveAllProperties() {
 		//Given
 		StockOperationType stockOperationType = eu().newStockOperationType(dao());
-		
+
 		//When
 		dao().saveStockOperationType(stockOperationType);
-		
+
 		//Let's clean up the cache to be sure getStockOperationTypeByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockOperationType savedStockOperationType = dao().getStockOperationTypeByUuid(stockOperationType.getUuid());
 		assertThat(savedStockOperationType, hasProperty("uuid", is(stockOperationType.getUuid())));
@@ -211,19 +211,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockOperationType,
 		    hasProperty("availableWhenReserved", is(stockOperationType.getAvailableWhenReserved())));
 	}
-	
+
 	@Test
 	public void saveStockItem_shouldSaveAllProperties() {
 		//Given
 		StockItem stockItem = eu().newStockItem(dao(), true);
-		
+
 		//When
 		dao().saveStockItem(stockItem);
-		
+
 		//Let's clean up the cache to be sure getStockItemByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockItem savedStockItem = dao().getStockItemByUuid(stockItem.getUuid());
 		assertThat(savedStockItem, hasProperty("uuid", is(stockItem.getUuid())));
@@ -244,19 +244,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockItem, hasProperty("dispensingUnit", is(stockItem.getDispensingUnit())));
 		assertThat(savedStockItem, hasProperty("defaultStockOperationsUoM", is(stockItem.getDefaultStockOperationsUoM())));
 	}
-	
+
 	@Test
 	public void saveStockBatch_shouldSaveAllProperties() {
 		//Given
 		StockBatch stockBatch = eu().newStockBatch(dao());
-		
+
 		//When
 		dao().saveStockBatch(stockBatch);
-		
+
 		//Let's clean up the cache to be sure getStockBatchByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockBatch savedStockBatch = dao().getStockBatchByUuid(stockBatch.getUuid());
 		assertThat(savedStockBatch, hasProperty("uuid", is(stockBatch.getUuid())));
@@ -272,19 +272,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockBatch, hasProperty("expiration", is(stockBatch.getExpiration())));
 		assertThat(savedStockBatch, hasProperty("stockItem", is(stockBatch.getStockItem())));
 	}
-	
+
 	@Test
 	public void saveUserRoleScope_shouldSaveAllProperties() {
 		//Given
 		UserRoleScope userRoleScope = eu().newUserRoleScope(dao());
-		
+
 		//When
 		dao().saveUserRoleScope(userRoleScope);
-		
+
 		//Let's clean up the cache to be sure getUserRoleScopeByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		UserRoleScope savedUserRoleScope = dao().getUserRoleScopeByUuid(userRoleScope.getUuid());
 		assertThat(savedUserRoleScope, hasProperty("uuid", is(userRoleScope.getUuid())));
@@ -303,19 +303,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedUserRoleScope, hasProperty("activeTo", is(userRoleScope.getActiveTo())));
 		assertThat(savedUserRoleScope, hasProperty("enabled", is(userRoleScope.getEnabled())));
 	}
-	
+
 	@Test
 	public void saveUserRoleScopeLocation_shouldSaveAllProperties() {
 		//Given
 		UserRoleScopeLocation userRoleScopeLocation = eu().newUserRoleScopeLocation(dao());
-		
+
 		//When
 		dao().saveUserRoleScopeLocation(userRoleScopeLocation);
-		
+
 		//Let's clean up the cache to be sure getUserRoleScopeLocationByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		UserRoleScopeLocation savedUserRoleScopeLocation = dao().getUserRoleScopeLocationByUuid(
 		    userRoleScopeLocation.getUuid());
@@ -333,19 +333,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedUserRoleScopeLocation,
 		    hasProperty("enableDescendants", is(userRoleScopeLocation.getEnableDescendants())));
 	}
-	
+
 	@Test
 	public void saveStockRule_shouldSaveAllProperties() {
 		//Given
 		StockRule stockRule = eu().newStockRule(dao());
-		
+
 		//When
 		dao().saveStockRule(stockRule);
-		
+
 		//Let's clean up the cache to be sure getStockRuleByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockRule savedStockRule = dao().getStockRuleByUuid(stockRule.getUuid());
 		assertThat(savedStockRule, hasProperty("uuid", is(stockRule.getUuid())));
@@ -371,19 +371,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockRule, hasProperty("alertRole", is(stockRule.getAlertRole())));
 		assertThat(savedStockRule, hasProperty("mailRole", is(stockRule.getMailRole())));
 	}
-	
+
 	@Test
 	public void saveStockOperationItem_shouldSaveAllProperties() {
 		//Given
 		StockOperationItem stockOperationItem = eu().newStockOperationItem(dao());
-		
+
 		//When
 		dao().saveStockOperationItem(stockOperationItem);
-		
+
 		//Let's clean up the cache to be sure getStockOperationItemByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockOperationItem savedStockOperationItem = dao().getStockOperationItemByUuid(stockOperationItem.getUuid());
 		assertThat(savedStockOperationItem, hasProperty("uuid", is(stockOperationItem.getUuid())));
@@ -403,19 +403,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockOperationItem, hasProperty("stockItem", is(stockOperationItem.getStockItem())));
 		assertThat(savedStockOperationItem, hasProperty("stockOperation", is(stockOperationItem.getStockOperation())));
 	}
-	
+
 	@Test
 	public void saveStockOperation_shouldSaveAllProperties() {
 		//Given
 		StockOperation stockOperation = eu().newStockOperation(dao());
-		
+
 		//When
 		dao().saveStockOperation(stockOperation);
-		
+
 		//Let's clean up the cache to be sure getStockOperationByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockOperation savedStockOperation = dao().getStockOperationByUuid(stockOperation.getUuid());
 		assertThat(savedStockOperation, hasProperty("uuid", is(stockOperation.getUuid())));
@@ -454,19 +454,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockOperation, hasProperty("rejectedDate", is(stockOperation.getRejectedDate())));
 		assertThat(savedStockOperation, hasProperty("rejectedBy", is(stockOperation.getRejectedBy())));
 	}
-	
+
 	@Test
 	public void saveStockOperationTypeLocationScope_shouldSaveAllProperties() {
 		//Given
 		StockOperationTypeLocationScope stockOperationTypeLocationScope = eu().newStockOperationTypeLocationScope(dao());
-		
+
 		//When
 		dao().saveStockOperationTypeLocationScope(stockOperationTypeLocationScope);
-		
+
 		//Let's clean up the cache to be sure getStockOperationTypeLocationScopeByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockOperationTypeLocationScope savedStockOperationTypeLocationScope = dao()
 		        .getStockOperationTypeLocationScopeByUuid(stockOperationTypeLocationScope.getUuid());
@@ -492,19 +492,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockOperationTypeLocationScope,
 		    hasProperty("locationTag", is(stockOperationTypeLocationScope.getLocationTag())));
 	}
-	
+
 	@Test
 	public void saveStockSource_shouldSaveAllProperties() {
 		//Given
 		StockSource stockSource = eu().newStockSource(dao());
-		
+
 		//When
 		dao().saveStockSource(stockSource);
-		
+
 		//Let's clean up the cache to be sure getStockSourceByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockSource savedStockSource = dao().getStockSourceByUuid(stockSource.getUuid());
 		assertThat(savedStockSource, hasProperty("uuid", is(stockSource.getUuid())));
@@ -520,19 +520,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockSource, hasProperty("acronym", is(stockSource.getAcronym())));
 		assertThat(savedStockSource, hasProperty("sourceType", is(stockSource.getSourceType())));
 	}
-	
+
 	@Test
 	public void saveParty_shouldSaveAllProperties() {
 		//Given
 		Party party = eu().newParty(dao());
-		
+
 		//When
 		dao().saveParty(party);
-		
+
 		//Let's clean up the cache to be sure getPartyByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		Party savedParty = dao().getPartyByUuid(party.getUuid());
 		assertThat(savedParty, hasProperty("uuid", is(party.getUuid())));
@@ -547,19 +547,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedParty, hasProperty("location", is(party.getLocation())));
 		assertThat(savedParty, hasProperty("stockSource", is(party.getStockSource())));
 	}
-	
+
 	@Test
 	public void saveStockOperationLink_shouldSaveAllProperties() {
 		//Given
 		StockOperationLink stockOperationLink = eu().newStockOperationLink(dao());
-		
+
 		//When
 		dao().saveStockOperationLink(stockOperationLink);
-		
+
 		//Let's clean up the cache to be sure getStockOperationLinkByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		StockOperationLink savedStockOperationLink = dao().getStockOperationLinkByUuid(stockOperationLink.getUuid());
 		assertThat(savedStockOperationLink, hasProperty("uuid", is(stockOperationLink.getUuid())));
@@ -574,25 +574,25 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedStockOperationLink, hasProperty("parent", is(stockOperationLink.getParent())));
 		assertThat(savedStockOperationLink, hasProperty("child", is(stockOperationLink.getChild())));
 	}
-	
+
 	@Test
 	public void saveOrderItem_shouldSaveAllProperties() {
 		StockItem stockItem = eu().newStockItem(dao(), false);
 		dao().saveStockItem(stockItem);
-		
+
 		StockItemPackagingUOM packagingUom = eu().newStockItemPackagingUOM(dao(), false, stockItem);
 		packagingUom.setFactor(BigDecimal.valueOf(2));
 		dao().saveStockItemPackagingUOM(packagingUom);
 		//Given
 		OrderItem orderItem = eu().newOrderItem(dao(), stockItem, packagingUom);
-		
+
 		//When
 		dao().saveOrderItem(orderItem);
-		
+
 		//Let's clean up the cache to be sure getOrderItemByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		OrderItem savedOrderItem = dao().getOrderItemByUuid(orderItem.getUuid());
 		assertThat(savedOrderItem, hasProperty("uuid", is(orderItem.getUuid())));
@@ -610,19 +610,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedOrderItem, hasProperty("createdFrom", is(orderItem.getCreatedFrom())));
 		assertThat(savedOrderItem, hasProperty("fulfilmentLocation", is(orderItem.getFulfilmentLocation())));
 	}
-	
+
 	@Test
 	public void saveBatchJobOwner_shouldSaveAllProperties() {
 		//Given
 		BatchJobOwner batchJobOwner = eu().newBatchJobOwner(dao());
-		
+
 		//When
 		dao().saveBatchJobOwner(batchJobOwner);
-		
+
 		//Let's clean up the cache to be sure getBatchJobOwnerByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		BatchJobOwner savedBatchJobOwner = dao().getBatchJobOwnerByUuid(batchJobOwner.getUuid());
 		assertThat(savedBatchJobOwner, hasProperty("uuid", is(batchJobOwner.getUuid())));
@@ -630,19 +630,19 @@ public class StockManagementDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(savedBatchJobOwner, hasProperty("owner", is(batchJobOwner.getOwner())));
 		assertThat(savedBatchJobOwner, hasProperty("dateCreated", is(batchJobOwner.getDateCreated())));
 	}
-	
+
 	@Test
 	public void saveBatchJob_shouldSaveAllProperties() {
 		//Given
 		BatchJob batchJob = eu().newBatchJob(dao());
-		
+
 		//When
 		dao().saveBatchJob(batchJob);
-		
+
 		//Let's clean up the cache to be sure getBatchJobByUuid fetches from DB and not from cache
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		//Then
 		BatchJob savedBatchJob = dao().getBatchJobByUuid(batchJob.getUuid());
 		assertThat(savedBatchJob, hasProperty("uuid", is(batchJob.getUuid())));

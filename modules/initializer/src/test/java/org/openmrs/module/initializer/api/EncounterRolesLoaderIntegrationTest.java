@@ -20,24 +20,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class EncounterRolesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("encounterService")
 	private EncounterService es;
-	
+
 	@Autowired
 	private EncounterRolesLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadOrderFrequenciesAccordingToCsvFiles() {
-		
+
 		loader.load();
-		
+
 		{
 			EncounterRole er = es.getEncounterRoleByUuid("54ce9816-1062-4636-af95-655066cd6aba");
 			Assert.assertNotNull(er);

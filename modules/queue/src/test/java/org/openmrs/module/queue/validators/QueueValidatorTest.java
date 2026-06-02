@@ -25,27 +25,27 @@ import org.springframework.validation.Errors;
 
 @ContextConfiguration(classes = SpringTestConfiguration.class, inheritLocations = false)
 public class QueueValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String[] QUEUE_VALIDATOR_INITIAL_DATASET_XML = {
 	        "org/openmrs/module/queue/api/dao/QueueDaoTest_locationInitialDataset.xml",
 	        "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_conceptsInitialDataset.xml",
 	        "org/openmrs/module/queue/validators/QueueEntryValidatorTest_globalPropertyInitialDataset.xml" };
-	
+
 	private static final String BAD_LOCATION_UUID = "60938432-1691-11df-97a5-7038c0lk";
-	
+
 	private static final String LOCATION_UUID = "d0938432-1691-11df-97a5-7038c098";
-	
+
 	private static final String VALID_SERVICE_CONCEPT = "67b910bd-298c-4ecf-a632-661ae2f446op";
-	
+
 	private static final String INVALID_SERVICE_CONCEPT_UUID = "91b910bd-298c-4ecf-a632-661ae2f909ut";
-	
+
 	@Autowired
 	private QueueValidator validator;
-	
+
 	private Queue queue;
-	
+
 	private Errors errors;
-	
+
 	@Before
 	public void setup() {
 		for (String dataset : QUEUE_VALIDATOR_INITIAL_DATASET_XML) {
@@ -54,7 +54,7 @@ public class QueueValidatorTest extends BaseModuleContextSensitiveTest {
 		queue = new Queue();
 		errors = new BindException(queue, queue.getClass().getName());
 	}
-	
+
 	@Test
 	public void shouldSucceedForValidServiceConcept() {
 		queue.setName("Test Queue");
@@ -63,7 +63,7 @@ public class QueueValidatorTest extends BaseModuleContextSensitiveTest {
 		validator.validate(queue, errors);
 		assertThat(errors.getAllErrors().size(), equalTo(0));
 	}
-	
+
 	@Test
 	public void shouldFailForInvalidServiceConcept() {
 		queue.setName("Test Queue");
@@ -72,7 +72,7 @@ public class QueueValidatorTest extends BaseModuleContextSensitiveTest {
 		validator.validate(queue, errors);
 		assertThat(errors.getAllErrors().size(), equalTo(1));
 	}
-	
+
 	@Test
 	public void shouldSucceedForValidLocation() {
 		queue.setName("Test Queue");
@@ -81,7 +81,7 @@ public class QueueValidatorTest extends BaseModuleContextSensitiveTest {
 		validator.validate(queue, errors);
 		assertThat(errors.getAllErrors().size(), equalTo(0));
 	}
-	
+
 	@Test
 	public void shouldFailForInvalidLocation() {
 		queue.setName("Test Queue");

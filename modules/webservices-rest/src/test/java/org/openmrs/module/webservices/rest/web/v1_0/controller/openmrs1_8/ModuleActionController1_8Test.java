@@ -34,34 +34,34 @@ import static org.hamcrest.collection.IsEmptyCollection.emptyCollectionOf;
 import static org.hamcrest.core.IsNot.not;
 
 public class ModuleActionController1_8Test extends MainResourceControllerTest {
-	
+
 	@Autowired
 	RestService restService;
-	
+
 	private Module atlasModule = new Module("Atlas Module", "atlas", "name", "author", "description", "version", "");
-	
+
 	private Module conceptLabModule = new Module("Open Concept Lab Module", "openconceptlab", "name", "author",
 	        "description", "version", "");
-	
+
 	private Module webservicesRestModule = new Module("Rest module", RestConstants.MODULE_ID,
 	        "org.openmrs.module.webservices.rest", "openrms", "rest", "2.17", "");
-	
+
 	private Module mockModuleToLoad = new Module("MockModule", "mockModule", "name", "author", "description", "version", "");
-	
+
 	MockModuleFactoryWrapper mockModuleFactory = new MockModuleFactoryWrapper();
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		mockModuleFactory.loadedModules.addAll(Arrays.asList(atlasModule, conceptLabModule, webservicesRestModule));
-		
+
 		ModuleActionResource1_8 moduleActionResource = (ModuleActionResource1_8) restService
 		        .getResourceBySupportedClass(ModuleAction.class);
 		moduleActionResource.setModuleFactoryWrapper(mockModuleFactory);
-		
+
 		ModuleResource1_8 moduleResource = (ModuleResource1_8) restService.getResourceBySupportedClass(Module.class);
 		moduleResource.setModuleFactoryWrapper(mockModuleFactory);
 	}
-	
+
 	@Test
 	public void shouldInstallModule() throws Exception {
 		mockModuleFactory.loadModuleMock = mockModuleToLoad;
@@ -70,7 +70,7 @@ public class ModuleActionController1_8Test extends MainResourceControllerTest {
 		assertThat(mockModuleFactory.loadedModules, hasItem(mockModuleToLoad));
 		assertThat(mockModuleFactory.startedModules, hasItem(mockModuleToLoad));
 	}
-	
+
 	@Test
 	public void shouldThrowErrorOnPoorUri() throws Exception {
 		assertThrows(IllegalRequestException.class, () -> {
@@ -78,7 +78,7 @@ public class ModuleActionController1_8Test extends MainResourceControllerTest {
 			        + getUuid() + "\"], \"installUri\":\"anystring\"}")));
 		});
 	}
-	
+
 	@Test
 	public void shouldStartAtlasModule() throws Exception {
 		//sanity check
@@ -86,84 +86,84 @@ public class ModuleActionController1_8Test extends MainResourceControllerTest {
 		deserialize(handle(newPostRequest(getURI(), "{\"action\":\"start\", \"modules\":[\"" + getUuid() + "\"]}")));
 		assertThat(mockModuleFactory.startedModules, hasItem(atlasModule));
 	}
-	
+
 	@Test
 	public void shouldStopAtlasModule() throws Exception {
 		mockModuleFactory.startedModules.add(atlasModule);
 		deserialize(handle(newPostRequest(getURI(), "{\"action\":\"stop\", \"modules\":[\"" + getUuid() + "\"]}")));
 		assertThat(mockModuleFactory.startedModules, not(hasItem(atlasModule)));
 	}
-	
+
 	@Test
 	public void shouldDoNothingIfAtlasModuleAlreadyStarted() throws Exception {
 		mockModuleFactory.startedModules.add(atlasModule);
 		//sanity check
 		assertThat(mockModuleFactory.startedModules, hasItem(atlasModule));
 		assertThat(mockModuleFactory.loadedModules, hasItem(atlasModule));
-		
+
 		deserialize(handle(newPostRequest(getURI(), "{\"action\":\"start\", \"modules\":[\"" + getUuid() + "\"]}")));
-		
+
 		//check if state preserved
 		assertThat(mockModuleFactory.startedModules, hasItem(atlasModule));
 		assertThat(mockModuleFactory.loadedModules, hasItem(atlasModule));
 	}
-	
+
 	@Test
 	public void shouldDoNothingIfAtlasModuleAlreadyStopped() throws Exception {
 		//sanity check
 		assertThat(mockModuleFactory.startedModules, not(hasItem(atlasModule)));
 		assertThat(mockModuleFactory.loadedModules, hasItem(atlasModule));
-		
+
 		deserialize(handle(newPostRequest(getURI(), "{\"action\":\"stop\", \"modules\":[\"" + getUuid() + "\"]}")));
-		
+
 		//check if state preserved
 		assertThat(mockModuleFactory.startedModules, not(hasItem(atlasModule)));
 		assertThat(mockModuleFactory.loadedModules, hasItem(atlasModule));
 	}
-	
+
 	@Test
 	public void shouldUnloadAtlasModule() throws Exception {
 		//sanity check
 		assertThat(mockModuleFactory.loadedModules, hasItem(atlasModule));
-		
+
 		deserialize(handle(newPostRequest(getURI(), "{\"action\":\"unload\", \"modules\":[\"" + getUuid() + "\"]}")));
 		assertThat(mockModuleFactory.loadedModules, not(hasItem(atlasModule)));
 	}
-	
+
 	@Test
 	public void shouldStartAllModules() throws Exception {
 		assertThat(mockModuleFactory.startedModules, emptyCollectionOf(Module.class));
-		
+
 		deserialize(handle(newPostRequest(getURI(), "{\"action\":\"start\", \"allModules\":\"true\"}")));
-		
+
 		for (Module loadedModule : mockModuleFactory.loadedModules) {
 			assertThat(mockModuleFactory.startedModules, hasItem(loadedModule));
 		}
 	}
-	
+
 	@Test
 	public void shouldRestartAllModules() throws Exception {
 		//'start' all modules
 		mockModuleFactory.startedModules.addAll(mockModuleFactory.getLoadedModules());
-		
+
 		deserialize(handle(newPostRequest(getURI(), "{\"action\":\"restart\", \"allModules\":\"true\"}")));
-		
+
 		for (Module loadedModule : mockModuleFactory.loadedModules) {
 			assertThat(mockModuleFactory.startedModules, hasItem(loadedModule));
 		}
 	}
-	
+
 	@Test
 	public void shouldNotStopRestModule() throws Exception {
 		//'start' all modules
 		mockModuleFactory.startedModules.addAll(mockModuleFactory.getLoadedModules());
-		
+
 		deserialize(handle(newPostRequest(getURI(), "{\"action\":\"stop\", \"allModules\":\"true\"}")));
-		
+
 		assertThat(mockModuleFactory.startedModules, hasSize(1));
 		assertThat(mockModuleFactory.startedModules, hasItem(webservicesRestModule));
 	}
-	
+
 	@Test
 	public void shouldFailIfTryingToStopNonExistentModule() throws Exception {
 		mockModuleFactory.startedModules.add(atlasModule);
@@ -178,7 +178,7 @@ public class ModuleActionController1_8Test extends MainResourceControllerTest {
 		assertThat(exception, instanceOf(IllegalRequestException.class));
 		assertThat(mockModuleFactory.startedModules, hasItem(atlasModule));
 	}
-	
+
 	//ModuleAction resource does not support these operations
 	@Override
 	@Test
@@ -187,7 +187,7 @@ public class ModuleActionController1_8Test extends MainResourceControllerTest {
 			super.shouldGetDefaultByUuid();
 		});
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetRefByUuid() throws Exception {
@@ -195,7 +195,7 @@ public class ModuleActionController1_8Test extends MainResourceControllerTest {
 			super.shouldGetRefByUuid();
 		});
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetFullByUuid() throws Exception {
@@ -203,7 +203,7 @@ public class ModuleActionController1_8Test extends MainResourceControllerTest {
 			super.shouldGetFullByUuid();
 		});
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetAll() throws Exception {
@@ -211,22 +211,22 @@ public class ModuleActionController1_8Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "moduleaction";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return "atlas";
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	public String getInstallUri() {
 		return "https://dl.bintray.com/openmrs/omod/xforms-4.3.11.omod";
 	}

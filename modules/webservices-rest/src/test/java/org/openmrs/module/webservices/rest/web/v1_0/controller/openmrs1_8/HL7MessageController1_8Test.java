@@ -28,45 +28,45 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * Tests functionality of {@link HL7MessageController1_8}.
  */
 public class HL7MessageController1_8Test extends MainResourceControllerTest {
-	
+
 	private static final String HL7_DATA = "MSH|^~\\&|NES|AMRS.ELD|TESTSYSTEM|TESTFACILITY|20010101000000||ADT^A04|REl7wt78q9Pzlqe9ecJB|P|2.5";
-	
+
 	private static final String HL7_INVALID_SOURCE_DATA = "MSH|^~\\&|NES|nonexistingsource|TESTSYSTEM|TESTFACILITY|20010101000000||ADT^A04|REl7wt78q9Pzlqe9ecJB|P|2.3";
-	
+
 	private HL7Service service;
-	
+
 	private static final String DATASET_FILENAME = "customTestDataset.xml";
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		this.service = Context.getHL7Service();
 		executeDataSet(DATASET_FILENAME);
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "hl7";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return "notsupported";
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return service.getAllHL7InQueues().size();
 	}
-	
+
 	@Test
 	public void enqueHl7Message_shouldEnqueueHl7InQueueMessageInPlainFormat() throws Exception {
 		int before = service.getAllHL7InQueues().size();
-		
+
 		MockHttpServletRequest req = newPostRequest(getURI(), HL7_DATA);
 		SimpleObject newHl7Message = deserialize(handle(req));
-		
+
 		Util.log("Enqued hl7 message", newHl7Message);
-		
+
 		Assertions.assertEquals(before + 1, service.getAllHL7InQueues().size());
 		for (HL7InQueue hl7InQueue : service.getAllHL7InQueues()) {
 			if (hl7InQueue.getUuid().equals(newHl7Message.get("uuid"))) {
@@ -74,17 +74,17 @@ public class HL7MessageController1_8Test extends MainResourceControllerTest {
 			}
 		}
 	}
-	
+
 	@Test
 	public void enqueHl7Message_shouldEnqueueHl7InQueueMessageInJSONFormat() throws Exception {
 		int before = service.getAllHL7InQueues().size();
-		
+
 		SimpleObject hl7Message = new SimpleObject();
 		hl7Message.add("hl7", HL7_DATA);
-		
+
 		MockHttpServletRequest req = newPostRequest(getURI(), hl7Message);
 		SimpleObject newHl7Message = deserialize(handle(req));
-		
+
 		Assertions.assertEquals(before + 1, service.getAllHL7InQueues().size());
 		for (HL7InQueue hl7InQueue : service.getAllHL7InQueues()) {
 			if (hl7InQueue.getUuid().equals(newHl7Message.get("uuid"))) {
@@ -92,57 +92,57 @@ public class HL7MessageController1_8Test extends MainResourceControllerTest {
 			}
 		}
 	}
-	
+
 	@Test
 	@Disabled("No route for hl7 message: ADT_A05")
 	public void adt_a28_shouldCreatePatient() throws Exception {
-		
+
 		//get the initial number of patients
 		int count = Context.getPatientService().getAllPatients().size();
-		
+
 		//all hl7 queues should be empty
 		Assertions.assertEquals(0, service.getAllHL7InQueues().size());
 		Assertions.assertEquals(0, service.getAllHL7InErrors().size());
 		Assertions.assertEquals(0, service.getAllHL7InArchives().size());
-		
+
 		//create an ADT_A28 hl7 message
 		SimpleObject hl7Message = new SimpleObject();
 		String hl7Data = "MSH|^~\\&|REST|LOCAL|HL7HANDLER|OPENMRS|20140331101300^0|HUP|ADT^A28^ADT_A05|ADD PERSON INFO|P|2.5|1|||AL||ASCII\r"
 		        + "EVN|A28|20140331101300|||1\r"
 		        + "PID|||1991^^^Old Identification Number||Rest^Created^Patient||20011114000000|M|||20371^02^2400^724||||||724^Y||||||02|||11|20371|724^DEUT^N||N";
 		hl7Message.add("hl7", hl7Data);
-		
+
 		//post the hl7 message
 		MockHttpServletRequest req = newPostRequest(getURI(), hl7Message);
 		handle(req);
-		
+
 		//only the hl7 in queue should have data
 		Assertions.assertEquals(1, service.getAllHL7InQueues().size());
 		Assertions.assertEquals(0, service.getAllHL7InErrors().size());
 		Assertions.assertEquals(0, service.getAllHL7InArchives().size());
-		
+
 		service.processHL7InQueue(service.getAllHL7InQueues().get(0));
-		
+
 		//only the hl7 archive queue should have data
 		Assertions.assertEquals(0, service.getAllHL7InQueues().size());
 		Assertions.assertEquals(0, service.getAllHL7InErrors().size());
 		Assertions.assertEquals(1, service.getAllHL7InArchives().size());
-		
+
 		//a new patient should be created
 		Assertions.assertEquals((count + 1), Context.getPatientService().getAllPatients().size());
 	}
-	
+
 	@Test
 	public void enqueHl7Message_shouldFailIfSourceDoesNotExist() throws Exception {
 		assertThrows(ConversionException.class, () -> {
 			SimpleObject hl7Message = new SimpleObject();
 			hl7Message.add("hl7", HL7_INVALID_SOURCE_DATA);
-		
+
 			MockHttpServletRequest req = newPostRequest(getURI(), hl7Message);
 			deserialize(handle(req));
 		});
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetDefaultByUuid()
 	 */
@@ -153,7 +153,7 @@ public class HL7MessageController1_8Test extends MainResourceControllerTest {
 			super.shouldGetDefaultByUuid();
 		});
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetFullByUuid()
 	 */
@@ -164,7 +164,7 @@ public class HL7MessageController1_8Test extends MainResourceControllerTest {
 			super.shouldGetFullByUuid();
 		});
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetRefByUuid()
 	 */
@@ -175,7 +175,7 @@ public class HL7MessageController1_8Test extends MainResourceControllerTest {
 			super.shouldGetRefByUuid();
 		});
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetAll()
 	 */
@@ -186,5 +186,5 @@ public class HL7MessageController1_8Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 }

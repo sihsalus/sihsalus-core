@@ -66,7 +66,7 @@ public class HibernateEventInterceptorTest extends BaseEventTest {
 		unknownLocation = locationService.getLocation(1);
 		program = programWorkflowService.getProgram(1);
 	}
-	
+
 	/**
 	 * @see Event#subscribe(Class, String, EventListener)
 	 */

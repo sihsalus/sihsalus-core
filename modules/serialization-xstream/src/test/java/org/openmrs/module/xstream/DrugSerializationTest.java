@@ -31,10 +31,10 @@ import static org.junit.Assert.assertTrue;
  * Test class that tests the serialization and deserialization of a drug
  */
 public class DrugSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a drug and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -44,11 +44,11 @@ public class DrugSerializationTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/DrugSerializationTest.xml");
 		authenticate();
-		
+
 		Drug drug = Context.getConceptService().getDrug(2);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(drug, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("3cfcf118-931c-46f7-8ff6-7b876f0d4202", "/drug/@uuid", xmlOutput);
@@ -62,10 +62,10 @@ public class DrugSerializationTest extends BaseModuleContextSensitiveTest {
 		XMLAssert.assertXpathEvaluatesTo("1.0tab(s)", "/drug/strength", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("4", "/drug/concept/conceptId", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -179,10 +179,10 @@ public class DrugSerializationTest extends BaseModuleContextSensitiveTest {
 		xmlBuilder.append("    <conceptMappings class=\"set\" id=\"44\"/>\n");
 		xmlBuilder.append("  </concept>\n");
 		xmlBuilder.append("</drug>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		Drug drug = Context.getSerializationService()
 		        .deserialize(xmlBuilder.toString(), Drug.class, XStreamSerializer.class);
 		assertEquals("3cfcf118-931c-46f7-8ff6-7b876f0d4202", drug.getUuid());

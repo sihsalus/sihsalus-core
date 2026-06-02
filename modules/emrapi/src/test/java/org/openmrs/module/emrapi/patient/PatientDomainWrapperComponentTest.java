@@ -21,14 +21,14 @@ import static org.hamcrest.core.IsNull.notNullValue;
  *
  */
 public class PatientDomainWrapperComponentTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private DomainWrapperFactory factory;
-	
+
 	@Test
 	public void testThatBeanCanHavePropertiesAutowired() throws Exception {
 		PatientDomainWrapper patientDomainWrapper = factory.newPatientDomainWrapper();
 		assertThat(patientDomainWrapper.emrApiProperties, notNullValue());
 	}
-	
+
 }

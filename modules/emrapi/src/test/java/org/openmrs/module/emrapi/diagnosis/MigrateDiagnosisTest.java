@@ -30,43 +30,43 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class MigrateDiagnosisTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String DIAGNOSIS_DATASET = "DiagnosisDataset.xml";
-	
+
 	@Autowired
 	ConceptService conceptService;
-	
+
 	@Autowired
 	EncounterService encounterService;
-	
+
 	@Autowired
 	ObsGroupDiagnosisService obsGroupDiagnosisService;
-	
+
 	@Autowired
 	org.openmrs.api.DiagnosisService diagnosisService;
-	
+
 	@Autowired
 	PatientService patientService;
-	
+
 	@Autowired
 	EmrApiProperties emrApiProperties;
-	
+
 	private DiagnosisMetadata diagnosisMetadata;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		executeDataSet(DIAGNOSIS_DATASET);
 		diagnosisMetadata = ContextSensitiveMetadataTestUtils.setupDiagnosisMetadata(conceptService, emrApiProperties);
 	}
-	
+
 	@Test
 	public void getAllPatientsWithDiagnosis_shouldReturnListOfPatientIdsWithADiagnosis() {
 		diagnosisMetadata.setDiagnosisSetConcept(conceptService.getConcept(159965));
 		List<Integer> patientIds = obsGroupDiagnosisService.getAllPatientsWithDiagnosis(diagnosisMetadata);
-		
+
 		assertEquals(2, patientIds.size());
 	}
-	
+
 	@Test
 	public void migrate_shouldVoidEmrapiDiagnosisAndCreateAnewCoreDiagnosis() {
 		Patient patient = patientService.getPatient(7);
@@ -80,14 +80,14 @@ public class MigrateDiagnosisTest extends BaseModuleContextSensitiveTest {
 		assertEquals(2, emrapiDiagnoses.size());
 		// before migration
 		assertEquals(0, diagnosisService.getDiagnoses(patient, null).size());
-		
+
 		new MigrateDiagnosis().migrate(diagnosisMetadata);
 		// after migration
 		assertEquals(2, diagnosisService.getDiagnoses(patient, null).size());
 		assertTrue(obs.getVoided());
-		
+
 	}
-	
+
 	@Test
 	public void migrate_shouldVoidChildObsOfMigratedDiagnosis() {
 		Patient patient = patientService.getPatient(7);
@@ -109,27 +109,27 @@ public class MigrateDiagnosisTest extends BaseModuleContextSensitiveTest {
 			assertEquals("Migrated parent to the new encounter_diagnosis table", child.getVoidReason());
 		}
 	}
-	
+
 	@Test
 	public void migrate_shouldReturnTrueIfAtLeastOneDiagnosisWasMigrated() {
 		Patient patient = patientService.getPatient(7);
 		new OldDiagnosisBuilder(diagnosisMetadata).buildDiagnosis(patient, "2013-09-10", Diagnosis.Order.SECONDARY,
 		    Diagnosis.Certainty.CONFIRMED, "non-coded pain", encounterService.getEncounter(1)).save();
-		
+
 		assertEquals(0, diagnosisService.getDiagnoses(patient, null).size());
-		
+
 		assertTrue(new MigrateDiagnosis().migrate(diagnosisMetadata));
-		
+
 		assertEquals(1, diagnosisService.getDiagnoses(patient, null).size());
 	}
-	
+
 	@Test
 	public void migrate_shouldReturnFalseIfNoDiagnosisWasMigrated() {
 		Patient patient = patientService.getPatient(7);
 		assertEquals(0, diagnosisService.getDiagnoses(patient, null).size());
-		
+
 		assertFalse(new MigrateDiagnosis().migrate(diagnosisMetadata));
-		
+
 		assertEquals(0, diagnosisService.getDiagnoses(patient, null).size());
 	}
 }

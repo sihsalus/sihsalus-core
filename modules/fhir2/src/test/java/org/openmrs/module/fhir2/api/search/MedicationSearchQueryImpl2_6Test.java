@@ -45,57 +45,57 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class MedicationSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String MEDICATION_REVINCLUDE_UUID = "05ec820a-d297-44e3-be6e-698531d9dd3f"; // from standard test dataset
-	
+
 	private static final int START_INDEX = 0;
-	
+
 	private static final int END_INDEX = 10;
-	
+
 	@Autowired
 	private FhirMedicationDao dao;
-	
+
 	@Autowired
 	private MedicationTranslator translator;
-	
+
 	@Autowired
 	private SearchQueryInclude<Medication> searchQueryInclude;
-	
+
 	@Autowired
 	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator, SearchQueryInclude<Medication>> searchQuery;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
-	
+
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
-	
+
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-	
+
 	@Test
 	public void searchForMedications_shouldAddMedicationRequestsToReturnedResults() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REVINCLUDE_UUID));
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("MedicationRequest:medication"));
 		revIncludes.add(new Include("MedicationDispense:prescription", true));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
-		
+
 		IBundleProvider results = search(theParams);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
-		
+
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
-		
+
 		assertThat(results, Matchers.notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(Matchers.equalTo(6))); // included resources added as part of result list
@@ -105,6 +105,6 @@ public class MedicationSearchQueryImpl2_6Test extends BaseModuleContextSensitive
 		    is(iterableWithSize(4))); // 5 requests that reference that medication
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationDispense).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // 1 dispense that references the above requests
-		
+
 	}
 }

@@ -24,30 +24,30 @@ import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class VisitWithBedPatientAssignmentValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private BedManagementService bedManagementService;
-	
+
 	@Before
 	public void beforeAllTests() throws Exception {
 		executeDataSet("testPatientsDataset.xml");
 		executeDataSet("bedManagementDAOComponentTestDataset.xml");
 	}
-	
+
 	@Test
 	public void testExceptionThrownWhenVisitSavedWithEndtimeBeforeBedAssignmentEndtime() {
 		VisitService visitService = Context.getVisitService();
 		PatientService patientService = Context.getPatientService();
 		Patient patient = patientService.getPatient(1001);
 		Visit visit = visitService.getVisit(1001);
-		
+
 		BedDetails bedDetails = bedManagementService.getBedAssignmentDetailsByPatient(patient);
-		
+
 		assertThat("Invalid test data, patient has no bed assigned", bedDetails, is(notNullValue()));
-		
+
 		BedDetails updatedBedDetails = bedManagementService.unAssignPatientFromBed(patient);
 		BedPatientAssignment endedAssignment = updatedBedDetails.getLastAssignment();
-		
+
 		assertThrows(ValidationException.class, () -> {
 			Date oneSecondBeforeEndingBedAssignment = Date
 			        .from(endedAssignment.getEndDatetime().toInstant().minus(1, ChronoUnit.SECONDS));

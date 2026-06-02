@@ -31,30 +31,30 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ConversionUtil1_12Test extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	ConceptService conceptService;
-	
+
 	@Autowired
 	UserService userService;
-	
+
 	@Test
 	public void convertToRepresentation_shouldConvertValuesOfMaps() throws Exception {
 		Map<Object, Object> toConvert = new LinkedHashMap<Object, Object>();
 		Date date = new Date();
 		toConvert.put("date", date);
-		
+
 		Map<String, Object> toConvert2ndLevel = new HashMap<String, Object>();
 		Concept concept = conceptService.getConcept(3);
 		toConvert2ndLevel.put("concept", concept);
 		toConvert.put("map", toConvert2ndLevel);
 		toConvert.put("string", "a string");
-		
+
 		User user = userService.getUser(1);
 		toConvert.put(1, user);
-		
+
 		SimpleObject converted = (SimpleObject) ConversionUtil.convertToRepresentation(toConvert, Representation.REF);
-		
+
 		assertThat(converted,
 		    (Matcher) hasEntry(is("date"), is(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(date))));
 		assertThat(converted, (Matcher) hasEntry(is("string"), is("a string")));

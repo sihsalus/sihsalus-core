@@ -40,59 +40,59 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class EncounterSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTest {
-	
+
 	public static final String ENCOUNTER_UUID = "y403fafb-e5e4-42d0-9d11-4f52e89d123r"; // encounter 6 from standard test dataset
-	
+
 	public static final int START_INDEX = 0;
-	
+
 	public static final int END_INDEX = 10;
-	
+
 	@Autowired
 	private FhirEncounterDao dao;
-	
+
 	@Autowired
 	private EncounterTranslator<org.openmrs.Encounter> translator;
-	
+
 	@Autowired
 	private SearchQueryInclude<Encounter> searchQueryInclude;
-	
+
 	@Autowired
 	private SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator<org.openmrs.Encounter>, SearchQueryInclude<Encounter>> searchQuery;
-	
+
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
-	
+
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-	
+
 	@Before
 	public void setup() {
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
-	
+
 	@Test
 	public void searchForEncounters_shouldReverseIncludeMedicationRequestsAndAssociatedMedicationDispensesWithReturnedResults() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ENCOUNTER_UUID));
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("MedicationRequest:encounter"));
 		revIncludes.add(new Include("MedicationDispense:prescription", true));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
-		
+
 		IBundleProvider results = search(theParams);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
-		
+
 		assertThat(resultList.size(), equalTo(8)); // reverse included resources added as part of the result list
 		assertThat(resultList.stream().filter(result -> result instanceof Encounter).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // the actual matched encounter

@@ -34,37 +34,37 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public class OrderController1_12Test extends MainResourceControllerTest {
-	
+
 	protected static final String ORDER_ENTRY_DATASET_XML = "org/openmrs/api/include/OrderEntryIntegrationTest-other.xml";
-	
+
 	private final static String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
-	
+
 	private OrderService orderService;
-	
+
 	private PatientService patientService;
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		this.orderService = Context.getOrderService();
 		this.patientService = Context.getPatientService();
 		executeDataSet(ORDER_ENTRY_DATASET_XML);
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "order";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_10.ORDER_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetAll()
 	 */
@@ -75,7 +75,7 @@ public class OrderController1_12Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Test
 	public void shouldPlaceANewDrugOrder() throws Exception {
 		executeDataSet(ORDER_ENTRY_DATASET_XML);
@@ -109,14 +109,14 @@ public class OrderController1_12Test extends MainResourceControllerTest {
 		order.add("brandName", "Some brand name");
 		order.add("dispenseAsWritten", true);
 		order.add("drugNonCoded", "Some non coded drug");
-		
+
 		MockHttpServletRequest req = newPostRequest(getURI(), order);
 		SimpleObject newOrder = deserialize(handle(req));
-		
+
 		List<Order> activeDrugOrders = orderService.getActiveOrders(patient, orderService.getOrderTypeByName("Drug order"),
 		    outPatient, null);
 		assertEquals(++originalActiveDrugOrderCount, activeDrugOrders.size());
-		
+
 		assertNotNull(PropertyUtils.getProperty(newOrder, "orderNumber"));
 		assertEquals("NEW", Util.getByPath(newOrder, "action"));
 		assertEquals(order.get("patient"), Util.getByPath(newOrder, "patient/uuid"));

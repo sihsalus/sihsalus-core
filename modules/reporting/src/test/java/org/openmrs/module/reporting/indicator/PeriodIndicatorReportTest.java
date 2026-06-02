@@ -34,34 +34,34 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 public class PeriodIndicatorReportTest extends BaseModuleContextSensitiveTest {
 
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	@Test
 	public void shouldEvaluteIndicatorForLocation() throws Exception {
-		
+
 		PeriodIndicatorReportDefinition report = new PeriodIndicatorReportDefinition();
 		report.setupDataSetDefinition();
-		
+
 		GenderCohortDefinition males = new GenderCohortDefinition();
 		males.setName("Males");
 		males.setMaleIncluded(true);
-		
+
 		EncounterCohortDefinition atSite = new EncounterCohortDefinition();
 		atSite.setName("At Site");
 		atSite.addParameter(new Parameter("locationList", "List of Locations", Location.class));
-		
+
 		CohortIndicator numberOfMales = new CohortIndicator("Males");
 		numberOfMales.addParameter(ReportingConstants.START_DATE_PARAMETER);
 		numberOfMales.addParameter(ReportingConstants.END_DATE_PARAMETER);
@@ -78,27 +78,27 @@ public class PeriodIndicatorReportTest extends BaseModuleContextSensitiveTest {
 		IndicatorResult ir = (IndicatorResult) ds.iterator().next().getColumnValue("1.A");
 		Assert.assertEquals(1, ir.getValue().intValue());
 	}
-	
+
 	@Test
 	public void shouldEvaluteFractionalIndicators() throws Exception {
-		
+
 		PeriodIndicatorReportDefinition report = new PeriodIndicatorReportDefinition();
 		report.setupDataSetDefinition();
-		
+
 		GenderCohortDefinition males = new GenderCohortDefinition();
 		males.setName("Males");
 		males.setMaleIncluded(true);
-		
+
 		GenderCohortDefinition all = new GenderCohortDefinition();
 		all.setName("All");
 		all.setMaleIncluded(true);
 		all.setFemaleIncluded(true);
 		all.setUnknownGenderIncluded(true);
-		
+
 		EncounterCohortDefinition atSite = new EncounterCohortDefinition();
 		atSite.setName("At Site");
 		atSite.addParameter(new Parameter("locationList", "List of Locations", Location.class));
-		
+
 		CohortIndicator percentMales = new CohortIndicator("Males");
 		percentMales.setType(IndicatorType.FRACTION);
 		percentMales.addParameter(ReportingConstants.START_DATE_PARAMETER);
@@ -108,7 +108,7 @@ public class PeriodIndicatorReportTest extends BaseModuleContextSensitiveTest {
 		percentMales.setDenominator(all, "");
 		percentMales.setLocationFilter(atSite, "locationList=${location}");
 		report.addIndicator("1.A", "Percent of Males", percentMales);
-		
+
 		ReportDefinitionService rs = Context.getService(ReportDefinitionService.class);
 		EvaluationContext context = new EvaluationContext();
 		context.addParameterValue("location", Context.getLocationService().getLocation(2));

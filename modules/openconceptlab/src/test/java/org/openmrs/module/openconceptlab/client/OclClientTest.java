@@ -59,15 +59,15 @@ public class OclClientTest extends MockTest {
 		FileUtils.deleteQuietly(tempDir);
 		tempDir.mkdir();
 		tempDir.deleteOnExit();
-		
+
 		oclClient = new OclClient(tempDir.getAbsolutePath());
 	}
-	
+
 	@After
 	public void deleteTempDir() throws IOException {
 		FileUtils.deleteQuietly(tempDir);
 	}
-	
+
 	/**
 	 * @see OclClient#extractResponse(GetMethod)
 	 * @verifies extract date and json
@@ -76,11 +76,11 @@ public class OclClientTest extends MockTest {
 	public void extractResponse_shouldExtractDateAndZippedJson() throws Exception {
 		String date = "Mon, 13 Oct 2014 11:07:19 GMT";
 		Header header = new Header("Date", date);
-		
+
 		when(get.getResponseHeader("Content-Type")).thenReturn(new Header("Content-Type", "application/zip"));
 		when(get.getResponseHeader("Date")).thenReturn(header);
 		when(get.getResponseBodyAsStream()).thenReturn(TestResources.getSimpleResponseAsStream());
-		
+
 		OclResponse subscription = oclClient.extractResponse(get);
 		InputStream in = subscription.getContentStream();
 		String json = "";
@@ -91,23 +91,23 @@ public class OclClientTest extends MockTest {
 		finally {
 			IOUtils.closeQuietly(in);
 		}
-		
+
 		assertThat(subscription.getUpdatedTo(), is(DateUtil.parseDate(date)));
 		assertThat(json, startsWith("{\"type\": \"Source\", \"uuid\": \"54e74b378a86f251d2e737d8\""));
 		assertThat(json, containsString("\"extras\": {\"about\": \"Source managed by Andrew Kanter\"}"));
 		assertThat(json.length(), is(266223));
 	}
-	
+
 	@Test
 	public void extractResponse_shouldExtractDateAndGzippedJson() throws Exception {
 		String date = "Wed, 22 Jul 2015 13:07:19 GMT";
 		Header header = new Header("Date", date);
-		
+
 		when(get.getPath()).thenReturn("https://ocl-source-export-staging.s3.amazonaws.com/CIEL/CIEL_20150514-testdata.20150622121229.tgz"
 				+ "?Signature=k%2FG0J%2Bt%2BlYJoscWxNFYbn%2BvtiPo%3D&Expires=1437567014&AWSAccessKeyId=AKIAJSVYSQTANHNWOOPQ");
 		when(get.getResponseHeader("Date")).thenReturn(header);
 		when(get.getResponseBodyAsStream()).thenReturn(TestResources.getInitialResponseAsStream());
-		
+
 		OclResponse subscription = oclClient.extractResponse(get);
 		InputStream in = subscription.getContentStream();
 		String json = "";
@@ -118,27 +118,27 @@ public class OclClientTest extends MockTest {
 		finally {
 			IOUtils.closeQuietly(in);
 		}
-		
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(0); //reset
 		calendar.set(2015, 5, 22, 12, 12, 29);
-		
+
 		assertThat(subscription.getUpdatedTo(), is(calendar.getTime()));
 		assertThat(json.substring(0, 512), startsWith("{\"type\": \"Source\", \"uuid\": \"5582be2550d61b5538ed694b\""));
 		assertThat(json.length(), is(7540529));
 	}
-	
+
 	@Test
 	public void parseDateFromPath_shouldParseDate() throws Exception {
 		String path = "https://ocl-source-export-staging.s3.amazonaws.com/CIEL/CIEL_20150514-testdata.20150622121229.tgz"
 				+ "?Signature=k%2FG0J%2Bt%2BlYJoscWxNFYbn%2BvtiPo%3D&Expires=1437567014&AWSAccessKeyId=AKIAJSVYSQTANHNWOOPQ";
-		
+
 		Date date = oclClient.parseDateFromPath(path);
-		
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(0); //reset
 		calendar.set(2015, 5, 22, 12, 12, 29);
-		
+
 		assertThat(date, is(calendar.getTime()));
 	}
 

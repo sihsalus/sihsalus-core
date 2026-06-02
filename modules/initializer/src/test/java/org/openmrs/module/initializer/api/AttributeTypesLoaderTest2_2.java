@@ -18,23 +18,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class AttributeTypesLoaderTest2_2 extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private AttributeTypesLoader loader;
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService cs;
-	
+
 	@Autowired
 	@Qualifier("programWorkflowService")
 	private ProgramWorkflowService pws;
-	
+
 	@Before
 	public void setup() {
 		executeDataSet("testdata/test-metadata-2.2.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
 		// Verify setup
@@ -48,10 +48,10 @@ public class AttributeTypesLoaderTest2_2 extends DomainBaseModuleContextSensitiv
 			Assert.assertThat(attType.getMinOccurs(), is(0));
 			Assert.assertThat(attType.getMaxOccurs(), is(1));
 		}
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verify creations
 		{
 			ConceptAttributeType attType = cs.getConceptAttributeTypeByUuid("7d002484-0fcd-4759-a67a-04dbf8fdaab1");
@@ -73,7 +73,7 @@ public class AttributeTypesLoaderTest2_2 extends DomainBaseModuleContextSensitiv
 			Assert.assertNull(attType.getMinOccurs());
 			Assert.assertNull(attType.getMaxOccurs());
 		}
-		
+
 		// Verify editions
 		{
 			ProgramAttributeType attType = pws.getProgramAttributeTypeByUuid("b1d98f27-c058-46f2-9c12-87dd7c92f7e3");
@@ -85,7 +85,7 @@ public class AttributeTypesLoaderTest2_2 extends DomainBaseModuleContextSensitiv
 			Assert.assertThat(attType.getMinOccurs(), is(0));
 			Assert.assertThat(attType.getMaxOccurs(), is(1));
 		}
-		
+
 		// Verify retirement using name as the pivot
 		{
 			ConceptAttributeType attType = cs.getConceptAttributeTypeByName("Concept Family");

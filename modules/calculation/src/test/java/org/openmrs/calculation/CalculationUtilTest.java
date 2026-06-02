@@ -29,11 +29,11 @@ import org.openmrs.test.Verifies;
  * Contains test methods for {@link CalculationUtilTest}
  */
 public class CalculationUtilTest {
-	
+
 	private enum Geek {
 		NERD
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#isPrimitiveWrapperClassName(Class)}
 	 */
@@ -49,7 +49,7 @@ public class CalculationUtilTest {
 		Assert.assertTrue(CalculationUtil.isPrimitiveWrapperClassName("java.lang.Double"));
 		Assert.assertTrue(CalculationUtil.isPrimitiveWrapperClassName("java.lang.Long"));
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -58,7 +58,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertACharacterValueToCharacter() throws Exception {
 		Assert.assertEquals('c', CalculationUtil.cast("c", Character.class).charValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -67,7 +67,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAResultWithAnNumberValueInTheValidRangeToByte() throws Exception {
 		Assert.assertEquals(127, CalculationUtil.cast(127, Byte.class).byteValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -76,7 +76,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertASingleCharacterValueToShort() throws Exception {
 		Assert.assertEquals(2, CalculationUtil.cast('2', Short.class).shortValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -85,7 +85,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidSingleCharacterValueToInteger() throws Exception {
 		Assert.assertEquals(2, CalculationUtil.cast('2', Integer.class).intValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -94,7 +94,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidSingleCharacterValueToLong() throws Exception {
 		Assert.assertEquals(2, CalculationUtil.cast('2', Long.class).longValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -104,7 +104,7 @@ public class CalculationUtilTest {
 		Assert.assertEquals(true, CalculationUtil.cast("true", Boolean.class).booleanValue());
 		Assert.assertEquals(false, CalculationUtil.cast("false", Boolean.class).booleanValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -113,7 +113,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidStringValueToByte() throws Exception {
 		Assert.assertEquals(2, CalculationUtil.cast("2", Byte.class).byteValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -123,7 +123,7 @@ public class CalculationUtilTest {
 		Assert.assertEquals(1.7976931348623157e+308, CalculationUtil.cast("1.7976931348623157e+308", Double.class)
 		        .doubleValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -132,7 +132,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidStringValueToFloat() throws Exception {
 		Assert.assertEquals(3.4028235e+1f, CalculationUtil.cast("3.4028235e+1f", Float.class).floatValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -141,7 +141,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidStringValueToInteger() throws Exception {
 		Assert.assertEquals(122, CalculationUtil.cast("122", Integer.class).intValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -150,7 +150,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidStringValueToLong() throws Exception {
 		Assert.assertEquals(122, CalculationUtil.cast("122", Long.class).longValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -159,7 +159,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidStringValueToShort() throws Exception {
 		Assert.assertEquals(122, CalculationUtil.cast("122", Short.class).shortValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -170,7 +170,7 @@ public class CalculationUtilTest {
 		Assert.assertNotNull(convertedObject);
 		Assert.assertTrue(Person.class.isAssignableFrom(convertedObject.getClass()));
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -179,7 +179,7 @@ public class CalculationUtilTest {
 	public void cast_shouldFailIfTheValueToConvertIsNotOfACompatibleType() throws Exception {
 		CalculationUtil.cast(new Person(), Patient.class);
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -188,7 +188,7 @@ public class CalculationUtilTest {
 	public void cast_shouldReturnNullIfThePassedInValueIsNull() throws Exception {
 		Assert.assertNull(CalculationUtil.cast(null, null));
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -197,7 +197,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidStringToAClassObject() throws Exception {
 		Assert.assertEquals(Concept.class, CalculationUtil.cast("org.openmrs.Concept", Class.class));
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -206,7 +206,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidStringToALocale() throws Exception {
 		Assert.assertEquals(Locale.US, CalculationUtil.cast("en_US", Locale.class));
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<T>)}
 	 */
@@ -215,7 +215,7 @@ public class CalculationUtilTest {
 	public void cast_shouldConvertAValidStringToAnEnumConstant() throws Exception {
 		Assert.assertEquals(Geek.NERD, CalculationUtil.cast("NERD", Geek.class));
 	}
-	
+
 	/**
 	 * @see {@link CalculationUtil#cast(Object,Class<QT;>)}
 	 */

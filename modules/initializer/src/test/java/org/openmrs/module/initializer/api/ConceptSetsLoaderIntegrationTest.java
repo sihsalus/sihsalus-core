@@ -30,39 +30,39 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class ConceptSetsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService cs;
-	
+
 	@Autowired
 	private ConceptsLoader conceptsLoader;
-	
+
 	@Autowired
 	private ConceptSetsLoader conceptSetsLoader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-concepts.xml");
 		executeDataSet("testdata/test-concepts-numeric.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadConceptSetsAccordingToCsvFiles() {
-		
+
 		// Test starting values
-		
+
 		{
 			Concept retiredSet = cs.getConceptByUuid("bcc1796a-16f1-11f1-a7b6-da82fbe923ea");
 			assertNotNull(retiredSet);
 			assertTrue(retiredSet.getRetired());
 			assertEquals(0, retiredSet.getSetMembers().size());
 		}
-		
+
 		// Load
 		conceptsLoader.load();
 		conceptSetsLoader.load();
-		
+
 		{
 			Concept senseSet = cs.getConceptByUuid("54014540-311d-11ec-8d2b-0242ac110002");
 			assertNotNull(senseSet);
@@ -80,7 +80,7 @@ public class ConceptSetsLoaderIntegrationTest extends DomainBaseModuleContextSen
 			assertEquals("Sound", senseMembers.get(4).getConcept().getName().getName());
 			assertEquals(new Double(50.0), senseMembers.get(4).getSortWeight());
 		}
-		
+
 		{
 			Concept senseQuestion = cs.getConceptByUuid("5a393db9-311d-11ec-8d2b-0242ac110002");
 			assertNotNull(senseQuestion);
@@ -94,7 +94,7 @@ public class ConceptSetsLoaderIntegrationTest extends DomainBaseModuleContextSen
 			assertEquals("Sight", senseAnswers.get(2).getAnswerConcept().getName().getName());
 			assertEquals(new Double(200), senseAnswers.get(2).getSortWeight());
 		}
-		
+
 		{
 			Concept retiredSet = cs.getConceptByUuid("bcc1796a-16f1-11f1-a7b6-da82fbe923ea");
 			assertNotNull(retiredSet);

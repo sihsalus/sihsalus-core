@@ -30,22 +30,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class PasswordResetController2_2Test extends RestControllerTestUtils {
-	
+
 	private static final String RESET_PASSWORD_URI = "passwordreset";
-	
+
 	@Autowired
 	@Qualifier("userService")
 	private UserService userService;
-	
+
 	@Autowired
 	private UserDAO dao;
-	
+
 	@BeforeEach
 	public void before() {
 		Context.getAdministrationService().setGlobalProperty(OpenmrsConstants.GP_HOST_URL,
 		    "http://localhost:8080/openmrs/admin/users/changePassword.form/{activationKey}");
 	}
-	
+
 	@Test
 	public void requestPasswordReset_shouldCreateUserActivationKeyGivenUsername() throws Exception {
 		User user = userService.getUserByUuid("c98a1558-e131-11de-babe-001e378eb67e");
@@ -55,7 +55,7 @@ public class PasswordResetController2_2Test extends RestControllerTestUtils {
 			assertNotNull(dao.getLoginCredential(user).getActivationKey());
 		});
 	}
-	
+
 	@Test
 	public void requestPasswordReset_shouldCreateUserActivationKeyGivenEmail() throws Exception {
 		User user = userService.getUserByUuid("c98a1558-e131-11de-babe-001e378eb67e");
@@ -112,7 +112,7 @@ public class PasswordResetController2_2Test extends RestControllerTestUtils {
 			assertNotNull(dao.getLoginCredential(user).getActivationKey());
 		});
 	}
-	
+
 	@Test
 	public void resetPassword_shouldResetUserPasswordIfActivationKeyIsCorrect() throws Exception {
 		User user = userService.getUserByUuid("c98a1558-e131-11de-babe-001e378eb67e");
@@ -129,7 +129,7 @@ public class PasswordResetController2_2Test extends RestControllerTestUtils {
 		        + newPassword + "\"}"));
 		assertEquals(200, response.getStatus());
 		Context.authenticate(user.getUsername(), newPassword);
-		
+
 	}
 
 	private User setUpUser(String userName) throws Exception {

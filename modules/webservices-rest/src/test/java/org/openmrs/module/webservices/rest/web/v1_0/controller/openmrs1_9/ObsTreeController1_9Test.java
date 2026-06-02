@@ -30,7 +30,7 @@ public class ObsTreeController1_9Test extends MainResourceControllerTest {
 	public void init() throws Exception {
 		executeDataSet("obsTreeDataset.xml");
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "obstree";
@@ -53,30 +53,30 @@ public class ObsTreeController1_9Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Override
 	public void shouldGetRefByUuid() throws Exception {
-		
+
 	}
-	
+
 	@Override
 	public void shouldGetDefaultByUuid() throws Exception {
-		
+
 	}
-	
+
 	@Override
 	public void shouldGetFullByUuid() throws Exception {
-		
+
 	}
-	
+
 	@Test
 	public void shouldGetObsTree() throws Exception {
-		MockHttpServletRequest req = newGetRequest(getURI(), 
+		MockHttpServletRequest req = newGetRequest(getURI(),
 				new Parameter("patient", "5946f880-b197-400b-9caa-a3c661d23041"),
 				new Parameter("concept", "0f97e14e-cdc2-49ac-9255-b5126f8a5148"));
-		
+
 		SimpleObject actualResult = deserialize(handle(req));
-		
+
 		InputStream inputStream = getClass().getClassLoader().getResourceAsStream("obsTreeDataset.json");
 		String json = IOUtils.toString(inputStream, "UTF-8");
 		SimpleObject expectedResult = SimpleObject.parseJson(json);

@@ -12,36 +12,36 @@ import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class ModulePropertiesComponentTest extends BaseModuleContextSensitiveTest {
-	
+
 	private ModuleProperties moduleProperties;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("modulePropertiesComponentTestDataset.xml");
-		
+
 		moduleProperties = new ModuleProperties() {
-			
+
 			@Override
 			public String getMetadataSourceName() {
 				return "org.openmrs.module.emrapi";
 			}
 		};
-		
+
 		//module properties is manually created so services are not injected
 		moduleProperties.setAdministrationService(Context.getAdministrationService());
 		moduleProperties.setConceptService(Context.getConceptService());
 		moduleProperties.setMetadataMappingService(Context.getService(MetadataMappingService.class));
 	}
-	
+
 	@Test
 	public void shouldFetchConceptSourceByUuid() {
 		// this concept source is in the standard test data set
 		ConceptSource source = moduleProperties.getConceptSourceByCode("emr.someConceptSource");
 		Assert.assertNotNull(source);
 		Assert.assertEquals("Some Standardized Terminology", source.getName());
-		
+
 	}
-	
+
 	@Test
 	public void shouldFetchLocationByUuid() {
 		// this location is in the standard test data set
@@ -49,7 +49,7 @@ public class ModulePropertiesComponentTest extends BaseModuleContextSensitiveTes
 		Assert.assertNotNull(location);
 		Assert.assertEquals("Unknown Location", location.getName());
 	}
-	
+
 	@Test
 	public void shouldFetchProviderByUuid() {
 		// this location is in the standard test data set
@@ -57,7 +57,7 @@ public class ModulePropertiesComponentTest extends BaseModuleContextSensitiveTes
 		Assert.assertNotNull(provider);
 		Assert.assertEquals("Test", provider.getIdentifier());
 	}
-	
+
 	@Test
 	public void shouldFetchFormByUuid() {
 		Form form = moduleProperties.getEmrApiMetadataByCode(Form.class, "emr.unknownForm");

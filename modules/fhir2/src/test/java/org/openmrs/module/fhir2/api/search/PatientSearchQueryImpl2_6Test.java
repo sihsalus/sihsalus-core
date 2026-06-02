@@ -40,57 +40,57 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class PatientSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTest {
-	
+
 	private static final int START_INDEX = 0;
-	
+
 	private static final int END_INDEX = 10;
-	
+
 	@Autowired
 	private PatientTranslator translator;
-	
+
 	@Autowired
 	private FhirPatientDao dao;
-	
+
 	@Autowired
 	private SearchQueryInclude<Patient> searchQueryInclude;
-	
+
 	@Autowired
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
-	
+
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
-	
+
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-	
+
 	@Before
 	public void setup() {
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
-	
+
 	@Test
 	public void searchForPatient_shouldReverseIncludeMedicationRequestsAndAssociatedMedicationDispensesWithReturnedResults() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam("da7f524f-27ce-4bb2-86d6-6d1d05312bd5")); // patient 2 from standard test dataset
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("MedicationRequest:patient"));
 		revIncludes.add(new Include("MedicationDispense:prescription", true));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
-		
+
 		IBundleProvider results = search(theParams);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
-		
+
 		assertThat(resultList.size(), equalTo(8)); // reverse included resources added as part of the result list
 		assertThat(resultList.stream().filter(result -> result instanceof Patient).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // the actual matched patient
@@ -99,5 +99,5 @@ public class PatientSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTes
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationDispense).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // 1 dispense that references the above requests
 	}
-	
+
 }

@@ -24,19 +24,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class VisitTypesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("visitService")
 	private VisitService vs;
-	
+
 	@Autowired
 	private VisitTypesLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadVisitTypeAccordingToCsvFiles() {
 		// Pre-asserts
@@ -45,16 +45,16 @@ public class VisitTypesLoaderIntegrationTest extends DomainBaseModuleContextSens
 			Assert.assertEquals("OPD", vt.getName());
 			Assert.assertEquals("Legacy OPD visit Description", vt.getDescription());
 		}
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verify fetch by name
 		{
 			List<VisitType> visitTypes = vs.getVisitTypes("TB");
 			Assert.assertNotNull(visitTypes);
 			Assert.assertThat(visitTypes.size(), is(1));
-			
+
 			VisitType vt = visitTypes.get(0);
 			Assert.assertEquals("Return TB Clinic Visit", vt.getName());
 		}
@@ -87,16 +87,16 @@ public class VisitTypesLoaderIntegrationTest extends DomainBaseModuleContextSens
 			VisitType vt = vs.getVisitTypeByUuid("e1d02b2e-cc85-48ac-a5bd-b0e4beea96e0");
 			Assert.assertEquals(true, vt.getRetired());
 		}
-		
+
 		// Verify retirement using name as pivot in CSV
 		{
 			List<VisitType> visitTypes = vs.getVisitTypes("Initial HIV");
 			Assert.assertNotNull(visitTypes);
 			Assert.assertThat(visitTypes.size(), is(1));
-			
+
 			VisitType vt = visitTypes.get(0);
 			Assert.assertTrue(vt.getRetired());
 		}
-		
+
 	}
 }

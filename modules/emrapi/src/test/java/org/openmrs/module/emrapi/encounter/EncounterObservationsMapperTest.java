@@ -26,27 +26,27 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class EncounterObservationsMapperTest {
-	
+
 	private EncounterObservationsMapper encounterObservationsMapper;
-	
+
 	@Mock
 	private DiagnosisMetadata diagnosisMetadata;
-	
+
 	@Mock
 	private ObservationMapper observationMapper;
-	
+
 	@Mock
 	private DiagnosisMapper diagnosisMapper;
-	
+
 	@Mock
 	private DispositionMapper dispositionMapper;
-	
+
 	@Mock
 	private EmrApiProperties emrApiProperties;
-	
+
 	@Mock
 	private ObservationTypeMatcher observationTypeMatcher;
-	
+
 	@Before
 	public void setUp() {
 		initMocks(this);
@@ -54,7 +54,7 @@ public class EncounterObservationsMapperTest {
 		        emrApiProperties, observationTypeMatcher);
 		when(emrApiProperties.getDiagnosisMetadata()).thenReturn(diagnosisMetadata);
 	}
-	
+
 	@Test
 	public void testUpdateMapsDiagnosis() throws Exception {
 		EncounterTransaction encounterTransaction = new EncounterTransaction();
@@ -66,18 +66,18 @@ public class EncounterObservationsMapperTest {
 		when(observationTypeMatcher.getObservationType(obs1)).thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
 		when(observationTypeMatcher.getObservationType(obs2)).thenReturn(ObservationTypeMatcher.ObservationType.OBSERVATION);
 		when(observationTypeMatcher.getObservationType(obs3)).thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
-		
+
 		EncounterTransaction.Disposition disposition = new EncounterTransaction.Disposition();
 		when(observationTypeMatcher.getObservationType(obs4)).thenReturn(ObservationTypeMatcher.ObservationType.DISPOSITION);
 		when(dispositionMapper.getDisposition(obs4)).thenReturn(disposition);
-		
+
 		encounterObservationsMapper.update(encounterTransaction, allObs);
-		
+
 		assertEquals(2, encounterTransaction.getDiagnoses().size());
 		assertEquals(disposition, encounterTransaction.getDisposition());
 		assertEquals(1, encounterTransaction.getObservations().size());
 	}
-	
+
 	@Test
 	public void updateShouldNotMapVoidedDiagnosis() throws Exception {
 		EncounterTransaction encounterTransaction = new EncounterTransaction();
@@ -88,7 +88,7 @@ public class EncounterObservationsMapperTest {
 		when(observationTypeMatcher.getObservationType(obs1)).thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
 		when(observationTypeMatcher.getObservationType(obs2)).thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
 		encounterObservationsMapper.update(encounterTransaction, allObs);
-		
+
 		assertEquals(1, encounterTransaction.getDiagnoses().size());
 	}
 }

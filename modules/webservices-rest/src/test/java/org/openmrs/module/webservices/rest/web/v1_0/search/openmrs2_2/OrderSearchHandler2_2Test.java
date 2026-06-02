@@ -26,11 +26,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.List;
 
 public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
-	
+
 	protected String getURI() {
 		return "order";
 	}
-	
+
 	/**
 	 * @verifies returns orders for a patient
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -40,12 +40,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("s", "default");
 		req.addParameter("patient", RestTestConstants1_8.PATIENT_UUID);
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(11, orders.size());
 	}
-	
+
 	/**
 	 * @verifies returns orders by care setting
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -55,12 +55,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("s", "default");
 		req.addParameter("careSetting", RestTestConstants2_2.OUTPATIENT_CARE_SETTING_UUID);
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(12, orders.size());
 	}
-	
+
 	/**
 	 * @verifies returns all drug orders
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -70,12 +70,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("s", "default");
 		req.addParameter("orderTypes", RestTestConstants1_10.DRUG_ORDER_TYPE_UUID);
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(10, orders.size());
 	}
-	
+
 	/**
 	 * @verifies returns drug and test orders
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -86,12 +86,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		req.addParameter("s", "default");
 		req.addParameter("orderTypes", RestTestConstants1_10.DRUG_ORDER_TYPE_UUID
 		        + "," + RestTestConstants1_10.TEST_ORDER_TYPE_UUID);
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(13, orders.size());
 	}
-	
+
 	/**
 	 * @verifies returns orders matching concepts
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -102,12 +102,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		req.addParameter("s", "default");
 		req.addParameter("concepts", RestTestConstants1_10.COUGH_SYRUP_UUID
 		        + "," + RestTestConstants1_10.ASPIRIN_UUID);
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(6, orders.size());
 	}
-	
+
 	/**
 	 * @verifies returns orders matching activatedOnOrBeforeDate
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -117,12 +117,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("s", "default");
 		req.addParameter("activatedOnOrBeforeDate", "2008-08-19");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(11, orders.size());
 	}
-	
+
 	/**
 	 * @verifies returns orders matching activatedOnOrAfterDate
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -132,12 +132,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("s", "default");
 		req.addParameter("activatedOnOrAfterDate", "2008-08-19");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(3, orders.size());
 	}
-	
+
 	/**
 	 * @verifies returns voided orders
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -147,12 +147,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("s", "default");
 		req.addParameter("includeVoided", "true");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(14, orders.size());
 	}
-	
+
 	/**
 	 * @verifies returns voided orders
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -168,12 +168,12 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 		req.addParameter("activatedOnOrAfterDate", "2008-08-19");
 		req.addParameter("activatedOnOrBeforeDate", "2009-08-19");
 		req.addParameter("includeVoided", "true");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		List<Order> orders = result.get("results");
 		Assertions.assertEquals(1, orders.size());
 	}
-	
+
 	/**
 	 * @verifies throws exception for invalid patient uuid
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -184,11 +184,11 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 			MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 			req.addParameter("s", "default");
 			req.addParameter("patient", "FAKE_PATIENT_123_UUID");
-		
+
 			handle(req);
 		});
 	}
-	
+
 	/**
 	 * @verifies throws exception for invalid care setting
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -199,11 +199,11 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 			MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 			req.addParameter("s", "default");
 			req.addParameter("careSetting", "FAKE_CARE_SETTING_123_UUID");
-		
+
 			handle(req);
 		});
 	}
-	
+
 	/**
 	 * @verifies throws exception if all order types are invalid
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -214,11 +214,11 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 			MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 			req.addParameter("s", "default");
 			req.addParameter("orderTypes", "FAKE_ORDER_TYPE_123_UUID");
-		
+
 			handle(req);
 		});
 	}
-	
+
 	/**
 	 * @verifies throws exception if all concepts are invalid
 	 * @see OrderSearchHandler2_2#search(RequestContext)
@@ -229,7 +229,7 @@ public class OrderSearchHandler2_2Test extends RestControllerTestUtils {
 			MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 			req.addParameter("s", "default");
 			req.addParameter("concepts", "FAKE_CONCEPT_123_UUID,FAKE_CONCEPT_124_UUID");
-		
+
 			handle(req);
 		});
 	}

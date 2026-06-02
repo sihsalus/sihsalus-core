@@ -51,39 +51,39 @@ import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestFhirResourceProviderTest {
-	
+
 	private static final String MEDICATION_REQUEST_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
-	
+
 	private static final String WRONG_MEDICATION_REQUEST_UUID = "862e20a1-e73c-4c92-a4e8-9f922e0cd7f4";
-	
+
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
-	
+
 	@Mock
 	private FhirMedicationRequestService fhirMedicationRequestService;
-	
+
 	private MedicationRequestFhirResourceProvider resourceProvider;
-	
+
 	private MedicationRequest medicationRequest;
-	
+
 	@Before
 	public void setup() {
 		resourceProvider = new MedicationRequestFhirResourceProvider();
 		resourceProvider.setFhirMedicationRequestService(fhirMedicationRequestService);
-		
+
 		medicationRequest = new MedicationRequest();
 		medicationRequest.setId(MEDICATION_REQUEST_UUID);
 	}
-	
+
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(MedicationRequest.class));
 		assertThat(resourceProvider.getResourceType().getName(), equalTo(MedicationRequest.class.getName()));
 	}
-	
+
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnMatchingMedicationRequest() {
 		when(fhirMedicationRequestService.get(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
-		
+
 		IdType id = new IdType();
 		id.setValue(MEDICATION_REQUEST_UUID);
 		MedicationRequest medicationRequest = resourceProvider.getMedicationRequestByUuid(id);
@@ -91,7 +91,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(medicationRequest.getId(), notNullValue());
 		assertThat(medicationRequest.getId(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test(expected = ResourceNotFoundException.class)
 	public void getMedicationRequestByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
@@ -99,171 +99,171 @@ public class MedicationRequestFhirResourceProviderTest {
 		MedicationRequest medicationRequest = resourceProvider.getMedicationRequestByUuid(id);
 		assertThat(medicationRequest, nullValue());
 	}
-	
+
 	private List<IBaseResource> getResources(IBundleProvider results, int theFromIndex, int theToIndex) {
 		return results.getResources(theFromIndex, theToIndex);
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestUsingCode() {
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
-		
+
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
 		codingToken.setValue("1000");
 		code.addAnd(codingToken);
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, code, null, null, null,
 		    null, null, null, null, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenPatientParamIsSpecified() {
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
-		
+
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(patientParam, null, null, null, null, null,
 		    null, null, null, null, null, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenMedicationParamIsSpecified() {
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
-		
+
 		ReferenceAndListParam medicationParam = new ReferenceAndListParam();
 		medicationParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Medication.SP_IDENTIFIER)));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, medicationParam,
 		    null, null, null, null, null, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenParticipantParamIsSpecified() {
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
-		
+
 		ReferenceAndListParam participantParam = new ReferenceAndListParam();
 		participantParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Practitioner.SP_NAME)));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, participantParam,
 		    null, null, null, null, null, null, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenEncounterParamIsSpecified() {
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
-		
+
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
 		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Encounter.SP_IDENTIFIER)));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, encounterParam, null, null, null,
 		    null, null, null, null, null, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenUUIDIsSpecified() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, uuid,
 		    null, null, null, null, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenLastUpdatedIsSpecified() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(
 		    new MedicationRequestSearchParams(null, null, null, null, null, null, null, null, lastUpdated, null, null)))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
 		    null, null, lastUpdated, null, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldAddRelatedMedicationsWhenIncluded() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("MedicationRequest:requester"));
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(
 		    new MedicationRequestSearchParams(null, null, null, null, null, null, null, null, null, includes, null)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(medicationRequest, new Practitioner()), 10, 1));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
 		    null, null, null, includes, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(2)));
 		assertThat(resources.get(0), notNullValue());
@@ -271,21 +271,21 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(resources.get(1).fhirType(), equalTo(FhirConstants.PRACTITIONER));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldAddRelatedMedicationDispenseWhenRevIncluded() {
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("MedicationDispense:prescription"));
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(
 		    new MedicationRequestSearchParams(null, null, null, null, null, null, null, null, null, null, revIncludes)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(medicationRequest, new MedicationDispense()), 10, 1));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
 		    null, null, null, null, revIncludes);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(2)));
 		assertThat(resources.get(0), notNullValue());
@@ -293,31 +293,31 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(resources.get(1).fhirType(), equalTo(FhirConstants.MEDICATION_DISPENSE));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void searchMedicationRequest_shouldNotAddRelatedMedicationsForEmptyInclude() {
 		HashSet<Include> includes = new HashSet<>();
-		
+
 		when(fhirMedicationRequestService.searchForMedicationRequests(
 		    new MedicationRequestSearchParams(null, null, null, null, null, null, null, null, null, null, null)))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
-		
+
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
 		    null, null, null, includes, null);
-		
+
 		List<IBaseResource> resources = getResources(results, 1, 5);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
+
 	@Test
 	public void deleteTask_shouldDeleteMedicationRequest() {
 		OperationOutcome result = resourceProvider.deleteMedicationRequest(new IdType().setValue(MEDICATION_REQUEST_UUID));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));

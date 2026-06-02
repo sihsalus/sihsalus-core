@@ -22,23 +22,23 @@ import org.junit.Test;
  * Test for Condition resource narrative generation
  */
 public class ConditionNarrativeTest extends BaseFhirNarrativeTest {
-	
+
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/condition-example.json";
-	
+
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/condition-expected.html";
-	
+
 	/**
 	 * Check that the expected narrative is generated for some example Condition resource
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
 	public void shouldGenerateConditionNarrative() throws IOException {
 		Condition given = parser.parseResource(Condition.class,
 		    getClass().getClassLoader().getResourceAsStream(EXAMPLE_RESOURCE_PATH));
-		
+
 		Condition result = parser.parseResource(Condition.class, parser.encodeResourceToString(given));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getText(), notNullValue());
 		assertThat(result.getText().getStatusAsString(), equalTo("generated"));

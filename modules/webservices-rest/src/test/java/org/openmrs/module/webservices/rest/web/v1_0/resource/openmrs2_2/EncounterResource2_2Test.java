@@ -26,7 +26,7 @@ public class EncounterResource2_2Test extends BaseDelegatingResourceTest<Encount
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants2_2.DIAGNOSIS_TEST_DATA_XML);
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#newObject()
 	 */
@@ -34,7 +34,7 @@ public class EncounterResource2_2Test extends BaseDelegatingResourceTest<Encount
 	public Encounter newObject() {
 		return Context.getEncounterService().getEncounterByUuid(getUuidProperty());
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#validateDefaultRepresentation()
 	 */
@@ -57,7 +57,7 @@ public class EncounterResource2_2Test extends BaseDelegatingResourceTest<Encount
 		assertEquals("59bf4fbc-fcdb-4a5b-97ea-0d5c4b4315a7" ,((List<SimpleObject>) getRepresentation().get("diagnoses")).get(0).get("uuid"));
 		assertEquals("Some Diagnosis" ,((List<SimpleObject>) getRepresentation().get("diagnoses")).get(0).get("display"));
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#validateFullRepresentation()
 	 */
@@ -82,7 +82,7 @@ public class EncounterResource2_2Test extends BaseDelegatingResourceTest<Encount
 		assertEquals("Some Diagnosis" ,((List<SimpleObject>) getRepresentation().get("diagnoses")).get(0).get("display"));
 
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getDisplayProperty()
 	 */
@@ -90,7 +90,7 @@ public class EncounterResource2_2Test extends BaseDelegatingResourceTest<Encount
 	public String getDisplayProperty() {
 		return "Emergency 01/08/2008";
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getUuidProperty()
 	 */

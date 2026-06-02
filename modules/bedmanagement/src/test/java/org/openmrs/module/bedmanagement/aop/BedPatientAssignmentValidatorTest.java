@@ -20,21 +20,21 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class BedPatientAssignmentValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private BedManagementService bedManagementService;
-	
+
 	@Before
 	public void beforeAllTests() throws Exception {
 		executeDataSet("testPatientsDataset.xml");
 		executeDataSet("bedManagementDAOComponentTestDataset.xml");
 	}
-	
+
 	@Test
 	public void testExceptionThrownWhenBedAssignmentEndtimeBeforeStarttime() {
 		BedPatientAssignment bpa = bedManagementService
 		        .getBedPatientAssignmentByUuid("10011001-1001-1001-1001-100000000001");
-		
+
 		assertThrows(ValidationException.class, () -> {
 			Date startTime = bpa.getStartDatetime();
 			Date oneSecondBeforeStartTime = Date.from(startTime.toInstant().minus(1, ChronoUnit.SECONDS));
@@ -42,14 +42,14 @@ public class BedPatientAssignmentValidatorTest extends BaseModuleContextSensitiv
 			bedManagementService.saveBedPatientAssignment(bpa);
 		});
 	}
-	
+
 	@Test
 	public void testExceptionThrownWhenBedAssignmentEndtimeAfterVisitStopTime() {
 		VisitService visitService = Context.getVisitService();
 		Visit visit = visitService.getVisit(1001);
 		BedPatientAssignment bpa = bedManagementService
 		        .getBedPatientAssignmentByUuid("10011001-1001-1001-1001-100000000001");
-		
+
 		assertThrows(ValidationException.class, () -> {
 			Date now = new Date();
 			visitService.endVisit(visit, now);
@@ -58,7 +58,7 @@ public class BedPatientAssignmentValidatorTest extends BaseModuleContextSensitiv
 			bedManagementService.saveBedPatientAssignment(bpa);
 		});
 	}
-	
+
 	@Test
 	public void testExceptionThrownWhenMultipleActiveBedsAssignedToPatient() {
 		BedPatientAssignment bpa = bedManagementService
@@ -66,7 +66,7 @@ public class BedPatientAssignmentValidatorTest extends BaseModuleContextSensitiv
 		Patient patient = bpa.getPatient();
 		Bed bed = bedManagementService.getBedById(13);
 		assertNull(bpa.getEndDatetime());
-		
+
 		assertThrows(ValidationException.class, () -> {
 			BedPatientAssignment bpa2 = new BedPatientAssignment();
 			bpa2.setPatient(patient);
@@ -76,7 +76,7 @@ public class BedPatientAssignmentValidatorTest extends BaseModuleContextSensitiv
 			bedManagementService.saveBedPatientAssignment(bpa2);
 		});
 	}
-	
+
 	@Test
 	public void testExceptionNotThrownWhenSavingEndedBedsAssignment() {
 		BedPatientAssignment bpa = bedManagementService
@@ -84,7 +84,7 @@ public class BedPatientAssignmentValidatorTest extends BaseModuleContextSensitiv
 		Patient patient = bpa.getPatient();
 		Bed bed = bedManagementService.getBedById(13);
 		bedManagementService.saveBedPatientAssignment(bpa);
-		
+
 		// No exception should be thrown when saving another bed assignment with
 		// endDatetime set
 		// this usually happens when merging patients

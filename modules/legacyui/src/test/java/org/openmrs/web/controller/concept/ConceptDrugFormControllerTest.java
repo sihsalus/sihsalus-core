@@ -22,7 +22,7 @@ import org.springframework.validation.BindException;
  * Tests against the {@link ConceptDrugFormController}
  */
 public class ConceptDrugFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @verifies should purge the concept drug
 	 * @see org.openmrs.web.controller.concept.ConceptDrugFormController#onSubmit(javax.servlet.http.HttpServletRequest,
@@ -34,16 +34,16 @@ public class ConceptDrugFormControllerTest extends BaseModuleWebContextSensitive
 		executeDataSet("org/openmrs/api/include/ConceptServiceTest-drugSearch.xml");
 		ConceptService service = Context.getConceptService();
 		ConceptDrugFormController controller = (ConceptDrugFormController) applicationContext.getBean("conceptDrugForm");
-		
+
 		Integer drugId = new Integer(444);
 		Drug drug = service.getDrug(drugId);
 		org.junit.jupiter.api.Assertions.assertEquals(drugId, drug.getDrugId());
-		
+
 		MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
 		MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
 		BindException errors = new BindException(drug, "drug");
 		mockHttpServletRequest.setParameter("purgeDrug", String.valueOf(drugId));
-		
+
 		controller.onSubmit(mockHttpServletRequest, mockHttpServletResponse, drug, errors);
 		Context.flushSession();
 		org.junit.jupiter.api.Assertions.assertNull(service.getDrug(drugId));

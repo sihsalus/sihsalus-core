@@ -32,179 +32,179 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<RelatedPersonFhirResourceProvider, RelatedPerson> {
-	
+
 	private static final String RELATIONSHIP_UUID = "c3c91630-8563-481b-8efa-48e10c139a3d";
-	
+
 	private static final String WRONG_RELATIONSHIP_UUID = "f4d45630-8563-481b-8efa-48e10c139a3d";
-	
+
 	private static final String RELATED_PERSON_DATA_FILES = "org/openmrs/module/fhir2/api/dao/impl/FhirRelatedPersonDaoImplTest_initial_data.xml";
-	
+
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private RelatedPersonFhirResourceProvider resourceProvider;
-	
+
 	@Before
 	@Override
 	public void setup() throws Exception {
 		super.setup();
 		executeDataSet(RELATED_PERSON_DATA_FILES);
 	}
-	
+
 	@Test
 	public void shouldReturnRelatedPersonAsJson() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson/" + RELATIONSHIP_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		RelatedPerson relatedPerson = readResponse(response);
-		
+
 		assertThat(relatedPerson, notNullValue());
 		assertThat(relatedPerson.getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
 	}
-	
+
 	@Test
 	public void shouldThrow404ForNonExistingRelationshipAsJson() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson/" + WRONG_RELATIONSHIP_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnRelatedPersonAsXML() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson/" + RELATIONSHIP_UUID).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		RelatedPerson relatedPerson = readResponse(response);
-		
+
 		assertThat(relatedPerson, notNullValue());
 		assertThat(relatedPerson.getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
 	}
-	
+
 	@Test
 	public void shouldThrow404ForNonExistingRelationshipAsXML() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson/" + WRONG_RELATIONSHIP_UUID).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnForAllRelatedPersonAsJson() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson").accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Bundle results = readBundleResponse(response);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		
+
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
-		
+
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/RelatedPerson/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(RelatedPerson.class))));
 	}
-	
+
 	@Test
 	public void shouldReturnSortedAndFilterSearchResultsForRelatedPersonAsJson() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson?name=John&_sort=-date").accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Bundle results = readBundleResponse(response);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		
+
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
-		
+
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", containsString("Doe"))))));
 		assertThat(entries, containsInRelativeOrder(
 		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("F"))))));
 	}
-	
+
 	@Test
 	public void shouldReturnForAllRelatedPersonAsXML() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson").accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Bundle results = readBundleResponse(response);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		
+
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
-		
+
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/RelatedPerson/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(RelatedPerson.class))));
 	}
-	
+
 	@Test
 	public void shouldReturnSortedAndFilterSearchResultsForRelatedPersonAsXML() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson?name=John&_sort=-date").accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Bundle results = readBundleResponse(response);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		
+
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
-		
+
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", containsString("Doe"))))));
 		assertThat(entries, containsInRelativeOrder(
 		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("F"))))));
 	}
-	
+
 	@Test
 	public void shouldReturnCountForRelatedPersonAsJson() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson?name=John&_summary=count").accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Bundle result = readBundleResponse(response);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(1)));
 	}
-	
+
 	@Test
 	public void shouldReturnCountForRelatedPersonAsXml() throws Exception {
 		MockHttpServletResponse response = get("/RelatedPerson?name=John&_summary=count").accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Bundle result = readBundleResponse(response);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(1)));

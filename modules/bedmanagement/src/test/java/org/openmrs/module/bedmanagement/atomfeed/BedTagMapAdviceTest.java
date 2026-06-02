@@ -35,50 +35,50 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BedTagMapAdviceTest {
-	
+
 	private BedTagMapAdvice bedTagMapAdvice;
-	
+
 	@Mock
 	private BedTagMap bedTagMap;
-	
+
 	@Mock
 	private AdministrationService administrationService;
-	
+
 	@Mock
 	private PlatformTransactionManager platformTransactionManager;
-	
+
 	private static final String BED_TAG_MAP_EVENT_RECORD_GLOBAL_PROPERTY = "atomfeed.publish.eventsForBedTagMapChange";
-	
+
 	private static final String BED_TAG_MAP_EVENT_URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForBedTagMap";
-	
+
 	private static final String DEFAULT_BED_TAG_MAP_EVENT_URL_PATTERN = "/openmrs/ws/rest/v1/bedTagMap/{uuid}";
-	
+
 	private static final String SOME_UUID = "SOME-UUID";
-	
+
 	private static final String DEFAULT_BED_TAG_MAP_EVENT_URL_PATTERN_AFTER_UUID_REPLACE = "/openmrs/ws/rest/v1/bedTagMap/"
 	        + SOME_UUID;
-	
+
 	private static final String CATEGORY = "bedtagmap";
-	
+
 	private static final String TITLE = "Bed-Tag-Map";
-	
+
 	private MockedStatic<Context> contextStaticMock;
-	
+
 	private MockedConstruction<AtomFeedSpringTransactionManager> atomFeedTxMgrConstruction;
-	
+
 	private MockedConstruction<AllEventRecordsQueueJdbcImpl> queueConstruction;
-	
+
 	private MockedConstruction<EventServiceImpl> eventServiceConstruction;
-	
+
 	private MockedConstruction<Event> eventConstruction;
-	
+
 	// A hack to resolve the error when Mocking the Context :)
 	private Logger logger = LoggerFactory.getLogger(BedTagMapAdviceTest.class);
-	
+
 	@BeforeEach
 	public void setUp() {
 		contextStaticMock = mockStatic(Context.class);
-		
+
 		contextStaticMock.when(() -> Context.getRegisteredComponents(PlatformTransactionManager.class))
 		        .thenReturn(Collections.singletonList(platformTransactionManager));
 		contextStaticMock.when(Context::getAdministrationService).thenReturn(administrationService);
@@ -103,18 +103,18 @@ public class BedTagMapAdviceTest {
 				return null;
 			});
 		});
-		
+
 		queueConstruction = mockConstruction(AllEventRecordsQueueJdbcImpl.class);
-		
+
 		eventServiceConstruction = mockConstruction(EventServiceImpl.class);
-		
+
 		eventConstruction = mockConstruction(Event.class);
-		
+
 		lenient().when(bedTagMap.getUuid()).thenReturn(SOME_UUID);
-		
+
 		bedTagMapAdvice = new BedTagMapAdvice();
 	}
-	
+
 	@AfterEach
 	void tearDown() {
 		contextStaticMock.close();
@@ -123,7 +123,7 @@ public class BedTagMapAdviceTest {
 		eventServiceConstruction.close();
 		eventConstruction.close();
 	}
-	
+
 	private void verifyAssertsForRaisingEvents() {
 		verify(administrationService, times(1)).getGlobalProperty(eq(BED_TAG_MAP_EVENT_RECORD_GLOBAL_PROPERTY));
 		verify(administrationService, times(1)).getGlobalProperty(eq(BED_TAG_MAP_EVENT_URL_PATTERN_GLOBAL_PROPERTY),
@@ -136,7 +136,7 @@ public class BedTagMapAdviceTest {
 		assertEquals(1, eventServiceConstruction.constructed().size());
 		verify(eventServiceConstruction.constructed().get(0), times(1)).notify(any(Event.class));
 	}
-	
+
 	private void verifyAssertsForNotRaisingEvents() {
 		verify(administrationService, times(1)).getGlobalProperty(eq(BED_TAG_MAP_EVENT_RECORD_GLOBAL_PROPERTY));
 		verify(administrationService, times(0)).getGlobalProperty(eq(BED_TAG_MAP_EVENT_URL_PATTERN_GLOBAL_PROPERTY),
@@ -144,55 +144,55 @@ public class BedTagMapAdviceTest {
 		verify(bedTagMap, times(0)).getUuid();
 		assertEquals(0, eventConstruction.constructed().size());
 	}
-	
+
 	@Test
 	public void shouldRaiseEventForBedTagMapChange() throws Exception {
-		
+
 		bedTagMapAdvice.afterReturning(bedTagMap, this.getClass().getMethod("save"), null, null);
-		
+
 		verifyAssertsForRaisingEvents();
 	}
-	
+
 	@Test
 	public void shouldRaiseEventIfEventGlobalPropertyIsEmpty() throws Exception {
 		when(administrationService.getGlobalProperty(eq(BED_TAG_MAP_EVENT_RECORD_GLOBAL_PROPERTY))).thenReturn("");
-		
+
 		bedTagMapAdvice.afterReturning(bedTagMap, this.getClass().getMethod("save"), null, null);
-		
+
 		verifyAssertsForRaisingEvents();
 	}
-	
+
 	@Test
 	public void shouldNotRaiseEventIfEventGlobalPropertyIsFalse() throws Exception {
 		when(administrationService.getGlobalProperty(eq(BED_TAG_MAP_EVENT_RECORD_GLOBAL_PROPERTY))).thenReturn("false");
-		
+
 		bedTagMapAdvice.afterReturning(bedTagMap, this.getClass().getMethod("save"), null, null);
-		
+
 		verifyAssertsForNotRaisingEvents();
 	}
-	
+
 	@Test
 	public void shouldNotRaiseEventIfMethodIsNotSaveAndDelete() throws Exception {
-		
+
 		bedTagMapAdvice.afterReturning(bedTagMap, this.getClass().getMethod("someOtherMethod"), null, null);
-		
+
 		verifyAssertsForNotRaisingEvents();
 	}
-	
+
 	@Test
 	public void shouldRaiseEventUsingBedTagMapFromParametersIfReturnValueIsNull() throws Exception {
 		Object[] parameters = new Object[] { bedTagMap };
 		bedTagMapAdvice.afterReturning(null, this.getClass().getMethod("delete"), parameters, null);
-		
+
 		verifyAssertsForRaisingEvents();
 	}
-	
+
 	public void save() {
 	}
-	
+
 	public void delete() {
 	}
-	
+
 	public void someOtherMethod() {
 	}
 }

@@ -40,63 +40,63 @@ import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValueSetTranslatorImplTest {
-	
+
 	private static final String CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
-	
+
 	private FhirConceptSourceService conceptSourceService;
-	
+
 	private Concept concept;
-	
+
 	private final ValueSetTranslatorImpl valueSetTranslator = new ValueSetTranslatorImpl();
-	
+
 	@Before
 	public void setup() {
 		conceptSourceService = mock(FhirConceptSourceService.class);
 		concept = mock(Concept.class);
 		valueSetTranslator.setConceptSourceService(conceptSourceService);
 	}
-	
+
 	@Test
 	public void shouldTranslateConceptSetToValueSet() {
 		ConceptName conceptName = new ConceptName();
 		conceptName.setName("test");
-		
+
 		ConceptDescription description = new ConceptDescription();
 		description.setDescription("test");
-		
+
 		when(concept.getUuid()).thenReturn(CONCEPT_UUID);
 		when(concept.getName()).thenReturn(conceptName);
 		when(concept.getDateChanged()).thenReturn(new Date());
 		when(concept.getSet()).thenReturn(true);
-		
+
 		Concept concept1 = new Concept();
 		ConceptMap conceptMap = mock(ConceptMap.class);
 		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
 		ConceptSource conceptSource = mock(ConceptSource.class);
 		ConceptMapType conceptMapType = mock(ConceptMapType.class);
-		
+
 		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
 		when(conceptMap.getConceptMapType()).thenReturn(conceptMapType);
 		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
 		concept1.addConceptMapping(conceptMap);
-		
+
 		FhirConceptSource loinc = new FhirConceptSource();
 		ConceptSource loincConceptSource = new ConceptSource();
 		loincConceptSource.setName("LOINC");
 		loinc.setConceptSource(loincConceptSource);
 		loinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		
+
 		ConceptSet conceptSet = new ConceptSet();
 		conceptSet.setConceptSet(concept);
 		conceptSet.setConcept(concept1);
-		
+
 		Collection<ConceptSet> conceptSets = new ArrayList<>();
 		conceptSets.add(conceptSet);
-		
+
 		when(concept.getConceptSets()).thenReturn(conceptSets);
-		
+
 		ValueSet valueSet = valueSetTranslator.toFhirResource(concept);
-		
+
 		assertThat(valueSet.getId(), equalTo(CONCEPT_UUID));
 		assertThat(valueSet.getCompose(), notNullValue());
 		assertThat(valueSet.getCompose().getInclude(), hasSize(greaterThanOrEqualTo(1)));
@@ -104,5 +104,5 @@ public class ValueSetTranslatorImplTest {
 		assertThat(((valueSet.getCompose().getInclude().iterator().next()).getConcept().iterator().next()).getCode(),
 		    notNullValue());
 	}
-	
+
 }

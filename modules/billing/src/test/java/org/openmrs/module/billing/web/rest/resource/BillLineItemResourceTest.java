@@ -34,33 +34,33 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
  * Tests for {@link BillLineItemResource}
  */
 public class BillLineItemResourceTest {
-	
+
 	private BillLineItemResource resource;
-	
+
 	private BillService billService;
-	
+
 	private User authenticatedUser;
-	
+
 	private MockedStatic<Context> contextMock;
-	
+
 	@Before
 	public void setUp() {
 		resource = new BillLineItemResource();
 		billService = mock(BillService.class);
 		authenticatedUser = mock(User.class);
-		
+
 		contextMock = mockStatic(Context.class);
 		contextMock.when(() -> Context.getService(BillService.class)).thenReturn(billService);
 		contextMock.when(() -> Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
 	}
-	
+
 	@After
 	public void tearDown() {
 		if (contextMock != null) {
 			contextMock.close();
 		}
 	}
-	
+
 	/**
 	 * @verifies void the line item and save the bill
 	 * @see BillLineItemResource#delete(BillLineItem, String, RequestContext)
@@ -69,32 +69,32 @@ public class BillLineItemResourceTest {
 	public void delete_shouldVoidTheLineItemAndSaveTheBill() {
 		Bill bill = new Bill();
 		bill.setId(1);
-		
+
 		BillLineItem lineItem = new BillLineItem();
 		lineItem.setId(1);
 		lineItem.setBill(bill);
 		assertFalse("Line item should not be voided initially", lineItem.getVoided());
 		assertNull("Void reason should be null initially", lineItem.getVoidReason());
 		assertNull("Voided by should be null initially", lineItem.getVoidedBy());
-		
+
 		String reason = "Test deletion reason";
 		RequestContext context = mock(RequestContext.class);
-		
+
 		Bill savedBill = new Bill();
 		savedBill.setId(1);
 		when(billService.saveBill(bill)).thenReturn(savedBill);
-		
+
 		resource.delete(lineItem, reason, context);
-		
+
 		assertTrue("Line item should be voided", lineItem.getVoided());
 		assertNotNull("Void reason should be set", lineItem.getVoidReason());
 		assertTrue("Void reason should match", reason.equals(lineItem.getVoidReason()));
 		assertNotNull("Voided by should be set", lineItem.getVoidedBy());
 		assertTrue("Voided by should be the authenticated user", authenticatedUser.equals(lineItem.getVoidedBy()));
-		
+
 		verify(billService).saveBill(bill);
 	}
-	
+
 	/**
 	 * @verifies throw IllegalArgumentException when reason is null or blank
 	 * @see BillLineItemResource#delete(BillLineItem, String, RequestContext)
@@ -103,14 +103,14 @@ public class BillLineItemResourceTest {
 	public void delete_shouldThrowExceptionWhenReasonIsNull() {
 		Bill bill = new Bill();
 		bill.setId(1);
-		
+
 		BillLineItem lineItem = new BillLineItem();
 		lineItem.setId(1);
 		lineItem.setBill(bill);
-		
+
 		String reason = null;
 		RequestContext context = mock(RequestContext.class);
-		
+
 		assertThrows(IllegalArgumentException.class, () -> resource.delete(lineItem, reason, context));
 	}
 }

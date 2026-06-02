@@ -91,7 +91,7 @@ public class BuiltInCohortDefinitionLibraryTest {
         assertThat(atLeastAgeOnDate, hasParameter("minAge", Integer.class));
         assertThat(atLeastAgeOnDate, hasProperty("minAgeUnit", is(DurationUnit.YEARS)));
     }
-    
+
     @Test
     public void testGetAgeInRangeOnDate() throws Exception {
         AgeCohortDefinition ageInRangeOnDate = library.getAgeInRangeOnDate();
@@ -101,7 +101,7 @@ public class BuiltInCohortDefinitionLibraryTest {
         assertThat(ageInRangeOnDate, hasParameter("maxAge", Integer.class));
         assertThat(ageInRangeOnDate, hasProperty("maxAgeUnit", is(DurationUnit.YEARS)));
     }
-    
+
     @Test
     public void testGetAnyEncounterDuringPeriod() throws Exception {
         CohortDefinition cd = library.getAnyEncounterDuringPeriod();
@@ -127,7 +127,7 @@ public class BuiltInCohortDefinitionLibraryTest {
         assertThat((String) wrapped.getParameterMappings().get("onOrBefore"), is("${endDate}"));
         assertThat((String) wrapped.getParameterMappings().get("encounterTypeList"), is("${encounterTypes}"));
     }
-    
+
     @Test
     public void testGetBornDuringPeriod() throws Exception {
         CohortDefinition cd = library.getBornDuringPeriod();
@@ -136,7 +136,7 @@ public class BuiltInCohortDefinitionLibraryTest {
         assertThat(cd, hasParameter("startDate", Date.class));
         assertThat(cd, hasParameter("endDate", Date.class));
     }
-    
+
     @Test
     public void testGetDiedDuringPeriod() throws Exception {
         CohortDefinition cd = library.getDiedDuringPeriod();

@@ -24,13 +24,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class MockModuleFactoryWrapper extends ModuleFactoryWrapper {
-	
+
 	public List<Module> loadedModules = new ArrayList<Module>();
 
 	public List<Extension> loadedExtensions = new ArrayList<Extension>();
 
 	public List<Module> startedModules = new ArrayList<Module>();
-	
+
 	public Module loadModuleMock;
 
 	public boolean webAdminEnabled = true;
@@ -52,17 +52,17 @@ public class MockModuleFactoryWrapper extends ModuleFactoryWrapper {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public Module parseModuleFile(MultipartFile file) throws IOException {
 		return new Module("ParsedModule", "atlas", "name", "author", "description", "version", "");
 	}
-	
+
 	@Override
 	public void refreshWebApplicationContext(ServletContext context) {
 		//do nothing
 	}
-	
+
 	@Override
 	public Collection<Module> getLoadedModules() {
 		return loadedModules;
@@ -83,38 +83,38 @@ public class MockModuleFactoryWrapper extends ModuleFactoryWrapper {
 	public boolean isModuleStarted(Module module) {
 		return startedModules.contains(module);
 	}
-	
+
 	@Override
 	public void unloadModule(Module module) {
 		startedModules.remove(module);
 		loadedModules.remove(module);
 	}
-	
+
 	@Override
 	public File insertModuleFile(Module module, String filename) {
 		return new File("fake");
 	}
-	
+
 	@Override
 	public Module loadModule(File moduleFile) {
 		return loadModuleMock;
 	}
-	
+
 	@Override
 	public List<Module> stopModuleAndGetDependent(Module module) {
 		return Collections.singletonList(new Module("dependent", "atlas", "name", "author", "description", "version", ""));
 	}
-	
+
 	@Override
 	public void stopModule(Module module, ServletContext servletContext) {
 		startedModules.remove(module);
 	}
-	
+
 	@Override
 	public boolean startModule(Module module, ServletContext servletContext) {
 		return startModule(module, servletContext, false);
 	}
-	
+
 	@Override
 	public boolean startModule(Module module, ServletContext servletContext, boolean delayRefreshContext) {
 		if (!loadedModules.contains(module)) {
@@ -122,12 +122,12 @@ public class MockModuleFactoryWrapper extends ModuleFactoryWrapper {
 		}
 		return startedModules.add(module);
 	}
-	
+
 	@Override
 	public void stopModuleSkipRefresh(Module module, ServletContext servletContext) {
 		startedModules.remove(module);
 	}
-	
+
 	@Override
 	public Collection<Module> getModulesInStartupOrder(Collection<Module> modules) {
 		return modules;

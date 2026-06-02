@@ -17,7 +17,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 
 
 public class IdentifierSourceResourceTest extends BaseDelegatingResourceTest<IdentifierSourceResource, IdentifierSource> {
-    
+
     public static final String IDENTIFIER_SOURCE_UUID = "0d47284f-9e9b-4a81-a88b-8bb42bc0a901";
 
     @Before
@@ -27,7 +27,7 @@ public class IdentifierSourceResourceTest extends BaseDelegatingResourceTest<Ide
 
     @Override
     public String getDisplayProperty() {
-        return getObject().getIdentifierType() + " - " 
+        return getObject().getIdentifierType() + " - "
                 + getObject().getName() + " - "
                 + getObject().getClass().getName();
     }
@@ -41,7 +41,7 @@ public class IdentifierSourceResourceTest extends BaseDelegatingResourceTest<Ide
     public IdentifierSource newObject() {
         return Context.getService(IdentifierSourceService.class).getIdentifierSourceByUuid(getUuidProperty());
     }
-    
+
     @Override
     public void validateRefRepresentation() throws Exception {
         super.validateRefRepresentation();
@@ -66,5 +66,5 @@ public class IdentifierSourceResourceTest extends BaseDelegatingResourceTest<Ide
         assertPropPresent("description");
         assertPropPresent("identifierType");
     }
-    
+
 }

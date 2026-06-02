@@ -35,13 +35,13 @@ public class InStateCohortDefinitionValidatorTest  extends BaseModuleContextSens
 	public void validate_shouldFailValidationIfBaseDefinitionIsNull() throws Exception {
 		InStateCohortDefinition inStateCohortDefinition = new InStateCohortDefinition();
 		inStateCohortDefinition.setStates(null);
-		
+
 		Errors errors = new BindException(inStateCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(inStateCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -50,13 +50,13 @@ public class InStateCohortDefinitionValidatorTest  extends BaseModuleContextSens
 	public void validate_shouldFailValidationIfStateIsEmpty() throws Exception {
 		InStateCohortDefinition inStateCohortDefinition = new InStateCohortDefinition();
 		inStateCohortDefinition.setStates(new ArrayList<ProgramWorkflowState>());
-		
+
 		Errors errors = new BindException(inStateCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(inStateCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -68,14 +68,14 @@ public class InStateCohortDefinitionValidatorTest  extends BaseModuleContextSens
 		programWorkflowState.setConcept(Context.getConceptService().getConcept(10));
 		List<ProgramWorkflowState> states = new ArrayList<ProgramWorkflowState>();
 		states.add(programWorkflowState);
-		
+
 		InStateCohortDefinition inStateCohortDefinition = new InStateCohortDefinition();
 		inStateCohortDefinition.setName("Name");
 		inStateCohortDefinition.setStates(states);
-		
+
 		Errors errors = new BindException(inStateCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(inStateCohortDefinition, errors);
-		
+
 		Assert.assertFalse(errors.hasErrors());
 	}
 }

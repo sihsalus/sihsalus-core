@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class LinkMatcher {
-	
+
 	public static Matcher hasLink(final String rel, final String uriEndsWith) {
 		return new BaseMatcher<Object>() {
 

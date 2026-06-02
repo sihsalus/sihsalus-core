@@ -27,21 +27,21 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a concept
  */
 public class ConceptShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldPatientShortSerialization() throws Exception {
-		
+
 		//prepare the necessary data
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptShortSerializationTest.xml");
 		authenticate();
-		
+
 		ConceptDescription cd = (ConceptDescription) Context.getConceptService().getConceptDescriptionByUuid("79a3efa7-3a43-4b38-ac5d-9b68aee086c6");
 		String xmlOutput = Context.getSerializationService().serialize(cd, XStreamShortSerializer.class);
 		//should only serialize "uuid"
@@ -50,25 +50,25 @@ public class ConceptShortSerializationTest extends BaseModuleContextSensitiveTes
 		//with short serialization, the "concept" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/conceptDescription/concept/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldPatientShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "ConceptShortSerializationTest.xml" here 
+		 * We also need to use the "ConceptShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<conceptDescription id=\"1\" uuid=\"79a3efa7-3a43-4b38-ac5d-9b68aee086c6\">\n");
@@ -79,7 +79,7 @@ public class ConceptShortSerializationTest extends BaseModuleContextSensitiveTes
 		xmlBuilder.append("  <creator id=\"4\" uuid=\"6adb7c42-cfd2-4301-b53b-ff17c5654ff7\"/>\n");
 		xmlBuilder.append("  <dateCreated class=\"sql-timestamp\" id=\"5\">2008-08-15 15:27:51 CST</dateCreated>\n");
 		xmlBuilder.append("</conceptDescription>\n");
-		
+
 		ConceptDescription cd = Context.getSerializationService().deserialize(xmlBuilder.toString(), ConceptDescription.class,
 		    XStreamShortSerializer.class);
 		assertEquals("0cbe2ed3-cd5f-4f46-9459-26127c9265ab", cd.getConcept().getUuid());

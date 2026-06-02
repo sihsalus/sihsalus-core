@@ -25,29 +25,29 @@ import org.openmrs.module.webservices.rest.web.v1_0.RestTestConstants2_1;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class CohortMembershipResource2_1Test extends BaseDelegatingResourceTest<CohortMembershipResource2_1, CohortMembership> {
-	
+
 	public static final String COHORT_NAME = "A cohort";
-	
+
 	public Date startDate;
-	
+
 	public Date endDate;
-	
+
 	@Autowired
 	private CohortService cohortService;
-	
+
 	@Autowired
 	private PatientService patientService;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		startDate = DateUtils.parseDate("2017-01-01", "yyyy-MM-dd");
 		endDate = DateUtils.parseDate("2017-02-28 23:59:59", "yyyy-MM-dd HH:mm:ss");
-		
+
 		CohortMembership membership = new CohortMembership(6);
 		membership.setUuid(RestTestConstants2_1.COHORT_MEMBERSHIP_UUID);
 		membership.setStartDate(startDate);
 		membership.setEndDate(endDate);
-		
+
 		Cohort cohort = new Cohort();
 		cohort.addMembership(membership);
 		cohort.addMembership(new CohortMembership(7));
@@ -56,32 +56,32 @@ public class CohortMembershipResource2_1Test extends BaseDelegatingResourceTest<
 		cohort.setUuid(RestTestConstants2_1.COHORT_UUID);
 		cohortService.saveCohort(cohort);
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
-		
+
 		assertPropEquals("startDate", startDate);
 		assertPropEquals("endDate", endDate);
 		//		assertThat((String) result.get("startDate"), new SameDatetimeMatcher(startDate));
 		//		assertThat((String) result.get("endDate"), new SameDatetimeMatcher(endDate));
-		
+
 		String patientUuid = patientService.getPatient(6).getUuid();
 		assertPropEquals("patientUuid", patientUuid);
 		assertThat(getRepresentation(), hasLink("patient", "/v1/patient/" + patientUuid));
 	}
-	
+
 	@Override
 	public CohortMembership newObject() {
 		return cohortService.getCohortMembershipByUuid(RestTestConstants2_1.COHORT_MEMBERSHIP_UUID);
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		// this is just hardcoded placeholder text like "Patient in cohort (see link with rel=patient)"
 		return new CohortMembershipResource2_1().getDisplay(null);
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_1.COHORT_MEMBERSHIP_UUID;

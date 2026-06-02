@@ -30,15 +30,15 @@ import org.openmrs.test.Verifies;
 // MS: Ignoring for now since we need to start up Logic module and I am getting DB errors doing so
 @Ignore
 public class LogicDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -52,26 +52,26 @@ public class LogicDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
     @Test
     @Verifies(value = "should evaluate a logic data set definition", method = "evaluate(DataSetDefinition,EvaluationContext)")
     public void evaluate_shouldEvaluateALogicDataSetDefinition() throws Exception {
-    	Cohort cohort = new Cohort();
-    	cohort.addMember(7);
-    	cohort.addMember(20);
-    	cohort.addMember(21);
-    	EvaluationContext evalContext = new EvaluationContext();
-    	evalContext.setBaseCohort(cohort);
-    	
-    	LogicService ls = Context.getLogicService();
-    	ls.addRule("gender", ls.getRule("%%person.gender"));
-    	ls.addRule("birthdate", ls.getRule("%%person.birthdate"));
-    	ls.addRule("CD4", ls.getRule("%%obs.CD4 COUNT"));
-    	
-    	LogicDataSetDefinition def = new LogicDataSetDefinition();
-    	def.addColumn("gender", "Gender", "gender", null);
-    	def.addColumn("birthdate", "Birth Date", "birthdate", null);
-    	def.addColumn("cd4", "Last CD4", "last CD4", null);
-    	
-    	DataSet result = Context.getService(DataSetDefinitionService.class).evaluate(def, evalContext);
-    	String csv = ReportUtil.toCsv(result);
-    	Assert.assertEquals("\"gender\",\"birthdate\",\"cd4\",\n\"F\",\"25/08/1976\",\"175.0\",\n\"F\",\"08/02/1925\",\"45.0\",\n\"M\",\"08/06/1959\",\"50.0\",\n", csv);
+	Cohort cohort = new Cohort();
+	cohort.addMember(7);
+	cohort.addMember(20);
+	cohort.addMember(21);
+	EvaluationContext evalContext = new EvaluationContext();
+	evalContext.setBaseCohort(cohort);
+
+	LogicService ls = Context.getLogicService();
+	ls.addRule("gender", ls.getRule("%%person.gender"));
+	ls.addRule("birthdate", ls.getRule("%%person.birthdate"));
+	ls.addRule("CD4", ls.getRule("%%obs.CD4 COUNT"));
+
+	LogicDataSetDefinition def = new LogicDataSetDefinition();
+	def.addColumn("gender", "Gender", "gender", null);
+	def.addColumn("birthdate", "Birth Date", "birthdate", null);
+	def.addColumn("cd4", "Last CD4", "last CD4", null);
+
+	DataSet result = Context.getService(DataSetDefinitionService.class).evaluate(def, evalContext);
+	String csv = ReportUtil.toCsv(result);
+	Assert.assertEquals("\"gender\",\"birthdate\",\"cd4\",\n\"F\",\"25/08/1976\",\"175.0\",\n\"F\",\"08/02/1925\",\"45.0\",\n\"M\",\"08/06/1959\",\"50.0\",\n", csv);
     }
 
 }

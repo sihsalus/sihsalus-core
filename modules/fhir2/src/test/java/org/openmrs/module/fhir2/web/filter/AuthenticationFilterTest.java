@@ -43,23 +43,23 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuthenticationFilterTest {
-	
+
 	private static final String USERNAME = "admin";
-	
+
 	private static final String PASSWORD = "Admin123";
-	
+
 	private AuthenticationFilter authenticationFilter;
-	
+
 	private MockFilterChain filterChain;
-	
+
 	@Mock
 	private ContextDAO contextDAO;
-	
+
 	@Mock
 	private User user;
-	
+
 	static class InMemoryAuthenticationScheme implements AuthenticationScheme {
-		
+
 		@Override
 		public Authenticated authenticate(Credentials credentials) throws ContextAuthenticationException {
 			if (!(credentials instanceof UsernamePasswordCredentials)) {
@@ -77,83 +77,83 @@ public class AuthenticationFilterTest {
 			}
 		}
 	}
-	
+
 	@Before
 	public void setup() throws NoSuchFieldException, IllegalAccessException {
 		Context.setDAO(contextDAO);
-		
+
 		ServiceContext mockServiceContext = mock(ServiceContext.class);
 		Class<?> serviceContextHolderClass = ServiceContext.class.getDeclaredClasses()[0];
 		Field instanceField = serviceContextHolderClass.getDeclaredField("instance");
 		instanceField.setAccessible(true);
 		instanceField.set(null, mockServiceContext);
-		
+
 		when(mockServiceContext.getRegisteredComponents(any())).thenReturn(new ArrayList<>(0));
-		
+
 		Field authSchemeField = Context.class.getDeclaredField("authenticationScheme");
 		authSchemeField.setAccessible(true);
 		authSchemeField.set(null, new InMemoryAuthenticationScheme());
-		
+
 		Context.openSession();
-		
+
 		authenticationFilter = new AuthenticationFilter();
 		filterChain = new MockFilterChain();
 	}
-	
+
 	@After
 	public void tearDown() {
 		Context.closeSession();
 	}
-	
+
 	@Test
 	public void shouldLoginWithBasicAuthentication() throws Exception {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		
+
 		servletRequest.setRequestURI("/openmrs/ws/fhir2/Patient?_id=aa1c7cf0-6a54-4a06-9d77-b26107ad9144");
 		servletRequest.addHeader(HttpHeaders.AUTHORIZATION,
 		    "Basic " + Base64.getEncoder().encodeToString((USERNAME + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8)));
-		
+
 		authenticationFilter.doFilter(servletRequest, servletResponse, filterChain);
-		
+
 		assertThat(servletResponse.getStatus(), equalTo(200));
 	}
-	
+
 	@Test
 	public void shouldReturn401WhenAuthenticationFails() throws Exception {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		
+
 		servletRequest.setRequestURI("/openmrs/ws/fhir2/Patient?_id=aa1c7cf0-6a54-4a06-9d77-b26107ad9144");
 		servletRequest.addHeader(HttpHeaders.AUTHORIZATION, "Basic "
 		        + Base64.getEncoder().encodeToString((USERNAME + ":" + "badpassword").getBytes(StandardCharsets.UTF_8)));
-		
+
 		authenticationFilter.doFilter(servletRequest, servletResponse, filterChain);
-		
+
 		assertThat(servletResponse.getStatus(), equalTo(401));
 	}
-	
+
 	@Test
 	public void shouldBypassAuthenticationForConformanceStatement() throws Exception {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		
+
 		servletRequest.setRequestURI("/openmrs/ws/fhir2/metadata");
-		
+
 		authenticationFilter.doFilter(servletRequest, servletResponse, filterChain);
-		
+
 		assertThat(servletResponse.getStatus(), equalTo(200));
 	}
-	
+
 	@Test
 	public void shouldBypassAuthenticationForWellKnownDirectory() throws Exception {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		
+
 		servletRequest.setRequestURI("/openmrs/ws/fhir2/.well-known/config.json");
-		
+
 		authenticationFilter.doFilter(servletRequest, servletResponse, filterChain);
-		
+
 		assertThat(servletResponse.getStatus(), equalTo(200));
 	}
 }

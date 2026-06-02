@@ -28,19 +28,19 @@ import org.openmrs.module.idgen.rest.resource.AutoGenerationOptionResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class AutoGenerationOptionResourceTest extends BaseDelegatingResourceTest<AutoGenerationOptionResource, AutoGenerationOption> {
-	
+
 	public static final int AUTO_GENERATION_OPTION_ID = 2;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		executeDataSet("org/openmrs/module/idgen/include/TestData.xml");
 	}
-	
+
 	@Override
 	public AutoGenerationOption newObject() {
 		return Context.getService(IdentifierSourceService.class).getAutoGenerationOption(AUTO_GENERATION_OPTION_ID);
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -51,7 +51,7 @@ public class AutoGenerationOptionResourceTest extends BaseDelegatingResourceTest
 		assertPropEquals("manualEntryEnabled", getObject().isManualEntryEnabled());
 		assertPropEquals("automaticGenerationEnabled", getObject().isAutomaticGenerationEnabled());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -62,22 +62,22 @@ public class AutoGenerationOptionResourceTest extends BaseDelegatingResourceTest
 		assertPropEquals("manualEntryEnabled", getObject().isManualEntryEnabled());
 		assertPropEquals("automaticGenerationEnabled", getObject().isAutomaticGenerationEnabled());
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		super.validateRefRepresentation();
 		assertPropEquals("uuid", getUuidProperty());
 		assertPropEquals("display", getDisplayProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return getObject().getIdentifierType() + " - " + getObject().getSource() + " - " + getObject().getLocation();
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return getObject().getUuid();
 	}
-	
+
 }

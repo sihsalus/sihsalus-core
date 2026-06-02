@@ -31,27 +31,27 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AllergyIntoleranceSeverityTranslatorImplTest {
-	
+
 	private static final String GLOBAL_PROPERTY_MILD_VALUE = "102553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String GLOBAL_PROPERTY_SEVERE_VALUE = "202553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String GLOBAL_PROPERTY_MODERATE_VALUE = "302553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String GLOBAL_PROPERTY_OTHER_VALUE = "402553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	@Mock
 	private FhirConceptService conceptService;
-	
+
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
-	
+
 	private AllergyIntoleranceSeverityTranslatorImpl severityTranslator;
-	
+
 	private final Map<String, String> severityConceptUUIDs = new HashMap<>();
-	
+
 	private Concept concept;
-	
+
 	@Before
 	public void setup() {
 		severityTranslator = new AllergyIntoleranceSeverityTranslatorImpl();
@@ -59,19 +59,19 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 		severityTranslator.setGlobalPropertyService(globalPropertyService);
 		concept = new Concept();
 	}
-	
+
 	@Before
 	public void setupMocks() {
 		severityConceptUUIDs.put(FhirConstants.GLOBAL_PROPERTY_MILD, GLOBAL_PROPERTY_MILD_VALUE);
 		severityConceptUUIDs.put(FhirConstants.GLOBAL_PROPERTY_MODERATE, GLOBAL_PROPERTY_MODERATE_VALUE);
 		severityConceptUUIDs.put(FhirConstants.GLOBAL_PROPERTY_SEVERE, GLOBAL_PROPERTY_SEVERE_VALUE);
 		severityConceptUUIDs.put(FhirConstants.GLOBAL_PROPERTY_OTHER, GLOBAL_PROPERTY_OTHER_VALUE);
-		
+
 		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUUIDs);
 	}
-	
+
 	@Test
 	public void shouldTranslateAllergyReactionToSEVEREAllergyIntoleranceSeverity() {
 		Concept severeConcept = new Concept();
@@ -80,7 +80,7 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 		assertThat(severity, notNullValue());
 		assertThat(severity, equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE));
 	}
-	
+
 	@Test
 	public void shouldTranslateAllergyReactionToMODERATEAllergyIntoleranceSeverity() {
 		Concept moderateConcept = new Concept();
@@ -89,7 +89,7 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 		assertThat(severity, notNullValue());
 		assertThat(severity, equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE));
 	}
-	
+
 	@Test
 	public void shouldTranslateAllergyReactionToMILDAllergyIntoleranceSeverity() {
 		Concept mildConcept = new Concept();
@@ -98,7 +98,7 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 		assertThat(severity, notNullValue());
 		assertThat(severity, equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.MILD));
 	}
-	
+
 	@Test
 	public void shouldTranslateAllergyReactionToNullAllergyIntoleranceSeverity() {
 		Concept otherConcept = new Concept();
@@ -106,7 +106,7 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 		AllergyIntolerance.AllergyIntoleranceSeverity severity = severityTranslator.toFhirResource(otherConcept);
 		assertThat(severity, nullValue());
 	}
-	
+
 	@Test
 	public void shouldTranslateSEVEREToOpenMrsTypeCorrectly() {
 		concept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
@@ -115,7 +115,7 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 		assertThat(concept, notNullValue());
 		assertThat(concept.getUuid(), equalTo(GLOBAL_PROPERTY_SEVERE_VALUE));
 	}
-	
+
 	@Test
 	public void shouldTranslateMODERATEToOpenMrsTypeCorrectly() {
 		concept.setUuid(GLOBAL_PROPERTY_MODERATE_VALUE);
@@ -124,7 +124,7 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 		assertThat(concept, notNullValue());
 		assertThat(concept.getUuid(), equalTo(GLOBAL_PROPERTY_MODERATE_VALUE));
 	}
-	
+
 	@Test
 	public void shouldTranslateMILDToOpenMrsTypeCorrectly() {
 		concept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
@@ -133,7 +133,7 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 		assertThat(concept, notNullValue());
 		assertThat(concept.getUuid(), equalTo(GLOBAL_PROPERTY_MILD_VALUE));
 	}
-	
+
 	@Test
 	public void shouldTranslateNULLToOpenMrsTypeCorrectly() {
 		concept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);

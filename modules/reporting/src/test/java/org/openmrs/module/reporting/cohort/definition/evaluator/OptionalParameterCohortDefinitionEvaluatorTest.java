@@ -42,7 +42,7 @@ public class OptionalParameterCohortDefinitionEvaluatorTest extends BaseModuleCo
 
 	@Autowired
 	BuiltInCohortDefinitionLibrary builtInCohortDefinitionLibrary;
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
@@ -66,7 +66,7 @@ public class OptionalParameterCohortDefinitionEvaluatorTest extends BaseModuleCo
 		gender.addParameter(new Parameter("femaleIncluded", "Females", Boolean.class));
 
 		OptionalParameterCohortDefinition cd = new OptionalParameterCohortDefinition(gender, "maleIncluded", "femaleIncluded");
-		
+
 		EvaluationContext context = new EvaluationContext();
 
 		context.addParameterValue("maleIncluded", Boolean.TRUE);

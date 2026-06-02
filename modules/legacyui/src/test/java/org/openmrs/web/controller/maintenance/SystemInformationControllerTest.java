@@ -23,14 +23,14 @@ import org.springframework.ui.ModelMap;
  * Tests the {@link SystemInformationController} controller
  */
 public class SystemInformationControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private ModelMap model = null;
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		createController();
 	}
-	
+
 	/**
 	 * Creates the controller with necessary parameters
 	 */
@@ -40,7 +40,7 @@ public class SystemInformationControllerTest extends BaseModuleWebContextSensiti
 		controller.showPage(model);
 		//System.out.println("SystemInformationControllerTest.createController() "+model.toString());
 	}
-	
+
 	/**
 	 * @see SystemInformationController#showPage(ModelMap)
 	 */
@@ -50,7 +50,7 @@ public class SystemInformationControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertTrue(((Map<String, Map<String, String>>) model.get("systemInfo"))
 		        .containsKey("SystemInfo.title.openmrsInformation"));
 	}
-	
+
 	/**
 	 * @see SystemInformationController#showPage(ModelMap)
 	 */
@@ -60,7 +60,7 @@ public class SystemInformationControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertTrue(((Map<String, Map<String, String>>) model.get("systemInfo"))
 		        .containsKey("SystemInfo.title.javaRuntimeEnvironmentInformation"));
 	}
-	
+
 	/**
 	 * @see SystemInformationController#showPage(ModelMap)
 	 */
@@ -70,7 +70,7 @@ public class SystemInformationControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertTrue(((Map<String, Map<String, String>>) model.get("systemInfo"))
 		        .containsKey("SystemInfo.title.moduleInformation"));
 	}
-	
+
 	/**
 	 * @see SystemInformationController#showPage(ModelMap)
 	 */
@@ -80,7 +80,7 @@ public class SystemInformationControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertTrue(((Map<String, Map<String, String>>) model.get("systemInfo"))
 		        .containsKey("SystemInfo.title.dataBaseInformation"));
 	}
-	
+
 	/**
 	 * @see SystemInformationController#showPage(ModelMap)
 	 */
@@ -90,5 +90,5 @@ public class SystemInformationControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertTrue(((Map<String, Map<String, String>>) model.get("systemInfo"))
 		        .containsKey("SystemInfo.title.memoryInformation"));
 	}
-	
+
 }

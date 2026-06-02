@@ -16,5 +16,5 @@ import org.springframework.context.annotation.ImportResource;
 @ImportResource({ "classpath:applicationContext-service.xml", "classpath*:moduleApplicationContext.xml",
         "classpath:openmrs-servlet.xml", "classpath*:webModuleApplicationContext.xml" })
 public class IntegrationTestConfiguration {
-	
+
 }

@@ -48,81 +48,81 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 public class PatientLocationLinkingInterceptorTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private PatientService patientService;
-	
+
 	@Autowired
 	private PersonService personService;
-	
+
 	@Autowired
 	private LocationService locationService;
-	
+
 	@Autowired
 	@Qualifier("adminService")
 	private AdministrationService as;
-	
+
 	@Rule
 	public ExpectedException ee = ExpectedException.none();
-	
+
 	@Override
 	public void updateSearchIndex() {
 		//Do nothing
 	}
-	
+
 	@Before
 	public void setup() {
 		enableInterceptor();
 	}
-	
+
 	private void enableInterceptor() {
 		setGlobalPropertyValue(true);
 	}
-	
+
 	private void disableInterceptor() {
 		setGlobalPropertyValue(false);
 	}
-	
+
 	private Patient createTestPatient(String id) {
 		Patient patient = new Patient();
 		patient.addIdentifier(new PatientIdentifier(id, new PatientIdentifierType(2), new Location(1)));
-		
+
 		PersonName pName = new PersonName();
 		pName.setGivenName("Lazy");
 		pName.setFamilyName("Developer");
 		patient.addName(pName);
-		
+
 		patient.setBirthdate(new Date());
 		patient.setBirthdateEstimated(true);
 		patient.setGender("M");
-		
+
 		return patient;
 	}
-	
+
 	private List<String> getPatientLocations(Patient p) {
 		List<List<Object>> rows = DatabaseUtil.executeSQL(getConnection(),
 		    "SELECT DISTINCT basis_identifier FROM " + MODULE_ID + "_entity_basis_map WHERE entity_identifier='" + p.getId()
 		            + "' AND entity_type='" + Patient.class.getName() + "' AND basis_type='" + Location.class.getName()
 		            + "'",
 		    false);
-		
+
 		List<String> locations = new ArrayList();
 		for (List<Object> columns : rows) {
 			locations.add(columns.get(0).toString());
 		}
-		
+
 		return locations;
 	}
-	
+
 	private Long getCountOfPatientLocationLinks() {
 		List<List<Object>> rows = DatabaseUtil.executeSQL(getConnection(),
 		    "SELECT COUNT(*) FROM " + MODULE_ID + "_entity_basis_map WHERE entity_type='" + Patient.class.getName()
 		            + "' AND basis_type='" + Location.class.getName() + "'",
 		    false);
-		
+
 		return (Long) rows.get(0).get(0);
 	}
-	
+
 	private void setGlobalPropertyValue(Boolean enabled) {
 		GlobalProperty gp = as.getGlobalPropertyObject(GP_PAT_LOC_INTERCEPTOR_ENABLED);
 		if (gp == null) {
@@ -132,7 +132,7 @@ public class PatientLocationLinkingInterceptorTest extends BaseModuleContextSens
 		}
 		as.saveGlobalProperty(gp);
 	}
-	
+
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void onSave_shouldCreateAnEntryInTheEntityBasisMapTableBetweenThePatientAndSessionLocation() {
@@ -141,13 +141,13 @@ public class PatientLocationLinkingInterceptorTest extends BaseModuleContextSens
 		Context.getUserContext().setLocation(new Location(locationId));
 		long originalCount = getCountOfPatientLocationLinks();
 		patientService.savePatient(patient);
-		
+
 		assertEquals(++originalCount, getCountOfPatientLocationLinks().intValue());
 		List<String> patientLocations = getPatientLocations(patient);
 		assertEquals(1, patientLocations.size());
 		assertTrue(patientLocations.contains(locationId.toString()));
 	}
-	
+
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void onSave_shouldNotLinkPatientsToLocationsIfTheGpIsNotEnabled() {
@@ -157,11 +157,11 @@ public class PatientLocationLinkingInterceptorTest extends BaseModuleContextSens
 		Context.getUserContext().setLocation(new Location(locationId));
 		long originalCount = getCountOfPatientLocationLinks();
 		patientService.savePatient(patient);
-		
+
 		assertEquals(originalCount, getCountOfPatientLocationLinks().intValue());
 		assertEquals(0, getPatientLocations(patient).size());
 	}
-	
+
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void onSave_shouldFailIfThereIsNoSessionLocation() {
@@ -169,10 +169,10 @@ public class PatientLocationLinkingInterceptorTest extends BaseModuleContextSens
 		ee.expect(HibernateSystemException.class);
 		ee.expectMessage(containsString(("Unable to perform beforeTransactionCompletion callback")));
 		ee.expectCause(Matchers.hasProperty("cause", isA(DAOException.class)));
-		
+
 		patientService.savePatient(patient);
 	}
-	
+
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void onSave_shouldCreateAnEntryWhenANewPatientIsCreatedUsingAnExistingPerson() {
@@ -183,26 +183,26 @@ public class PatientLocationLinkingInterceptorTest extends BaseModuleContextSens
 		final Integer locationId = 1;
 		Context.getUserContext().setLocation(new Location(locationId));
 		long originalCount = getCountOfPatientLocationLinks();
-		
+
 		patientService.savePatient(patient);
-		
+
 		assertEquals(++originalCount, getCountOfPatientLocationLinks().intValue());
 		List<String> patientLocations = getPatientLocations(patient);
 		assertEquals(1, patientLocations.size());
 		assertTrue(patientLocations.contains(locationId.toString()));
 	}
-	
+
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void onSave_shouldNotCreateAnEntryWhenUpdatingAnExistingPatient() {
 		Patient patient = patientService.getPatient(7);
 		assertNotNull(patient);
 		long originalCount = getCountOfPatientLocationLinks();
-		
+
 		patientService.savePatient(patient);
-		
+
 		assertEquals(originalCount, getCountOfPatientLocationLinks().intValue());
 		assertEquals(0, getPatientLocations(patient).size());
 	}
-	
+
 }

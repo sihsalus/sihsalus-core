@@ -34,13 +34,13 @@ import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class UserProgramBasedFilterTest extends BaseProgramBasedFilterTest {
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Override
 	public Properties getRuntimeProperties() {
 		Properties props = super.getRuntimeProperties();
@@ -48,17 +48,17 @@ public class UserProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		props.setProperty(Environment.URL, props.getProperty(Environment.URL) + ";MODE=MYSQL");
 		return props;
 	}
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "persons.xml");
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "users.xml");
 	}
-	
+
 	private Collection<User> getUsers() {
 		return userService.getUsers("Mulemba", null, true, null, null);
 	}
-	
+
 	@Test
 	public void getUsers_shouldExcludeUsersWithProgramRolesForAUserThatHasNoRoles() {
 		reloginAs("smulemba", "test");
@@ -70,7 +70,7 @@ public class UserProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		assertTrue(TestUtil.containsId(users, 10005));
 		assertTrue(TestUtil.containsId(users, 10006));
 	}
-	
+
 	@Test
 	public void getUsers_shouldExcludeUsersWithProgramRolesForAUserThatHasNoProgramRoles() {
 		reloginAs("tmulemba", "test");
@@ -84,7 +84,7 @@ public class UserProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		assertTrue(TestUtil.containsId(users, 10005));
 		assertTrue(TestUtil.containsId(users, 10006));
 	}
-	
+
 	@Test
 	public void getUsers_shouldReturnUsersWithAccessToTheSameProgramsAsTheAuthenticatedUser() {
 		reloginAs("cmulemba", "test");
@@ -101,7 +101,7 @@ public class UserProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		assertTrue(TestUtil.containsId(users, 10006));
 		//Should include a user with any of the roles the user has
 		assertTrue(TestUtil.containsId(users, 10007));
-		
+
 		service.grantAccess(new Role(ROLE_COORDINATOR_PROG_1), new Program(10002));
 		expCount = 7;
 		users = getUsers();
@@ -114,20 +114,20 @@ public class UserProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		assertTrue(TestUtil.containsId(users, 10006));
 		assertTrue(TestUtil.containsId(users, 10007));
 	}
-	
+
 	@Test
 	public void getUsers_shouldReturnAllUsersIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
 		assertEquals(7, getUsers().size());
 	}
-	
+
 	@Test
 	public void getUsers_shouldReturnAllUsersIfTheFilterIsDisabled() {
 		FilterTestUtils.disableFilter(ImplConstants.PROGRAM_BASED_FILTER_NAME_USER);
 		reloginAs("dyorke", "test");
 		assertEquals(7, getUsers().size());
 	}
-	
+
 	@Test
 	public void getProvidersByPerson_shouldNotFailWithSQLSyntaxErrorException() throws Exception {
 		// Setup
@@ -135,11 +135,11 @@ public class UserProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		FilterTestUtils.enableFilter(ImplConstants.PROGRAM_BASED_FILTER_NAME_USER);
 		DatabaseUtil.executeSQL(getConnection(), sql, false);
 		Context.logout();
-		
+
 		// Replay
 		Context.addProxyPrivilege(PrivilegeConstants.GET_PERSONS);
 		Context.addProxyPrivilege(PrivilegeConstants.GET_PROVIDERS);
 		Context.getProviderService().getProvidersByPerson(Context.getPersonService().getPerson(1001));
 	}
-	
+
 }

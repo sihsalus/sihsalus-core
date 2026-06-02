@@ -44,57 +44,57 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class PractitionerSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String PRACTITIONER_UUID = "f9badd80-ab76-11e2-9e96-0800200c9a66";
-	
+
 	private static final String PRACTITIONER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPractitionerDaoImplTest_initial_data.xml";
-	
+
 	private static final int START_INDEX = 0;
-	
+
 	private static final int END_INDEX = 10;
-	
+
 	@Autowired
 	private FhirPractitionerDao dao;
-	
+
 	@Autowired
 	private PractitionerTranslator<Provider> translator;
-	
+
 	@Autowired
 	private SearchQueryInclude<Practitioner> searchQueryInclude;
-	
+
 	@Autowired
 	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>, SearchQueryInclude<Practitioner>> searchQuery;
-	
+
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
-	
+
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-	
+
 	@Before
 	public void setup() {
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
-	
+
 	@Test
 	public void searchForPractitioners_shouldReverseIncludeMedicationRequestsAndAssociatedMedicationDispensesWithReturnedResults() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("MedicationRequest:requester"));
 		revIncludes.add(new Include("MedicationDispense:prescription", true));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
-		
+
 		IBundleProvider results = search(theParams);
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(11))); // included resources added as part of result list

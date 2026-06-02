@@ -27,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests CRUD operations for {@link GlobalProperty}s via web service calls
  */
 public class SystemSettingController2_0Test extends MainResourceControllerTest {
-	
+
 	private AdministrationService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -37,7 +37,7 @@ public class SystemSettingController2_0Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "systemsetting";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -45,17 +45,17 @@ public class SystemSettingController2_0Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_9.GLOBAL_PROPERTY_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return service.getAllGlobalProperties().size();
 	}
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		this.service = Context.getAdministrationService();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetAll()
 	 */
@@ -63,13 +63,13 @@ public class SystemSettingController2_0Test extends MainResourceControllerTest {
 	public void shouldGetAll() throws Exception {
 		super.shouldGetAll();
 	}
-	
+
 	@Test
 	public void shouldGetASystemSettingWithDotByName() throws Exception {
 		final String name = "concept.defaultConceptMapType";
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + name);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		GlobalProperty gp = service.getGlobalPropertyObject(name);
 		assertEquals(gp.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(gp.getProperty(), PropertyUtils.getProperty(result, "property"));

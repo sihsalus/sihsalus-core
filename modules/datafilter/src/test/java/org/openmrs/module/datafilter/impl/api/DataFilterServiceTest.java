@@ -27,16 +27,16 @@ import org.openmrs.module.datafilter.impl.EntityBasisMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DataFilterServiceTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Test
 	public void hasAccess_shouldReturnFalseIfTheUserHasNoAccessToTheSpecifiedBasis() {
 		assertFalse(service.hasAccess(new User(501), new Location(1)));
 		assertFalse(service.hasAccess(new User(3000), new Program(2)));
 	}
-	
+
 	@Test
 	public void hasAccess_shouldReturnTrueIfTheUserHasAccessToTheSpecifiedBasis() {
 		assertTrue(service.hasAccess(new User(3000), new Location(1)));
@@ -44,7 +44,7 @@ public class DataFilterServiceTest extends BaseFilterTest {
 		assertTrue(service.hasAccess(new User(3000), new Program(1)));
 		assertTrue(service.hasAccess(new User(501), new Location(4000)));
 	}
-	
+
 	@Test
 	public void grantAccess_shouldGrantTheUserAccessToRecordsAtTheSpecifiedBasis() {
 		User user = new User(3000);
@@ -53,7 +53,7 @@ public class DataFilterServiceTest extends BaseFilterTest {
 		service.grantAccess(user, location);
 		assertTrue(service.hasAccess(user, location));
 	}
-	
+
 	@Test
 	public void grantAccess_shouldGrantTheUserAccessToRecordsAtTheSpecifiedBases() {
 		User user = new User(501);
@@ -61,14 +61,14 @@ public class DataFilterServiceTest extends BaseFilterTest {
 		for (OpenmrsObject basis : bases) {
 			assertFalse(service.hasAccess(user, basis));
 		}
-		
+
 		service.grantAccess(user, bases);
-		
+
 		for (OpenmrsObject basis : bases) {
 			assertTrue(service.hasAccess(user, basis));
 		}
 	}
-	
+
 	@Test
 	public void revokeAccess_shouldRevokeAccessForTheUserToRecordsAtTheSpecifiedBasis() {
 		User user = new User(3000);
@@ -77,7 +77,7 @@ public class DataFilterServiceTest extends BaseFilterTest {
 		service.revokeAccess(user, location);
 		assertFalse(service.hasAccess(user, location));
 	}
-	
+
 	@Test
 	public void revokeAccess_shouldRevokeAccessForTheUserToRecordsAtTheSpecifiedBases() {
 		User user = new User(3000);
@@ -85,21 +85,21 @@ public class DataFilterServiceTest extends BaseFilterTest {
 		for (OpenmrsObject basis : bases) {
 			assertTrue(service.hasAccess(user, basis));
 		}
-		
+
 		service.revokeAccess(user, bases);
-		
+
 		for (OpenmrsObject basis : bases) {
 			assertFalse(service.hasAccess(user, basis));
 		}
 	}
-	
+
 	@Test
 	public void getEntityBasisMaps_shouldGetAllEntityBasisForAnEntityForABasisType() {
 		User user = new User(3000);
 		Collection<EntityBasisMap> map = service.getEntityBasisMaps(user, Location.class.getName());
 		Assert.assertEquals(2, map.size());
 	}
-	
+
 	@Test
 	public void getEntityBasisMapsByBasis_shouldGetAllEntityBasisMapsForABasisEntity() {
 		Location location = new Location(4000);

@@ -34,7 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SpringTestConfiguration.class, inheritLocations = false)
 public class VisitWithQueueEntriesSaveHandlerTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final List<String> INITIAL_DATASET_XML = Arrays.asList(
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_locationInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_conceptsInitialDataset.xml",
@@ -43,20 +43,20 @@ public class VisitWithQueueEntriesSaveHandlerTest extends BaseModuleContextSensi
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/validators/QueueEntryValidatorTest_globalPropertyInitialDataset.xml");
-	
+
 	private Visit visit;
-	
+
 	private QueueEntry queueEntry;
-	
+
 	private Date stopDate;
-	
+
 	@Autowired
 	@Qualifier("queue.QueueEntryService")
 	private QueueEntryService queueEntryService;
-	
+
 	@Autowired
 	private VisitService visitService;
-	
+
 	@Before
 	public void setup() {
 		INITIAL_DATASET_XML.forEach(this::executeDataSet);
@@ -64,7 +64,7 @@ public class VisitWithQueueEntriesSaveHandlerTest extends BaseModuleContextSensi
 		visit = queueEntry.getVisit();
 		stopDate = DateUtils.addHours(visit.getStartDatetime(), 12);
 	}
-	
+
 	@Test
 	public void shouldNotEndQueueEntriesIfVisitIsNotStopped() {
 		assertNull(visit.getStopDatetime());
@@ -74,7 +74,7 @@ public class VisitWithQueueEntriesSaveHandlerTest extends BaseModuleContextSensi
 		assertNull(visit.getStopDatetime());
 		assertNull(queueEntry.getEndedAt());
 	}
-	
+
 	@Test
 	public void shouldEndQueueEntriesIfVisitIsStopped() {
 		assertNull(visit.getStopDatetime());
@@ -85,7 +85,7 @@ public class VisitWithQueueEntriesSaveHandlerTest extends BaseModuleContextSensi
 		assertThat(visit.getStopDatetime(), equalTo(stopDate));
 		assertThat(queueEntry.getEndedAt(), equalTo(stopDate));
 	}
-	
+
 	@Test
 	public void shouldNotVoidQueueEntriesIfVisitIsNotVoided() {
 		assertFalse(visit.getVoided());
@@ -95,7 +95,7 @@ public class VisitWithQueueEntriesSaveHandlerTest extends BaseModuleContextSensi
 		assertFalse(visit.getVoided());
 		assertFalse(queueEntry.getVoided());
 	}
-	
+
 	@Test
 	public void shouldVoidQueueEntriesIfVisitIsVoided() {
 		assertFalse(visit.getVoided());

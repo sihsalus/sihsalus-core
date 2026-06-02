@@ -27,9 +27,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * Tests {@code RegexValidatedTextDatatypeHandler}.
  */
 public class RegexValidatedTextDatatypeHandlerTest {
-	
+
 	private final RegexValidatedTextDatatypeHandler handler = new RegexValidatedTextDatatypeHandler();
-	
+
 	/**
 	 * @see org.openmrs.web.attribute.handler.FieldGenDatatypeHandler#getValue(CustomDatatype,
 	 *      HttpServletRequest, String)
@@ -38,7 +38,7 @@ public class RegexValidatedTextDatatypeHandlerTest {
 	 */
 	@Test
 	public void getValue_shouldReturnAttributeValueFromRequestForGivenFieldNameIfTheAttributeValueIsValidAccordingToDatatype() {
-		
+
 		// given
 		String fieldName = "regexfield";
 		String validFieldValue = "1";
@@ -46,10 +46,10 @@ public class RegexValidatedTextDatatypeHandlerTest {
 		request.setParameter(fieldName, validFieldValue);
 		RegexValidatedTextDatatype datatype = new RegexValidatedTextDatatype();
 		datatype.setConfiguration("^[012]$");
-		
+
 		assertThat(handler.getValue(datatype, request, fieldName), is(validFieldValue));
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.attribute.handler.FieldGenDatatypeHandler#getValue(CustomDatatype,
 	 *      HttpServletRequest, String)
@@ -58,7 +58,7 @@ public class RegexValidatedTextDatatypeHandlerTest {
 	 */
 	@Test
 	public void getValue_shouldThrowInvalidCustomValueExceptionIfAttributeValueFromRequestForGivenFieldNameIsInvalidAccordingToDatatype() {
-		
+
 		// given
 		String fieldName = "regexfield";
 		String invalidFieldValue = "9";
@@ -66,12 +66,12 @@ public class RegexValidatedTextDatatypeHandlerTest {
 		request.setParameter(fieldName, invalidFieldValue);
 		RegexValidatedTextDatatype datatype = new RegexValidatedTextDatatype();
 		datatype.setConfiguration("^[012]$");
-		
+
 		InvalidCustomValueException ex = org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomValueException.class,
 			() -> handler.getValue(datatype, request, fieldName));
 		assertThat(ex.getMessage(), containsString("Invalid value: " + invalidFieldValue));
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.attribute.handler.FieldGenDatatypeHandler#toHtml(org.openmrs.customdatatype.CustomDatatype,
 	 *      String)
@@ -79,15 +79,15 @@ public class RegexValidatedTextDatatypeHandlerTest {
 	 */
 	@Test
 	public void toHtml_shouldReturnTheValueReference() throws Exception {
-		
+
 		final String fieldValue = "1";
-		
+
 		RegexValidatedTextDatatype datatype = new RegexValidatedTextDatatype();
 		datatype.setConfiguration("^[012]$");
-		
+
 		assertThat(handler.toHtml(datatype, fieldValue), is(fieldValue));
 	}
-	
+
 	/**
 	 * @verifies use the name in the html summary instance
 	 * @see BaseMetadataFieldGenDatatypeHandler#toHtmlSummary(org.openmrs.customdatatype.CustomDatatype,
@@ -95,14 +95,14 @@ public class RegexValidatedTextDatatypeHandlerTest {
 	 */
 	@Test
 	public void toHtmlSummary_shouldUseTheNameInTheHtmlSummaryInstance() throws Exception {
-		
+
 		final String fieldValue = "1";
-		
+
 		RegexValidatedTextDatatype datatype = new RegexValidatedTextDatatype();
 		datatype.setConfiguration("^[012]$");
-		
+
 		CustomDatatype.Summary summary = handler.toHtmlSummary(datatype, fieldValue);
-		
+
 		assertNotNull(summary);
 		assertEquals(fieldValue, summary.getSummary());
 		assertEquals(true, summary.isComplete());

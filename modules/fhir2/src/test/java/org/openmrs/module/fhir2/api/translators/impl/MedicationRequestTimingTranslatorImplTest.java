@@ -39,30 +39,30 @@ import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestTimingTranslatorImplTest {
-	
+
 	private MedicationRequestTimingTranslatorImpl timingTranslator;
-	
+
 	private MedicationRequestTimingRepeatComponentTranslatorImpl timingRepeatComponentTranslator;
-	
+
 	@Mock
 	private ConceptTranslator conceptTranslator;
-	
+
 	@Mock
 	private OrderService orderService;
-	
+
 	@Mock
 	private DurationUnitTranslator durationUnitTranslator;
-	
+
 	private DrugOrder drugOrder;
-	
+
 	private Concept daysConcept;
-	
+
 	private Concept oncePerDayConcept;
-	
+
 	private CodeableConcept oncePerDayFhirConcept;
-	
+
 	private OrderFrequency oncePerDayFrequency;
-	
+
 	@Before
 	public void setup() {
 		timingTranslator = new MedicationRequestTimingTranslatorImpl();
@@ -71,13 +71,13 @@ public class MedicationRequestTimingTranslatorImplTest {
 		timingTranslator.setTimingRepeatComponentTranslator(timingRepeatComponentTranslator);
 		timingTranslator.setConceptTranslator(conceptTranslator);
 		timingTranslator.setOrderService(orderService);
-		
+
 		drugOrder = new DrugOrder();
-		
+
 		daysConcept = new Concept();
 		when(durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.D)).thenReturn(daysConcept);
 		when(durationUnitTranslator.toFhirResource(daysConcept)).thenReturn(Timing.UnitsOfTime.D);
-		
+
 		oncePerDayConcept = new Concept();
 		oncePerDayFhirConcept = new CodeableConcept();
 		oncePerDayFhirConcept.addCoding(new Coding("system", "code", "display"));
@@ -89,7 +89,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		when(orderService.getOrderFrequencyByConcept(oncePerDayConcept)).thenReturn(oncePerDayFrequency);
 		when(orderService.getOrderFrequencyByUuid("once-per-day-frequency-uuid")).thenReturn(oncePerDayFrequency);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldAddEvent() {
 		drugOrder.setScheduledDate(new Date());
@@ -99,7 +99,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		assertThat(result.getEvent().get(0).getValue(), notNullValue());
 		assertThat(result.getEvent().get(0).getValue(), DateMatchers.sameDay(new Date()));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetScheduledDate() {
 		Date eventDate = new Date();
@@ -109,7 +109,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		drugOrder = timingTranslator.toOpenmrsType(drugOrder, timing);
 		assertThat(drugOrder.getScheduledDate(), equalTo(eventDate));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldSetDuration() {
 		drugOrder.setDuration(10);
@@ -120,7 +120,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		assertThat(result.getRepeat().getDuration().intValue(), equalTo(10));
 		assertThat(result.getRepeat().getDurationUnit(), equalTo(Timing.UnitsOfTime.D));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDuration() {
 		Timing timing = new Timing();
@@ -132,7 +132,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		assertThat(drugOrder.getDuration(), equalTo(10));
 		assertThat(drugOrder.getDurationUnits(), equalTo(daysConcept));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldSetCodeValue() {
 		drugOrder.setFrequency(oncePerDayFrequency);
@@ -141,7 +141,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		assertThat(result.getCode(), notNullValue());
 		assertThat(result.getCode(), equalTo(oncePerDayFhirConcept));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetOrderFrequencyFromConceptRef() {
 		Timing timing = new Timing();
@@ -150,7 +150,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		drugOrder = timingTranslator.toOpenmrsType(drugOrder, timing);
 		assertThat(drugOrder.getFrequency(), equalTo(oncePerDayFrequency));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetOrderFrequencyUsingFrequencyRef() {
 		Timing timing = new Timing();
@@ -161,10 +161,10 @@ public class MedicationRequestTimingTranslatorImplTest {
 		drugOrder = timingTranslator.toOpenmrsType(drugOrder, timing);
 		assertThat(drugOrder.getFrequency(), equalTo(oncePerDayFrequency));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfDrugOrderIsNull() {
 		assertThat(timingTranslator.toFhirResource(null), nullValue());
 	}
-	
+
 }

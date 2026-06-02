@@ -24,28 +24,28 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class MetadataDelegatingCrudResourceTest {
-	
+
 	/**
 	 * @verifies return a localized message if specified
 	 */
 	@Test
 	public void getDisplayString_shouldReturnALocalizedMessageIfSpecified() throws Exception {
 		String UUID = "0cbe2ed3-cd5f-4f46-9459-26127c9265ab";
-		
+
 		MessageSourceService messageSourceService = mock(MessageSourceService.class);
 		when(messageSourceService.getMessage("ui.i18n.Location.name." + UUID)).thenReturn("Correct");
 		ServiceContext.getInstance().setMessageSourceService(messageSourceService);
-		
+
 		Location location = new Location();
 		location.setName("Incorrect");
 		location.setUuid(UUID);
-		
+
 		MockLocationResource resource = new MockLocationResource();
 		String display = resource.getDisplayString(location);
-		
+
 		assertThat(display, is("Correct"));
 	}
-	
+
 	/**
 	 * @verifies return the name property when no localized message is specified
 	 */
@@ -53,13 +53,13 @@ public class MetadataDelegatingCrudResourceTest {
 	public void getDisplayString_shouldReturnTheNamePropertyWhenNoLocalizedMessageIsSpecified() throws Exception {
 		Location location = new Location();
 		location.setName("Correct");
-		
+
 		MockLocationResource resource = new MockLocationResource();
 		String display = resource.getDisplayString(location);
-		
+
 		assertThat(display, is("Correct"));
 	}
-	
+
 	/**
 	 * @verifies return the empty string when no localized message is specified and the name
 	 *           property is null
@@ -69,53 +69,53 @@ public class MetadataDelegatingCrudResourceTest {
 	        throws Exception {
 		Location location = new Location();
 		location.setName(null);
-		
+
 		MockLocationResource resource = new MockLocationResource();
 		String display = resource.getDisplayString(location);
-		
+
 		assertThat(display, is(""));
 	}
-	
+
 	class MockLocationResource extends MetadataDelegatingCrudResource<Location> {
-		
+
 		@Override
 		public Location getByUniqueId(String uniqueId) {
 			return null;
 		}
-		
+
 		@Override
 		public Location newDelegate() {
 			return new Location();
 		}
-		
+
 		@Override
 		public Location save(Location delegate) {
 			return null;
 		}
-		
+
 		@Override
 		public void purge(Location delegate, RequestContext context) throws ResponseException {
 		}
-		
+
 		@Override
 		public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 			return null;
 		}
-		
+
 		@Override
 		public Model getGETModel(Representation representation) {
 			return null;
 		}
-		
+
 		@Override
 		public Model getCREATEModel(Representation representation) {
 			return null;
 		}
-		
+
 		@Override
 		public Model getUPDATEModel(Representation representation) {
 			return null;
 		}
 	}
-	
+
 }

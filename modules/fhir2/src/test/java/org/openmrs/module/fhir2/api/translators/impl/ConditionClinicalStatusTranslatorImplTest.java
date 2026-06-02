@@ -22,18 +22,18 @@ import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.module.fhir2.FhirConstants;
 
 public class ConditionClinicalStatusTranslatorImplTest {
-	
+
 	private static final String ACTIVE = "active";
-	
+
 	private static final String INACTIVE = "inactive";
-	
+
 	private ConditionClinicalStatusTranslatorImpl clinicalStatusTranslator;
-	
+
 	@Before
 	public void setUp() {
 		this.clinicalStatusTranslator = new ConditionClinicalStatusTranslatorImpl();
 	}
-	
+
 	@Test
 	public void shouldMapOpenMrsActiveToFHIRActive() {
 		CodeableConcept codeableConcept = clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.ACTIVE);
@@ -42,7 +42,7 @@ public class ConditionClinicalStatusTranslatorImplTest {
 		assertThat(codeableConcept.getCodingFirstRep().getSystem(),
 		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 	}
-	
+
 	@Test
 	public void shouldMapOpenMrsInActiveToFHIRInActive() {
 		CodeableConcept codeableConcept = clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.INACTIVE);
@@ -51,7 +51,7 @@ public class ConditionClinicalStatusTranslatorImplTest {
 		assertThat(codeableConcept.getCodingFirstRep().getSystem(),
 		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 	}
-	
+
 	@Test
 	public void shouldMapOpenMrsHistoryOfToFHIRInActive() {
 		CodeableConcept codeableConcept = clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.HISTORY_OF);
@@ -60,7 +60,7 @@ public class ConditionClinicalStatusTranslatorImplTest {
 		assertThat(codeableConcept.getCodingFirstRep().getSystem(),
 		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 	}
-	
+
 	@Test
 	public void shouldMapFHIRActiveToOpenMrsActiveClinicalCondition() {
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -70,7 +70,7 @@ public class ConditionClinicalStatusTranslatorImplTest {
 		codeableConcept.addCoding(coding);
 		assertThat(clinicalStatusTranslator.toOpenmrsType(codeableConcept), is(ConditionClinicalStatus.ACTIVE));
 	}
-	
+
 	@Test
 	public void shouldMapFHIRInActiveToOpenMrsInActive() {
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -80,5 +80,5 @@ public class ConditionClinicalStatusTranslatorImplTest {
 		codeableConcept.addCoding(coding);
 		assertThat(clinicalStatusTranslator.toOpenmrsType(codeableConcept), is(ConditionClinicalStatus.INACTIVE));
 	}
-	
+
 }

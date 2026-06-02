@@ -16,28 +16,28 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_9;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class FormResourceResource1_9Test extends BaseDelegatingResourceTest<FormResourceResource1_9, FormResource> {
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		executeDataSet(RestTestConstants1_9.FORM_RESOURCE_DATA_SET);
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		assertPropPresent("uuid");
 		assertPropPresent("name");
 		assertPropPresent("valueReference");
 		assertPropPresent("display");
-		
+
 		assertPropNotPresent("dataType");
 		assertPropNotPresent("handler");
 		assertPropNotPresent("handlerConfig");
-		
+
 		assertPropEquals("uuid", getUuidProperty());
 		assertPropEquals("display", getDisplayProperty());
 		assertPropEquals("name", getObject().getName());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		assertPropPresent("uuid");
@@ -47,7 +47,7 @@ public class FormResourceResource1_9Test extends BaseDelegatingResourceTest<Form
 		assertPropPresent("handler");
 		assertPropPresent("handlerConfig");
 		assertPropPresent("display");
-		
+
 		assertPropEquals("uuid", getUuidProperty());
 		assertPropEquals("display", getDisplayProperty());
 		assertPropEquals("name", getObject().getName());
@@ -55,31 +55,31 @@ public class FormResourceResource1_9Test extends BaseDelegatingResourceTest<Form
 		assertPropEquals("handler", getObject().getPreferredHandlerClassname());
 		assertPropEquals("handlerConfig", getObject().getHandlerConfig());
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		assertPropPresent("uuid");
 		assertPropPresent("display");
-		
+
 		assertPropNotPresent("dataType");
 		assertPropNotPresent("handler");
 		assertPropNotPresent("handlerConfig");
 		assertPropNotPresent("name");
-		
+
 		assertPropEquals("uuid", getUuidProperty());
 		assertPropEquals("display", getDisplayProperty());
 	}
-	
+
 	@Override
 	public FormResource newObject() {
 		return Context.getFormService().getFormResourceByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return getObject().getName();
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_9.FORM_RESOURCE_UUID;

@@ -49,30 +49,30 @@ import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 
 @RunWith(JUnitParamsRunner.class)
 public class ObservationQuantityCodingTranslatorImplTest {
-	
+
 	private static final String CONCEPT_UUID = "33fdc8ad-fe4d-499b-93a8-8a991c1d488g";
-	
+
 	private static final String baseUcumServiceXml = "ucum-essence.xml";
-	
+
 	private static final String fhirUcumServiceXml = "ucum-fhir-essence.xml";
-	
+
 	@Rule
 	public MockitoRule rule = MockitoJUnit.rule();
-	
+
 	@Mock
 	private FhirConceptService conceptService;
-	
+
 	@Mock
 	private FhirConceptSourceService conceptSourceService;
-	
+
 	ObservationQuantityCodingTranslatorImpl quantityCodingTranslator;
-	
+
 	@Before
 	public void setup() throws UcumException, IOException {
 		ConceptTranslatorImpl conceptTranslator = new ConceptTranslatorImpl();
 		conceptTranslator.setConceptService(conceptService);
 		conceptTranslator.setConceptSourceService(conceptSourceService);
-		
+
 		// Define UCUM services
 		ArrayList<UcumEssenceService> ucumServices = new ArrayList<>();
 		try (InputStream baseUcum = UcumService.class.getClassLoader().getResourceAsStream(baseUcumServiceXml);
@@ -80,14 +80,14 @@ public class ObservationQuantityCodingTranslatorImplTest {
 			ucumServices.add(new UcumEssenceService(baseUcum));
 			ucumServices.add(new UcumEssenceService(fhirUcum));
 		}
-		
+
 		quantityCodingTranslator = new ObservationQuantityCodingTranslatorImpl();
 		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
 		quantityCodingTranslator.setUcumServices(ucumServices);
-		
+
 		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
 	}
-	
+
 	/**
 	 * Tests all common fhir ucum codes specified in https://www.hl7.org/fhir/valueset-ucum-common.html
 	 */
@@ -95,101 +95,101 @@ public class ObservationQuantityCodingTranslatorImplTest {
 	@FileParameters("classpath:org/openmrs/module/fhir2/api/translators.impl/fhir-ucum-common.csv")
 	public void toFhirResource_shouldTranslateConceptWithCommonUCUMUnitCodes(String code) {
 		ConceptNumeric cn = new ConceptNumeric();
-		
+
 		cn.setUnits(code);
 		Coding coding = quantityCodingTranslator.toFhirResource(cn);
-		
+
 		assertThat(String.format("%s should be a valid UCUM code", code), coding.getSystem(), is(UCUM_SYSTEM_URI));
 		assertThat(coding.getCode(), is(code));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldFallbackToUUIDAndNullSystemIfNoUCUMUnitCode() {
 		ConceptNumeric cn = new ConceptNumeric();
 		cn.setUuid(CONCEPT_UUID);
-		
+
 		cn.setUnits("thisiscertainlynotaunit");
 		Coding coding = quantityCodingTranslator.toFhirResource(cn);
 		assertThat(coding.getCode(), is(CONCEPT_UUID));
 		assertNull(coding.getSystem());
-		
+
 		// UCUM lookup is case-sensitive
 		cn.setUnits("mmhg");
 		coding = quantityCodingTranslator.toFhirResource(cn);
 		assertThat(coding.getCode(), is(CONCEPT_UUID));
 		assertNull(coding.getSystem());
-		
+
 		cn.setUnits("mm[hg]");
 		coding = quantityCodingTranslator.toFhirResource(cn);
 		assertThat(coding.getCode(), is(CONCEPT_UUID));
 		assertNull(coding.getSystem());
-		
+
 		cn.setUnits("/MIN");
 		coding = quantityCodingTranslator.toFhirResource(cn);
 		assertThat(coding.getCode(), is(CONCEPT_UUID));
 		assertNull(coding.getSystem());
-		
+
 		cn.setUnits(null);
 		coding = quantityCodingTranslator.toFhirResource(cn);
 		assertNull(coding.getSystem());
 		assertThat(coding.getCode(), is(CONCEPT_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateNullSystemQuantityToNullSystemConcept() {
 		Concept mg = new Concept();
 		when(conceptService.get(CONCEPT_UUID)).thenReturn(mg);
-		
+
 		SimpleQuantity observationQuantity = new SimpleQuantity();
 		observationQuantity.setValue(1000d);
 		observationQuantity.setSystem(null);
 		observationQuantity.setCode(CONCEPT_UUID);
-		
+
 		Concept result = quantityCodingTranslator.toOpenmrsType(observationQuantity);
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(mg));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldBeUnableToTranslateUCUMSystemQuantityIfOpenMRSUcumSystemIsUndefined() {
 		when(conceptSourceService.getConceptSourceByUrl(UCUM_SYSTEM_URI)).thenReturn(Optional.empty());
-		
+
 		SimpleQuantity observationQuantity = new SimpleQuantity();
 		observationQuantity.setValue(1000d);
 		observationQuantity.setSystem(UCUM_SYSTEM_URI);
 		observationQuantity.setCode("mg");
-		
+
 		Concept result = quantityCodingTranslator.toOpenmrsType(observationQuantity);
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateUCUMSystemQuantityIfOpenMRSUcumSystemDefined() {
 		Concept mg = new Concept();
-		
+
 		ConceptSource mgSource = new ConceptSource();
 		mgSource.setName("UCUM");
-		
+
 		ConceptMapType broaderThan = new ConceptMapType();
 		broaderThan.setName("BROADER-THAN");
-		
+
 		ConceptMap m = new ConceptMap();
 		m.setConceptMapType(broaderThan);
 		m.setConcept(mg);
 		m.setConceptReferenceTerm(new ConceptReferenceTerm(mgSource, "mg", "mg"));
 		mg.addConceptMapping(m);
-		
+
 		List<Concept> matchingConcepts = new ArrayList<>();
 		matchingConcepts.add(mg);
-		
+
 		when(conceptSourceService.getConceptSourceByUrl(UCUM_SYSTEM_URI)).thenReturn(Optional.of(mgSource));
 		when(conceptService.getConceptsWithAnyMappingInSource(mgSource, "mg")).thenReturn(matchingConcepts);
-		
+
 		SimpleQuantity observationQuantity = new SimpleQuantity();
 		observationQuantity.setValue(1000d);
 		observationQuantity.setSystem(UCUM_SYSTEM_URI);
 		observationQuantity.setCode("mg");
-		
+
 		Concept result = quantityCodingTranslator.toOpenmrsType(observationQuantity);
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(mg));

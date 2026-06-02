@@ -46,23 +46,23 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 
+ *
  */
 public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
 
 	/**
 	 * Logger
 	 */
-	protected final Log log = LogFactory.getLog(getClass());	
-	
+	protected final Log log = LogFactory.getLog(getClass());
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -70,7 +70,7 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
 
-	
+
 	/**
 	 * @see {@link SqlCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -79,17 +79,17 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 	public void evaluate_shouldSupportIntegerParameter() throws Exception {
 		String sqlQuery = "SELECT distinct patient_id FROM patient WHERE patient_id = :patientId";
 		Map<String, Object> parameterValues = new HashMap<String, Object>();
-		parameterValues.put("patientId", new Integer(6));				
-		
+		parameterValues.put("patientId", new Integer(6));
+
 		EvaluationContext evaluationContext = new EvaluationContext();
 		evaluationContext.setParameterValues(parameterValues);
 		SqlCohortDefinition cohortDefinition = new SqlCohortDefinition(sqlQuery);
-		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);		
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);
 
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(6));
 	}
-	
+
 	/**
 	 * @see {@link SqlCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -98,13 +98,13 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 	public void evaluate_shouldSupportStringParameter() throws Exception {
 		String sqlQuery = "SELECT distinct patient_id FROM patient WHERE patient_id = :patientId";
 		Map<String, Object> parameterValues = new HashMap<String, Object>();
-		parameterValues.put("patientId", new String("6"));		
-		
+		parameterValues.put("patientId", new String("6"));
+
 		EvaluationContext evaluationContext = new EvaluationContext();
 		evaluationContext.setParameterValues(parameterValues);
 		SqlCohortDefinition cohortDefinition = new SqlCohortDefinition(sqlQuery);
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);
-		
+
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(6));
 	}
@@ -127,15 +127,15 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(6));
 	}
-	
+
 
 	/**
 	 * @see {@link SqlCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
 	@Test
 	@Verifies(value = "should support integer list parameter", method = "evaluate(CohortDefinition,EvaluationContext)")
-	public void evaluate_shouldSupportIntegerListParameter() throws Exception { 	
-		
+	public void evaluate_shouldSupportIntegerListParameter() throws Exception {
+
 		String sqlQuery = "SELECT distinct patient_id FROM patient WHERE patient_id IN (:patientIdList)";
 		List<Integer> patientIdList = new ArrayList<Integer>();
 		patientIdList.add(new Integer(6));
@@ -145,8 +145,8 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 		EvaluationContext evaluationContext = new EvaluationContext();
 		evaluationContext.setParameterValues(parameterValues);
 		SqlCohortDefinition cohortDefinition = new SqlCohortDefinition(sqlQuery);
-		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);		
-		
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);
+
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(6));
 	}
@@ -192,23 +192,23 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 
 		Assert.assertEquals(0, cohort.size());
 	}
-	
+
 	/**
 	 * @see {@link SqlCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
 	@Test
 	@Verifies(value = "should support patient list parameter", method = "evaluate(CohortDefinition,EvaluationContext)")
-	public void evaluate_shouldSupportPatientListParameter() throws Exception { 		
+	public void evaluate_shouldSupportPatientListParameter() throws Exception {
 		String sqlQuery = "SELECT distinct patient_id FROM patient WHERE patient_id IN (:patientList)";
 		List<Patient> patientList = new ArrayList<Patient>();
 		patientList.add(Context.getPatientService().getPatient(new Integer(6)));
 		Map<String, Object> parameterValues = new HashMap<String, Object>();
 		parameterValues.put("patientList", patientList);
-		
+
 		EvaluationContext evaluationContext = new EvaluationContext();
 		evaluationContext.setParameterValues(parameterValues);
 		SqlCohortDefinition cohortDefinition = new SqlCohortDefinition(sqlQuery);
-		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);		
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);
 
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(6));
@@ -253,23 +253,23 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 
 		Assert.assertEquals(0, cohort.size());
 	}
-	
+
 	/**
 	 * @see {@link SqlCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
 	@Test
 	@Verifies(value = "should support cohort parameter", method = "evaluate(CohortDefinition,EvaluationContext)")
-	public void evaluate_shouldSupportCohortParameter() throws Exception { 		
+	public void evaluate_shouldSupportCohortParameter() throws Exception {
 		String sqlQuery = "SELECT distinct patient_id FROM patient WHERE patient_id IN (:cohort)";
 		Cohort cohortParam = new Cohort();
-		cohortParam.addMember(new Integer(6));		
+		cohortParam.addMember(new Integer(6));
 		Map<String, Object> parameterValues = new HashMap<String, Object>();
-		parameterValues.put("cohort", cohortParam);					
-		
+		parameterValues.put("cohort", cohortParam);
+
 		EvaluationContext evaluationContext = new EvaluationContext();
 		evaluationContext.setParameterValues(parameterValues);
 		SqlCohortDefinition cohortDefinition = new SqlCohortDefinition(sqlQuery);
-		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);		
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);
 
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(6));
@@ -278,7 +278,7 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 
 	/**
      * @see {@link SqlCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
-     * 
+     *
      */
     @Test
     @Verifies(value = "should support date parameter", method = "evaluate(CohortDefinition,EvaluationContext)")
@@ -286,11 +286,11 @@ public class SqlCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 		String sqlQuery = "SELECT distinct patient_id FROM encounter WHERE encounter_datetime < :date";
 		Map<String, Object> parameterValues = new HashMap<String, Object>();
 		parameterValues.put("date", new SimpleDateFormat("yyyy-MM-dd").parse("2008-08-18"));
-		
+
 		EvaluationContext evaluationContext = new EvaluationContext();
 		evaluationContext.setParameterValues(parameterValues);
 		SqlCohortDefinition cohortDefinition = new SqlCohortDefinition(sqlQuery);
-		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);		
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, evaluationContext);
 
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(7));

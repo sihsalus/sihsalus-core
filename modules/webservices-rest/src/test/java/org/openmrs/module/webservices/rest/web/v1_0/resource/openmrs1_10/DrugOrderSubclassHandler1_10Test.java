@@ -18,16 +18,16 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class DrugOrderSubclassHandler1_10Test {
-	
+
 	@Test
 	public void getDisplayString_shouldNotFailForDcOrder() throws Exception {
 		Drug drug = new Drug();
 		drug.setName("Aspirin");
-		
+
 		DrugOrder order = new DrugOrder();
 		order.setAction(Order.Action.DISCONTINUE);
 		order.setDrug(drug);
-		
+
 		String actual = DrugOrderSubclassHandler1_10.getDisplay(order);
 		assertThat(actual, is("(DISCONTINUE) Aspirin"));
 	}

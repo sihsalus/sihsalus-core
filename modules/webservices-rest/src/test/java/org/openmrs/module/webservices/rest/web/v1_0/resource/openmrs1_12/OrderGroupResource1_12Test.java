@@ -16,27 +16,27 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_12;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class OrderGroupResource1_12Test extends BaseDelegatingResourceTest<OrderGroupResource1_12, OrderGroup> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_12.ORDER_GROUP_TEST_DATA_SET);
 	}
-	
+
 	@Override
 	public OrderGroup newObject() {
 		return Context.getOrderService().getOrderGroupByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "1234 - John Doe - Order_Set_1";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_12.ORDER_GROUP_UUID;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -49,7 +49,7 @@ public class OrderGroupResource1_12Test extends BaseDelegatingResourceTest<Order
 		assertPropPresent("orderSet");
 		assertPropNotPresent("auditInfo");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -62,5 +62,5 @@ public class OrderGroupResource1_12Test extends BaseDelegatingResourceTest<Order
 		assertPropPresent("orderSet");
 		assertPropPresent("auditInfo");
 	}
-	
+
 }

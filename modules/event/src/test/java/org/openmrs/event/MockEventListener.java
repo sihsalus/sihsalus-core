@@ -28,27 +28,27 @@ import org.openmrs.event.Event.Action;
  * A Test Event Listener that just keeps counts of all created, updated and deleted items
  */
 public class MockEventListener implements EventListener {
-	
+
 	private int createdCount = 0;
-	
+
 	private int updatedCount = 0;
-	
+
 	private int deletedCount = 0;
-	
+
 	private CountDownLatch latch;
-	
+
 	/**
 	 * The count should be set to the number of expected events.
-	 * 
+	 *
 	 * @param expectedEventsCount
 	 */
 	public MockEventListener(int expectedEventsCount) {
 		latch = new CountDownLatch(expectedEventsCount);
 	}
-	
+
 	/**
 	 * Releases the old counter and sets a new one.
-	 * 
+	 *
 	 * @param expectedEventsCount
 	 */
 	public void setExpectedEventsCount(int expectedEventsCount) {
@@ -57,19 +57,19 @@ public class MockEventListener implements EventListener {
 		}
 		latch = new CountDownLatch(expectedEventsCount);
 	}
-	
+
 	/**
 	 * Waits for events for at most 2 seconds.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 */
 	public void waitForEvents() throws InterruptedException {
 		waitForEvents(2, TimeUnit.SECONDS);
 	}
-	
+
 	/**
 	 * Allows to wait for events.
-	 * 
+	 *
 	 * @param timeout
 	 * @param unit
 	 * @throws InterruptedException
@@ -77,49 +77,49 @@ public class MockEventListener implements EventListener {
 	public void waitForEvents(long timeout, TimeUnit unit) throws InterruptedException {
 		latch.await(timeout, unit);
 	}
-	
+
 	/**
 	 * @return the createdCount
 	 */
 	public int getCreatedCount() {
 		return createdCount;
 	}
-	
+
 	/**
 	 * @param createdCount the createdCount to set
 	 */
 	public void setCreatedCount(int createdCount) {
 		this.createdCount = createdCount;
 	}
-	
+
 	/**
 	 * @return the updatedCount
 	 */
 	public int getUpdatedCount() {
 		return updatedCount;
 	}
-	
+
 	/**
 	 * @param updatedCount the updatedCount to set
 	 */
 	public void setUpdatedCount(int updatedCount) {
 		this.updatedCount = updatedCount;
 	}
-	
+
 	/**
 	 * @return the deletedCount
 	 */
 	public int getDeletedCount() {
 		return deletedCount;
 	}
-	
+
 	/**
 	 * @param deletedCount the deletedCount to set
 	 */
 	public void setDeletedCount(int deletedCount) {
 		this.deletedCount = deletedCount;
 	}
-	
+
 	/**
 	 * @see javax.jms.MessageListener#onMessage(Message)
 	 */
@@ -133,12 +133,12 @@ public class MockEventListener implements EventListener {
 				updatedCount++;
 			else
 				deletedCount++;
-			
+
 			latch.countDown();
 		}
 		catch (JMSException e) {
 			Assert.fail(e.getMessage());
 		}
 	}
-	
+
 }

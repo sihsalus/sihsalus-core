@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.List;
 
 public class ObservationSearchHandlerTest extends RestControllerTestUtils {
-	
+
 	protected String getURI() {
 		return "obs";
 	}
-	
+
 	@Test
 	public void shouldReturnObsForPatientAndQuestionConcept() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
@@ -35,7 +35,7 @@ public class ObservationSearchHandlerTest extends RestControllerTestUtils {
 		Assertions.assertEquals(1, obs.size());
 		Assertions.assertEquals("e26cea2c-1b9f-4afe-b211-f3ef6c88af6f", PropertyUtils.getProperty(obs.get(0), "uuid"));
 	}
-	
+
 	@Test
 	public void shouldReturnObsForPatientAndQuestionConcepts() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
@@ -50,7 +50,7 @@ public class ObservationSearchHandlerTest extends RestControllerTestUtils {
 		Assertions.assertEquals("2f616900-5e7c-4667-9a7f-dcb260abf1de", PropertyUtils.getProperty(obs.get(1), "uuid"));
 		Assertions.assertEquals("39fb7f47-e80a-4056-9285-bd798be13c63", PropertyUtils.getProperty(obs.get(3), "uuid"));
 	}
-	
+
 	@Test
 	public void shouldReturnObsForPatientAndAnswerConcepts() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
@@ -62,7 +62,7 @@ public class ObservationSearchHandlerTest extends RestControllerTestUtils {
 		// test should sort by order descending
 		Assertions.assertEquals("b6521c32-47b6-47da-9c6f-3673ddfb74f9", PropertyUtils.getProperty(obs.get(0), "uuid"));
 	}
-	
+
 	@Test
 	public void shouldReturnObsForPatientAndQuestionAndAnswerConcepts() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
@@ -75,7 +75,7 @@ public class ObservationSearchHandlerTest extends RestControllerTestUtils {
 		// test should sort by order descending
 		Assertions.assertEquals("b6521c32-47b6-47da-9c6f-3673ddfb74f9", PropertyUtils.getProperty(obs.get(0), "uuid"));
 	}
-	
+
 	@Test
 	public void shouldNotReturnObsForPatientIfQuestionAndAnswerConceptsDontMatch() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
@@ -86,7 +86,7 @@ public class ObservationSearchHandlerTest extends RestControllerTestUtils {
 		List<Object> obs = result.get("results");
 		Assertions.assertEquals(0, obs.size());
 	}
-	
+
 	@Test
 	public void shouldReturnAllObsInObsgroup() throws Exception {
 		executeDataSet("encounterWithObsGroup1_9.xml");
@@ -103,7 +103,7 @@ public class ObservationSearchHandlerTest extends RestControllerTestUtils {
 		Assertions.assertEquals("0d37552a-96cd-11e0-8d6b-9b9415a91465", PropertyUtils.getProperty(obs.get(3), "uuid"));
 		Assertions.assertEquals("11de743c-96cd-11e0-8d6b-9b9415a91465", PropertyUtils.getProperty(obs.get(4), "uuid"));
 	}
-	
+
 	@Test
 	public void shouldReturnObsInObsgroupLimitedByQuestion() throws Exception {
 		executeDataSet("encounterWithObsGroup1_9.xml");

@@ -62,10 +62,10 @@ public class ConvertedPersonDataEvaluatorTest extends BaseModuleContextSensitive
 	@Test
 	@SuppressWarnings("unchecked")
 	public void evaluate_shouldReturnConvertedData() throws Exception {
-		
+
 		EvaluationContext context = new EvaluationContext();
 		context.setBaseCohort(new Cohort("2"));
-		
+
 		AgeDataDefinition d = new AgeDataDefinition();
 		d.setEffectiveDate(DateUtil.getDateTime(2013, 10, 1));
 
@@ -75,9 +75,9 @@ public class ConvertedPersonDataEvaluatorTest extends BaseModuleContextSensitive
 		AgeConverter converter = new AgeConverter();
 		converter.setFormat("{y} years {m} months");
 		cd.addConverter(converter);
-		
+
 		EvaluatedPersonData pd = Context.getService(PersonDataService.class).evaluate(cd, context);
-		
+
 		Object o = pd.getData().get(2);
 		Assert.assertEquals(o, "38 years 5 months");
 	}

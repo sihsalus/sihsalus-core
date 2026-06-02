@@ -27,7 +27,7 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
  */
 @org.openmrs.module.webservices.rest.web.annotation.Resource(name = RestConstants.VERSION_1 + "/animal", order = 1, supportedClass = Animal.class, supportedOpenmrsVersions = { "3.0.*" })
 public class DuplicateNameAndOrderAnimalResource_1_9 extends DelegatingCrudResource<Animal> {
-	
+
 	/**
 	 * @see DelegatingResourceHandler#getResourceVersion()
 	 */
@@ -35,7 +35,7 @@ public class DuplicateNameAndOrderAnimalResource_1_9 extends DelegatingCrudResou
 	public String getResourceVersion() {
 		return "1.9";
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#newDelegate()
 	 */
@@ -43,7 +43,7 @@ public class DuplicateNameAndOrderAnimalResource_1_9 extends DelegatingCrudResou
 	public Animal newDelegate() {
 		return new Animal();
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#save(Object)
 	 */
@@ -51,7 +51,7 @@ public class DuplicateNameAndOrderAnimalResource_1_9 extends DelegatingCrudResou
 	public Animal save(Animal delegate) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#getRepresentationDescription(Representation)
 	 */
@@ -59,7 +59,7 @@ public class DuplicateNameAndOrderAnimalResource_1_9 extends DelegatingCrudResou
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#getByUniqueId(String)
 	 */
@@ -67,7 +67,7 @@ public class DuplicateNameAndOrderAnimalResource_1_9 extends DelegatingCrudResou
 	public Animal getByUniqueId(String uniqueId) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#delete(Object, String, RequestContext)
 	 */
@@ -75,7 +75,7 @@ public class DuplicateNameAndOrderAnimalResource_1_9 extends DelegatingCrudResou
 	protected void delete(Animal delegate, String reason, RequestContext context) throws ResponseException {
 		throw new ResourceDoesNotSupportOperationException();
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#purge(Object, RequestContext)
 	 */

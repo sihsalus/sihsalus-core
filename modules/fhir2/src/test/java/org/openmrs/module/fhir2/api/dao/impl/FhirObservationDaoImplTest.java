@@ -28,51 +28,51 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private static final String OBS_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObservationDaoImplTest_initial_data_suppl.xml";
-	
+
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
-	
+
 	private static final String BAD_OBS_UUID = "121b73a6-e1a4-4424-8610-d5765bf2fdf7";
-	
+
 	private static final String OBS_CONCEPT_ID = "5089";
-	
+
 	@Autowired
 	private FhirObservationDao dao;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(OBS_DATA_XML);
 	}
-	
+
 	@Test
 	public void get_shouldGetObsByUuid() {
 		Obs result = dao.get(OBS_UUID);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(OBS_UUID));
 	}
-	
+
 	@Test
 	public void get_shouldReturnNullIfObsNotFoundByUuid() {
 		Obs result = dao.get(BAD_OBS_UUID);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void search_shouldReturnSearchQuery() {
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
 		codingToken.setValue(OBS_CONCEPT_ID);
 		code.addAnd(codingToken);
-		
+
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
-		
+
 		Collection<Obs> obs = dao.getSearchResults(theParams);
-		
+
 		assertThat(obs, notNullValue());
 	}
-	
+
 }

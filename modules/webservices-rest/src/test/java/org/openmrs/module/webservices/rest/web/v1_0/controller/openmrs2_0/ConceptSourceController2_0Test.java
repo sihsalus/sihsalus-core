@@ -29,14 +29,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests functionality of {@link ConceptSourceController}.
  */
 public class ConceptSourceController2_0Test extends MainResourceControllerTest {
-	
+
 	private ConceptService service;
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getConceptService();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -44,7 +44,7 @@ public class ConceptSourceController2_0Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "conceptsource";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -52,7 +52,7 @@ public class ConceptSourceController2_0Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return service.getAllConceptSources(false).size();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -60,73 +60,73 @@ public class ConceptSourceController2_0Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_8.CONCEPT_SOURCE_UUID;
 	}
-	
+
 	@Test
 	public void shouldGetAConceptSourceByUuid() throws Exception {
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		ConceptSource conceptSource = service.getConceptSourceByUuid(getUuid());
 		Assertions.assertEquals(conceptSource.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertEquals(conceptSource.getName(), PropertyUtils.getProperty(result, "name"));
 		Assertions.assertEquals(conceptSource.getHl7Code(), PropertyUtils.getProperty(result, "hl7Code"));
 		Assertions.assertEquals(conceptSource.getDescription(), PropertyUtils.getProperty(result, "description"));
 	}
-	
+
 	@Test
 	public void shouldGetAConceptSourceByName() throws Exception {
 		final String name = "SNOMED CT";
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + name);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		ConceptSource conceptSource = service.getConceptSourceByName(name);
 		Assertions.assertEquals(conceptSource.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertEquals(conceptSource.getName(), PropertyUtils.getProperty(result, "name"));
 	}
-	
+
 	@Test
 	public void shouldListAllConceptSources() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(result);
 		Assertions.assertEquals(getAllCount(), Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldCreateAConceptSource() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject conceptSource = new SimpleObject();
 		conceptSource.add("name", "test name");
 		conceptSource.add("description", "test description");
-		
+
 		String json = new ObjectMapper().writeValueAsString(conceptSource);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newConceptSource = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(newConceptSource, "uuid"));
 		Assertions.assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldEditAConceptSource() throws Exception {
 		final String newName = "updated name";
 		SimpleObject conceptSource = new SimpleObject();
 		conceptSource.add("name", newName);
-		
+
 		String json = new ObjectMapper().writeValueAsString(conceptSource);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
 		req.setContent(json.getBytes());
 		handle(req);
 		Assertions.assertEquals(newName, service.getConceptSourceByUuid(getUuid()).getName());
 	}
-	
+
 	@Test
 	public void shouldRetireAConceptSource() throws Exception {
 		Assertions.assertEquals(false, service.getConceptSourceByUuid(getUuid()).isRetired());
@@ -138,7 +138,7 @@ public class ConceptSourceController2_0Test extends MainResourceControllerTest {
 		Assertions.assertEquals(true, service.getConceptSourceByUuid(getUuid()).isRetired());
 		Assertions.assertEquals(reason, service.getConceptSourceByUuid(getUuid()).getRetireReason());
 	}
-	
+
 	@Test
 	public void shouldPurgeAConceptSource() throws Exception {
 		Assertions.assertNotNull(service.getConceptSourceByUuid(getUuid()));
@@ -147,16 +147,16 @@ public class ConceptSourceController2_0Test extends MainResourceControllerTest {
 		handle(req);
 		Assertions.assertNull(service.getConceptSourceByUuid(getUuid()));
 	}
-	
+
 	@Test
 	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	@Test
 	public void shouldSearchAConceptSourceIfItMatchesTheQuery() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());

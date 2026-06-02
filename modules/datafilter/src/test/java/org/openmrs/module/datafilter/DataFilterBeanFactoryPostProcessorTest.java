@@ -35,26 +35,26 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.w3c.dom.Document;
 
 public class DataFilterBeanFactoryPostProcessorTest {
-	
+
 	private DataFilterBeanFactoryPostProcessor processor;
-	
+
 	@Mock
 	private ConfigurableListableBeanFactory mockFactory;
-	
+
 	@Mock
 	private BeanDefinition mockBeanDefinition;
-	
+
 	public class MockEntity {
-		
+
 	}
-	
+
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		when(mockFactory.getBeanDefinition(SESSION_FACTORY_BEAN_NAME)).thenReturn(mockBeanDefinition);
 		processor = new DataFilterBeanFactoryPostProcessor();
 	}
-	
+
 	@Test
 	@Ignore
 	public void postProcessBeanFactory_shouldRegisterFiltersToMappingResourceFiles() throws Exception {
@@ -66,21 +66,21 @@ public class DataFilterBeanFactoryPostProcessorTest {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add(CFG_LOC_PROP_NAME, configLocations);
 		when(mockBeanDefinition.getPropertyValues()).thenReturn(propertyValues);
-		
+
 		processor.postProcessBeanFactory(mockFactory);
-		
+
 		Optional<TypedStringValue> dataFilterHbmCfgFile = configLocations.stream()
 		        .filter(loc -> (loc.getValue()).contains("datafilter-" + hbmCfgFile)).findFirst();
 		assertNotNull(dataFilterHbmCfgFile.get().getValue());
-		
+
 		String resource = dataFilterHbmCfgFile.get().getValue();
 		Document doc = getDocumentBuilder().parse(new FileInputStream(resource.substring(5)));
 		assertEquals(6, UtilTest.getCount(doc, "/hibernate-configuration/session-factory/mapping[@file]"));
-		
+
 		Optional<TypedStringValue> dataFilterTestHbmCfgFile = configLocations.stream()
 		        .filter(loc -> (loc.getValue()).contains("datafilter-" + testHbmCfgFile)).findFirst();
 		assertNotNull(dataFilterTestHbmCfgFile.get().getValue());
-		
+
 		resource = dataFilterTestHbmCfgFile.get().getValue();
 		doc = getDocumentBuilder().parse(new FileInputStream(resource.substring(5)));
 		assertTrue(UtilTest.getAttribute(doc, "/hibernate-configuration/session-factory/mapping", "file")
@@ -88,5 +88,5 @@ public class DataFilterBeanFactoryPostProcessorTest {
 		assertNotNull(propertyValues.getPropertyValue("filteredResourcesLocation"));
 		verify(mockBeanDefinition, times(1)).setBeanClassName(DataFilterSessionFactoryBean.class.getName());
 	}
-	
+
 }

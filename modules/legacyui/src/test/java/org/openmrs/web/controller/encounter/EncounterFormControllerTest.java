@@ -23,11 +23,11 @@ import org.springframework.validation.BindException;
 import java.util.List;
 
 public class EncounterFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	protected static final String ENC_INITIAL_DATA_XML = "org/openmrs/api/include/EncounterServiceTest-initialData.xml";
-	
+
 	protected static final String TRANSFER_ENC_DATA_XML = "org/openmrs/api/include/EncounterServiceTest-transferEncounter.xml";
-	
+
 	/**
 	 * @see EncounterFormController#onSubmit(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse, java.lang.Object,
@@ -38,26 +38,26 @@ public class EncounterFormControllerTest extends BaseModuleWebContextSensitiveTe
 	public void onSubmit_shouldSaveANewEncounterRoleObject() throws Exception {
 		executeDataSet(ENC_INITIAL_DATA_XML);
 		executeDataSet(TRANSFER_ENC_DATA_XML);
-		
+
 		EncounterFormController controller = new EncounterFormController();
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter("patientId", "201");
-		
+
 		Encounter encounter = Context.getEncounterService().getEncounter(200);
-		
+
 		Patient oldPatient = encounter.getPatient();
 		Patient newPatient = Context.getPatientService().getPatient(201);
 		Assertions.assertNotEquals(oldPatient, newPatient);
-		
+
 		List<Encounter> newEncounter = Context.getEncounterService().getEncountersByPatientId(newPatient.getPatientId());
 		Assertions.assertEquals(0, newEncounter.size());
-		
+
 		BindException errors = new BindException(encounter, "encounterRole");
-		
+
 		controller.onSubmit(request, response, encounter, errors);
-		
+
 		Assertions.assertEquals(true, encounter.isVoided());
 		newEncounter = Context.getEncounterService().getEncountersByPatientId(newPatient.getPatientId());
 		Assertions.assertEquals(1, newEncounter.size());

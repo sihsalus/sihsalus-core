@@ -56,14 +56,14 @@ public class OrderForVisitDataEvaluatorTest extends BaseModuleContextSensitiveTe
 
 	@Autowired
 	TestDataManager data;
-	
+
 	private Integer expectedOrders;
 	private Integer expectedOrdersWithType;
 
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -91,11 +91,11 @@ public class OrderForVisitDataEvaluatorTest extends BaseModuleContextSensitiveTe
 		encounter6.setVisit(visit1);
 
 		expectedOrders = 4;
-		
+
 		// Set Order Type 1 to the Order 3
 		OrderType type1 = orderService.getOrderType(1);
 		orderService.getOrder(3).setOrderType(type1);
-		
+
 		expectedOrdersWithType = 1;
 
 	}
@@ -107,11 +107,11 @@ public class OrderForVisitDataEvaluatorTest extends BaseModuleContextSensitiveTe
 		Encounter encounter6 = encounterService.getEncounter(6);
 		encounter6.setVisit(visit1);
 
-		expectedOrders = 11;  
-		
+		expectedOrders = 11;
+
 		expectedOrdersWithType = 8;
 	}
-	
+
 	/**
 	 * @see OrderForVisitDataEvaluator#evaluate(VisitDataDefinition,EvaluationContext)
 	 * @verifies return the orders that match the passed definition configuration

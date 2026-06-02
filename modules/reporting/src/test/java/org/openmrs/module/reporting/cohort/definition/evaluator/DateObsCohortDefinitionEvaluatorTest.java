@@ -32,16 +32,16 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 
 public class DateObsCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link DateObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -65,12 +65,12 @@ public class DateObsCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 
 	/**
      * @see {@link DateObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
-     * 
+     *
      */
     @Test
     @Verifies(value = "should find nobody if no patients match", method = "evaluate(CohortDefinition,EvaluationContext)")
     public void evaluate_shouldFindNobodyIfNoPatientsMatch() throws Exception {
-    	DateObsCohortDefinition cd = new DateObsCohortDefinition();
+	DateObsCohortDefinition cd = new DateObsCohortDefinition();
 		cd.setTimeModifier(TimeModifier.ANY);
 		cd.setQuestion(new Concept(20));
 		cd.setOnOrAfter(DateUtil.getDateTime(2008, 8, 15));
@@ -89,20 +89,20 @@ public class DateObsCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
     @Test
     @Verifies(value = "should find patients with obs within the specified time frame", method = "evaluate(CohortDefinition,EvaluationContext)")
     public void evaluate_shouldReturnPatientsWithObsWithinTheSpecifiedTimeframe() throws Exception {
-		
-    	NumericObsCohortDefinition cd = new NumericObsCohortDefinition();
+
+	NumericObsCohortDefinition cd = new NumericObsCohortDefinition();
 		cd.setTimeModifier(TimeModifier.ANY);
 		cd.setQuestion(new Concept(5089));
-		
+
 		// There should be 4 patients with observations on any date
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(4, c.size());
-		
+
 		// 3 patients have observations on or after 2009-08-19
 		cd.setOnOrAfter(DateUtil.getDateTime(2009, 8, 19, 0, 0, 0, 0));
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(3, c.size());
-		
+
 		// Only 2 patients have any observations on or after 2009-08-19 with a non zero time
 		cd.setOnOrAfter(DateUtil.getDateTime(2009, 8, 19, 0, 0, 0, 7));
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
@@ -113,19 +113,19 @@ public class DateObsCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 		cd.setOnOrBefore(DateUtil.getDateTime(2009, 9, 19, 0, 0, 0, 0));
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(4, c.size());
-		
+
 		// One patient has an observation on 2009-09-19 between 6am and noon
 		cd.setOnOrAfter(DateUtil.getDateTime(2009, 9, 19, 6, 0, 0, 0));
 		cd.setOnOrBefore(DateUtil.getDateTime(2009, 9, 19, 12, 0, 0, 0));
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(1, c.size());
-		
+
 		// No patients have observations on 2009-09-19 between 6am and 9am
 		cd.setOnOrAfter(DateUtil.getDateTime(2009, 9, 19, 6, 0, 0, 0));
 		cd.setOnOrBefore(DateUtil.getDateTime(2009, 9, 19, 9, 0, 0, 0));
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(0, c.size());
-		
+
 		// No patients have observations on 2009-09-19 between 12pm and 6pm
 		cd.setOnOrAfter(DateUtil.getDateTime(2009, 9, 19, 12, 0, 0, 0));
 		cd.setOnOrBefore(DateUtil.getDateTime(2009, 9, 19, 18, 0, 0, 0));

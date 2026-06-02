@@ -27,48 +27,48 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a fieldType
  */
 public class FieldTypeShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldFieldTypeShortSerialization() throws Exception {
-		
+
 		//prepare the necessary data
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/FieldTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		Field f = Context.getFormService().getField(1);
-		
+
 		String xmlOutput = Context.getSerializationService().serialize(f, XStreamShortSerializer.class);
 		//should only serialize "uuid"
 		XMLAssert.assertXpathEvaluatesTo("abf16b7d-39a5-4911-89da-0eefbfef7cb4", "/field/fieldType/@uuid", xmlOutput);
 		//with short serialization, the "fieldType" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/field/fieldType/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldFieldTypeShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "FieldTypeShortSerializationTest.xml" here 
+		 * We also need to use the "FieldTypeShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/FieldTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<field id=\"1\" uuid=\"db016b7d-39a5-4911-89da-0eefbfef7cb2\" retired=\"false\">\n");
@@ -84,7 +84,7 @@ public class FieldTypeShortSerializationTest extends BaseModuleContextSensitiveT
 		xmlBuilder.append("  <selectMultiple>false</selectMultiple>\n");
 		xmlBuilder.append("  <answers id=\"6\"/>\n");
 		xmlBuilder.append("</field>\n");
-		
+
 		Field f = Context.getSerializationService().deserialize(xmlBuilder.toString(), Field.class,
 		    XStreamShortSerializer.class);
 		assertEquals("abf16b7d-39a5-4911-89da-0eefbfef7cb4", f.getFieldType().getUuid());

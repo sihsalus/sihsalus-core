@@ -12,5 +12,5 @@ package org.openmrs.module.fhir2.providers.r3;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
 public abstract class BaseFhirR3ProvenanceResourceTest<T extends org.hl7.fhir.r4.model.DomainResource> extends BaseFhirProvenanceResourceTest<T> {
-	
+
 }

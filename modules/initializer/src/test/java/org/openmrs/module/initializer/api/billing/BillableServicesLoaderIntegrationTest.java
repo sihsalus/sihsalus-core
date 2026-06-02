@@ -22,24 +22,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class BillableServicesLoaderIntegrationTest extends DomainBaseModuleContextSensitive_2_7_Test {
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService conceptService;
-	
+
 	@Autowired
 	private BillableServicesLoader loader;
-	
+
 	@Autowired
 	private BillableServiceService billableServiceService;
-	
+
 	@Before
 	public void setup() {
 		executeDataSet("testdata/test-concepts-2.7.xml");
 		{
 			// To be edited
 			Concept concept = conceptService.getConceptByUuid("3f6f6c92-8d5c-4a9e-bb1c-d3e00e4f8b71");
-			
+
 			BillableService service = new BillableService();
 			service.setUuid("a0f7d8a1-4fa2-418c-aa8a-9b358f43d605");
 			service.setName("Orthopedic Therapy");
@@ -48,11 +48,11 @@ public class BillableServicesLoaderIntegrationTest extends DomainBaseModuleConte
 			service.setServiceStatus(BillableServiceStatus.ENABLED);
 			billableServiceService.saveBillableService(service);
 		}
-		
+
 		{
 			// To be retired
 			Concept concept = conceptService.getConceptByUuid("550e8400-e29b-41d4-a716-446655440000");
-			
+
 			BillableService service = new BillableService();
 			service.setUuid("16435ab4-27c3-4d91-b21e-52819bd654d8");
 			service.setName("Nutrition");
@@ -64,12 +64,12 @@ public class BillableServicesLoaderIntegrationTest extends DomainBaseModuleConte
 			billableServiceService.saveBillableService(service);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadBillableServicesAccordingToCsvFiles() {
 		// Replay
 		loader.load();
-		
+
 		// Verify creation
 		{
 			BillableService service = billableServiceService
@@ -81,7 +81,7 @@ public class BillableServicesLoaderIntegrationTest extends DomainBaseModuleConte
 			    service.getConcept().getId());
 			Assert.assertEquals(BillableServiceStatus.ENABLED, service.getServiceStatus());
 		}
-		
+
 		// Verify edition
 		{
 			BillableService service = billableServiceService
@@ -93,13 +93,13 @@ public class BillableServicesLoaderIntegrationTest extends DomainBaseModuleConte
 			    service.getConcept().getId());
 			Assert.assertEquals(BillableServiceStatus.DISABLED, service.getServiceStatus());
 		}
-		
+
 		// Verify retirement
 		{
 			BillableService service = billableServiceService
 			        .getBillableServiceByUuid("16435ab4-27c3-4d91-b21e-52819bd654d8");
 			Assert.assertTrue(service.getRetired());
-			
+
 		}
 	}
 }

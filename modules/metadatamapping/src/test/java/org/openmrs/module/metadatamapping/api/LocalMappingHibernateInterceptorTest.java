@@ -40,32 +40,32 @@ import static org.junit.Assert.assertNotNull;
  * Tests {@link LocalMappingHibernateInterceptor}
  */
 public class LocalMappingHibernateInterceptorTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("metadatamapping.MetadataMappingService")
 	private MetadataMappingService service;
-	
+
 	@Autowired
 	@Qualifier("adminService")
 	private AdministrationService adminService;
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService conceptService;
-	
+
 	private ConceptSource localConceptSource;
-	
+
 	@Before
 	public void setupLocalConceptSource() {
 		localConceptSource = new ConceptSource();
 		localConceptSource.setName("my-dict");
 		localConceptSource.setDescription("Description");
 		conceptService.saveConceptSource(localConceptSource);
-		
+
 		adminService.saveGlobalProperty(new GlobalProperty(MetadataMapping.GP_LOCAL_SOURCE_UUID, localConceptSource
 		        .getUuid()));
 	}
-	
+
 	@Test
 	public void shouldRetireConceptReferenceTermIfConceptPurged() {
 		//given
@@ -73,67 +73,67 @@ public class LocalMappingHibernateInterceptorTest extends BaseModuleContextSensi
 		concept.setConceptClass(conceptService.getConceptClass(1));
 		concept.setDatatype(conceptService.getConceptDatatype(1));
 		concept.addName(new ConceptName("my-dict-concept", Locale.ENGLISH));
-		
+
 		//description(s)
 		ConceptDescription description = new ConceptDescription();
 		assertNotNull(description);
 		description.setDescription("my-dict-concept-description");
-		
+
 		Set<ConceptDescription> descriptions = new HashSet<ConceptDescription>();
 		descriptions.add(description);
-		
+
 		concept.setDescriptions(descriptions);
 		conceptService.saveConcept(concept);
 		Integer id = concept.getId();
-		
+
 		service.addLocalMappingToConcept(concept);
-		
+
 		ConceptReferenceTerm term = conceptService.getConceptReferenceTermByCode(id.toString(), localConceptSource);
 		Assert.assertFalse(term.isRetired());
-		
+
 		//when
 		conceptService.purgeConcept(concept);
-		
+
 		//then
 		term = conceptService.getConceptReferenceTermByCode(id.toString(), localConceptSource);
 		Assert.assertTrue(term.isRetired());
 	}
-	
+
 	@Test
 	public void shouldRetireConceptReferenceTermIfConceptRetired() {
 		//given
 		Concept concept = conceptService.getConcept(3);
-		
+
 		service.addLocalMappingToConcept(concept);
-		
+
 		ConceptReferenceTerm term = conceptService.getConceptReferenceTermByCode("3", localConceptSource);
 		Assert.assertFalse(term.isRetired());
-		
+
 		//when
 		conceptService.retireConcept(concept, "Testing...");
-		
+
 		//then
 		term = conceptService.getConceptReferenceTermByCode("3", localConceptSource);
 		Assert.assertTrue(term.isRetired());
 	}
-	
+
 	@Test
 	public void shouldUnretireConceptReferenceTermIfConceptUnretired() {
 		//given
 		Concept concept = conceptService.getConcept(3);
 		conceptService.retireConcept(concept, "Testing...");
-		
+
 		service.addLocalMappingToConcept(concept);
-		
+
 		ConceptReferenceTerm term = conceptService.getConceptReferenceTermByCode("3", localConceptSource);
 		Assert.assertTrue(term.isRetired());
-		
+
 		//when
 		concept.setRetired(false);
 		concept.setRetiredBy(null);
 		concept.setRetireReason(null);
 		conceptService.saveConcept(concept);
-		
+
 		//then
 		term = conceptService.getConceptReferenceTermByCode("3", localConceptSource);
 		Assert.assertFalse(term.isRetired());

@@ -28,7 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
  * Tests the {@link FieldFormController} class.
  */
 public class FieldFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see FieldFormController#formBackingObject(HttpServletRequest)
 	 */
@@ -39,18 +39,18 @@ public class FieldFormControllerTest extends BaseModuleWebContextSensitiveTest {
 	public void formBackingObject_shouldGetField() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		request.setParameter("fieldId", "1");
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
-		
+
 		FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
-		
+
 		ModelAndView modelAndView = controller.handleRequest(request, response);
-		
+
 		// make sure there is a "userId" filled in on the concept
 		Field command = (Field) modelAndView.getModel().get("field");
 		Assertions.assertNotNull(command.getFieldId());
 	}
-	
+
 	/**
 	 * @see FieldFormController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
@@ -58,18 +58,18 @@ public class FieldFormControllerTest extends BaseModuleWebContextSensitiveTest {
 	@Verifies(value = "should not fail on field answers", method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
 	public void onSubmit_shouldNotFailOnFieldAnswers() throws Exception {
 		final String FIELD_ID = "1";
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		request.setParameter("fieldId", FIELD_ID);
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
 		FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
 		controller.handleRequest(request, response);
-		
+
 		Context.closeSession();
 		Context.openSession();
 		authenticate();
-		
+
 		request = new MockHttpServletRequest("POST", "");
 		response = new MockHttpServletResponse();
 		request.setParameter("fieldId", FIELD_ID);
@@ -79,18 +79,18 @@ public class FieldFormControllerTest extends BaseModuleWebContextSensitiveTest {
 		request.setParameter("name", "Some concept");
 		request.setParameter("conceptId", "3");
 		request.setParameter("action", "save");
-		
+
 		controller.handleRequest(request, response);
 	}
-	
+
 	@Test
 	@Verifies(value = "should purge field", method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
 	public void onSubmit_shouldPurgeField() throws Exception {
 		final String FIELD_ID = "1";
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
 		FieldFormController controller = (FieldFormController) applicationContext.getBean("fieldForm");
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "");
 		response = new MockHttpServletResponse();
 		request.setParameter("fieldId", FIELD_ID);
@@ -100,9 +100,9 @@ public class FieldFormControllerTest extends BaseModuleWebContextSensitiveTest {
 		request.setParameter("name", "Some concept");
 		request.setParameter("conceptId", "3");
 		request.setParameter("action", Context.getMessageSourceService().getMessage("general.delete"));
-		
+
 		controller.handleRequest(request, response);
-		
+
 		Assertions.assertNull(Context.getFormService().getField(Integer.valueOf(FIELD_ID)));
 	}
 }

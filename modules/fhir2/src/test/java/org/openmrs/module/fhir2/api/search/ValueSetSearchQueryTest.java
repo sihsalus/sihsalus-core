@@ -36,42 +36,42 @@ import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ValueSetSearchQueryTest extends BaseFhirContextSensitiveTest {
-	
+
 	private static final String CONCEPT_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirConceptDaoImplTest_initial_data.xml";
-	
+
 	private static final String ROOT_CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
-	
+
 	private static final String ROOT_CONCEPT_NAME = "FOOD CONSTRUCT";
-	
+
 	private static final int START_INDEX = 0;
-	
+
 	private static final int END_INDEX = 10;
-	
+
 	@Autowired
 	private FhirConceptDao dao;
-	
+
 	@Autowired
 	private ValueSetTranslator translator;
-	
+
 	@Autowired
 	private SearchQueryInclude<ValueSet> searchQueryInclude;
-	
+
 	@Autowired
 	SearchQuery<Concept, ValueSet, FhirConceptDao, ValueSetTranslator, SearchQueryInclude<ValueSet>> searchQuery;
-	
+
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
-	
+
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(CONCEPT_INITIAL_DATA_XML);
 	}
-	
+
 	@Test
 	public void searchForConceptSets_shouldSearchForConceptSetsByTitle() {
 		StringAndListParam root_concept = new StringAndListParam()
@@ -79,15 +79,15 @@ public class ValueSetSearchQueryTest extends BaseFhirContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER,
 		    root_concept);
 		IBundleProvider results = search(theParams);
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((ValueSet) resultList.iterator().next()).getId(), equalTo(ROOT_CONCEPT_UUID));
 	}
-	
+
 	@Test
 	public void searchForConceptSets_shouldReturnEmptyListOfValueSet() {
 		StringAndListParam root_concept = new StringAndListParam()
@@ -95,9 +95,9 @@ public class ValueSetSearchQueryTest extends BaseFhirContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER,
 		    root_concept);
 		IBundleProvider results = search(theParams);
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
 	}

@@ -34,18 +34,18 @@ import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 // we intentionally have unnecessary stubbings for this class when testing the X-Forwarded headers
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class OpenmrsFhirAddressStrategyTest {
-	
+
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
-	
+
 	@Mock
 	private ServletContext servletContext;
-	
+
 	@Mock
 	private HttpServletRequest httpServletRequest;
-	
+
 	private OpenmrsFhirAddressStrategy fhirAddressStrategy;
-	
+
 	@Before
 	public void setup() {
 		fhirAddressStrategy = new OpenmrsFhirAddressStrategy();
@@ -53,37 +53,37 @@ public class OpenmrsFhirAddressStrategyTest {
 		new FhirGlobalPropertyHolder()
 		        .globalPropertyChanged(new GlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, ""));
 	}
-	
+
 	@After
 	public void after() {
 		FhirGlobalPropertyHolder.reset();
 		;
 	}
-	
+
 	@Test
 	public void shouldDetermineServerBaseFromGlobalProperty() {
 		new FhirGlobalPropertyHolder().globalPropertyChanged(
 		    new GlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, "http://my.openmrs.org/ws/fhir2/"));
 		when(httpServletRequest.getContextPath()).thenReturn("/");
 		when(httpServletRequest.getRequestURI()).thenReturn("/ws/fhir2/R4");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, startsWith("http://my.openmrs.org/ws/fhir2/"));
 	}
-	
+
 	@Test
 	public void shouldDetermineServerBaseFromGlobalPropertyWithoutTrailingSlash() {
 		new FhirGlobalPropertyHolder().globalPropertyChanged(
 		    new GlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, "http://my.openmrs.org/ws/fhir2"));
 		when(httpServletRequest.getContextPath()).thenReturn("/");
 		when(httpServletRequest.getRequestURI()).thenReturn("/ws/fhir2/R4");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, startsWith("http://my.openmrs.org/ws/fhir2/"));
 	}
-	
+
 	@Test
 	public void shouldReturnAppropriateBaseUrlWithContextPath() {
 		when(httpServletRequest.getScheme()).thenReturn("http");
@@ -91,12 +91,12 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(80);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, equalTo("http://localhost/openmrs/ws/fhir2/R4"));
 	}
-	
+
 	@Test
 	public void shouldDetermineServerBaseForR3() {
 		when(httpServletRequest.getScheme()).thenReturn("http");
@@ -104,12 +104,12 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(80);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R3/Person");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, endsWith("/R3"));
 	}
-	
+
 	@Test
 	public void shouldDetermineServerBaseForR4() {
 		when(httpServletRequest.getScheme()).thenReturn("http");
@@ -117,12 +117,12 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(80);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, endsWith("/R4"));
 	}
-	
+
 	@Test
 	public void shouldOmitDefaultPortForHttp() {
 		when(httpServletRequest.getScheme()).thenReturn("http");
@@ -130,12 +130,12 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(80);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, not(containsString(":80/")));
 	}
-	
+
 	@Test
 	public void shouldHaveNonDefaultPortForHttp() {
 		when(httpServletRequest.getScheme()).thenReturn("http");
@@ -143,12 +143,12 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(8080);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, containsString(":8080/"));
 	}
-	
+
 	@Test
 	public void shouldOmitDefaultPortForHttps() {
 		when(httpServletRequest.getScheme()).thenReturn("https");
@@ -156,12 +156,12 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(443);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, not(containsString(":443/")));
 	}
-	
+
 	@Test
 	public void shouldHaveNonDefaultPortForHttps() {
 		when(httpServletRequest.getScheme()).thenReturn("https");
@@ -169,12 +169,12 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(8443);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, containsString(":8443/"));
 	}
-	
+
 	@Test
 	public void shouldProperlyHandleStandardProxyHeaders() {
 		when(httpServletRequest.getHeader("X-Forwarded-Proto")).thenReturn("https");
@@ -185,9 +185,9 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(8080);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
-		
+
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
-		
+
 		assertThat(serverBase, equalTo("https://my.openmrs.org:4443/openmrs/ws/fhir2/R4"));
 	}
 }

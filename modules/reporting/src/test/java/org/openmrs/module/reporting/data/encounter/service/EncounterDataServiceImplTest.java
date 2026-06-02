@@ -25,22 +25,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * Test the EncounterDataServiceImpl
  */
 public class EncounterDataServiceImplTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see EncounterDataServiceImpl#evaluate(EncounterData,EvaluationContext)
 	 * @verifies evaluate an encounter query
@@ -51,7 +51,7 @@ public class EncounterDataServiceImplTest extends BaseModuleContextSensitiveTest
 		EncounterData data = Context.getService(EncounterDataService.class).evaluate(definition, new EvaluationContext());
 		Assert.assertNotNull(data);
 	}
-	
+
 	/**
 	 * @see EncounterDataServiceImpl#saveDefinition(EncounterData)
 	 * @verifies save an encounter query
@@ -66,5 +66,5 @@ public class EncounterDataServiceImplTest extends BaseModuleContextSensitiveTest
 		EncounterDataDefinition loadedDefinition = Context.getService(EncounterDataService.class).getDefinitionByUuid(definition.getUuid());
 		Assert.assertEquals(definition, loadedDefinition);
 	}
-	
+
 }

@@ -30,42 +30,42 @@ import org.openmrs.test.Verifies;
  * Testing the utility methods within PeriodIndicatorReportUtil
  */
 public class IndicatorUtilTest {
-	
+
 	protected Log log = LogFactory.getLog(this.getClass());
-	
+
 	/**
      * @see {@link PeriodIndicatorReportUtil#compileColumnDimensionOptions(Map)}
      */
     @Test
     @Verifies(value = "return all combinations of dimension options", method = "compileColumnDimensionOptions(Map)")
-	public void compileColumnDimensionOptions_shouldReturnAllCombinationsOfDimensionOptions() { 
-		
+	public void compileColumnDimensionOptions_shouldReturnAllCombinationsOfDimensionOptions() {
+
 		CohortIndicatorDataSetDefinition dsd = new CohortIndicatorDataSetDefinition();
-		
+
 		CohortDefinitionDimension ages = new CohortDefinitionDimension();
 		ages.addCohortDefinition("Adult", null);
 		ages.addCohortDefinition("Child", null);
 		ages.addCohortDefinition("UnknownAge", null);
 		dsd.addDimension("Age", new Mapped<CohortDefinitionDimension>(ages, null));
-		
+
 		CohortDefinitionDimension genders = new CohortDefinitionDimension();
 		genders.addCohortDefinition("Male", null);
 		genders.addCohortDefinition("Female", null);
 		dsd.addDimension("Gender", new Mapped<CohortDefinitionDimension>(genders, null));
-		
+
 		CohortDefinitionDimension locations = new CohortDefinitionDimension();
 		locations.addCohortDefinition("Boston", null);
 		locations.addCohortDefinition("Indianapolis", null);
 		locations.addCohortDefinition("Rwinkwavu", null);
 		locations.addCohortDefinition("Eldoret", null);
 		dsd.addDimension("Location", new Mapped<CohortDefinitionDimension>(locations, null));
-		
+
 		{
 			Map<String, List<String>> toInclude = new LinkedHashMap<String, List<String>>();
 			toInclude.put("Age", Arrays.asList("Adult", "Child", "Unknown"));
 			toInclude.put("Gender", Arrays.asList("Male", "Female"));
 			toInclude.put("Location", Arrays.asList("Boston", "Indianapolis", "Rwinkwavu", "Eldoret"));
-	
+
 			Set<String> options = new HashSet<String>(IndicatorUtil.compileColumnDimensionOptions(toInclude));
 			Assert.assertEquals(59, options.size());
 		}
@@ -75,16 +75,16 @@ public class IndicatorUtilTest {
 			toInclude.put("Age", Arrays.asList("Adult", "Child"));
 			toInclude.put("Gender", Arrays.asList("Male", "Female"));
 			toInclude.put("Location", Arrays.asList("Boston", "Rwinkwavu"));
-	
+
 			Set<String> options = new HashSet<String>(IndicatorUtil.compileColumnDimensionOptions(toInclude));
 			Assert.assertEquals(26, options.size());
 		}
-		
+
 		{
 			Map<String, List<String>> toInclude = new LinkedHashMap<String, List<String>>();
 			toInclude.put("Age", Arrays.asList("Adult", "Child"));
 			toInclude.put("Gender", Arrays.asList("Male", "Female"));
-	
+
 			Set<String> options = new HashSet<String>(IndicatorUtil.compileColumnDimensionOptions(toInclude));
 			Assert.assertEquals(8, options.size());
 		}

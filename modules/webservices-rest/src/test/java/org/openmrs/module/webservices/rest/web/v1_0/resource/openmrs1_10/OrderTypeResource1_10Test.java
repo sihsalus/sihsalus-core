@@ -15,22 +15,22 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_10;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class OrderTypeResource1_10Test extends BaseDelegatingResourceTest<OrderTypeResource1_10, OrderType> {
-	
+
 	@Override
 	public OrderType newObject() {
 		return Context.getOrderService().getOrderTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Test order";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_10.ORDER_TYPE_UUID;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -42,7 +42,7 @@ public class OrderTypeResource1_10Test extends BaseDelegatingResourceTest<OrderT
 		assertPropPresent("conceptClasses");
 		assertPropNotPresent("auditInfo");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -53,7 +53,7 @@ public class OrderTypeResource1_10Test extends BaseDelegatingResourceTest<OrderT
 		assertPropPresent("parent");
 		assertPropPresent("conceptClasses");
 		assertPropPresent("auditInfo");
-		
+
 	}
-	
+
 }

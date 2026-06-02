@@ -26,7 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
  * Tests for the {@link AddPersonController} which handles the Add Person.form page.
  */
 public class AddPersonControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see AddPersonController#formBackingObject(HttpServletRequest)
 	 * @verifies catch an invalid birthdate
@@ -35,19 +35,19 @@ public class AddPersonControllerTest extends BaseModuleWebContextSensitiveTest {
 	public void formBackingObject_shouldCatchAnInvalidBirthdate() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		HttpServletResponse response = new MockHttpServletResponse();
-		
+
 		request.setParameter("addName", "Gayan Perera");
 		request.setParameter("addBirthdate", "03/07/199s");
 		request.setParameter("addGender", "M");
 		request.setParameter("personType", "patient");
 		request.setParameter("viewType", "edit");
-		
+
 		AddPersonController controller = (AddPersonController) applicationContext.getBean("addPerson");
 		ModelAndView mav = controller.handleRequest(request, response);
 		assertNotNull(mav);
 		assertEquals("Person.birthdate.required", mav.getModel().get("errorMessage"));
 	}
-	
+
 	/**
 	 * @see AddPersonController#formBackingObject(HttpServletRequest)
 	 * @verifies catch pass for a valid birthdate
@@ -56,16 +56,16 @@ public class AddPersonControllerTest extends BaseModuleWebContextSensitiveTest {
 	public void formBackingObject_shouldCatchPassForAValidBirthdate() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		HttpServletResponse response = new MockHttpServletResponse();
-		
+
 		request.setParameter("addName", "Gayan Perera");
 		request.setParameter("addBirthdate", "03/07/1990");
 		request.setParameter("addGender", "M");
 		request.setParameter("personType", "patient");
 		request.setParameter("viewType", "edit");
-		
+
 		AddPersonController controller = (AddPersonController) applicationContext.getBean("addPerson");
 		ModelAndView mav = controller.handleRequest(request, response);
-		
+
 		assertNotNull(mav);
 		assertTrue(mav.getModel().isEmpty());
 	}

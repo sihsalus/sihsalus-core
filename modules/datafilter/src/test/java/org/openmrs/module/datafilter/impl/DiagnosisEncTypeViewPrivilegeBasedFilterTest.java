@@ -26,19 +26,19 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DiagnosisEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivilegeBasedFilterTest {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "privilegedEncounters.xml");
 	}
-	
+
 	protected List<Diagnosis> getDiagnoses() {
 		return sessionFactory.getCurrentSession().createCriteria(Diagnosis.class).list();
 	}
-	
+
 	@Test
 	public void getDiagnosis_shouldIncludeDiagnosesLinkedToEncountersThatRequireAPrivilegeAndTheUserHasIt() {
 		reloginAs("dyorke", "test");
@@ -46,14 +46,14 @@ public class DiagnosisEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		int expCount = 0;
 		Collection<Diagnosis> diagnoses = getDiagnoses();
 		assertEquals(expCount, diagnoses.size());
-		
+
 		DataFilterTestUtils.addPrivilege(PRIV_MANAGE_CHEMO_PATIENTS);
 		expCount = 1;
 		diagnoses = getDiagnoses();
 		assertEquals(expCount, diagnoses.size());
 		assertTrue(TestUtil.containsId(diagnoses, 1004));
 	}
-	
+
 	@Test
 	public void getDiagnosis_shouldReturnAllDiagnosesIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -61,7 +61,7 @@ public class DiagnosisEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertEquals(1, diagnoses.size());
 		assertTrue(TestUtil.containsId(diagnoses, 1004));
 	}
-	
+
 	@Test
 	public void getDiagnosis_shouldReturnAllDiagnosesIfEncTypeViewPrivFilteringIsDisabled() {
 		DataFilterTestUtils.disableEncTypeViewPrivilegeFiltering();
@@ -69,5 +69,5 @@ public class DiagnosisEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertEquals(1, diagnoses.size());
 		assertTrue(TestUtil.containsId(diagnoses, 1004));
 	}
-	
+
 }

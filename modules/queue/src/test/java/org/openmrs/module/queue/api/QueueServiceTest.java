@@ -43,31 +43,31 @@ import org.openmrs.module.queue.model.Queue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QueueServiceTest {
-	
+
 	private static final String QUEUE_UUID = "b5ffbb90-86f4-4d9c-8b6c-3713d748ef74";
-	
+
 	private static final String QUEUE_NAME = "Queue test name";
-	
+
 	private static final Integer QUEUE_ID = 123;
-	
+
 	private QueueServiceImpl queueService;
-	
+
 	@Mock
 	private QueueDao dao;
-	
+
 	@Captor
 	ArgumentCaptor<Queue> queueArgumentCaptor;
-	
+
 	@Captor
 	ArgumentCaptor<QueueSearchCriteria> queueSearchCriteriaArgumentCaptor;
-	
+
 	@Before
 	public void setupMocks() {
 		MockitoAnnotations.openMocks(this);
 		queueService = new QueueServiceImpl();
 		queueService.setDao(dao);
 	}
-	
+
 	@Test
 	public void shouldGetByUuid() {
 		Queue queue = mock(Queue.class);
@@ -77,7 +77,7 @@ public class QueueServiceTest {
 		assertThat(result.isPresent(), is(true));
 		result.ifPresent(q -> assertThat(q.getUuid(), is(QUEUE_UUID)));
 	}
-	
+
 	@Test
 	public void shouldGetById() {
 		Queue queue = mock(Queue.class);
@@ -87,7 +87,7 @@ public class QueueServiceTest {
 		assertThat(result.isPresent(), is(true));
 		result.ifPresent(q -> assertThat(q.getId(), is(QUEUE_ID)));
 	}
-	
+
 	@Test
 	public void shouldCreateNewQueue() {
 		Queue queue = mock(Queue.class);
@@ -99,7 +99,7 @@ public class QueueServiceTest {
 		assertThat(result.getUuid(), is(QUEUE_UUID));
 		assertThat(result.getName(), is(QUEUE_NAME));
 	}
-	
+
 	@Test
 	public void shouldRetireQueue() {
 		User user = new User(1);
@@ -118,7 +118,7 @@ public class QueueServiceTest {
 		assertThat(queue.getRetiredBy(), equalTo(user));
 		assertThat(queue.getRetireReason(), equalTo("retireReason"));
 	}
-	
+
 	@Test
 	public void shouldPurgeQueue() {
 		Queue queue = new Queue();
@@ -126,7 +126,7 @@ public class QueueServiceTest {
 		verify(dao).delete(queueArgumentCaptor.capture());
 		assertThat(queueArgumentCaptor.getValue(), equalTo(queue));
 	}
-	
+
 	@Test
 	public void shouldGetAllQueuesByCriteria() {
 		Concept concept1 = new Concept();

@@ -37,19 +37,19 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class RequestProcedureControllerTest extends BaseWebControllerTest {
-	
+
 	private static final String REQUEST_PROCEDURE_DATASET = "testRequestProcedureDataset.xml";
-	
+
 	@InjectMocks
 	private RequestProcedureController controller;
-	
+
 	private RequestProcedureStepService requestProcedureStepService;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		executeDataSet(REQUEST_PROCEDURE_DATASET);
 	}
-	
+
 	private static StudyUpdatePayload getStudyUpdatePayload(RequestProcedure requestProcedure,
                                                             RequestProcedureStep step) {
         StudyUpdatePayload payload = new StudyUpdatePayload();
@@ -91,7 +91,7 @@ public class RequestProcedureControllerTest extends BaseWebControllerTest {
 
         return payload;
     }
-	
+
 	@Test
     @Transactional
     public void testUseRequestProcedures_shouldReturnOnlyScheduledProcedures() throws Exception {
@@ -101,7 +101,7 @@ public class RequestProcedureControllerTest extends BaseWebControllerTest {
         assertTrue("Expected all procedures to be scheduled",
                 requestProcedures.stream().allMatch(rp -> "scheduled".equalsIgnoreCase(rp.getStatus())));
     }
-	
+
 	//	@Test
 	//    @Transactional
 	//    public void testUpdateRequestStatus_shouldMarkProcedureCompletedIfAllStepsCompleted() throws Exception {
@@ -150,33 +150,33 @@ public class RequestProcedureControllerTest extends BaseWebControllerTest {
 	//        }
 	//    }
 	//
-	
+
 	@Test
 	@Transactional
 	public void testUpdateProcedureStepStatus_InvalidStepId() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		ResponseEntity<?> result = controller.updateProcedureStepStatus(0, "COMPLETED", request, response);
 		assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
 		assertEquals("step ID is missing", result.getBody());
 	}
-	
+
 	@Test
 	@Transactional
 	public void testUpdateProcedureStepStatus_ValidStep() {
 		executeDataSet("testRequestProcedureStepDataset.xml");
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		RequestProcedureStepService service = Context.getService(RequestProcedureStepService.class);
 		RequestProcedureStep step = service.getProcedureStep(1);
 		ResponseEntity<?> result = controller.updateProcedureStepStatus(1, "rejected", request, response);
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals("rejected", step.getPerformedProcedureStepStatus());
 	}
-	
+
 	@Test
 	@Transactional
 	public void testSaveRequestProcedure_shouldCreateNewProcedure() {
@@ -204,7 +204,7 @@ public class RequestProcedureControllerTest extends BaseWebControllerTest {
 				&& "Dr. House".equals(rp.getRequestingPhysician()));
 		assertTrue("New request procedure should be created", found);
 	}
-	
+
 	@Test
 	@Transactional
 	public void testSaveRequestProcedureStep_shouldCreateStepAndUpdateRequest() throws Exception {
@@ -248,7 +248,7 @@ public class RequestProcedureControllerTest extends BaseWebControllerTest {
 		assertEquals("progress", updatedRequest.getStatus());
 		assertEquals(4, steps.size());
 	}
-	
+
 	@Test
 	@Transactional
 	public void testUseRequestsByPatient_shouldReturnAllRequestsForPatient() throws Exception {
@@ -281,7 +281,7 @@ public class RequestProcedureControllerTest extends BaseWebControllerTest {
 		assertEquals("scheduled", requestList.get(2).getStatus());
 		assertEquals("testInstanceUID333", requestList.get(2).getStudyInstanceUID());
 	}
-	
+
 	@Test
 	@Transactional
 	public void testUseProcedureStep_shouldReturnAllStepsForRequest() throws Exception {
@@ -309,63 +309,63 @@ public class RequestProcedureControllerTest extends BaseWebControllerTest {
 		assertEquals(requestProcedure.getId(), stepList.get(0).getId());
 		assertEquals("Head Scan", stepList.get(0).getRequestedProcedureDescription());
 	}
-	
+
 	@Test
 	@Transactional
 	public void testDeleteRequest_shouldDeleteProcedureAndSteps() throws Exception {
 		executeDataSet("testRequestProcedureStepDataset.xml");
-		
+
 		// Fetch an existing request procedure
 		RequestProcedureService requestProcedureService = Context.getService(RequestProcedureService.class);
 		RequestProcedureStepService requestProcedureStepService = Context.getService(RequestProcedureStepService.class);
-		
+
 		RequestProcedure requestProcedure = requestProcedureService.getRequestProcedure(1);
 		assertNotNull(requestProcedure);
-		
+
 		List<RequestProcedureStep> stepsBefore = requestProcedureStepService.getAllStepByRequestProcedure(requestProcedure);
 		assertFalse(stepsBefore.isEmpty());
-		
+
 		MockHttpServletRequest request = newDeleteRequest("/rest/v1/worklist/request", new BaseWebControllerTest.Parameter(
 		        "requestId", String.valueOf(requestProcedure.getId())));
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		ResponseEntity<Object> result = controller.deleteRequest(requestProcedure.getId(), request, response);
-		
+
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		
+
 		List<RequestProcedureStep> stepsAfter = requestProcedureStepService.getAllStepByRequestProcedure(requestProcedure);
 		assertTrue(stepsAfter.isEmpty());
-		
+
 		RequestProcedure deletedRequest = requestProcedureService.getRequestProcedure(requestProcedure.getId());
 		assertNull(deletedRequest);
 	}
-	
+
 	@Test
 	@Transactional
 	public void testDeleteProcedureStep_shouldDeleteStep() throws Exception {
 		executeDataSet("testRequestProcedureStepDataset.xml");
-		
+
 		RequestProcedureService requestProcedureService = Context.getService(RequestProcedureService.class);
 		RequestProcedureStepService requestProcedureStepService = Context.getService(RequestProcedureStepService.class);
-		
+
 		RequestProcedureStep step = requestProcedureStepService.getProcedureStep(1);
 		assertNotNull(step);
-		
+
 		// Ensure step exists before deletion
 		RequestProcedure requestProcedure = step.getRequestProcedure();
 		List<RequestProcedureStep> stepsBefore = requestProcedureStepService.getAllStepByRequestProcedure(requestProcedure);
 		assertTrue(stepsBefore.contains(step));
-		
+
 		MockHttpServletRequest request = newDeleteRequest("/rest/v1/worklist/requeststep",
 		    new BaseWebControllerTest.Parameter("stepId", String.valueOf(step.getId())));
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		ResponseEntity<Object> result = controller.deleteProcedureStep(step.getId(), request, response);
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		
+
 		RequestProcedureStep deletedStep = requestProcedureStepService.getProcedureStep(step.getId());
 		assertNull(deletedStep);
-		
+
 		RequestProcedure remainingRequest = requestProcedureService.getRequestProcedure(requestProcedure.getId());
 		assertNotNull(remainingRequest);
 	}

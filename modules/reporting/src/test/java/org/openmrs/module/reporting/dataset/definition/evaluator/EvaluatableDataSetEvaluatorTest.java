@@ -41,5 +41,5 @@ public class EvaluatableDataSetEvaluatorTest extends BaseModuleContextSensitiveT
 		assertThat(row.getColumnValue("one"), Is.<Object>is(1));
 		assertFalse(iter.hasNext());
 	}
-	
+
 }

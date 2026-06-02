@@ -15,22 +15,22 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.openmrs.module.webservices.rest.web.v1_0.RestTestConstants2_2;
 
 public class OrderResource2_2Test extends BaseDelegatingResourceTest<OrderResource2_2, Order> {
-	
+
 	@Override
 	public Order newObject() {
 		return Context.getOrderService().getOrderByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "CD4 COUNT";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_2.ORDER_UUID;
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#validateFullRepresentation()
 	 */
@@ -40,5 +40,5 @@ public class OrderResource2_2Test extends BaseDelegatingResourceTest<OrderResour
 		assertPropPresent("fulfillerStatus");
 		assertPropPresent("fulfillerComment");
 	}
-	
+
 }

@@ -15,17 +15,17 @@ import org.openmrs.Location;
 import org.openmrs.customdatatype.datatype.MockLocationDatatype;
 
 public class MockLocationFieldGenDatatypeHandler extends BaseMetadataFieldGenDatatypeHandler<MockLocationDatatype, Location> {
-	
+
 	@Override
 	public String getWidgetName() {
 		return null;
 	}
-	
+
 	@Override
 	public Map<String, Object> getWidgetConfiguration() {
 		return null;
 	}
-	
+
 	@Override
 	public void setHandlerConfiguration(String handlerConfig) {
 	}

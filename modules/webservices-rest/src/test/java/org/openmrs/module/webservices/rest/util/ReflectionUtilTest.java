@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ReflectionUtilTest {
-	
+
 	/**
 	 * @verifies find genericInterface on a superclass if clazz does not directly implement it
 	 * @see ReflectionUtil#getParameterizedTypeFromInterface(Class, Class, int)
@@ -33,25 +33,25 @@ public class ReflectionUtilTest {
 		Class<?> expectedClass = ReflectionUtil.getParameterizedTypeFromInterface(DrugOrderSubclassHandler1_10.class,
 		    DelegatingSubclassHandler.class, 0);
 		assertEquals(Order.class, expectedClass);
-		
+
 		expectedClass = ReflectionUtil.getParameterizedTypeFromInterface(DrugOrderSubclassHandler1_10.class,
 		    DelegatingSubclassHandler.class, 1);
 		assertEquals(DrugOrder.class, expectedClass);
 	}
-	
+
 	/**
 	 * @verifies ignore type variables on the declaring interface
 	 * @see ReflectionUtil#getParameterizedTypeFromInterface(Class, Class, int)
 	 */
 	@Test
 	public void getParameterizedTypeFromInterface_shouldIgnoreTypeVariablesOnTheDeclaringInterface() throws Exception {
-		//DelegatingResourceHandler<T> is one of the generic interfaces implemented by 
+		//DelegatingResourceHandler<T> is one of the generic interfaces implemented by
 		//BaseDelegatingResource, once the logic reaches it, the type parameter T has to be ignored
 		Class<?> clazz = ReflectionUtil.getParameterizedTypeFromInterface(BaseDelegatingResource.class,
 		    DelegatingResourceHandler.class, 0);
 		assertNull(clazz);
 	}
-	
+
 	/**
 	 * @verifies not inspect superclasses of the specified genericInterface
 	 * @see ReflectionUtil#getParameterizedTypeFromInterface(Class, Class, int)

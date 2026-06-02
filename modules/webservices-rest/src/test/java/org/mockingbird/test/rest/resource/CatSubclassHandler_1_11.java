@@ -19,5 +19,5 @@ import org.mockingbird.test.Cat;
  */
 @org.openmrs.module.webservices.rest.web.annotation.SubClassHandler(supportedClass = Cat.class, supportedOpenmrsVersions = { "1.11.*" })
 public class CatSubclassHandler_1_11 extends CatSubclassHandler_1_9 {
-	
+
 }

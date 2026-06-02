@@ -21,41 +21,41 @@ import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirEncounterClassMapDaoImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	private FhirEncounterClassMapDaoImpl dao;
-	
+
 	private static final String FHIR_ENCOUNTER_CLASS_MAP_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterClassMapDaoImplTest_initial_data.xml";
-	
+
 	private static final String LOCATION_UUID_WITH_SINGLE_MAPPING = "9356400c-a5a2-4532-8f2b-2361b3446eb8";
-	
+
 	private static final String LOCATION_UUID_WITH_MULTIPLE_MAPPINGS = "167ce20c-4785-4285-9119-d197268f7f4a";
-	
+
 	private static final String LOCATION_UUID_WITH_NO_MAPPING = "non-existent-uuid";
-	
+
 	private static final String EXPECTED_ENCOUNTER_CLASS = "AMB";
-	
+
 	@Before
 	public void setup() throws Exception {
 		dao = new FhirEncounterClassMapDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 		executeDataSet(FHIR_ENCOUNTER_CLASS_MAP_INITIAL_DATA_XML);
 	}
-	
+
 	@Test
 	public void getFhirClass_shouldReturnEncounterClassForLocationWithSingleMapping() {
 		String result = dao.getFhirClass(LOCATION_UUID_WITH_SINGLE_MAPPING);
 		assertThat(result, is(equalTo(EXPECTED_ENCOUNTER_CLASS)));
 	}
-	
+
 	@Test
 	public void getFhirClass_shouldReturnNullForLocationWithNoMapping() {
 		String result = dao.getFhirClass(LOCATION_UUID_WITH_NO_MAPPING);
 		assertThat(result, is(nullValue()));
 	}
-	
+
 	@Test
 	public void getFhirClass_shouldReturnNullForLocationWithMultipleMappings() {
 		String result = dao.getFhirClass(LOCATION_UUID_WITH_MULTIPLE_MAPPINGS);

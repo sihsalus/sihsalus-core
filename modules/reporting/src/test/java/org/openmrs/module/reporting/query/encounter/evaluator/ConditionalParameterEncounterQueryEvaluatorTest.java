@@ -42,7 +42,7 @@ public class ConditionalParameterEncounterQueryEvaluatorTest extends BaseModuleC
 
 	@Autowired
 	EncounterService encounterService;
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
@@ -71,7 +71,7 @@ public class ConditionalParameterEncounterQueryEvaluatorTest extends BaseModuleC
 		cpq.addConditionalQuery("visit", Mapped.mapStraightThrough(q1));
 		cpq.addConditionalQuery("lab", Mapped.mapStraightThrough(q2));
 		cpq.setParameterToCheck("type");
-		
+
 		EvaluationContext context = new EvaluationContext();
 
 		context.addParameterValue("type", "visit");

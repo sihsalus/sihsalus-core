@@ -21,10 +21,10 @@ import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
 
 public class LocationBasedPrefixProviderTest {
-	
+
 	LocationBasedPrefixProvider locationPrefixProvider;
 	UserContext userContext;
-	
+
 	// user context locations
 	Location locationB3;
 	Location locationA3;
@@ -34,15 +34,15 @@ public class LocationBasedPrefixProviderTest {
 	Location locationA2;
 
 	MockedStatic<Context> mockedContext;
-	
+
 	@Before
 	public void setup() {
 		locationPrefixProvider = new LocationBasedPrefixProvider();
-		
+
 		mockedContext = mockStatic(Context.class);
 		userContext = mock(UserContext.class);
 		mockedContext.when(Context::getUserContext).thenReturn(userContext);
-		
+
 		LocationService ls = mock(LocationService.class);
 		AdministrationService as = mock(AdministrationService.class);
 		mockedContext.when(Context::getLocationService).thenReturn(ls);
@@ -57,7 +57,7 @@ public class LocationBasedPrefixProviderTest {
 	public void teardown() {
 		mockedContext.close();
 	}
-	
+
 	@Test
 	public void getValue_shouldReturnPrefixDependingOnLocationInUserContext() {
 		when(userContext.getLocation()).thenReturn(locationB3);
@@ -67,12 +67,12 @@ public class LocationBasedPrefixProviderTest {
 		Assert.assertThat(locationPrefixProvider.getValue(), is("LOC-A2"));
 
 	}
-	
+
 	@Test
 	public void getLocationPrefix_shouldPickTheNearestValidPrefixUpTheTree() {
 		Assert.assertEquals("LOC-A2", locationPrefixProvider.getLocationPrefix(locationA3));
 	}
-	
+
 	@Test
 	public void getLocationPrefix_shouldClimbToTopOfTheTreeAndPickValidPrefixIfOneIsSet() {
 		LocationAttribute locationA2PrefixAtt = locationA2.getActiveAttributes().iterator().next();
@@ -82,7 +82,7 @@ public class LocationBasedPrefixProviderTest {
 		location5PrefixAtt.setValue(" ");
 		Assert.assertEquals("LOC-3", locationPrefixProvider.getLocationPrefix(locationA3));
 	}
-	
+
 	@Test(expected = RuntimeException.class)
 	public void getLocationPrefix_throwAnExceptionIfNoValidPrefixIsFound() {
 		// Invalidate valid prefixes
@@ -90,61 +90,61 @@ public class LocationBasedPrefixProviderTest {
 		location2PrefixAtt.setValue(" ");
 		locationPrefixProvider.getLocationPrefix(location3);
 	}
-	
+
 	@Test
 	public void getLocationPrefixRecursively_shouldPickThePrefixFromCurrentLocationIfOneIsSet() {
 		Assert.assertEquals("LOC-5", locationPrefixProvider.getLocationPrefix(location5));
 	}
-	
+
 	private void setupLocationTree() {
 		LocationAttributeType locationPrefixType = createPrefixAttributeType();
-		
-		Location location1 = new Location(); 
+
+		Location location1 = new Location();
 		Location location2 = new Location();
 		location2.setParentLocation(location1);
-		
-		location3 = new Location(); 
+
+		location3 = new Location();
 		location3.setParentLocation(location2);
 		LocationAttribute location3PrefixAtt = new LocationAttribute();
 		location3PrefixAtt.setAttributeType(locationPrefixType);
 		location3PrefixAtt.setValue("LOC-3");
 		location3.addAttribute(location3PrefixAtt);
-		
+
 		Location location4 = new Location();
 		location4.setParentLocation(location3);
-		
-		location5 = new Location(); 
+
+		location5 = new Location();
 		location5.setParentLocation(location4);
 		LocationAttribute location5PrefixAtt = new LocationAttribute();
 		location5PrefixAtt.setAttributeType(locationPrefixType);
 		location5PrefixAtt.setValue("LOC-5");
 		location5.addAttribute(location5PrefixAtt);
-		
+
 		// First branch
 		Location locationA1 = new Location();
 		location5.addChildLocation(locationA1);
-		
-		locationA2 = new Location(); 
+
+		locationA2 = new Location();
 		locationA2.setParentLocation(locationA1);
 		LocationAttribute locationA2PrefixAtt = new LocationAttribute();
 		locationA2PrefixAtt.setAttributeType(locationPrefixType);
 		locationA2PrefixAtt.setValue("LOC-A2");
 		locationA2.addAttribute(locationA2PrefixAtt);
-		
+
 		locationA3 = new Location();
 		locationA3.setParentLocation(locationA2);
-		
+
 		// Second Branch
 		Location locationB1 = new Location();
 		location5.addChildLocation(locationB1);
 
 		Location locationB2 = new Location();
 		locationB2.setParentLocation(locationB1);
-		
+
 		locationB3 = new Location();
 		locationB3.setParentLocation(locationB2);
 	}
-	
+
 	private LocationAttributeType createPrefixAttributeType() {
 		LocationAttributeType prefixAttrType = new LocationAttributeType();
 		prefixAttrType.setName(LocationBasedPrefixProvider.getPrefixLocationAttributeType());

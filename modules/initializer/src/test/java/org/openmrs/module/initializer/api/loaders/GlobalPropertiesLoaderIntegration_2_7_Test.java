@@ -23,16 +23,16 @@ import org.springframework.beans.factory.annotation.Autowired;
  * works successfully in an OpenMRS 2.7 environment
  */
 public class GlobalPropertiesLoaderIntegration_2_7_Test extends DomainBaseModuleContextSensitive_2_7_Test {
-	
+
 	@Autowired
 	private GlobalPropertiesLoader loader;
-	
+
 	@Test
 	public void loadGlobalProperties_shouldLoadGlobalProperties() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verif
 		Assert.assertEquals("GP one one", Context.getAdministrationService().getGlobalProperty("gp.gp11"));
 		Assert.assertEquals("GP one two", Context.getAdministrationService().getGlobalProperty("gp.gp12"));
@@ -41,32 +41,32 @@ public class GlobalPropertiesLoaderIntegration_2_7_Test extends DomainBaseModule
 		Assert.assertEquals("GP three two", Context.getAdministrationService().getGlobalProperty("gp.gp32"));
 		Assert.assertEquals("GP three three", Context.getAdministrationService().getGlobalProperty("gp.gp33"));
 	}
-	
+
 	@Test
 	public void load_shouldOverrideGlobalProperties() {
-		
+
 		// Setup
 		Context.getAdministrationService().saveGlobalProperty(new GlobalProperty("gp.gp11", "foobar"));
 		Assert.assertEquals("foobar", Context.getAdministrationService().getGlobalProperty("gp.gp11"));
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verif
 		Assert.assertEquals("GP one one", Context.getAdministrationService().getGlobalProperty("gp.gp11"));
 	}
-	
+
 	@Test
 	public void load_shouldNotAffectOtherGlobalProperties() {
-		
+
 		// Setup
 		Context.getAdministrationService().saveGlobalProperty(new GlobalProperty("gp.foo", "Foo"));
 		Context.getAdministrationService().saveGlobalProperty(new GlobalProperty("gp.bar", "Bar"));
 		Context.getAdministrationService().saveGlobalProperty(new GlobalProperty("gp.baz", "Baz"));
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verif
 		Assert.assertEquals("Foo", Context.getAdministrationService().getGlobalProperty("gp.foo"));
 		Assert.assertEquals("Bar", Context.getAdministrationService().getGlobalProperty("gp.bar"));

@@ -22,23 +22,23 @@ import org.junit.Test;
  * Test for DiagnosticReport resource narrative generation
  */
 public class DiagnosticReportNarrativeTest extends BaseFhirNarrativeTest {
-	
+
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/diagnosticreport-example.json";
-	
+
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/diagnosticreport-expected.html";
-	
+
 	/**
 	 * Check that the expected narrative is generated for some example DiagnosticReport resource
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
 	public void shouldGenerateDiagnosticReportNarrative() throws IOException {
 		DiagnosticReport given = parser.parseResource(DiagnosticReport.class,
 		    getClass().getClassLoader().getResourceAsStream(EXAMPLE_RESOURCE_PATH));
-		
+
 		DiagnosticReport result = parser.parseResource(DiagnosticReport.class, parser.encodeResourceToString(given));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getText(), notNullValue());
 		assertThat(result.getText().getStatusAsString(), equalTo("generated"));

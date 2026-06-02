@@ -34,13 +34,13 @@ public class InProgramCohortDefinitionValidatorTest  extends BaseModuleContextSe
 	public void validate_shouldFailValidationIfProgramsIsNull() throws Exception {
 		InProgramCohortDefinition inProgramCohortDefinition = new InProgramCohortDefinition();
 		inProgramCohortDefinition.setPrograms(null);
-		
+
 		Errors errors = new BindException(inProgramCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(inProgramCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -49,13 +49,13 @@ public class InProgramCohortDefinitionValidatorTest  extends BaseModuleContextSe
 	public void validate_shouldFailValidationIfProgramsIsEmpty() throws Exception {
 		InProgramCohortDefinition inProgramCohortDefinition = new InProgramCohortDefinition();
 		inProgramCohortDefinition.setPrograms(new ArrayList<Program>());
-		
+
 		Errors errors = new BindException(inProgramCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(inProgramCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -64,14 +64,14 @@ public class InProgramCohortDefinitionValidatorTest  extends BaseModuleContextSe
 	public void validate_shouldPassValidationIfAllFieldsAreCorrect() throws Exception {
 		List<Program> programs = new ArrayList<Program>();
 		programs.add(new Program());
-		
+
 		InProgramCohortDefinition inProgramCohortDefinition = new InProgramCohortDefinition();
 		inProgramCohortDefinition.setName("Test CD");
 		inProgramCohortDefinition.setPrograms(programs);
-		
+
 		Errors errors = new BindException(inProgramCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(inProgramCohortDefinition, errors);
-		
+
 		Assert.assertFalse(errors.hasErrors());
 	}
 }

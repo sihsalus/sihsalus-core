@@ -27,10 +27,10 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a user
  */
 public class UserShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -40,7 +40,7 @@ public class UserShortSerializationTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/UserShortSerializationTest.xml");
 		authenticate();
-		
+
 		PatientIdentifierType pit = Context.getPatientService().getPatientIdentifierTypeByUuid(
 		    "1a339fe9-38bc-4ab3-b180-320988c0b968");
 		String xmlOutput = Context.getSerializationService().serialize(pit, XStreamShortSerializer.class);
@@ -50,25 +50,25 @@ public class UserShortSerializationTest extends BaseModuleContextSensitiveTest {
 		//with short serialization, the "user" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/patientIdentifierType/creator/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldUserShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "UserShortSerializationTest.xml" here 
+		 * We also need to use the "UserShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/UserShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder
@@ -82,7 +82,7 @@ public class UserShortSerializationTest extends BaseModuleContextSensitiveTest {
 		xmlBuilder.append("  <checkDigit>true</checkDigit>\n");
 		xmlBuilder.append("  <validator>org.openmrs.patient.impl.LuhnIdentifierValidator</validator>\n");
 		xmlBuilder.append("</patientIdentifierType>\n");
-		
+
 		PatientIdentifierType pit = Context.getSerializationService().deserialize(xmlBuilder.toString(),
 		    PatientIdentifierType.class, XStreamShortSerializer.class);
 		assertEquals(Context.getAuthenticatedUser().getUuid(), pit.getCreator().getUuid());

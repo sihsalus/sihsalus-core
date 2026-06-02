@@ -26,35 +26,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class AppointmentServiceDefinitionsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("appointmentServiceService")
 	private AppointmentServiceDefinitionService apts;
-	
+
 	@Autowired
 	@Qualifier("specialityService")
 	private SpecialityService sps;
-	
+
 	@Autowired
 	@Qualifier("locationService")
 	private LocationService ls;
-	
+
 	@Autowired
 	private AppointmentServiceDefinitionsLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
-		
+
 		Location l = ls.getLocation(2); // 'Xanadu'
 		LocationTag lt = ls.getLocationTag(4091); // 'Appointment Location'
 		l.getTags().add(lt);
 		ls.saveLocation(l);
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
-		
+
 		// Verify setup
 		{
 			Assert.assertEquals("Orthopaedic",
@@ -62,10 +62,10 @@ public class AppointmentServiceDefinitionsLoaderIntegrationTest extends DomainBa
 			Assert.assertEquals("Xanadu",
 			    apts.getAppointmentServiceByUuid("a1039051-6f34-420d-9779-24e77eb0ca00").getLocation().getName());
 		}
-		
+
 		// Replay
 		loader.load();
-		
+
 		Assert.assertThat(apts.getAllAppointmentServices(false).size(), is(7));
 		// Location set by UUID
 		{
@@ -75,7 +75,7 @@ public class AppointmentServiceDefinitionsLoaderIntegrationTest extends DomainBa
 			Assert.assertEquals(new Integer(15), def.getMaxAppointmentsLimit());
 			Assert.assertEquals("Xanadu", def.getLocation().getName());
 		}
-		// Location set by name 
+		// Location set by name
 		{
 			AppointmentServiceDefinition def = apts.getAppointmentServiceByUuid("bfff3484-320a-4c1e-84c8-dbe8f0d44e8b");
 			Assert.assertEquals("Orthopaedic Follow-up", def.getName());
@@ -89,7 +89,7 @@ public class AppointmentServiceDefinitionsLoaderIntegrationTest extends DomainBa
 			Assert.assertEquals("Orthopaedic", def.getSpeciality().getName());
 			Assert.assertEquals("#8FBC8F", def.getColor());
 		}
-		// Speciality set by UUID 
+		// Speciality set by UUID
 		{
 			AppointmentServiceDefinition def = apts.getAppointmentServiceByUuid("b4b96cea-a0ed-4bbc-84f0-6c6b4e79f447");
 			Assert.assertEquals("Tenotomy", def.getName());
@@ -109,7 +109,7 @@ public class AppointmentServiceDefinitionsLoaderIntegrationTest extends DomainBa
 			Assert.assertEquals("Specialized Appointment", def.getName());
 			Assert.assertNull(def.getSpeciality());
 		}
-		
+
 		// Removing location
 		{
 			AppointmentServiceDefinition def = apts.getAppointmentServiceByUuid("a1039051-6f34-420d-9779-24e77eb0ca00");

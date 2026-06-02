@@ -26,18 +26,18 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EncounterLocationBasedFilterTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private EncounterService encounterService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "encounters.xml");
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnNoEncountersIfTheUserIsNotGrantedAccessToAnyBasis() {
 		reloginAs("dBeckham", "test");
@@ -46,7 +46,7 @@ public class EncounterLocationBasedFilterTest extends BaseFilterTest {
 		assertEquals(expCount, encounterService.getCountOfEncounters(name, false).intValue());
 		assertEquals(expCount, encounterService.getEncounters(name, 0, Integer.MAX_VALUE, false).size());
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnEncountersBelongingToPatientsAccessibleToTheUser() {
 		reloginAs("dyorke", "test");
@@ -57,7 +57,7 @@ public class EncounterLocationBasedFilterTest extends BaseFilterTest {
 		assertEquals(expCount, encounters.size());
 		assertTrue(TestUtil.containsId(encounters, 1000));
 		assertTrue(TestUtil.containsId(encounters, 1001));
-		
+
 		service.grantAccess(Context.getAuthenticatedUser(), new Location(4001));
 		expCount = 3;
 		assertEquals(expCount, encounterService.getCountOfEncounters(name, false).intValue());
@@ -67,7 +67,7 @@ public class EncounterLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(encounters, 1001));
 		assertTrue(TestUtil.containsId(encounters, 1002));
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnAllEncountersIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -80,7 +80,7 @@ public class EncounterLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(encounters, 1001));
 		assertTrue(TestUtil.containsId(encounters, 1002));
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnAllEncountersIfLocationFilteringIsDisabled() {
 		DataFilterTestUtils.disableLocationFiltering();
@@ -90,5 +90,5 @@ public class EncounterLocationBasedFilterTest extends BaseFilterTest {
 		assertEquals(expCount, encounterService.getCountOfEncounters(name, false).intValue());
 		assertEquals(expCount, encounterService.getEncounters(name, 0, Integer.MAX_VALUE, false).size());
 	}
-	
+
 }

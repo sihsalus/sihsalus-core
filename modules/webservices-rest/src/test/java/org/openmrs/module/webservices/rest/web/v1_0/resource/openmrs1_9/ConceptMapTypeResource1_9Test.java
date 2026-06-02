@@ -15,12 +15,12 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_9;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ConceptMapTypeResource1_9Test extends BaseDelegatingResourceTest<ConceptMapTypeResource1_9, ConceptMapType> {
-	
+
 	@Override
 	public ConceptMapType newObject() {
 		return Context.getConceptService().getConceptMapTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -29,7 +29,7 @@ public class ConceptMapTypeResource1_9Test extends BaseDelegatingResourceTest<Co
 		assertPropEquals("isHidden", getObject().getIsHidden());
 		assertPropEquals("retired", getObject().isRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -39,15 +39,15 @@ public class ConceptMapTypeResource1_9Test extends BaseDelegatingResourceTest<Co
 		assertPropEquals("retired", getObject().isRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "related-to";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_9.CONCEPT_MAP_TYPE_UUID;
 	}
-	
+
 }

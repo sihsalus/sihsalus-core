@@ -11,21 +11,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class RelationshipTypesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("personService")
 	private PersonService ps;
-	
+
 	@Autowired
 	private RelationshipTypesLoader loader;
-	
+
 	@Test
 	public void load_shouldLoadRelationshipTypesAccordingToCsvFiles() {
-		
+
 		// replay
 		loader.load();
-		
-		// verify created 
+
+		// verify created
 		{
 			RelationshipType rt = ps.getRelationshipTypeByUuid("c86d9979-b8ac-4d8c-85cf-cc04e7f16315");
 			Assert.assertNotNull(rt);
@@ -36,7 +36,7 @@ public class RelationshipTypesLoaderIntegrationTest extends DomainBaseModuleCont
 			Assert.assertEquals(true, rt.getPreferred());
 			Assert.assertEquals(1, rt.getWeight().intValue());
 		}
-		
+
 		// verify edited
 		{
 			RelationshipType rt = ps.getRelationshipTypeByUuid("53d8a8f3-0084-4a52-8666-c655f5bd2689");
@@ -44,7 +44,7 @@ public class RelationshipTypesLoaderIntegrationTest extends DomainBaseModuleCont
 			Assert.assertEquals("Supervisor/Supervisee", rt.toString());
 			Assert.assertEquals("A new description for supervisor to supervisee relationship", rt.getDescription());
 		}
-		
+
 		// verify retired
 		{
 			RelationshipType rt = ps.getRelationshipTypeByUuid("3982f469-cedc-4b2d-91ea-fe38f881e1a0");
@@ -52,5 +52,5 @@ public class RelationshipTypesLoaderIntegrationTest extends DomainBaseModuleCont
 			Assert.assertTrue(rt.getRetired());
 		}
 	}
-	
+
 }

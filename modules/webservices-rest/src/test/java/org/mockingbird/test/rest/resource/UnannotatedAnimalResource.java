@@ -25,7 +25,7 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
  * {@link org.openmrs.module.webservices.rest.web.OpenmrsClassScanner} and its classpath pattern.
  */
 public class UnannotatedAnimalResource extends DelegatingCrudResource<Animal> {
-	
+
 	/**
 	 * @see DelegatingResourceHandler#getResourceVersion()
 	 */
@@ -33,7 +33,7 @@ public class UnannotatedAnimalResource extends DelegatingCrudResource<Animal> {
 	public String getResourceVersion() {
 		return "1.9";
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#newDelegate()
 	 */
@@ -41,7 +41,7 @@ public class UnannotatedAnimalResource extends DelegatingCrudResource<Animal> {
 	public Animal newDelegate() {
 		return new Animal();
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#save(Object)
 	 */
@@ -49,7 +49,7 @@ public class UnannotatedAnimalResource extends DelegatingCrudResource<Animal> {
 	public Animal save(Animal delegate) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#getRepresentationDescription(Representation)
 	 */
@@ -57,7 +57,7 @@ public class UnannotatedAnimalResource extends DelegatingCrudResource<Animal> {
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#getByUniqueId(String)
 	 */
@@ -65,7 +65,7 @@ public class UnannotatedAnimalResource extends DelegatingCrudResource<Animal> {
 	public Animal getByUniqueId(String uniqueId) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#delete(Object, String, RequestContext)
 	 */
@@ -73,7 +73,7 @@ public class UnannotatedAnimalResource extends DelegatingCrudResource<Animal> {
 	protected void delete(Animal delegate, String reason, RequestContext context) throws ResponseException {
 		throw new ResourceDoesNotSupportOperationException();
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#purge(Object, RequestContext)
 	 */

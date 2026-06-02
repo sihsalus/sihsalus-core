@@ -15,29 +15,29 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_11;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class DrugResource1_11Test extends BaseDelegatingResourceTest<DrugResource1_11, Drug> {
-	
+
 	@Override
 	public Drug newObject() {
 		return Context.getConceptService().getDrugByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
 		assertPropPresent("ingredients");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
 		assertPropPresent("ingredients");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "ASPIRIN";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_11.DRUG_UUID;

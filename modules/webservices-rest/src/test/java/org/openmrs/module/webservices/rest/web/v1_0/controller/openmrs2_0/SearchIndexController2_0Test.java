@@ -21,19 +21,19 @@ public class SearchIndexController2_0Test extends BaseContextMockTest {
 	ContextDAO contextDAO;
 
 	private SearchIndexController2_0 controller = new SearchIndexController2_0();
-	
+
 	@Test
 	public void updateSearchIndex_shouldUpdateTheEntireSearchIndex() throws Exception {
 		controller.updateSearchIndex(null);
 
 		Mockito.verify(contextDAO, Mockito.times(1)).updateSearchIndex();
 	}
-	
+
 	@Test
 	public void updateSearchIndex_shouldUpdateTheEntireSearchIndexAsynchronously() throws Exception {
 		controller.updateSearchIndex("{\"async\": true}");
-		
+
 		Mockito.verify(contextDAO, Mockito.times(1)).updateSearchIndexAsync();
 	}
-	
+
 }

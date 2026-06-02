@@ -39,19 +39,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests functionality of {@link DiagnosisController2_2}.
  */
 public class DiagnosisController2_2Test extends MainResourceControllerTest {
-	
+
 	private DiagnosisService diagnosisService;
-	
+
 	private Encounter encounter;
-	
+
 	private Patient patient;
-	
+
 	private Condition condition;
-	
+
 	private Concept concept;
-	
+
 	private ConceptName conceptName;
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants2_2.DIAGNOSIS_TEST_DATA_XML);
@@ -62,7 +62,7 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 		this.concept = Context.getConceptService().getConcept(1001);
 		this.conceptName = Context.getConceptService().getConceptName(1001);
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -70,7 +70,7 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "patientdiagnoses";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -78,7 +78,7 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants2_2.DIAGNOSIS_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -86,7 +86,7 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return diagnosisService.getPrimaryDiagnoses(this.encounter).size();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetAll()
 	 */
@@ -97,17 +97,17 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Test
 	public void shouldCreateANonCodedDiagnosis() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject codedOrFreeText = new SimpleObject();
-		
+
 		codedOrFreeText.add("nonCoded", "Some condition");
-		
+
 		SimpleObject diagnosisSource = new SimpleObject();
-		
+
 		diagnosisSource.add("condition", condition.getUuid());
 		diagnosisSource.add("certainty", CONFIRMED);
 		diagnosisSource.add("diagnosis", codedOrFreeText);
@@ -115,24 +115,24 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 		diagnosisSource.add("encounter", encounter.getUuid());
 		diagnosisSource.add("voided", false);
 		diagnosisSource.add("patient", patient.getUuid());
-		
+
 		String json = new ObjectMapper().writeValueAsString(diagnosisSource);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newDiagnosisSource = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(newDiagnosisSource, "uuid"));
-		
+
 		Diagnosis diagnosis = diagnosisService.getDiagnosisByUuid(newDiagnosisSource.get("uuid").toString());
-		
+
 		LinkedHashMap condition = newDiagnosisSource.get("condition");
-		
+
 		LinkedHashMap nonCoded = newDiagnosisSource.get("diagnosis");
-		
+
 		LinkedHashMap patient = newDiagnosisSource.get("patient");
-		
+
 		Assertions.assertNotNull(diagnosis.getEncounter().toString());
 		Assertions.assertEquals(diagnosis.getCondition().getUuid(), condition.get("uuid"));
 		Assertions.assertEquals((diagnosis.getCertainty().toString()), newDiagnosisSource.get("certainty"));
@@ -144,18 +144,18 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 		Assertions.assertEquals(patient.get("uuid"), diagnosis.getPatient().getUuid());
 		Assertions.assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldCreateACodedDiagnosis() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject codedOrFreeText = new SimpleObject();
-		
+
 		codedOrFreeText.add("coded", concept.getUuid());
 		codedOrFreeText.add("specificName", conceptName.getUuid());
-		
+
 		SimpleObject diagnosisSource = new SimpleObject();
-		
+
 		diagnosisSource.add("condition", condition.getUuid());
 		diagnosisSource.add("certainty", CONFIRMED);
 		diagnosisSource.add("diagnosis", codedOrFreeText);
@@ -163,28 +163,28 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 		diagnosisSource.add("encounter", encounter.getUuid());
 		diagnosisSource.add("voided", false);
 		diagnosisSource.add("patient", patient.getUuid());
-		
+
 		String json = new ObjectMapper().writeValueAsString(diagnosisSource);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newDiagnosisSource = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(newDiagnosisSource, "uuid"));
-		
+
 		Diagnosis diagnosis = diagnosisService.getDiagnosisByUuid(newDiagnosisSource.get("uuid").toString());
-		
+
 		LinkedHashMap condition = newDiagnosisSource.get("condition");
-		
+
 		LinkedHashMap codedOrText = newDiagnosisSource.get("diagnosis");
-		
+
 		LinkedHashMap conceptName = (LinkedHashMap) codedOrText.get("specificName");
-		
+
 		LinkedHashMap concept = (LinkedHashMap) codedOrText.get("coded");
-		
+
 		LinkedHashMap patient = newDiagnosisSource.get("patient");
-		
+
 		Assertions.assertNotNull(diagnosis.getEncounter().toString());
 		Assertions.assertEquals(diagnosis.getCondition().getUuid(), condition.get("uuid"));
 		Assertions.assertEquals((diagnosis.getCertainty().toString()), newDiagnosisSource.get("certainty"));
@@ -197,29 +197,29 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 		Assertions.assertEquals(patient.get("uuid"), diagnosis.getPatient().getUuid());
 		Assertions.assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldFetchExistingDiagnosis() throws Exception {
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Diagnosis diagnosis = diagnosisService.getDiagnosisByUuid(getUuid());
-		
+
 		Assertions.assertEquals(diagnosis.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 	}
-	
+
 	@Test
 	public void shouldVoidDiagnosis() throws Exception {
-		
+
 		Diagnosis diagnosis = diagnosisService.getDiagnosisByUuid(getUuid());
-		
+
 		Assertions.assertFalse(diagnosis.isVoided());
-		
+
 		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
 		req.addParameter("reason", "test");
 		handle(req);
-		
+
 		diagnosis = diagnosisService.getDiagnosisByUuid(getUuid());
 		Assertions.assertTrue(diagnosis.isVoided());
 		Assertions.assertEquals("test", diagnosis.getVoidReason());
@@ -227,54 +227,54 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 		Assertions.assertNotNull(diagnosis.getVoidedBy());
 		Assertions.assertEquals(Context.getAuthenticatedUser().getUuid(), diagnosis.getVoidedBy().getUuid());
 	}
-	
+
 	@Test
 	public void shouldUnVoidDiagnosis() throws Exception {
-		
+
 		Diagnosis diagnosis = diagnosisService.getDiagnosisByUuid(RestTestConstants2_2.VOIDED_DIAGNOSIS_UUID);
-		
+
 		Assertions.assertTrue(diagnosis.isVoided());
-		
+
 		SimpleObject attributes = new SimpleObject();
 		attributes.add("voided", false);
-		
+
 		String json = new ObjectMapper().writeValueAsString(attributes);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + RestTestConstants2_2.VOIDED_DIAGNOSIS_UUID);
 		req.setContent(json.getBytes());
 		handle(req);
-		
+
 		diagnosis = diagnosisService.getDiagnosisByUuid(RestTestConstants2_2.VOIDED_DIAGNOSIS_UUID);
-		
+
 		Assertions.assertFalse(diagnosis.isVoided());
 		Assertions.assertNull(diagnosis.getDateVoided());
 		Assertions.assertNull(diagnosis.getVoidedBy());
 		Assertions.assertNull(diagnosis.getVoidReason());
-		
+
 	}
-	
+
 	@Test
 	public void shouldUpdateANonCodedDiagnosis() throws Exception {
 		Diagnosis diagnosis = diagnosisService.getDiagnosisByUuid(RestTestConstants2_2.UPDATABLE_NON_CODED_DIAGNOSIS_UUID);
-		
+
 		Assertions.assertFalse(diagnosis.getVoided());
 		Assertions.assertNull(diagnosis.getDiagnosis().getCoded());
 		Assertions.assertEquals(2, (int) diagnosis.getRank());
 		Assertions.assertEquals("CONFIRMED", diagnosis.getCertainty().toString());
 		Assertions.assertEquals("4b2f8e8e-7c91-4268-953b-3987c711f801", diagnosis.getCondition().getUuid());
 		Assertions.assertEquals("6519d653-393b-4118-9c83-a3715b82d4ac", diagnosis.getEncounter().getUuid());
-		
+
 		String json = "{\"diagnosis\":{\"coded\":\"" + concept.getUuid() + "\",\"specificName\":\"" + conceptName.getUuid()
 		        + "\"},\"condition\":\"" + condition.getUuid()
 		        + "\",\"certainty\":\"" + "PROVISIONAL" + "\",\"encounter\":\""
 		        + encounter.getUuid() + "\",\"rank\":\"" + 1
 		        + "\",\"voided\":\"" + true + "\"}";
-		
+
 		handle(newPostRequest(getURI() + "/" + RestTestConstants2_2.UPDATABLE_NON_CODED_DIAGNOSIS_UUID, json));
-		
+
 		Diagnosis newDiagnosis = diagnosisService
 		        .getDiagnosisByUuid(RestTestConstants2_2.UPDATABLE_NON_CODED_DIAGNOSIS_UUID);
-		
+
 		Assertions.assertTrue(newDiagnosis.getVoided());
 		Assertions.assertEquals(concept.getUuid(), newDiagnosis.getDiagnosis().getCoded().getUuid());
 		Assertions.assertEquals(1, (int) newDiagnosis.getRank());
@@ -282,30 +282,30 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 		Assertions.assertEquals("PROVISIONAL", newDiagnosis.getCertainty().toString());
 		Assertions.assertEquals(encounter.getUuid(), newDiagnosis.getEncounter().getUuid());
 	}
-	
+
 	@Test
 	public void shouldUpdateACodedDiagnosis() throws Exception {
-		
+
 		final String nonCoded = "Some condition";
 		Diagnosis diagnosis = diagnosisService.getDiagnosisByUuid(RestTestConstants2_2.UPDATABLE_CODED_DIAGNOSIS_UUID);
-		
+
 		Assertions.assertFalse(diagnosis.getVoided());
 		Assertions.assertNull(diagnosis.getDiagnosis().getNonCoded());
 		Assertions.assertEquals(1, (int) diagnosis.getRank());
 		Assertions.assertEquals("e804ee60-ecbc-4d70-abda-1e4f6f64e5b5", diagnosis.getCondition().getUuid());
 		Assertions.assertEquals("6519d653-393b-4118-9c83-a3715b82d4ac", diagnosis.getEncounter().getUuid());
 		Assertions.assertEquals("PROVISIONAL", diagnosis.getCertainty().toString());
-		
+
 		String json = "{ \"diagnosis\":{\"coded\":null,\"specificName\":null,\"nonCoded\":\"" + nonCoded
 		        + "\"},\"condition\":\"" + condition.getUuid()
 		        + "\",\"certainty\":\"" + "CONFIRMED" + "\",\"encounter\":\""
 		        + encounter.getUuid() + "\",\"rank\":\"" + 2
 		        + "\",\"voided\":\"" + false + "\"}";
-		
+
 		handle(newPostRequest(getURI() + "/" + RestTestConstants2_2.UPDATABLE_CODED_DIAGNOSIS_UUID, json));
-		
+
 		Diagnosis newDiagnosis = diagnosisService.getDiagnosisByUuid(RestTestConstants2_2.UPDATABLE_CODED_DIAGNOSIS_UUID);
-		
+
 		Assertions.assertFalse(newDiagnosis.getVoided());
 		Assertions.assertEquals("Some condition", newDiagnosis.getDiagnosis().getNonCoded());
 		Assertions.assertEquals(2, (int) newDiagnosis.getRank());
@@ -313,15 +313,15 @@ public class DiagnosisController2_2Test extends MainResourceControllerTest {
 		Assertions.assertEquals("CONFIRMED", newDiagnosis.getCertainty().toString());
 		Assertions.assertEquals(encounter.getUuid(), newDiagnosis.getEncounter().getUuid());
 	}
-	
+
 	@Test
 	public void shouldPurgeDiagnosis() throws Exception {
 		Assertions.assertNotNull(diagnosisService.getDiagnosisByUuid(getUuid()));
-		
+
 		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
 		req.addParameter("purge", "true");
 		handle(req);
-		
+
 		Assertions.assertNull(diagnosisService.getDiagnosisByUuid(getUuid()));
 	}
 

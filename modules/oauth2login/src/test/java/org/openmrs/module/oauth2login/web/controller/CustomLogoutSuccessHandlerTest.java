@@ -23,11 +23,11 @@ import org.springframework.security.web.RedirectStrategy;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
 public class CustomLogoutSuccessHandlerTest {
-	
+
 	public CustomLogoutSuccessHandlerTest() {
 		OAuth2IntegrationTest.initPathInSystemProperties("Keycloak");
 	}
-	
+
 	@Test
 	public void onLogoutSuccess_redirectToLogoutURL() throws IOException, ServletException {
 		final String idToken = "myToken";
@@ -36,7 +36,7 @@ public class CustomLogoutSuccessHandlerTest {
 		User user = new User();
 		user.setUserProperty(OAuth2LoginConstants.USER_PROP_ID_TOKEN, idToken);
 		Mockito.when(Context.getAuthenticatedUser()).thenReturn(user);
-		
+
 		CustomLogoutSuccessHandler customLogoutSuccessHandler = new CustomLogoutSuccessHandler();
 		RedirectStrategy redirectStrategy = mock(RedirectStrategy.class);
 		customLogoutSuccessHandler.setRedirectStrategy(redirectStrategy);
@@ -44,13 +44,13 @@ public class CustomLogoutSuccessHandlerTest {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		//replay
 		customLogoutSuccessHandler.onLogoutSuccess(request, response, null);
-		
+
 		//verify
 		PowerMockito.verifyStatic();
 		Context.logout();
-		
+
 		verify(redirectStrategy).sendRedirect(request, response,
 		    "http://localhost:8081/auth/realms/demo/protocol/openid-connect/logout?id_token_hint=" + idToken);
 	}
-	
+
 }

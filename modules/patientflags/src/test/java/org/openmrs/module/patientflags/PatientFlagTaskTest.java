@@ -48,7 +48,7 @@ public class PatientFlagTaskTest extends BaseModuleContextSensitiveTest {
 
         PatientFlagTask.setDaemonToken(token);
     }
- 
+
     @Test
     public void generatePatientFlags_shouldGeneratePatientFlagsForPatient() {
         Patient patient = Context.getService(PatientService.class).getPatient(1);

@@ -13,12 +13,12 @@ import org.junit.Assert;
 import org.openmrs.User;
 
 public class GoogleAPIAuthenticationTest extends OAuth2IntegrationTest {
-	
+
 	@Override
 	protected String getAppDataDirName() {
 		return "GoogleAPI";
 	}
-	
+
 	@Override
 	protected String getUserInfoJson() {
 		return "{\n" + "  \"sub\": \"31a709c3-67f4-4b01-b76c-b39e650c0a41\",\n" + "  \"name\": \"John Doe\",\n"
@@ -26,7 +26,7 @@ public class GoogleAPIAuthenticationTest extends OAuth2IntegrationTest {
 		        + "  \"profile\": \"http://example.com/profile\",\n" + "  \"picture\": \"http://example.com/picture\",\n"
 		        + "  \"email\": \"jdoe@example.com\",\n" + "  \"email_verified\": true,\n" + "  \"locale\": \"en\",\n" + "}";
 	}
-	
+
 	@Override
 	protected void assertAuthenticatedUser(User user) {
 		Assert.assertEquals("31a709c3-67f4-4b01-b76c-b39e650c0a41", user.getUsername());
@@ -36,10 +36,10 @@ public class GoogleAPIAuthenticationTest extends OAuth2IntegrationTest {
 		Assert.assertEquals("jdoe@example.com", user.getEmail());
 		assertThatProviderAccountIsActivated(user);
 	}
-	
+
 	@Override
 	protected String[] roleNamesToAssert() {
 		return new String[] {};
 	}
-	
+
 }

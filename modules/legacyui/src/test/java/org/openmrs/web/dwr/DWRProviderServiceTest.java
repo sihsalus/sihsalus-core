@@ -24,21 +24,21 @@ import org.junit.jupiter.api.Test;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
 public class DWRProviderServiceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private static final String PROVIDERS_INITIAL_XML = "org/openmrs/api/include/ProviderServiceTest-initial.xml";
-	
+
 	private static final String PROVIDER_ATTRIBUTE_TYPES_XML = "org/openmrs/api/include/ProviderServiceTest-providerAttributes.xml";
-	
+
 	private DWRProviderService service;
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		service = new DWRProviderService();
-		
+
 		executeDataSet(PROVIDERS_INITIAL_XML);
 		executeDataSet(PROVIDER_ATTRIBUTE_TYPES_XML);
 	}
-	
+
 	/**
 	 * @see DWRProviderService#findProvider(String,boolean,Integer,Integer)
 	 * @verifies return a message with no matches found when no providers are found
@@ -46,10 +46,10 @@ public class DWRProviderServiceTest extends BaseModuleWebContextSensitiveTest {
 	@Test
 	public void findProvider_shouldReturnAMessageWithNoMatchesFoundWhenNoProvidersAreFound() throws Exception {
 		Vector<Object> providers = service.findProvider("noProvider", false, 0, 1);
-		
+
 		Assertions.assertEquals("Provider.noMatchesFound", ((String) providers.get(0)));
 	}
-	
+
 	/**
 	 * @see DWRProviderService#findProvider(String,boolean,Integer,Integer)
 	 * @verifies return the list of providers including retired providers for the matching search
@@ -58,42 +58,42 @@ public class DWRProviderServiceTest extends BaseModuleWebContextSensitiveTest {
 	@Test
 	public void findProvider_shouldReturnTheListOfProvidersIncludingRetiredProvidersForTheMatchingSearchName()
 	        throws Exception {
-		
+
 		Vector<Object> providers = service.findProvider("provider", true, 0, 10);
 		Assertions.assertEquals(4, providers.size());
-		
+
 		Assertions.assertTrue(CollectionUtils.exists(providers, new Predicate() {
-			
+
 			@Override
 			public boolean evaluate(Object object) {
 				return ((ProviderListItem) object).getDisplayName().equals("Jimmy Manana Chemalit");
 			}
 		}));
 	}
-	
+
 	/**
 	 * @see DWRProviderService#findProvider(String,boolean,Integer,Integer)
 	 * @verifies return the list of providers matching the search name
 	 */
 	@Test
 	public void findProvider_shouldReturnTheListOfProvidersMatchingTheSearchName() throws Exception {
-		
+
 		Vector<Object> providers = service.findProvider("provider", false, 0, 10);
 		Assertions.assertEquals(2, providers.size());
-		
+
 		final ArrayList<String> providerNames = new ArrayList<String>();
-		
+
 		CollectionUtils.forAllDo(providers, new Closure() {
-			
+
 			@Override
 			public void execute(Object input) {
 				providerNames.add(((ProviderListItem) input).getDisplayName());
 			}
 		});
-		
+
 		Assertions.assertTrue(providerNames.containsAll(Arrays.asList("Bruno Otterbourg", "Hippocrates of Cos")));
 	}
-	
+
 	/**
 	 * @see DWRProviderService#findProviderCountAndProvider(String,boolean,Integer,Integer)
 	 * @verifies return the count of all providers matching the searched name along with provider

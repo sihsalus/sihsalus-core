@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.openmrs.PatientProgram;
 
 public class CalculationResultMapTest {
-	
+
 	/**
 	 * @see CalculationResultMap#getAsBoolean(Integer)
 	 * @verifies return false if key is not mapped
@@ -16,7 +16,7 @@ public class CalculationResultMapTest {
 		CalculationResultMap map = new CalculationResultMap();
 		Assert.assertFalse(map.getAsBoolean(999));
 	}
-	
+
 	/**
 	 * @see CalculationResultMap#getAsBoolean(Integer)
 	 * @verifies return false if key is mapped to a falsey value
@@ -30,7 +30,7 @@ public class CalculationResultMapTest {
 			Assert.assertFalse(map.getAsBoolean(1));
 		}
 	}
-	
+
 	/**
 	 * @see CalculationResultMap#getAsBoolean(Integer)
 	 * @verifies return true if key is mapped to a truthy value
@@ -44,7 +44,7 @@ public class CalculationResultMapTest {
 			Assert.assertTrue(map.getAsBoolean(1));
 		}
 	}
-	
+
 	/**
 	 * @see CalculationResultMap#isEmpty(Integer)
 	 * @verifies return true if key is not mapped
@@ -54,7 +54,7 @@ public class CalculationResultMapTest {
 		CalculationResultMap map = new CalculationResultMap();
 		Assert.assertTrue(map.isEmpty(999));
 	}
-	
+
 	/**
 	 * @see CalculationResultMap#isEmpty(Integer)
 	 * @verifies return true if key is mapped to an empty value
@@ -68,7 +68,7 @@ public class CalculationResultMapTest {
 			Assert.assertTrue(map.isEmpty(1));
 		}
 	}
-	
+
 	/**
 	 * @see CalculationResultMap#isEmpty(Integer)
 	 * @verifies return false if key is mapped to a non-empty value

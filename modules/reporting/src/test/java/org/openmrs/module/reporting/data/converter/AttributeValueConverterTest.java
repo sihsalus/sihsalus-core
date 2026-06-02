@@ -21,22 +21,22 @@ import org.openmrs.test.BaseContextSensitiveTest;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class AttributeValueConverterTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see AttributeValueConverter#convert(Object)
 	 * @verifies convert a serialized attribute value into its hydrated object form
@@ -60,5 +60,5 @@ public class AttributeValueConverterTest extends BaseModuleContextSensitiveTest 
 		Assert.assertEquals(Concept.class, value.getClass());
 		Assert.assertEquals(conceptValue.getHydratedObject(), value);
 	}
-	
+
 }

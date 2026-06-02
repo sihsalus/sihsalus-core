@@ -251,16 +251,16 @@ public class AppointmentsControllerTest {
         AppointmentStatusChangeRequest request = new AppointmentStatusChangeRequest();
         request.setAppointmentUuids(Arrays.asList("uuid1", "uuid2"));
         request.setToStatus(AppointmentStatus.Cancelled);
-        
+
         List<Appointment> updatedAppointments = new ArrayList<>();
         List<AppointmentDefaultResponse> expectedResponse = new ArrayList<>();
-        
+
         when(appointmentsService.changeStatusForAppointments(request.getAppointmentUuids(), AppointmentStatus.Cancelled))
                 .thenReturn(updatedAppointments);
         when(appointmentMapper.constructResponse(updatedAppointments)).thenReturn(expectedResponse);
-        
+
         ResponseEntity<Object> response = appointmentsController.updateAppointmentStatus(request);
-        
+
         verify(appointmentsService, times(1)).changeStatusForAppointments(request.getAppointmentUuids(), AppointmentStatus.Cancelled);
         verify(appointmentMapper, times(1)).constructResponse(updatedAppointments);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -271,13 +271,13 @@ public class AppointmentsControllerTest {
         AppointmentStatusChangeRequest request = new AppointmentStatusChangeRequest();
         request.setAppointmentUuids(Arrays.asList("uuid1", "uuid2"));
         request.setToStatus(AppointmentStatus.Cancelled);
-        
+
         doThrow(new RuntimeException("Appointments not found"))
                 .when(appointmentsService)
                 .changeStatusForAppointments(request.getAppointmentUuids(), AppointmentStatus.Cancelled);
-        
+
         ResponseEntity<Object> response = appointmentsController.updateAppointmentStatus(request);
-        
+
         verify(appointmentsService, times(1)).changeStatusForAppointments(request.getAppointmentUuids(), AppointmentStatus.Cancelled);
         verify(appointmentMapper, never()).constructResponse(anyList());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());

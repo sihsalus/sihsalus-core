@@ -20,11 +20,11 @@ import org.springframework.mock.web.MockHttpServletResponse;
  * Tests the {@link LoginServlet}
  */
 public class LoginServletTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * The servlet should send the user back to the login box if the user enters the wrong username
 	 * or password.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -33,19 +33,19 @@ public class LoginServletTest extends BaseModuleWebContextSensitiveTest {
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/loginServlet");
 		request.setContextPath("/somecontextpath");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		request.setParameter("uname", "some wrong username");
 		request.setParameter("pw", "some wrong password");
-		
+
 		loginServlet.service(request, response);
-		
+
 		Assertions.assertEquals("/somecontextpath/login.htm", response.getRedirectedUrl());
 	}
-	
+
 	/**
 	 * If a user logs in correctly, they should never be redirected back to the login screen because
 	 * this would cause confusion
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -54,24 +54,24 @@ public class LoginServletTest extends BaseModuleWebContextSensitiveTest {
 		Context.logout();
 		Context.authenticate("admin", "test");
 		Assertions.assertTrue(Context.isAuthenticated());
-		
+
 		// do the test now
 		LoginServlet loginServlet = new LoginServlet();
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/loginServlet");
 		request.setContextPath("/somecontextpath");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		request.setParameter("uname", "admin");
 		request.setParameter("pw", "test");
-		
+
 		loginServlet.service(request, response);
-		
+
 		Assertions.assertNotSame("/somecontextpath/login.htm", response.getRedirectedUrl());
 	}
-	
+
 	/**
 	 * The lockout value is set to five
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -80,31 +80,31 @@ public class LoginServletTest extends BaseModuleWebContextSensitiveTest {
 		Context.logout();
 		Context.authenticate("admin", "test");
 		Assertions.assertTrue(Context.isAuthenticated());
-		
+
 		// do the test now
 		LoginServlet loginServlet = new LoginServlet();
-		
+
 		for (int x = 1; x < 4; x++) {
 			MockHttpServletRequest request = new MockHttpServletRequest("POST", "/loginServlet");
 			request.setContextPath("/somecontextpath");
 			MockHttpServletResponse response = new MockHttpServletResponse();
-			
-			// change the username everytime so that we're not  
+
+			// change the username everytime so that we're not
 			// accidentally testing against the API lockout
 			request.setParameter("uname", "wrong username" + x);
 			request.setParameter("pw", "wrong password");
-			
+
 			loginServlet.service(request, response);
 		}
-		
-		// now attempting to log in the fifth time should fail 
+
+		// now attempting to log in the fifth time should fail
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/loginServlet");
 		request.setContextPath("/somecontextpath");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setParameter("uname", "admin");
 		request.setParameter("pw", "test");
 		loginServlet.service(request, response);
-		
+
 		Assertions.assertNotSame("/somecontextpath/login.htm", response.getRedirectedUrl());
 	}
 }

@@ -24,38 +24,38 @@ import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirPatientIdentifierSystemServiceImplTest {
-	
+
 	private static final String PATIENT_IDENTIFIER_URL = "www.example.com";
-	
+
 	@Mock
 	private FhirPatientIdentifierSystemDao dao;
-	
+
 	private FhirPatientIdentifierSystemServiceImpl patientIdentifierSystemService;
-	
+
 	private PatientIdentifierType patientIdentifierType;
-	
+
 	@Before
 	public void setup() {
 		patientIdentifierSystemService = new FhirPatientIdentifierSystemServiceImpl();
 		patientIdentifierType = new PatientIdentifierType();
 		patientIdentifierSystemService.setDao(dao);
 	}
-	
+
 	@Test
 	public void getUrlByPatientIdentifierType_shouldReturnUrl() {
 		when(dao.getUrlByPatientIdentifierType(patientIdentifierType)).thenReturn(PATIENT_IDENTIFIER_URL);
-		
+
 		String result = patientIdentifierSystemService.getUrlByPatientIdentifierType(patientIdentifierType);
-		
+
 		assertThat(result, notNullValue());
 	}
-	
+
 	@Test
 	public void getUrlByPatientIdentifierType_shouldReturnNullWhenPatientIdentifierTypeNotFound() {
 		when(dao.getUrlByPatientIdentifierType(patientIdentifierType)).thenReturn(null);
-		
+
 		String result = patientIdentifierSystemService.getUrlByPatientIdentifierType(patientIdentifierType);
-		
+
 		assertThat(result, nullValue());
 	}
 }

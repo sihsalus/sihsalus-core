@@ -31,42 +31,42 @@ import static org.junit.Assert.*;
  * Tests methods in {@link RequestProcedureDao}
  */
 public class RequestProcedureDAOTest extends BaseModuleContextSensitiveTest {
-	
+
 	private RequestProcedureDao requestProcedureDao;
-	
+
 	private static final String REQUEST_PROCEDURE_TEST_DATASET = "testRequestProcedureDataset.xml";
-	
+
 	private RequestProcedure requestProcedure;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		executeDataSet(REQUEST_PROCEDURE_TEST_DATASET);
 		assertNotNull(applicationContext);
 		requestProcedureDao = (RequestProcedureDao) applicationContext.getBean("imaging.RequestProcedureDao");
 	}
-	
+
 	@Test
 	public void testGetAll_shouldReturnDataFromDB() {
 		List<RequestProcedure> allRequests = requestProcedureDao.getAll();
 		assertNotNull(allRequests);
 		assertEquals(3, allRequests.size());
 	}
-	
+
 	@Test
 	public void testGetAllByStudyInstanceUID_shouldReturnMatchingRecords() {
 		String studyInstanceUID = "testInstanceUID888";
-		
+
 		List<RequestProcedure> results = requestProcedureDao.getAllByStudyInstanceUID(studyInstanceUID);
-		
+
 		assertNotNull(results);
 		assertFalse(results.isEmpty());
-		
+
 		// Verify all results have the requested studyInstanceUID
 		for (RequestProcedure rp : results) {
 			assertEquals(studyInstanceUID, rp.getStudyInstanceUID());
 		}
 	}
-	
+
 	@Test
 	public void testGetByPatient_shouldReturnCorrectRequests() {
 		Patient patient = Context.getPatientService().getPatient(1); // assuming patient ID 1 exists in test dataset
@@ -76,7 +76,7 @@ public class RequestProcedureDAOTest extends BaseModuleContextSensitiveTest {
 			assertEquals(patient.getPatientId(), rp.getMrsPatient().getPatientId());
 		}
 	}
-	
+
 	@Test
 	public void testGetByAccessNumber_shouldReturnRequestProcedure() {
 		String accessNumber = "ACC1001";
@@ -84,17 +84,17 @@ public class RequestProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(result);
 		assertEquals(accessNumber, result.getAccessionNumber());
 	}
-	
+
 	@Test
 	public void testGetByConfig_shouldReturnRequestProcedure() {
 		OrthancConfigurationService orthancConfigurationService = Context.getService(OrthancConfigurationService.class);
 		OrthancConfiguration config = orthancConfigurationService.getOrthancConfiguration(1);
-		
+
 		List<RequestProcedure> requestProcedureList = requestProcedureDao.getRequestProcedureByConfig(config);
 		assertNotNull(requestProcedureList);
 		assertEquals(3, requestProcedureList.size());
 	}
-	
+
 	@Test
 	public void testSave_shouldPersistRequestProcedure() {
 		Patient patient = Context.getPatientService().getPatient(1);
@@ -110,42 +110,42 @@ public class RequestProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		requestProcedure.setOrthancConfiguration(config);
 		requestProcedure.setAccessionNumber("ACC222");
 		requestProcedure.setRequestDescription("Test request procedure description");
-		
+
 		requestProcedureDao.save(requestProcedure);
-		
+
 		RequestProcedure newRequestProcedure = requestProcedureDao.getByAccessionNumber("ACC222");
 		assertNotNull(newRequestProcedure);
 		assertEquals("ACC222", newRequestProcedure.getAccessionNumber());
-		
+
 		List<RequestProcedure> allRequests = requestProcedureDao.getAll();
 		assertNotNull(allRequests);
 		assertEquals(4, allRequests.size());
 	}
-	
+
 	@Test
 	public void testUpdate_shouldModifyExistingRequestProcedure() {
 		RequestProcedureService requestProcedureService = Context.getService(RequestProcedureService.class);
 		RequestProcedure requestProcedure = requestProcedureService.getRequestProcedure(1);
-		
+
 		requestProcedure.setRequestDescription("Update request procedure description");
 		requestProcedure.setStudyInstanceUID("testInstanceUID444");
-		
+
 		Patient patient = Context.getPatientService().getPatient(2);
 		// update patient
 		requestProcedure.setMrsPatient(patient);
 		requestProcedureDao.update(requestProcedure);
-		
+
 		RequestProcedure updated = requestProcedureDao.getByAccessionNumber("ACC1001");
 		assertEquals("testInstanceUID444", updated.getStudyInstanceUID());
 		assertTrue(requestProcedure.getRequestDescription().contains("Update request procedure description"));
 	}
-	
+
 	@Test
 	public void testRemove_shouldDeleteRequestProcedure() {
 		RequestProcedure result = requestProcedureDao.getByAccessionNumber("ACC1002");
 		assertNotNull(result);
 		requestProcedureDao.remove(result);
-		
+
 		RequestProcedure deleted = requestProcedureDao.getByAccessionNumber("ACC1002");
 		assertNull(deleted);
 	}

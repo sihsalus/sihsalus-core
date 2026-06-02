@@ -64,16 +64,16 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore({ "javax.management.*" })
 @PrepareForTest({ AccessUtil.class, Util.class, Context.class, Daemon.class })
 public class AccessInterceptorTest {
-	
+
 	private AccessInterceptor interceptor = new AccessInterceptor();
-	
+
 	@Rule
 	public ExpectedException ee = ExpectedException.none();
-	
+
 	private AdministrationService adminService = null;
-	
+
 	private String threadName;
-	
+
 	@Before
 	public void beforeEachMethod() {
 		threadName = Thread.currentThread().getName();
@@ -89,7 +89,7 @@ public class AccessInterceptorTest {
 		when(Util.isFilterDisabled(anyString())).thenReturn(false);
 		when(adminService.getGlobalProperty(eq(ImplConstants.GP_RUN_IN_STRICT_MODE))).thenReturn("true");
 	}
-	
+
 	@After
 	public void after() {
 		//Reset
@@ -97,7 +97,7 @@ public class AccessInterceptorTest {
 			Thread.currentThread().setName(threadName);
 		}
 	}
-	
+
 	@Test
 	public void onLoad_shouldFailWithAnExceptionIfTheAuthenticatedUserIsNotAllowedToViewThePatientGettingLoaded() {
 		final Integer userId = 1;
@@ -109,7 +109,7 @@ public class AccessInterceptorTest {
 		ee.expectMessage(equalTo(ImplConstants.ILLEGAL_RECORD_ACCESS_MESSAGE));
 		interceptor.onLoad(new Patient(), patientId, null, null, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfTheAuthenticatedUserIsAllowedToViewThePatientGettingLoaded() {
 		final Integer userId = 1;
@@ -119,14 +119,14 @@ public class AccessInterceptorTest {
 		when(AccessUtil.getAccessiblePersonIds(eq(Location.class))).thenReturn(accessiblePatientIds);
 		interceptor.onLoad(new Patient(), patientId, null, null, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassForTheDaemonThread() {
 		mockStatic(Daemon.class);
 		when(Daemon.isDaemonThread()).thenReturn(true);
 		interceptor.onLoad(null, null, null, null, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassForSuperUser() {
 		User superUser = mock(User.class);
@@ -134,7 +134,7 @@ public class AccessInterceptorTest {
 		when(Context.getAuthenticatedUser()).thenReturn(superUser);
 		interceptor.onLoad(new Patient(), null, null, null, null);
 	}
-	
+
 	@Ignore
 	@Test
 	public void onLoad_shouldPassForAnyUserWithTheByPassPrivilege() {
@@ -144,18 +144,18 @@ public class AccessInterceptorTest {
 		when(superUser.hasPrivilege(eq(DataFilterConstants.PRIV_BY_PASS))).thenReturn(true);
 		interceptor.onLoad(new Patient(), null, null, null, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfTheInterceptorIsDisabled() {
 		when(adminService.getGlobalProperty(eq(ImplConstants.GP_RUN_IN_STRICT_MODE))).thenReturn("false");
 		interceptor.onLoad(new Patient(), null, null, null, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassForAnEntityThatIsNotFiltered() {
 		interceptor.onLoad(new Role(), null, null, null, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassForAllFilteredTypesIfAllLocationBasedFiltersAreDisabled() {
 		User user = mock(User.class);
@@ -163,7 +163,7 @@ public class AccessInterceptorTest {
 		when(Context.getAuthenticatedUser()).thenReturn(user);
 		interceptor.onLoad(new Patient(), null, null, null, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldFailWithAnExceptionIfTheAuthenticatedUserIsNotAllowedToViewThePrivilegedEncounterGettingLoaded() {
 		final Integer userId = 1;
@@ -183,7 +183,7 @@ public class AccessInterceptorTest {
 		interceptor.onLoad(new Encounter(), encounterId, new Object[] { encType }, new String[] { "encounterType" },
 		    new Type[] { new ManyToOneType((TypeFactory.TypeScope) null, null) });
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfAllEncounterTypeViewPrivilegeBasedFiltersAreDisabled() throws Exception {
 		User user = mock(User.class);
@@ -194,7 +194,7 @@ public class AccessInterceptorTest {
 			interceptor.onLoad(clazz.newInstance(), null, null, null, null);
 		}
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfTheEncounterTypeForTheEncounterHasNoViewPrivilege() {
 		User user = mock(User.class);
@@ -205,7 +205,7 @@ public class AccessInterceptorTest {
 		interceptor.onLoad(new Encounter(), null, new Object[] { new EncounterType(encounterTypeId) },
 		    new String[] { "encounterType" }, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldFailIfTheAuthUserIsNotAllowedToViewThePrivilegedObsGettingLoadedAndTheEncTypeIsNotYetLoaded() {
 		final Integer userId = 1;
@@ -225,7 +225,7 @@ public class AccessInterceptorTest {
 		interceptor.onLoad(new Obs(), obsId, new Object[] { new Encounter(encounterId) }, new String[] { "encounter" },
 		    new Type[] { new ManyToOneType((TypeFactory.TypeScope) null, null) });
 	}
-	
+
 	@Test
 	public void onLoad_shouldFailIfTheAuthUserIsNotAllowedToViewThePrivilegedObsGettingLoadedAndTheEncTypeIsLoaded() {
 		final Integer userId = 1;
@@ -245,14 +245,14 @@ public class AccessInterceptorTest {
 		interceptor.onLoad(new Obs(), obsId, new Object[] { e }, new String[] { "encounter" },
 		    new Type[] { new ManyToOneType((TypeFactory.TypeScope) null, null) });
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfTheTheObsBelongsToNoEncounter() {
 		when(Util.isFilterDisabled(startsWith(LOCATION_BASED_FILTER_NAME_PREFIX))).thenReturn(true);
 		when(AccessUtil.getViewPrivilege(Matchers.any())).thenReturn("Some Privilege");
 		interceptor.onLoad(new Obs(), null, new Object[] { null }, new String[] { "encounter" }, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfTheAssociatedEncounterTypeForTheObsEncounterHasNoViewPrivilege() {
 		User user = mock(User.class);
@@ -261,7 +261,7 @@ public class AccessInterceptorTest {
 		final Integer encounterId = 101;
 		interceptor.onLoad(new Obs(), null, new Object[] { new Encounter(encounterId) }, new String[] { "encounter" }, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfTheAuthenticatedUserIsAllowedToViewThePatientVisitGettingLoaded() {
 		final Integer patientId = 101;
@@ -270,7 +270,7 @@ public class AccessInterceptorTest {
 		when(AccessUtil.getAccessiblePersonIds(eq(Location.class))).thenReturn(accessiblePatientIds);
 		interceptor.onLoad(new Visit(), null, new Object[] { new Patient(patientId) }, new String[] { "patient" }, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfTheAuthenticatedUserIsAllowedToViewThePatientEncounterGettingLoaded() {
 		final Integer patientId = 101;
@@ -280,7 +280,7 @@ public class AccessInterceptorTest {
 		when(AccessUtil.getAccessiblePersonIds(eq(Location.class))).thenReturn(accessiblePatientIds);
 		interceptor.onLoad(new Encounter(), null, new Object[] { new Patient(101) }, new String[] { "patient" }, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassIfTheAuthenticatedUserIsAllowedToViewTheObsGettingLoaded() {
 		final Integer patientId = 101;
@@ -290,7 +290,7 @@ public class AccessInterceptorTest {
 		when(AccessUtil.getAccessiblePersonIds(eq(Location.class))).thenReturn(accessiblePatientIds);
 		interceptor.onLoad(new Obs(), null, new Object[] { new Patient(patientId) }, new String[] { "person" }, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassForAnyUserWithTheIndividualFilterByPassPrivileges() {
 		when(Context.isAuthenticated()).thenReturn(true);
@@ -298,11 +298,11 @@ public class AccessInterceptorTest {
 		when(Context.hasPrivilege(ENC_TYPE_PRIV_BASED_FILTER_NAME_ENCOUNTER + BYPASS_PRIV_SUFFIX)).thenReturn(true);
 		interceptor.onLoad(new Encounter(), null, null, null, null);
 	}
-	
+
 	@Test
 	public void onLoad_shouldPassWhenLoadingAnEntityFromAHibernateSearchIndexLoaderThread() {
 		Thread.currentThread().setName(AccessInterceptor.SEARCH_LOADER_THREAD_NAME_PREFIX + "-test");
 		interceptor.onLoad(new Encounter(), null, null, null, null);
 	}
-	
+
 }

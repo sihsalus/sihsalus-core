@@ -31,9 +31,9 @@ import java.util.List;
  * Contains tests for the {@link VisitTypeController}
  */
 public class VisitTypeController1_9Test extends MainResourceControllerTest {
-	
+
 	private VisitService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -41,7 +41,7 @@ public class VisitTypeController1_9Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "visittype";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -49,7 +49,7 @@ public class VisitTypeController1_9Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_9.VISIT_TYPE_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -61,15 +61,15 @@ public class VisitTypeController1_9Test extends MainResourceControllerTest {
 				count++;
 			}
 		}
-		
+
 		return count;
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getVisitService();
 	}
-	
+
 	@Test
 	public void shouldGetAVisitTypeByName() throws Exception {
 		Object result = deserialize(handle(newGetRequest(getURI() + "/Return TB Clinic Visit")));
@@ -77,7 +77,7 @@ public class VisitTypeController1_9Test extends MainResourceControllerTest {
 		Assertions.assertEquals(RestTestConstants1_9.VISIT_TYPE_UUID, PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertEquals("Return TB Clinic Visit", PropertyUtils.getProperty(result, "name"));
 	}
-	
+
 	@Test
 	public void shouldCreateAVisitType() throws Exception {
 		int originalCount = service.getAllVisitTypes().size();
@@ -86,7 +86,7 @@ public class VisitTypeController1_9Test extends MainResourceControllerTest {
 		Assertions.assertNotNull(PropertyUtils.getProperty(newVisitType, "uuid"));
 		Assertions.assertEquals(originalCount + 1, service.getAllVisitTypes().size());
 	}
-	
+
 	@Test
 	public void shouldEditAVisitType() throws Exception {
 		String json = "{ \"name\":\"new visit type\", \"description\":\"new description\" }";
@@ -96,7 +96,7 @@ public class VisitTypeController1_9Test extends MainResourceControllerTest {
 		Assertions.assertEquals("new visit type", updated.getName());
 		Assertions.assertEquals("new description", updated.getDescription());
 	}
-	
+
 	@Test
 	public void shouldRetireAVisitType() throws Exception {
 		VisitType visitType = service.getVisitTypeByUuid(RestTestConstants1_9.VISIT_TYPE_UUID);
@@ -106,7 +106,7 @@ public class VisitTypeController1_9Test extends MainResourceControllerTest {
 		Assertions.assertTrue(visitType.isRetired());
 		Assertions.assertEquals("test reason", visitType.getRetireReason());
 	}
-	
+
 	@Test
 	public void shouldPurgeAVisitType() throws Exception {
 		String uuid = "759799ab-c9a5-435e-b671-77773ada74e6";
@@ -116,36 +116,36 @@ public class VisitTypeController1_9Test extends MainResourceControllerTest {
 		Assertions.assertNull(service.getVisitTypeByUuid(uuid));
 		Assertions.assertEquals(originalCount - 1, service.getAllVisitTypes().size());
 	}
-	
+
 	@Test
 	public void shouldSearchAndReturnAListOfVisitTypesMatchingTheQueryString() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("q", "Ret"))));
 		List<Object> hits = Util.getResultsList(result);
 		Assertions.assertEquals(1, hits.size());
 		Assertions.assertEquals(RestTestConstants1_9.VISIT_TYPE_UUID, PropertyUtils.getProperty(hits.get(0), "uuid"));
-		
+
 	}
-	
+
 	@Test
 	public void shouldSearchAndReturnAListOfVisitTypesMatchingTheQueryStringExcludingRetiredOnes() throws Exception {
 		final String searchString = "Hos";
 		//sanity check
 		Assertions.assertEquals(1, Context.getVisitService().getVisitTypes(searchString).size());
-		
+
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("q", searchString))));
 		List<Object> hits = Util.getResultsList(result);
 		Assertions.assertEquals(0, hits.size());
-		
+
 	}
-	
+
 	@Test
 	public void shouldGetAVisitTypeByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		VisitType visitType = service.getVisitTypeByUuid(getUuid());
 		assertEquals(visitType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(visitType.getName(), PropertyUtils.getProperty(result, "name"));
 	}
-	
+
 }

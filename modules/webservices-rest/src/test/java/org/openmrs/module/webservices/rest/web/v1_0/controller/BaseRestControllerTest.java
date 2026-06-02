@@ -39,13 +39,13 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import java.util.LinkedHashMap;
 
 public class BaseRestControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	BaseRestController controller;
-	
+
 	MockHttpServletRequest request;
-	
+
 	MockHttpServletResponse response;
-	
+
 	Log spyOnLog;
 
 	@BeforeEach
@@ -60,7 +60,7 @@ public class BaseRestControllerTest extends BaseModuleWebContextSensitiveTest {
 		log.setAccessible(true);
 		log.set(controller, spyOnLog);
 	}
-	
+
 	/**
 	 * @verifies return unauthorized if not logged in
 	 * @see BaseRestController#apiAuthenticationExceptionHandler(Exception,
@@ -69,12 +69,12 @@ public class BaseRestControllerTest extends BaseModuleWebContextSensitiveTest {
 	@Test
 	public void apiAuthenticationExceptionHandler_shouldReturnUnauthorizedIfNotLoggedIn() throws Exception {
 		Context.logout();
-		
+
 		controller.apiAuthenticationExceptionHandler(new APIAuthenticationException(), request, response);
-		
+
 		assertThat(response.getStatus(), is(HttpServletResponse.SC_UNAUTHORIZED));
 	}
-	
+
 	/**
 	 * @verifies return forbidden if logged in
 	 * @see BaseRestController#apiAuthenticationExceptionHandler(Exception,
@@ -83,26 +83,26 @@ public class BaseRestControllerTest extends BaseModuleWebContextSensitiveTest {
 	@Test
 	public void apiAuthenticationExceptionHandler_shouldReturnForbiddenIfLoggedIn() throws Exception {
 		controller.apiAuthenticationExceptionHandler(new APIAuthenticationException(), request, response);
-		
+
 		assertThat(response.getStatus(), is(HttpServletResponse.SC_FORBIDDEN));
 	}
-	
+
 	@Test
 	public void validationException_shouldReturnBadRequestResponse() throws Exception {
 		Errors ex = new BindException(new Person(), "");
 		ex.reject("error.message");
-		
+
 		SimpleObject responseSimpleObject = controller.validationExceptionHandler(new ValidationException(ex), request,
 		    response);
 		assertThat(response.getStatus(), is(HttpServletResponse.SC_BAD_REQUEST));
-		
+
 		SimpleObject errors = (SimpleObject) responseSimpleObject.get("error");
 		Assertions.assertEquals("webservices.rest.error.invalid.submission", errors.get("code"));
 	}
-	
+
 	@Test
 	public void handleException_shouldLogUnannotatedAsErrors() throws Exception {
-		
+
 		String message = "ErrorMessage";
 		Exception ex = new Exception(message);
 		controller.handleException(ex, request, response);
@@ -110,29 +110,29 @@ public class BaseRestControllerTest extends BaseModuleWebContextSensitiveTest {
 		verify(spyOnLog).error(message, ex);
 
 	}
-	
+
 	@Test
 	public void handleException_shouldLog500AndAboveAsErrors() throws Exception {
 		String message = "ErrorMessage";
 		Exception ex = new GenericRestException(message);
-		
+
 		controller.handleException(ex, request, response);
 
 		verify(spyOnLog).error(message, ex);
 
 	}
-	
+
 	@Test
 	public void handleException_shouldLogBelow500AsInfo() throws Exception {
-		
+
 		String message = "ErrorMessage";
 		Exception ex = new IllegalPropertyException(message);
-		
+
 		controller.handleException(ex, request, response);
 
 		verify(spyOnLog).info(message, ex);
 	}
-	
+
 	@Test
 	public void handleConversionException_shouldLogConversionErrorAsInfo() throws Exception {
 		String message = "conversion error";
@@ -142,7 +142,7 @@ public class BaseRestControllerTest extends BaseModuleWebContextSensitiveTest {
 		LinkedHashMap errors = (LinkedHashMap) responseSimpleObject.get("error");
 		Assertions.assertEquals("[" + message + "]", errors.get("message"));
 	}
-	
+
 	@Test
 	public void httpMessageNotReadableExceptionHandler_shouldReturnBadRequestIfEmptyBody() throws Exception {
 		controller.httpMessageNotReadableExceptionHandler(new HttpMessageNotReadableException("", (org.springframework.http.HttpInputMessage) null), request, response);

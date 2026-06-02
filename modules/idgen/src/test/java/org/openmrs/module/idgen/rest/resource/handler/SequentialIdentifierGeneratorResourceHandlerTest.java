@@ -22,22 +22,22 @@ import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SequentialIdentifierGeneratorResourceHandlerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	private IdentifierSourceService service;
-	
+
 	private SequentialIdentifierGeneratorResourceHandler handler;
-	
+
 	@Before
 	public void setup() {
 		handler = new SequentialIdentifierGeneratorResourceHandler();
 	}
-	
+
 	@Test
 	public void newDelegate_shouldReturnSequentialIdentifierGenerator() throws Exception  {
 		assertTrue(handler.newDelegate().getClass().isAssignableFrom(SequentialIdentifierGenerator.class));
 	}
-	
+
 	@Test
 	public void save_shouldSaveRemoteSequentialIdentifierGenerator() throws Exception  {
 		SequentialIdentifierGenerator generator = new SequentialIdentifierGenerator();
@@ -55,9 +55,9 @@ public class SequentialIdentifierGeneratorResourceHandlerTest extends BaseModule
 		assertEquals(name, src.getName());
 		assertEquals(firstIdentifierBase, src.getFirstIdentifierBase());
 		assertEquals(baseCharacterSet, src.getBaseCharacterSet());
-		
+
 	}
-	
+
 	@Test
 	public void getRepresentationDescription_shouldReturnRepresentation_GivenRepresentation()throws Exception  {
 		Representation defaultRep = new DefaultRepresentation();
@@ -70,7 +70,7 @@ public class SequentialIdentifierGeneratorResourceHandlerTest extends BaseModule
 		assertNotNull(properties.get("maxLength"));
 		assertNotNull(properties.get("baseCharacterSet"));
 		assertEquals(DefaultRepresentation.class, properties.get("identifierType").getRep().getClass());
-		
+
 		Representation fullRep = new FullRepresentation();
 		properties = handler.getRepresentationDescription(fullRep).getProperties();
 		assertNotNull(properties.get("baseCharacterSet"));
@@ -81,13 +81,13 @@ public class SequentialIdentifierGeneratorResourceHandlerTest extends BaseModule
 		assertNotNull(properties.get("maxLength"));
 		assertNotNull(properties.get("nextSequenceValue"));
 		assertEquals(FullRepresentation.class, properties.get("identifierType").getRep().getClass());
-		
+
 		Representation refRep = new RefRepresentation();
 		properties = handler.getRepresentationDescription(refRep).getProperties();
 		assertNotNull(properties.get("baseCharacterSet"));
 		assertEquals(RefRepresentation.class, properties.get("identifierType").getRep().getClass());
 	}
-	
+
 	@Test
 	public void getCreatableProperties_shouldReturnCreatableProperties() throws Exception {
 		Map<String, Property> properties = handler.getCreatableProperties().getProperties();
@@ -101,7 +101,7 @@ public class SequentialIdentifierGeneratorResourceHandlerTest extends BaseModule
 		assertTrue(properties.keySet().contains("nextSequenceValue"));
 
 	}
-	
+
 	@Test
 	public void getUpdatableProperties_shouldReturnUpdatableProperties() throws Exception {
 		Map<String, Property> properties = handler.getCreatableProperties().getProperties();
@@ -115,11 +115,10 @@ public class SequentialIdentifierGeneratorResourceHandlerTest extends BaseModule
 		assertTrue(properties.keySet().contains("nextSequenceValue"));
 
 	}
-	
+
 	@Test
 	public void getTypeName_shouldReturnTypeName() throws Exception {
 		assertEquals("sequentialidentifiergenerator", handler.getTypeName());
 	}
-	
-}
 
+}

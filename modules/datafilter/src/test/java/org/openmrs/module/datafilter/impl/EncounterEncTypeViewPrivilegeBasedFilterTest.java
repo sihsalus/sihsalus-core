@@ -27,22 +27,22 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EncounterEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivilegeBasedFilterTest {
-	
+
 	@Autowired
 	private EncounterService encounterService;
-	
+
 	@Autowired
 	private VisitService visitService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "encounters.xml");
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "privilegedEncounters.xml");
 	}
-	
+
 	@Test
 	public void getEncounters_shouldExcludeEncountersThatRequireAPrivilege() {
 		reloginAs("dBeckham", "test");
@@ -51,7 +51,7 @@ public class EncounterEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertEquals(expCount, encounterService.getCountOfEncounters(name, false).intValue());
 		assertEquals(expCount, encounterService.getEncounters(name, 0, Integer.MAX_VALUE, false).size());
 	}
-	
+
 	@Test
 	public void getEncounters_shouldIncludeEncountersThatRequireAPrivilegeAndTheUserHasIt() {
 		reloginAs("dyorke", "test");
@@ -63,7 +63,7 @@ public class EncounterEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertTrue(TestUtil.containsId(encounters, 1000));
 		assertTrue(TestUtil.containsId(encounters, 1001));
 		assertTrue(TestUtil.containsId(encounters, 1002));
-		
+
 		DataFilterTestUtils.addPrivilege(PRIV_MANAGE_CHEMO_PATIENTS);
 		expCount = 4;
 		assertEquals(expCount, encounterService.getCountOfEncounters(name, false).intValue());
@@ -74,7 +74,7 @@ public class EncounterEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertTrue(TestUtil.containsId(encounters, 1002));
 		assertTrue(TestUtil.containsId(encounters, 2001));
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnAllEncountersIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -88,7 +88,7 @@ public class EncounterEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertTrue(TestUtil.containsId(encounters, 1002));
 		assertTrue(TestUtil.containsId(encounters, 2001));
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnAllEncountersIfEncTypeViewPrivFilteringIsDisabled() {
 		DataFilterTestUtils.disableEncTypeViewPrivilegeFiltering();
@@ -102,7 +102,7 @@ public class EncounterEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertTrue(TestUtil.containsId(encounters, 1001));
 		assertTrue(TestUtil.containsId(encounters, 1002));
 	}
-	
+
 	@Test
 	public void getVisits_shouldExcludePrivilegedEncountersOfTheVisitIfTheUserHasNoRequiredPrivilege() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "visitWithEncounters.xml");
@@ -112,7 +112,7 @@ public class EncounterEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		assertTrue(TestUtil.containsId(encounters, 20001));
 		assertTrue(TestUtil.containsId(encounters, 20002));
 	}
-	
+
 	@Test
 	public void getVisits_shouldIncludePrivilegedEncountersOfTheVisitIfTheUserHasTheRequiredPrivilege() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "visitWithEncounters.xml");
@@ -120,5 +120,5 @@ public class EncounterEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeVie
 		DataFilterTestUtils.addPrivilege(PRIV_MANAGE_CHEMO_PATIENTS);
 		assertEquals(4, visitService.getVisit(10001).getEncounters().size());
 	}
-	
+
 }

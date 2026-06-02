@@ -17,9 +17,9 @@ import java.util.Date;
 import java.util.UUID;
 
 public class DrugOrderBuilder {
-	
+
 	private final EncounterTransaction.DrugOrder drugOrder;
-	
+
 	public DrugOrderBuilder() {
 		drugOrder = new EncounterTransaction.DrugOrder();
 		drugOrder.setCareSetting(CareSetting.CareSettingType.OUTPATIENT);
@@ -38,48 +38,48 @@ public class DrugOrderBuilder {
 		drugOrder.setDuration(2);
 		drugOrder.setDurationUnits("Day");
 	}
-	
+
 	public EncounterTransaction.DrugOrder build() {
 		return drugOrder;
 	}
-	
+
 	public DrugOrderBuilder withDurationUnits(String durationUnits) {
 		drugOrder.setDurationUnits(durationUnits);
 		return this;
 	}
-	
+
 	public DrugOrderBuilder withDrugUuid(String drugUuid) {
 		EncounterTransaction.Drug drug = new EncounterTransaction.Drug();
 		drug.setUuid(drugUuid);
 		drugOrder.setDrug(drug);
 		return this;
 	}
-	
+
 	public DrugOrderBuilder withNonCodedDrug(String freeTextDrug) {
 		drugOrder.setDrugNonCoded(freeTextDrug);
 		return this;
 	}
-	
+
 	public DrugOrderBuilder withScheduledDate(Date scheduledDate) {
 		drugOrder.setScheduledDate(scheduledDate);
 		return this;
 	}
-	
+
 	public DrugOrderBuilder withFrequency(String frequency) {
 		drugOrder.getDosingInstructions().setFrequency(frequency);
 		return this;
 	}
-	
+
 	public DrugOrderBuilder withAction(String action) {
 		drugOrder.setAction(action);
 		return this;
 	}
-	
+
 	public DrugOrderBuilder withPreviousOrderUuid(String previousOrderUuid) {
 		drugOrder.setPreviousOrderUuid(previousOrderUuid);
 		return this;
 	}
-	
+
 	public DrugOrderBuilder withAutoExpireDate(Date date) {
 		drugOrder.setAutoExpireDate(date);
 		return this;

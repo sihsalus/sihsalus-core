@@ -26,17 +26,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService cs;
-	
+
 	@Autowired
 	private DrugsLoader loader;
-	
+
 	@Before
 	public void setup() {
-		
+
 		// A concept to be used as 'dosage form'
 		{
 			Concept c = new Concept();
@@ -74,7 +74,7 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 			c.setConceptClass(cs.getConceptClassByName("Drug"));
 			c.setDatatype(cs.getConceptDatatypeByName("Text"));
 			c = cs.saveConcept(c);
-			
+
 			Drug d = new Drug();
 			d.setUuid("2bcf7212-d218-4572-8893-25c4b5b71934");
 			d.setName("Metronidazole 500mg Tablet");
@@ -87,7 +87,7 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 			c.setConceptClass(cs.getConceptClassByName("Drug"));
 			c.setDatatype(cs.getConceptDatatypeByName("Text"));
 			c = cs.saveConcept(c);
-			
+
 			Drug d = new Drug();
 			d.setUuid("42f010f8-26fe-102b-80cb-0017a47871b2");
 			d.setName("d4T 30");
@@ -110,13 +110,13 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 			cs.saveDrug(d);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadDrugsAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// a vanilla drug
 		{
 			Drug d = cs.getDrug("Cetirizine 10mg Tablet");
@@ -124,7 +124,7 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 			Assert.assertEquals(cs.getConceptByName("Cetirizine"), d.getConcept());
 			Assert.assertEquals(cs.getConceptByName("Tablet"), d.getDosageForm());
 		}
-		
+
 		// a drug without dosage form
 		{
 			Drug d = cs.getDrug("Erythromycine 500mg Tablet");
@@ -132,7 +132,7 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 			Assert.assertEquals(cs.getConceptByName("Erythromycine"), d.getConcept());
 			Assert.assertNull(d.getDosageForm());
 		}
-		
+
 		// an edited drug
 		{
 			Drug d = cs.getDrug("Metronidazole 500mg Tablet");
@@ -157,7 +157,7 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 			Assert.assertTrue(d.getRetired());
 		}
 	}
-	
+
 	@Test
 	public void load_shouldAddIngredientsToDrugs() {
 		loader.load();
@@ -185,10 +185,10 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 			}
 		}
 	}
-	
+
 	@Test
 	public void load_shouldRemoveIngredientsFromDrugs() {
-		
+
 		Drug drug = cs.getDrugByUuid("8abf401a-7f65-11f0-9e36-be568b1ab237");
 		Assert.assertNotNull(drug);
 		Assert.assertEquals("Drug with Erythromycine", drug.getName());
@@ -197,9 +197,9 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 		Assert.assertEquals(cs.getConceptByName("Erythromycine"), erythromycine.getIngredient());
 		Assert.assertEquals((Double) 20.0, erythromycine.getStrength());
 		Assert.assertEquals(cs.getConceptByName("mg"), erythromycine.getUnits());
-		
+
 		loader.load();
-		
+
 		drug = cs.getDrugByUuid("8abf401a-7f65-11f0-9e36-be568b1ab237");
 		Assert.assertNotNull(drug);
 		Assert.assertEquals("Drug without Erythromycine", drug.getName());
@@ -210,12 +210,12 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 		Assert.assertEquals((Double) 15.0, cetirizine.getStrength());
 		Assert.assertEquals(cs.getConceptByName("mg"), cetirizine.getUnits());
 	}
-	
+
 	@Test
 	public void load_shouldModifyIngredientsInDrugs() {
-		
+
 		loader.load();
-		
+
 		Drug drug = cs.getDrugByUuid("8abf401a-7f65-11f0-9e36-be568b1ab237");
 		Assert.assertNotNull(drug);
 		Assert.assertEquals("Drug without Erythromycine", drug.getName());
@@ -223,18 +223,18 @@ public class DrugsLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 		DrugIngredient cetirizine = drug.getIngredients().iterator().next();
 		Assert.assertEquals(cs.getConceptByName("Cetirizine"), cetirizine.getIngredient());
 		Assert.assertEquals((Double) 15.0, cetirizine.getStrength());
-		
+
 		cetirizine.setStrength(20.0);
 		cs.saveDrug(drug);
-		
+
 		drug = cs.getDrugByUuid("8abf401a-7f65-11f0-9e36-be568b1ab237");
 		Assert.assertEquals(1, drug.getIngredients().size());
 		DrugIngredient originalIngredient = drug.getIngredients().iterator().next();
 		Assert.assertEquals((Double) 20.0, originalIngredient.getStrength());
-		
+
 		loader.getDirUtil().deleteChecksums();
 		loader.load();
-		
+
 		drug = cs.getDrugByUuid("8abf401a-7f65-11f0-9e36-be568b1ab237");
 		Assert.assertEquals(1, drug.getIngredients().size());
 		DrugIngredient modifiedIngredient = drug.getIngredients().iterator().next();

@@ -44,81 +44,81 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * Tests CRUD operations for {@link ConceptReferenceTerm}s via web service calls
  */
 public class ConceptReferenceTermController1_9Test extends MainResourceControllerTest {
-	
+
 	private ConceptService service;
-	
+
 	@Override
 	public String getURI() {
 		return "conceptreferenceterm";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_9.CONCEPT_REFERENCE_TERM_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return service.getConceptReferenceTerms(false).size();
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getConceptService();
 	}
-	
+
 	@Test
 	public void shouldGetAnConceptReferenceTermByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		ConceptReferenceTerm conceptReferenceTermType = service.getConceptReferenceTermByUuid(getUuid());
 		assertEquals(conceptReferenceTermType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(conceptReferenceTermType.getCode(), PropertyUtils.getProperty(result, "code"));
 	}
-	
+
 	@Test
 	public void shouldListAllConceptReferenceTerms() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(result);
 		assertEquals(getAllCount(), Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldCreateAConceptReferenceTerm() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject conceptReferenceTermType = new SimpleObject();
 		conceptReferenceTermType.add("code", "test code");
 		conceptReferenceTermType.add("conceptSource", "00001827-639f-4cb4-961f-1e025bf80000");
-		
+
 		String json = new ObjectMapper().writeValueAsString(conceptReferenceTermType);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newConceptReferenceTerm = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(newConceptReferenceTerm, "uuid"));
 		assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldEditingAConceptReferenceTerm() throws Exception {
 		final String newCode = "updated code";
 		SimpleObject conceptReferenceTermType = new SimpleObject();
 		conceptReferenceTermType.add("code", newCode);
-		
+
 		String json = new ObjectMapper().writeValueAsString(conceptReferenceTermType);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
 		req.setContent(json.getBytes());
 		handle(req);
 		assertEquals(newCode, service.getConceptReferenceTermByUuid(getUuid()).getCode());
 	}
-	
+
 	@Test
 	public void shouldRetireAConceptReferenceTerm() throws Exception {
 		assertEquals(false, service.getConceptReferenceTermByUuid(getUuid()).isRetired());
@@ -130,7 +130,7 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 		assertEquals(true, service.getConceptReferenceTermByUuid(getUuid()).isRetired());
 		assertEquals(reason, service.getConceptReferenceTermByUuid(getUuid()).getRetireReason());
 	}
-	
+
 	@Test
 	public void shouldPurgeAConceptReferenceTerm() throws Exception {
 		final String uuid = "SSTRM-retired code";
@@ -140,16 +140,16 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 		handle(req);
 		assertNull(service.getConceptReferenceTermByUuid(uuid));
 	}
-	
+
 	@Test
 	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	@Test
 	public void shouldSearchAndReturnAListOfConceptReferenceTermsMatchingTheQueryString() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
@@ -157,7 +157,7 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 		SimpleObject result = deserialize(handle(req));
 		assertEquals(3, Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldFindBySourceName() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("source",
@@ -165,7 +165,7 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 		Integer resultsSize = Util.getResultsSize(result);
 		assertThat(resultsSize, is(9));
 	}
-	
+
 	@Test
 	public void shouldFindBySourceUuid() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("source",
@@ -173,38 +173,38 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 		Integer resultsSize = Util.getResultsSize(result);
 		assertThat(resultsSize, is(9));
 	}
-	
+
 	@Test
 	public void shouldFindBySourceAndCodeOrName() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("source",
 		        "Some Standardized Terminology"), new Parameter("codeOrName", "WGT234"), new Parameter("v", "full"))));
-		
+
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, contains((Matcher) hasEntry("code", "WGT234")));
 	}
-	
+
 	@Test
 	public void shouldFindBySourceAndCodeOrNameAlike() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("source",
 		        "Some Standardized Terminology"), new Parameter("codeOrName", "WGT"), new Parameter("searchType", "alike"),
 		    new Parameter("v", "full"))));
-		
+
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, contains((Matcher) hasEntry("code", "WGT234")));
 	}
-	
+
 	@Test
 	public void shouldFindByCodeOrNameAlikeName() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("codeOrName", "no term name"),
 		    new Parameter("searchType", "alike"), new Parameter("v", "full"))));
-		
+
 		List<Object> results = Util.getResultsList(result);
 		assertThat(
 		    results,
 				(Matcher) containsInAnyOrder(hasEntry("name", "no term name"), hasEntry("name", "no term name2"),
 		        hasEntry("name", "no term name3")));
 	}
-	
+
 	@Test
 	public void shouldFindBySourceAndCodeOrNameAlikeName() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("source",
@@ -217,7 +217,7 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 				(Matcher) containsInAnyOrder(hasEntry("name", "no term name"), hasEntry("name", "no term name2"),
 		        hasEntry("name", "no term name3")));
 	}
-	
+
 	@Test
 	public void shouldFindBySourceAndCodeOrNameAlikeNameWithPaging() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("source",
@@ -225,20 +225,20 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 		        "alike"), new Parameter("v", "full"), new Parameter("limit", "2"))));
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, hasSize(2));
-		
+
 		result = deserialize(handle(newGetRequest(getURI(), new Parameter("source", "Some Standardized Terminology"),
 		    new Parameter("codeOrName", "no term name"), new Parameter("searchType", "alike"), new Parameter("v", "full"),
 		    new Parameter("limit", "10"), new Parameter("startIndex", "2"))));
 		List<Object> resultsSecondPage = Util.getResultsList(result);
 		assertThat(resultsSecondPage, hasSize(1));
-		
+
 		results.addAll(resultsSecondPage);
 		assertThat(
 		    results,
 				(Matcher) hasItems(hasEntry("name", "no term name"), hasEntry("name", "no term name2"),
 		        hasEntry("name", "no term name3")));
 	}
-	
+
 	@Test
 	public void shouldFindBySourceAndCodeOrNameEqualName() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("source",
@@ -247,7 +247,7 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, (Matcher) contains(hasEntry("name", "no term name")));
 	}
-	
+
 	@Test
 	public void shouldFindByCodeOrNameEqualCode() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("codeOrName", "127689"),
@@ -255,24 +255,24 @@ public class ConceptReferenceTermController1_9Test extends MainResourceControlle
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, (Matcher) containsInAnyOrder(hasEntry("name", "died term"), hasEntry("name", "married term")));
 	}
-	
+
 	@Test
 	public void shouldFindByCodeOrNameEqualCodeWithLimit() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("codeOrName", "127689"),
 		    new Parameter("searchType", "equal"), new Parameter("limit", "1"), new Parameter("v", "full"))));
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, hasSize(1));
-		
+
 		result = deserialize(handle(newGetRequest(getURI(), new Parameter("codeOrName", "127689"), new Parameter(
 		        "searchType", "equal"), new Parameter("limit", "5"), new Parameter("startIndex", "1"), new Parameter("v",
 		        "full"))));
 		List<Object> resultsSecondPage = Util.getResultsList(result);
 		assertThat(resultsSecondPage, hasSize(1));
-		
+
 		results.addAll(resultsSecondPage);
 		assertThat(results, (Matcher) containsInAnyOrder(hasEntry("name", "died term"), hasEntry("name", "married term")));
 	}
-	
+
 	@Test
 	public void shouldThrowExceptionWhenSearchTypeIsInvalid() throws Exception {
 		assertThrows(InvalidSearchException.class, () -> {

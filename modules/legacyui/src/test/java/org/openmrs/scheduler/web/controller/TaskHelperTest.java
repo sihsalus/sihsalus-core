@@ -23,23 +23,23 @@ import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
 public class TaskHelperTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private static final String INITIAL_SCHEDULER_TASK_CONFIG_XML = "org/openmrs/web/include/TaskHelperTest.xml";
-	
+
 	private static final long MAX_WAIT_TIME_IN_MILLISECONDS = 2048;
-	
+
 	private SchedulerService service;
-	
+
 	private TaskHelper taskHelper;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		executeDataSet(INITIAL_SCHEDULER_TASK_CONFIG_XML);
-		
+
 		service = Context.getSchedulerService();
 		taskHelper = new TaskHelper(service);
 	}
-	
+
 	/**
 	 * @verifies get a time in the future
 	 * @see TaskHelper#getTime(int, int)
@@ -49,7 +49,7 @@ public class TaskHelperTest extends BaseModuleWebContextSensitiveTest {
 		Date then = taskHelper.getTime(Calendar.SECOND, 123);
 		Assertions.assertTrue(then.after(new Date()));
 	}
-	
+
 	/**
 	 * @verifies get a time in the past
 	 * @see TaskHelper#getTime(int, int)
@@ -59,7 +59,7 @@ public class TaskHelperTest extends BaseModuleWebContextSensitiveTest {
 		Date then = taskHelper.getTime(Calendar.SECOND, -123);
 		Assertions.assertTrue(then.before(new Date()));
 	}
-	
+
 	/**
 	 * @verifies return a task that has been started
 	 * @see TaskHelper#getScheduledTaskDefinition(java.util.Date)
@@ -70,7 +70,7 @@ public class TaskHelperTest extends BaseModuleWebContextSensitiveTest {
 		TaskDefinition task = taskHelper.getScheduledTaskDefinition(time);
 		Assertions.assertTrue(task.getStarted());
 	}
-	
+
 	/**
 	 * @verifies return a task that has not been started
 	 * @see TaskHelper#getUnscheduledTaskDefinition(java.util.Date)
@@ -81,7 +81,7 @@ public class TaskHelperTest extends BaseModuleWebContextSensitiveTest {
 		TaskDefinition task = taskHelper.getUnscheduledTaskDefinition(time);
 		Assertions.assertFalse(task.getStarted());
 	}
-	
+
 	/**
 	 * @verifies wait until task is executing
 	 * @see TaskHelper#waitUntilTaskIsExecuting(org.openmrs.scheduler.TaskDefinition, long)
@@ -91,11 +91,11 @@ public class TaskHelperTest extends BaseModuleWebContextSensitiveTest {
 		Date time = taskHelper.getTime(Calendar.SECOND, 1);
 		TaskDefinition task = taskHelper.getScheduledTaskDefinition(time);
 		taskHelper.waitUntilTaskIsExecuting(task, MAX_WAIT_TIME_IN_MILLISECONDS);
-		
+
 		Assertions.assertTrue(task.getTaskInstance().isExecuting());
 		deleteAllData();
 	}
-	
+
 	/**
 	 * @verifies raise a timeout exception when the timeout is exceeded
 	 * @see TaskHelper#waitUntilTaskIsExecuting(org.openmrs.scheduler.TaskDefinition, long)

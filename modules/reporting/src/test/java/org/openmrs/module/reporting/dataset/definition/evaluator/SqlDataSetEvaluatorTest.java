@@ -33,16 +33,16 @@ import java.util.List;
 
 
 public class SqlDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link SqlDataSetEvaluator#evaluate(DataSetDefinition,EvaluationContext)}
 	 */
@@ -59,7 +59,7 @@ public class SqlDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
 		Assert.assertEquals("M", firstRow.getColumnValue("gender"));
 		Assert.assertEquals(DateUtil.getDateTime(1975, 4, 8), firstRow.getColumnValue("birthdate"));
 	}
-	
+
 	/**
 	 * @see {@link SqlDataSetEvaluator#evaluate(DataSetDefinition,EvaluationContext)}
 	 */
@@ -78,7 +78,7 @@ public class SqlDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
 		Assert.assertEquals("M", firstRow.getColumnValue("gender"));
 		Assert.assertEquals(DateUtil.getDateTime(1959, 6, 8), firstRow.getColumnValue("birthdate"));
 	}
-	
+
 	/**
 	 * @see {@link SqlDataSetEvaluator#evaluate(DataSetDefinition,EvaluationContext)}
 	 */

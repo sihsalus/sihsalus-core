@@ -28,19 +28,19 @@ import org.springframework.validation.Errors;
  * Contains tests for {@link CalculationRegistrationValidator} class.
  */
 public class CalculationRegistrationValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	private CalculationRegistrationService calculationRegistrationService = null;
-	
+
 	private static final String TEST_DATA_PATH = "org/openmrs/calculation/include/";
-	
+
 	private static final String MODULE_TEST_DATA_XML = TEST_DATA_PATH + "moduleTestData.xml";
-	
+
 	@Before
 	public void before() throws Exception {
 		calculationRegistrationService = Context.getService(CalculationRegistrationService.class);
 		executeDataSet(MODULE_TEST_DATA_XML);
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationValidator#validate(Object,Errors)}
 	 */
@@ -55,7 +55,7 @@ public class CalculationRegistrationValidatorTest extends BaseModuleContextSensi
 		new CalculationRegistrationValidator().validate(calculationRegistration, errors);
 		Assert.assertEquals(true, errors.hasFieldErrors("calculationName"));
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationValidator#validate(Object,Errors)}
 	 */
@@ -70,7 +70,7 @@ public class CalculationRegistrationValidatorTest extends BaseModuleContextSensi
 		new CalculationRegistrationValidator().validate(calculationRegistration, errors);
 		Assert.assertEquals(true, errors.hasFieldErrors("token"));
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationValidator#validate(Object,Errors)}
 	 */
@@ -83,7 +83,7 @@ public class CalculationRegistrationValidatorTest extends BaseModuleContextSensi
 		new CalculationRegistrationValidator().validate(calculationRegistration, errors);
 		Assert.assertEquals(true, errors.hasFieldErrors("token"));
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationValidator#validate(Object,Errors)}
 	 */
@@ -98,7 +98,7 @@ public class CalculationRegistrationValidatorTest extends BaseModuleContextSensi
 		new CalculationRegistrationValidator().validate(calculationRegistration, errors);
 		Assert.assertEquals(true, errors.hasFieldErrors("providerClassName"));
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationValidator#validate(Object,Errors)}
 	 */
@@ -110,7 +110,7 @@ public class CalculationRegistrationValidatorTest extends BaseModuleContextSensi
 		new CalculationRegistrationValidator().validate(calculationRegistration, errors);
 		Assert.assertEquals(false, errors.hasFieldErrors("token"));
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationValidator#validate(Object,Errors)}
 	 */
@@ -125,7 +125,7 @@ public class CalculationRegistrationValidatorTest extends BaseModuleContextSensi
 		new CalculationRegistrationValidator().validate(calculationRegistration, errors);
 		Assert.assertEquals(false, errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationValidator#validate(Object,Errors)}
 	 */

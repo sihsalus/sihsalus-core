@@ -694,7 +694,7 @@ public class AllAppointmentRecurringPatternUpdateServiceTest {
 
     @Test
     public void shouldVoidTheCancelledProviders() {
-    	TimeZone.setDefault(TimeZone.getTimeZone("IST"));
+	TimeZone.setDefault(TimeZone.getTimeZone("IST"));
         RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
         AppointmentProviderDetail appointmentProviderDetail = new AppointmentProviderDetail();
         appointmentProviderDetail.setResponse(AppointmentProviderResponse.ACCEPTED.toString());

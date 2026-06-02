@@ -38,30 +38,30 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private static final String DRUG_ORDER_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
-	
+
 	private static final String BAD_DRUG_ORDER_UUID = "uie3b9a2-4de5-4b12-ac40-jk90sdh";
-	
+
 	private static final Integer DISCONTINUE_ORDER_ID = 1008;
-	
+
 	private static final String DISCONTINUE_ORDER_UUID = "b951a436-c775-4dfc-9432-e19446d18c28";
-	
+
 	private static final String MEDICATION_REQUEST_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
-	
+
 	private static final String MEDICATION_REQUEST_CONCEPT_ID = "4020";
-	
+
 	@Autowired
 	private ObjectProvider<FhirMedicationRequestDao> daoProvider;
-	
+
 	private FhirMedicationRequestDao dao;
-	
+
 	@Before
 	public void setup() throws Exception {
 		dao = daoProvider.getObject();
 		executeDataSet(MEDICATION_REQUEST_INITIAL_DATA_XML);
 	}
-	
+
 	@Test
 	public void getMedicationRequestByUuid_shouldGetByUuid() {
 		DrugOrder drugOrder = dao.get(DRUG_ORDER_UUID);
@@ -69,56 +69,56 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		assertThat(drugOrder.getUuid(), notNullValue());
 		assertThat(drugOrder.getUuid(), equalTo(DRUG_ORDER_UUID));
 	}
-	
+
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnNullWhenCalledWithBadUuid() {
 		DrugOrder drugOrder = dao.get(BAD_DRUG_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
 	}
-	
+
 	@Test
 	public void getMedicationRequestByUuids_shouldReturnEmptyListWhenCalledWithBadUuid() {
 		List<DrugOrder> drugOrders = dao.get(Collections.singletonList(BAD_DRUG_ORDER_UUID));
 		assertThat(drugOrders.size(), is(0));
 	}
-	
+
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnNullWhenRequestingDiscontinueOrder() {
 		DrugOrder drugOrder = dao.get(DISCONTINUE_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
 	}
-	
+
 	@Test
 	public void getMedicationRequestsByUuid_shouldNotReturnDiscontinueOrders() {
 		List<DrugOrder> drugOrders = dao.get(Arrays.asList(DRUG_ORDER_UUID, DISCONTINUE_ORDER_UUID));
 		assertThat(drugOrders.size(), is(1));
 		assertThat(drugOrders.get(0).getUuid(), is(DRUG_ORDER_UUID));
 	}
-	
+
 	@Test
 	public void getMedicationRequestsBySearchResults_shouldNotReturnDiscontinuedOrders() {
 		SearchParameterMap theParams = new SearchParameterMap();
-		
+
 		List<DrugOrder> drugOrders = dao.getSearchResults(theParams);
-		
+
 		assertThat(drugOrders, not(hasItems(hasId(DISCONTINUE_ORDER_ID))));
 		assertThat(drugOrders, hasSize(11));
 	}
-	
+
 	@Test
 	public void search_shouldReturnSearchQuery() {
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
 		codingToken.setValue(MEDICATION_REQUEST_CONCEPT_ID);
 		code.addAnd(codingToken);
-		
+
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
-		
+
 		Collection<DrugOrder> drugOrders = dao.getSearchResults(theParams);
-		
+
 		assertThat(drugOrders, notNullValue());
 		assertThat(drugOrders, hasSize(greaterThanOrEqualTo(1)));
 	}
-	
+
 }

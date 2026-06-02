@@ -17,17 +17,17 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 public class OpenmrsVersionTestListener extends AbstractTestExecutionListener {
-	
+
 	@Override
 	public void beforeTestClass(TestContext testContext) {
 		Class testClass = testContext.getTestClass();
-		
+
 		RequiresVersion requiresVersionAnnotation = (RequiresVersion) testClass.getAnnotation(RequiresVersion.class);
-		
+
 		if (requiresVersionAnnotation == null || StringUtils.isBlank(requiresVersionAnnotation.value())) {
 			return;
 		}
-		
+
 		if (!ModuleUtil.matchRequiredVersions(OpenmrsConstants.OPENMRS_VERSION,
 				requiresVersionAnnotation.value())) {
 			// silly hack to work with JUnit 4.11 where the AssumptionViolationException is not exposed as a public class

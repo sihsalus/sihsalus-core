@@ -17,7 +17,7 @@
      # the api jar and war files.                         #
      #                                                    #
      ###################################################### -->
- 
+
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
 
 	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
@@ -32,8 +32,8 @@
 		<level value="FATAL" />
 	</logger>
 
-	<!-- 
-		This controls the LoggingAdvice class that wraps around the OpenMRS services 
+	<!--
+		This controls the LoggingAdvice class that wraps around the OpenMRS services
 		WARN == don't log anything special for the services
 		INFO == log all setters
 		DEBUG == log all setters & getters &  execution time
@@ -41,11 +41,11 @@
 	<logger name="org.openmrs.api">
 		<level value="WARN" />
 	</logger>
-	
+
 	<logger name="org.openmrs.test">
 		<level value="INFO" />
 	</logger>
-	
+
 	<logger name="org.hibernate.SQL">
 		<level value="ERROR" />
 	</logger>

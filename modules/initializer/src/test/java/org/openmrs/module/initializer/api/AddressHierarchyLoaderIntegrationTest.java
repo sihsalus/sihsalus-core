@@ -49,53 +49,53 @@ import org.openmrs.util.OpenmrsConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class AddressHierarchyLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	protected static final String MODULES_TO_LOAD = "org/openmrs/module/addresshierarchy/include/"
 	        + ExtI18nConstants.MODULE_ARTIFACT_ID + ".omod";
-	
+
 	private InitializerMessageSource inizSrc;
-	
+
 	@Autowired
 	protected InitializerConfig cfg;
-	
+
 	@Autowired
 	private AddressHierarchyLoader loader;
-	
+
 	@Before
 	public void setup() {
 		// Disabling AH full caching otherwise loading takes too long
 		Context.getAdministrationService().saveGlobalProperty(new GlobalProperty(
 		        AddressHierarchyConstants.GLOBAL_PROP_INITIALIZE_ADDRESS_HIERARCHY_CACHE_ON_STARTUP, "false"));
-		
+
 		Context.getAdministrationService().saveGlobalProperty(
 		    new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST, "en_GB, km_KH"));
-		
+
 		Context.getAdministrationService()
 		        .saveGlobalProperty(new GlobalProperty(ExtI18nConstants.GLOBAL_PROP_REV_I18N_SUPPORT, "true"));
 		runtimeProperties.setProperty(ModuleConstants.RUNTIMEPROPERTY_MODULE_LIST_TO_LOAD, MODULES_TO_LOAD);
 		ModuleUtil.startup(runtimeProperties);
 		Assert.assertTrue(ModuleFactory.isModuleStarted(ExtI18nConstants.MODULE_ARTIFACT_ID));
-		
+
 		inizSrc = (InitializerMessageSource) Context.getMessageSourceService().getActiveMessageSource();
 	}
-	
+
 	@After
 	public void tearDown() {
 		Context.getAdministrationService()
 		        .saveGlobalProperty(new GlobalProperty(ExtI18nConstants.GLOBAL_PROP_REV_I18N_SUPPORT, "false"));
 		ModuleFactory.stopModule(ModuleFactory.getModuleById(ExtI18nConstants.MODULE_ARTIFACT_ID));
 	}
-	
+
 	@Test
 	@Verifies(value = "should load i18n messages specific to the address hierarchy configuration", method = "refreshCache()")
 	public void load_shouldLoadAddressHierarchyMessages() throws IOException {
-		
+
 		// Replay
 		loader.load();
 		AddressConfigurationLoader.loadAddressConfiguration();
 		AddressHierarchyService ahs = Context.getService(AddressHierarchyService.class);
 		InitializerService iniz = Context.getService(InitializerService.class);
-		
+
 		File csvFile = new File(
 		        Paths.get(iniz.getConfigDirPath(), InitializerConstants.DOMAIN_ADDR, "addresshierarchy.csv").toString());
 		LineNumberReader lnr = new LineNumberReader(new FileReader(csvFile));
@@ -104,21 +104,21 @@ public class AddressHierarchyLoaderIntegrationTest extends DomainBaseModuleConte
 		lnr.close();
 		Assert.assertTrue(csvLineCount < ahs.getAddressHierarchyEntryCount()); // there should be more entries than the
 		                                                                       // number of lines in CSV import
-		
+
 		// Working in km_KH
 		Context.getUserContext().setLocale(new Locale("km", "KH"));
 		PersonAddress address = new PersonAddress();
 		address.setStateProvince("កំពង់ស្ពឺ");
 		address.setCountyDistrict("ច្បារមន");
 		address.setAddress1("សុព័រទេព");
-		
+
 		AddressHierarchyI18nCache ahI18nCache = Context.getRegisteredComponent(ExtI18nConstants.COMPONENT_AH_REVI18N,
 		    AddressHierarchyI18nCache.class);
 		// Looking for possible villages based on an address provided in km_KH
 		AddressHierarchyLevel villageLevel = ahs.getAddressHierarchyLevelByAddressField(AddressField.CITY_VILLAGE);
 		List<AddressHierarchyEntry> villageEntries = ahs.getPossibleAddressHierarchyEntries(address, villageLevel);
 		Assert.assertFalse(CollectionUtils.isEmpty(villageEntries));
-		
+
 		// Verifying that possible villages are provided as i18n message codes
 		final Set<String> expectedVillageNames = new HashSet<String>(); // filled by looking at the test CSV
 		expectedVillageNames.add("addresshierarchy.tangTonle");
@@ -134,13 +134,13 @@ public class AddressHierarchyLoaderIntegrationTest extends DomainBaseModuleConte
 		for (AddressHierarchyEntry entry : villageEntries) {
 			Assert.assertTrue(expectedVillageNames.contains(entry.getName()));
 		}
-		
+
 		// Pinpointing a specific village
 		address.setCityVillage("ប៉ែលហែល");
-		
+
 		// Looking for possible villages
 		villageEntries = ahs.getPossibleAddressHierarchyEntries(address, villageLevel);
-		
+
 		// We should find our one village
 		Assert.assertEquals(1, villageEntries.size());
 		String messageKey = villageEntries.get(0).getName();

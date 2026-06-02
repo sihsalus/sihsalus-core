@@ -27,10 +27,10 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a personAttributeType
  */
 public class PersonAttributeTypeShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -40,7 +40,7 @@ public class PersonAttributeTypeShortSerializationTest extends BaseModuleContext
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PersonAttributeTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		PersonAttribute pa = Context.getPersonService().getPersonAttributeByUuid("0768f3da-b692-44b7-a33f-abf2c450474e");
 		String xmlOutput = Context.getSerializationService().serialize(pa, XStreamShortSerializer.class);
 		//should only serialize "uuid"
@@ -49,25 +49,25 @@ public class PersonAttributeTypeShortSerializationTest extends BaseModuleContext
 		//with short serialization, the "attributeType" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/personAttribute/attributeType/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldPersonShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "PersonAttributeTypeShortSerializationTest.xml" here 
+		 * We also need to use the "PersonAttributeTypeShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PersonAttributeTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<personAttribute id=\"1\" uuid=\"0768f3da-b692-44b7-a33f-abf2c450474e\" voided=\"false\">\n");
@@ -78,7 +78,7 @@ public class PersonAttributeTypeShortSerializationTest extends BaseModuleContext
 		xmlBuilder.append("  <attributeType id=\"5\" uuid=\"b3b6d540-a32e-44c7-91b3-292d97667518\"/>\n");
 		xmlBuilder.append("  <value></value>\n");
 		xmlBuilder.append("</personAttribute>\n");
-		
+
 		PersonAttribute pa = Context.getSerializationService().deserialize(xmlBuilder.toString(), PersonAttribute.class,
 		    XStreamShortSerializer.class);
 		assertEquals("b3b6d540-a32e-44c7-91b3-292d97667518", pa.getAttributeType().getUuid());

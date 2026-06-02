@@ -24,7 +24,7 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
  * Tests against the {@link EncounterTypeListController}
  */
 public class EncounterTypeListControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see EncounterTypeListController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
@@ -33,9 +33,9 @@ public class EncounterTypeListControllerTest extends BaseModuleWebContextSensiti
 	public void onSubmit_shouldNotFailIfNoEncounterTypesAreSelected() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "");
 		HttpServletResponse response = new MockHttpServletResponse();
-		
+
 		SimpleFormController controller = (SimpleFormController) applicationContext.getBean("encounterTypeList");
-		
+
 		// make sure an NPE isn't thrown here because no encounter types were selected
 		controller.handleRequest(request, response);
 	}

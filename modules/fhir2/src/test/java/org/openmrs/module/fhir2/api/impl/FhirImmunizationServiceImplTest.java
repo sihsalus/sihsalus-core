@@ -61,37 +61,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private static final String FREETEXT_COMMENT_CONCEPT_CODE = "161011";
-	
+
 	private static final String CIEL_CONCEPT_SOURCE = "CIEL";
-	
+
 	private static final String NEXT_DOSE_DATE_CONCEPT_CODE = "170000";
-	
+
 	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/Immunization_metadata.xml";
-	
+
 	private static final String IMMUNIZATIONS_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/services/impl/FhirImmunizationService_initial_data.xml";
-	
+
 	private static final String PRACTITIONER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPractitionerDaoImplTest_initial_data.xml";
-	
+
 	private static final String IMMUNIZATION_NEXT_DOSE_DATE = "/org/openmrs/module/fhir2/providers/immunization-next-dose-date.json";
-	
+
 	@Autowired
 	private FhirImmunizationServiceImpl service;
-	
+
 	@Autowired
 	private ConceptService conceptService;
-	
+
 	@Autowired
 	private ObsService obsService;
-	
+
 	@Autowired
 	@Qualifier("adminService")
 	private AdministrationService administrationService;
-	
+
 	@Autowired
 	private ImmunizationObsGroupHelper helper;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(IMMUNIZATIONS_METADATA_XML);
@@ -102,7 +102,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		administrationService.setGlobalProperty(FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY,
 		    "546cce2d-6d58-4097-ba92-206c1a2a0462");
 	}
-	
+
 	/**
 	 * Asserts the commons parts between the grouping obs and its members.
 	 *
@@ -115,13 +115,13 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertThat(obs.getPerson().getUuid(), is(patientUuid));
 		assertThat(obs.getEncounter().getEncounterType(), is(helper.getImmunizationsEncounterType()));
 		assertThat(obs.getEncounter().getVisit().getUuid(), is(visitUuid));
-		
+
 		Set<Provider> providers = obs.getEncounter().getProvidersByRole(helper.getAdministeringEncounterRole());
-		
+
 		assertThat(providers.size(), is(1));
 		assertThat(providers.iterator().next().getUuid(), is(providerUuid));
 	}
-	
+
 	@Test
 	public void saveImmunization_shouldCreateEncounterAndObsGroupWhenNewImmunization() {
 		// setup
@@ -141,19 +141,19 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		        + "        \"type\": \"Practitioner\"\n" + "      }\n" + "    }\n" + "  ],\n" + "  \"protocolApplied\": [\n"
 		        + "    {\n" + "      \"doseNumberPositiveInt\": 2,\n" + "      \"series\": \"Dose 2\"\n" + "    }\n"
 		        + "  ]\n" + "}");
-		
+
 		// replay
 		Immunization savedImmunization = service.create(newImmunization);
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
-		
+
 		// verify
 		helper.validateImmunizationObsGroup(obs);
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
-		
+
 		obs.getGroupMembers().forEach(o -> assertObsCommons(o, "a7e04421-525f-442f-8138-05b619d16def",
 		    "7d8c1980-6b78-11e0-93c3-18a905e044dc", "f9badd80-ab76-11e2-9e96-0800200c9a66"));
-		
+
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		assertThat(members.get(CIEL_984).getValueCoded().getUuid(), is("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
 		assertThat(members.get(CIEL_1410).getValueDatetime(),
@@ -164,7 +164,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertThat(members.get(CIEL_165907).getValueDatetime(),
 		    equalTo(new DateTimeType("2022-07-31T18:30:00.000Z").getValue()));
 	}
-	
+
 	@Test
 	public void saveImmunization_shouldSaveImmunizationWithNoteField() throws Exception {
 		FhirContext ctx = FhirContext.forR4();
@@ -180,13 +180,13 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertThat(members.get(CIEL_161011).getValueText(), is("This is a test immunization note."));
 		assertThat(savedImmunization.getNoteFirstRep().getText(), is("This is a test immunization note."));
 	}
-	
+
 	@Test
 	public void saveImmunization_shouldNotFailIfNoteConceptIsMissingAndNoteProvided() throws Exception {
 		// Remove the note concept since @Before loads it
 		conceptService.purgeConcept(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
-		
+
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
 		String json = IOUtils.toString(
@@ -201,7 +201,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertTrue(savedImmunization.getNote().isEmpty() || savedImmunization.getNoteFirstRep().getText() == null);
 		assertThat(savedImmunization.getNoteFirstRep().getText(), is(not("This is a test immunization note.")));
 	}
-	
+
 	@Test
 	public void saveImmunization_shouldSaveImmunizationWithNextDoseDateExtension() throws Exception {
 		FhirContext ctx = FhirContext.forR4();
@@ -210,49 +210,49 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		    StandardCharsets.UTF_8);
 		Immunization newImmunization = parser.parseResource(Immunization.class, json);
 		Immunization savedImmunization = service.create(newImmunization);
-		
+
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
-		
+
 		assertThat(members.get(CIEL_170000), notNullValue());
 		assertThat(members.get(CIEL_170000).getValueDatetime(), notNullValue());
 		assertThat(members.get(CIEL_170000).getValueDatetime().getTime(),
 		    is(new DateTimeType("2024-04-15T10:30:00Z").getValue().getTime()));
-		
+
 		assertThat(savedImmunization.hasExtension(), is(true));
 		assertThat(savedImmunization.getExtension().size(), is(1));
-		
+
 		org.hl7.fhir.r4.model.Extension extension = savedImmunization
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
 		assertThat(extension, notNullValue());
 		assertThat(extension.getValue(), notNullValue());
 		assertThat(extension.getValue() instanceof DateTimeType, is(true));
-		
+
 		DateTimeType dateTimeValue = (DateTimeType) extension.getValue();
 		assertThat(dateTimeValue.getValue(), notNullValue());
 		assertThat(dateTimeValue.getValue().getTime(), is(new DateTimeType("2024-04-15T10:30:00Z").getValue().getTime()));
 	}
-	
+
 	@Test
 	public void saveImmunization_shouldNotFailIfNextDoseDateConceptIsMissingAndExtensionProvided() throws Exception {
 		// Remove the next dose date concept since @Before loads it
 		conceptService.purgeConcept(conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		assertNull(conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
-		
+
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
 		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)),
 		    StandardCharsets.UTF_8);
 		Immunization newImmunization = parser.parseResource(Immunization.class, json);
 		Immunization savedImmunization = service.create(newImmunization);
-		
+
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
-		
+
 		assertNull(members.get(CIEL_170000));
 		assertThat(savedImmunization.hasExtension(), is(false));
 	}
-	
+
 	@Test
 	public void updateImmunization_shouldUpdateImmunizationAccordingly() {
 		// setup
@@ -274,19 +274,19 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		            + "        \"type\": \"Practitioner\"\n" + "      }\n" + "    }\n" + "  ],\n"
 		            + "  \"protocolApplied\": [\n" + "    {\n" + "      \"doseNumberPositiveInt\": 4\n" + "    }\n" + "  ]\n"
 		            + "}");
-		
+
 		// replay
 		Immunization savedImmunization = service.update("9353776b-dead-4588-8723-d687197d8438", updatedImmunization);
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
-		
+
 		// verify
 		helper.validateImmunizationObsGroup(obs);
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
-		
+
 		obs.getGroupMembers().forEach(o -> assertObsCommons(o, "a7e04421-525f-442f-8138-05b619d16def",
 		    "7d8c1980-6b78-11e0-93c3-18a905e044dc", "f9badd80-ab76-11e2-9e96-0800200c9a66"));
-		
+
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		assertThat(members.get(CIEL_984).getValueCoded().getUuid(), is("d144d24f-6913-4b63-9660-a9108c2bebef"));
 		assertThat(new DateTimeType(members.get(CIEL_1410).getValueDatetime()).toHumanDisplayLocalTimezone(),
@@ -296,7 +296,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertThat(members.get(CIEL_1420).getValueText(), is("YU765YT-1"));
 		assertThat(members.get(CIEL_165907).getValueDate(), equalTo(new DateType("2020-10-08").getValue()));
 	}
-	
+
 	@Test
 	public void updateImmunization_shouldUpdateNoteFieldWhenNoteConceptIsAvailable() throws Exception {
 		FhirContext ctx = FhirContext.forR4();
@@ -307,20 +307,20 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		    StandardCharsets.UTF_8);
 		Immunization created = service.create(parser.parseResource(Immunization.class, createJson));
 		assertThat(created.getNoteFirstRep().getText(), is("This is a test immunization note."));
-		
+
 		Immunization immunizationToBeUpdated = service.get(created.getId());
 		immunizationToBeUpdated.getNote().clear();
 		immunizationToBeUpdated.addNote().setText("This is an UPDATED immunization note.");
 		Immunization updated = service.update(created.getId(), immunizationToBeUpdated);
 		assertThat(updated.getNoteFirstRep().getText(), is("This is an UPDATED immunization note."));
 	}
-	
+
 	@Test
 	public void updateImmunization_shouldNotFailIfNoteConceptIsMissingButNoteIsProvided() throws Exception {
 		// Remove the note concept since @Before loads it
 		conceptService.purgeConcept(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
-		
+
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
 		String createJson = IOUtils.toString(
@@ -333,7 +333,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		Immunization updated = service.update(created.getId(), created);
 		assertTrue(updated.getNote().isEmpty() || updated.getNoteFirstRep().getText() == null);
 	}
-	
+
 	@Test
 	public void updateImmunization_shouldUpdateNextDoseDateExtensionWhenConceptIsAvailable() throws Exception {
 		FhirContext ctx = FhirContext.forR4();
@@ -343,28 +343,28 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		Immunization created = service.create(parser.parseResource(Immunization.class, json));
 		assertThat(created.hasExtension(), is(true));
 		assertThat(created.getExtension().size(), is(1));
-		
+
 		Immunization immunizationToBeUpdated = service.get(created.getId());
 		immunizationToBeUpdated.getExtension().clear();
 		org.hl7.fhir.r4.model.Extension newExtension = new org.hl7.fhir.r4.model.Extension();
 		newExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
 		newExtension.setValue(new DateTimeType("2024-07-15T10:30:00Z"));
 		immunizationToBeUpdated.addExtension(newExtension);
-		
+
 		Immunization updated = service.update(created.getId(), immunizationToBeUpdated);
 		assertThat(updated.hasExtension(), is(true));
 		assertThat(updated.getExtension().size(), is(1));
-		
+
 		org.hl7.fhir.r4.model.Extension extension = updated
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
 		assertThat(extension, notNullValue());
 		assertThat(extension.getValue(), notNullValue());
 		assertThat(extension.getValue() instanceof DateTimeType, is(true));
-		
+
 		DateTimeType dateTimeValue = (DateTimeType) extension.getValue();
 		assertThat(dateTimeValue.getValue(), notNullValue());
 		assertThat(dateTimeValue.getValue().getTime(), is(new DateTimeType("2024-07-15T10:30:00Z").getValue().getTime()));
-		
+
 		Obs obs = obsService.getObsByUuid(updated.getId());
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		assertThat(members.get(CIEL_170000), notNullValue());
@@ -372,19 +372,19 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertThat(members.get(CIEL_170000).getValueDatetime().getTime(),
 		    is(new DateTimeType("2024-07-15T10:30:00Z").getValue().getTime()));
 	}
-	
+
 	@Test
 	public void searchImmunizations_shouldFetchImmunizationsByPatientIdentifier() {
 		// setup
 		ReferenceAndListParam param = new ReferenceAndListParam();
 		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(SP_IDENTIFIER, "12345K")));
-		
+
 		// replay
 		List<Immunization> immunizations = get(service.searchImmunizations(param, null));
-		
+
 		// verify (in chronological order)
 		assertThat(immunizations.size(), is(2));
-		
+
 		{
 			Immunization immunization = immunizations.get(0);
 			Coding coding = immunization.getVaccineCode().getCoding().get(0);
@@ -405,7 +405,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 			assertThat(immunization.getProtocolApplied().size(), is(1));
 			assertThat(immunization.getProtocolApplied().get(0).getDoseNumberPositiveIntType().getValue(), is(3));
 		}
-		
+
 		{
 			Immunization immunization = immunizations.get(1);
 			Coding coding = immunization.getVaccineCode().getCoding().get(0);
@@ -427,10 +427,10 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 			assertThat(immunization.getProtocolApplied().get(0).getDoseNumberPositiveIntType().getValue(), is(11));
 		}
 	}
-	
+
 	private List<Immunization> get(IBundleProvider results) {
 		return results.getResources(0, results.size()).stream().filter(it -> it instanceof Immunization)
 		        .map(it -> (Immunization) it).collect(Collectors.toList());
 	}
-	
+
 }

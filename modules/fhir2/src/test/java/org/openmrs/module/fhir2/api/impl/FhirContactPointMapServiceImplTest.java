@@ -31,21 +31,21 @@ import org.openmrs.module.fhir2.model.FhirContactPointMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirContactPointMapServiceImplTest {
-	
+
 	@Mock
 	private FhirContactPointMapDao fhirContactPointMapDao;
-	
+
 	@Mock
 	private FhirContactPointMapServiceImpl fhirContactPointMapService;
-	
+
 	private FhirContactPointMap fhirContactPointMap;
-	
+
 	private PersonAttributeType personAttributeType;
-	
+
 	private LocationAttributeType locationAttributeType;
-	
+
 	private ProviderAttributeType providerAttributeType;
-	
+
 	@Before
 	public void setup() {
 		fhirContactPointMapService = new FhirContactPointMapServiceImpl();
@@ -55,96 +55,96 @@ public class FhirContactPointMapServiceImplTest {
 		providerAttributeType = new ProviderAttributeType();
 		fhirContactPointMap = new FhirContactPointMap();
 	}
-	
+
 	@Test
 	public void getFhirContactPointMapByUuid_shouldFhirContactPointMapByUuid() {
 		when(fhirContactPointMapDao.getFhirContactPointMapByUuid("497daha3-5750-4yf6-8g11-518c49f73445"))
 		        .thenReturn(Optional.of(fhirContactPointMap));
-		
+
 		Optional<FhirContactPointMap> result = fhirContactPointMapService
 		        .getFhirContactPointMapByUuid("497daha3-5750-4yf6-8g11-518c49f73445");
-		
+
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), equalTo(fhirContactPointMap));
 	}
-	
+
 	@Test
 	public void getFhirContactPointMapByUuid_shouldReturnEmptyFhirContactPointMapWhenNoUuidIsFound() {
 		when(fhirContactPointMapDao.getFhirContactPointMapByUuid(null)).thenReturn(Optional.empty());
-		
+
 		Optional<FhirContactPointMap> result = fhirContactPointMapService.getFhirContactPointMapByUuid(null);
-		
+
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void getFhirContactPointMapForPersonAttributeType_shouldReturnEmptyFhirContactPointMapWhenNoPersonAttributeTypeIsFound() {
 		when(fhirContactPointMapDao.getFhirContactPointMapForPersonAttributeType(null)).thenReturn(Optional.empty());
-		
+
 		Optional<FhirContactPointMap> result = fhirContactPointMapService.getFhirContactPointMapForPersonAttributeType(null);
-		
+
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void getFhirContactPointMapForPersonAttributeType_shouldReturnFhirContactPointMapWhenPersonAttributeTypeIsFound() {
 		when(fhirContactPointMapDao.getFhirContactPointMapForPersonAttributeType(personAttributeType))
 		        .thenReturn(Optional.of(fhirContactPointMap));
-		
+
 		Optional<FhirContactPointMap> result = fhirContactPointMapService
 		        .getFhirContactPointMapForPersonAttributeType(personAttributeType);
-		
+
 		assertThat(result.isPresent(), is(true));
 		assertThat(result, contains(equalTo(fhirContactPointMap)));
 	}
-	
+
 	@Test
 	public void getFhirContactPointMapForAttributeType_shouldReturnEmptyFhirContactPointMapWhenAttributeTypeIsNotFound() {
 		when(fhirContactPointMapDao.getFhirContactPointMapForAttributeType(null)).thenReturn(Optional.empty());
-		
+
 		Optional<FhirContactPointMap> result = fhirContactPointMapService.getFhirContactPointMapForAttributeType(null);
-		
+
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void getFhirContactPointMapForAttributeType_shouldReturnFhirContactPointMapWhenLocationAttributeTypeIsFound() {
 		when(fhirContactPointMapDao.getFhirContactPointMapForAttributeType(locationAttributeType))
 		        .thenReturn(Optional.of(fhirContactPointMap));
-		
+
 		Optional<FhirContactPointMap> result = fhirContactPointMapService
 		        .getFhirContactPointMapForAttributeType(locationAttributeType);
-		
+
 		assertThat(result.isPresent(), is(true));
 		assertThat(result, contains(equalTo(fhirContactPointMap)));
 	}
-	
+
 	@Test
 	public void getFhirContactPointMapForAttributeType_shouldReturnFhirContactPointMapWhenProviderAttributeTypeIsFound() {
 		when(fhirContactPointMapDao.getFhirContactPointMapForAttributeType(providerAttributeType))
 		        .thenReturn(Optional.of(fhirContactPointMap));
-		
+
 		Optional<FhirContactPointMap> result = fhirContactPointMapService
 		        .getFhirContactPointMapForAttributeType(providerAttributeType);
-		
+
 		assertThat(result.isPresent(), is(true));
 		assertThat(result, contains(equalTo(fhirContactPointMap)));
 	}
-	
+
 	@Test
 	public void saveFhirContactPointMap_ShouldReturnFhirContactPointMap() {
 		fhirContactPointMap.setSystem(ContactPoint.ContactPointSystem.EMAIL);
 		fhirContactPointMap.setUse(ContactPoint.ContactPointUse.WORK);
 		fhirContactPointMap.setRank(2);
 		when(fhirContactPointMapDao.saveFhirContactPointMap(fhirContactPointMap)).thenReturn(fhirContactPointMap);
-		
+
 		FhirContactPointMap result = fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap);
-		
+
 		assertThat(result.getSystem(), equalTo(ContactPoint.ContactPointSystem.EMAIL));
 		assertThat(result.getUse(), equalTo(ContactPoint.ContactPointUse.WORK));
 		assertThat(result.getRank(), equalTo(2));
 	}
-	
+
 	@Test
 	public void saveFhirContactPointMap_ShouldUpdateExistingFhirContactPointMap() {
 		FhirContactPointMap existingFhirContactPointMap = new FhirContactPointMap();
@@ -156,21 +156,21 @@ public class FhirContactPointMapServiceImplTest {
 		existingFhirContactPointMap.setRank(1);
 		when(fhirContactPointMapDao.saveFhirContactPointMap(existingFhirContactPointMap))
 		        .thenReturn(existingFhirContactPointMap);
-		
+
 		FhirContactPointMap result = fhirContactPointMapService.saveFhirContactPointMap(existingFhirContactPointMap);
 		assertThat(result.getAttributeTypeDomain(), equalTo("person"));
 		assertThat(result.getAttributeTypeId(), equalTo(10001));
 		assertThat(result.getSystem(), equalTo(ContactPoint.ContactPointSystem.PHONE));
 		assertThat(result.getUse(), equalTo(ContactPoint.ContactPointUse.WORK));
 		assertThat(result.getRank(), equalTo(1));
-		
+
 		fhirContactPointMap.setAttributeTypeDomain("person");
 		fhirContactPointMap.setAttributeTypeId(10001);
 		fhirContactPointMap.setSystem(ContactPoint.ContactPointSystem.EMAIL);
 		fhirContactPointMap.setUse(ContactPoint.ContactPointUse.HOME);
 		fhirContactPointMap.setRank(2);
 		when(fhirContactPointMapDao.saveFhirContactPointMap(fhirContactPointMap)).thenReturn(fhirContactPointMap);
-		
+
 		result = fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap);
 		assertThat(result.getAttributeTypeDomain(), equalTo("person"));
 		assertThat(result.getAttributeTypeId(), equalTo(10001));

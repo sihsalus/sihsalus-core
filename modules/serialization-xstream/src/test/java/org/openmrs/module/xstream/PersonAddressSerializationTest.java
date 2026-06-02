@@ -30,27 +30,27 @@ import static org.junit.Assert.assertFalse;
  * Test class that tests the serialization and deserialization of a PersonAddress
  */
 public class PersonAddressSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a person address and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldSerializePersonAddress() throws Exception {
-		
+
 		//instantiate object
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PersonAddressSerializationTest.xml");
 		authenticate();
 		PersonAddress pa = Context.getPersonService().getPersonAddressByUuid("921c0e23-d941-4bac-8ce4-ab0d0f7d8123");
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(pa, XStreamSerializer.class);
-		
+
 		XMLAssert.assertXpathEvaluatesTo("921c0e23-d941-4bac-8ce4-ab0d0f7d8123", "/personAddress/@uuid", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("1", "/personAddress/personAddressId", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("false", "/personAddress/@voided", xmlOutput);
@@ -65,10 +65,10 @@ public class PersonAddressSerializationTest extends BaseModuleContextSensitiveTe
 		XMLAssert.assertXpathEvaluatesTo("46202", "/personAddress/postalCode", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo(sdf.format(pa.getDateCreated()), "/personAddress/dateCreated", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -132,10 +132,10 @@ public class PersonAddressSerializationTest extends BaseModuleContextSensitiveTe
 		xmlBuilder.append("  <country>USA</country>\n");
 		xmlBuilder.append("  <postalCode>46202</postalCode>\n");
 		xmlBuilder.append("</personAddress>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		PersonAddress pa = Context.getSerializationService().deserialize(xmlBuilder.toString(), PersonAddress.class,
 		    XStreamSerializer.class);
 		assertEquals(1, pa.getPersonAddressId().intValue());

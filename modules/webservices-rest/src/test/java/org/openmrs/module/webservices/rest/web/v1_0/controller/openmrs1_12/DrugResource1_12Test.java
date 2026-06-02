@@ -16,12 +16,12 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_12.DrugResource1_12;
 
 public class DrugResource1_12Test extends BaseDelegatingResourceTest<DrugResource1_12, Drug> {
-	
+
 	@Override
 	public Drug newObject() {
 		return Context.getConceptService().getDrugByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -29,7 +29,7 @@ public class DrugResource1_12Test extends BaseDelegatingResourceTest<DrugResourc
 		assertPropNotPresent("units");
 		assertPropNotPresent("route");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -37,12 +37,12 @@ public class DrugResource1_12Test extends BaseDelegatingResourceTest<DrugResourc
 		assertPropNotPresent("units");
 		assertPropNotPresent("route");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "ASPIRIN";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_12.DRUG_UUID;

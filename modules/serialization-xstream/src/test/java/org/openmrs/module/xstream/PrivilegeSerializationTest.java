@@ -27,10 +27,10 @@ import static org.junit.Assert.assertEquals;
  * Test class that tests the serialization and deserialization of a privilege
  */
 public class PrivilegeSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a privilege and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -40,19 +40,19 @@ public class PrivilegeSerializationTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PrivilegeSerializationTest.xml");
 		authenticate();
-		
+
 		Privilege p = Context.getUserService().getPrivilege("Delete Cohorts");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(p, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("Delete Cohorts", "/privilege/privilege", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("afc993ec-8b43-4af2-9974-54c7f98214ce", "/privilege/@uuid", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("Able to add a cohort to the system", "/privilege/description", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -63,7 +63,7 @@ public class PrivilegeSerializationTest extends BaseModuleContextSensitiveTest {
 		xmlBuilder.append("  <description>Able to add a cohort to the system</description>\n");
 		xmlBuilder.append("  <privilege>Delete Cohorts</privilege>\n");
 		xmlBuilder.append("</privilege>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		Privilege p = Context.getSerializationService().deserialize(xmlBuilder.toString(), Privilege.class,
 		    XStreamSerializer.class);

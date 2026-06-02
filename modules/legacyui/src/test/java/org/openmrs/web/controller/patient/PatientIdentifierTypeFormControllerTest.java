@@ -25,62 +25,62 @@ import org.springframework.web.servlet.ModelAndView;
  * Tests the {@link PatientIdentifierTypeFormController}
  */
 public class PatientIdentifierTypeFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private MockHttpServletRequest request;
-	
+
 	private HttpServletResponse response;
-	
+
 	private PatientIdentifierTypeFormController controller;
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet("org/openmrs/web/patient/include/PatientIdentifierTypeFormControllerTest.xml");
 		controller = (PatientIdentifierTypeFormController) applicationContext.getBean("patientIdentifierTypeForm");
 		controller.setFormView("index.htm");
 		controller.setSuccessView("patientIdentifierType.form");
-		
+
 		request = new MockHttpServletRequest("POST", "/admin/patients/patientIdentifierType.form?patientIdentifierTypeId=1");
 		request.setSession(new MockHttpSession(null));
 		request.setContentType("application/x-www-form-urlencoded");
 		request.addParameter("name", "TRUNK");
 		response = new MockHttpServletResponse();
 	}
-	
+
 	@Test
 	public void shouldNotSavePatientIdentifierTypeWhenPatientIdentifierTypesAreLocked() throws Exception {
 		request.addParameter("save", "Save Identifier Type");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The save attempt should have failed!");
 		Assertions.assertNotEquals("patientIdentifierType.form", mav.getViewName());
 		Assertions.assertNotNull(Context.getPersonService().getPersonAttributeType(1));
 	}
-	
+
 	@Test
 	public void shouldNotRetirePatientIdentifierTypeWhenPatientIdentifierTypesAreLocked() throws Exception {
 		request.addParameter("retire", "Retire Identifier Type");
 		request.addParameter("retireReason", "Same reason");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The retire attempt should have failed!");
 		Assertions.assertNotEquals("patientIdentifierType.form", mav.getViewName());
 		Assertions.assertNotNull(Context.getPersonService().getPersonAttributeType(1));
 	}
-	
+
 	@Test
 	public void shouldNotUnretirePatientIdentifierTypeWhenPatientIdentifierTypesAreLocked() throws Exception {
 		request.addParameter("unretire", "Unretire Identifier Type");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The unretire attempt should have failed!");
 		Assertions.assertNotEquals("patientIdentifierType.form", mav.getViewName());
 		Assertions.assertNotNull(Context.getPersonService().getPersonAttributeType(1));
 	}
-	
+
 	@Test
 	public void shouldNotDeletePatientIdentifierTypeWhenPatientIdentifierTypesAreLocked() throws Exception {
 		request.addParameter("purge", "Delete Identifier Type");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The delete attempt should have failed!");
 		Assertions.assertNotEquals("patientIdentifierType.form", mav.getViewName());

@@ -38,15 +38,15 @@ import java.util.Date;
 import java.util.List;
 
 public class NumericObsCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -70,7 +70,7 @@ public class NumericObsCohortDefinitionEvaluatorTest extends BaseModuleContextSe
 		Assert.assertTrue(cohort.contains(21));
 		Assert.assertTrue(cohort.contains(22));
 	}
-	
+
 	/**
 	 * @see {@link NumericObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -91,7 +91,7 @@ public class NumericObsCohortDefinitionEvaluatorTest extends BaseModuleContextSe
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(7));
 	}
-	
+
 	/**
 	 * @see {@link NumericObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -113,7 +113,7 @@ public class NumericObsCohortDefinitionEvaluatorTest extends BaseModuleContextSe
 		Assert.assertTrue(cohort.contains(20));
 		Assert.assertTrue(cohort.contains(22));
 	}
-	
+
 	/**
 	 * @see {@link NumericObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */

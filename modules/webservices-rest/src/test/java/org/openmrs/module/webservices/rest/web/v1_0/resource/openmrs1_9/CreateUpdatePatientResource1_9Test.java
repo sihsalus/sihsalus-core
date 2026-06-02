@@ -31,14 +31,14 @@ import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
  * Integration tests for the framework that lets a resource handle an entire class hierarchy
  */
 public class CreateUpdatePatientResource1_9Test extends BaseModuleWebContextSensitiveTest {
-	
+
 	private PatientResource1_9 resource;
-	
+
 	@BeforeEach
 	public void beforeEachTests() throws Exception {
 		resource = (PatientResource1_9) Context.getService(RestService.class).getResourceBySupportedClass(Patient.class);
 	}
-	
+
 	@Test
 	public void shouldCreatePatient() throws Exception {
 		SimpleObject patientSimpleObject = new SimpleObject();
@@ -47,7 +47,7 @@ public class CreateUpdatePatientResource1_9Test extends BaseModuleWebContextSens
 		SimpleObject created = (SimpleObject) resource.create(patientSimpleObject, new RequestContext());
 		Assertions.assertEquals("id-B - Ram Kabir", created.get("display"));
 	}
-	
+
 	@Test
 	public void shouldUpdatePatient() throws Exception {
 		SimpleObject patientSimpleObject = new SimpleObject();
@@ -55,9 +55,9 @@ public class CreateUpdatePatientResource1_9Test extends BaseModuleWebContextSens
 		    getClass().getClassLoader().getResourceAsStream("update_patient.json"), HashMap.class));
 		SimpleObject created = (SimpleObject) resource.update("da7f524f-27ce-4bb2-86d6-6d1d05312bd5", patientSimpleObject,
 		    new RequestContext());
-		
+
 		Date birthdate = (Date) ConversionUtil.convert("1979-12-08T00:00:00.000+0530", Date.class);
-		
+
 		Assertions.assertEquals("101-6 - Rama Kabira", created.get("display"));
 		Map<String, Object> person = (Map<String, Object>) created.get("person");
 		Assertions.assertEquals("F", person.get("gender"));
@@ -72,5 +72,5 @@ public class CreateUpdatePatientResource1_9Test extends BaseModuleWebContextSens
 		List<Map> attributes = (List<Map>) person.get("attributes");
 		Assertions.assertEquals("Muslim", attributes.get(0).get("display"));
 	}
-	
+
 }

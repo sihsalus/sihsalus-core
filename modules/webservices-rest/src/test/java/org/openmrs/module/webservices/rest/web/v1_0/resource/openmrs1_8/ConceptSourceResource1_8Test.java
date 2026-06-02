@@ -15,12 +15,12 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ConceptSourceResource1_8Test extends BaseDelegatingResourceTest<ConceptSourceResource1_8, ConceptSource> {
-	
+
 	@Override
 	public ConceptSource newObject() {
 		return Context.getConceptService().getConceptSourceByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -29,7 +29,7 @@ public class ConceptSourceResource1_8Test extends BaseDelegatingResourceTest<Con
 		assertPropEquals("hl7Code", getObject().getHl7Code());
 		assertPropEquals("retired", getObject().isRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -39,15 +39,15 @@ public class ConceptSourceResource1_8Test extends BaseDelegatingResourceTest<Con
 		assertPropEquals("retired", getObject().isRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "ICD-10";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.CONCEPT_SOURCE_UUID;
 	}
-	
+
 }

@@ -32,31 +32,31 @@ import java.util.List;
 import java.util.Locale;
 
 public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest {
-	
+
 	private static final String SESSION_ID = "test-session-id";
-	
+
 	private static final String UNKNOWN_LOCATION_UUID = "8d6c993e-c2cc-11de-8d13-0010c6dffd0f"; // Unknown Location
-	
+
 	private static final String XANADU_UUID = "9356400c-a5a2-4532-8f2b-2361b3446eb8"; // Xanadu
-	
+
 	private SessionController1_9 controller;
-	
+
 	private HttpServletRequest hsr;
-	
+
 	@BeforeEach
 	public void before() {
 		controller = Context.getRegisteredComponents(SessionController1_9.class).iterator().next(); // should only be 1
 		MockHttpServletRequest mockHsr = new MockHttpServletRequest();
 		mockHsr.setSession(new MockHttpSession(new MockServletContext(), SESSION_ID));
 		hsr = mockHsr;
-		
+
 		Context.getAdministrationService().saveGlobalProperty(
 		    new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST, "en_GB, sp, fr"));
 		Context.getUserContext().setLocation(Context.getLocationService().getLocationByUuid(UNKNOWN_LOCATION_UUID));
 	}
-	
+
 	/**
-	 * @see SessionController1_9#delete(HttpServletRequest) 
+	 * @see SessionController1_9#delete(HttpServletRequest)
 	 * @verifies log the client out
 	 */
 	@Test
@@ -66,7 +66,7 @@ public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest 
 		Assertions.assertFalse(Context.isAuthenticated());
 		Assertions.assertNull(hsr.getSession(false));
 	}
-	
+
 	/**
 	 * @see SessionController1_9#get()
 	 * @verifies return the session id if the user is authenticated
@@ -101,7 +101,7 @@ public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest 
 		Assertions.assertArrayEquals(Context.getAdministrationService().getAllowedLocales().toArray(),
 				((List<Locale>) PropertyUtils.getProperty(ret, "allowedLocales")).toArray());
 	}
-	
+
 	@Test
 	public void get_shouldReturnLocaleInfoIfTheUserIsAuthenticated() throws Exception {
 		Assertions.assertTrue(Context.isAuthenticated());
@@ -110,7 +110,7 @@ public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest 
 		Assertions.assertArrayEquals(Context.getAdministrationService().getAllowedLocales().toArray(),
 		    ((List<Locale>) PropertyUtils.getProperty(ret, "allowedLocales")).toArray());
 	}
-	
+
 	@Test
 	public void get_shouldReturnLocationIfTheUserIsAuthenticated() throws Exception {
 		Assertions.assertTrue(Context.isAuthenticated());
@@ -141,7 +141,7 @@ public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest 
 		Assertions.assertNotNull(currentProvider);
 		Assertions.assertTrue(currentProvider.toString().contains("Super User"));
 	}
-	
+
 	@Test
 	public void post_shouldSetTheUserLocale() throws Exception {
 		Locale newLocale = new Locale("sp");
@@ -153,7 +153,7 @@ public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest 
 		Assertions.assertArrayEquals(Context.getAdministrationService().getAllowedLocales().toArray(),
 				((List<Locale>) PropertyUtils.getProperty(ret, "allowedLocales")).toArray());
 	}
-	
+
 	@Test
 	public void post_shouldFailWhenSettingIllegalLocale() throws Exception {
 		assertThrows(APIException.class, () -> {
@@ -162,7 +162,7 @@ public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest 
 			controller.post(hsr, new ObjectMapper().readValue(content, HashMap.class));
 		});
 	}
-	
+
 	@Test
 	public void post_shouldFailWhenSettingDisallowedLocale() throws Exception {
 		assertThrows(APIException.class, () -> {
@@ -171,7 +171,7 @@ public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest 
 			controller.post(hsr, new ObjectMapper().readValue(content, HashMap.class));
 		});
 	}
-	
+
 	@Test
 	public void post_shouldSetTheSessionLocation() throws Exception {
 		String content = "{\"sessionLocation\":\"" + XANADU_UUID + "\"}";
@@ -183,7 +183,7 @@ public class SessionController1_9Test extends BaseModuleWebContextSensitiveTest 
 		Assertions.assertTrue(responseLoc.toString().contains("display=Xanadu"),
 				responseLoc.toString() + " should contain 'display=Xanadu'");
 	}
-	
+
 	@Test
 	public void post_shouldFailWhenSettingNonexistantLocation() throws Exception {
 		assertThrows(APIException.class, () -> {

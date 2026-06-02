@@ -19,20 +19,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class SpecialitiesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("specialityService")
 	private SpecialityService sps;
-	
+
 	@Autowired
 	private SpecialitiesLoader loader;
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verif speciality name
 		{
 			Speciality speciality = sps.getSpecialityByUuid("21ec1632-420f-473c-b380-31ed45214362");
@@ -47,6 +47,6 @@ public class SpecialitiesLoaderIntegrationTest extends DomainBaseModuleContextSe
 		{
 			Assert.assertEquals(3, sps.getAllSpecialities().size()); //Unfortunately, there is no #specialityService.getSpecialityByName method.
 		}
-		
+
 	}
 }

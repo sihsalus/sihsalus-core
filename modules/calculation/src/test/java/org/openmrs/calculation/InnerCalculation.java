@@ -26,7 +26,7 @@ import org.openmrs.calculation.result.CalculationResultMap;
  * Calculation used by {@link OuterCalculation}. This has a side-effect, of retiring a concept.
  */
 public class InnerCalculation extends BaseCalculation implements PatientCalculation {
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(java.util.Collection, java.util.Map, org.openmrs.calculation.patient.PatientCalculationContext)
 	 */
@@ -36,10 +36,10 @@ public class InnerCalculation extends BaseCalculation implements PatientCalculat
 		if (concept.isRetired()) {
 			throw new RuntimeException("Concept must not be retired");
 		}
-		
+
 		Context.getConceptService().retireConcept(concept, "Retiring for test purposes");
-		
+
 		return new CalculationResultMap();
 	}
-	
+
 }

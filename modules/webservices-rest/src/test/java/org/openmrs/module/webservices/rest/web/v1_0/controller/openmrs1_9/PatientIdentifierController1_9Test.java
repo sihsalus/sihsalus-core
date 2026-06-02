@@ -37,69 +37,69 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests CRUD operations for {@link PatientIdentifier}s via web service calls
  */
 public class PatientIdentifierController1_9Test extends MainResourceControllerTest {
-	
+
 	private PatientService service;
-	
+
 	@Override
 	public String getURI() {
 		return "patient/" + RestTestConstants1_8.PATIENT_UUID + "/identifier";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_8.PATIENT_IDENTIFIER_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return service.getPatientByUuid(RestTestConstants1_8.PATIENT_UUID).getActiveIdentifiers().size();
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getPatientService();
 	}
-	
+
 	@Test
 	public void shouldGetAPatientIdentifierByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		PatientIdentifier patientIdentifier = service.getPatientIdentifierByUuid(getUuid());
 		assertEquals(patientIdentifier.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(patientIdentifier.getIdentifier(), PropertyUtils.getProperty(result, "identifier"));
 		assertNotNull(PropertyUtils.getProperty(result, "identifierType"));
 	}
-	
+
 	@Test
 	public void shouldListAllPatientIdentifiersForAPatient() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(result);
 		assertEquals(getAllCount(), Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldAddANewIdentifierToAPatient() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject patientIdentifier = new SimpleObject();
 		patientIdentifier.add("identifier", "abc123ez");
 		patientIdentifier.add("identifierType", "2f470aa8-1d73-43b7-81b5-01f0c0dfa53c");
 		patientIdentifier.add("location", RestTestConstants1_8.LOCATION_UUID);
-		
+
 		String json = new ObjectMapper().writeValueAsString(patientIdentifier);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newPatientIdentifier = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(newPatientIdentifier, "uuid"));
 		assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldEditAPatientIdentifier() throws Exception {
 		final String newLocationUuid = RestTestConstants1_8.LOCATION_UUID;
@@ -107,15 +107,15 @@ public class PatientIdentifierController1_9Test extends MainResourceControllerTe
 		assertFalse(newLocationUuid.equals(patientIdentifierType.getLocation().getUuid()));
 		SimpleObject patientIdentifier = new SimpleObject();
 		patientIdentifier.add("location", newLocationUuid);
-		
+
 		String json = new ObjectMapper().writeValueAsString(patientIdentifier);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
 		req.setContent(json.getBytes());
 		handle(req);
 		assertEquals(newLocationUuid, patientIdentifierType.getLocation().getUuid());
 	}
-	
+
 	@Test
 	public void shouldUnsetOtherPreferredIdentifiers() throws Exception {
 		PatientIdentifier exisitingIdentifier = service.getPatientIdentifierByUuid(getUuid());
@@ -126,23 +126,23 @@ public class PatientIdentifierController1_9Test extends MainResourceControllerTe
 		patientIdentifier.add("identifierType", "2f470aa8-1d73-43b7-81b5-01f0c0dfa53c");
 		patientIdentifier.add("location", RestTestConstants1_8.LOCATION_UUID);
 		patientIdentifier.add("preferred", true);
-		
+
 		String json = new ObjectMapper().writeValueAsString(patientIdentifier);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newPatientIdentifier = deserialize(handle(req));
 		Object uuid = PropertyUtils.getProperty(newPatientIdentifier, "uuid");
 		assertNotNull(uuid);
 		assertEquals(originalCount + 1, getAllCount());
-		
+
 		PatientIdentifier newIdentifer = service.getPatientIdentifierByUuid(uuid.toString());
 		assertFalse(exisitingIdentifier.isPreferred());
 		assertTrue(newIdentifer.isPreferred());
 		assertEquals("abc123ez", newIdentifer.getIdentifier());
 	}
-	
+
 	@Test
 	public void shouldVoidAPatientIdentifier() throws Exception {
 		assertEquals(false, service.getPatientIdentifierByUuid(getUuid()).isVoided());
@@ -154,7 +154,7 @@ public class PatientIdentifierController1_9Test extends MainResourceControllerTe
 		assertEquals(true, service.getPatientIdentifierByUuid(getUuid()).isVoided());
 		assertEquals(reason, service.getPatientIdentifierByUuid(getUuid()).getVoidReason());
 	}
-	
+
 	@Test
 	public void shouldListAllPatientIdentifiersWithVoidedIdentifiersForAPatient() throws Exception {
 		assertEquals(false, service.getPatientIdentifierByUuid(getUuid()).isVoided());
@@ -166,12 +166,12 @@ public class PatientIdentifierController1_9Test extends MainResourceControllerTe
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter(
 		        RestConstants.REQUEST_PROPERTY_FOR_INCLUDE_ALL, "true"))));
 		assertNotEquals(getAllCount(), Util.getResultsSize(result));
-		
+
 		SimpleObject nextResult = deserialize(handle(newGetRequest(getURI(), new Parameter(
 		        RestConstants.REQUEST_PROPERTY_FOR_INCLUDE_ALL, "false"))));
 		assertEquals(getAllCount(), Util.getResultsSize(nextResult));
 	}
-	
+
 	@Test
 	public void shouldPurgeAPatientIdentifier() throws Exception {
 		long initialIdCount = getAllCount();
@@ -182,13 +182,13 @@ public class PatientIdentifierController1_9Test extends MainResourceControllerTe
 		assertNull(service.getPatientIdentifierByUuid(getUuid()));
 		assertEquals(--initialIdCount, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
 

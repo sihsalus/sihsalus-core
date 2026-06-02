@@ -33,45 +33,45 @@ import org.openmrs.module.queue.model.Queue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QueueServicesWrapperTest {
-	
+
 	QueueServicesWrapper wrapper;
-	
+
 	@Mock
 	private QueueService queueService;
-	
+
 	@Mock
 	private QueueEntryService queueEntryService;
-	
+
 	@Mock
 	private QueueRoomService queueRoomService;
-	
+
 	@Mock
 	private RoomProviderMapService roomProviderMapService;
-	
+
 	@Mock
 	private AdministrationService administrationService;
-	
+
 	@Mock
 	private ConceptService conceptService;
-	
+
 	@Mock
 	private LocationService locationService;
-	
+
 	@Mock
 	private PatientService patientService;
-	
+
 	@Mock
 	private VisitService visitService;
-	
+
 	@Mock
 	private ProviderService providerService;
-	
+
 	private Queue queue;
-	
+
 	private Concept conceptSet1;
-	
+
 	private Concept conceptSet2;
-	
+
 	@Before
 	public void setupMocks() {
 		MockitoAnnotations.openMocks(this);
@@ -85,19 +85,19 @@ public class QueueServicesWrapperTest {
 		when(conceptService.getConceptByUuid(conceptSet1.getUuid())).thenReturn(conceptSet1);
 		queue = new Queue();
 	}
-	
+
 	@Test(expected = IllegalStateException.class)
 	public void getAllowedServices_shouldThrowErrorIfNoGpConfigured() {
 		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_SERVICE)).thenReturn(null);
 		wrapper.getAllowedServices();
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void getAllowedServices_shouldThrowErrorIfInvalidGpConfigured() {
 		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_SERVICE)).thenReturn("invalid");
 		wrapper.getAllowedServices();
 	}
-	
+
 	@Test
 	public void getAllowedServices_shouldSucceedIfValidGpConfigured() {
 		String conceptSetUuid = conceptSet1.getUuid();
@@ -105,19 +105,19 @@ public class QueueServicesWrapperTest {
 		List<Concept> services = wrapper.getAllowedServices();
 		assertThat(services.size(), equalTo(2));
 	}
-	
+
 	@Test(expected = IllegalStateException.class)
 	public void getAllowedPriorities_shouldThrowErrorIfNoGpConfigured() {
 		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_PRIORITY)).thenReturn(null);
 		wrapper.getAllowedPriorities(queue);
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void getAllowedPriorities_shouldThrowErrorIfInvalidGpConfigured() {
 		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_PRIORITY)).thenReturn("invalid");
 		wrapper.getAllowedPriorities(queue);
 	}
-	
+
 	@Test
 	public void getAllowedPriorities_shouldSucceedIfValidGpConfigured() {
 		String conceptSetUuid = conceptSet1.getUuid();
@@ -125,26 +125,26 @@ public class QueueServicesWrapperTest {
 		List<Concept> priorities = wrapper.getAllowedPriorities(queue);
 		assertThat(priorities.size(), equalTo(2));
 	}
-	
+
 	@Test
 	public void getAllowedPriorities_shouldSucceedIfConceptConfiguredOnQueue() {
 		queue.setPriorityConceptSet(conceptSet2);
 		List<Concept> priorities = wrapper.getAllowedPriorities(queue);
 		assertThat(priorities.size(), equalTo(1));
 	}
-	
+
 	@Test(expected = IllegalStateException.class)
 	public void getAllowedStatuses_shouldThrowErrorIfNoGpConfigured() {
 		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_STATUS)).thenReturn(null);
 		wrapper.getAllowedStatuses(queue);
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void getAllowedStatuses_shouldThrowErrorIfInvalidGpConfigured() {
 		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_STATUS)).thenReturn("invalid");
 		wrapper.getAllowedStatuses(queue);
 	}
-	
+
 	@Test
 	public void getAllowedStatuses_shouldSucceedIfValidGpConfigured() {
 		String conceptSetUuid = conceptSet1.getUuid();
@@ -152,7 +152,7 @@ public class QueueServicesWrapperTest {
 		List<Concept> statuses = wrapper.getAllowedStatuses(queue);
 		assertThat(statuses.size(), equalTo(2));
 	}
-	
+
 	@Test
 	public void getAllowedStatuses_shouldSucceedIfConceptConfiguredOnQueue() {
 		queue.setStatusConceptSet(conceptSet2);

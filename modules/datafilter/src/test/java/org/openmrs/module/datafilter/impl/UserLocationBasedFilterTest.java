@@ -26,30 +26,30 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class UserLocationBasedFilterTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "persons.xml");
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "users.xml");
 		DataFilterTestUtils.disableProgramBasedFiltering();
 	}
-	
+
 	private Collection<User> getUsers() {
 		return userService.getUsers("Mulemba", null, true, null, null);
 	}
-	
+
 	@Test
 	public void getUsers_shouldReturnNoUsersIfTheUserIsNotGrantedAccessToAnyBasis() {
 		reloginAs("dBeckham", "test");
 		assertEquals(0, getUsers().size());
 	}
-	
+
 	@Test
 	public void getUsers_shouldReturnUsersAccessibleToTheUser() {
 		reloginAs("dyorke", "test");
@@ -58,7 +58,7 @@ public class UserLocationBasedFilterTest extends BaseFilterTest {
 		assertEquals(expCount, users.size());
 		assertTrue(TestUtil.containsId(users, 10001));
 		assertTrue(TestUtil.containsId(users, 10002));
-		
+
 		service.grantAccess(Context.getAuthenticatedUser(), new Location(4001));
 		expCount = 3;
 		users = getUsers();
@@ -67,18 +67,18 @@ public class UserLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(users, 10002));
 		assertTrue(TestUtil.containsId(users, 10003));
 	}
-	
+
 	@Test
 	public void getUsers_shouldReturnAllUsersIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
 		assertEquals(7, getUsers().size());
 	}
-	
+
 	@Test
 	public void getUsers_shouldReturnAllUsersIfLocationFilteringIsDisabled() {
 		DataFilterTestUtils.disableLocationFiltering();
 		reloginAs("dyorke", "test");
 		assertEquals(7, getUsers().size());
 	}
-	
+
 }

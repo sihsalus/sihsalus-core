@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ProviderController2_0Test extends MainResourceControllerTest {
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(RestTestConstants2_0.PROVIDER_TEST_DATA_XML);
 	}
-	
+
 	@Test
 	public void doGetAll_shouldProcessIncludeAllParameter() throws Exception {
 
@@ -88,7 +88,7 @@ public class ProviderController2_0Test extends MainResourceControllerTest {
 		}
 
 	}
-	
+
 	@Test
 	public void doSearch_shouldProcessIncludeAll() throws Exception {
 
@@ -157,17 +157,17 @@ public class ProviderController2_0Test extends MainResourceControllerTest {
 			assertThat(array, Matchers.arrayContainingInAnyOrder(allUuids.toArray()));
 		}
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "provider";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants2_0.PROVIDER_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return Context.getProviderService().getAllProviders(false).size();

@@ -30,26 +30,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public class CohortMembershipResource2_1WebTest extends MainResourceControllerTest {
-	
+
 	public static final String COHORT_NAME = "A cohort";
-	
+
 	public Date startDate;
-	
+
 	public Date endDate;
-	
+
 	@Autowired
 	private CohortService cohortService;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		startDate = DateUtils.parseDate("2017-01-01", "yyyy-MM-dd");
 		endDate = DateUtils.parseDate("2017-02-28 23:59:59", "yyyy-MM-dd HH:mm:ss");
-		
+
 		CohortMembership membership = new CohortMembership(6);
 		membership.setUuid(RestTestConstants2_1.COHORT_MEMBERSHIP_UUID);
 		membership.setStartDate(startDate);
 		membership.setEndDate(endDate);
-		
+
 		Cohort cohort = new Cohort();
 		cohort.addMembership(membership);
 		cohort.addMembership(new CohortMembership(7));
@@ -58,9 +58,9 @@ public class CohortMembershipResource2_1WebTest extends MainResourceControllerTe
 		cohort.setUuid(RestTestConstants2_1.COHORT_UUID);
 		cohortService.saveCohort(cohort);
 	}
-	
+
 	// there's a test for GET ALL in the superclass
-	
+
 	@Test
 	public void shouldCreateNew() throws Exception {
 		String uuidForPatient8 = "8adf539e-4b5a-47aa-80c0-ba1025c957fa";
@@ -71,7 +71,7 @@ public class CohortMembershipResource2_1WebTest extends MainResourceControllerTe
 		assertThat((String) result.get("startDate"), new SameDatetimeMatcher("2017-02-01"));
 		assertNull(result.get("endDate"));
 	}
-	
+
 	@Test
 	public void shouldUpdate() throws Exception {
 		SimpleObject post = new SimpleObject().add("endDate", "2017-02-01");
@@ -80,14 +80,14 @@ public class CohortMembershipResource2_1WebTest extends MainResourceControllerTe
 		assertThat((String) result.get("uuid"), is(RestTestConstants2_1.COHORT_MEMBERSHIP_UUID));
 		assertThat((String) result.get("endDate"), new SameDatetimeMatcher("2017-02-01"));
 	}
-	
+
 	@Test
 	public void shouldVoid() throws Exception {
 		MockHttpServletRequest request = newDeleteRequest(getURI() + "/" + getUuid());
 		handle(request);
 		assertTrue(cohortService.getCohortMembershipByUuid(RestTestConstants2_1.COHORT_MEMBERSHIP_UUID).getVoided());
 	}
-	
+
 	@Test
 	public void shouldPurge() throws Exception {
 		MockHttpServletRequest request = newDeleteRequest(getURI() + "/" + getUuid());
@@ -95,17 +95,17 @@ public class CohortMembershipResource2_1WebTest extends MainResourceControllerTe
 		handle(request);
 		assertNull(cohortService.getCohortMembershipByUuid(RestTestConstants2_1.COHORT_MEMBERSHIP_UUID));
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "cohort/" + RestTestConstants2_1.COHORT_UUID + "/membership";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants2_1.COHORT_MEMBERSHIP_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 2;

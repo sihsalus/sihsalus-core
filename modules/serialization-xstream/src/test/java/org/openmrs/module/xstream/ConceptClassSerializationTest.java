@@ -30,10 +30,10 @@ import static org.junit.Assert.assertTrue;
  * Test class that tests the serialization and deserialization of a conceptClass
  */
 public class ConceptClassSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a conceptClass and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -43,11 +43,11 @@ public class ConceptClassSerializationTest extends BaseModuleContextSensitiveTes
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptClassSerializationTest.xml");
 		authenticate();
-		
+
 		ConceptClass cc = Context.getConceptService().getConceptClass(4);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(cc, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("4", "/conceptClass/conceptClassId", xmlOutput);
@@ -61,10 +61,10 @@ public class ConceptClassSerializationTest extends BaseModuleContextSensitiveTes
 		XMLAssert.assertXpathEvaluatesTo(sdf.format(cc.getDateRetired()), "/conceptClass/dateRetired", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("we don't want to use it", "/conceptClass/retireReason", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -126,10 +126,10 @@ public class ConceptClassSerializationTest extends BaseModuleContextSensitiveTes
 		xmlBuilder.append("  <retireReason>we don&apos;t want to use it</retireReason>\n");
 		xmlBuilder.append("  <conceptClassId>4</conceptClassId>\n");
 		xmlBuilder.append("</conceptClass>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		ConceptClass cc = Context.getSerializationService().deserialize(xmlBuilder.toString(), ConceptClass.class,
 		    XStreamSerializer.class);
 		assertEquals("003d0731-92b2-102c-adee-6014420f8468", cc.getUuid());

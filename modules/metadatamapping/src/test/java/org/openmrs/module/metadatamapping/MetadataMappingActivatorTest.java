@@ -12,10 +12,10 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class MetadataMappingActivatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	UserService userService;
-	
+
 	@Test
 	public void started_shouldRemoveDeprecatedMetadataMappingPrivilege() {
 		final String metadataMapping = "Metadata Mapping";
@@ -25,14 +25,14 @@ public class MetadataMappingActivatorTest extends BaseModuleContextSensitiveTest
 		for (Role role : userService.getAllRoles()) {
 			role.addPrivilege(privilege);
 		}
-		
+
 		//when
 		new MetadataMappingActivator().started();
-		
+
 		//then
 		privilege = userService.getPrivilege(metadataMapping);
-		
+
 		assertThat(privilege, is(nullValue()));
 	}
-	
+
 }

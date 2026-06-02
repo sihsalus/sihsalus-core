@@ -21,13 +21,13 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 public class HtmlFormsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private HtmlFormsLoader htmlFormsLoader;
-	
+
 	@Autowired
 	private HtmlFormEntryService htmlFormEntryService;
-	
+
 	@Test
 	public void load_shouldLoadFormWithAllAttributesSpecified() throws Exception {
 		htmlFormsLoader.load();
@@ -46,10 +46,10 @@ public class HtmlFormsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 		String expectedFormXml = getHtmlFormResourceAsString("allAttributeForm.xml");
 		Assert.assertEquals(expectedFormXml.trim(), f.getXmlData().trim());
 	}
-	
+
 	@Test
 	public void load_shouldLoadAndUpdateForm() throws Exception {
-		
+
 		// Test that initial version loads in with expected values
 		htmlFormsLoader.load();
 		HtmlForm f1 = htmlFormEntryService.getHtmlFormByUuid("26ddfe02-28f3-11eb-bc37-0242ac110002");
@@ -60,10 +60,10 @@ public class HtmlFormsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 		Assert.assertEquals(Boolean.TRUE, f1.getForm().getPublished());
 		Assert.assertEquals(Boolean.FALSE, f1.getForm().getRetired());
 		Assert.assertEquals(Boolean.FALSE, f1.getRetired());
-		
+
 		File formFile = new File(htmlFormsLoader.getDirUtil().getDomainDirPath(), "allAttributeForm.xml");
 		String originalXml = f1.getXmlData();
-		
+
 		try {
 			// Modify the loaded form's xml, and save it back to the configuration directory
 			Document doc = HtmlFormEntryUtil.stringToDocument(f1.getXmlData());
@@ -73,7 +73,7 @@ public class HtmlFormsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			updateHtmlFormAttribute(doc, HtmlFormsLoader.FORM_PUBLISHED_ATTRIBUTE, "false");
 			updateHtmlFormAttribute(doc, HtmlFormsLoader.FORM_RETIRED_ATTRIBUTE, "true");
 			FileUtils.writeStringToFile(formFile, HtmlFormEntryUtil.documentToString(doc));
-			
+
 			// Now, reload configuration and test that the form has the new values
 			htmlFormsLoader.load();
 			HtmlForm f2 = htmlFormEntryService.getHtmlFormByUuid("26ddfe02-28f3-11eb-bc37-0242ac110002");
@@ -90,7 +90,7 @@ public class HtmlFormsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			FileUtils.writeStringToFile(formFile, originalXml);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldNotCreateDuplicates() {
 		htmlFormsLoader.load();
@@ -101,7 +101,7 @@ public class HtmlFormsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 		Assert.assertNotNull(f1);
 		Assert.assertEquals(numFormsAfterFirstLoad, numFormsAfterSecondLoad);
 	}
-	
+
 	protected void updateHtmlFormAttribute(Document doc, String attributeName, String attributeValue) throws Exception {
 		Node htmlFormNode = HtmlFormEntryUtil.findChild(doc, HtmlFormsLoader.HTML_FORM_TAG);
 		NamedNodeMap atts = htmlFormNode.getAttributes();
@@ -112,7 +112,7 @@ public class HtmlFormsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			}
 		}
 	}
-	
+
 	protected String getHtmlFormResourceAsString(String formPath) throws Exception {
 		String resourcePath = "testAppDataDir/configuration/htmlforms/" + formPath;
 		try (InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream(resourcePath)) {

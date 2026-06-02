@@ -32,55 +32,55 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * Tests {@link NeedsPaging}.
  */
 public class NeedsPagingTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	Converter<Order> converter;
-	
+
 	MockHttpServletRequest request = new MockHttpServletRequest();
-	
+
 	RequestContext context;
-	
+
 	Patient patientWithOrders = new Patient();
-	
+
 	Order order1 = new Order();
-	
+
 	Order order2 = new Order();
-	
+
 	List<Order> orders = new ArrayList<Order>();
-	
+
 	@BeforeEach
 	public void setUp() {
-		
+
 		converter = ConversionUtil.getConverter(Order.class);
-		
+
 		order1.setPatient(patientWithOrders);
 		order2.setPatient(patientWithOrders);
 		orders.add(order1);
 		orders.add(order2);
-		
+
 		context = new RequestContext();
 		context.setStartIndex(0);
 		context.setLimit(1);
-		
+
 		context.setRequest(request);
 	}
-	
+
 	/**
 	 * @see BasePageableResult#toSimpleObject(Converter)
 	 * @verifies add property totalCount if context contains parameter totalCount which is true
 	 */
 	@Test
 	public void toSimpleObject_shouldAddPropertyTotalCountIfContextContainsParameterTotalCountWhichIsTrue() throws Exception {
-		
+
 		request.addParameter("totalCount", "true");
 		NeedsPaging<Order> needsPaging = new NeedsPaging<Order>(orders, context);
-		
+
 		SimpleObject result = needsPaging.toSimpleObject(converter);
-		
+
 		assertTrue(result.containsKey("totalCount"));
 		assertThat((Long) result.get("totalCount"), is((long) orders.size()));
 		assertThat(needsPaging.getTotalCount(), is((long) orders.size()));
 	}
-	
+
 	/**
 	 * @see BasePageableResult#toSimpleObject(Converter)
 	 * @verifies not add property totalCount if context contains parameter totalCount which is false
@@ -88,26 +88,26 @@ public class NeedsPagingTest extends BaseModuleWebContextSensitiveTest {
 	@Test
 	public void toSimpleObject_shouldNotAddPropertyTotalCountIfContextContainsParameterTotalCountWhichIsFalse()
 	        throws Exception {
-		
+
 		request.addParameter("totalCount", "false");
 		NeedsPaging<Order> needsPaging = new NeedsPaging<Order>(orders, context);
-		
+
 		SimpleObject result = needsPaging.toSimpleObject(converter);
-		
+
 		assertFalse(result.containsKey("totalCount"));
 	}
-	
+
 	/**
 	 * @see BasePageableResult#toSimpleObject(Converter)
 	 * @verifies not add property totalCount if context does not contains parameter totalCount
 	 */
 	@Test
 	public void toSimpleObject_shouldNotAddPropertyTotalCountIfContextDoesNotContainsParameterTotalCount() throws Exception {
-		
+
 		NeedsPaging<Order> needsPaging = new NeedsPaging<Order>(orders, context);
-		
+
 		SimpleObject result = needsPaging.toSimpleObject(converter);
-		
+
 		assertFalse(result.containsKey("totalCount"));
 	}
 }

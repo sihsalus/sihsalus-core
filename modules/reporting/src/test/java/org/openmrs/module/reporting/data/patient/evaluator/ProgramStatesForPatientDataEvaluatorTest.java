@@ -33,22 +33,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  */
 @SuppressWarnings("deprecation")
 public class ProgramStatesForPatientDataEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see ProgramStatesForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return patient states that are active on a given date
@@ -60,23 +60,23 @@ public class ProgramStatesForPatientDataEvaluatorTest extends BaseModuleContextS
 
 		ProgramStatesForPatientDataDefinition def = new ProgramStatesForPatientDataDefinition();
 		def.setState(Context.getProgramWorkflowService().getStateByUuid("0d521bb4-2edb-4dd1-8d9f-34489bb4d9ea"));
-		
+
 		def.setActiveOnDate(DateUtil.getDateTime(2008, 8, 11));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(2, pd.getData().size());
-		
+
 		def.setActiveOnDate(DateUtil.getDateTime(2008, 8, 9));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(1, pd.getData().size());
-		
+
 		PatientState ps = (PatientState) pd.getData().get(8);
 		Assert.assertEquals(4, ps.getPatientStateId().intValue());
-		
+
 		def.setActiveOnDate(DateUtil.getDateTime(2010, 1, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(0, pd.getData().size());
 	}
-	
+
 	/**
 	 * @see ProgramStatesForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return patient states started on or after a given date
@@ -88,20 +88,20 @@ public class ProgramStatesForPatientDataEvaluatorTest extends BaseModuleContextS
 
 		ProgramStatesForPatientDataDefinition def = new ProgramStatesForPatientDataDefinition();
         def.setState(Context.getProgramWorkflowService().getStateByUuid("0d521bb4-2edb-4dd1-8d9f-34489bb4d9ea"));
-		
+
 		def.setStartedOnOrAfter(DateUtil.getDateTime(2008, 8, 11));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(1, pd.getData().size());
-		
+
 		def.setStartedOnOrAfter(DateUtil.getDateTime(2008, 8, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(2, pd.getData().size());
-		
+
 		def.setStartedOnOrAfter(DateUtil.getDateTime(2010, 1, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(0, pd.getData().size());
 	}
-	
+
 	/**
 	 * @see ProgramStatesForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return patient states started on or before a given date
@@ -113,20 +113,20 @@ public class ProgramStatesForPatientDataEvaluatorTest extends BaseModuleContextS
 
 		ProgramStatesForPatientDataDefinition def = new ProgramStatesForPatientDataDefinition();
         def.setState(Context.getProgramWorkflowService().getStateByUuid("0d521bb4-2edb-4dd1-8d9f-34489bb4d9ea"));
-		
+
 		def.setStartedOnOrBefore(DateUtil.getDateTime(2008, 1, 1));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(0, pd.getData().size());
-		
+
 		def.setStartedOnOrBefore(DateUtil.getDateTime(2008, 8, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(1, pd.getData().size());
-		
+
 		def.setStartedOnOrBefore(DateUtil.getDateTime(2010, 1, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(2, pd.getData().size());
 	}
-	
+
 	/**
 	 * @see ProgramStatesForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return patient states ended on or after a given date
@@ -138,15 +138,15 @@ public class ProgramStatesForPatientDataEvaluatorTest extends BaseModuleContextS
 
 		ProgramStatesForPatientDataDefinition def = new ProgramStatesForPatientDataDefinition();
         def.setState(Context.getProgramWorkflowService().getStateByUuid("0d521bb4-2edb-4dd1-8d9f-34489bb4d9ea"));
-		
+
 		def.setEndedOnOrAfter(DateUtil.getDateTime(2008, 1, 1));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(2, pd.getData().size());
-		
+
 		def.setEndedOnOrAfter(DateUtil.getDateTime(2009, 1, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(1, pd.getData().size());
-		
+
 		def.setEndedOnOrAfter(DateUtil.getDateTime(2010, 1, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(0, pd.getData().size());
@@ -163,20 +163,20 @@ public class ProgramStatesForPatientDataEvaluatorTest extends BaseModuleContextS
 
 		ProgramStatesForPatientDataDefinition def = new ProgramStatesForPatientDataDefinition();
         def.setState(Context.getProgramWorkflowService().getStateByUuid("0d521bb4-2edb-4dd1-8d9f-34489bb4d9ea"));
-		
+
 		def.setEndedOnOrBefore(DateUtil.getDateTime(2008, 1, 1));
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(0, pd.getData().size());
-		
+
 		def.setEndedOnOrBefore(DateUtil.getDateTime(2009, 1, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(1, pd.getData().size());
-		
+
 		def.setEndedOnOrBefore(DateUtil.getDateTime(2010, 1, 1));
 		pd = Context.getService(PatientDataService.class).evaluate(def, context);
 		Assert.assertEquals(2, pd.getData().size());
 	}
-	
+
 	/**
 	 * @see ProgramStatesForPatientDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return the first patient state by start date
@@ -238,7 +238,7 @@ public class ProgramStatesForPatientDataEvaluatorTest extends BaseModuleContextS
 	public void evaluate_shouldReturnAListOfPatientStatesForEachPatient() throws Exception {
 		EvaluationContext context = new EvaluationContext();
 		context.setBaseCohort(new Cohort("8"));
-		
+
 		ProgramStatesForPatientDataDefinition def = new ProgramStatesForPatientDataDefinition();
         def.setState(Context.getProgramWorkflowService().getStateByUuid("0d521bb4-2edb-4dd1-8d9f-34489bb4d9ea"));
 

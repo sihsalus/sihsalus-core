@@ -21,25 +21,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class AppointmentServiceTypesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("appointmentServiceService")
 	private AppointmentServiceDefinitionService apts;
-	
+
 	@Autowired
 	private AppointmentServiceTypesLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verify edition
 		{
 			AppointmentServiceType type = Utils.fetchBahmniAppointmentServiceType("f378bec4-2d0d-4509-a56e-b709e0a53700",

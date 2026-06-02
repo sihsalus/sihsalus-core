@@ -36,43 +36,43 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SpringTestConfiguration.class, inheritLocations = false)
 public class QueueDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final List<String> QUEUE_INITIAL_DATASET_XML = Arrays.asList(
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_locationInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_conceptsInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_patientInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_queueWaitTimeInitialDataset.xml");
-	
+
 	private static final String QUEUE_UUID = "3eb7fe43-2813-4kbc-80dc-2e5d30252bb5";
-	
+
 	private static final String RETIRED_QUEUE_UUID = "4eb8fe43-2813-4kbc-80dc-2e5d30252bb9";
-	
+
 	public static final String EMPTY_QUEUE_UUID = "5ob8gj90-9090-4kbc-80dc-2e5d30252bb3";
-	
+
 	private static final String NEW_QUEUE_UUID = "45b9fe43-2813-4kbc-80dc-2e5d30290iik";
-	
+
 	private static final String NEW_QUEUE_NAME = "Test triage queue";
-	
+
 	private static final String NEW_QUEUE_LOCATION_UUID = "d0938432-1691-11df-97a5-7038c098";
-	
+
 	private static final String CONCEPT_UUID = "67b910bd-298c-4ecf-a632-661ae2f446op";
-	
+
 	@Autowired
 	@Qualifier("queueDao")
 	private QueueDao dao;
-	
+
 	@Autowired
 	private QueueServicesWrapper services;
-	
+
 	private QueueSearchCriteria criteria;
-	
+
 	@Before
 	public void setup() {
 		QUEUE_INITIAL_DATASET_XML.forEach(this::executeDataSet);
 		criteria = new QueueSearchCriteria();
 	}
-	
+
 	@Test
 	public void shouldGetQueueByUuid() {
 		Optional<Queue> queue = dao.get(QUEUE_UUID);
@@ -80,13 +80,13 @@ public class QueueDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(queue.isPresent(), is(true));
 		queue.ifPresent(queue1 -> assertThat(queue1.getUuid(), is(QUEUE_UUID)));
 	}
-	
+
 	@Test
 	public void shouldReturnNullForRetiredQueue() {
 		Optional<Queue> queue = dao.get(RETIRED_QUEUE_UUID);
 		assertThat(queue.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void shouldCreateNewQueue() {
 		Queue queue = new Queue();
@@ -94,11 +94,11 @@ public class QueueDaoTest extends BaseModuleContextSensitiveTest {
 		queue.setName(NEW_QUEUE_NAME);
 		queue.setService(Context.getConceptService().getConceptByUuid(CONCEPT_UUID));
 		queue.setLocation(Context.getLocationService().getLocationByUuid(NEW_QUEUE_LOCATION_UUID));
-		
+
 		Queue result = dao.createOrUpdate(queue);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(NEW_QUEUE_UUID));
-		
+
 		//Get the saved queue version
 		Optional<Queue> newlyCreatedQueue = dao.get(NEW_QUEUE_UUID);
 		assertThat(newlyCreatedQueue.isPresent(), is(true));
@@ -108,7 +108,7 @@ public class QueueDaoTest extends BaseModuleContextSensitiveTest {
 			assertThat(createdQueue.getLocation().getUuid(), is(NEW_QUEUE_LOCATION_UUID));
 		});
 	}
-	
+
 	@Test
 	public void shouldUpdateQueue() {
 		//Get saved queue
@@ -127,35 +127,35 @@ public class QueueDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(updatedQueue.isPresent(), is(true));
 		updatedQueue.ifPresent(revisedQueue -> assertThat(revisedQueue.getName(), is("Updated queue name")));
 	}
-	
+
 	@Test
 	public void shouldFindAllQueues() {
 		Collection<Queue> queues = dao.findAll();
 		assertThat(queues.isEmpty(), is(false));
 		assertThat(queues, hasSize(3));
 	}
-	
+
 	@Test
 	public void shouldFindAllQueuesIncludingRetired() {
 		Collection<Queue> queues = dao.findAll(true);
 		assertThat(queues.isEmpty(), is(false));
 		assertThat(queues, hasSize(4));
 	}
-	
+
 	@Test
 	public void shouldDeleteQueueByUuid() {
 		dao.delete(EMPTY_QUEUE_UUID);
 		Optional<Queue> result = dao.get(EMPTY_QUEUE_UUID);
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void shouldDeleteQueueByEntity() {
 		dao.get(EMPTY_QUEUE_UUID).ifPresent((queue) -> dao.delete(queue));
 		Optional<Queue> result = dao.get(EMPTY_QUEUE_UUID);
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void shouldGetQueuesByLocation() {
 		Location location1 = services.getLocationService().getLocation(1);
@@ -170,7 +170,7 @@ public class QueueDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setLocations(Arrays.asList(location1, location3));
 		assertResults(criteria, 1, 3, 4);
 	}
-	
+
 	@Test
 	public void shouldGetQueuesByService() {
 		Concept concept1 = services.getConceptService().getConcept(2001);
@@ -185,14 +185,14 @@ public class QueueDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setServices(Arrays.asList(concept1, concept2));
 		assertResults(criteria, 1, 3, 4);
 	}
-	
+
 	@Test
 	public void shouldGetQueuesByIncludeRetired() {
 		assertResults(criteria, 1, 3, 4);
 		criteria.setIncludeRetired(true);
 		assertResults(criteria, 1, 2, 3, 4);
 	}
-	
+
 	/**
 	 * Utility method that tests criteria against both DAO methods to getQueueEntries and
 	 * getCountOfQueueEntries

@@ -35,21 +35,21 @@ import static org.mockito.Mockito.doThrow;
  * Tests the {@link SearchIndexController} controller
  */
 public class SearchIndexControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private SearchIndexController controller;
-	
+
 	@Mock
 	private ContextDAO contextDao;
-	
+
 	@Mock
 	private UserContext userContext;
-	
+
 	@BeforeEach
 	public void before() {
 		controller = new SearchIndexController();
 	}
-	
-	
+
+
 	/**
 	 * @verifies return the search index view
 	 * @see SearchIndexController#showPage()
@@ -59,7 +59,7 @@ public class SearchIndexControllerTest extends BaseModuleWebContextSensitiveTest
 		String viewName = controller.showPage();
 		assertEquals("/module/legacyui/admin/maintenance/searchIndex", viewName);
 	}
-	
+
 	/**
 	 * @verifies return true for success if the update does not fail and authenticated user makes
 	 *           call
@@ -70,12 +70,12 @@ public class SearchIndexControllerTest extends BaseModuleWebContextSensitiveTest
 		// this test depends on being a authenticated user
 		when(userContext.isAuthenticated()).thenReturn(true);
 		assertTrue(Context.getUserContext().isAuthenticated());
-		
+
 		when(contextDao.updateSearchIndexAsync()).thenReturn(null);
 		Map<String, Object> response = controller.rebuildSearchIndex();
 		assertEquals(true, response.get("success"));
 	}
-	
+
 	/**
 	 * @verifies return false for success if a RuntimeException is thrown
 	 * @see SearchIndexController#rebuildSearchIndex()
@@ -85,12 +85,12 @@ public class SearchIndexControllerTest extends BaseModuleWebContextSensitiveTest
 		// this test depends on being a authenticated user
 		when(userContext.isAuthenticated()).thenReturn(true);
 		assertTrue(Context.getUserContext().isAuthenticated());
-		
+
 		doThrow(new RuntimeException("boom")).when(contextDao).updateSearchIndexAsync();
 		Map<String, Object> response = controller.rebuildSearchIndex();
 		assertEquals(false, response.get("success"));
 	}
-	
+
 	/**
 	 * @verifies return false for success if a un-authenticated user makes call
 	 * @see SearchIndexController#rebuildSearchIndex()
@@ -100,11 +100,11 @@ public class SearchIndexControllerTest extends BaseModuleWebContextSensitiveTest
 		// this test depends on not being a authenticated user
 		when(userContext.isAuthenticated()).thenReturn(false);
 		assertFalse(Context.getUserContext().isAuthenticated());
-		
+
 		Map<String, Object> response = controller.rebuildSearchIndex();
 		assertEquals(false, response.get("success"));
 	}
-	
+
 	/**
 	 * @verifies return inProgress for status if a rebuildSearchIndex is not completed
 	 * @see SearchIndexController#getStatus()
@@ -120,7 +120,7 @@ public class SearchIndexControllerTest extends BaseModuleWebContextSensitiveTest
         Map<String, String> response = controller.getStatus();
         assertEquals("inProgress", response.get("status"));
     }
-	
+
 	/**
 	 * @verifies return success for status if a rebuildSearchIndex is completed successfully
 	 * @see SearchIndexController#getStatus()
@@ -137,7 +137,7 @@ public class SearchIndexControllerTest extends BaseModuleWebContextSensitiveTest
         Map<String, String> response = controller.getStatus();
         assertEquals("success", response.get("status"));
     }
-	
+
 	/**
 	 * @verifies return error for status if a rebuildSearchIndex is not completed normally
 	 * @see SearchIndexController#getStatus()
@@ -154,7 +154,7 @@ public class SearchIndexControllerTest extends BaseModuleWebContextSensitiveTest
         Map<String, String> response = controller.getStatus();
         assertEquals("error", response.get("status"));
     }
-	
+
 	/**
 	 * @verifies throws API exception if getStatus called before rebuildSearchIndex
 	 * @see SearchIndexController#getStatus()

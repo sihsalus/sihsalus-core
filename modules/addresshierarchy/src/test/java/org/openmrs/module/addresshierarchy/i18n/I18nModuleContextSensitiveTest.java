@@ -22,13 +22,13 @@ import org.openmrs.module.exti18n.icpt.AddressValuesAOPInterceptor;
  * Extend this class to run context sensitive tests with i18n enabled, including Spring AOP.
  */
 abstract public class I18nModuleContextSensitiveTest extends AOPModuleContextSensitiveTest {
-	
+
 	protected final Log log = LogFactory.getLog(getClass());
-	
+
 	protected static final String XML_DATASET_PACKAGE_PATH = "org/openmrs/module/addresshierarchy/include/addressHierarchy-i18n-dataset.xml";
-	
+
 	protected AddressHierarchyService ahService;
-	
+
 	protected TestsMessageSource getTestsMessageSource() {
 		return (TestsMessageSource) Context.getMessageSourceService().getActiveMessageSource();
 	}
@@ -40,7 +40,7 @@ abstract public class I18nModuleContextSensitiveTest extends AOPModuleContextSen
 		super();
         ModuleFactory.getStartedModulesMap().put("exti18n", new Module("", "exti18n", "", "", "", "1.0.0", "") );
 	}
-	
+
 	@Override
 	protected void setInterceptorAndServices(TestWithAOP testCase) {
 		testCase.setInterceptor(AddressValuesAOPInterceptor.class);
@@ -48,7 +48,7 @@ abstract public class I18nModuleContextSensitiveTest extends AOPModuleContextSen
 		testCase.addService(PersonService.class);
 		testCase.addService(PatientService.class);
 	}
-	
+
 	@Before
 	public void setupI18n() throws Exception {
 		initializeInMemoryDatabase();
@@ -61,14 +61,14 @@ abstract public class I18nModuleContextSensitiveTest extends AOPModuleContextSen
 		getTestsMessageSource().addMessageProperties("org/openmrs/module/addresshierarchy/include/addresshierarchy.properties");
 		getTestsMessageSource().addMessageProperties("org/openmrs/module/addresshierarchy/include/addresshierarchy_fr.properties");
 		getTestsMessageSource().refreshCache();
-		
+
 		Context.getAdministrationService().saveGlobalProperty(
 		    new GlobalProperty(ExtI18nConstants.GLOBAL_PROP_REV_I18N_SUPPORT, "true"));
 
 		ahService = Context.getService(AddressHierarchyService.class);
 		ahService.initI18nCache();
 	}
-	
+
 	@After
 	public void tearDownI18n() {
 		Context.getAdministrationService().saveGlobalProperty(

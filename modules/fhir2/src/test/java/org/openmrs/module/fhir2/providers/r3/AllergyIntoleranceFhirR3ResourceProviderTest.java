@@ -57,40 +57,40 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.AllergyIntolerance> {
-	
+
 	private static final String ALLERGY_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String WRONG_ALLERGY_UUID = "2085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String CODED_ALLERGEN_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String SEVERITY_CONCEPT_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String CODED_REACTION_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
-	
+
 	private static final int START_INDEX = 0;
-	
+
 	private static final int END_INDEX = 10;
-	
+
 	private static final int PREFERRED_PAGE_SIZE = 1;
-	
+
 	private static final int COUNT = 1;
-	
+
 	@Mock
 	private FhirAllergyIntoleranceService service;
-	
+
 	private AllergyIntoleranceFhirResourceProvider resourceProvider;
-	
+
 	private org.hl7.fhir.r4.model.AllergyIntolerance allergyIntolerance;
-	
+
 	@Before
 	public void setup() {
 		resourceProvider = new AllergyIntoleranceFhirResourceProvider();
 		resourceProvider.setAllergyIntoleranceService(service);
 	}
-	
+
 	@Before
 	public void initAllergyIntolerance() {
 		allergyIntolerance = new org.hl7.fhir.r4.model.AllergyIntolerance();
@@ -98,22 +98,22 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		allergyIntolerance.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.FOOD);
 		setProvenanceResources(allergyIntolerance);
 	}
-	
+
 	private List<AllergyIntolerance> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof AllergyIntolerance)
 		        .map(it -> (AllergyIntolerance) it).collect(Collectors.toList());
 	}
-	
+
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(AllergyIntolerance.class));
 		assertThat(resourceProvider.getResourceType().getName(), equalTo(AllergyIntolerance.class.getName()));
 	}
-	
+
 	@Test
 	public void getAllergyIntoleranceByUuid_shouldReturnMatchingAllergy() {
 		when(service.get(ALLERGY_UUID)).thenReturn(allergyIntolerance);
-		
+
 		IdType id = new IdType();
 		id.setValue(ALLERGY_UUID);
 		AllergyIntolerance allergy = resourceProvider.getAllergyIntoleranceById(id);
@@ -121,7 +121,7 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		assertThat(allergy.getId(), notNullValue());
 		assertThat(allergy.getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test(expected = ResourceNotFoundException.class)
 	public void getAllergyIntoleranceByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
@@ -129,305 +129,305 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		AllergyIntolerance result = resourceProvider.getAllergyIntoleranceById(id);
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByIdentifier() {
 		ReferenceAndListParam patient = new ReferenceAndListParam();
 		patient.addValue(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("M4001-1").setChain(Patient.SP_IDENTIFIER)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patient, null, null, null, null, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null, null,
 		    null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByPatientGivenName() {
 		ReferenceAndListParam patient = new ReferenceAndListParam();
 		patient.addValue(new ReferenceOrListParam().add(new ReferenceParam().setValue("John").setChain(Patient.SP_GIVEN)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patient, null, null, null, null, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null, null,
 		    null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByPatientFamilyName() {
 		ReferenceAndListParam patient = new ReferenceAndListParam();
 		patient.addValue(new ReferenceOrListParam().add(new ReferenceParam().setValue("John").setChain(Patient.SP_FAMILY)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patient, null, null, null, null, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null, null,
 		    null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByPatientName() {
 		ReferenceAndListParam patient = new ReferenceAndListParam();
 		patient.addValue(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("John Doe").setChain(Patient.SP_NAME)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patient, null, null, null, null, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null, null,
 		    null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesWhenPatientGivenNameIsSpecifiedAsSubject() {
 		ReferenceAndListParam subject = new ReferenceAndListParam();
 		subject.addValue(new ReferenceOrListParam().add(new ReferenceParam().setValue("John").setChain(Patient.SP_GIVEN)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(subject, null, null, null, null, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, subject, null, null, null, null, null, null,
 		    null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByCategory() {
 		TokenAndListParam category = new TokenAndListParam();
 		category.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("food")));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, category, null, null, null, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, category, null, null, null, null, null,
 		    null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByAllergen() {
 		TokenAndListParam allergen = new TokenAndListParam();
 		allergen.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODED_ALLERGEN_UUID)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, allergen, null, null, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, allergen, null, null, null, null,
 		    null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesBySeverity() {
 		TokenAndListParam severity = new TokenAndListParam();
 		severity.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(SEVERITY_CONCEPT_UUID)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, severity, null, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, severity, null, null, null,
 		    null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByManifestation() {
 		TokenAndListParam manifestation = new TokenAndListParam();
 		manifestation.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODED_REACTION_UUID)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, manifestation, null, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, manifestation, null,
 		    null, null, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByStatus() {
 		TokenAndListParam status = new TokenAndListParam();
 		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("active")));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, status, null, null, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, null, status, null, null,
 		    null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByUUID() {
 		TokenAndListParam uuid = new TokenAndListParam();
 		uuid.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(ALLERGY_UUID)));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, uuid, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, null, null, uuid, null,
 		    null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByLastUpdated() {
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE)
 		        .setLowerBound(LAST_UPDATED_DATE);
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, null, dateRangeParam, null, null)))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, null, null, null,
 		    dateRangeParam, null, null);
-		
+
 		List<AllergyIntolerance> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldAddPatientsToReturnedResultsForPatientInclude() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("AllergyIntolerance:patient"));
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, null, null, null, includes)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(allergyIntolerance, new org.hl7.fhir.r4.model.Patient()),
 		                PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, null, null, null, null,
 		    null, includes);
-		
+
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(2));
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(resultList.get(1).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void searchForAllergies_shouldNotAddPatientsToReturnedResultsForEmptyInclude() {
 		HashSet<Include> includes = new HashSet<>();
-		
+
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, null, null, null, null,
 		    null, includes);
-		
+
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.ALLERGY_INTOLERANCE));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getId(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void createAllergyIntolerance_shouldCreateNewAllergyIntolerance() {
 		when(service.create(any(org.hl7.fhir.r4.model.AllergyIntolerance.class))).thenReturn(allergyIntolerance);
-		
+
 		MethodOutcome result = resourceProvider.creatAllergyIntolerance(
 		    (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance));
 		assertThat(result, notNullValue());
@@ -435,55 +435,55 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test
 	public void updateAllergyIntolerance_shouldUpdateAllergyIntolerance() {
 		when(service.update(eq(ALLERGY_UUID), any(org.hl7.fhir.r4.model.AllergyIntolerance.class)))
 		        .thenReturn(allergyIntolerance);
-		
+
 		MethodOutcome result = resourceProvider.updateAllergyIntolerance(new IdType().setValue(ALLERGY_UUID),
 		    (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance));
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
-	
+
 	@Test(expected = InvalidRequestException.class)
 	public void updateAllergyIntolerance_shouldThrowInvalidRequestForUuidMismatch() {
 		when(service.update(eq(WRONG_ALLERGY_UUID), any(org.hl7.fhir.r4.model.AllergyIntolerance.class)))
 		        .thenThrow(InvalidRequestException.class);
-		
+
 		resourceProvider.updateAllergyIntolerance(new IdType().setValue(WRONG_ALLERGY_UUID),
 		    (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance));
 	}
-	
+
 	@Test(expected = InvalidRequestException.class)
 	public void updateAllergyIntolerance_shouldThrowInvalidRequestForMissingId() {
 		org.hl7.fhir.r4.model.AllergyIntolerance noIdAllergyIntolerance = new org.hl7.fhir.r4.model.AllergyIntolerance();
-		
+
 		when(service.update(eq(ALLERGY_UUID), any(org.hl7.fhir.r4.model.AllergyIntolerance.class)))
 		        .thenThrow(InvalidRequestException.class);
-		
+
 		resourceProvider.updateAllergyIntolerance(new IdType().setValue(ALLERGY_UUID),
 		    (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(noIdAllergyIntolerance));
 	}
-	
+
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateAllergyIntolerance_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		org.hl7.fhir.r4.model.AllergyIntolerance wrongAllergyIntolerance = new org.hl7.fhir.r4.model.AllergyIntolerance();
 		wrongAllergyIntolerance.setId(WRONG_ALLERGY_UUID);
-		
+
 		when(service.update(eq(WRONG_ALLERGY_UUID), any(org.hl7.fhir.r4.model.AllergyIntolerance.class)))
 		        .thenThrow(MethodNotAllowedException.class);
-		
+
 		resourceProvider.updateAllergyIntolerance(new IdType().setValue(WRONG_ALLERGY_UUID),
 		    (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(wrongAllergyIntolerance));
 	}
-	
+
 	@Test
 	public void deleteAllergyIntolerance_shouldDeleteRequestedAllergyIntolerance() {
 		OperationOutcome result = resourceProvider.deleteAllergyIntolerance(new IdType().setValue(ALLERGY_UUID));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));

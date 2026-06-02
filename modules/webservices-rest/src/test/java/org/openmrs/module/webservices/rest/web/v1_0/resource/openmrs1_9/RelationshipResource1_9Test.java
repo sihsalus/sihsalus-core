@@ -29,12 +29,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * {@link RelationshipResource1_9}
  */
 public class RelationshipResource1_9Test extends BaseDelegatingResourceTest<RelationshipResource1_9, Relationship> {
-	
+
 	@Override
 	public Relationship newObject() {
 		return Context.getPersonService().getRelationshipByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -49,7 +49,7 @@ public class RelationshipResource1_9Test extends BaseDelegatingResourceTest<Rela
 		assertFalse(findSelfLink((SimpleObject) getRepresentation().get("personB")).contains("/patient/"),
 		    "Should not expose the Patient subclass");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -65,17 +65,17 @@ public class RelationshipResource1_9Test extends BaseDelegatingResourceTest<Rela
 		assertFalse(findSelfLink((SimpleObject) getRepresentation().get("personB")).contains("/patient/"),
 		    "Should not expose the Patient subclass");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Hippocrates is the Doctor of Horatio";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.RELATIONSHIP_UUID;
 	}
-	
+
 	@Test
 	public void createShouldIgnoreRelationshipTypeSpecificDisplayPropertiesWhenCreating() {
 		// Ensuring that when the payload comes with displayAIsToB/displayBIsToA the resource should create resource without any issue.
@@ -86,10 +86,10 @@ public class RelationshipResource1_9Test extends BaseDelegatingResourceTest<Rela
 		relationshipType.setbIsToA(RELATIONSHIP_NAME);
 		relationshipType.setDescription(DESCRIPTION);
 		relationshipType.setWeight(1);
-		
+
 		PersonService personService = Context.getPersonService();
 		relationshipType = personService.saveRelationshipType(relationshipType);
-		
+
 		// Convert the previously saved relationship_type into simple object.
 		SimpleObject relationshipTypeSimpleObject = new SimpleObject()
 		        .add("uuid", relationshipType.getUuid())
@@ -102,13 +102,13 @@ public class RelationshipResource1_9Test extends BaseDelegatingResourceTest<Rela
 		        .add("weight", 1);
 		List<Person> people = Context.getPersonService().getPeople("", false);
 		assert people != null && people.size() >= 2;
-		
+
 		SimpleObject relationship = new SimpleObject()
 		        .add("personA", people.get(0).getUuid())
 		        .add("relationshipType", relationshipTypeSimpleObject)
 		        .add("personB", people.get(1).getUuid());
-		
+
 		getResource().create(relationship, new RequestContext());
-		
+
 	}
 }

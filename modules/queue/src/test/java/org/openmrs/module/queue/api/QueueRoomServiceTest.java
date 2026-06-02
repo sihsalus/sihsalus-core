@@ -38,54 +38,54 @@ import org.openmrs.module.queue.model.QueueRoom;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QueueRoomServiceTest {
-	
+
 	private static final String QUEUE_ROOM_UUID = "4eb8fe43-2813-4kbc-80dc-2e5d30252cc6";
-	
+
 	private static final String QUEUE_ROOM_NAME = "Triage Room 1";
-	
+
 	private static final String QUEUE_UUID = "3eb7fe43-2813-4kbc-80dc-2e5d30252bb5";
-	
+
 	private static final String LOCATION_UUID = "d0938432-1691-11df-97a5-7038c098";
-	
+
 	private QueueRoomServiceImpl queueRoomService;
-	
+
 	@Mock
 	private QueueRoomDao dao;
-	
+
 	@Captor
 	ArgumentCaptor<QueueRoomSearchCriteria> queueRoomSearchCriteriaArgumentCaptor;
-	
+
 	@Before
 	public void setupMocks() {
 		MockitoAnnotations.openMocks(this);
 		queueRoomService = new QueueRoomServiceImpl();
 		queueRoomService.setDao(dao);
 	}
-	
+
 	@Test
 	public void shouldGetByUuid() {
 		QueueRoom queueRoom = mock(QueueRoom.class);
 		when(queueRoom.getUuid()).thenReturn(QUEUE_ROOM_UUID);
 		when(dao.get(QUEUE_ROOM_UUID)).thenReturn(Optional.of(queueRoom));
-		
+
 		Optional<QueueRoom> result = queueRoomService.getQueueRoomByUuid(QUEUE_ROOM_UUID);
 		assertThat(result.isPresent(), is(true));
 		result.ifPresent(q -> assertThat(q.getUuid(), is(QUEUE_ROOM_UUID)));
 	}
-	
+
 	@Test
 	public void shouldCreateNewQueueRoom() {
 		QueueRoom queueRoom = mock(QueueRoom.class);
 		when(queueRoom.getUuid()).thenReturn(QUEUE_ROOM_UUID);
 		when(queueRoom.getName()).thenReturn(QUEUE_ROOM_NAME);
 		when(dao.createOrUpdate(queueRoom)).thenReturn(queueRoom);
-		
+
 		QueueRoom result = queueRoomService.saveQueueRoom(queueRoom);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(QUEUE_ROOM_UUID));
 		assertThat(result.getName(), is(QUEUE_ROOM_NAME));
 	}
-	
+
 	@Test
 	public void shouldRetireQueueRoom() {
 		User user = new User(1);
@@ -104,7 +104,7 @@ public class QueueRoomServiceTest {
 		assertThat(queueRoom.getRetiredBy(), equalTo(user));
 		assertThat(queueRoom.getRetireReason(), equalTo("retireReason"));
 	}
-	
+
 	@Test
 	public void shouldPurgeQueueRoom() {
 		QueueRoom queueRoom = mock(QueueRoom.class);
@@ -112,7 +112,7 @@ public class QueueRoomServiceTest {
 		queueRoomService.purgeQueueRoom(queueRoom);
 		assertThat(queueRoomService.getQueueRoomByUuid(QUEUE_ROOM_UUID).isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void shouldGetQueueRoomsByCriteria() {
 		QueueRoomSearchCriteria criteria = new QueueRoomSearchCriteria();

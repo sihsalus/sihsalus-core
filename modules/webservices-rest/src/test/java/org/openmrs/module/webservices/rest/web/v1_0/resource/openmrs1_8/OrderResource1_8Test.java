@@ -15,26 +15,26 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class OrderResource1_8Test extends BaseDelegatingResourceTest<OrderResource1_8, Order> {
-	
+
 	@Override
 	public Order newObject() {
 		return Context.getOrderService().getOrderByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "(NEW) ASPIRIN: 325.0 mg UNKNOWN 1/day x 7 days/week";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.ORDER_UUID;
 	}
-	
+
 	private void voidOneOrder() {
 		Order order = Context.getOrderService().getOrderByUuid(RestTestConstants1_8.ORDER_UUID);
 		order.setVoided(true);
 		Context.getOrderService().saveOrder(order, null);
 	}
-	
+
 }

@@ -26,7 +26,7 @@ import org.springframework.mock.web.MockHttpSession;
  * Tests the {@link ConceptStopWordListController}
  */
 public class ConceptStopWordListControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see ConceptStopWordListController#showForm(javax.servlet.http.HttpSession)
 	 */
@@ -35,16 +35,16 @@ public class ConceptStopWordListControllerTest extends BaseModuleWebContextSensi
 	public void showForm_shouldReturnConceptStopWordListView() throws Exception {
 		ConceptStopWordListController controller = (ConceptStopWordListController) applicationContext
 		        .getBean("conceptStopWordListController");
-		
+
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		mockRequest.setMethod("POST");
-		
+
 		String showFormResult = controller.showForm(mockRequest.getSession());
-		
+
 		Assertions.assertNotNull(showFormResult);
 		Assertions.assertEquals("admin/concepts/conceptStopWordList", showFormResult);
 	}
-	
+
 	/**
 	 * @see ConceptStopWordListController#showForm(javax.servlet.http.HttpSession)
 	 */
@@ -54,18 +54,18 @@ public class ConceptStopWordListControllerTest extends BaseModuleWebContextSensi
 	public void showForm_shouldAddAllConceptStopWordsInSessionAttribute() throws Exception {
 		ConceptStopWordListController controller = (ConceptStopWordListController) applicationContext
 		        .getBean("conceptStopWordListController");
-		
+
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		mockRequest.setMethod("POST");
-		
+
 		controller.showForm(mockRequest.getSession());
-		
+
 		List<ConceptStopWord> conceptStopWordList = (List<ConceptStopWord>) mockRequest.getSession().getAttribute(
 		    "conceptStopWordList");
 		Assertions.assertNotNull(conceptStopWordList);
 		Assertions.assertEquals(4, conceptStopWordList.size());
 	}
-	
+
 	/**
 	 * @see {@link ConceptStopWordListController#handleSubmission(javax.servlet.http.HttpSession, String[])
 
@@ -76,16 +76,16 @@ public class ConceptStopWordListControllerTest extends BaseModuleWebContextSensi
 	public void handleSubmission_shouldDeleteGivenConceptStopWordFromDB() throws Exception {
 		ConceptStopWordListController controller = (ConceptStopWordListController) applicationContext
 		        .getBean("conceptStopWordListController");
-		
+
 		HttpSession mockSession = new MockHttpSession();
-		
+
 		controller.handleSubmission(mockSession, new String[] { "1" });
-		
+
 		List<ConceptStopWord> conceptStopWordList = (List<ConceptStopWord>) mockSession.getAttribute("conceptStopWordList");
 		Assertions.assertNotNull(conceptStopWordList);
 		Assertions.assertEquals(3, conceptStopWordList.size());
 	}
-	
+
 	/**
 	 * @see {@link ConceptStopWordListController#handleSubmission(javax.servlet.http.HttpSession, String[])
 
@@ -95,19 +95,19 @@ public class ConceptStopWordListControllerTest extends BaseModuleWebContextSensi
 	public void handleSubmission_shouldAddTheDeleteSuccessMessageInSession() throws Exception {
 		ConceptStopWordListController controller = (ConceptStopWordListController) applicationContext
 		        .getBean("conceptStopWordListController");
-		
+
 		HttpSession mockSession = new MockHttpSession();
-		
+
 		controller.handleSubmission(mockSession, new String[] { "2" });
-		
+
 		String successMessage = (String) mockSession.getAttribute(WebConstants.OPENMRS_MSG_ATTR);
 		String errorMessage = (String) mockSession.getAttribute(WebConstants.OPENMRS_ERROR_ATTR);
-		
+
 		Assertions.assertNotNull(successMessage);
 		Assertions.assertNull(errorMessage);
 		Assertions.assertEquals("general.deleted", successMessage);
 	}
-	
+
 	/**
 	 * @see {@link ConceptStopWordListController#handleSubmission(javax.servlet.http.HttpSession, String[])
 
@@ -117,14 +117,14 @@ public class ConceptStopWordListControllerTest extends BaseModuleWebContextSensi
 	public void handleSubmission_shouldAddTheDeleteErrorMessageInSession() throws Exception {
 		ConceptStopWordListController controller = (ConceptStopWordListController) applicationContext
 		        .getBean("conceptStopWordListController");
-		
+
 		HttpSession mockSession = new MockHttpSession();
-		
+
 		controller.handleSubmission(mockSession, new String[] { "1", "1" });
-		
+
 		String successMessage = (String) mockSession.getAttribute(WebConstants.OPENMRS_MSG_ATTR);
 		String errorMessage = (String) mockSession.getAttribute(WebConstants.OPENMRS_ERROR_ATTR);
-		
+
 		Assertions.assertNotNull(successMessage);
 		Assertions.assertNotNull(errorMessage);
 		Assertions.assertEquals("ConceptStopWord.error.notfound", errorMessage);

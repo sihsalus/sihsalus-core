@@ -27,7 +27,7 @@ import org.openmrs.module.openconceptlab.client.OclClient;
 
 
 public class TestResources {
-	
+
 	public static InputStream getSimpleResponseAsStream() {
 		return TestResources.class.getClassLoader().getResourceAsStream("response.zip");
 	}
@@ -65,29 +65,29 @@ public class TestResources {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public static InputStream getInitialResponseAsStream() {
 		return TestResources.class.getClassLoader().getResourceAsStream("CIEL_20150514-testdata.20150622121229.tar");
 	}
-	
+
 	@SuppressWarnings("unchecked")
     public static void setupDaemonToken() {
 		Map<String, DaemonToken> daemonTokens;
 	    try {
-	    	Field field = ModuleFactory.class.getDeclaredField("daemonTokens");
-	    	field.setAccessible(true);
-	    	Object daemonTokensObj = field.get(null);
+		Field field = ModuleFactory.class.getDeclaredField("daemonTokens");
+		field.setAccessible(true);
+		Object daemonTokensObj = field.get(null);
 
-	    	// Handle both Map and Guava Cache types
-	    	if (daemonTokensObj instanceof Map) {
-	    		daemonTokens = (Map<String, DaemonToken>) daemonTokensObj;
-	    	} else if (daemonTokensObj instanceof com.google.common.cache.Cache) {
-	    		daemonTokens = ((com.google.common.cache.Cache<String, DaemonToken>) daemonTokensObj).asMap();
-	    	} else {
-	    		throw new RuntimeException("Unexpected daemonTokens type: " + daemonTokensObj.getClass());
-	    	}
+		// Handle both Map and Guava Cache types
+		if (daemonTokensObj instanceof Map) {
+			daemonTokens = (Map<String, DaemonToken>) daemonTokensObj;
+		} else if (daemonTokensObj instanceof com.google.common.cache.Cache) {
+			daemonTokens = ((com.google.common.cache.Cache<String, DaemonToken>) daemonTokensObj).asMap();
+		} else {
+			throw new RuntimeException("Unexpected daemonTokens type: " + daemonTokensObj.getClass());
+		}
 	    } catch (Exception e) {
-	    	throw new RuntimeException(e);
+		throw new RuntimeException(e);
 	    }
 
 		DaemonToken daemonToken = new DaemonToken("openconceptlab");

@@ -47,11 +47,11 @@ public class GroupMemberObsDataEvaluatorTest extends BaseModuleContextSensitiveT
 
     @Autowired
     TestDataManager data;
-    
+
     @Autowired
     @Qualifier("conceptService")
     ConceptService conceptService;
-    
+
     @Before
     public void setup() throws Exception {
         executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
@@ -63,7 +63,7 @@ public class GroupMemberObsDataEvaluatorTest extends BaseModuleContextSensitiveT
         Concept weight = conceptService.getConcept(5089);
         Concept cd4 = conceptService.getConcept(5497);
         Concept groupConcept = conceptService.getConcept(10001);
-        
+
         // create an obs with a few members
         Patient patient = data.randomPatient().save();
         Encounter enc = data.randomEncounter().patient(patient).save();
@@ -181,5 +181,5 @@ public class GroupMemberObsDataEvaluatorTest extends BaseModuleContextSensitiveT
 
         assertThat(results.getData().size(), is(0));
     }
-    
+
 }

@@ -33,33 +33,33 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 public class OrderGroupController1_12Test extends MainResourceControllerTest {
-	
+
 	private OrderService orderService;
-	
+
 	@BeforeEach
 	public void init() throws Exception {
 		orderService = Context.getOrderService();
 		executeDataSet(RestTestConstants1_12.ORDER_GROUP_TEST_DATA_SET);
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "ordergroup";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_12.ORDER_GROUP_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	@Test
 	public void shouldCreateNewOrderGroup() throws Exception {
-		
+
 		final String JSON = "{\n" + "  \"patient\": \"" + RestTestConstants1_12.ORDER_GROUP_PATIENT_UUID + "\",\n"
 		        + "  \"encounter\": \"" + RestTestConstants1_12.ORDER_GROUP_ENCOUNTER_UUID + "\",\n" + "  \"orders\": [\n"
 		        + "    {\n"
@@ -93,21 +93,21 @@ public class OrderGroupController1_12Test extends MainResourceControllerTest {
 		        + "      \"orderReasonNonCoded\": \"string\",\n" + "      \"instructions\": \"string\",\n"
 		        + "      \"commentToFulfiller\": \"string\"\n" + "    }\n" + "  ],\n"
 		        + "      \"orderSet\": \"" + RestTestConstants1_12.ORDER_GROUP_ORDERSET_UUID + "\"\n" + "}";
-		
+
 		MockHttpServletRequest req = newPostRequest(getURI(), JSON);
 		SimpleObject result = deserialize(handle(req));
 		Assertions.assertEquals(RestTestConstants1_12.ORDER_GROUP_PATIENT_UUID, Util.getByPath(result, "patient/uuid"));
 		Assertions.assertEquals(RestTestConstants1_12.ORDER_GROUP_ENCOUNTER_UUID, Util.getByPath(result, "encounter/uuid"));
 		Assertions.assertEquals(RestTestConstants1_12.ORDER_GROUP_ORDERSET_UUID, Util.getByPath(result, "orderSet/uuid"));
 		Assertions.assertEquals(RestTestConstants1_12.ORDER_GROUP_DISPLAY, Util.getByPath(result, "display"));
-		
+
 		String uuid = (String) PropertyUtils.getProperty(result, "uuid");
 		Assertions.assertEquals(2, orderService.getOrderGroupByUuid(uuid).getOrders().size());
 	}
-	
+
 	@Test
 	public void shouldGetOrderGroupByUuid() throws Exception {
-		
+
 		OrderGroup orderGroup = Context.getOrderService().getOrderGroupByUuid(RestTestConstants1_12.ORDER_GROUP_UUID);
 		Patient patient = orderGroup.getPatient();
 		Encounter encounter = orderGroup.getEncounter();
@@ -117,11 +117,11 @@ public class OrderGroupController1_12Test extends MainResourceControllerTest {
 		List<Order> orders = new ArrayList<Order>();
 		orders.add(order);
 		orders.add(order2);
-		
+
 		orderGroup.setOrders(orders);
 		order.setOrderGroup(orderGroup);
 		order2.setOrderGroup(orderGroup);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + RestTestConstants1_12.ORDER_GROUP_UUID);
 		SimpleObject response = deserialize(handle(req));
 		Assertions.assertEquals(patient.getUuid(), Util.getByPath(response, "patient/uuid"));
@@ -131,7 +131,7 @@ public class OrderGroupController1_12Test extends MainResourceControllerTest {
 		List<Order> orderList = (List<Order>) PropertyUtils.getProperty(response, "orders");
 		Assertions.assertEquals(2, orderList.size());
 	}
-	
+
 	@Test
 	public void shouldAddOrdersToAnExistingOrderGroup() throws Exception {
 		final String JSON_ORDER = " { \"orders\": [\n" + "    {\n"
@@ -150,13 +150,13 @@ public class OrderGroupController1_12Test extends MainResourceControllerTest {
 		        + "      \"orderReasonNonCoded\": \"for Test\",\n" + "      \"instructions\": \"string\",\n"
 		        + "      \"commentToFulfiller\": \"string\"\n" + "    }\n" + "  ]\n" + "}";
 		Integer ordersBefore = orderService.getOrderGroupByUuid(RestTestConstants1_12.ORDER_GROUP_UUID).getOrders().size();
-		
+
 		MockHttpServletRequest req = newPostRequest(getURI() + "/" + RestTestConstants1_12.ORDER_GROUP_UUID, JSON_ORDER);
 		handle(req);
 		Integer ordersAfter = orderService.getOrderGroupByUuid(RestTestConstants1_12.ORDER_GROUP_UUID).getOrders().size();
 		Assertions.assertEquals(++ordersBefore, ordersAfter);
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetAll() throws Exception {

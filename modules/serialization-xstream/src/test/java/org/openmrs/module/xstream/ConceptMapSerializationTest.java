@@ -29,10 +29,10 @@ import static org.junit.Assert.assertEquals;
  * Test class that tests the serialization and deserialization of a conceptMap
  */
 public class ConceptMapSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a conceptMap and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -42,11 +42,11 @@ public class ConceptMapSerializationTest extends BaseModuleContextSensitiveTest 
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptMapSerializationTest.xml");
 		authenticate();
-		
+
 		ConceptMap cm = Context.getConceptService().getConcept(3).getConceptMappings().iterator().next();
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(cm, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("6c36f786-957d-4a14-a6ed-e66ced057066", "/conceptMap/@uuid", xmlOutput);
@@ -58,10 +58,10 @@ public class ConceptMapSerializationTest extends BaseModuleContextSensitiveTest 
 		XMLAssert.assertXpathExists("/conceptMap/creator", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo(sdf.format(cm.getDateCreated()), "/conceptMap/dateCreated", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -79,5 +79,5 @@ public class ConceptMapSerializationTest extends BaseModuleContextSensitiveTest 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 		assertEquals(sdf.parse("2006-02-20 00:00:00 CST"), cm.getDateCreated());
 	}
-	
+
 }

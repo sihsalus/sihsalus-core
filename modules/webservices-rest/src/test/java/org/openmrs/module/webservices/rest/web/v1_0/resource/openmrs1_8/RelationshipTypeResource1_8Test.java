@@ -22,12 +22,12 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
  * {@link RelationShipTypeResource1_8}
  */
 public class RelationshipTypeResource1_8Test extends BaseDelegatingResourceTest<RelationShipTypeResource1_8, RelationshipType> {
-	
+
 	@Override
 	public RelationshipType newObject() {
 		return Context.getPersonService().getRelationshipTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -39,7 +39,7 @@ public class RelationshipTypeResource1_8Test extends BaseDelegatingResourceTest<
 		assertPropEquals("displayBIsToA", getObject().getbIsToA());
 		assertPropEquals("retired", getObject().isRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -53,17 +53,17 @@ public class RelationshipTypeResource1_8Test extends BaseDelegatingResourceTest<
 		assertPropEquals("weight", getObject().getWeight());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return getObject().toString();
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.RELATIONSHIP_TYPE_UUID;
 	}
-	
+
 	@Test
 	public void shouldIgnoreRelationshipSpecificPropertiesWhenCreating() {
 		SimpleObject relationshipTypeSimpleObject = new SimpleObject()
@@ -74,9 +74,9 @@ public class RelationshipTypeResource1_8Test extends BaseDelegatingResourceTest<
 		        .add("displayAIsToB", "Sibling side")
 		        .add("displayBIsToA", "Sibling another")
 		        .add("weight", 1);
-		
+
 		// This line should not throw exception.
 		getResource().create(relationshipTypeSimpleObject, new RequestContext());
 	}
-	
+
 }

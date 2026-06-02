@@ -27,7 +27,7 @@ import org.springframework.ui.ModelMap;
  * Tests the {@link PersonAttributeTypeListController} controller
  */
 public class PersonAttributeTypeListControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#displayPage(ModelMap)
 	 */
@@ -37,7 +37,7 @@ public class PersonAttributeTypeListControllerTest extends BaseModuleWebContextS
 		Context.logout();
 		new PersonAttributeTypeListController().displayPage(new ModelMap());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#displayPage(ModelMap)
 	 */
@@ -50,7 +50,7 @@ public class PersonAttributeTypeListControllerTest extends BaseModuleWebContextS
 		List<PersonAttributeType> alltypes = (List<PersonAttributeType>) map.get("personAttributeTypeList");
 		Assertions.assertEquals(3, alltypes.size());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#moveDown(null,HttpSession)
 	 */
@@ -60,14 +60,14 @@ public class PersonAttributeTypeListControllerTest extends BaseModuleWebContextS
 		// sanity check
 		List<PersonAttributeType> allTypes = Context.getPersonService().getAllPersonAttributeTypes();
 		Assertions.assertEquals(1, allTypes.get(0).getId().intValue());
-		
+
 		// the test
 		Integer[] ids = new Integer[] { 1 };
 		new PersonAttributeTypeListController().moveDown(ids, new MockHttpSession());
 		allTypes = Context.getPersonService().getAllPersonAttributeTypes();
 		Assertions.assertEquals(8, allTypes.get(0).getId().intValue(), "The types didn't move correctly");
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#moveDown(null,HttpSession)
 	 */
@@ -77,14 +77,14 @@ public class PersonAttributeTypeListControllerTest extends BaseModuleWebContextS
 		// sanity check
 		List<PersonAttributeType> allTypes = Context.getPersonService().getAllPersonAttributeTypes();
 		Assertions.assertEquals(2, allTypes.get(allTypes.size() - 1).getId().intValue());
-		
+
 		// the test
 		Integer[] ids = new Integer[] { 2 };
 		new PersonAttributeTypeListController().moveDown(ids, new MockHttpSession());
 		allTypes = Context.getPersonService().getAllPersonAttributeTypes();
 		Assertions.assertEquals(2, allTypes.get(allTypes.size() - 1).getId().intValue());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#moveDown(null,HttpSession)
 	 */
@@ -94,25 +94,25 @@ public class PersonAttributeTypeListControllerTest extends BaseModuleWebContextS
 		new PersonAttributeTypeListController().moveDown(new Integer[] {}, new MockHttpSession());
 		new PersonAttributeTypeListController().moveDown(null, new MockHttpSession());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#moveUp(null,HttpSession)
 	 */
 	@Test
 	@Verifies(value = "should move selected ids up one in the list", method = "moveUp(null,HttpSession)")
 	public void moveUp_shouldMoveSelectedIdsUpOneInTheList() throws Exception {
-		
+
 		// sanity check
 		List<PersonAttributeType> allTypes = Context.getPersonService().getAllPersonAttributeTypes();
 		Assertions.assertEquals(8, allTypes.get(1).getId().intValue());
-		
+
 		// the test
 		Integer[] ids = new Integer[] { 8 };
 		new PersonAttributeTypeListController().moveUp(ids, new MockHttpSession());
 		allTypes = Context.getPersonService().getAllPersonAttributeTypes();
 		Assertions.assertEquals(8, allTypes.get(0).getId().intValue(), "The types didn't move correctly");
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#moveUp(null,HttpSession)
 	 */
@@ -122,11 +122,11 @@ public class PersonAttributeTypeListControllerTest extends BaseModuleWebContextS
 		// sanity check
 		List<PersonAttributeType> allTypes = Context.getPersonService().getAllPersonAttributeTypes();
 		Assertions.assertEquals(1, allTypes.get(0).getId().intValue());
-		
+
 		// the test
 		new PersonAttributeTypeListController().moveUp(new Integer[] { 1 }, new MockHttpSession());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#moveUp(null,HttpSession)
 	 */
@@ -136,7 +136,7 @@ public class PersonAttributeTypeListControllerTest extends BaseModuleWebContextS
 		new PersonAttributeTypeListController().moveUp(new Integer[] {}, new MockHttpSession());
 		new PersonAttributeTypeListController().moveUp(null, new MockHttpSession());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeListController#updateGlobalProperties(String,String,String,String,String,HttpSession)
 	 */

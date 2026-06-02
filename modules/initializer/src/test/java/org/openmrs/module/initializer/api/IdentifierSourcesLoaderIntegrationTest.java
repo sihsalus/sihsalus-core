@@ -28,32 +28,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Properties;
 
 public class IdentifierSourcesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private IdentifierSourceService idgenService;
-	
+
 	@Autowired
 	private IdentifierSourcesLoader loader;
-	
+
 	public static final String EXISTING_SEQ = "c1d8a345-3f10-11e4-adec-0800271c1b75";
-	
+
 	public static final String EXISTING_REMOTE = "c1d90956-3f10-11e4-adec-0800271c1b75";
-	
+
 	public static final String EXISTING_POOL = "ef35fb58-6618-411a-a331-bff960a29d40";
-	
+
 	public static final String NEW_SEQ = "1af1422c-8c65-438d-9770-cbb723821bc8";
-	
+
 	public static final String NEW_REMOTE = "d2a10e86-59ce-11ec-8885-0242ac110002";
-	
+
 	public static final String NEW_POOL = "30799e8f-59cf-11ec-8885-0242ac110002";
-	
+
 	@Before
 	public void setup() {
-		
+
 		PatientIdentifierType type = new PatientIdentifierType();
 		type.setName("PATIENTIDENTIFIERTYPE_1_OPENMRS_ID");
 		Context.getPatientService().savePatientIdentifierType(type);
-		
+
 		SequentialIdentifierGenerator seqSrc = new SequentialIdentifierGenerator();
 		{
 			seqSrc.setName("Test sequential identifier generator");
@@ -66,7 +66,7 @@ public class IdentifierSourcesLoaderIntegrationTest extends DomainBaseModuleCont
 			seqSrc.setFirstIdentifierBase("1000");
 			idgenService.saveIdentifierSource(seqSrc);
 		}
-		
+
 		{
 			RemoteIdentifierSource src = new RemoteIdentifierSource();
 			src.setName("Test remote identifier source");
@@ -77,7 +77,7 @@ public class IdentifierSourcesLoaderIntegrationTest extends DomainBaseModuleCont
 			src.setPassword("Testing123");
 			idgenService.saveIdentifierSource(src);
 		}
-		
+
 		{
 			IdentifierPool src = new IdentifierPool();
 			src.setName("Test identifier pool");
@@ -91,13 +91,13 @@ public class IdentifierSourcesLoaderIntegrationTest extends DomainBaseModuleCont
 			idgenService.saveIdentifierSource(src);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldModifyExistingIdentifierSources() throws Exception {
-		
+
 		// Replay
 		loader.loadUnsafe(null, true);
-		
+
 		// Verify that existing sources are appropriately edited
 		{
 			IdentifierSource source = idgenService.getIdentifierSourceByUuid(EXISTING_SEQ);
@@ -137,13 +137,13 @@ public class IdentifierSourcesLoaderIntegrationTest extends DomainBaseModuleCont
 			Assert.assertFalse(BooleanUtils.isTrue(pool.getRetired()));
 		}
 	}
-	
+
 	@Test
 	public void load_shouldCreateNewIdentifierSources() throws Exception {
-		
+
 		// Replay
 		loader.loadUnsafe(null, true);
-		
+
 		// Verify that existing sources are appropriately edited
 		{
 			IdentifierSource source = idgenService.getIdentifierSourceByUuid(NEW_SEQ);
@@ -184,13 +184,13 @@ public class IdentifierSourcesLoaderIntegrationTest extends DomainBaseModuleCont
 			Assert.assertFalse(BooleanUtils.isTrue(pool.getRetired()));
 		}
 	}
-	
+
 	@Before
 	@Override
 	public void setupAppDataDir() {
-		
+
 		String path = getAppDataDirPath();
-		
+
 		System.setProperty("OPENMRS_APPLICATION_DATA_DIRECTORY", path);
 		System.setProperty("idgen_remote_password", "value-from-system-property");
 		Properties prop = new Properties();

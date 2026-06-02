@@ -31,110 +31,110 @@ import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
-	
+
 	private BillDAO billDAO;
-	
+
 	private PatientService patientService;
-	
+
 	private ProviderService providerService;
-	
+
 	private CashPointService cashPointService;
-	
+
 	@BeforeEach
 	public void setup() {
 		billDAO = Context.getRegisteredComponent("billDAO", BillDAO.class);
 		patientService = Context.getPatientService();
 		providerService = Context.getProviderService();
 		cashPointService = Context.getService(CashPointService.class);
-		
+
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "CashPointTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillTest.xml");
 	}
-	
+
 	@Test
 	public void getBill_shouldReturnBillById() {
 		Bill bill = billDAO.getBill(0);
 		assertNotNull(bill);
 		assertEquals(0, bill.getId());
 	}
-	
+
 	@Test
 	public void getBill_shouldReturnNullIfBillNotFound() {
 		Bill bill = billDAO.getBill(999);
 		assertNull(bill);
 	}
-	
+
 	@Test
 	public void getBillByUuid_shouldReturnBillByUuid() {
 		Bill bill = billDAO.getBill(0);
 		assertNotNull(bill);
 		String uuid = bill.getUuid();
-		
+
 		Bill foundBill = billDAO.getBillByUuid(uuid);
 		assertNotNull(foundBill);
 		assertEquals(uuid, foundBill.getUuid());
 		assertEquals(0, foundBill.getId());
 	}
-	
+
 	@Test
 	public void getBillByUuid_shouldReturnNullIfUuidNotFound() {
 		Bill bill = billDAO.getBillByUuid("nonexistent-uuid");
 		assertNull(bill);
 	}
-	
+
 	@Test
 	public void saveBill_shouldCreateNewBill() {
 		Patient patient = patientService.getPatient(1);
 		assertNotNull(patient);
-		
+
 		Bill newBill = new Bill();
 		newBill.setCashier(providerService.getProvider(0));
 		newBill.setPatient(patient);
 		newBill.setCashPoint(cashPointService.getCashPoint(0));
 		newBill.setReceiptNumber("TEST-" + UUID.randomUUID());
 		newBill.setStatus(BillStatus.PENDING);
-		
+
 		Bill savedBill = billDAO.saveBill(newBill);
 		Context.flushSession();
-		
+
 		assertNotNull(savedBill);
 		assertNotNull(savedBill.getId());
 		assertEquals(BillStatus.PENDING, savedBill.getStatus());
 	}
-	
+
 	@Test
 	public void saveBill_shouldUpdateExistingBill() {
 		Bill existingBill = billDAO.getBill(2);
 		assertNotNull(existingBill);
 		assertEquals(BillStatus.PENDING, existingBill.getStatus());
-		
+
 		String newReceiptNumber = "UPDATED-" + UUID.randomUUID();
 		existingBill.setReceiptNumber(newReceiptNumber);
-		
+
 		billDAO.saveBill(existingBill);
 		Context.flushSession();
 		Context.clearSession();
-		
+
 		Bill updatedBill = billDAO.getBill(2);
 		assertEquals(newReceiptNumber, updatedBill.getReceiptNumber());
 	}
-	
+
 	@Test
 	public void getBillByReceiptNumber_shouldReturnBillWithMatchingReceiptNumber() {
 		Bill bill = billDAO.getBillByReceiptNumber("test 1 receipt number");
 		assertNotNull(bill);
 		assertEquals("test 1 receipt number", bill.getReceiptNumber());
 	}
-	
+
 	@Test
 	public void getBillByReceiptNumber_shouldReturnNullIfReceiptNumberNotFound() {
 		Bill bill = billDAO.getBillByReceiptNumber("nonexistent receipt number");
 		assertNull(bill);
 	}
-	
+
 	@Test
 	public void getBillsByPatientId_shouldReturnBillsForPatient() {
 		List<Bill> bills = billDAO.getBillsByPatientUuid("5631b434-78aa-102b-91a0-001e378eb67e", null);
@@ -142,110 +142,110 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		assertFalse(bills.isEmpty());
 		assertEquals(1, bills.size());
 	}
-	
+
 	@Test
 	public void getBillsByPatientId_shouldReturnEmptyListWhenPatientHasNoBills() {
 		List<Bill> bills = billDAO.getBillsByPatientUuid("abc", null);
 		assertNotNull(bills);
 		assertTrue(bills.isEmpty());
 	}
-	
+
 	@Test
 	public void getBillsByPatientId_shouldApplyPagingCorrectly() {
 		PagingInfo pagingInfo = new PagingInfo(1, 5);
 		List<Bill> bills = billDAO.getBillsByPatientUuid("5631b434-78aa-102b-91a0-001e378eb67e", pagingInfo);
-		
+
 		assertNotNull(bills);
 		assertTrue(bills.size() <= 5);
 	}
-	
+
 	@Test
 	public void getBills_shouldReturnAllBillsWhenSearchIsEmpty() {
 		BillSearch billSearch = new BillSearch();
 		List<Bill> bills = billDAO.getBills(billSearch, null);
-		
+
 		assertNotNull(bills);
 		assertFalse(bills.isEmpty());
 	}
-	
+
 	@Test
 	public void getBills_shouldFilterByPatientUuid() {
 		Patient patient = patientService.getPatient(0);
 		assertNotNull(patient);
-		
+
 		BillSearch billSearch = new BillSearch();
 		billSearch.setPatientUuid(patient.getUuid());
-		
+
 		List<Bill> bills = billDAO.getBills(billSearch, null);
 		assertNotNull(bills);
 		assertFalse(bills.isEmpty());
-		
+
 		for (Bill bill : bills) {
 			assertEquals(patient.getUuid(), bill.getPatient().getUuid());
 		}
 	}
-	
+
 	@Test
 	public void getBills_shouldFilterByCashPointUuid() {
 		Bill existingBill = billDAO.getBill(0);
 		assertNotNull(existingBill);
 		assertNotNull(existingBill.getCashPoint());
-		
+
 		BillSearch billSearch = new BillSearch();
 		billSearch.setCashPointUuid(existingBill.getCashPoint().getUuid());
-		
+
 		List<Bill> bills = billDAO.getBills(billSearch, null);
 		assertNotNull(bills);
 		assertFalse(bills.isEmpty());
 	}
-	
+
 	@Test
 	public void getBills_shouldExcludeVoidedBillsByDefault() {
 		BillSearch billSearch = new BillSearch();
 		billSearch.setIncludeVoided(false);
-		
+
 		List<Bill> bills = billDAO.getBills(billSearch, null);
 		assertNotNull(bills);
-		
+
 		for (Bill bill : bills) {
 			assertFalse(bill.getVoided());
 		}
 	}
-	
+
 	@Test
 	public void purgeBill_shouldDeleteBill() {
 		Patient patient = patientService.getPatient(1);
 		assertNotNull(patient);
-		
+
 		Bill newBill = new Bill();
 		newBill.setCashier(providerService.getProvider(0));
 		newBill.setPatient(patient);
 		newBill.setCashPoint(cashPointService.getCashPoint(0));
 		newBill.setReceiptNumber("TO-DELETE-" + UUID.randomUUID());
 		newBill.setStatus(BillStatus.PENDING);
-		
+
 		Bill savedBill = billDAO.saveBill(newBill);
 		Context.flushSession();
-		
+
 		Integer billId = savedBill.getId();
 		assertNotNull(billId);
-		
+
 		billDAO.purgeBill(savedBill);
 		Context.flushSession();
 		Context.clearSession();
-		
+
 		Bill deletedBill = billDAO.getBill(billId);
 		assertNull(deletedBill);
 	}
-	
+
 	@Test
 	public void getBills_shouldReturnBillsOrderedByDateCreatedDescending() {
 		BillSearch billSearch = new BillSearch();
 		List<Bill> bills = billDAO.getBills(billSearch, null);
-		
+
 		assertNotNull(bills);
 		assertTrue(bills.size() >= 2, "Expected at least 2 bills in test dataset for ordering assertion");
-		
+
 		for (int i = 0; i < bills.size() - 1; i++) {
 			Date current = bills.get(i).getDateCreated();
 			Date next = bills.get(i + 1).getDateCreated();
@@ -255,13 +255,13 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 			        + ") should be >= bill at index " + (i + 1) + " (dateCreated=" + next + ")");
 		}
 	}
-	
+
 	@Test
 	public void getBillsByPatientUuid_shouldReturnBillsOrderedByDateCreatedDescending() {
 		// Save two bills for the same patient with explicit dateCreated values to assert ordering
 		Patient patient = patientService.getPatient(0);
 		assertNotNull(patient);
-		
+
 		Bill olderBill = new Bill();
 		olderBill.setCashier(providerService.getProvider(0));
 		olderBill.setPatient(patient);
@@ -270,7 +270,7 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		olderBill.setStatus(BillStatus.PENDING);
 		olderBill.setDateCreated(new Date(System.currentTimeMillis() - 86400000));
 		billDAO.saveBill(olderBill);
-		
+
 		Bill newerBill = new Bill();
 		newerBill.setCashier(providerService.getProvider(0));
 		newerBill.setPatient(patient);
@@ -279,12 +279,12 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		newerBill.setStatus(BillStatus.PENDING);
 		newerBill.setDateCreated(new Date());
 		billDAO.saveBill(newerBill);
-		
+
 		List<Bill> bills = billDAO.getBillsByPatientUuid(patient.getUuid(), null);
-		
+
 		assertNotNull(bills);
 		assertTrue(bills.size() >= 2, "Expected at least 2 bills for ordering assertion");
-		
+
 		for (int i = 0; i < bills.size() - 1; i++) {
 			Date current = bills.get(i).getDateCreated();
 			Date next = bills.get(i + 1).getDateCreated();

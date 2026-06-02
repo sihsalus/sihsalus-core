@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 class ResourceTestUtils {
-	
+
 	static Object getExactlyOneObjectFromSearchResponse(SimpleObject responseData) {
 		assertNotNull(responseData);
 		List<SimpleObject> results = responseData.get("results");

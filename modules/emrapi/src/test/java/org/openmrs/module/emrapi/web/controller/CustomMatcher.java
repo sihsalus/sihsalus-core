@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CustomMatcher implements BaseEncounterMatcher {
-	
+
 	@Override
 	public Encounter findEncounter(Visit visit, EncounterParameters encounterParameters) {
 		for (Encounter encounter : visit.getEncounters()) {

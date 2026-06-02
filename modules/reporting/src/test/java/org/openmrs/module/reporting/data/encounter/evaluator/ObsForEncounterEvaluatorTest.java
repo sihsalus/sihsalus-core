@@ -48,18 +48,18 @@ public class ObsForEncounterEvaluatorTest extends BaseModuleContextSensitiveTest
 
     @Autowired
     private TestDataManager data;
-    
+
     @Autowired
     @Qualifier("conceptService")
     private ConceptService conceptService;
-    
+
     @Autowired
     @Qualifier("encounterService")
     private EncounterService encounterService;
 
     @Autowired
     private EncounterDataService encounterDataService;
-    
+
     /**
      * Run this before each unit test in this class. The "@Before" method in
      * {@link org.openmrs.test.BaseContextSensitiveTest} is run right before this method.

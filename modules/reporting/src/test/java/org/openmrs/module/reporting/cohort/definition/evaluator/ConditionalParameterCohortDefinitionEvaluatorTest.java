@@ -42,7 +42,7 @@ public class ConditionalParameterCohortDefinitionEvaluatorTest extends BaseModul
 
 	@Autowired
 	BuiltInCohortDefinitionLibrary builtInCohortDefinitionLibrary;
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
@@ -68,7 +68,7 @@ public class ConditionalParameterCohortDefinitionEvaluatorTest extends BaseModul
 		cd.setParameterToCheck("gender");
 		cd.addConditionalCohortDefinition("M", Mapped.mapStraightThrough(builtInCohortDefinitionLibrary.getMales()));
 		cd.addConditionalCohortDefinition("F", Mapped.mapStraightThrough(builtInCohortDefinitionLibrary.getFemales()));
-		
+
 		EvaluationContext context = new EvaluationContext();
 
 		context.addParameterValue("gender", "M");

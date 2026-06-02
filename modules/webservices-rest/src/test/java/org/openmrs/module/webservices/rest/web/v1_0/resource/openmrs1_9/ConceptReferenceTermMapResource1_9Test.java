@@ -16,20 +16,20 @@ import org.openmrs.module.webservices.rest.web.api.RestHelperService;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ConceptReferenceTermMapResource1_9Test extends BaseDelegatingResourceTest<ConceptReferenceTermMapResource1_9, ConceptReferenceTermMap> {
-	
+
 	@Override
 	public ConceptReferenceTermMap newObject() {
 		return Context.getService(RestHelperService.class).getObjectByUuid(ConceptReferenceTermMap.class, getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Some Standardized Terminology: WGT234 - Some Standardized Terminology: CD41003";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_9.CONCEPT_REFERENCE_TERM_MAP_UUID;
 	}
-	
+
 }

@@ -31,10 +31,10 @@ import static org.junit.Assert.assertTrue;
  * Test class that tests the serialization and deserialization of a user
  */
 public class UserSerializaionTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a user and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -44,11 +44,11 @@ public class UserSerializaionTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/UserSerializaionTest.xml");
 		authenticate();
-		
+
 		User user = Context.getUserService().getUser(501);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(user, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("55685062-1b48-11df-a5c7-001e378eb67e", "/user/@uuid", xmlOutput);
@@ -70,10 +70,10 @@ public class UserSerializaionTest extends BaseModuleContextSensitiveTest {
 		XMLAssert.assertXpathExists("/user/userProperties/entry[string='lockoutTimestamp']", xmlOutput);
 		XMLAssert.assertXpathExists("/user/userProperties/entry[string='loginAttempts']", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -165,10 +165,10 @@ public class UserSerializaionTest extends BaseModuleContextSensitiveTest {
 		xmlBuilder.append("  </userProperties>\n");
 		xmlBuilder.append("  <parsedProficientLocalesProperty></parsedProficientLocalesProperty>\n");
 		xmlBuilder.append("</user>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		User user = Context.getSerializationService()
 		        .deserialize(xmlBuilder.toString(), User.class, XStreamSerializer.class);
 		assertEquals("df8ae447-6745-45be-b859-403241d9913c", user.getUuid());

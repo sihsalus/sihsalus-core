@@ -48,14 +48,14 @@ import org.springframework.web.context.request.WebRequest;
 
 /**
  * Consists of unit tests for the ShortPatientFormController
- * 
+ *
  * @see ShortPatientFormController
  */
 public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	WebTestHelper webTestHelper;
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,ShortPatientModel,BindingResult,SessionStatus)
 	 */
@@ -64,26 +64,26 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 	public void saveShortPatient_shouldPassIfAllTheFormDataIsValid() throws Exception {
 		Patient p = Context.getPatientService().getPatient(2);
 		ShortPatientModel patientModel = new ShortPatientModel(p);
-		
+
 		WebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		BindException errors = new BindException(patientModel, "patientModel");
 		mockWebRequest.setAttribute("personNameCache", BeanUtils.cloneBean(p.getPersonName()), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("personAddressCache", p.getPersonAddress().clone(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("patientModel", patientModel, WebRequest.SCOPE_SESSION);
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest,
 		    (PersonName) mockWebRequest.getAttribute("personNameCache", WebRequest.SCOPE_SESSION),
 		    (PersonAddress) mockWebRequest.getAttribute("personAddressCache", WebRequest.SCOPE_SESSION), null,
 		    (ShortPatientModel) mockWebRequest.getAttribute("patientModel", WebRequest.SCOPE_SESSION), errors);
-		
+
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertEquals("Patient.saved",
 		    mockWebRequest.getAttribute(WebConstants.OPENMRS_MSG_ATTR, WebRequest.SCOPE_SESSION));
 		Assertions.assertEquals("redirect:/patientDashboard.form?patientId=" + p.getPatientId(), redirectUrl);
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,ShortPatientModel,BindingResult,SessionStatus)
 	 */
@@ -103,15 +103,15 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		patientModel.getPatient().setBirthdate(new Date());
 		patientModel.getPatient().setGender("M");
 		patientModel.setPersonAddress(new PersonAddress());
-		
+
 		WebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		BindException errors = new BindException(patientModel, "patientModel");
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest, new PersonName(), new PersonAddress(), null,
 		    patientModel, errors);
-		
+
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertNotNull(p.getId());
 		Assertions.assertNotNull(p.getPersonName());
@@ -122,7 +122,7 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		    mockWebRequest.getAttribute(WebConstants.OPENMRS_MSG_ATTR, WebRequest.SCOPE_SESSION));
 		Assertions.assertEquals("redirect:/patientDashboard.form?patientId=" + p.getPatientId(), redirectUrl);
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,ShortPatientModel,BindingResult,SessionStatus)
 	 */
@@ -135,19 +135,19 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		List<PatientIdentifier> identifiers = new ArrayList<PatientIdentifier>();
 		patientModel.setIdentifiers(identifiers);
 		patientModel.setPersonAddress(new PersonAddress());
-		
+
 		WebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		BindException errors = new BindException(patientModel, "patientModel");
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String formUrl = controller.saveShortPatient(mockWebRequest, new PersonName(), new PersonAddress(), null,
 		    patientModel, errors);
-		
+
 		Assertions.assertTrue(errors.hasErrors(), "Should report validation errors");
 		Assertions.assertEquals("module/legacyui/admin/patients/shortPatientForm", formUrl);
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,ShortPatientModel,BindingResult,SessionStatus)
 	 */
@@ -159,19 +159,19 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		PersonName oldPersonName = p.getPersonName();
 		String oldGivenName = oldPersonName.getGivenName();
 		int nameCount = p.getNames().size();
-		
+
 		BindException errors = new BindException(patientModel, "patientModel");
 		ServletWebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		PersonName personNameCache = (PersonName) BeanUtils.cloneBean(p.getPersonName());
-		
+
 		// edit the name and submit
 		patientModel.getPersonName().setGivenName("Changed");
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest, personNameCache, (PersonAddress) p
 		        .getPersonAddress().clone(), null, patientModel, errors);
-		
+
 		Assertions.assertEquals(nameCount + 1, p.getNames().size());
 		Assertions.assertTrue(oldPersonName.isVoided(), "The old name should be voided");
 		Assertions.assertNotNull(oldPersonName.getVoidReason(), "The void reason should be set");
@@ -182,7 +182,7 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertEquals("redirect:/patientDashboard.form?patientId=" + p.getPatientId(), redirectUrl);
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,ShortPatientModel,BindingResult,SessionStatus)
 	 */
@@ -190,33 +190,33 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 	@Verifies(value = "should add a new name if the person had no names", method = "saveShortPatient(WebRequest,ShortPatientModel,BindingResult,SessionStatus)")
 	public void saveShortPatient_shouldAddANewNameIfThePersonHadNoNames() throws Exception {
 		Patient p = Context.getPatientService().getPatient(7);
-		
+
 		//Commenting this out because person validator requires each person
 		//to have at least one non voided name.
 		/*p.getPersonName().setVoided(true);
 		Context.getPatientService().savePatient(p);
 		Assertions.assertNull(p.getPersonName());// make sure all names are voided*/
-		
+
 		// add a name that will used as a duplicate for testing purposes
 		PersonName newName = new PersonName("new", null, "name");
 		newName.setDateCreated(new Date());
 		ShortPatientModel patientModel = new ShortPatientModel(p);
 		patientModel.setPersonName(newName);
-		
+
 		BindException errors = new BindException(patientModel, "patientModel");
 		ServletWebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest, new PersonName(), (PersonAddress) p
 		        .getPersonAddress().clone(), null, patientModel, errors);
-		
+
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertEquals("redirect:/patientDashboard.form?patientId=" + p.getPatientId(), redirectUrl);
 		Assertions.assertNotNull(newName.getId());// name should have been added to
 		// DB
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,ShortPatientModel,BindingResult,SessionStatus)
 	 */
@@ -228,14 +228,14 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		PersonAddress oldPersonAddress = patientModel.getPersonAddress();
 		String oldAddress1 = oldPersonAddress.getAddress1();
 		int addressCount = p.getAddresses().size();
-		
+
 		BindException errors = new BindException(patientModel, "patientModel");
 		ServletWebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		PersonAddress personAddressCache = (PersonAddress) p.getPersonAddress().clone();
-		
+
 		// edit address1 value and submit
 		patientModel.getPersonAddress().setAddress1("Kampala");
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest,
@@ -253,7 +253,7 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		// effect
 		Assertions.assertEquals("redirect:/patientDashboard.form?patientId=" + p.getPatientId(), redirectUrl);
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,PersonName,ShortPatientModel,Map,BindingResult,
 	 *      SessionStatus)
@@ -266,28 +266,28 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		Context.getPatientService().savePatient(p);
 		Assertions.assertNull(p.getPersonAddress());// make sure all addresses are
 		// voided
-		
+
 		// add a name that will used as a duplicate for testing purposes
 		PersonAddress newAddress = new PersonAddress();
 		newAddress.setAddress1("Kampala");
 		newAddress.setDateCreated(new Date());
 		ShortPatientModel patientModel = new ShortPatientModel(p);
 		patientModel.setPersonAddress(newAddress);
-		
+
 		BindException errors = new BindException(patientModel, "patientModel");
 		ServletWebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest,
 		    (PersonName) BeanUtils.cloneBean(p.getPersonName()), new PersonAddress(), null, patientModel, errors);
-		
+
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertEquals("redirect:/patientDashboard.form?patientId=" + p.getPatientId(), redirectUrl);
 		Assertions.assertNotNull(newAddress.getId());// name should have been added
 		// to DB
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,PersonName,PersonAddress,ShortPatientModel,BindingResult,SessionStatus)
 	 */
@@ -300,7 +300,7 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		// make sure all addresses are voided so that whatever is entered a new
 		// address
 		Assertions.assertNull(p.getPersonAddress());
-		
+
 		// add the new address
 		PersonAddress newAddress = new PersonAddress();
 		newAddress.setAddress1("Kampala");
@@ -308,21 +308,21 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		newAddress.setVoided(true);
 		ShortPatientModel patientModel = new ShortPatientModel(p);
 		patientModel.setPersonAddress(newAddress);
-		
+
 		BindException errors = new BindException(patientModel, "patientModel");
 		ServletWebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest,
 		    (PersonName) BeanUtils.cloneBean(p.getPersonName()), new PersonAddress(), null, patientModel, errors);
-		
+
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertEquals("redirect:/patientDashboard.form?patientId=" + p.getPatientId(), redirectUrl);
 		// address should have been ignored
 		Assertions.assertNull(p.getPersonAddress());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,PersonName,PersonAddress,Map,ShortPatientModel,
 	 *      BindingResult)
@@ -340,13 +340,13 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		newPersonAttribute.setDateCreated(new Date());
 		newPersonAttribute.setCreator(Context.getAuthenticatedUser());
 		patientModel.getPersonAttributes().add(newPersonAttribute);
-		
+
 		WebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		BindException errors = new BindException(patientModel, "patientModel");
 		mockWebRequest.setAttribute("personNameCache", p.getPersonName(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("personAddressCache", p.getPersonAddress(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("patientModel", patientModel, WebRequest.SCOPE_SESSION);
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest,
@@ -354,7 +354,7 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		    (PersonAddress) mockWebRequest.getAttribute("personAddressCache", WebRequest.SCOPE_SESSION), null,
 		    (ShortPatientModel) mockWebRequest.getAttribute("patientModel", WebRequest.SCOPE_SESSION), errors);
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
-		
+
 		Assertions.assertEquals("Patient.saved",
 		    mockWebRequest.getAttribute(WebConstants.OPENMRS_MSG_ATTR, WebRequest.SCOPE_SESSION));
 		Assertions.assertEquals("redirect:/patientDashboard.form?patientId=" + p.getPatientId(), redirectUrl);
@@ -363,7 +363,7 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		Assertions.assertEquals(birthPlace, p.getAttribute(2).getValue());
 		Assertions.assertEquals(originalAttributeCount + 1, p.getAttributes().size());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,PersonName,PersonAddress,Map,ShortPatientModel,
 	 *      BindingResult)
@@ -377,20 +377,20 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		//add a new person Attribute with no value
 		patientModel.getPersonAttributes().add(
 		    new PersonAttribute(Context.getPersonService().getPersonAttributeType(2), null));
-		
+
 		WebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		BindException errors = new BindException(patientModel, "patientModel");
 		mockWebRequest.setAttribute("personNameCache", p.getPersonName(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("personAddressCache", p.getPersonAddress(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("patientModel", patientModel, WebRequest.SCOPE_SESSION);
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		String redirectUrl = controller.saveShortPatient(mockWebRequest,
 		    (PersonName) mockWebRequest.getAttribute("personNameCache", WebRequest.SCOPE_SESSION),
 		    (PersonAddress) mockWebRequest.getAttribute("personAddressCache", WebRequest.SCOPE_SESSION), null,
 		    (ShortPatientModel) mockWebRequest.getAttribute("patientModel", WebRequest.SCOPE_SESSION), errors);
-		
+
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertEquals("Patient.saved",
 		    mockWebRequest.getAttribute(WebConstants.OPENMRS_MSG_ATTR, WebRequest.SCOPE_SESSION));
@@ -398,7 +398,7 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		//The new blank person attribute should have been ignored
 		Assertions.assertEquals(originalAttributeCount, p.getAttributes().size());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,PersonName,PersonAddress,Map,ShortPatientModel,
 	 *      BindingResult)
@@ -415,15 +415,15 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 			gp = new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_VIEWING_ATTRIBUTES);
 		gp.setPropertyValue(pat.getName());
 		as.saveGlobalProperty(gp);
-		
+
 		Patient p = Context.getPatientService().getPatient(2);
 		int originalActiveAttributeCount = p.getActiveAttributes().size();
-		
+
 		ShortPatientModel patientModel = new ShortPatientModel(p);
 		PersonAttribute attributeToEdit = null;
 		String oldValue = null;
 		String newValue = "";
-		//assuming we are in the webapp on the form, find the attribute with the matching 
+		//assuming we are in the webapp on the form, find the attribute with the matching
 		// attribute type and change its value to an empty string
 		for (PersonAttribute at : patientModel.getPersonAttributes()) {
 			if (at.getAttributeType().equals(pat)) {
@@ -436,28 +436,28 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		//ensure we found and edited it
 		Assertions.assertNotNull(attributeToEdit);
 		Assertions.assertNotNull(oldValue);
-		
+
 		WebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		BindException errors = new BindException(patientModel, "patientModel");
 		mockWebRequest.setAttribute("personNameCache", p.getPersonName(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("personAddressCache", p.getPersonAddress(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("patientModel", patientModel, WebRequest.SCOPE_SESSION);
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		controller.saveShortPatient(mockWebRequest,
 		    (PersonName) mockWebRequest.getAttribute("personNameCache", WebRequest.SCOPE_SESSION),
 		    (PersonAddress) mockWebRequest.getAttribute("personAddressCache", WebRequest.SCOPE_SESSION), null,
 		    (ShortPatientModel) mockWebRequest.getAttribute("patientModel", WebRequest.SCOPE_SESSION), errors);
-		
+
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertEquals("Patient.saved",
 		    mockWebRequest.getAttribute(WebConstants.OPENMRS_MSG_ATTR, WebRequest.SCOPE_SESSION));
-		
+
 		//the attribute should have been voided
 		Assertions.assertEquals(originalActiveAttributeCount - 1, p.getActiveAttributes().size());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,PersonName,PersonAddress,Map,ShortPatientModel,
 	 *      BindingResult)
@@ -474,15 +474,15 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 			gp = new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_PATIENT_VIEWING_ATTRIBUTES);
 		gp.setPropertyValue(pat.getName());
 		as.saveGlobalProperty(gp);
-		
+
 		Patient p = Context.getPatientService().getPatient(2);
 		int originalAttributeCount = p.getAttributes().size();
-		
+
 		ShortPatientModel patientModel = new ShortPatientModel(p);
 		PersonAttribute attributeToEdit = null;
 		String oldValue = null;
 		String newValue = "New";
-		//assuming we are in the webapp on the form, find the attribute with the matching 
+		//assuming we are in the webapp on the form, find the attribute with the matching
 		// attribute type and change its value
 		for (PersonAttribute at : patientModel.getPersonAttributes()) {
 			if (at.getAttributeType().equals(pat)) {
@@ -495,29 +495,29 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		//ensure we found and edited it
 		Assertions.assertNotNull(attributeToEdit);
 		Assertions.assertNotNull(oldValue);
-		
+
 		WebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
 		BindException errors = new BindException(patientModel, "patientModel");
 		mockWebRequest.setAttribute("personNameCache", p.getPersonName(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("personAddressCache", p.getPersonAddress(), WebRequest.SCOPE_SESSION);
 		mockWebRequest.setAttribute("patientModel", patientModel, WebRequest.SCOPE_SESSION);
-		
+
 		ShortPatientFormController controller = (ShortPatientFormController) applicationContext
 		        .getBean("shortPatientFormController");
 		controller.saveShortPatient(mockWebRequest,
 		    (PersonName) mockWebRequest.getAttribute("personNameCache", WebRequest.SCOPE_SESSION),
 		    (PersonAddress) mockWebRequest.getAttribute("personAddressCache", WebRequest.SCOPE_SESSION), null,
 		    (ShortPatientModel) mockWebRequest.getAttribute("patientModel", WebRequest.SCOPE_SESSION), errors);
-		
+
 		Assertions.assertTrue(!errors.hasErrors(), "Should pass with no validation errors");
 		Assertions.assertEquals("Patient.saved",
 		    mockWebRequest.getAttribute(WebConstants.OPENMRS_MSG_ATTR, WebRequest.SCOPE_SESSION));
-		
+
 		//a new replacement attribute should have been created with the new value
 		PersonAttribute newAttribute = p.getAttribute(attributeTypeId);
 		Assertions.assertEquals(originalAttributeCount + 1, p.getAttributes().size());
 		Assertions.assertEquals(newValue, newAttribute.getValue());
-		
+
 		PersonAttribute oldAttribute = null;
 		//find the voided attribute
 		for (PersonAttribute at : p.getAttributes()) {
@@ -529,13 +529,13 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 				break;
 			}
 		}
-		
+
 		//The old attribute should have been voided and maintained its old value
 		Assertions.assertNotNull(oldAttribute);
 		Assertions.assertEquals(oldValue, oldAttribute.getValue());
 		Assertions.assertTrue(oldAttribute.isVoided());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,PersonName,PersonAddress,Map,ShortPatientModel,
 	 *      BindingResult)
@@ -545,20 +545,20 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 	public void saveShortPatient_shouldNotVoidAddressIfItWasNotChanged() throws Exception {
 		Patient patient = Context.getPatientService().getPatient(2);
 		PersonAddress personAddress = patient.getPersonAddress();
-		
+
 		MockHttpServletRequest request = webTestHelper.newPOST("/admin/patients/shortPatientForm.form");
 		request.setParameter("patientId", "2");
 		request.setParameter("personAddress.address1", personAddress.getAddress1());
 		request.setParameter("personAddress.countyDistrict", "");
-		
+
 		webTestHelper.handle(request);
-		
+
 		patient = Context.getPatientService().getPatient(2);
 		assertEquals(1, patient.getAddresses().size());
 		assertFalse(patient.getPersonAddress().isVoided());
 		assertEquals(personAddress, patient.getPersonAddress());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormController#saveShortPatient(WebRequest,PersonName,PersonAddress,Map,ShortPatientModel,
 	 *      BindingResult)
@@ -568,14 +568,14 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 	public void saveShortPatient_shouldVoidAddressIfItWasChanged() throws Exception {
 		Patient patient = Context.getPatientService().getPatient(2);
 		PersonAddress personAddress = patient.getPersonAddress();
-		
+
 		MockHttpServletRequest request = webTestHelper.newPOST("/admin/patients/shortPatientForm.form");
 		request.setParameter("patientId", "2");
 		request.setParameter("personAddress.address1", "new");
 		request.setParameter("personAddress.countyDistrict", "");
-		
+
 		webTestHelper.handle(request);
-		
+
 		patient = Context.getPatientService().getPatient(2);
 		assertEquals(2, patient.getAddresses().size());
 		for (PersonAddress address : patient.getAddresses()) {

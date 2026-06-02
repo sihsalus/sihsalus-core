@@ -21,7 +21,7 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
     private String readOnlyUser;
     private String noPrivilegeUser;
     private String password;
-    
+
     @Autowired
     SpecialityService specialityService;
 
@@ -58,7 +58,7 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
         Context.authenticate(noPrivilegeUser, password);
         specialityService.getAllSpecialities();
     }
-    
+
     @Test
     public void shouldBeAbleToSaveSpecialityIfUserHasManageSpecialitiesPrivilege() throws Exception {
         Context.authenticate(adminUser, password);
@@ -66,7 +66,7 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
         speciality.setName("speciality");
         assertNotNull(specialityService.save(speciality));
     }
-    
+
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotBeAbleToSaveSpecialityIfUserDoesNotHaveManageSpecialitiesPrivilege() throws Exception {
         Context.authenticate(manageUser, password);

@@ -30,15 +30,15 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ObsEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivilegeBasedFilterTest {
-	
+
 	@Autowired
 	private ObsService obsService;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "privilegedEncounters.xml");
 	}
-	
+
 	private List<Obs> getObservations() {
 		List<Concept> questions = Collections.singletonList(new Concept(5497));
 		Person person = new Person();
@@ -46,7 +46,7 @@ public class ObsEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivi
 		List<Person> persons = Collections.singletonList(person);
 		return obsService.getObservations(persons, null, questions, null, null, null, null, null, null, null, null, false);
 	}
-	
+
 	@Test
 	public void getEncounters_shouldIncludeObsLinkedToEncountersThatRequireAPrivilegeAndTheUserHasIt() {
 		reloginAs("dyorke", "test");
@@ -57,7 +57,7 @@ public class ObsEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivi
 		Obs obs = observations.iterator().next();
 		assertEquals(1005, obs.getId().longValue());
 		assertNull(obs.getEncounter());
-		
+
 		DataFilterTestUtils.addPrivilege(PRIV_MANAGE_CHEMO_PATIENTS);
 		expCount = 2;
 		observations = getObservations();
@@ -65,7 +65,7 @@ public class ObsEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivi
 		assertTrue(TestUtil.containsId(observations, 1004));
 		assertTrue(TestUtil.containsId(observations, 1005));
 	}
-	
+
 	@Test
 	public void getObs_shouldReturnAllObsIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -74,7 +74,7 @@ public class ObsEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivi
 		assertTrue(TestUtil.containsId(observations, 1004));
 		assertTrue(TestUtil.containsId(observations, 1005));
 	}
-	
+
 	@Test
 	public void getObs_shouldReturnAllObsIfEncTypeViewPrivFilteringIsDisabled() {
 		DataFilterTestUtils.disableEncTypeViewPrivilegeFiltering();
@@ -84,5 +84,5 @@ public class ObsEncTypeViewPrivilegeBasedFilterTest extends BaseEncTypeViewPrivi
 		assertTrue(TestUtil.containsId(observations, 1004));
 		assertTrue(TestUtil.containsId(observations, 1005));
 	}
-	
+
 }

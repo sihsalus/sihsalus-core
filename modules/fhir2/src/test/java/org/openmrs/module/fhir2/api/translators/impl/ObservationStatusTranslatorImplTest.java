@@ -23,27 +23,27 @@ import org.openmrs.Obs;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationStatusTranslatorImplTest {
-	
+
 	private static final Obs.Status OBS_STATUS = Obs.Status.FINAL;
-	
+
 	private ObservationStatusTranslatorImpl observationStatusTranslator;
-	
+
 	private Obs obs;
-	
+
 	@Before
 	public void setUp() {
 		observationStatusTranslator = new ObservationStatusTranslatorImpl();
 		obs = new Obs();
 		obs.setStatus(OBS_STATUS);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateObsStatusToFhirObservationStatus() {
 		Observation.ObservationStatus status = observationStatusTranslator.toFhirResource(obs);
 		MatcherAssert.assertThat(status, Matchers.notNullValue());
 		MatcherAssert.assertThat(status, Matchers.is(Observation.ObservationStatus.valueOf(OBS_STATUS.toString())));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslatePreliminaryFhirObservationStatusToObsStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.PRELIMINARY;
@@ -52,7 +52,7 @@ public class ObservationStatusTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.is(Obs.Status.PRELIMINARY));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateFinalFhirObservationStatusToObsStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.FINAL;
@@ -61,7 +61,7 @@ public class ObservationStatusTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.is(Obs.Status.FINAL));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateAmendedFhirObservationStatusToObsStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.AMENDED;
@@ -70,7 +70,7 @@ public class ObservationStatusTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.is(Obs.Status.AMENDED));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnObsWithNullStatusWhenCalledWithUnsupportedRegisteredStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.REGISTERED;
@@ -78,7 +78,7 @@ public class ObservationStatusTranslatorImplTest {
 		observationStatusTranslator.toOpenmrsType(obs, status);
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnObsWithNullStatusWhenCalledWithUnsupportedCorrectedStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.CORRECTED;
@@ -86,7 +86,7 @@ public class ObservationStatusTranslatorImplTest {
 		observationStatusTranslator.toOpenmrsType(obs, status);
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnObsWithNullStatusWhenCalledWithUnsupportedCancelledStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.CANCELLED;
@@ -94,7 +94,7 @@ public class ObservationStatusTranslatorImplTest {
 		observationStatusTranslator.toOpenmrsType(obs, status);
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnObsWithNullStatusWhenCalledWithUnsupportedEnteredInErrorStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.ENTEREDINERROR;
@@ -102,7 +102,7 @@ public class ObservationStatusTranslatorImplTest {
 		observationStatusTranslator.toOpenmrsType(obs, status);
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnObsWithNullStatusWhenCalledWithUnsupportedUnknownStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.UNKNOWN;
@@ -110,7 +110,7 @@ public class ObservationStatusTranslatorImplTest {
 		observationStatusTranslator.toOpenmrsType(obs, status);
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnObsWithNullStatusWhenCalledWithUnsupportedNullStatus() {
 		Observation.ObservationStatus status = Observation.ObservationStatus.NULL;
@@ -118,7 +118,7 @@ public class ObservationStatusTranslatorImplTest {
 		observationStatusTranslator.toOpenmrsType(obs, status);
 		MatcherAssert.assertThat(obs.getStatus(), Matchers.nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldMapFhirRepresentationToNull() {
 		Obs obs = new Obs();

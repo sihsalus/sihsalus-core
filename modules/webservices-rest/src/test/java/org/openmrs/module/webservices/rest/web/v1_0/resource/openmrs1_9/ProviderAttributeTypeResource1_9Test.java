@@ -16,17 +16,17 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_9;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ProviderAttributeTypeResource1_9Test extends BaseDelegatingResourceTest<ProviderAttributeTypeResource1_9, ProviderAttributeType> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_9.TEST_DATASET);
 	}
-	
+
 	@Override
 	public ProviderAttributeType newObject() {
 		return Context.getProviderService().getProviderAttributeTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -38,7 +38,7 @@ public class ProviderAttributeTypeResource1_9Test extends BaseDelegatingResource
 		assertPropEquals("preferredHandlerClassname", getObject().getPreferredHandlerClassname());
 		assertPropEquals("retired", getObject().getRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -53,12 +53,12 @@ public class ProviderAttributeTypeResource1_9Test extends BaseDelegatingResource
 		assertPropEquals("retired", getObject().getRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Joining Date";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_9.PROVIDER_ATTRIBUTE_TYPE_UUID;

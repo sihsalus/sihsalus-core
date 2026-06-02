@@ -44,103 +44,103 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<ImmunizationFhirResourceProvider, Immunization> {
-	
+
 	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/Immunization_metadata.xml";
-	
+
 	private static final String IMMUNIZATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirImmunizationDaoImplTest_initial_data.xml";
-	
+
 	private static final String JSON_CREATE_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create.json";
-	
+
 	private static final String JSON_CREATE_PARTIAL_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create_partial.json";
-	
+
 	private static final String XML_CREATE_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create.xml";
-	
+
 	private static final String XML_CREATE_PARTIAL_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create_partial.xml";
-	
+
 	private static final String JSON_MERGE_PATCH_IMMUNIZATION_PATH = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_json_merge_patch.json";
-	
+
 	private static final String JSON_PATCH_IMMUNIZATION_PATH = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_json_patch.json";
-	
+
 	private static final String XML_PATCH_IMMUNIZATION_PATH = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_xml_patch.xml";
-	
+
 	private static final String IMMUNIZATION_UUID = "28668ca0-d7d7-4314-8a67-70f083bcf8ba";
-	
+
 	private static final String UNKNOWN_IMMUNIZATION_UUID = "46fc09a6-3368-4579-849f-98875a7c2d5a";
-	
+
 	public static final String PATIENT_UUID = "8d703ff2-c3e2-4070-9737-73e713d5a50d";
-	
+
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private ImmunizationFhirResourceProvider resourceProvider;
-	
+
 	@Before
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		
+
 		executeDataSet(IMMUNIZATIONS_METADATA_XML);
 		executeDataSet(IMMUNIZATION_INITIAL_DATA_XML);
 	}
-	
+
 	@Test
 	public void shouldReturnExistingImmunizationAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization Immunization = readResponse(response);
-		
+
 		assertThat(Immunization, notNullValue());
 		assertThat(Immunization.getIdElement().getIdPart(), equalTo(IMMUNIZATION_UUID));
 		assertThat(Immunization, validResource());
 	}
-	
+
 	@Test
 	public void shouldReturnNotFoundWhenImmunizationNotFoundAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
+
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
+
 	@Test
 	public void shouldReturnExistingImmunizationAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization Immunization = readResponse(response);
-		
+
 		assertThat(Immunization, notNullValue());
 		assertThat(Immunization.getIdElement().getIdPart(), equalTo(IMMUNIZATION_UUID));
 		assertThat(Immunization, validResource());
 	}
-	
+
 	@Test
 	public void shouldReturnNotFoundWhenImmunizationNotFoundAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
+
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
+
 	@Test
 	public void shouldCreateNewImmunizationAsJson() throws Exception {
 		// read JSON record
@@ -149,18 +149,18 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 			Objects.requireNonNull(is);
 			jsonImmunization = inputStreamToString(is, UTF_8);
 		}
-		
+
 		// create IMMUNIZATION
 		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.JSON).jsonContent(jsonImmunization)
 		        .go();
-		
+
 		// verify created correctly
 		assertThat(response, isCreated());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization immunization = readResponse(response);
-		
+
 		assertThat(immunization, notNullValue());
 		assertThat(immunization.getResourceType().toString(), equalTo("Immunization"));
 		assertThat(immunization.getStatus().toCode(), equalTo("completed"));
@@ -177,17 +177,17 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
 		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
 		assertThat(immunization, validResource());
-		
+
 		// try to get new immunization
 		response = get("/Immunization/" + immunization.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
-		
+
 		Immunization newImmunization = readResponse(response);
-		
+
 		assertThat(newImmunization.getId(), equalTo(immunization.getId()));
 	}
-	
+
 	@Test
 	public void shouldCreateNewImmunizationWithoutSomeOptionalMembersAsJSON() throws Exception {
 		// read JSON record
@@ -197,18 +197,18 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 			Objects.requireNonNull(is);
 			jsonImmunization = inputStreamToString(is, UTF_8);
 		}
-		
+
 		// create IMMUNIZATION
 		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.JSON).jsonContent(jsonImmunization)
 		        .go();
-		
+
 		// verify created correctly
 		assertThat(response, isCreated());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization immunization = readResponse(response);
-		
+
 		assertThat(immunization, notNullValue());
 		assertThat(immunization.getResourceType().toString(), equalTo("Immunization"));
 		assertThat(immunization.getStatus().toCode(), equalTo("completed"));
@@ -225,17 +225,17 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
 		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
 		assertThat(immunization, validResource());
-		
+
 		// try to get new immunization
 		response = get("/Immunization/" + immunization.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
-		
+
 		Immunization newImmunization = readResponse(response);
-		
+
 		assertThat(newImmunization.getId(), equalTo(immunization.getId()));
 	}
-	
+
 	@Test
 	public void shouldCreateNewImmunizationAsXML() throws Exception {
 		// read XML record
@@ -244,17 +244,17 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 			Objects.requireNonNull(is);
 			xmlImmunization = inputStreamToString(is, UTF_8);
 		}
-		
+
 		// create IMMUNIZATION
 		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.XML).xmlContent(xmlImmunization).go();
-		
+
 		// verify created correctly
 		assertThat(response, isCreated());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization immunization = readResponse(response);
-		
+
 		assertThat(immunization, notNullValue());
 		assertThat(immunization.getResourceType().toString(), equalTo("Immunization"));
 		assertThat(immunization.getStatus().toCode(), equalTo("completed"));
@@ -271,17 +271,17 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
 		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
 		assertThat(immunization, validResource());
-		
+
 		// try to get new IMMUNIZATION
 		response = get("/Immunization/" + immunization.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
-		
+
 		Immunization newImmunization = readResponse(response);
-		
+
 		assertThat(newImmunization.getId(), equalTo(immunization.getId()));
 	}
-	
+
 	@Test
 	public void shouldCreateNewImmunizationWithoutSomeOptionalMembersAsXML() throws Exception {
 		// read XML record
@@ -291,17 +291,17 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 			Objects.requireNonNull(is);
 			xmlImmunization = inputStreamToString(is, UTF_8);
 		}
-		
+
 		// create IMMUNIZATION
 		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.XML).xmlContent(xmlImmunization).go();
-		
+
 		// verify created correctly
 		assertThat(response, isCreated());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization immunization = readResponse(response);
-		
+
 		assertThat(immunization, notNullValue());
 		assertThat(immunization.getResourceType().toString(), equalTo("Immunization"));
 		assertThat(immunization.getStatus().toCode(), equalTo("completed"));
@@ -318,173 +318,173 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
 		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
 		assertThat(immunization, validResource());
-		
+
 		// try to get new immunization
 		response = get("/Immunization/" + immunization.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
-		
+
 		Immunization newImmunization = readResponse(response);
-		
+
 		assertThat(newImmunization.getId(), equalTo(immunization.getId()));
 	}
-	
+
 	@Test
 	public void shouldUpdateExistingImmunizationAsJson() throws Exception {
 		// get the existing record
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
 		Immunization immunization = readResponse(response);
-		
+
 		// update the existing record
 		Date expirationDate = DateUtils.truncate(new Date(), Calendar.DATE);
 		immunization.setExpirationDate(expirationDate);
-		
+
 		// send the update to the server
 		response = put("/Immunization/" + IMMUNIZATION_UUID).jsonContent(toJson(immunization)).accept(FhirMediaTypes.JSON)
 		        .go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		// read the updated record
 		Immunization updatedImmunization = readResponse(response);
-		
+
 		assertThat(updatedImmunization, notNullValue());
 		assertThat(updatedImmunization.getIdElement().getIdPart(), equalTo(IMMUNIZATION_UUID));
 		assertThat(updatedImmunization.getExpirationDate(), equalTo(expirationDate));
 		assertThat(immunization, validResource());
-		
+
 		// double-check the record returned via get
 		response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
 		Immunization reReadImmunization = readResponse(response);
-		
+
 		assertThat(reReadImmunization.getExpirationDate(), equalTo(expirationDate));
 	}
-	
+
 	@Test
 	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchImmunizationIdAsJson() throws Exception {
 		// get the existing record
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
 		Immunization immunization = readResponse(response);
-		
+
 		// update the existing record
 		immunization.setId(UNKNOWN_IMMUNIZATION_UUID);
-		
+
 		// send the update to the server
 		response = put("/Immunization/" + IMMUNIZATION_UUID).jsonContent(toJson(immunization)).accept(FhirMediaTypes.JSON)
 		        .go();
-		
+
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
+
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
+
 	@Test
 	public void shouldReturnNotFoundWhenUpdatingNonExistentImmunizationAsJson() throws Exception {
 		// get the existing record
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
 		Immunization immunization = readResponse(response);
-		
+
 		// update the existing record
 		immunization.setId(UNKNOWN_IMMUNIZATION_UUID);
-		
+
 		// send the update to the server
 		response = put("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).jsonContent(toJson(immunization))
 		        .accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
+
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
+
 	@Test
 	public void shouldUpdateExistingImmunizationAsXML() throws Exception {
 		// get the existing record
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
 		Immunization immunization = readResponse(response);
-		
+
 		// update the existing record
 		Date expirationDate = DateUtils.truncate(new Date(), Calendar.DATE);
 		immunization.setExpirationDate(expirationDate);
-		
+
 		// send the update to the server
 		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContent(toXML(immunization)).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		// read the updated record
 		Immunization updatedImmunization = readResponse(response);
-		
+
 		assertThat(updatedImmunization, notNullValue());
 		assertThat(updatedImmunization.getIdElement().getIdPart(), equalTo(IMMUNIZATION_UUID));
 		assertThat(updatedImmunization.getExpirationDate(), equalTo(expirationDate));
 		assertThat(immunization, validResource());
-		
+
 		// double-check the record returned via get
 		response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
 		Immunization reReadImmunization = readResponse(response);
-		
+
 		assertThat(reReadImmunization.getExpirationDate(), equalTo(expirationDate));
 	}
-	
+
 	@Test
 	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchImmunizationIdAsXML() throws Exception {
 		// get the existing record
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
 		Immunization immunization = readResponse(response);
-		
+
 		// update the existing record
 		immunization.setId(UNKNOWN_IMMUNIZATION_UUID);
-		
+
 		// send the update to the server
 		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContent(toXML(immunization)).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
+
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
+
 	@Test
 	public void shouldReturnNotFoundWhenUpdatingNonExistentImmunizationAsXML() throws Exception {
 		// get the existing record
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
 		Immunization immunization = readResponse(response);
-		
+
 		// update the existing record
 		immunization.setId(UNKNOWN_IMMUNIZATION_UUID);
-		
+
 		// send the update to the server
 		response = put("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).xmlContent(toXML(immunization))
 		        .accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
+
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
+
 	@Test
 	public void shouldPatchExistingImmunizationUsingJsonMergePatch() throws Exception {
 		String jsonImmunizationPatch;
@@ -492,23 +492,23 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 			Objects.requireNonNull(is);
 			jsonImmunizationPatch = inputStreamToString(is, UTF_8);
 		}
-		
+
 		MockHttpServletResponse response = patch("/Immunization/" + IMMUNIZATION_UUID).jsonMergePatch(jsonImmunizationPatch)
 		        .accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
 		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization immunization = readResponse(response);
-		
+
 		assertThat(immunization, notNullValue());
 		assertThat(immunization.getIdElement().getIdPart(), equalTo(IMMUNIZATION_UUID));
 		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2023-07-30")));
 		assertThat(immunization, validResource());
 	}
-	
+
 	@Test
 	public void shouldPatchExistingImmunizationUsingJsonPatch() throws Exception {
 		String jsonImmunizationPatch;
@@ -516,23 +516,23 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 			Objects.requireNonNull(is);
 			jsonImmunizationPatch = inputStreamToString(is, UTF_8);
 		}
-		
+
 		MockHttpServletResponse response = patch("/Immunization/" + IMMUNIZATION_UUID).jsonPatch(jsonImmunizationPatch)
 		        .accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
 		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization immunization = readResponse(response);
-		
+
 		assertThat(immunization, notNullValue());
 		assertThat(immunization.getIdElement().getIdPart(), equalTo(IMMUNIZATION_UUID));
 		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2023-07-30")));
 		assertThat(immunization, validResource());
 	}
-	
+
 	@Test
 	public void shouldPatchExistingImmunizationUsingXmlPatch() throws Exception {
 		String xmlImmunizationPatch;
@@ -540,187 +540,187 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 			Objects.requireNonNull(is);
 			xmlImmunizationPatch = inputStreamToString(is, UTF_8);
 		}
-		
+
 		MockHttpServletResponse response = patch("/Immunization/" + IMMUNIZATION_UUID).xmlPatch(xmlImmunizationPatch)
 		        .accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
 		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization immunization = readResponse(response);
-		
+
 		assertThat(immunization, notNullValue());
 		assertThat(immunization.getIdElement().getIdPart(), equalTo(IMMUNIZATION_UUID));
 		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2023-07-30")));
 		assertThat(immunization, validResource());
 	}
-	
+
 	@Test
 	public void shouldDeleteExistingImmunizationAsJson() throws Exception {
 		MockHttpServletResponse response = delete("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
-		
+
 		response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, statusEquals(HttpStatus.GONE));
 	}
-	
+
 	@Test
 	public void shouldReturnNotFoundWhenDeletingNonExistentImmunizationAsJson() throws Exception {
 		MockHttpServletResponse response = delete("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
+
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
+
 	@Test
 	public void shouldDeleteExistingImmunizationAsXML() throws Exception {
 		MockHttpServletResponse response = delete("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
-		
+
 		response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, statusEquals(HttpStatus.GONE));
 	}
-	
+
 	@Test
 	public void shouldReturnNotFoundWhenDeletingNonExistentImmunizationAsXML() throws Exception {
 		MockHttpServletResponse response = delete("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).accept(FhirMediaTypes.XML)
 		        .go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
+
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
+
 	@Test
 	public void shouldSearchForExistingImmunizationAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Immunization").accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Bundle results = readBundleResponse(response);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		
+
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
-		
+
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Immunization/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Immunization.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
+
 		response = get("/Immunization?patient.identifier=M4001-1&_sort=status").accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		results = readBundleResponse(response);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		
+
 		entries = results.getEntry();
-		
+
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("patient", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_UUID)))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
-	
+
 	@Test
 	public void shouldSearchForExistingImmunizationAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Immunization").accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Bundle results = readBundleResponse(response);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		
+
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
-		
+
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Immunization/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Immunization.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
+
 		response = get("/Immunization?patient.identifier=M4001-1&_sort=status").accept(FhirMediaTypes.XML).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		results = readBundleResponse(response);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		
+
 		entries = results.getEntry();
-		
+
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("patient", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_UUID)))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
-	
+
 	@Test
 	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingImmunization() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
-		
+
 		assertThat(response.getHeader("etag"), notNullValue());
 		assertThat(response.getHeader("etag"), startsWith("W/"));
-		
+
 		assertThat(response.getContentAsString(), notNullValue());
-		
+
 		Immunization immunization = readResponse(response);
-		
+
 		assertThat(immunization, notNullValue());
 		assertThat(immunization.getMeta().getVersionId(), notNullValue());
 		assertThat(immunization, validResource());
 	}
-	
+
 	@Test
 	public void shouldReturnNotModifiedWhenRetrievingAnExistingImmunizationWithAnEtag() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
-		
+
 		String etagValue = response.getHeader("etag");
-		
+
 		response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
-	
+
 }

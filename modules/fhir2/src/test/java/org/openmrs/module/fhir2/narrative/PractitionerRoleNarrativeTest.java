@@ -22,23 +22,23 @@ import org.junit.Test;
  * Test for PractitionerRole resource narrative generation
  */
 public class PractitionerRoleNarrativeTest extends BaseFhirNarrativeTest {
-	
+
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/practitionerrole-example.json";
-	
+
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/practitionerrole-expected.html";
-	
+
 	/**
 	 * Check that the expected narrative is generated for some example PractitionerRole resource
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
 	public void shouldGeneratePractitionerRoleNarrative() throws IOException {
 		PractitionerRole given = parser.parseResource(PractitionerRole.class,
 		    getClass().getClassLoader().getResourceAsStream(EXAMPLE_RESOURCE_PATH));
-		
+
 		PractitionerRole result = parser.parseResource(PractitionerRole.class, parser.encodeResourceToString(given));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getText(), notNullValue());
 		assertThat(result.getText().getStatusAsString(), equalTo("generated"));

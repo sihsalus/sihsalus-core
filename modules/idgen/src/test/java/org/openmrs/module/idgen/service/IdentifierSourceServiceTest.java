@@ -62,7 +62,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
     public void beforeEachTest() {
 		executeDataSet("org/openmrs/module/idgen/include/TestData.xml");
     }
-    
+
 	/**
 	 * @see {@link IdentifierSourceService#generateIdentifiers(IdentifierSource, Integer, String)}
 	 */
@@ -72,7 +72,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 		List<String>  sig = identifierSourceService.generateIdentifiers(is, 7, "hello");
 		assertEquals("[G-0, H-8, I-5, J-3, K-1, L-9, M-7]", sig.toString());
 	}
-	
+
 	@Test
 	public void generateIdentifiers_shouldReturnLocationPrefixedIdentifiers() {
 		Context.getUserContext().setLocationId(13);
@@ -116,7 +116,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 
 	/**
 	 * @see {@link IdentifierSourceService#getIdentifierSource(Integer)}
-	 * 
+	 *
 	 */
 	@Test
 	public void getIdentifierSource_shouldReturnASavedIdentifierPool() throws Exception {
@@ -126,10 +126,10 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 		assertEquals(5, idpool.getAvailableIdentifiers().size());
 		assertEquals(0, idpool.getUsedIdentifiers().size());
 	}
-	
+
 	/**
 	 * @see {@link IdentifierSourceService#retireIdentifierSource(IdentifierSource, String)}
-	 * 
+	 *
 	 */
 	@Test
 	public void retireIdentifierSource_shouldRetireAnIdentifierSourceFromTheSystem() throws Exception {
@@ -141,7 +141,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 
 	/**
 	 * @see {@link IdentifierSourceService#purgeIdentifierSource(IdentifierSource)}
-	 * 
+	 *
 	 */
 	@Test
 	public void purgeIdentifierSource_shouldDeleteAnIdentifierSourceFromTheSystem() throws Exception {
@@ -152,21 +152,21 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 
 	/**
 	 * @see {@link IdentifierSourceService#saveIdentifierSource(IdentifierSource)}
-	 * 
+	 *
 	 */
 	@Test
 	public void saveIdentifierSource_shouldSaveASequentialIdentifierGeneratorForLaterRetrieval() throws Exception {
-		
+
 		String name = "Sample Id Gen";
 		String baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		
+
 		SequentialIdentifierGenerator sig = new SequentialIdentifierGenerator();
 		sig.setName(name);
 		sig.setBaseCharacterSet(baseChars);
 		sig.setFirstIdentifierBase("1");
 		sig.setIdentifierType(Context.getPatientService().getPatientIdentifierType(1));
 		IdentifierSource source = identifierSourceService.saveIdentifierSource(sig);
-		
+
 		assertNotNull(source.getId());
 		IdentifierSource s = identifierSourceService.getIdentifierSource(source.getId());
 		assertEquals(SequentialIdentifierGenerator.class, s.getClass());
@@ -176,19 +176,19 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 
 	/**
 	 * @see {@link IdentifierSourceService#saveIdentifierSource(IdentifierSource)}
-	 * 
+	 *
 	 */
 	@Test
 	public void saveIdentifierSource_shouldSaveARestIdentifierGeneratorForLaterRetrieval() throws Exception {
 		String name = "Sample Id Gen";
 		String url = "http://localhost";
-		
+
 		RemoteIdentifierSource idgen = new RemoteIdentifierSource();
 		idgen.setName(name);
 		idgen.setUrl(url);
 		idgen.setIdentifierType(Context.getPatientService().getPatientIdentifierType(1));
 		IdentifierSource source = identifierSourceService.saveIdentifierSource(idgen);
-		
+
 		assertNotNull(source.getId());
 		IdentifierSource s = identifierSourceService.getIdentifierSource(source.getId());
 		assertEquals(RemoteIdentifierSource.class, s.getClass());
@@ -198,28 +198,28 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 
 	/**
 	 * @see {@link IdentifierSourceService#saveIdentifierSource(IdentifierSource)}
-	 * 
+	 *
 	 */
 	@Test
 	public void saveIdentifierSource_shouldSaveAnIdentifierPoolForLaterRetrieval() throws Exception {
 		String name = "Sample Id Gen";
 		int batchSize = 500;
-		
+
 		IdentifierPool pool = new IdentifierPool();
 		pool.setName(name);
 		pool.setBatchSize(batchSize);
 		pool.setIdentifierType(Context.getPatientService().getPatientIdentifierType(1));
-		
+
 		Set<PooledIdentifier> pooledIdentifiers = new LinkedHashSet<PooledIdentifier>();
 		pooledIdentifiers.add(new PooledIdentifier(pool, "ABC00"));
 		pooledIdentifiers.add(new PooledIdentifier(pool, "ABC01"));
 		pooledIdentifiers.add(new PooledIdentifier(pool, "ABC02"));
 		pooledIdentifiers.add(new PooledIdentifier(pool, "ABC03"));
 		pool.setIdentifiers(pooledIdentifiers);
-		
+
 		IdentifierSource source = identifierSourceService.saveIdentifierSource(pool);
-		
-		assertNotNull(source.getId()); 
+
+		assertNotNull(source.getId());
 		IdentifierPool s = (IdentifierPool)identifierSourceService.getIdentifierSource(source.getId());
 		assertEquals(name, s.getName());
 		assertEquals(batchSize, s.getBatchSize().intValue());
@@ -231,7 +231,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
         IdentifierSource identifierSource = identifierSourceService.getIdentifierSourceByUuid("0d47284f-9e9b-4a81-a88b-8bb42bc0a903");
         assertEquals(3, identifierSource.getId().intValue());
     }
-    
+
     @Test
     public void getIdentifierSourcesByPatientIdentifierType_shouldGetIdentifierSourcesByPatientIdentifierType() {
         PatientIdentifierType patientIdentifierType = patientService.getPatientIdentifierType(1);
@@ -241,10 +241,10 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 
     @Test
     public void getAutoGenerationOptionByUuid_shouldGetAutoGenerationOptionByUuid() {
-    	AutoGenerationOption autoGenerationOption = identifierSourceService.getAutoGenerationOptionByUuid("599c5a90-1937-42de-aa7d-79bd9f9acca7");
-    	assertEquals(1, autoGenerationOption.getId().intValue());
+	AutoGenerationOption autoGenerationOption = identifierSourceService.getAutoGenerationOptionByUuid("599c5a90-1937-42de-aa7d-79bd9f9acca7");
+	assertEquals(1, autoGenerationOption.getId().intValue());
     }
-    
+
     @Test
     public void getAutoGenerationOptionByPatientIdentifier_shouldGetAutoGenerationOptionByIdentifier() {
         PatientIdentifierType patientIdentifierType = patientService.getPatientIdentifierType(1);

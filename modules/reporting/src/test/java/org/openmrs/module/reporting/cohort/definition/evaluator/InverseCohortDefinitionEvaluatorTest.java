@@ -28,22 +28,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 
 public class InverseCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link InverseCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -53,11 +53,11 @@ public class InverseCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 		GenderCohortDefinition males = new GenderCohortDefinition();
 		males.setMaleIncluded(true);
 		InverseCohortDefinition nonMales = new InverseCohortDefinition(males);
-		
+
 		GenderCohortDefinition femaleOrUnknown = new GenderCohortDefinition();
 		femaleOrUnknown.setFemaleIncluded(true);
 		femaleOrUnknown.setUnknownGenderIncluded(true);
-		
+
 		Cohort nonMaleCohort = Context.getService(CohortDefinitionService.class).evaluate(nonMales, null);
 		Cohort femaleOrUnknownCohort = Context.getService(CohortDefinitionService.class).evaluate(femaleOrUnknown, null);
 
@@ -71,7 +71,7 @@ public class InverseCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 	@Test
 	@Verifies(value = "should successfully use the context base cohort", method = "evaluate(CohortDefinition,EvaluationContext)")
 	public void evaluate_shouldSuccessfullyUseTheContextBaseCohort() throws Exception {
-		
+
 		// Set the base cohort to males only (3 patients born in 1959, 1975, 2007)
 		EvaluationContext context = new EvaluationContext();
 		GenderCohortDefinition males = new GenderCohortDefinition();
@@ -79,19 +79,19 @@ public class InverseCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 		Cohort baseCohort = Context.getService(CohortDefinitionService.class).evaluate(males, null);
 		context.setBaseCohort(baseCohort);
 		Assert.assertEquals(3, baseCohort.size());
-		
+
 		// Children on 1/1/2010 (4)
 		AgeCohortDefinition children = new AgeCohortDefinition();
 		children.setMaxAge(15);
 		children.setEffectiveDate(DateUtil.getDateTime(2010, 1, 1));
 		Cohort childrenCohort = Context.getService(CohortDefinitionService.class).evaluate(children, null);
 		Assert.assertEquals(4, childrenCohort.size());
-		
+
 		InverseCohortDefinition nonChildren = new InverseCohortDefinition(children);
 
 		// Inverse Children, non base cohort
 		Assert.assertEquals(5, Context.getService(CohortDefinitionService.class).evaluate(nonChildren, null).size());
-		
+
 		// Inverse Children, base cohort
 		Assert.assertEquals(2, Context.getService(CohortDefinitionService.class).evaluate(nonChildren, context).size());
 

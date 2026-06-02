@@ -18,12 +18,12 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
  * Tests functionality of {@link EncounterRoleResource1_9}.
  */
 public class EncounterRoleResource1_9Test extends BaseDelegatingResourceTest<EncounterRoleResource1_9, EncounterRole> {
-	
+
 	@Override
 	public EncounterRole newObject() {
 		return Context.getEncounterService().getEncounterRoleByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -31,7 +31,7 @@ public class EncounterRoleResource1_9Test extends BaseDelegatingResourceTest<Enc
 		assertPropEquals("description", getObject().getDescription());
 		assertPropEquals("retired", getObject().isRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -40,12 +40,12 @@ public class EncounterRoleResource1_9Test extends BaseDelegatingResourceTest<Enc
 		assertPropEquals("retired", getObject().isRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Unknown";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_9.ENCOUNTER_ROLE_UUID;

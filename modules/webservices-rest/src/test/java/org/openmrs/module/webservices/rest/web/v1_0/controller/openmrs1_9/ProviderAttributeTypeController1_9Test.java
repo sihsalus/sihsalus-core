@@ -27,12 +27,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public class ProviderAttributeTypeController1_9Test extends MainResourceControllerTest {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_9.TEST_DATASET);
 	}
-	
+
 	/**
 	 * @see ProviderAttributeTypeController#createProviderAttributeType(SimpleObject,WebRequest)
 	 * @verifies create a new ProviderAttributeType
@@ -41,12 +41,12 @@ public class ProviderAttributeTypeController1_9Test extends MainResourceControll
 	public void createProviderAttributeType_shouldCreateANewProviderAttributeType() throws Exception {
 		int before = Context.getProviderService().getAllProviderAttributeTypes().size();
 		String json = "{ \"name\":\"Some attributeType\",\"description\":\"Attribute Type for provider\",\"datatypeClassname\":\"org.openmrs.customdatatype.datatype.FreeTextDatatype\"}";
-		
+
 		handle(newPostRequest(getURI(), json));
-		
+
 		Assertions.assertEquals(before + 1, Context.getProviderService().getAllProviderAttributeTypes().size());
 	}
-	
+
 	/**
 	 * @see ProviderAttributeTypeController#updateProviderAttributeType(ProviderAttributeType,SimpleObject,WebRequest)
 	 * @verifies change a property on a provider
@@ -55,10 +55,10 @@ public class ProviderAttributeTypeController1_9Test extends MainResourceControll
 	public void updateProviderAttributeType_shouldChangeAPropertyOnAProviderAttributeType() throws Exception {
 		String json = "{\"description\":\"Updated description\"}";
 		handle(newPostRequest(getURI() + "/" + RestTestConstants1_9.PROVIDER_ATTRIBUTE_TYPE_UUID, json));
-		
+
 		Assertions.assertEquals("Updated description", Context.getProviderService().getProviderAttributeType(1).getDescription());
 	}
-	
+
 	/**
 	 * @see ProviderAttributeTypeController#retireProviderAttributeType(ProviderAttributeType,String,WebRequest)
 	 * @verifies void a provider attribute type
@@ -67,17 +67,17 @@ public class ProviderAttributeTypeController1_9Test extends MainResourceControll
 	public void retireProviderAttributeType_shouldRetireAProviderAttributeType() throws Exception {
 		ProviderAttributeType providerAttributeType = Context.getProviderService().getProviderAttributeType(1);
 		Assertions.assertFalse(providerAttributeType.isRetired());
-		
+
 		MockHttpServletRequest request = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
 		request.addParameter("reason", "test");
-		
+
 		handle(request);
-		
+
 		providerAttributeType = Context.getProviderService().getProviderAttributeType(1);
 		Assertions.assertTrue(providerAttributeType.isRetired());
 		Assertions.assertEquals("test", providerAttributeType.getRetireReason());
 	}
-	
+
 	/**
 	 * @see ProviderAttributeTypeController#findProviderAttributeTypes(String,WebRequest,HttpServletResponse)
 	 * @verifies return no results if there are no matching provider(s)
@@ -86,11 +86,11 @@ public class ProviderAttributeTypeController1_9Test extends MainResourceControll
 	public void findProviderAttributeTypes_shouldReturnNoResultsIfThereAreNoMatchingProviders() throws Exception {
 		MockHttpServletRequest request = newGetRequest(getURI());
 		request.addParameter("q", "zzzznotype");
-		
+
 		SimpleObject result = deserialize(handle(request));
 		Assertions.assertEquals(0, Util.getResultsSize(result));
 	}
-	
+
 	/**
 	 * @see ProviderAttributeTypeController#findProviderAttributeTypes(String,WebRequest,HttpServletResponse)
 	 * @verifies find matching provider attribute types
@@ -99,18 +99,18 @@ public class ProviderAttributeTypeController1_9Test extends MainResourceControll
 	public void findProviderAttributeTypes_shouldFindMatchingProviderAttributeTypes() throws Exception {
 		MockHttpServletRequest request = newGetRequest(getURI());
 		request.addParameter("q", "Joining");
-		
+
 		SimpleObject response = deserialize(handle(request));
 		Assertions.assertEquals(1, Util.getResultsSize(response));
-		
+
 		List<Object> results = Util.getResultsList(response);
 		Object result = results.get(0);
-		
+
 		Assertions.assertEquals(RestTestConstants1_9.PROVIDER_ATTRIBUTE_TYPE_UUID, PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "links"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "display"));
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -118,7 +118,7 @@ public class ProviderAttributeTypeController1_9Test extends MainResourceControll
 	public String getURI() {
 		return "providerattributetype";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -126,7 +126,7 @@ public class ProviderAttributeTypeController1_9Test extends MainResourceControll
 	public String getUuid() {
 		return RestTestConstants1_9.PROVIDER_ATTRIBUTE_TYPE_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */

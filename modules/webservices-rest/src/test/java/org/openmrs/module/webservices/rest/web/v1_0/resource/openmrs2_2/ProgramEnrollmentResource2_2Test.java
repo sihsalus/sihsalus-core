@@ -15,30 +15,30 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ProgramEnrollmentResource2_2Test extends BaseDelegatingResourceTest<ProgramEnrollmentResource2_2, PatientProgram> {
-	
+
 	protected static final String PROGRAM_ATTRIBUTES_XML = "ProgramAttributesDataset.xml";
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet("programEnrollmentDataSet.xml");
 	}
-	
+
 	@Override
 	public PatientProgram newObject() {
 		return Context.getProgramWorkflowService().getPatientProgramByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
 		assertPropPresent("attributes");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "HIV Program";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return "9119b9f8-af3d-4ad8-9e2e-2317c3de91c6";

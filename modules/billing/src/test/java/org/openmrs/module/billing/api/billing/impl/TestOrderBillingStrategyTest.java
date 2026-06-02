@@ -42,59 +42,59 @@ import org.openmrs.module.billing.api.search.BillableServiceSearch;
 
 @ExtendWith(MockitoExtension.class)
 public class TestOrderBillingStrategyTest {
-	
+
 	@Mock
 	private BillableServiceService billableServiceService;
-	
+
 	@Mock
 	private ItemPriceService itemPriceService;
-	
+
 	@Mock
 	private BillExemptionService billExemptionService;
-	
+
 	@InjectMocks
 	private TestOrderBillingStrategy strategy;
-	
+
 	private Concept concept;
-	
+
 	private TestOrder testOrder;
-	
+
 	private BillableService billableService;
-	
+
 	@BeforeEach
 	public void setup() {
 		concept = new Concept();
 		concept.setUuid("test-concept-uuid");
-		
+
 		testOrder = new TestOrder();
 		testOrder.setConcept(concept);
 		testOrder.setUuid("test-order-uuid");
-		
+
 		billableService = new BillableService();
 		billableService.setUuid("test-service-uuid");
 	}
-	
+
 	@Test
 	public void supportsOrder_shouldReturnTrueForTestOrder() {
 		assertTrue(strategy.supportsOrder(testOrder));
 	}
-	
+
 	@Test
 	public void supportsOrder_shouldReturnFalseForDrugOrder() {
 		assertFalse(strategy.supportsOrder(new DrugOrder()));
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldCreateLineItemWithServicePrice() {
 		CashierItemPrice servicePrice = new CashierItemPrice();
 		servicePrice.setPrice(new BigDecimal("75.00"));
-		
+
 		when(billableServiceService.getBillableServices(any(BillableServiceSearch.class), isNull()))
 		        .thenReturn(Collections.singletonList(billableService));
 		when(itemPriceService.getServicePrice(billableService)).thenReturn(Collections.singletonList(servicePrice));
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(testOrder);
-		
+
 		assertTrue(result.isPresent());
 		BillLineItem lineItem = result.get();
 		assertEquals(new BigDecimal("75.00"), lineItem.getPrice());
@@ -102,35 +102,35 @@ public class TestOrderBillingStrategyTest {
 		assertEquals(BillStatus.PENDING, lineItem.getPaymentStatus());
 		assertEquals(billableService, lineItem.getBillableService());
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldReturnZeroPriceWhenNoPriceConfigured() {
 		when(billableServiceService.getBillableServices(any(BillableServiceSearch.class), isNull()))
 		        .thenReturn(Collections.singletonList(billableService));
 		when(itemPriceService.getServicePrice(billableService)).thenReturn(Collections.emptyList());
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(testOrder);
-		
+
 		assertTrue(result.isPresent());
 		assertEquals(BigDecimal.ZERO, result.get().getPrice());
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldReturnEmptyWhenNoBillableServiceFound() {
 		when(billableServiceService.getBillableServices(any(BillableServiceSearch.class), isNull()))
 		        .thenReturn(Collections.emptyList());
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(testOrder);
-		
+
 		assertFalse(result.isPresent());
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldReturnEmptyWhenConceptIsNull() {
 		testOrder.setConcept(null);
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(testOrder);
-		
+
 		assertFalse(result.isPresent());
 	}
 }

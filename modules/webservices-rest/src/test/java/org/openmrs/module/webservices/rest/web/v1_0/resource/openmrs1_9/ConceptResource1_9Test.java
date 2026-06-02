@@ -35,12 +35,12 @@ import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.ConceptResource1_8;
 
 public class ConceptResource1_9Test extends BaseDelegatingResourceTest<ConceptResource1_9, Concept> {
-	
+
 	@Override
 	public Concept newObject() {
 		return Context.getConceptService().getConceptByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -57,7 +57,7 @@ public class ConceptResource1_9Test extends BaseDelegatingResourceTest<ConceptRe
 		assertPropPresent("setMembers");
 		assertPropNotPresent("shortName");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -75,17 +75,17 @@ public class ConceptResource1_9Test extends BaseDelegatingResourceTest<ConceptRe
 		assertPropPresent("setMembers");
 		assertPropPresent("shortName");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "YES";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.CONCEPT_UUID;
 	}
-	
+
 	@Test
 	public void testSetNames() throws Exception {
 		Concept instance = new Concept();
@@ -96,46 +96,46 @@ public class ConceptResource1_9Test extends BaseDelegatingResourceTest<ConceptRe
 		otherName.setName("newName");
 		otherName.setUuid("newUuid");
 		otherNames.add(otherName);
-		
+
 		ConceptResource1_8.setNames(instance, otherNames);
 		assertEquals(1, instance.getNames().size());
 		assertTrue(instance.getNames().contains(otherName));
-		
+
 		ConceptResource1_8.setNames(instance, getMockNamesList());
 		assertEquals(2, instance.getNames().size());
 		assertFalse(instance.getNames().contains(otherName));
-		
+
 		otherNames.addAll(getMockNamesList());
-		
+
 		ConceptResource1_8.setNames(instance, otherNames);
 		assertEquals(3, instance.getNames().size());
 		assertTrue(instance.getNames().contains(otherName));
-		
+
 		ConceptResource1_8.setNames(instance, getMockNamesList());
 		assertEquals(2, instance.getNames().size());
 		assertFalse(instance.getNames().contains(otherName));
 	}
-	
+
 	public List<ConceptName> getMockNamesList() {
 		ConceptName oldName1 = new ConceptName();
 		oldName1.setLocale(Locale.ENGLISH);
 		oldName1.setConceptNameType(ConceptNameType.FULLY_SPECIFIED);
 		oldName1.setName("oldName1");
 		oldName1.setUuid("uuid1");
-		
+
 		ConceptName oldName2 = new ConceptName();
 		oldName2.setLocale(Locale.ENGLISH);
 		oldName2.setConceptNameType(ConceptNameType.SHORT);
 		oldName2.setName("oldName2");
 		oldName2.setUuid("uuid2");
-		
+
 		List<ConceptName> oldNames = new ArrayList<ConceptName>();
 		oldNames.add(oldName1);
 		oldNames.add(oldName2);
-		
+
 		return oldNames;
 	}
-	
+
 	@Test
 	public void testGetNamedRepresentation() throws Exception {
 		Concept object = getObject();
@@ -178,9 +178,9 @@ public class ConceptResource1_9Test extends BaseDelegatingResourceTest<ConceptRe
 
 		Concept concept = new Concept();
 		concept.setUuid(UUID);
-		
+
 		MessageSourceService originalMessageSourceService = ServiceContext.getInstance().getMessageSourceService();
-		
+
 		MessageSourceService messageSourceService = mock(MessageSourceService.class);
 		when(messageSourceService.getMessage("ui.i18n.Concept.name." + UUID)).thenReturn("Overridden by message source");
 		ServiceContext.getInstance().setMessageSourceService(messageSourceService);
@@ -193,7 +193,7 @@ public class ConceptResource1_9Test extends BaseDelegatingResourceTest<ConceptRe
 
 		ConceptResource1_9 resource = new ConceptResource1_9();
 		String result = resource.getDisplayString(concept);
-		
+
 		ServiceContext.getInstance().setMessageSourceService(originalMessageSourceService);
 
 		Assertions.assertEquals("Overridden by message source", result);

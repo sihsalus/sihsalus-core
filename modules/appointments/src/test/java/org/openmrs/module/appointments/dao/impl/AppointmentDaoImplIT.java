@@ -322,13 +322,13 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         long cancelledCount = allAppointments.stream()
                 .filter(apt -> apt.getStatus() == AppointmentStatus.Cancelled)
                 .count();
-        
+
         List<Appointment> reminderAppointments = appointmentDao.getAllAppointmentsReminder(null);
-        
+
         assertEquals(0, reminderAppointments.stream()
                 .filter(apt -> apt.getStatus() == AppointmentStatus.Cancelled)
                 .count());
-        
+
         if (cancelledCount > 0) {
             assertTrue(reminderAppointments.size() < allAppointments.size());
         }
@@ -431,9 +431,9 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
             "75504r42-3ca8-11e3-bf2b-0800271c1b77",
             "75504r42-3ca8-11e3-bf2b-0800271c1111"
         );
-        
+
         List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(uuids);
-        
+
         assertNotNull(appointments);
         assertEquals(2, appointments.size());
         assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1b77")));
@@ -443,9 +443,9 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldReturnEmptyListWhenGetAppointmentsByUuidsCalledWithEmptyList() {
         List<String> uuids = new ArrayList<>();
-        
+
         List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(uuids);
-        
+
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
     }
@@ -453,7 +453,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldReturnEmptyListWhenGetAppointmentsByUuidsCalledWithNull() {
         List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(null);
-        
+
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
     }

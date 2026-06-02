@@ -27,43 +27,43 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirVisitDaoImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private static final String VISIT_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirVisitDaoImplTest_initial_data.xml";
-	
+
 	private static final String VISIT_UUID = "65aefd46-973d-4526-89de-93842c80ad11";
-	
+
 	private static final String BAD_VISIT_UUID = "65a7fd46-xx56-4526-89de-93842c8078d11";
-	
+
 	@Autowired
 	private ObjectFactory<FhirVisitDao> daoFactory;
-	
+
 	private FhirVisitDao dao;
-	
+
 	@Before
 	public void setup() throws Exception {
 		dao = daoFactory.getObject();
 		executeDataSet(VISIT_INITIAL_DATA_XML);
 	}
-	
+
 	@Test
 	public void get_shouldReturnVisitByUuid() {
 		Visit visit = dao.get(VISIT_UUID);
-		
+
 		assertThat(visit, notNullValue());
 		assertThat(visit.getUuid(), equalTo(VISIT_UUID));
 	}
-	
+
 	@Test
 	public void get_shouldReturnNullIfVisitNotFoundByUuid() {
 		Visit visit = dao.get(BAD_VISIT_UUID);
-		
+
 		assertThat(visit, nullValue());
 	}
-	
+
 	@Test
 	public void get_shouldRequireGetVisitPrivilege() {
 		Context.logout();
-		
+
 		try {
 			dao.get(VISIT_UUID);
 			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
@@ -71,7 +71,7 @@ public class FhirVisitDaoImplTest extends BaseFhirContextSensitiveTest {
 		catch (APIAuthenticationException ignored) {
 			// this is the happy path
 		}
-		
+
 		try {
 			Context.addProxyPrivilege(GET_VISITS);
 			assertThat(dao.get(VISIT_UUID), notNullValue());

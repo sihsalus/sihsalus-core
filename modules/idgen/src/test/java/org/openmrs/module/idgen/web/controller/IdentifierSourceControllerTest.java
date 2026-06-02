@@ -53,20 +53,20 @@ public class IdentifierSourceControllerTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 	}
-	
+
 	@Test
 	public void exportIdentifiers_shouldReturnJson() throws Exception {
 		when(iss.generateIdentifiers(
-				Mockito.any(IdentifierSource.class), 
-				Mockito.any(Integer.class), 
+				Mockito.any(IdentifierSource.class),
+				Mockito.any(Integer.class),
 				Mockito.any(String.class))).thenReturn(Arrays.asList("1", "2", "3"));
-		
-		
+
+
 		SequentialIdentifierGenerator generator = new SequentialIdentifierGenerator();
 
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
-		
+
 		controller.exportIdentifiers(null, mockRequest, mockResponse, generator, 3, "Mirebalais", null, null);
 
 		Assert.assertEquals("{\"identifiers\":[\"1\",\"2\",\"3\"]}", mockResponse.getContentAsString());

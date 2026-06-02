@@ -19,28 +19,28 @@ import org.openmrs.Provider;
 import java.util.HashSet;
 
 public class ProviderListItemTest {
-	
+
 	private Provider provider;
-	
+
 	@SuppressWarnings("serial")
 	@BeforeEach
 	public void setup() {
 		provider = new Provider() {
-			
+
 			{
 				setPerson(new Person() {
-					
+
 					{
 						setNames(new HashSet<PersonName>() {
-							
+
 							{
 								add(new PersonName() {
-									
+
 									{
 										setGivenName("givenName");
 										setFamilyName("familyName");
 										setMiddleName("middleName");
-										
+
 									}
 								});
 							}
@@ -50,18 +50,18 @@ public class ProviderListItemTest {
 			}
 		};
 	}
-	
+
 	/**
 	 * @see ProviderListItem#getDisplayName()
 	 * @verifies return a display name based on whether provider has a person associated
 	 */
 	@Test
 	public void getDisplayName_shouldReturnADisplayNameBasedOnWhetherProviderHasAPersonAssociated() throws Exception {
-		
+
 		ProviderListItem providerListItem = new ProviderListItem(provider);
 		Assertions.assertEquals("givenName middleName familyName", providerListItem.getDisplayName());
 	}
-	
+
 	/**
 	 * @see ProviderListItem#getIdentifier()
 	 * @verifies return the identifier that is mentioned for the provider when a person is not
@@ -75,7 +75,7 @@ public class ProviderListItemTest {
 		ProviderListItem providerListItem = new ProviderListItem(provider);
 		Assertions.assertEquals("identifier", providerListItem.getIdentifier());
 	}
-	
+
 	/**
 	 * @see ProviderListItem#getProviderId()
 	 * @verifies return the provider id
@@ -83,9 +83,9 @@ public class ProviderListItemTest {
 	@Test
 	public void getProviderId_shouldReturnTheProviderId() throws Exception {
 		provider.setProviderId(2);
-		
+
 		ProviderListItem providerListItem = new ProviderListItem(provider);
 		Assertions.assertEquals(Integer.valueOf(2), providerListItem.getProviderId());
 	}
-	
+
 }

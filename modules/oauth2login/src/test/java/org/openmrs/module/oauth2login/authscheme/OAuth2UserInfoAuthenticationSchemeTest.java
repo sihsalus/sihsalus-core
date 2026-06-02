@@ -38,24 +38,24 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OAuth2UserInfoAuthenticationSchemeTest {
-	
+
 	@InjectMocks
 	private OAuth2UserInfoAuthenticationScheme authScheme;
-	
+
 	@Mock
 	private ContextDAO contextDAO;
-	
+
 	@Mock
 	private UserService userService;
-	
+
 	@Mock
 	private UserInfo userInfo;
-	
+
 	@Mock
 	private DaemonToken daemonToken;
-	
+
 	private OAuth2TokenCredentials credentials;
-	
+
 	@Before
 	public void setup() {
 		Context.setDAO(contextDAO);
@@ -66,35 +66,35 @@ public class OAuth2UserInfoAuthenticationSchemeTest {
 		when(credentials.getAuthenticationScheme()).thenReturn("oauth2");
 		when(daemonToken.getId()).thenReturn("token");
 	}
-	
+
 	@Test
 	public void authenticate_shouldCreateNewUserWhenUserDoesNotExist() throws Exception {
 		when(contextDAO.getUserByUsername("tester")).thenReturn(null);
 		User newUser = new User();
 		when(userInfo.getOpenmrsUser(anyString())).thenReturn(newUser);
 		when(userInfo.getRoleNames()).thenReturn(Arrays.asList("Provider", "Nurse"));
-		
+
 		Authenticated result = authScheme.authenticate(credentials);
-		
+
 		verify(contextDAO).createUser(eq(newUser), anyString(), eq(Arrays.asList("Provider", "Nurse")));
 		assertNotNull(result);
 	}
-	
+
 	@Test(expected = ContextAuthenticationException.class)
 	public void authenticate_shouldThrowExceptionForInvalidCredentials() {
 		Credentials invalidCredentials = mock(Credentials.class);
-		
+
 		authScheme.authenticate(invalidCredentials);
 	}
-	
+
 	@Test
 	@SuppressWarnings("unchecked")
 	public void authenticate_shouldSkipUserCreationForServiceAccount() throws Exception {
 		when(credentials.isServiceAccount()).thenReturn(true);
 		when(contextDAO.getUserByUsername("tester")).thenReturn(new User());
-		
+
 		Authenticated result = authScheme.authenticate(credentials);
-		
+
 		assertNotNull(result);
 		verify(userInfo, never()).getOpenmrsUser(anyString());
 		verify(contextDAO, never()).createUser(any(User.class), anyString(), anyList());

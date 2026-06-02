@@ -28,15 +28,15 @@ import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
 public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private DWRConceptService dwrConceptService = new DWRConceptService();
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet("org/openmrs/web/dwr/include/DWRConceptServiceTest-coded-concept-with-no-answers.xml");
 		updateSearchIndex();
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findConceptAnswers(String,Integer,boolean,boolean)
 	 * @verifies not fail if the specified concept has no answers (regression test for TRUNK-2807)
@@ -47,7 +47,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		dwrConceptService.findConceptAnswers("", 1000, false, true);
 		// if we got here, we've passed, because we didn't get a NullPointerException
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -62,7 +62,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertTrue(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -80,7 +80,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertTrue(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -99,7 +99,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertFalse(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -117,7 +117,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertFalse(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -135,7 +135,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertTrue(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -154,7 +154,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertFalse(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -172,10 +172,10 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertFalse(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * Convenient method that determines whether given concept is present in result list or not
-	 * 
+	 *
 	 * @param expected the concept to be checked
 	 * @param result the list of concept lookup result items
 	 * @return true if given concept is present among result items
@@ -196,7 +196,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		}
 		return found;
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findConceptAnswers(String,Integer,boolean,boolean)
 	 * @verifies search for concept answers in all search locales
@@ -206,7 +206,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		//Given
 		Context.getAdministrationService().saveGlobalProperty(
 		    new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST, "en_GB, en_US, pl"));
-		
+
 		User user = Context.getAuthenticatedUser();
 		user.setUserProperty(OpenmrsConstants.USER_PROPERTY_PROFICIENT_LOCALES, "en_GB, en_US, pl");
 		Context.getUserService().saveUser(user);
@@ -215,20 +215,20 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Concept answer1 = Context.getConceptService().getConcept(7);
 		answer1.addName(new ConceptName("TAK", new Locale("pl")));
 		Context.getConceptService().saveConcept(answer1);
-		
+
 		Concept answer2 = Context.getConceptService().getConcept(8);
 		answer2.addName(new ConceptName("T", new Locale("en")));
 		Context.getConceptService().saveConcept(answer2);
-		
+
 		Concept answer3 = Context.getConceptService().getConcept(22);
 		answer3.addName(new ConceptName("T", new Locale("es")));
 		Context.getConceptService().saveConcept(answer3);
-		
+
 		updateSearchIndex();
-		
+
 		//when
 		List<Object> findConceptAnswers = dwrConceptService.findConceptAnswers("T", 21, false, true);
-		
+
 		//then
 		Assertions.assertEquals(2, findConceptAnswers.size());
 		for (Object findConceptAnswer : findConceptAnswers) {
@@ -238,7 +238,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 			}
 		}
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findConceptAnswers(String,Integer,boolean,boolean)
 	 * @verifies not return duplicates
@@ -248,25 +248,25 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		//Given
 		Context.getAdministrationService().saveGlobalProperty(
 		    new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST, "en_GB, en_US, pl"));
-		
+
 		User user = Context.getAuthenticatedUser();
 		user.setUserProperty(OpenmrsConstants.USER_PROPERTY_PROFICIENT_LOCALES, "en_GB, en_US, pl");
 		Context.getUserService().saveUser(user);
 		Context.clearSession();
-		
+
 		Concept answer1 = Context.getConceptService().getConcept(7);
 		answer1.addName(new ConceptName("TAK", new Locale("pl")));
 		Context.getConceptService().saveConcept(answer1);
-		
+
 		Concept answer2 = Context.getConceptService().getConcept(7);
 		answer2.addName(new ConceptName("True", new Locale("en")));
 		Context.getConceptService().saveConcept(answer2);
-		
+
 		updateSearchIndex();
-		
+
 		//when
 		List<Object> findConceptAnswers = dwrConceptService.findConceptAnswers("T", 21, false, true);
-		
+
 		//then
 		Assertions.assertEquals(1, findConceptAnswers.size());
 		for (Object findConceptAnswer : findConceptAnswers) {
@@ -275,9 +275,9 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 				Assertions.fail("Should have found an answer with id 7");
 			}
 		}
-		
+
 	}
-	
+
 	@Test
 	public void findBatchOfConcepts_shouldNotReturnDuplicatesWhenSearchingByConceptId() {
 		String phrase = "1001";
@@ -288,9 +288,9 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertEquals(1, result.size());
 		Assertions.assertTrue(isConceptFound(expected, result));
 	}
-	
+
 	//Tests for search by Concept's UUID
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -305,7 +305,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertTrue(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -323,7 +323,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertTrue(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -342,7 +342,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertFalse(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -360,7 +360,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertFalse(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -378,7 +378,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertTrue(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -397,7 +397,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertFalse(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)
@@ -415,7 +415,7 @@ public class DWRConceptServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNotNull(result);
 		Assertions.assertFalse(isConceptFound(expected, result));
 	}
-	
+
 	/**
 	 * @see DWRConceptService#findBatchOfConcepts(String, boolean, java.util.List, java.util.List,
 	 *      java.util.List, java.util.List, Integer, Integer)

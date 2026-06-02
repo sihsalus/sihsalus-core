@@ -27,31 +27,31 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.List;
 
 public class TaskDefinitionController1_8Test extends MainResourceControllerTest {
-	
+
 	@Autowired
 	RestService restService;
-	
+
 	private TaskDefinition testTask = new TaskDefinition(1, "TestTask", "TestTask Description",
 	        "org.openmrs.scheduler.tasks.TestTask");
-	
+
 	private MockTaskServiceWrapper mockTaskServiceWrapper = new MockTaskServiceWrapper();
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		testTask.setRepeatInterval(10L);
 		testTask.setStartOnStartup(true);
 		testTask.setProperty("propertyKey", "propertyValue");
-		
+
 		mockTaskServiceWrapper.registeredTasks.add(testTask);
-		
+
 		TaskDefinitionResource1_8 taskResource = (TaskDefinitionResource1_8) restService
 		        .getResourceBySupportedClass(TaskDefinition.class);
 		taskResource.setTaskServiceWrapper(mockTaskServiceWrapper);
 	}
-	
+
 	/**
 	 * Get all registered tasks - Used to test for registered tasks.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -63,10 +63,10 @@ public class TaskDefinitionController1_8Test extends MainResourceControllerTest 
 		Assertions.assertNotNull(resultTasks);
 		Assertions.assertEquals(results.size(), getAllCount());
 	}
-	
+
 	/**
 	 * Get all scheduled tasks - Used to test for scheduled tasks.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -78,7 +78,7 @@ public class TaskDefinitionController1_8Test extends MainResourceControllerTest 
 		Assertions.assertNotNull(resultTasks);
 		Assertions.assertEquals(results.size(), getAllScheduledCount());
 	}
-	
+
 	@Test
 	public void shouldGetTaskByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
@@ -87,13 +87,13 @@ public class TaskDefinitionController1_8Test extends MainResourceControllerTest 
 		Assertions.assertNotNull(result.get("description"));
 		Assertions.assertNotNull(result.get("taskClass"));
 	}
-	
+
 	@Test
 	@Override
 	public void shouldGetFullByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter("v", "full");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "name"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "description"));
@@ -103,7 +103,7 @@ public class TaskDefinitionController1_8Test extends MainResourceControllerTest 
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "started"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "properties"));
 	}
-	
+
 	@Test
 	@Override
 	public void shouldGetDefaultByUuid() throws Exception {
@@ -115,7 +115,7 @@ public class TaskDefinitionController1_8Test extends MainResourceControllerTest 
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "startTime"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "started"));
 	}
-	
+
 	@Test
 	@Override
 	public void shouldGetRefByUuid() throws Exception {
@@ -126,7 +126,7 @@ public class TaskDefinitionController1_8Test extends MainResourceControllerTest 
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "description"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "taskClass"));
 	}
-	
+
 	@Test
 	public void shouldSaveTaskDefinition() throws Exception {
 		SimpleObject mockTask = new SimpleObject();
@@ -138,39 +138,39 @@ public class TaskDefinitionController1_8Test extends MainResourceControllerTest 
 		mockTask.add("startOnStartup", false);
 		mockTask.add("properties", null);
 		String json = new ObjectMapper().writeValueAsString(mockTask);
-		
+
 		Assertions.assertNull(mockTaskServiceWrapper.getTaskByName("MockTask"));
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
 		deserialize(handle(req));
 		Assertions.assertEquals("MockTask", mockTaskServiceWrapper.getTaskByName("MockTask").getName());
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "taskdefinition";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return getTestTaskName();
 	}
-	
+
 	private String getTestTaskName() {
 		return "TestTask";
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return getAllRegisteredCount();
 	}
-	
+
 	public long getAllRegisteredCount() {
 		return mockTaskServiceWrapper.registeredTasks.size();
 	}
-	
+
 	public long getAllScheduledCount() {
 		return mockTaskServiceWrapper.scheduledTasks.size();
 	}
-	
+
 }

@@ -31,10 +31,10 @@ import static org.junit.Assert.assertTrue;
  * Test class that tests the serialization and deserialization of a patient
  */
 public class PatientSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a patient and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -44,9 +44,9 @@ public class PatientSerializationTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PatientSerializationTest.xml");
 		authenticate();
-		
+
 		Patient patient = Context.getPatientService().getPatient(999);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(patient, XStreamSerializer.class);
@@ -64,10 +64,10 @@ public class PatientSerializationTest extends BaseModuleContextSensitiveTest {
 		XMLAssert.assertXpathEvaluatesTo("999", "/patient/patientId", xmlOutput);
 		XMLAssert.assertXpathExists("/patient/identifiers/patientIdentifier[patientIdentifierId=7]", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -187,13 +187,13 @@ public class PatientSerializationTest extends BaseModuleContextSensitiveTest {
 		xmlBuilder.append("    </patientIdentifier>\n");
 		xmlBuilder.append("  </identifiers>\n");
 		xmlBuilder.append("</patient>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		Patient patient = Context.getSerializationService().deserialize(xmlBuilder.toString(), Patient.class,
 		    XStreamSerializer.class);
-		
+
 		assertEquals("86526ed6-3c11-11de-a0ba-001e378eb67e", patient.getUuid());
 		assertTrue("The voided shouldn't be " + patient.getVoided(), patient.getVoided());
 		assertEquals(1, patient.getCreator().getUserId().intValue());

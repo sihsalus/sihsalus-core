@@ -21,20 +21,20 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	public static final Locale HAITIAN_KREYOL = LocaleUtils.toLocale("ht");
-	
+
 	public static final Locale CAMBODIA_KHMER = LocaleUtils.toLocale("km_KH");
-	
+
 	@Autowired
 	InitializerMessageSource initializerMessageSource;
-	
+
 	@Test
 	public void shouldConfigureActiveMessageSource() {
 		assertEquals(InitializerMessageSource.class, messageSourceService.getActiveMessageSource().getClass());
 		assertNull(messageSourceService.getActiveMessageSource().getParentMessageSource());
 	}
-	
+
 	@Test
 	public void shouldIncludeMessagesInAddressHierarchyDomain() {
 		Context.setLocale(Locale.ENGLISH);
@@ -42,7 +42,7 @@ public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleCon
 		Context.setLocale(CAMBODIA_KHMER);
 		testMessage("ព្រះរាជាណាចក្រកម្ពុជា", "addresshierarchy.cambodia");
 	}
-	
+
 	@Test
 	public void shouldIncludeMessagesInMessagePropertiesDomain() {
 		Context.setLocale(Locale.ENGLISH);
@@ -52,7 +52,7 @@ public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleCon
 		testMessage("Clinique", "metadata.healthcenter");
 		testMessage("Ceci est la description d'une clinique.", "metadata.healthcenter.description");
 	}
-	
+
 	@Test
 	public void shouldIncludeMessagesOnClasspath() {
 		Context.setLocale(Locale.getDefault());
@@ -64,7 +64,7 @@ public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleCon
 		Context.setLocale(HAITIAN_KREYOL);
 		testMessage("ht", "messageFileLocale");
 	}
-	
+
 	@Test
 	public void getCachedMessages_shouldLoadMessagePropertiesWithArguments() {
 		Context.setLocale(Locale.FRENCH);
@@ -72,7 +72,7 @@ public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleCon
 		String msg = messageSourceService.getMessage(code, new Object[] { "Azul" }, Context.getLocale());
 		assertEquals("Ceci est la description de la clinique Azul.", msg);
 	}
-	
+
 	@Test
 	public void shouldLoadTranslationsWithAppropriateFallbacks() {
 		Context.setLocale(HAITIAN_KREYOL);
@@ -80,20 +80,20 @@ public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleCon
 		testMessage("messageOnlyInFrFr", "messageOnlyInFrFr"); // No match, fallback to message code
 		testMessage("Only In fr", "messageOnlyInFr"); // Fallback to explicit added fallback
 		testMessage("Only In Default", "messageOnlyInDefault"); // Fallback to system default locale
-		
+
 		Context.setLocale(Locale.FRANCE);
 		testMessage("messageOnlyInHt", "messageOnlyInHt"); // Fallback to message code
 		testMessage("Only In fr FR", "messageOnlyInFrFr"); // Direct match
 		testMessage("Only In fr", "messageOnlyInFr"); // Fallback to language fallback
 		testMessage("Only In Default", "messageOnlyInDefault"); // Fallback to system default locale
-		
+
 		Context.setLocale(Locale.FRENCH);
 		testMessage("messageOnlyInHt", "messageOnlyInHt"); // No match, fallback to message code
 		testMessage("messageOnlyInFrFr", "messageOnlyInFrFr"); // No match, fallback to message code
 		testMessage("Only In fr", "messageOnlyInFr"); // Direct match
 		testMessage("Only In Default", "messageOnlyInDefault"); // Fallback to system default locale
 	}
-	
+
 	@Test
 	public void shouldOverrideMessagesFromClasspathWithMessagesFromInitializer() {
 		Context.setLocale(HAITIAN_KREYOL);
@@ -105,14 +105,14 @@ public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleCon
 		Context.setLocale(Locale.ENGLISH);
 		testMessage("Hello", "greeting");
 	}
-	
+
 	@Test
 	public void shouldOverrideMessagesInInitializerBasedOnOrderProperty() {
 		Context.setLocale(Locale.ENGLISH);
 		testMessage("Hello", "greeting");
 		testMessage("Overridden", "shouldOverride");
 	}
-	
+
 	@Test
 	public void shouldDefaultToDefaultLocaleSettingIfNoMessageFoundInLocale() {
 		Locale startingDefaultLocale = LocaleUtility.getDefaultLocale();
@@ -124,7 +124,7 @@ public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleCon
 		LocaleUtility.setDefaultLocaleCache(startingDefaultLocale);
 		testMessage("English", "englishAndSpanishOnly");
 	}
-	
+
 	@Test
 	public void shouldReturnEnglishIfNoOtherMatchesFound() {
 		Locale startingDefaultLocale = LocaleUtility.getDefaultLocale();
@@ -134,13 +134,13 @@ public class InitializerMessageSourceIntegrationTest extends DomainBaseModuleCon
 		testMessage("Only defined in English", "metadata.healthcenter.onlyInEnglish");
 		LocaleUtility.setDefaultLocaleCache(startingDefaultLocale);
 	}
-	
+
 	@Test
 	public void shouldDefaultToMessageCodeIfNoMessageFound() {
 		Context.setLocale(Locale.FRANCE);
 		testMessage("invalid.code", "invalid.code");
 	}
-	
+
 	protected void testMessage(String message, String code) {
 		assertEquals(message, messageSourceService.getMessage(code));
 	}

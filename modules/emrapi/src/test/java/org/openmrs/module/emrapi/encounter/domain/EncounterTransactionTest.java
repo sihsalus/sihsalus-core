@@ -22,14 +22,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class EncounterTransactionTest {
-	
+
 	@Test
 	public void dateConversion() {
 		EncounterTransaction encounterTransaction = new EncounterTransaction();
 		encounterTransaction.setEncounterDateTime(new Date(2013, 10, 30, 0, 0, 0));
 		assertEquals(new Date(2013, 10, 30, 0, 0, 0), encounterTransaction.getEncounterDateTime());
 	}
-	
+
 	@Test
 	public void shouldDeserializeContext() throws IOException {
 		String patientProgramUuidKey = "patientProgramUuid";

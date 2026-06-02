@@ -19,5 +19,5 @@ package org.mockingbird.test;
  * </p>
  */
 public class AnimalClass {
-	
+
 }

@@ -20,23 +20,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class PatientIdentifierTypesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("patientService")
 	private PatientService ps;
-	
+
 	@Autowired
 	private PatientIdentifierTypesLoader loader;
-	
+
 	@Before
 	public void setup() {
 	}
-	
+
 	@Test
 	public void load_shouldLoadPatientIdentifierTypesAccordingToCsvFiles() {
-		
+
 		loader.load();
-		
+
 		{ // new PIT loaded with all expected fields
 			PatientIdentifierType pit = ps.getPatientIdentifierTypeByUuid("73f4f1d6-6086-41d5-a0f1-6d688a4b10af");
 			Assert.assertNotNull(pit);

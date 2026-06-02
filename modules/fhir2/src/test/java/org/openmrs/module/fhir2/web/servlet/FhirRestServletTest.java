@@ -29,33 +29,33 @@ import org.mockito.MockitoAnnotations;
 import org.openmrs.util.OpenmrsClassLoader;
 
 public class FhirRestServletTest {
-	
+
 	@Mock
 	private HttpServletRequest mockRequest;
-	
+
 	@Mock
 	private HttpServletResponse mockResponse;
-	
+
 	@Mock
 	private ServletConfig mockServletConfig;
-	
+
 	@Mock
 	private PrintWriter mockWriter;
-	
+
 	private TestableFhirRestServlet servlet;
-	
+
 	@Before
 	public void setUp() throws ServletException, IOException {
 		MockitoAnnotations.initMocks(this);
-		
+
 		servlet = new TestableFhirRestServlet();
-		
+
 		when(mockServletConfig.getServletContext()).thenReturn(mock(javax.servlet.ServletContext.class));
 		when(mockResponse.getWriter()).thenReturn(mockWriter);
-		
+
 		servlet.init(mockServletConfig);
 	}
-	
+
 	@Test
 	public void testServiceSetsContextClassLoader() throws ServletException, IOException {
 		// setup
@@ -65,15 +65,15 @@ public class FhirRestServletTest {
 		when(mockRequest.getServletPath()).thenReturn("");
 		when(mockRequest.getContextPath()).thenReturn("");
 		when(mockRequest.getQueryString()).thenReturn("");
-		
+
 		Thread.currentThread().setContextClassLoader(null);
 		assertNull(Thread.currentThread().getContextClassLoader());
 		servlet.service(mockRequest, mockResponse);
 		assertEquals(OpenmrsClassLoader.getInstance(), Thread.currentThread().getContextClassLoader());
 	}
-	
+
 	class TestableFhirRestServlet extends FhirRestServlet {
-		
+
 		@Override
 		public void initialize() {
 		}

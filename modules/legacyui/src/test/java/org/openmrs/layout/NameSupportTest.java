@@ -16,7 +16,7 @@ import org.openmrs.test.Verifies;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
 public class NameSupportTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * Changes made in TRUNK-3849 to move NameSupport from package layout.web.name to layout.name
 	 * broke layout.web.name.NameSupport.getInstance(), because there was no longer a bean of the
@@ -33,5 +33,5 @@ public class NameSupportTest extends BaseModuleWebContextSensitiveTest {
 		//make sure that all 5 layout templates defined at the time of the package change continue to work
 		Assertions.assertTrue(nameSupport.getLayoutTemplates().size() >= 5);
 	}
-	
+
 }

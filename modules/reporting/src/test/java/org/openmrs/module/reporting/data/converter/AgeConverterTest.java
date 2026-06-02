@@ -16,14 +16,14 @@ import org.openmrs.module.reporting.common.DateUtil;
 import org.openmrs.module.reporting.data.converter.AgeConverter;
 
 public class AgeConverterTest {
-	
+
 	/**
 	 * @return a new Age for someone who is 36 years, 4 months old
 	 */
 	public Age getAgeToTest() {
 		return new Age(DateUtil.getDateTime(1975, 4, 8), DateUtil.getDateTime(2011, 9, 6));
 	}
-	
+
 	/**
 	 * @see AgeConverter#convert(Object)
 	 * @verifies convert an Age to integer years
@@ -55,7 +55,7 @@ public class AgeConverterTest {
 		Object conversion = (new AgeConverter("I am {y} years and {m} months old")).convert(getAgeToTest());
 		Assert.assertEquals("I am 36 years and 4 months old", conversion.toString());
 		Assert.assertEquals(String.class, conversion.getClass());
-		
+
 		conversion = (new AgeConverter("I am {m} months old")).convert(getAgeToTest());
 		Assert.assertEquals("I am 436 months old", conversion.toString());
 		Assert.assertEquals(String.class, conversion.getClass());

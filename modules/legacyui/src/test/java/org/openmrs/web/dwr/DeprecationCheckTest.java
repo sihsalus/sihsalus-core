@@ -31,9 +31,9 @@ import org.springframework.util.SystemPropertyUtils;
  * behind this see JIRA issue: https://tickets.openmrs.org/browse/TRUNK-2517
  */
 public class DeprecationCheckTest {
-	
+
 	private static final String OPENMRS_DWR_PACKAGE_NAME = "org.openmrs.web.dwr";
-	
+
 	/**
 	 * @verifies fail if any of the DWR*Service classes contain {@literal @}Deprecated annotation
 	 *           (TRUNK-2517)
@@ -60,13 +60,13 @@ public class DeprecationCheckTest {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Returns a list of class names which contain the {@literal @}Deprecated annotation. Does this
 	 * search ONLY for DWR*Service classes. Found the basic code here:
 	 * http://stackoverflow.com/questions
 	 * /1456930/how-do-i-read-all-classes-from-a-java-package-in-the-classpath
-	 * 
+	 *
 	 * @return List of classes which contain the Deprecated annotation ({@literal @}Deprecated)
 	 * @throws IOException
 	 * @throws ClassNotFoundException
@@ -74,11 +74,11 @@ public class DeprecationCheckTest {
 	private List<String> findDWRServiceClassesWhichContainDeprecatedAnnotation() throws IOException, ClassNotFoundException {
 		ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 		MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
-		
+
 		//Search only for Service Classes in DWR package.
 		String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
 		        + resolveBasePackage(OPENMRS_DWR_PACKAGE_NAME) + "/**/*Service.class";
-		
+
 		List<String> candidateClasses = new ArrayList<String>();
 		Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
 		for (Resource resource : resources) {
@@ -89,18 +89,18 @@ public class DeprecationCheckTest {
 				}
 			}
 		}
-		
+
 		return candidateClasses;
 	}
-	
+
 	private String resolveBasePackage(String basePackage) {
 		return ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(basePackage));
 	}
-	
+
 	/**
 	 * For the given class, checks if it contains any {@literal @}Deprecated annotation (at
 	 * method/class level).
-	 * 
+	 *
 	 * @param metadataReader
 	 * @return true if it finds {@literal @}Deprecated annotation in the class or any of its
 	 *         methods.
@@ -109,11 +109,11 @@ public class DeprecationCheckTest {
 	private boolean doesClassContainDeprecatedAnnotation(MetadataReader metadataReader) throws ClassNotFoundException {
 		try {
 			Class dwrClass = Class.forName(metadataReader.getClassMetadata().getClassName());
-			
+
 			if (dwrClass.isAnnotationPresent(Deprecated.class)) {
 				return true;
 			}
-			
+
 			Method[] methods = dwrClass.getDeclaredMethods();
 			for (Method method : methods) {
 				if (method.isAnnotationPresent(Deprecated.class))

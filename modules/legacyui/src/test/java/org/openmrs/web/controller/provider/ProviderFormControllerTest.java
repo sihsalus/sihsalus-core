@@ -30,11 +30,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Tests against the {@link ProviderFormController}
  */
 public class ProviderFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	protected static final String PROVIDERS_ATTRIBUTES_XML = "org/openmrs/api/include/ProviderServiceTest-providerAttributes.xml";
-	
+
 	protected static final String PROVIDERS_XML = "org/openmrs/api/include/ProviderServiceTest-initial.xml";
-	
+
 	/**
 	 * @verifies not void or change attributeList if the attribute values are same
 	 * @see org.openmrs.web.controller.provider.ProviderFormController#onSubmit(javax.servlet.http.HttpServletRequest,
@@ -56,9 +56,9 @@ public class ProviderFormControllerTest extends BaseModuleWebContextSensitiveTes
 		    createModelMap(providerAttributeType));
 		Assertions.assertFalse(((ProviderAttribute) (provider.getAttributes().toArray()[0])).getVoided());
 		Assertions.assertEquals(1, provider.getAttributes().size());
-		
+
 	}
-	
+
 	/**
 	 * @verifies set attributes to void if the values is not set
 	 * @see org.openmrs.web.controller.provider.ProviderFormController#onSubmit(javax.servlet.http.HttpServletRequest,
@@ -81,9 +81,9 @@ public class ProviderFormControllerTest extends BaseModuleWebContextSensitiveTes
 		    createModelMap(providerAttributeType));
 		Assertions.assertEquals(1, provider.getAttributes().size());
 		Assertions.assertTrue(((ProviderAttribute) (provider.getAttributes().toArray()[0])).isVoided());
-		
+
 	}
-	
+
 	/**
 	 * @verifies should purge the provider
 	 * @see org.openmrs.web.controller.provider.ProviderFormController#onSubmit(javax.servlet.http.HttpServletRequest,
@@ -104,11 +104,11 @@ public class ProviderFormControllerTest extends BaseModuleWebContextSensitiveTes
 		Context.flushSession();
 		assertNull(Context.getProviderService().getProvider(2));
 	}
-	
+
 	private ModelMap createModelMap(ProviderAttributeType providerAttributeType) {
 		ModelMap modelMap = new ModelMap();
 		modelMap.put("providerAttributeTypes", Arrays.asList(providerAttributeType));
 		return modelMap;
 	}
-	
+
 }

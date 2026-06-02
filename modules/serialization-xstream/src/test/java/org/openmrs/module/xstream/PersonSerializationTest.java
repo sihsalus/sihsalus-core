@@ -31,10 +31,10 @@ import static org.junit.Assert.assertTrue;
  * Test class that tests the serialization and deserialization of a person
  */
 public class PersonSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a person and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -44,11 +44,11 @@ public class PersonSerializationTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PersonSerializationTest.xml");
 		authenticate();
-		
+
 		Person person = Context.getPersonService().getPerson(1000);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(person, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("04079813-4c9d-4f9d-b676-4c0502a5c1c3", "/person/@uuid", xmlOutput);
@@ -70,10 +70,10 @@ public class PersonSerializationTest extends BaseModuleContextSensitiveTest {
 		XMLAssert.assertXpathEvaluatesTo("test purpose", "/person/personVoidReason", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("false", "/person/isPatient", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -228,10 +228,10 @@ public class PersonSerializationTest extends BaseModuleContextSensitiveTest {
 		xmlBuilder.append("  <personVoidReason>test purpose</personVoidReason>\n");
 		xmlBuilder.append("  <isPatient>false</isPatient>\n");
 		xmlBuilder.append("</person>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		Person person = Context.getSerializationService().deserialize(xmlBuilder.toString(), Person.class, XStreamSerializer.class);
 		assertEquals("04079813-4c9d-4f9d-b676-4c0502a5c1c3", person.getUuid());
 		assertEquals(1000, person.getPersonId().intValue());

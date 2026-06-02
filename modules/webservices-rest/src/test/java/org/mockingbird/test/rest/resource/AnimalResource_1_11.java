@@ -20,7 +20,7 @@ import org.openmrs.module.webservices.rest.web.RestConstants;
  */
 @org.openmrs.module.webservices.rest.web.annotation.Resource(name = RestConstants.VERSION_1 + "/animal", order = 1, supportedClass = Animal.class, supportedOpenmrsVersions = { "1.11.*" })
 public class AnimalResource_1_11 extends AnimalResource_1_9 {
-	
+
 	@Override
 	public String getResourceVersion() {
 		return "1.11";

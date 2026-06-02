@@ -22,7 +22,7 @@ import org.openmrs.test.Verifies;
  * Tests for classes in the aggregation package
  */
 public class AggregationTest {
-	
+
 	/**
 	 * @see {@link MeanAggregator#compute(Collection)}
 	 */
@@ -32,7 +32,7 @@ public class AggregationTest {
 		MeanAggregator ma = new MeanAggregator();
 		ma.compute(null);
 	}
-	
+
 	/**
 	 * @see {@link MeanAggregator#compute(Collection)}
 	 */
@@ -43,7 +43,7 @@ public class AggregationTest {
 		Collection<Number> c = new LinkedHashSet<Number>();
 		Assert.assertTrue(ma.compute(c).equals(Double.valueOf(0) / 0));
 	}
-	
+
 	/**
 	 * @see {@link MeanAggregator#compute(Collection)}
 	 */
@@ -55,7 +55,7 @@ public class AggregationTest {
 		c.add(1);
 		Assert.assertTrue(ma.compute(c).equals(Double.valueOf(1)));
 	}
-	
+
 	/**
 	 * @see {@link MeanAggregator#compute(Collection)}
 	 */
@@ -69,7 +69,7 @@ public class AggregationTest {
 		c.add(5);
 		Assert.assertTrue(ma.compute(c).equals(Double.valueOf(3)));
 	}
-	
+
 	/**
 	 * @see {@link MedianAggregator#compute(Collection)}
 	 */
@@ -79,7 +79,7 @@ public class AggregationTest {
 		MedianAggregator ma = new MedianAggregator();
 		ma.compute(null);
 	}
-	
+
 	/**
 	 * @see {@link MedianAggregator#compute(Collection)}
 	 */
@@ -90,7 +90,7 @@ public class AggregationTest {
 		MedianAggregator ma = new MedianAggregator();
 		Assert.assertTrue(ma.compute(c).equals(Double.valueOf(0) / 0));
 	}
-	
+
 	/**
 	 * @see {@link MedianAggregator#compute(Collection)}
 	 */
@@ -102,7 +102,7 @@ public class AggregationTest {
 		MedianAggregator ma = new MedianAggregator();
 		Assert.assertTrue(ma.compute(c).equals(1));
 	}
-	
+
 	/**
 	 * @see {@link MedianAggregator#compute(Collection)}
 	 */
@@ -116,7 +116,7 @@ public class AggregationTest {
 		MedianAggregator ma = new MedianAggregator();
 		Assert.assertTrue(ma.compute(c).equals(1));
 	}
-	
+
 	/**
 	 * @see {@link MedianAggregator#compute(Collection)}
 	 */
@@ -131,7 +131,7 @@ public class AggregationTest {
 		MedianAggregator ma = new MedianAggregator();
 		Assert.assertTrue(ma.compute(c).equals(1.5));
 	}
-	
+
 	/**
 	 * @see {@link ModeAggregator#compute(Collection)}
 	 */
@@ -141,7 +141,7 @@ public class AggregationTest {
 		ModeAggregator ma = new ModeAggregator();
 		ma.compute(null);
 	}
-	
+
 	/**
 	 * @see {@link ModeAggregator#compute(Collection)}
 	 */
@@ -151,7 +151,7 @@ public class AggregationTest {
 		ModeAggregator ma = new ModeAggregator();
 		ma.compute(Collections.<Number>emptyList());
 	}
-	
+
 	/**
 	 * @see {@link MeanAggregator#compute(Collection)}
 	 */

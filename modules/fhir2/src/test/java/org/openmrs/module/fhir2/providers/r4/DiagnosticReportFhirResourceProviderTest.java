@@ -50,198 +50,198 @@ import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiagnosticReportFhirResourceProviderTest {
-	
+
 	private static final String UUID = "bdd7e368-3d1a-42a9-9538-395391b64adf";
-	
+
 	private static final String WRONG_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
-	
+
 	private static final int START_INDEX = 0;
-	
+
 	private static final int END_INDEX = 10;
-	
+
 	private static final int PREFERRED_PAGE_SIZE = 10;
-	
+
 	private static final int COUNT = 1;
-	
+
 	@Mock
 	private FhirDiagnosticReportService service;
-	
+
 	@Getter(AccessLevel.PUBLIC)
 	private DiagnosticReportFhirResourceProvider resourceProvider;
-	
+
 	private DiagnosticReport diagnosticReport;
-	
+
 	@Before
 	public void setup() {
 		resourceProvider = new DiagnosticReportFhirResourceProvider();
 		resourceProvider.setService(service);
 	}
-	
+
 	@Before
 	public void initDiagnosticReport() {
 		diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 	}
-	
+
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
-	
+
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(DiagnosticReport.class));
 		assertThat(resourceProvider.getResourceType().getName(), equalTo(DiagnosticReport.class.getName()));
 	}
-	
+
 	@Test
 	public void getDiagnosticReportById_shouldReturnMatchingDiagnosticReport() {
 		IdType id = new IdType();
 		id.setValue(UUID);
-		
+
 		when(service.get(UUID)).thenReturn(diagnosticReport);
-		
+
 		DiagnosticReport result = resourceProvider.getDiagnosticReportById(id);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.isResource(), is(true));
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(UUID));
 	}
-	
+
 	@Test(expected = ResourceNotFoundException.class)
 	public void getDiagnosticReportByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_UUID);
-		
+
 		assertThat(resourceProvider.getDiagnosticReportById(idType).isResource(), is(true));
 		assertThat(resourceProvider.getDiagnosticReportById(idType), nullValue());
 	}
-	
+
 	@Test
 	public void createDiagnosticReport_shouldCreateNewDiagnosticReport() {
 		when(service.create(diagnosticReport)).thenReturn(diagnosticReport);
-		
+
 		MethodOutcome result = resourceProvider.createDiagnosticReport(diagnosticReport);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(diagnosticReport));
 	}
-	
+
 	@Test
 	public void updateDiagnosticReport_shouldUpdateExistingDiagnosticReport() {
 		when(service.update(UUID, diagnosticReport)).thenReturn(diagnosticReport);
-		
+
 		MethodOutcome result = resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), diagnosticReport);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(diagnosticReport));
 	}
-	
+
 	@Test(expected = InvalidRequestException.class)
 	public void updateDiagnosticReport_shouldThrowInvalidRequestForUuidMismatch() {
 		when(service.update(WRONG_UUID, diagnosticReport)).thenThrow(InvalidRequestException.class);
-		
+
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), diagnosticReport);
 	}
-	
+
 	@Test(expected = InvalidRequestException.class)
 	public void updateDiagnosticReport_shouldThrowInvalidRequestForMissingId() {
 		DiagnosticReport noIdDiagnosticReport = new DiagnosticReport();
-		
+
 		when(service.update(UUID, noIdDiagnosticReport)).thenThrow(InvalidRequestException.class);
-		
+
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnosticReport);
 	}
-	
+
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateDiagnosticReport_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		DiagnosticReport wrongDiagnosticReport = new DiagnosticReport();
-		
+
 		wrongDiagnosticReport.setId(WRONG_UUID);
-		
+
 		when(service.update(WRONG_UUID, wrongDiagnosticReport)).thenThrow(MethodNotAllowedException.class);
-		
+
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
 	}
-	
+
 	@Test
 	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReports() {
 		when(service.searchForDiagnosticReports(
 		    new DiagnosticReportSearchParams(null, null, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
 		    null, null);
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}
-	
+
 	@Test
 	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReportsWhenSubjectIsSpecified() {
-		
+
 		ReferenceAndListParam subject = new ReferenceAndListParam();
 		subject.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
-		
+
 		when(service.searchForDiagnosticReports(
 		    new DiagnosticReportSearchParams(null, subject, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null, null,
 		    null, null, null);
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}
-	
+
 	@Test
 	public void findDiagnosticReports_shouldReturnRelatedResourcesIfIncludeIsSpecified() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("DiagnosticReport:patient"));
-		
+
 		when(service.searchForDiagnosticReports(
 		    new DiagnosticReportSearchParams(null, null, null, null, null, null, null, null, includes))).thenReturn(
 		        new MockIBundleProvider<>(Arrays.asList(diagnosticReport, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
 		    null, includes);
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(2));
 		assertThat(resultList.get(1).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}
-	
+
 	@Test
 	public void findDiagnosticReports_shouldNotReturnRelatedResourcesIfIncludeIsEmpty() {
 		HashSet<Include> includes = new HashSet<>();
-		
+
 		when(service.searchForDiagnosticReports(
 		    new DiagnosticReportSearchParams(null, null, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
 		    null, includes);
-		
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), equalTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}
-	
+
 	@Test
 	public void deleteDiagnosticReport_shouldDeleteRequestedDiagnosticReport() {
 		OperationOutcome result = resourceProvider.deleteDiagnosticReport(new IdType().setValue(UUID));

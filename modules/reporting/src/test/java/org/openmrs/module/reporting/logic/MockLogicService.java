@@ -39,32 +39,32 @@ import org.springframework.stereotype.Service;
  */
 @Service(value="logicService")
 public class MockLogicService implements LogicService {
-	
+
 	protected final Log log = LogFactory.getLog(getClass());
-	
+
 	private Map<String, Rule> rules = new HashMap<String, Rule>();
-		
+
 	/**
 	 * Default constructor
 	 */
 	public MockLogicService() {
 		rules.put("gender", new GenderRule());
 	}
-		
+
 	/**
 	 * @see LogicService#getTokens()
 	 */
 	public Set<String> getTokens() {
 		return rules.keySet();
 	}
-	
+
 	/**
 	 * @see LogicService#getAllTokens()
 	 */
 	public List<String> getAllTokens() {
 		return new ArrayList<String>(getTokens());
 	}
-	
+
 	/**
 	 * @see LogicService#findToken(String)
 	 */
@@ -73,7 +73,7 @@ public class MockLogicService implements LogicService {
 		tokens.addAll(getTokens(token));
 		return tokens;
 	}
-	
+
 	/**
 	 * @see LogicService#getTokens(String)
 	 */
@@ -86,14 +86,14 @@ public class MockLogicService implements LogicService {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * @see LogicService#addRule(String, Rule)
 	 */
 	public void addRule(String token, Rule rule) throws LogicException {
 		rules.put(token, rule);
 	}
-	
+
 	/**
 	 * @see LogicService#getRule(String)
 	 * @should return ReferenceRule when the token are already registered
@@ -104,28 +104,28 @@ public class MockLogicService implements LogicService {
 	public Rule getRule(String token) throws LogicException {
 		return rules.get(token);
 	}
-	
+
 	/**
 	 * @see LogicService#updateRule(String, Rule)
 	 */
 	public void updateRule(String token, Rule rule) throws LogicException {
 		addRule(token, rule);
 	}
-	
+
 	/**
 	 * @see LogicService#removeRule(String)
 	 */
 	public void removeRule(String token) throws LogicException {
 		rules.remove(token);
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Integer, String)
 	 */
 	public Result eval(Integer patientId, String expression) throws LogicException {
 		return eval(patientId, parse(expression));
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Integer, String, java.util.Map)
 	 */
@@ -134,7 +134,7 @@ public class MockLogicService implements LogicService {
 		criteria.setLogicParameters(params);
 		return eval(patientId, criteria);
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Integer, java.util.Map,
 	 *      String[])
@@ -149,13 +149,13 @@ public class MockLogicService implements LogicService {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Integer, java.util.Map, LogicCriteria[])
 	 */
 	public Map<LogicCriteria, Result> eval(Integer patientId, Map<String, Object> parameters, LogicCriteria... criteria) throws LogicException {
 		LogicContext context = new MockLogicContext(patientId);
-		
+
 		Map<LogicCriteria, Result> ret = new LinkedHashMap<LogicCriteria, Result>();
 		for (int i = 0; i < criteria.length; ++i) {
 			LogicCriteria criterion = criteria[i];
@@ -163,14 +163,14 @@ public class MockLogicService implements LogicService {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Integer, LogicCriteria)
 	 */
 	public Result eval(Integer patientId, LogicCriteria criteria) throws LogicException {
 		return eval(patientId, criteria, criteria.getLogicParameters());
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Integer, LogicCriteria,
 	 *      java.util.Map)
@@ -181,42 +181,42 @@ public class MockLogicService implements LogicService {
 		context = null;
 		return result;
 	}
-	
+
 	/**
 	 * @see LogicService#eval(org.openmrs.Patient, String)
 	 */
 	public Result eval(Patient who, String expression) throws LogicException {
 		return eval(who.getPatientId(), expression);
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Patient, String, Map)
 	 */
 	public Result eval(Patient who, String expression, Map<String, Object> parameters) throws LogicException {
 		return eval(who.getPatientId(), expression, parameters);
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Patient, LogicCriteriaImpl)
 	 */
 	public Result eval(Patient who, LogicCriteria criteria) throws LogicException {
 		return eval(who.getPatientId(), criteria);
 	}
-	
+
 	/**
 	 * @see LogicService#eval(Patient, LogicCriteria, Map)
 	 */
 	public Result eval(Patient who, LogicCriteria criteria, Map<String, Object> parameters) throws LogicException {
 		return eval(who.getPatientId(), criteria, parameters);
 	}
-	
+
 	/**
 	 * @see LogicService#eval(org.openmrs.Cohort, String)
 	 */
 	public Map<Integer, Result> eval(Cohort who, String expression) throws LogicException {
 		return eval(who, parse(expression));
 	}
-	
+
 	/**
 	 * @see LogicService#eval(org.openmrs.Cohort, String, java.util.Map)
 	 */
@@ -225,14 +225,14 @@ public class MockLogicService implements LogicService {
 		criteria.setLogicParameters(parameters);
 		return eval(who, criteria);
 	}
-	
+
 	/**
 	 * @see LogicService#eval(org.openmrs.Cohort, LogicCriteria)
 	 */
 	public Map<Integer, Result> eval(Cohort who, LogicCriteria criteria) throws LogicException {
 		return eval(who, criteria, criteria.getLogicParameters());
 	}
-	
+
 	/**
 	 * @see LogicService#eval(org.openmrs.Cohort, LogicCriteria,
 	 *      java.util.Map)
@@ -246,93 +246,93 @@ public class MockLogicService implements LogicService {
 		context = null;
 		return resultMap;
 	}
-	
+
 	/**
 	 * @see LogicService#eval(org.openmrs.Cohort, java.util.List)
 	 */
 	public Map<LogicCriteria, Map<Integer, Result>> eval(Cohort patients, List<LogicCriteria> criterias)
 	                                                                                                    throws LogicException {
 		Map<LogicCriteria, Map<Integer, Result>> result = new HashMap<LogicCriteria, Map<Integer, Result>>();
-		
+
 		for (LogicCriteria criteria : criterias) {
 			result.put(criteria, eval(patients, criteria));
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * @see LogicService#addRule(String, String[], Rule)
 	 */
 	public void addRule(String token, String[] tags, Rule rule) throws LogicException {
 		throw new UnsupportedOperationException("Use TokenService.registerToken and manually add tags");
 	}
-	
+
 	/**
 	 * @see LogicService#addTokenTag(String, String)
 	 */
 	public void addTokenTag(String token, String tag) {
 	}
-	
+
 	/**
 	 * @see LogicService#findTags(String)
 	 */
 	public Set<String> findTags(String partialTag) {
 		return new HashSet<String>();
 	}
-	
+
 	/**
 	 * @see LogicService#getTags(String)
 	 */
 	public List<String> getTags(String partialTag) {
 		return new ArrayList<String>(findTags(partialTag));
 	}
-	
+
 	/**
 	 * @see LogicService#getTagsByToken(String)
 	 */
 	public Collection<String> getTagsByToken(String token) {
 		return findTags(token);
 	}
-	
+
 	/**
 	 * @see LogicService#getTokenTags(String)
 	 */
 	public Set<String> getTokenTags(String token) {
 		return findTags(token);
 	}
-	
+
 	/**
 	 * @see LogicService#getTokensByTag(String)
 	 */
 	public Set<String> getTokensByTag(String tag) {
 		return findTags(tag);
 	}
-	
+
 	/**
 	 * @see LogicService#getTokensWithTag(String)
 	 */
 	public List<String> getTokensWithTag(String tag) {
 		return getTags(tag);
 	}
-	
+
 	/**
 	 * @see LogicService#removeTokenTag(String, String)
 	 */
 	public void removeTokenTag(String token, String tag) {
 	}
-	
+
 	/**
 	 * @see LogicService#getDefaultDatatype(String)
 	 */
 	public Datatype getDefaultDatatype(String token) {
 		return getRule(token).getDefaultDatatype();
 	}
-	
+
 	public Set<RuleParameterInfo> getParameterList(String token) {
 		return new HashSet<RuleParameterInfo>();
 	}
-	
+
 	/**
 	 * @deprecated data sources are now auto-registered via Spring
 	 * @see LogicService#registerLogicDataSource(String, LogicDataSource)
@@ -340,28 +340,28 @@ public class MockLogicService implements LogicService {
 	public void registerLogicDataSource(String name, LogicDataSource dataSource) throws LogicException {
 		// do nothing
 	}
-	
+
 	/**
 	 * @see LogicService#getLogicDataSource(String)
 	 */
 	public LogicDataSource getLogicDataSource(String name) {
 		return getLogicDataSources().get(name);
 	}
-	
+
 	/**
 	 * @see LogicService#getLogicDataSources()
 	 */
 	public Map<String, LogicDataSource> getLogicDataSources() {
 		return new HashMap<String, LogicDataSource>();
 	}
-	
+
 	/**
 	 * @see LogicService#parseString(String)
 	 */
 	public LogicCriteria parseString(String inStr) {
 		return parse(inStr);
 	}
-	
+
 	/**
 	 * @see LogicService#parse(String)
 	 */

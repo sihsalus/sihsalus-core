@@ -28,39 +28,39 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationReferenceTranslatorImplTest {
-	
+
 	private static final String MEDICATION_UUID = "12cc917e-920f-4118-aab5-4d6e5e780ad4";
-	
+
 	@Mock
 	private FhirMedicationDao dao;
-	
+
 	private MedicationReferenceTranslatorImpl medicationReferenceTranslator;
-	
+
 	@Before
 	public void setup() {
 		medicationReferenceTranslator = new MedicationReferenceTranslatorImpl();
 		medicationReferenceTranslator.setMedicationDao(dao);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertDrugToReference() {
 		Drug drug = new Drug();
 		drug.setUuid(MEDICATION_UUID);
-		
+
 		Reference result = medicationReferenceTranslator.toFhirResource(drug);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.MEDICATION));
 		assertThat(getReferenceId(result).orElse(null), equalTo(MEDICATION_UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfMedicationNull() {
 		Reference result = medicationReferenceTranslator.toFhirResource(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldConvertReferenceToDrug() {
 		Reference medicationReference = new Reference().setReference(FhirConstants.MEDICATION + "/" + MEDICATION_UUID)
@@ -68,35 +68,35 @@ public class MedicationReferenceTranslatorImplTest {
 		Drug drug = new Drug();
 		drug.setUuid(MEDICATION_UUID);
 		when(dao.get(MEDICATION_UUID)).thenReturn(drug);
-		
+
 		Drug result = medicationReferenceTranslator.toOpenmrsType(medicationReference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(MEDICATION_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
 		Drug result = medicationReferenceTranslator.toOpenmrsType(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceIdIsNull() {
 		Reference medicationReference = new Reference().setReference(FhirConstants.MEDICATION + "/" + MEDICATION_UUID)
 		        .setType(FhirConstants.MEDICATION);
 		assertThat(medicationReference.getId(), nullValue());
 		Drug result = medicationReferenceTranslator.toOpenmrsType(medicationReference);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsntForMedication() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + MEDICATION_UUID).setType("Unknown");
-		
+
 		medicationReferenceTranslator.toOpenmrsType(reference);
 	}
-	
+
 }

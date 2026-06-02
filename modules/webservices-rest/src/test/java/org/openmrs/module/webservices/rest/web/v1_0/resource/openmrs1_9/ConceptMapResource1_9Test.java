@@ -19,7 +19,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
  *
  */
 public class ConceptMapResource1_9Test extends BaseDelegatingResourceTest<ConceptMapResource1_9, ConceptMap> {
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#newObject()
 	 */
@@ -27,7 +27,7 @@ public class ConceptMapResource1_9Test extends BaseDelegatingResourceTest<Concep
 	public ConceptMap newObject() {
 		return Context.getService(RestHelperService.class).getObjectByUuid(ConceptMap.class, getUuidProperty());
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getDisplayProperty()
 	 */
@@ -35,7 +35,7 @@ public class ConceptMapResource1_9Test extends BaseDelegatingResourceTest<Concep
 	public String getDisplayProperty() {
 		return "Some Standardized Terminology: WGT234 (weight term)";
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getUuidProperty()
 	 */
@@ -43,5 +43,5 @@ public class ConceptMapResource1_9Test extends BaseDelegatingResourceTest<Concep
 	public String getUuidProperty() {
 		return RestTestConstants1_9.CONCEPT_MAP_UUID;
 	}
-	
+
 }

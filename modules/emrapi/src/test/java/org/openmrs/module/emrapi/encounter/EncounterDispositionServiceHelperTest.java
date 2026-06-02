@@ -34,25 +34,25 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class EncounterDispositionServiceHelperTest {
-	
+
 	public static final String TEXT_CONCEPT_UUID = "text-concept-uuid";
-	
+
 	public static final String NUMERIC_CONCEPT_UUID = "numeric-concept-uuid";
-	
+
 	@Mock
 	private ConceptService conceptService;
-	
+
 	@Mock
 	private ObsService obsService;
-	
+
 	private EncounterDispositionServiceHelper encounterDispositionServiceHelper;
-	
+
 	private static final String UUID_SUFFIX = "-uuid-1234";
-	
+
 	private Concept dispositionGroupConcept;
-	
+
 	private Concept dispositionConcept;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		initMocks(this);
@@ -63,7 +63,7 @@ public class EncounterDispositionServiceHelperTest {
 		setUpConceptByMapping("DISCHARGE");
 		setUpConceptByMapping("TRANSFER");
 	}
-	
+
 	@Test
 	public void shouldSaveDispositionAsObsGroup() {
 		String noteConceptUuid = "disposition-note" + UUID_SUFFIX;
@@ -75,12 +75,12 @@ public class EncounterDispositionServiceHelperTest {
 		EncounterTransaction.Observation additionalObs = new EncounterTransaction.Observation()
 		        .setConcept(getConcept(noteConceptUuid)).setValue(dispositionNoteValue);
 		disposition.setCode(code).setAdditionalObs(Arrays.asList(additionalObs));
-		
+
 		encounterDispositionServiceHelper.update(encounter, disposition);
-		
+
 		assertDispositionValues(noteConceptUuid, dispositionNoteValue, code, encounter);
 	}
-	
+
 	@Test
 	public void shouldVoidObsWhenDispositionIsVoided() {
 		Encounter encounter = new Encounter();
@@ -91,20 +91,20 @@ public class EncounterDispositionServiceHelperTest {
 		disposition.setCode("ADMIT");
 		disposition.setVoided(true);
 		disposition.setVoidReason("Entry by mistake");
-		
+
 		encounterDispositionServiceHelper.update(encounter, disposition);
-		
+
 		Obs updatedDispositionGroupObservation = getObsByUuid(dispositionGroupObservation.getUuid(),
 		    encounter.getAllObs(true));
 		assertEquals(true, updatedDispositionGroupObservation.getVoided());
 		assertEquals(disposition.getVoidReason(), updatedDispositionGroupObservation.getVoidReason());
-		
+
 		for (Obs obs : groupMembersObservation) {
 			assertEquals(true, obs.getVoided());
 			assertEquals(disposition.getVoidReason(), obs.getVoidReason());
 		}
 	}
-	
+
 	@Test
 	public void shouldUpdateDispositionAsObsGroup() {
 		String noteConceptUuid = "disposition-note" + UUID_SUFFIX;
@@ -112,25 +112,25 @@ public class EncounterDispositionServiceHelperTest {
 		String code = "ADMIT";
 		newConcept(ConceptDatatype.TEXT, noteConceptUuid);
 		Encounter encounter = createEncounter("e-uuid");
-		
+
 		EncounterTransaction.Disposition disposition = new EncounterTransaction.Disposition();
 		disposition.setCode(code).setAdditionalObs(Arrays.asList(
 		    new EncounterTransaction.Observation().setConcept(getConcept(noteConceptUuid)).setValue(dispositionNoteValue)));
-		
+
 		encounterDispositionServiceHelper.update(encounter, disposition);
-		
+
 		code = "DISCHARGE";
 		dispositionNoteValue = dispositionNoteValue + " addendum";
 		disposition = new EncounterTransaction.Disposition();
 		disposition.setCode(code).setAdditionalObs(Arrays.asList(
 		    new EncounterTransaction.Observation().setConcept(getConcept(noteConceptUuid)).setValue(dispositionNoteValue)));
 		setUpConceptByMapping(code, null);
-		
+
 		encounterDispositionServiceHelper.update(encounter, disposition);
-		
+
 		assertDispositionValues(noteConceptUuid, dispositionNoteValue, code, encounter);
 	}
-	
+
 	private Encounter createEncounter(String uuid) {
 		Encounter encounter = new Encounter();
 		encounter.setUuid(uuid);
@@ -138,7 +138,7 @@ public class EncounterDispositionServiceHelperTest {
 		encounter.setEncounterDatetime(encounterDateTime);
 		return encounter;
 	}
-	
+
 	//    @Test
 	//    public void shouldAddNewObservationWithDisposition() throws ParseException {
 	//        String dipositionAction = EmrApiConstants.DISPOSITION_ANSWER_DISCHARGE;
@@ -189,11 +189,11 @@ public class EncounterDispositionServiceHelperTest {
 	//        assertEquals(dispostionNoteConceptUuid, adtObservation.getConcept().getUuid());
 	//
 	//    }
-	
+
 	private EncounterTransaction.Concept getConcept(String conceptUuid) {
 		return new EncounterTransaction.Concept(conceptUuid, "concept_name");
 	}
-	
+
 	private void assertDispositionValues(String noteConceptUuid, String dispositionNoteValue, String code,
 	        Encounter encounter) {
 		Set<Obs> obsAtTopLevel = encounter.getObsAtTopLevel(false);
@@ -204,10 +204,10 @@ public class EncounterDispositionServiceHelperTest {
 		assertNotEquals(encounter.getEncounterDatetime(), obs.getObsDatetime());
 		Set<Obs> obsGroupMembers = obs.getGroupMembers();
 		assertEquals(2, obsGroupMembers.size());
-		
+
 		boolean dispositionConceptExists = false;
 		boolean noteConceptExists = false;
-		
+
 		for (Obs obsGroupMember : obsGroupMembers) {
 			if (obsGroupMember.getConcept().getUuid().equals(EmrApiConstants.CONCEPT_CODE_DISPOSITION + UUID_SUFFIX)) {
 				dispositionConceptExists = true;
@@ -225,7 +225,7 @@ public class EncounterDispositionServiceHelperTest {
 		assertTrue("disposition not being added correctly", dispositionConceptExists);
 		assertTrue("Disposition note is not being added correctly", noteConceptExists);
 	}
-	
+
 	private Obs buildDispositionGroupObservation() {
 		Obs dispositionGroupObservation = new ObsBuilder().setConcept(dispositionGroupConcept)
 		        .setUuid(UUID.randomUUID().toString()).get();
@@ -234,7 +234,7 @@ public class EncounterDispositionServiceHelperTest {
 		dispositionGroupObservation.addGroupMember(dispositionObservation);
 		return dispositionGroupObservation;
 	}
-	
+
 	private Obs getObsByUuid(String uuid, Set<Obs> obsSet) {
 		for (Obs obs : obsSet) {
 			if (obs.getUuid().equals(uuid))
@@ -242,7 +242,7 @@ public class EncounterDispositionServiceHelperTest {
 		}
 		return null;
 	}
-	
+
 	private Concept newConcept(String hl7, String uuid) {
 		Concept concept = new Concept();
 		ConceptDatatype textDataType = new ConceptDatatype();
@@ -252,11 +252,11 @@ public class EncounterDispositionServiceHelperTest {
 		when(conceptService.getConceptByUuid(uuid)).thenReturn(concept);
 		return concept;
 	}
-	
+
 	private Concept setUpConceptByMapping(String mapping) {
 		return setUpConceptByMapping(mapping, null);
 	}
-	
+
 	private Concept setUpConceptByMapping(String mapping, List<ConceptAnswer> answers) {
 		Concept concept = new Concept();
 		ConceptDatatype textDataType = new ConceptDatatype();
@@ -269,12 +269,12 @@ public class EncounterDispositionServiceHelperTest {
 		}
 		return concept;
 	}
-	
+
 	private List<ConceptAnswer> dispositionAnswers() {
 		List<ConceptAnswer> answers = new ArrayList<ConceptAnswer>();
-		
+
 		String[] dispositionAnswers = { "ADMIT", "DISCHARGE", "TRANSFER" };
-		
+
 		for (String dispositionAnswer : dispositionAnswers) {
 			ConceptAnswer conceptAnswer = new ConceptAnswer();
 			Concept dispositionAnsConcept = new Concept();

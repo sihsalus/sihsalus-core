@@ -37,9 +37,9 @@ import org.openmrs.util.OpenmrsUtil;
  * Evaluates encounters since a given date.
  */
 public class RecentEncounterCalculation extends BaseCalculation implements ConfigurableCalculation, PatientCalculation {
-	
+
 	private Date since;
-	
+
 	/**
 	 * @see org.openmrs.calculation.Calculation#setConfiguration(java.lang.String)
 	 */
@@ -53,7 +53,7 @@ public class RecentEncounterCalculation extends BaseCalculation implements Confi
 			throw new InvalidCalculationException(this, configuration);
 		}
 	}
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(java.util.Collection, java.util.Map, org.openmrs.calculation.patient.PatientCalculationContext)
 	 */
@@ -67,24 +67,24 @@ public class RecentEncounterCalculation extends BaseCalculation implements Confi
 				Patient patient = ps.getPatient(patientId);
 				if (patient != null) {
 					ListResult list = new ListResult();
-					
+
 					TreeSet<Encounter> sortedEncounters = new TreeSet<Encounter>(new Comparator<Encounter>() {
-						
+
 						@Override
 						public int compare(Encounter o1, Encounter o2) {
 							return OpenmrsUtil.compareWithNullAsEarliest(o1.getEncounterDatetime(),
 							    o2.getEncounterDatetime());
 						}
-						
+
 					});
-					
+
 					List<Encounter> encounters = es.getEncountersByPatient(patient);
 					for (Encounter encounter : encounters) {
 						if (OpenmrsUtil.compareWithNullAsEarliest(encounter.getEncounterDatetime(), since) > 0) {
 							sortedEncounters.add(encounter);
 						}
 					}
-					
+
 					if (!sortedEncounters.isEmpty()) {
 						for (Encounter encounter : sortedEncounters) {
 							list.add(new EncounterResult(encounter, this, context));
@@ -96,8 +96,8 @@ public class RecentEncounterCalculation extends BaseCalculation implements Confi
 				}
 			}
 		}
-		
+
 		return results;
 	}
-	
+
 }

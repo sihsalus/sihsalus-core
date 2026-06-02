@@ -2,10 +2,10 @@
 <dataset>
 	<rows>
 		<% 	dataset = reportData.dataSets.get("allPatients");
-			for (row in dataset) { 
+			for (row in dataset) {
 		%>
 			<row>
-				<% for (column in dataset.metaData.columns) { 
+				<% for (column in dataset.metaData.columns) {
 					colValue = row.getColumnValue(column);
 					colValue = (colValue instanceof java.util.Date) ? util.format(colValue, 'dd/MMM/yyyy') : util.format(colValue);
 				%>

@@ -23,20 +23,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class EmrDiagnosisDAOTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String DIAGNOSIS_DATASET = "DiagnosisDataset.xml";
-	
+
 	@Autowired
 	private EmrDiagnosisDAO emrDiagnosisDAO;
-	
+
 	private Visit visit = mock(Visit.class);
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		executeDataSet(DIAGNOSIS_DATASET);
 		when(visit.getId()).thenReturn(1010);
 	}
-	
+
 	@Test
 	public void shouldReturnAllNonVoidedDiagnosesFromVisit() {
 		List<org.openmrs.Diagnosis> diagnoses = emrDiagnosisDAO.getDiagnoses(visit, false, false);
@@ -46,14 +46,14 @@ public class EmrDiagnosisDAOTest extends BaseModuleContextSensitiveTest {
 		assertEquals(Boolean.FALSE, diagnoses.get(2).getVoided());
 		assertEquals(Boolean.FALSE, diagnoses.get(3).getVoided());
 	}
-	
+
 	@Test
 	public void shouldReturnAllPrimaryConfirmedDiagnosesFromVisit() {
 		List<org.openmrs.Diagnosis> diagnoses = emrDiagnosisDAO.getDiagnoses(visit, true, true);
 		assertEquals(1, diagnoses.size());
 		assertEquals(ConditionVerificationStatus.CONFIRMED, diagnoses.get(0).getCertainty());
 	}
-	
+
 	@Test
 	public void shouldReturnAllPrimaryDiagnosesFromVisit() {
 		List<org.openmrs.Diagnosis> diagnoses = emrDiagnosisDAO.getDiagnoses(visit, true, false);
@@ -61,7 +61,7 @@ public class EmrDiagnosisDAOTest extends BaseModuleContextSensitiveTest {
 		assertEquals(new Integer(1), diagnoses.get(0).getRank());
 		assertEquals(new Integer(1), diagnoses.get(1).getRank());
 	}
-	
+
 	@Test
 	public void shouldReturnAllConfirmedDiagnosesFromVisit() {
 		List<org.openmrs.Diagnosis> diagnoses = emrDiagnosisDAO.getDiagnoses(visit, false, true);

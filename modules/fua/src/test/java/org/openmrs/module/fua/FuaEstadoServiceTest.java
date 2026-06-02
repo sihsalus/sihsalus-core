@@ -49,7 +49,7 @@ public class FuaEstadoServiceTest {
     @Test
     public void saveEstado_shouldGenerateUuidWhenBlank() throws APIException {
         FuaEstado estado = new FuaEstado();
-        
+
 
         FuaEstado result = service.saveEstado(estado);
 

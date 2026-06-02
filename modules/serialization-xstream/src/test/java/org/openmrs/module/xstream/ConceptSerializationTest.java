@@ -30,10 +30,10 @@ import static org.junit.Assert.assertFalse;
  * Test class that tests the serialization and deserialization of a concept
  */
 public class ConceptSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a concept and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -43,11 +43,11 @@ public class ConceptSerializationTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptSerializationTest.xml");
 		authenticate();
-		
+
 		Concept concept = Context.getConceptService().getConcept(3);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(concept, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("0cbe2ed3-cd5f-4f46-9459-26127c9265ab", "//concept/@uuid", xmlOutput);
@@ -64,10 +64,10 @@ public class ConceptSerializationTest extends BaseModuleContextSensitiveTest {
 		XMLAssert.assertXpathExists("/concept/descriptions/conceptDescription[conceptDescriptionId=9]", xmlOutput);
 		XMLAssert.assertXpathExists("/concept/conceptMappings/conceptMap[conceptMapId=1]", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -250,10 +250,10 @@ public class ConceptSerializationTest extends BaseModuleContextSensitiveTest {
 		xmlBuilder.append("    </conceptMap>\n");
 		xmlBuilder.append("  </conceptMappings>\n");
 		xmlBuilder.append("</concept>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		Concept concept = Context.getSerializationService().deserialize(xmlBuilder.toString(), Concept.class,
 		    XStreamSerializer.class);
 		assertEquals("0cbe2ed3-cd5f-4f46-9459-26127c9265ab", concept.getUuid());

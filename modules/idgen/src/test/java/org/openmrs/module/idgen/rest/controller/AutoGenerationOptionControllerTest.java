@@ -35,37 +35,37 @@ import static org.junit.Assert.assertTrue;
  * Tests CRUD operations for {@link AutoGenerationOption}s via web service calls
  */
 public class AutoGenerationOptionControllerTest extends MainResourceControllerTest {
-	
+
 	@Autowired
 	private IdentifierSourceService identifierSourceService;
-	
+
 	public static final String NEW_LOCATION = "9356400c-a5a2-4532-8f2b-2361b3446eb8";
-	
+
 	public static final String NEW_SOURCE = "0d47284f-9e9b-4a81-a88b-8bb42bc0a901";
-	
+
 	public static final String LOCATION = "8d6c993e-c2cc-11de-8d13-0010c6dffd0f";
-	
+
 	public static final String SOURCE = "0d47284f-9e9b-4a81-a88b-8bb42bc0a902";
-	
+
 	public static final String AUTO_GENERATION_OPTION_UUID = "6d8230d1-34dc-445b-8f4e-5afa964df3fc";
-	
+
 	public static final String IDENTIFIER_TYPE_UUID = "2f470aa8-1d73-43b7-81b5-01f0c0dfa53c";
-	
+
 	@Before
 	public void before() throws Exception {
 		executeDataSet("org/openmrs/module/idgen/include/TestData.xml");
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "idgen/autogenerationoption";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return AUTO_GENERATION_OPTION_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		Integer allAutoGenerationOptions = 0;
@@ -74,7 +74,7 @@ public class AutoGenerationOptionControllerTest extends MainResourceControllerTe
 		}
 		return allAutoGenerationOptions;
 	}
-	
+
 	@Test()
 	public void shouldCreateNewAutoGenerationOption() throws Exception {
 		long originalCount = getAllCount();
@@ -98,7 +98,7 @@ public class AutoGenerationOptionControllerTest extends MainResourceControllerTe
 		assertEquals(true, newAutoGenerationOption.isAutomaticGenerationEnabled());
 		assertEquals(true, newAutoGenerationOption.isManualEntryEnabled());
 	}
-	
+
 	@Test()
 	public void shouldCreateNewAutoGenerationOptionWithoutLocation() throws Exception {
 		long originalCount = getAllCount();
@@ -121,7 +121,7 @@ public class AutoGenerationOptionControllerTest extends MainResourceControllerTe
 		assertEquals(true, newAutoGenerationOption.isAutomaticGenerationEnabled());
 		assertEquals(true, newAutoGenerationOption.isManualEntryEnabled());
 	}
-	
+
 	@Test(expected = ValidationException.class)
 	public void shouldNotCreateNewAutoGenerationOptionWithNullParameters() throws Exception {
 		SimpleObject autoGenerationOption = new SimpleObject();
@@ -130,7 +130,7 @@ public class AutoGenerationOptionControllerTest extends MainResourceControllerTe
 		req.setContent(json.getBytes());
 		handle(req);
 	}
-	
+
 	@Test
 	public void shouldEditAnAutoGenerationOption() throws Exception {
 		AutoGenerationOption autogenerationOption = identifierSourceService.getAutoGenerationOptionByUuid(AUTO_GENERATION_OPTION_UUID);
@@ -153,7 +153,7 @@ public class AutoGenerationOptionControllerTest extends MainResourceControllerTe
 		assertFalse(updatedAutogenerationOption.isAutomaticGenerationEnabled());
 		assertFalse(updatedAutogenerationOption.isManualEntryEnabled());
 	}
-	
+
 	@Test(expected = ResourceDoesNotSupportOperationException.class)
 	public void shouldNotEditAnAutoGenerationOptionProvidedWithAllNullParams() throws Exception {
 		SimpleObject autoGenerationOption = new SimpleObject();
@@ -162,7 +162,7 @@ public class AutoGenerationOptionControllerTest extends MainResourceControllerTe
 		req.setContent(json.getBytes());
 		handle(req);
 	}
-	
+
 	@Test
 	public void shouldEditAnAutoGenerationOptionByAnyNumberOFArguments() throws Exception {
 		AutoGenerationOption autogenerationOption = identifierSourceService.getAutoGenerationOptionByUuid(AUTO_GENERATION_OPTION_UUID);
@@ -179,7 +179,7 @@ public class AutoGenerationOptionControllerTest extends MainResourceControllerTe
 		assertFalse(updatedAutogenerationOption.isAutomaticGenerationEnabled());
 		assertFalse(updatedAutogenerationOption.isManualEntryEnabled());
 	}
-	
+
 	@Test
 	public void shouldPurgeAnAutoGenerationOption() throws Exception {
 		assertNotNull(identifierSourceService.getAutoGenerationOptionByUuid(AUTO_GENERATION_OPTION_UUID));

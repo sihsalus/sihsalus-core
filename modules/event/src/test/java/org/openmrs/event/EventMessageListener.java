@@ -19,15 +19,15 @@ import javax.jms.Message;
 import org.junit.Assert;
 
 public class EventMessageListener extends MockEventListener {
-	
+
 	private String city;
-	
+
 	private String state;
-	
+
 	EventMessageListener(int expectedEventsCount) {
 		super(expectedEventsCount);
 	}
-	
+
 	public void onMessage(Message message) {
 		MapMessage mapMessage = (MapMessage) message;
 		try {
@@ -38,14 +38,14 @@ public class EventMessageListener extends MockEventListener {
 			Assert.fail(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * @return the city
 	 */
 	public String getCity() {
 		return city;
 	}
-	
+
 	/**
 	 * @return the state
 	 */

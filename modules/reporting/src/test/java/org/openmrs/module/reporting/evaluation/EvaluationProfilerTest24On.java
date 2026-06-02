@@ -32,25 +32,25 @@ import org.springframework.test.context.TestExecutionListeners;
 @TestExecutionListeners(OpenmrsVersionTestListener.class)
 @RequiresVersion("2.4.* - 2.*")
 public class EvaluationProfilerTest24On extends BaseModuleContextSensitiveTest {
-	
+
 	protected EvaluationProfiler profiler1, profiler2;
-	
+
 	private static MemoryAppender appender;
-	
+
 	@BeforeClass
 	public static void beforeClass() {
 		appender = OpenmrsLoggingUtil.getMemoryAppender();
-		
+
 		if (appender == null) {
 			LoggerContext context = (LoggerContext) LogManager.getContext(false);
 			Configuration config = context.getConfiguration();
-			
+
 			appender = MemoryAppender.newBuilder().setName("MEMORY_APPENDER").setLayout(PatternLayout.createDefaultLayout())
 					.setConfiguration(config).build();
 			appender.start();
-			
+
 			config.addAppender(appender);
-			
+
 			AppenderRef appenderRef = AppenderRef.createAppenderRef("MEMORY_APPENDER", Level.ALL, null);
 			LoggerConfig loggerConfig = LoggerConfig.createLogger(false, Level.ALL, EvaluationProfiler.class.getName(), null,
 					new AppenderRef[] { appenderRef }, null, config, null);
@@ -58,14 +58,14 @@ public class EvaluationProfilerTest24On extends BaseModuleContextSensitiveTest {
 			config.addLogger(EvaluationProfiler.class.getName(), loggerConfig);
 			context.updateLoggers();
 		}
-		
+
 	}
-	
+
 	@AfterClass
 	public static void afterClass() {
 		((LoggerContext) LogManager.getContext()).updateLoggers();
 	}
-	
+
 	/**
 	 * Setup each test by configuring AOP on the relevant services and logging for the profiler class
 	 */
@@ -74,18 +74,18 @@ public class EvaluationProfilerTest24On extends BaseModuleContextSensitiveTest {
 		profiler1 = new EvaluationProfiler(new EvaluationContext());
 		profiler2 = new EvaluationProfiler(new EvaluationContext());
 	}
-	
+
 	@Test
 	public void integration() throws EvaluationException {
 		GenderCohortDefinition males = new GenderCohortDefinition();
 		males.setName("males");
 		males.setMaleIncluded(true);
-		
+
 		CohortIndicator count = new CohortIndicator(); // No name, log message should use "?"
 		count.setCohortDefinition(males, "");
-		
+
 		Context.getService(IndicatorService.class).evaluate(count, null);
-		
+
 		List<String> split = appender.getLogLines();
 		Assert.assertEquals(6, split.size());
 		Assert.assertTrue(split.get(0).contains("EVALUATION_STARTED"));

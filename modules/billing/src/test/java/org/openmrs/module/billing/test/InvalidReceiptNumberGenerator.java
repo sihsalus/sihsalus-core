@@ -13,34 +13,34 @@ import org.openmrs.module.billing.api.IReceiptNumberGenerator;
 import org.openmrs.module.billing.api.model.Bill;
 
 public class InvalidReceiptNumberGenerator implements IReceiptNumberGenerator {
-	
+
 	public InvalidReceiptNumberGenerator(String name) {
 	}
-	
+
 	@Override
 	public String getName() {
 		return null;
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return null;
 	}
-	
+
 	@Override
 	public void load() {
 	}
-	
+
 	@Override
 	public String generateNumber(Bill bill) {
 		return null;
 	}
-	
+
 	@Override
 	public String getConfigurationPage() {
 		return null;
 	}
-	
+
 	@Override
 	public boolean isLoaded() {
 		return false;

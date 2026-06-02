@@ -21,7 +21,7 @@ import org.springframework.validation.Errors;
  * Tests methods on the {@link CohortDefinitionValidator} class.
  */
 public class StaticCohortDefinitionValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -30,10 +30,10 @@ public class StaticCohortDefinitionValidatorTest extends BaseModuleContextSensit
 	public void validate_shouldFailValidationIfCohortIsNull() throws Exception {
 		StaticCohortDefinition staticCohortDefinition = new StaticCohortDefinition();
 		staticCohortDefinition.setCohort(null);
-		
+
 		Errors errors = new BindException(staticCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(staticCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
 }

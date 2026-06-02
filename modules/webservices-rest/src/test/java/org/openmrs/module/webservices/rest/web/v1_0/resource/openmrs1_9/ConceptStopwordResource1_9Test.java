@@ -19,7 +19,7 @@ import java.util.List;
  * Contains tests for the {@link ConceptStopWordResource1_9}
  */
 public class ConceptStopwordResource1_9Test extends BaseDelegatingResourceTest<ConceptStopwordResource1_9, ConceptStopWord> {
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#newObject()
 	 */
@@ -33,7 +33,7 @@ public class ConceptStopwordResource1_9Test extends BaseDelegatingResourceTest<C
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#validateDefaultRepresentation()
 	 */
@@ -46,7 +46,7 @@ public class ConceptStopwordResource1_9Test extends BaseDelegatingResourceTest<C
 		assertPropPresent("locale");
 		assertPropEquals("resourceVersion", "1.9");
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#validateFullRepresentation()
 	 */
@@ -59,7 +59,7 @@ public class ConceptStopwordResource1_9Test extends BaseDelegatingResourceTest<C
 		assertPropPresent("locale");
 		assertPropEquals("resourceVersion", "1.9");
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getDisplayProperty()
 	 */
@@ -67,7 +67,7 @@ public class ConceptStopwordResource1_9Test extends BaseDelegatingResourceTest<C
 	public String getDisplayProperty() {
 		return "AN";
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getUuidProperty()
 	 */

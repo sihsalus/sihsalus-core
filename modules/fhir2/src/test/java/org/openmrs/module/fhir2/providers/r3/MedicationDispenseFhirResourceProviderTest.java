@@ -49,47 +49,47 @@ import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationDispenseFhirResourceProviderTest {
-	
+
 	private static final String MEDICATION_DISPENSE_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
-	
+
 	private static final String WRONG_MEDICATION_DISPENSE_UUID = "862e20a1-e73c-4c92-a4e8-9f922e0cd7f4";
-	
+
 	@Mock
 	private FhirMedicationDispenseService fhirMedicationDispenseService;
-	
+
 	private MedicationDispenseFhirResourceProvider resourceProvider;
-	
+
 	private org.hl7.fhir.r4.model.MedicationDispense medicationDispense;
-	
+
 	private TokenAndListParam idParam;
-	
+
 	private ReferenceAndListParam patientParam;
-	
+
 	private ReferenceAndListParam subjectParam;
-	
+
 	private ReferenceAndListParam encounterParam;
-	
+
 	private ReferenceAndListParam medicationRequestParam;
-	
+
 	private DateRangeParam lastUpdatedParam;
-	
+
 	private HashSet<Include> includeParam;
-	
+
 	private SortSpec sortParam;
-	
+
 	@Before
 	public void setup() {
 		resourceProvider = new MedicationDispenseFhirResourceProvider();
 		resourceProvider.setFhirMedicationDispenseService(fhirMedicationDispenseService);
-		
+
 		medicationDispense = new org.hl7.fhir.r4.model.MedicationDispense();
 		medicationDispense.setId(MEDICATION_DISPENSE_UUID);
-		
+
 		when(fhirMedicationDispenseService.get(MEDICATION_DISPENSE_UUID)).thenReturn(medicationDispense);
-		
+
 		when(fhirMedicationDispenseService.searchMedicationDispenses(ArgumentMatchers.any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationDispense), 10, 1));
-		
+
 		idParam = null;
 		patientParam = null;
 		subjectParam = null;
@@ -99,13 +99,13 @@ public class MedicationDispenseFhirResourceProviderTest {
 		includeParam = new HashSet<>();
 		sortParam = null;
 	}
-	
+
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(MedicationDispense.class));
 		assertThat(resourceProvider.getResourceType().getName(), equalTo(MedicationDispense.class.getName()));
 	}
-	
+
 	@Test
 	public void getMedicationDispenseByUuid_shouldReturnMatchingMedicationDispense() {
 		IdType id = new IdType();
@@ -115,14 +115,14 @@ public class MedicationDispenseFhirResourceProviderTest {
 		assertThat(medicationDispense.getId(), notNullValue());
 		assertThat(medicationDispense.getId(), equalTo(MEDICATION_DISPENSE_UUID));
 	}
-	
+
 	@Test(expected = ResourceNotFoundException.class)
 	public void getMedicationDispenseByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_MEDICATION_DISPENSE_UUID);
 		resourceProvider.getMedicationDispenseByUuid(id);
 	}
-	
+
 	@Test
 	public void createMedicationDispense_shouldCreateMedicationDispense() {
 		when(fhirMedicationDispenseService.create(ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class)))
@@ -133,189 +133,189 @@ public class MedicationDispenseFhirResourceProviderTest {
 		assertThat(result.getCreated(), equalTo(true));
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationDispense.getId()));
 	}
-	
+
 	@Test
 	public void updateMedicationDispense_shouldUpdateMedicationDispense() {
 		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(MEDICATION_DISPENSE_UUID),
 		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenReturn(medicationDispense);
-		
+
 		MethodOutcome result = resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID),
 		    (MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationDispense.getId()));
 	}
-	
+
 	@Test(expected = InvalidRequestException.class)
 	public void updateMedicationDispense_shouldThrowInvalidRequestForUuidMismatch() {
 		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(WRONG_MEDICATION_DISPENSE_UUID),
 		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
-		
+
 		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
 		    (MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
 	}
-	
+
 	@Test(expected = InvalidRequestException.class)
 	public void updateMedicationDispense_shouldThrowInvalidRequestForMissingId() {
 		MedicationDispense noIdMedicationDispense = new MedicationDispense();
-		
+
 		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(MEDICATION_DISPENSE_UUID),
 		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
-		
+
 		resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID), noIdMedicationDispense);
 	}
-	
+
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
 		MedicationDispense wrongMedicationDispense = new MedicationDispense();
 		wrongMedicationDispense.setId(WRONG_MEDICATION_DISPENSE_UUID);
-		
+
 		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(WRONG_MEDICATION_DISPENSE_UUID),
 		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class)))
 		        .thenThrow(MethodNotAllowedException.class);
-		
+
 		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
 		    wrongMedicationDispense);
 	}
-	
+
 	@Test
 	public void deleteTask_shouldDeleteMedicationDispense() {
 		OperationOutcome result = resourceProvider.deleteMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchById() {
 		idParam = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_DISPENSE_UUID));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchByPatientId() {
 		patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam("patient-reference")));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchByPatientIdentifier() {
 		patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_IDENTIFIER)));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchByPatientGivenName() {
 		patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_GIVEN)));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchByPatientFamilyName() {
 		patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_FAMILY)));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchByPatientName() {
 		patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchBySubjectId() {
 		subjectParam = new ReferenceAndListParam();
 		subjectParam.addValue(new ReferenceOrListParam().add(new ReferenceParam("patient-reference")));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchBySubjectIdentifier() {
 		subjectParam = new ReferenceAndListParam();
 		subjectParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_IDENTIFIER)));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchBySubjectGivenName() {
 		subjectParam = new ReferenceAndListParam();
 		subjectParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_GIVEN)));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchBySubjectFamilyName() {
 		subjectParam = new ReferenceAndListParam();
 		subjectParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_FAMILY)));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchBySubjectName() {
 		subjectParam = new ReferenceAndListParam();
 		subjectParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchByEncounter() {
 		encounterParam = new ReferenceAndListParam();
 		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam("encounter-reference")));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchByMedicationRequest() {
 		medicationRequestParam = new ReferenceAndListParam();
 		medicationRequestParam.addValue(new ReferenceOrListParam().add(new ReferenceParam("med-request-ref")));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldSearchByLastUpdated() {
 		lastUpdatedParam = new DateRangeParam();
 		lastUpdatedParam.setLowerBound("2021-01-01").setUpperBound("2021-12-31");
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldHandlePatientInclude() {
 		includeParam.add(new Include("MedicationDispense:patient"));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldHandleEncounterInclude() {
 		includeParam.add(new Include("MedicationDispense:context"));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldHandleMedicationRequestInclude() {
 		includeParam.add(new Include("MedicationDispense:prescription"));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldHandlePerformerInclude() {
 		includeParam.add(new Include("MedicationDispense:performer"));
 		testSearch();
 	}
-	
+
 	@Test
 	public void searchMedicationDispense_shouldHandleSort() {
 		sortParam = new SortSpec("status");
 		testSearch();
 	}
-	
+
 	protected void testSearch() {
 		IBundleProvider results = resourceProvider.searchForMedicationDispenses(idParam, patientParam, subjectParam,
 		    encounterParam, medicationRequestParam, lastUpdatedParam, includeParam, sortParam);
@@ -326,7 +326,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_DISPENSE));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_DISPENSE_UUID));
 	}
-	
+
 	private List<IBaseResource> getResources(IBundleProvider results, int theFromIndex, int theToIndex) {
 		return results.getResources(theFromIndex, theToIndex);
 	}

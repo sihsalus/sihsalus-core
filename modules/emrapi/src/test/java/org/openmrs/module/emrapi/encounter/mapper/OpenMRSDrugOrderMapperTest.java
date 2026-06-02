@@ -47,76 +47,76 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class OpenMRSDrugOrderMapperTest {
-	
+
 	public static final String OUT_PATIENT_CARE_SETTING = "OUTPATIENT";
-	
+
 	public static final String DAY_DURATION_UNIT = "day";
-	
+
 	public static final String DRUG_UUID = "drug-uuid";
-	
+
 	public static final String DRUG_CONCEPT_UUID = "drug-concept-uuid";
-	
+
 	public static final String FREE_TEXT_DRUG_NAME = "FreeTextDrug Tablet";
-	
+
 	private final Concept DAY_DURATION_CONCEPT = new Concept();
-	
+
 	@Mock
 	private OrderService orderService;
-	
+
 	@Mock
 	private ConceptService conceptService;
-	
+
 	@Mock
 	private DosingInstructionsMapper dosingInstructionsMapper;
-	
+
 	@Mock
 	private OrderMetadataService orderMetadataService;
-	
+
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
-	
+
 	private OpenMRSDrugOrderMapper openMRSDrugOrderMapper;
-	
+
 	private Encounter encounter;
-	
+
 	@Before
 	public void setup() {
 		initMocks(this);
-		
+
 		openMRSDrugOrderMapper = new OpenMRSDrugOrderMapper(orderService, conceptService, dosingInstructionsMapper,
 		        orderMetadataService);
-		
+
 		Drug drug = new Drug();
 		drug.setUuid(DRUG_UUID);
 		when(conceptService.getDrugByUuid(DRUG_UUID)).thenReturn(drug);
-		
+
 		OrderType orderType = new OrderType("Drug Order", "", "org.openmrs.DrugOrder");
 		when(orderService.getOrderTypeByConcept(any(Concept.class))).thenReturn(orderType);
-		
+
 		when(orderMetadataService.getDurationUnitsConceptByName(DAY_DURATION_UNIT)).thenReturn(DAY_DURATION_CONCEPT);
-		
+
 		CareSetting outPatientCareSetting = new CareSetting(OUT_PATIENT_CARE_SETTING, OUT_PATIENT_CARE_SETTING,
 		        CareSetting.CareSettingType.OUTPATIENT);
 		when(orderService.getCareSettingByName(OUT_PATIENT_CARE_SETTING)).thenReturn(outPatientCareSetting);
-		
+
 		when(dosingInstructionsMapper.map(any(EncounterTransaction.DosingInstructions.class), any(DrugOrder.class)))
 		        .thenAnswer(argumentAt(1));
-		
+
 		encounter = new Encounter();
 		HashSet<EncounterProvider> encounterProviders = new HashSet<EncounterProvider>();
 		EncounterProvider encounterProvider = new EncounterProvider();
 		encounterProviders.add(encounterProvider);
 		encounter.setEncounterProviders(encounterProviders);
 	}
-	
+
 	@Test
 	public void shouldMapNewDrugOrders() throws ParseException {
 		Date autoExpireDate = new Date();
 		EncounterTransaction.DrugOrder drugOrder = new DrugOrderBuilder().withDrugUuid(DRUG_UUID)
 		        .withDurationUnits(DAY_DURATION_UNIT).withAutoExpireDate(autoExpireDate).build();
-		
+
 		DrugOrder openMrsDrugOrder = openMRSDrugOrderMapper.map(drugOrder, encounter);
-		
+
 		assertThat(openMrsDrugOrder.getCareSetting().getName(), is(equalTo(OUT_PATIENT_CARE_SETTING)));
 		assertThat(openMrsDrugOrder.getDrug().getUuid(), is(equalTo(DRUG_UUID)));
 		assertTrue(openMrsDrugOrder.getDosingType().isAssignableFrom(SimpleDosingInstructions.class));
@@ -128,35 +128,35 @@ public class OpenMRSDrugOrderMapperTest {
 		assertThat(openMrsDrugOrder.getAutoExpireDate(), is(equalTo(autoExpireDate)));
 		verify(dosingInstructionsMapper).map(any(EncounterTransaction.DosingInstructions.class), any(DrugOrder.class));
 	}
-	
+
 	@Test
 	public void shouldMapNewNonCodedDrugOrders() throws ParseException {
 		Date autoExpireDate = new Date();
 		when(conceptService.getConceptByUuid(DRUG_CONCEPT_UUID)).thenReturn(new Concept());
 		EncounterTransaction.DrugOrder nonCodedDrugOrder = new DrugOrderBuilder().withNonCodedDrug(FREE_TEXT_DRUG_NAME)
 		        .withDurationUnits(DAY_DURATION_UNIT).withAutoExpireDate(autoExpireDate).build();
-		
+
 		nonCodedDrugOrder.setConcept(new EncounterTransaction.Concept("drug-concept-uuid"));
 		nonCodedDrugOrder.setConcept(new EncounterTransaction.Concept(DRUG_CONCEPT_UUID));
-		
+
 		DrugOrder openMrsDrugOrder = openMRSDrugOrderMapper.map(nonCodedDrugOrder, encounter);
-		
+
 		assertThat(openMrsDrugOrder.getDrug(), is(equalTo(null)));
 		assertTrue(openMrsDrugOrder instanceof DrugOrder);
 		assertThat(openMrsDrugOrder.getDrugNonCoded(), is(equalTo(FREE_TEXT_DRUG_NAME)));
 	}
-	
+
 	@Test
 	public void shouldMapRevisedDrugOrders() throws ParseException {
 		EncounterTransaction.DrugOrder drugOrder = new DrugOrderBuilder().withDrugUuid(DRUG_UUID)
 		        .withDurationUnits(DAY_DURATION_UNIT).build();
 		DrugOrder openMrsDrugOrder = openMRSDrugOrderMapper.map(drugOrder, encounter);
-		
+
 		drugOrder.setAction(Order.Action.REVISE.name());
 		drugOrder.setPreviousOrderUuid(openMrsDrugOrder.getUuid());
 		when(orderService.getOrderByUuid(openMrsDrugOrder.getUuid())).thenReturn(openMrsDrugOrder);
 		DrugOrder revisedOpenMrsDrugOrder = openMRSDrugOrderMapper.map(drugOrder, encounter);
-		
+
 		assertThat(revisedOpenMrsDrugOrder.getPreviousOrder().getUuid(), is(equalTo(openMrsDrugOrder.getUuid())));
 		assertThat(revisedOpenMrsDrugOrder.getCareSetting().getName(), is(equalTo(OUT_PATIENT_CARE_SETTING)));
 		assertThat(revisedOpenMrsDrugOrder.getDrug().getUuid(), is(equalTo(DRUG_UUID)));
@@ -169,7 +169,7 @@ public class OpenMRSDrugOrderMapperTest {
 		verify(dosingInstructionsMapper, times(2)).map(any(EncounterTransaction.DosingInstructions.class),
 		    any(DrugOrder.class));
 	}
-	
+
 	@Test
 	public void shouldClearScheduledDateAndUrgencyWhenScheduledOrderRevisedToStartFromToday() {
 		DrugOrder previousOpenMrsDrugOrder = new DrugOrder();
@@ -183,24 +183,24 @@ public class OpenMRSDrugOrderMapperTest {
 		EncounterTransaction.DrugOrder revisedDrugOrder = new DrugOrderBuilder().withScheduledDate(null)
 		        .withAction(Order.Action.REVISE.name()).withPreviousOrderUuid(previousOpenMrsDrugOrder.getUuid())
 		        .withDrugUuid(DRUG_UUID).withDurationUnits(DAY_DURATION_UNIT).build();
-		
+
 		DrugOrder revisedOpenMrsDrugOrder = openMRSDrugOrderMapper.map(revisedDrugOrder, encounter);
-		
+
 		assertThat(revisedOpenMrsDrugOrder.getUrgency(), is(equalTo(OpenMRSDrugOrderMapper.DEFAULT_URGENCY)));
 		assertNull(revisedOpenMrsDrugOrder.getScheduledDate());
 	}
-	
+
 	@Test
 	public void shouldMapStoppedDrugOrders() throws ParseException {
 		EncounterTransaction.DrugOrder drugOrder = new DrugOrderBuilder().withDrugUuid(DRUG_UUID)
 		        .withDurationUnits(DAY_DURATION_UNIT).build();
 		DrugOrder openMrsDrugOrder = openMRSDrugOrderMapper.map(drugOrder, encounter);
-		
+
 		drugOrder.setAction(Order.Action.DISCONTINUE.name());
 		drugOrder.setPreviousOrderUuid(openMrsDrugOrder.getUuid());
 		when(orderService.getOrderByUuid(openMrsDrugOrder.getUuid())).thenReturn(openMrsDrugOrder);
 		DrugOrder revisedOpenMrsDrugOrder = openMRSDrugOrderMapper.map(drugOrder, encounter);
-		
+
 		assertThat(revisedOpenMrsDrugOrder.getPreviousOrder().getUuid(), is(equalTo(openMrsDrugOrder.getUuid())));
 		assertThat(revisedOpenMrsDrugOrder.getCareSetting().getName(), is(equalTo(OUT_PATIENT_CARE_SETTING)));
 		assertThat(revisedOpenMrsDrugOrder.getDrug().getUuid(), is(equalTo(DRUG_UUID)));
@@ -213,7 +213,7 @@ public class OpenMRSDrugOrderMapperTest {
 		verify(dosingInstructionsMapper, times(2)).map(any(EncounterTransaction.DosingInstructions.class),
 		    any(DrugOrder.class));
 	}
-	
+
 	@Test
 	public void shouldDiscontinueDrugOrderWithRetiredDrug() {
 		EncounterTransaction.DrugOrder drugOrder = new DrugOrderBuilder().withDrugUuid(DRUG_UUID)
@@ -224,20 +224,20 @@ public class OpenMRSDrugOrderMapperTest {
 		drugOrder.setPreviousOrderUuid(openMrsDrugOrder.getUuid());
 		drugOrder.getDrug().setName("Paracetamol");
 		when(orderService.getOrderByUuid(openMrsDrugOrder.getUuid())).thenReturn(openMrsDrugOrder);
-		
+
 		DrugOrder discontinuedDrugOrder = openMRSDrugOrderMapper.map(drugOrder, encounter);
-		
+
 		assertNotNull(discontinuedDrugOrder);
 	}
-	
+
 	private Answer<DrugOrder> argumentAt(final int arg) {
 		return new Answer<DrugOrder>() {
-			
+
 			@Override
 			public DrugOrder answer(InvocationOnMock invocationOnMock) throws Throwable {
 				return (DrugOrder) invocationOnMock.getArguments()[arg];
 			}
 		};
 	}
-	
+
 }

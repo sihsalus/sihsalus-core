@@ -31,18 +31,18 @@ import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationDispenseStatusTranslatorImplTest {
-	
+
 	@Mock
 	FhirConceptSourceService conceptSourceService;
-	
+
 	@Mock
 	FhirConceptService conceptService;
-	
+
 	private MedicationDispenseStatusTranslatorImpl dispenseStatusTranslator;
-	
+
 	@Mock
 	ConceptSource dispenseStatusSource;
-	
+
 	@Before
 	public void setup() {
 		dispenseStatusTranslator = new MedicationDispenseStatusTranslatorImpl();
@@ -50,7 +50,7 @@ public class MedicationDispenseStatusTranslatorImplTest {
 		dispenseStatusTranslator.setConceptService(conceptService);
 		when(conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI)).thenReturn(Optional.of(dispenseStatusSource));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateConceptToDispenseStatus() {
 		for (MedicationDispense.MedicationDispenseStatus expected : MedicationDispense.MedicationDispenseStatus.values()) {
@@ -58,22 +58,22 @@ public class MedicationDispenseStatusTranslatorImplTest {
 				Concept concept = new Concept();
 				when(conceptService.getSameAsMappingForConceptInSource(dispenseStatusSource, concept))
 				        .thenReturn(Optional.of(expected.toCode()));
-				
+
 				MedicationDispense.MedicationDispenseStatus actual = dispenseStatusTranslator.toFhirResource(concept);
-				
+
 				assertThat(actual, notNullValue());
 				assertThat(actual, equalTo(expected));
 			}
 		}
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldNotTranslateConceptWithoutCorrectSource() {
 		Concept concept = new Concept();
 		MedicationDispense.MedicationDispenseStatus actual = dispenseStatusTranslator.toFhirResource(concept);
 		assertThat(actual, nullValue());
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldNotTranslateConceptWithoutCorrectMapping() {
 		Concept concept = new Concept();
@@ -82,7 +82,7 @@ public class MedicationDispenseStatusTranslatorImplTest {
 		MedicationDispense.MedicationDispenseStatus actual = dispenseStatusTranslator.toFhirResource(concept);
 		assertThat(actual, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldNotTranslateToConceptWithCorrectMapping() {
 		for (MedicationDispense.MedicationDispenseStatus status : MedicationDispense.MedicationDispenseStatus.values()) {
@@ -90,15 +90,15 @@ public class MedicationDispenseStatusTranslatorImplTest {
 				Concept expected = new Concept();
 				when(conceptService.getConceptWithSameAsMappingInSource(dispenseStatusSource, status.toCode()))
 				        .thenReturn(Optional.of(expected));
-				
+
 				Concept actual = dispenseStatusTranslator.toOpenmrsType(status);
-				
+
 				assertThat(actual, notNullValue());
 				assertThat(actual, equalTo(expected));
 			}
 		}
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfNoConceptWithCorrectMappingIsFound() {
 		Concept concept = dispenseStatusTranslator.toOpenmrsType(MedicationDispense.MedicationDispenseStatus.COMPLETED);

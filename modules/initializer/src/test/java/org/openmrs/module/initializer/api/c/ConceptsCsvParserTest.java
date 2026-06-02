@@ -40,15 +40,15 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({ CustomDatatypeUtil.class, Context.class })
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class ConceptsCsvParserTest {
-	
+
 	private ConceptService cs;
-	
+
 	@Before
 	public void setup() {
 		PowerMockito.mockStatic(CustomDatatypeUtil.class);
 		PowerMockito.mockStatic(Context.class);
 		cs = mock(ConceptService.class);
-		
+
 		ConceptClass classQuestion = new ConceptClass();
 		classQuestion.setName("Question");
 		when(cs.getConceptClassByName(eq("Question"))).thenReturn(classQuestion);
@@ -67,25 +67,25 @@ public class ConceptsCsvParserTest {
 		ConceptDatatype typeNA = new ConceptDatatype();
 		typeNA.setName("N/A");
 		when(cs.getConceptDatatypeByName(eq("N/A"))).thenReturn(typeNA);
-		
+
 		when(CustomDatatypeUtil.getDatatype(eq(FreeTextDatatype.class.getName()), anyString()))
 		        .thenReturn((CustomDatatype) new FreeTextDatatype());
 		when(CustomDatatypeUtil.getDatatype(eq(DateDatatype.class.getName()), anyString()))
 		        .thenReturn((CustomDatatype) new DateDatatype());
-		
+
 		ConceptAttributeType autditDateAttType = new ConceptAttributeType();
 		autditDateAttType.setName("Audit Date");
 		autditDateAttType.setDatatypeClassname(DateDatatype.class.getName());
-		
+
 		ConceptAttributeType emailAttrType = new ConceptAttributeType();
 		emailAttrType.setName("Email Address");
 		emailAttrType.setDatatypeClassname(FreeTextDatatype.class.getName());
-		
+
 		when(cs.getConceptAttributeTypeByName("Audit Date")).thenReturn(autditDateAttType);
 		when(cs.getConceptAttributeTypeByName("Email Address")).thenReturn(emailAttrType);
-		
+
 		when(cs.saveConcept(any(Concept.class))).thenAnswer(new Answer<Concept>() {
-			
+
 			@Override
 			public Concept answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
@@ -94,9 +94,9 @@ public class ConceptsCsvParserTest {
 				return c;
 			}
 		});
-		
+
 		when(cs.getConceptByUuid(any(String.class))).thenAnswer(new Answer<Concept>() {
-			
+
 			@Override
 			public Concept answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
@@ -106,45 +106,45 @@ public class ConceptsCsvParserTest {
 			}
 		});
 	}
-	
+
 	@Test
 	public void process_shouldParseBaseCsv() throws IOException {
 		// setup
 		InputStream is = getClass().getClassLoader()
 		        .getResourceAsStream("testAppDataDir/configuration/concepts/concepts_base.csv");
-		
+
 		// replay
 		ConceptsCsvParser parser = new ConceptsCsvParser(cs, new ConceptLineProcessor(cs),
 		        new ConceptNumericLineProcessor(cs), new ConceptComplexLineProcessor(cs),
 		        new NestedConceptLineProcessor(cs, new ConceptListParser(cs)), new MappingsConceptLineProcessor(cs),
 		        new ConceptAttributeLineProcessor(cs));
 		parser.setInputStream(is);
-		
+
 		List<String[]> lines = parser.process(parser.getLines()).getFailingLines();
-		
+
 		// verif
 		Assert.assertEquals(1, lines.size());
 	}
-	
+
 	@Test
 	public void process_shouldParseCsvWithBom() throws IOException {
 		// setup
 		InputStream is = getClass().getClassLoader()
 		        .getResourceAsStream("org/openmrs/module/initializer/include/csv/with_bom.csv");
-		
+
 		// replay
 		ConceptsCsvParser parser = new ConceptsCsvParser(cs, new ConceptLineProcessor(cs),
 		        new ConceptNumericLineProcessor(cs), new ConceptComplexLineProcessor(cs),
 		        new NestedConceptLineProcessor(cs, new ConceptListParser(cs)), new MappingsConceptLineProcessor(cs),
 		        new ConceptAttributeLineProcessor(cs));
 		parser.setInputStream(is);
-		
+
 		List<String[]> lines = parser.process(parser.getLines()).getFailingLines();
-		
+
 		// verify
 		Assert.assertEquals(1, lines.size());
 	}
-	
+
 	@Test
 	public void process_shouldFailOnMisformattedCsv() throws IOException {
 		ConceptsCsvParser parser = new ConceptsCsvParser(cs, new ConceptLineProcessor(cs),
@@ -152,17 +152,17 @@ public class ConceptsCsvParserTest {
 		        new NestedConceptLineProcessor(cs, new ConceptListParser(cs)), new MappingsConceptLineProcessor(cs),
 		        new ConceptAttributeLineProcessor(cs));
 		InputStream is = null;
-		
+
 		is = getClass().getClassLoader()
 		        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_uuid.csv");
 		parser.setInputStream(is);
 		Assert.assertEquals(1, parser.process(parser.getLines()).getFailingLines().size());
-		
+
 		is = getClass().getClassLoader()
 		        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_fsn.csv");
 		parser.setInputStream(is);
 		Assert.assertEquals(1, parser.process(parser.getLines()).getFailingLines().size());
-		
+
 		is = getClass().getClassLoader()
 		        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_shortname.csv");
 		parser.setInputStream(is);

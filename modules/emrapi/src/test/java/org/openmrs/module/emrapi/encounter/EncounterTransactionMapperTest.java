@@ -31,23 +31,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class EncounterTransactionMapperTest {
-	
+
 	@Mock
 	private EncounterObservationsMapper encounterObservationsMapper;
-	
+
 	@Mock
 	private EncounterProviderMapper encounterProviderMapper;
-	
+
 	@Mock
 	private EmrOrderService emrOrderService;
-	
+
 	@Mock
 	private OrderMapper orderMapper;
-	
+
 	private MockedStatic<Context> mockedContext;
-	
+
 	private EncounterTransactionMapper encounterTransactionMapper;
-	
+
 	@Before
 	public void setUp() {
 		initMocks(this);
@@ -55,20 +55,20 @@ public class EncounterTransactionMapperTest {
 		        orderMapper);
 		mockedContext = mockStatic(Context.class);
 	}
-	
+
 	@After
 	public void tearDown() {
 		mockedContext.close();
 	}
-	
+
 	@Test
 	public void shouldMap() throws Exception {
 		Encounter encounter = new EncounterBuilder().build();
 		boolean includeAll = false;
-		
+
 		mockedContext.when(() -> Context.getRegisteredComponents(EncounterTransactionHandler.class)).thenReturn(null);
 		EncounterTransaction encounterTransaction = encounterTransactionMapper.map(encounter, includeAll);
-		
+
 		Assert.assertEquals(encounter.getUuid(), encounterTransaction.getEncounterUuid());
 		Assert.assertEquals(encounter.getVisit().getUuid(), encounterTransaction.getVisitUuid());
 		Assert.assertEquals(encounter.getPatient().getUuid(), encounterTransaction.getPatientUuid());
@@ -78,31 +78,31 @@ public class EncounterTransactionMapperTest {
 		Assert.assertEquals(encounter.getVisit().getLocation().getUuid(), encounterTransaction.getVisitLocationUuid());
 		Assert.assertEquals(encounter.getVisit().getVisitType().getUuid(), encounterTransaction.getVisitTypeUuid());
 	}
-	
+
 	@Test
 	public void shouldMapEncounterWithoutEncounterType() throws Exception {
 		Encounter encounter = new EncounterBuilder().withEncounterType(null).build();
 		mockedContext.when(() -> Context.getRegisteredComponents(EncounterTransactionHandler.class)).thenReturn(null);
-		
+
 		EncounterTransaction encounterTransaction = encounterTransactionMapper.map(encounter, false);
-		
+
 		Assert.assertEquals(null, encounterTransaction.getEncounterTypeUuid());
 	}
-	
+
 	@Test
 	public void shouldMapEncounterTransactionsWithExtensions() {
 		Encounter encounter = new EncounterBuilder().build();
 		boolean includeAll = false;
-		
+
 		EncounterTransactionHandler encounterTransactionHandler = mock(EncounterTransactionHandler.class);
 		mockedContext.when(() -> Context.getRegisteredComponents(EncounterTransactionHandler.class))
 		        .thenReturn(Arrays.asList(encounterTransactionHandler));
-		
+
 		encounterTransactionMapper = new EncounterTransactionMapper(encounterObservationsMapper, encounterProviderMapper,
 		        orderMapper);
-		
+
 		EncounterTransaction encounterTransaction = encounterTransactionMapper.map(encounter, includeAll);
 		verify(encounterTransactionHandler).forRead(eq(encounter), any(EncounterTransaction.class));
-		
+
 	}
 }

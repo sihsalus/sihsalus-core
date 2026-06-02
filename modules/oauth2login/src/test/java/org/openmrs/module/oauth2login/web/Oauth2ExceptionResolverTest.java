@@ -29,24 +29,24 @@ import org.springframework.web.servlet.ModelAndView;
 
 @RunWith(PowerMockRunner.class)
 public class Oauth2ExceptionResolverTest {
-	
+
 	@Mock
 	private HttpServletRequest mockRequest;
-	
+
 	@Mock
 	private HttpServletResponse mockResp;
-	
+
 	@Mock
 	private Object mockHandler;
-	
+
 	private Oauth2ExceptionResolver resolver = new Oauth2ExceptionResolver();
-	
+
 	@Test
 	public void resolveException_shouldReturnNullForUserRedirectRequiredException() {
 		UserRedirectRequiredException ex = new UserRedirectRequiredException(null, null);
 		Assert.assertNull(resolver.resolveException(mockRequest, mockResp, mockHandler, ex));
 	}
-	
+
 	@Test
 	public void resolveException_shouldDelegateToSuperClassForOtherExceptionsTypes() {
 		final String viewName = "testErrorView";
@@ -57,9 +57,9 @@ public class Oauth2ExceptionResolverTest {
 		Properties props = new Properties();
 		props.put(APIException.class.getName(), viewName);
 		resolver.setExceptionMappings(props);
-		
+
 		ModelAndView mav = resolver.resolveException(mockRequest, mockResp, mockHandler, ex);
-		
+
 		Assert.assertEquals(viewName, mav.getViewName());
 	}
 }

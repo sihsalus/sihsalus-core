@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.openmrs.module.reporting.data.converter.StringConverter;
 
 public class StringConverterTest {
-	
+
 	/**
 	 * @see StringConverter#convert(Object)
 	 * @verifies convert an Object to a configured String representation

@@ -45,54 +45,54 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class DiagnosisServiceTest {
-	
+
 	private ObsGroupDiagnosisService service;
-	
+
 	private EmrApiProperties emrApiProperties;
-	
+
 	private ConceptService conceptService;
-	
+
 	private ObsService obsService;
-	
+
 	private EncounterService encounterService;
-	
+
 	private Concept codedDiagnosis;
-	
+
 	private Concept primary;
-	
+
 	private Concept secondary;
-	
+
 	private Concept confirmed;
-	
+
 	private Concept presumed;
-	
+
 	private Concept diagnosisCertainty;
-	
+
 	private Concept diagnosisOrder;
-	
+
 	private Concept diagnosisGroupingConcept;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		emrApiProperties = mock(EmrApiProperties.class);
 		conceptService = mock(ConceptService.class);
 		obsService = mock(ObsService.class);
-		
+
 		encounterService = mock(EncounterService.class);
 		when(encounterService.saveEncounter(any(Encounter.class))).thenAnswer(new Answer<Object>() {
-			
+
 			@Override
 			public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
 				return invocationOnMock.getArguments()[0];
 			}
 		});
-		
+
 		ObsGroupDiagnosisService service = new ObsGroupDiagnosisService();
 		service.setEmrApiProperties(emrApiProperties);
 		service.setObsService(obsService);
 		service.setEncounterService(encounterService);
 		this.service = service;
-		
+
 		ConceptMapType sameAs = new ConceptMapType();
 		ConceptSource emrConceptSource = new ConceptSource();
 		emrConceptSource.setName(EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
@@ -105,12 +105,12 @@ public class DiagnosisServiceTest {
 		secondary.addConceptMapping(new ConceptMap(
 		        new ConceptReferenceTerm(emrConceptSource, EmrApiConstants.CONCEPT_CODE_DIAGNOSIS_ORDER_SECONDARY, null),
 		        sameAs));
-		
+
 		confirmed = buildConcept(11, "Confirmed");
 		confirmed.addConceptMapping(new ConceptMap(
 		        new ConceptReferenceTerm(emrConceptSource, EmrApiConstants.CONCEPT_CODE_DIAGNOSIS_CERTAINTY_CONFIRMED, null),
 		        sameAs));
-		
+
 		presumed = buildConcept(12, "Presumed");
 		presumed.addConceptMapping(new ConceptMap(
 		        new ConceptReferenceTerm(emrConceptSource, EmrApiConstants.CONCEPT_CODE_DIAGNOSIS_CERTAINTY_PRESUMED, null),
@@ -118,23 +118,23 @@ public class DiagnosisServiceTest {
 		diagnosisCertainty = buildConcept(10, "Diagnosis Certainty");
 		diagnosisCertainty.addAnswer(new ConceptAnswer(confirmed));
 		diagnosisCertainty.addAnswer(new ConceptAnswer(presumed));
-		
+
 		diagnosisOrder = buildConcept(6, "Diagnosis Order");
 		diagnosisOrder.addAnswer(new ConceptAnswer(primary));
 		diagnosisOrder.addAnswer(new ConceptAnswer(secondary));
 		diagnosisGroupingConcept = buildConcept(9, "Grouping for Diagnosis");
 		diagnosisGroupingConcept.addSetMember(diagnosisOrder);
-		
+
 	}
-	
+
 	private Matcher<? super Obs> hasGroupMember(final Concept question, final Object answer, final boolean isVoided) {
 		return new TypeSafeMatcher<Obs>() {
-			
+
 			@Override
 			public void describeTo(Description description) {
-				
+
 			}
-			
+
 			@Override
 			protected boolean matchesSafely(Obs obs) {
 				return CoreMatchers
@@ -144,17 +144,17 @@ public class DiagnosisServiceTest {
 				                        || answer instanceof String && argument.getValueText().equals(answer)))
 				        .matches(obs.getGroupMembers(true));
 			}
-			
+
 		};
 	}
-	
+
 	private Concept buildConcept(int conceptId, String name) {
 		Concept concept = new Concept();
 		concept.setConceptId(conceptId);
 		concept.addName(new ConceptName(name, Locale.ENGLISH));
 		return concept;
 	}
-	
+
 	@Test
 	public void codeNonCodedDiagnosis_should_editExistingObsGroup() throws Exception {
 		String nonCodedDiagnosis = "pain";
@@ -162,23 +162,23 @@ public class DiagnosisServiceTest {
 		Diagnosis malariaDiagnosis = new Diagnosis(new CodedOrFreeTextAnswer(malaria), Diagnosis.Order.PRIMARY);
 		List<Diagnosis> diagnoses = new ArrayList<Diagnosis>();
 		diagnoses.add(malariaDiagnosis);
-		
+
 		MockMetadataTestUtil.setupMockConceptService(conceptService, emrApiProperties);
 		MockMetadataTestUtil.setupDiagnosisMetadata(emrApiProperties, conceptService);
-		
+
 		//create an Obs with a non-coded diagnosis
 		Diagnosis diagnosis = new Diagnosis(new CodedOrFreeTextAnswer(nonCodedDiagnosis), Diagnosis.Order.PRIMARY);
 		diagnosis.setCertainty(Diagnosis.Certainty.PRESUMED);
-		
+
 		DiagnosisMetadata dmd = emrApiProperties.getDiagnosisMetadata();
 		Obs obs = dmd.buildDiagnosisObsGroup(diagnosis);
-		
+
 		Encounter encounter = new Encounter();
 		obs.setEncounter(encounter);
-		
+
 		when(obsService.saveObs(obs, "code a diagnosis")).thenReturn(obs);
 		//change the non-coded diagnosis to a coded diagnosis and update the Obs
-		
+
 		List<Obs> codedObs = service.codeNonCodedDiagnosis(obs, diagnoses);
 		for (Obs codedOb : codedObs) {
 			if (codedOb.getConcept().equals(dmd.getCodedDiagnosisConcept())) {
@@ -186,5 +186,5 @@ public class DiagnosisServiceTest {
 			}
 		}
 	}
-	
+
 }

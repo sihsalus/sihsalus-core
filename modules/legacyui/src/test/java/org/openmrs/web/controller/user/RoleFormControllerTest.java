@@ -26,14 +26,14 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * ` Tests {@link RoleFormController}.
  */
 public class RoleFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	WebTestHelper wth;
-	
+
 	public UserService getUS() {
 		return Context.getUserService();
 	}
-	
+
 	@Test
 	public void shouldUpdateRoleWithParent() throws Exception {
 		Role child = new Role("child", "child");
@@ -42,21 +42,21 @@ public class RoleFormControllerTest extends BaseModuleWebContextSensitiveTest {
 		parent.setChildRoles(new HashSet<Role>());
 		parent.getChildRoles().add(child);
 		getUS().saveRole(parent);
-		
+
 		MockHttpServletRequest requestGET = wth.newGET("/admin/users/role.form");
 		requestGET.addParameter("roleName", "child");
 		Response responseGET = wth.handle(requestGET);
-		
+
 		MockHttpServletRequest requestPOST = wth.newPOST("/admin/users/role.form", responseGET);
 		requestPOST.addParameter("roleName", "child");
 		requestPOST.addParameter("description", "updated child");
 		requestPOST.addParameter("inheritedRoles", "parent");
-		
+
 		wth.handle(requestPOST);
-		
+
 		Assertions.assertEquals("updated child", getUS().getRole("child").getDescription());
-		
+
 		deleteAllData();
 	}
-	
+
 }

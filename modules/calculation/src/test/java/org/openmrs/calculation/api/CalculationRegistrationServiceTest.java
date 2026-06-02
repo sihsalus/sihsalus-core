@@ -29,21 +29,21 @@ import org.openmrs.test.Verifies;
  * Contains test methods for {@link CalculationRegistrationService}
  */
 public class CalculationRegistrationServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String TOKEN_UUID = "467dd0d8-5785-11e1-80a0-00248140a5eb";
-	
+
 	private static final String TEST_DATA_PATH = "org/openmrs/calculation/include/";
-	
+
 	private static final String MODULE_TEST_DATA_XML = TEST_DATA_PATH + "moduleTestData.xml";
-	
+
 	private CalculationRegistrationService service;
-	
+
 	@Before
 	public void before() throws Exception {
 		executeDataSet(MODULE_TEST_DATA_XML);
 		service = Context.getService(CalculationRegistrationService.class);
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#getCalculationRegistration(Integer)}
 	 */
@@ -52,7 +52,7 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 	public void getCalculationRegistration_shouldReturnATokenWithAMatchingId() throws Exception {
 		Assert.assertEquals(TOKEN_UUID, service.getCalculationRegistration(1).getUuid());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#getCalculationRegistrationByUuid(Integer)}
 	 */
@@ -61,7 +61,7 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 	public void getCalculationRegistrationByUuid_shouldFetchATokenWithAMatchingUuid() throws Exception {
 		Assert.assertEquals("age", service.getCalculationRegistrationByUuid(TOKEN_UUID).getToken());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#getAllCalculationRegistrations()}
 	 */
@@ -70,7 +70,7 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 	public void getAllCalculationRegistrations_shouldGetAllTokensInTheDatabase() throws Exception {
 		Assert.assertEquals(3, service.getAllCalculationRegistrations().size());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#saveCalculationRegistration(CalculationRegistration)}
 	 */
@@ -86,7 +86,7 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 		Assert.assertNotNull(token.getId());
 		Assert.assertEquals(originalTokenCount + 1, service.getAllCalculationRegistrations().size());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#purgeCalculationRegistration(CalculationRegistration)}
 	 */
@@ -99,7 +99,7 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 		service.purgeCalculationRegistration(token);
 		Assert.assertNull(service.getCalculationRegistrationByUuid(TOKEN_UUID));
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#saveCalculationRegistration(CalculationRegistration)}
 	 */
@@ -109,13 +109,13 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 		String newTokenName = "new test token name";
 		CalculationRegistration token = service.getCalculationRegistrationByUuid(TOKEN_UUID);
 		Assert.assertNotSame(newTokenName, token.getToken());
-		
+
 		token.setToken(newTokenName);
 		service.saveCalculationRegistration(token);
-		
+
 		Assert.assertSame(newTokenName, token.getToken());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#getCalculation(java.lang.String)}
 	 */
@@ -127,7 +127,7 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 		Assert.assertNotNull(calculation);
 		Assert.assertEquals(5497, calculation.getWhichConcept().getConceptId().intValue());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#findCalculationRegistrations(String)}
 	 */
@@ -136,7 +136,7 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 	public void findCalculationRegistrations_shouldGetAllCalculationRegistrationsWithAMatchingName() throws Exception {
 		Assert.assertEquals(2, service.findCalculationRegistrations("mostRecent").size());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#getCalculationRegistrationByToken(String)}
 	 */
@@ -145,7 +145,7 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 	public void getCalculationRegistrationByToken_shouldFetchATokenWithAMatchingName() throws Exception {
 		Assert.assertEquals(TOKEN_UUID, service.getCalculationRegistrationByToken("age").getUuid());
 	}
-	
+
 	/**
 	 * @see {@link CalculationRegistrationService#saveCalculationRegistration(CalculationRegistration)}
 	 */
@@ -153,29 +153,29 @@ public class CalculationRegistrationServiceTest extends BaseModuleContextSensiti
 	@Verifies(value = "should update the cached token registration", method = "saveCalculationRegistration(CalculationRegistration)")
 	public void saveCalculationRegistration_shouldUpdateTheCachedTokenRegistration() throws Exception {
 		final String tokenName = "age";
-		
-		//This effectively loads the object into the session, so that on the line after it is 
+
+		//This effectively loads the object into the session, so that on the line after it is
 		//what gets cached in our registration cache when fetching the calculation from the service
 		//since we will still be in the same hibernate session
 		CalculationRegistration originalTokenReg = service.getCalculationRegistrationByToken(tokenName);
 		try {
 			//This should lead to the token registration getting cached
 			Assert.assertNotNull(service.getCalculation(tokenName, AgeCalculation.class));
-			
-			//now we need to remove it from the session so that we effectively 
+
+			//now we need to remove it from the session so that we effectively
 			//mimic our cache and DB being out of sync when changes are made
 			Context.evictFromSession(originalTokenReg);
 		}
 		catch (APIException e) {
 			Assert.fail(e.getMessage());
 		}
-		
+
 		CalculationRegistration newTokenRegInstance = service.getCalculationRegistrationByToken(tokenName);
 		newTokenRegInstance.setCalculationName("some.unknown.Classname");
-		
+
 		//this should synchronize our cache with the DB
 		service.saveCalculationRegistration(newTokenRegInstance);
-		
+
 		//should fail this time because of the new unknown class
 		service.getCalculation(tokenName, AgeCalculation.class);
 	}

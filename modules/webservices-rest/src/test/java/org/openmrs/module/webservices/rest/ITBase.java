@@ -26,17 +26,17 @@ import java.util.List;
 import static io.restassured.RestAssured.basic;
 
 public abstract class ITBase {
-	
+
 	private static final Object serverStartupLock = new Object();
-	
+
 	private static boolean serverStarted = false;
-	
+
 	public static final String ADMIN_USERNAME;
-	
+
 	public static final String ADMIN_PASSWORD;
-	
+
 	public static final URI TEST_URL;
-	
+
 	static {
 		String testUrlProperty = System.getProperty("testUrl", "http://admin:Admin123@localhost:8080/openmrs");
 		try {
@@ -53,7 +53,7 @@ public abstract class ITBase {
 			throw new RuntimeException("Invalid uri: " + testUrlProperty, e);
 		}
 	}
-	
+
 	@BeforeAll
 	public static void waitForServerToStart() {
 		synchronized (serverStartupLock) {
@@ -61,14 +61,14 @@ public abstract class ITBase {
 				final long time = System.currentTimeMillis();
 				final int timeout = 300000;
 				final int retryAfter = 10000;
-				
+
 				final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(retryAfter)
 				        .setConnectTimeout(retryAfter).build();
-				
+
 				final String startupUri = TEST_URL.getScheme() + "://" + TEST_URL.getHost() + ":"
 				        + TEST_URL.getPort() + TEST_URL.getPath();
 				System.out.println("Waiting for server at " + startupUri + " for " + timeout / 1000 + " more seconds...");
-				
+
 				while (System.currentTimeMillis() - time < timeout) {
 					try {
 						final HttpClient client = HttpClientBuilder.create().disableAutomaticRetries().build();
@@ -76,18 +76,18 @@ public abstract class ITBase {
 						sessionGet.setConfig(requestConfig);
 						final HttpClientContext context = HttpClientContext.create();
 						final HttpResponse response = client.execute(sessionGet, context);
-						
+
 						int status = response.getStatusLine().getStatusCode();
 						if (status >= 400) {
 							throw new RuntimeException(status + " " + response.getStatusLine().getReasonPhrase());
 						}
-						
+
 						URI finalUri = sessionGet.getURI();
 						List<URI> redirectLocations = context.getRedirectLocations();
 						if (redirectLocations != null) {
 							finalUri = redirectLocations.get(redirectLocations.size() - 1);
 						}
-						
+
 						String finalUriString = finalUri.toString();
 						if (!finalUriString.contains("initialsetup")) {
 							serverStarted = true;
@@ -97,7 +97,7 @@ public abstract class ITBase {
 					catch (IOException e) {
 						System.out.println(e.toString());
 					}
-					
+
 					try {
 						System.out.println("Waiting for "
 						        + (timeout - (System.currentTimeMillis() - time)) / 1000 + " more seconds...");
@@ -107,10 +107,10 @@ public abstract class ITBase {
 						throw new RuntimeException(e);
 					}
 				}
-				
+
 				throw new RuntimeException("Server startup took longer than 5 minutes!");
 			}
 		}
 	}
-	
+
 }

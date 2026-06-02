@@ -28,7 +28,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
  * Tests the {@link ConceptSourceFormController}
  */
 public class ConceptSourceFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see ConceptSourceListController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
@@ -38,20 +38,20 @@ public class ConceptSourceFormControllerTest extends BaseModuleWebContextSensiti
 		ConceptService cs = Context.getConceptService();
 		ConceptSourceFormController controller = (ConceptSourceFormController) applicationContext
 		        .getBean("conceptSourceForm");
-		
+
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		mockRequest.setMethod("POST");
 		mockRequest.setParameter("conceptSourceId", "3");
 		mockRequest.setParameter("retireReason", "dummy reason for retirement");
 		mockRequest.setParameter("retire", "dummy reason for retirement");
-		
+
 		controller.handleRequest(mockRequest, new MockHttpServletResponse());
-		
+
 		ConceptSource conceptSource = cs.getConceptSource(3);
 		Assertions.assertTrue(conceptSource.isRetired());
 		Assertions.assertEquals("dummy reason for retirement", conceptSource.getRetireReason());
 	}
-	
+
 	/**
 	 * @see ConceptSourceListController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
@@ -61,18 +61,18 @@ public class ConceptSourceFormControllerTest extends BaseModuleWebContextSensiti
 		ConceptService cs = Context.getConceptService();
 		ConceptSourceFormController controller = (ConceptSourceFormController) applicationContext
 		        .getBean("conceptSourceForm");
-		
+
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		mockRequest.setMethod("POST");
 		mockRequest.setParameter("conceptSourceId", "3");
 		mockRequest.setParameter("purge", "dummy reason for deletion");
-		
+
 		controller.handleRequest(mockRequest, new MockHttpServletResponse());
-		
+
 		ConceptSource nullConceptSource = cs.getConceptSource(3);
 		Assertions.assertNull(nullConceptSource);
 	}
-	
+
 	/**
 	 * @see ConceptSourceListController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
@@ -82,26 +82,26 @@ public class ConceptSourceFormControllerTest extends BaseModuleWebContextSensiti
 		ConceptService cs = Context.getConceptService();
 		ConceptSourceFormController controller = (ConceptSourceFormController) applicationContext
 		        .getBean("conceptSourceForm");
-		
+
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		mockRequest.setMethod("POST");
 		mockRequest.setParameter("conceptSourceId", "3");
 		mockRequest.setParameter("retireReason", "dummy reason for retirement");
 		mockRequest.setParameter("retire", "dummy reason for retirement");
-		
+
 		controller.handleRequest(mockRequest, new MockHttpServletResponse());
-		
+
 		ConceptSource conceptSource = cs.getConceptSource(3);
 		Assertions.assertTrue(conceptSource.isRetired());
 		Assertions.assertEquals("dummy reason for retirement", conceptSource.getRetireReason());
-		
+
 		MockHttpServletRequest restoreMockRequest = new MockHttpServletRequest();
 		restoreMockRequest.setMethod("POST");
 		restoreMockRequest.setParameter("conceptSourceId", "3");
 		restoreMockRequest.setParameter("restore", "dummy reason for restoration");
-		
+
 		controller.handleRequest(restoreMockRequest, new MockHttpServletResponse());
-		
+
 		ConceptSource newConceptSource = cs.getConceptSource(3);
 		Assertions.assertNotNull(newConceptSource, "Error, Object is null");
 		Assertions.assertTrue(!newConceptSource.isRetired());

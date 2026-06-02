@@ -25,35 +25,35 @@ import org.openmrs.test.Verifies;
  * Tests the SqlCohortDefinitionConverter
  */
 public class SqlCohortDefinitionConverterTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	@Test
 	@Verifies(value = "convert legacy definitions to latest format", method = "convert")
 	public void convert_shouldConvertLegacyDefinitionsToLatestFormat() throws Exception {
 
 		SqlCohortDefinitionConverter converter = new SqlCohortDefinitionConverter();
-		
+
 		List<SerializedObject> before = converter.getInvalidDefinitions();
 		Assert.assertEquals(1, before.size());
-		
+
 		for (SerializedObject so : before) {
 			Assert.assertTrue(converter.convertDefinition(so));
 		}
-		
+
 		Assert.assertEquals(0, converter.getInvalidDefinitions().size());
 	}
 }

@@ -26,11 +26,11 @@ import org.springframework.web.servlet.ModelAndView;
  * Tests the {@link FormFormController} class.
  */
 public class FormFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private FormService formService;
-	
+
 	private FormFormController controller;
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		if (formService == null) {
@@ -38,33 +38,33 @@ public class FormFormControllerTest extends BaseModuleWebContextSensitiveTest {
 		}
 		// dataset to locks forms
 		executeDataSet("org/openmrs/web/controller/include/FormFormControllerTest.xml");
-		
+
 		//setting the controller
 		controller = (FormFormController) applicationContext.getBean("formEditForm");
 		controller.setApplicationContext(applicationContext);
 		controller.setFormView("index.htm");
 		controller.setSuccessView("formEdit.form");
 	}
-	
+
 	@Test
 	public void shouldNotSaveAFormWhenFormsAreLocked() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/forms/formEdit.form?formId=1");
 		request.setSession(new MockHttpSession(null));
 		HttpServletResponse response = new MockHttpServletResponse();
 		controller.handleRequest(request, response);
-		
+
 		request.addParameter("name", "TRUNK");
 		request.addParameter("version", "1");
 		request.addParameter("action", "Form.save");
 		request.setContentType("application/x-www-form-urlencoded");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The save attempt should have failed!");
 		Assertions.assertNotEquals("formEdit.form", mav.getViewName());
 		Assertions.assertSame(controller.getFormView(), mav.getViewName());
 		Assertions.assertNotNull(formService.getForm(1));
 	}
-	
+
 	@Test
 	public void shouldNotDuplicateAFormWhenFormsAreLocked() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("POST",
@@ -72,12 +72,12 @@ public class FormFormControllerTest extends BaseModuleWebContextSensitiveTest {
 		request.setSession(new MockHttpSession(null));
 		HttpServletResponse response = new MockHttpServletResponse();
 		controller.handleRequest(request, response);
-		
+
 		request.addParameter("name", "TRUNK");
 		request.addParameter("version", "1");
 		request.addParameter("action", "Form.Duplicate");
 		request.setContentType("application/x-www-form-urlencoded");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The duplicate attempt should have failed!");
 		Assertions.assertNotEquals("formEdit.form", mav.getViewName());

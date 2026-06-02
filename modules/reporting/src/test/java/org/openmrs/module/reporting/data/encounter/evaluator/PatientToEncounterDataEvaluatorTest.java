@@ -70,7 +70,7 @@ public class PatientToEncounterDataEvaluatorTest extends BaseModuleContextSensit
         EncounterEvaluationContext context = new EncounterEvaluationContext();
         context.setBaseEncounters(new EncounterIdSet(8,9,10));     // in our demo set include two encounters for same patient
         EvaluatedEncounterData ed = Context.getService(EncounterDataService.class).evaluate(d, context);
-        
+
         assertThat(ed.getData().size(), is(3));
         assertThat((PatientIdentifier) ed.getData().get(8), is(patientService.getPatient(21).getPatientIdentifier(pit)));
         assertThat((PatientIdentifier) ed.getData().get(9), is(patientService.getPatient(22).getPatientIdentifier(pit)));

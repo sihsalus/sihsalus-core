@@ -15,12 +15,12 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class EncounterTypeResource1_8Test extends BaseDelegatingResourceTest<EncounterTypeResource1_8, EncounterType> {
-	
+
 	@Override
 	public EncounterType newObject() {
 		return Context.getEncounterService().getEncounterTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -28,7 +28,7 @@ public class EncounterTypeResource1_8Test extends BaseDelegatingResourceTest<Enc
 		assertPropEquals("description", getObject().getDescription());
 		assertPropEquals("retired", getObject().isRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -37,15 +37,15 @@ public class EncounterTypeResource1_8Test extends BaseDelegatingResourceTest<Enc
 		assertPropEquals("retired", getObject().isRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Scheduled";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.ENCOUNTER_TYPE_UUID;
 	}
-	
+
 }

@@ -35,13 +35,13 @@ public class CompositionCohortDefinitionValidatorTest  extends BaseModuleContext
 		CompositionCohortDefinition compositionCohortDefinition = new CompositionCohortDefinition();
 		compositionCohortDefinition.setSearches(null);
 		compositionCohortDefinition.setCompositionString("Some Composition String");
-		
+
 		Errors errors = new BindException(compositionCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(compositionCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -51,13 +51,13 @@ public class CompositionCohortDefinitionValidatorTest  extends BaseModuleContext
 		CompositionCohortDefinition compositionCohortDefinition = new CompositionCohortDefinition();
 		compositionCohortDefinition.setSearches(new HashMap<String, Mapped<CohortDefinition>>());
 		compositionCohortDefinition.setCompositionString("Some Composition String");
-		
+
 		Errors errors = new BindException(compositionCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(compositionCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -66,17 +66,17 @@ public class CompositionCohortDefinitionValidatorTest  extends BaseModuleContext
 	public void validate_shouldFailValidationIfCompositionStringIsNull() throws Exception {
 		HashMap<String, Mapped<CohortDefinition>> searches = new HashMap<String, Mapped<CohortDefinition>>();
 		searches.put("Some Key", new Mapped());
-		
+
 		CompositionCohortDefinition compositionCohortDefinition = new CompositionCohortDefinition();
 		compositionCohortDefinition.setSearches(searches);
 		compositionCohortDefinition.setCompositionString(null);
-		
+
 		Errors errors = new BindException(compositionCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(compositionCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -85,17 +85,17 @@ public class CompositionCohortDefinitionValidatorTest  extends BaseModuleContext
 	public void validate_shouldFailValidationIfCompositionStringIsEmpty() throws Exception {
 		HashMap<String, Mapped<CohortDefinition>> searches = new HashMap<String, Mapped<CohortDefinition>>();
 		searches.put("Some Key", new Mapped());
-		
+
 		CompositionCohortDefinition compositionCohortDefinition = new CompositionCohortDefinition();
 		compositionCohortDefinition.setSearches(searches);
 		compositionCohortDefinition.setCompositionString(" ");
-		
+
 		Errors errors = new BindException(compositionCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(compositionCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -104,15 +104,15 @@ public class CompositionCohortDefinitionValidatorTest  extends BaseModuleContext
 	public void validate_shouldPassValidationIfAllFieldsAreCorrect() throws Exception {
 		HashMap<String, Mapped<CohortDefinition>> searches = new HashMap<String, Mapped<CohortDefinition>>();
 		searches.put("Some Key", new Mapped<CohortDefinition>());
-		
+
 		CompositionCohortDefinition compositionCohortDefinition = new CompositionCohortDefinition();
 		compositionCohortDefinition.setName("Test CD");
 		compositionCohortDefinition.setSearches(searches);
 		compositionCohortDefinition.setCompositionString("Some Composition String");
-		
+
 		Errors errors = new BindException(compositionCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(compositionCohortDefinition, errors);
-		
+
 		Assert.assertFalse(errors.hasErrors());
 	}
 }

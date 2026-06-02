@@ -41,7 +41,7 @@ public class TaskActionController2_4Test extends TaskActionController1_8Test {
     private SchedulerService schedulerService;
 
 	private final TaskServiceWrapper2_4 TASK_SERVICE_WRAPPER = new TaskServiceWrapper2_4();
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		executeDataSet(TASK_SCHEDULER_XML);
@@ -54,7 +54,7 @@ public class TaskActionController2_4Test extends TaskActionController1_8Test {
 	private TaskDefinition getTaskByUuid(String uuid) {
 		return TASK_SERVICE_WRAPPER.getTaskByUuid(uuid);
 	}
-	
+
 	@Test
 	public void shouldScheduleTask() throws Exception {
 		assertThat(schedulerService.getScheduledTasks(), not(hasItem(getTaskByUuid(EQUIPMENT_MAINTENANCE_UUID))));
@@ -71,7 +71,7 @@ public class TaskActionController2_4Test extends TaskActionController1_8Test {
 				"{\"action\": \"scheduletask\", \"tasks\":[\"" + NURSE_PRECEPTING_UUID + "\"]}")));
 		assertThat(schedulerService.getScheduledTasks(), hasItem(getTaskByUuid(NURSE_PRECEPTING_UUID)));
 	}
-	
+
 	@Test
 	public void shouldShutdownTask() throws Exception {
 		schedulerService.scheduleTask(getTaskByUuid(NURSE_PRECEPTING_UUID));
@@ -80,7 +80,7 @@ public class TaskActionController2_4Test extends TaskActionController1_8Test {
 				"{\"action\": \"shutdowntask\", \"tasks\":[\"" + NURSE_PRECEPTING_UUID + "\"]}")));
 		assertThat(schedulerService.getScheduledTasks(), not(hasItem(getTaskByUuid(NURSE_PRECEPTING_UUID))));
 	}
-	
+
 	@Test
 	public void shutdownTask_shouldDoNothingIfTaskAlreadyShutdown() throws Exception {
 		assertThat(schedulerService.getScheduledTasks(), not(hasItem(getTaskByUuid(NURSE_PRECEPTING_UUID))));
@@ -90,7 +90,7 @@ public class TaskActionController2_4Test extends TaskActionController1_8Test {
 		assertThat(schedulerService.getScheduledTasks(), not(hasItem(getTaskByUuid(NURSE_PRECEPTING_UUID))));
 		assertThat(schedulerService.getRegisteredTasks(), hasItem(getTaskByUuid(NURSE_PRECEPTING_UUID)));
 	}
-	
+
 	@Test
 	@Disabled// see: https://openmrs.atlassian.net/browse/RESTWS-1032
 	public void shouldRunTask() throws Exception {
@@ -127,7 +127,7 @@ public class TaskActionController2_4Test extends TaskActionController1_8Test {
 				"{\"action\": \"rescheduletask\", \"tasks\":[\"" + NURSING_EDUCATION_UUID + "\"]}")));
 		assertThat(schedulerService.getScheduledTasks(), hasItem(getTaskByUuid(NURSING_EDUCATION_UUID)));
 	}
-	
+
 	@Test
 	public void shouldDeleteTask() throws Exception {
 		assertThat(schedulerService.getRegisteredTasks(), hasItem(getTaskByUuid(NURSING_EDUCATION_UUID)));

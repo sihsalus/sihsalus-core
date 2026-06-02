@@ -23,22 +23,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.Set;
 
 public class LocationTagMapsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("locationService")
 	private LocationService ls;
-	
+
 	@Autowired
 	private LocationTagMapsLoader loader;
-	
+
 	LocationTag facilityLocation;
-	
+
 	LocationTag shed;
-	
+
 	LocationTag appointmentLocation;
-	
+
 	LocationTag visitLocation;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
@@ -47,7 +47,7 @@ public class LocationTagMapsLoaderIntegrationTest extends DomainBaseModuleContex
 		appointmentLocation = ls.getLocationTagByName("Appointment Location");
 		visitLocation = ls.getLocationTagByName("Visit Location");
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
 		// Pre-load verification
@@ -58,10 +58,10 @@ public class LocationTagMapsLoaderIntegrationTest extends DomainBaseModuleContex
 		Assert.assertTrue(tags.contains(facilityLocation));
 		Assert.assertFalse(tags.contains(appointmentLocation));
 		Assert.assertTrue(tags.contains(visitLocation));
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Post-load verification
 		patientHome = ls.getLocationByUuid("af939782-898b-409a-99a4-d1653484edbd");
 		tags = patientHome.getTags();

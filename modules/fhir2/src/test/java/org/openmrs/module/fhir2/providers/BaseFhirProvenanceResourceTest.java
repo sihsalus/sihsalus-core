@@ -19,35 +19,35 @@ import org.hl7.fhir.r4.model.Provenance;
 import org.openmrs.module.fhir2.FhirConstants;
 
 public abstract class BaseFhirProvenanceResourceTest<T extends DomainResource> {
-	
+
 	private static final String UPDATE = "Update";
-	
+
 	private static final String REVISE = "revise";
-	
+
 	private static final String CREATE = "CREATE";
-	
+
 	private static final String CREATE_DISPLAY = "create";
-	
+
 	public void setProvenanceResources(T resource) {
 		resource.setContained(Arrays.asList(onCreateDataOperation(), onUpdateDataOperation()));
 	}
-	
+
 	private Provenance onUpdateDataOperation() {
 		Coding coding = new Coding();
 		coding.setCode(UPDATE);
 		coding.setDisplay(REVISE);
 		coding.setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION);
-		
+
 		return new Provenance().setActivity(new CodeableConcept().addCoding(coding)).setRecorded(new Date());
 	}
-	
+
 	private Provenance onCreateDataOperation() {
 		Coding coding = new Coding();
 		coding.setCode(CREATE);
 		coding.setDisplay(CREATE_DISPLAY);
 		coding.setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION);
-		
+
 		return new Provenance().setActivity(new CodeableConcept().addCoding(coding)).setRecorded(new Date());
 	}
-	
+
 }

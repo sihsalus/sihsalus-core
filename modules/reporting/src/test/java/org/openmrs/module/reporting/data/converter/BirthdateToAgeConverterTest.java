@@ -20,7 +20,7 @@ import org.openmrs.module.reporting.common.DateUtil;
 import org.openmrs.module.reporting.data.converter.BirthdateToAgeConverter;
 
 public class BirthdateToAgeConverterTest {
-	
+
 	/**
 	 * @see BirthdateToAgeConverter#convert(Object)
 	 * @verifies convert a birthdate to an age on the configured date

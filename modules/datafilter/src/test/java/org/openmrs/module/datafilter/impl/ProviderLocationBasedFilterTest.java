@@ -27,13 +27,13 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProviderLocationBasedFilterTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private ProviderService providerService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "persons.xml");
@@ -41,17 +41,17 @@ public class ProviderLocationBasedFilterTest extends BaseFilterTest {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "providers.xml");
 		DataFilterTestUtils.disableProgramBasedFiltering();
 	}
-	
+
 	private Collection<Provider> getProviders() {
 		return providerService.getProviders("Mulemba", null, null, null, true);
 	}
-	
+
 	@Test
 	public void getProviders_shouldReturnNoProvidersIfTheProviderIsNotGrantedAccessToAnyBasis() {
 		reloginAs("dBeckham", "test");
 		assertEquals(0, getProviders().size());
 	}
-	
+
 	@Test
 	public void getProviders_shouldReturnProvidersAccessibleToTheProvider() {
 		reloginAs("dyorke", "test");
@@ -60,7 +60,7 @@ public class ProviderLocationBasedFilterTest extends BaseFilterTest {
 		assertEquals(expCount, providers.size());
 		assertTrue(TestUtil.containsId(providers, 100001));
 		assertTrue(TestUtil.containsId(providers, 100002));
-		
+
 		service.grantAccess(Context.getAuthenticatedUser(), new Location(4001));
 		expCount = 3;
 		providers = getProviders();
@@ -69,28 +69,28 @@ public class ProviderLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(providers, 100002));
 		assertTrue(TestUtil.containsId(providers, 100003));
 	}
-	
+
 	@Test
 	public void getProviders_shouldReturnAllProvidersIfTheAuthenticatedProviderIsASuperProvider() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
 		assertEquals(7, getProviders().size());
 	}
-	
+
 	@Test
 	public void getProviders_shouldReturnAllProvidersIfLocationFilteringIsDisabled() {
 		DataFilterTestUtils.disableLocationFiltering();
 		reloginAs("dyorke", "test");
 		assertEquals(7, getProviders().size());
 	}
-	
+
 	@Test
 	public void getProviderByUuid_shouldReturnTheProviderThatMatchesTheSpecifiedUuid() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "users.xml");
 		reloginAs("cmulemba", "test");
-		
+
 		Provider provider = providerService.getProviderByUuid("b1e3868a-6b90-11e0-93c3-18a905e044dc");
 		Assert.assertNotNull(provider);
 		assertEquals(100002, provider.getProviderId().intValue());
 	}
-	
+
 }

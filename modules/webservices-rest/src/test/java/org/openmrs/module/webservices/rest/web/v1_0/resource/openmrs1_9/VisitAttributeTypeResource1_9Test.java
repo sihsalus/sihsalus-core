@@ -18,12 +18,12 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
  * Contains tests for the {@link VisitAttributeTypeResource1_9}
  */
 public class VisitAttributeTypeResource1_9Test extends BaseDelegatingResourceTest<VisitAttributeTypeResource1_9, VisitAttributeType> {
-	
+
 	@Override
 	public VisitAttributeType newObject() {
 		return Context.getVisitService().getVisitAttributeTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -35,7 +35,7 @@ public class VisitAttributeTypeResource1_9Test extends BaseDelegatingResourceTes
 		assertPropEquals("preferredHandlerClassname", getObject().getPreferredHandlerClassname());
 		assertPropEquals("retired", getObject().getRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -50,12 +50,12 @@ public class VisitAttributeTypeResource1_9Test extends BaseDelegatingResourceTes
 		assertPropEquals("retired", getObject().getRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Audit Date";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_9.VISIT_ATTRIBUTE_TYPE_UUID;

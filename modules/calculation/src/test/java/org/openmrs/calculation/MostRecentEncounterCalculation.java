@@ -32,10 +32,10 @@ import org.openmrs.util.OpenmrsUtil;
  * Calculates the latest encounters of the patient(s)
  */
 public class MostRecentEncounterCalculation extends BaseCalculation implements PatientCalculation {
-	
+
 	//Prefix for keys used to map each patient to their most recent encounter in the current context
 	public static final String MOST_RECENT_ENCOUNTER_KEY_PREFIX = "mostRecentEncounter";
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(java.util.Collection, java.util.Map, org.openmrs.calculation.patient.PatientCalculationContext)
 	 */
@@ -57,9 +57,9 @@ public class MostRecentEncounterCalculation extends BaseCalculation implements P
 							mostRecentEncounterFound = encounter;
 						}
 					}
-					
+
 					if (mostRecentEncounterFound != null) {
-						// (As a test usecase) cache the most recent encounter for later use incase the 
+						// (As a test usecase) cache the most recent encounter for later use incase the
 						//caller's next call is for its most recent obs and they share contextual data
 						context.addToCache(MOST_RECENT_ENCOUNTER_KEY_PREFIX + patientId, mostRecentEncounterFound);
 						results.put(patientId, new EncounterResult(mostRecentEncounterFound, this, context));
@@ -69,7 +69,7 @@ public class MostRecentEncounterCalculation extends BaseCalculation implements P
 				}
 			}
 		}
-		
+
 		return results;
 	}
 }

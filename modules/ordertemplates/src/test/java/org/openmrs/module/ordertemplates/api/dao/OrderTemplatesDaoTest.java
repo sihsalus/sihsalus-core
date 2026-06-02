@@ -27,16 +27,16 @@ import static org.hamcrest.Matchers.isEmptyOrNullString;
 
 /**
  * Unit tests for the OrderTemplatesDao
- * 
+ *
  * @author Arthur D. Mugume, Samuel Male [UCSF] date: 19/07/2022
  */
 public class OrderTemplatesDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	OrderTemplatesDao orderTemplatesDao;
-	
+
 	private static ObjectMapper jsonPrinter = new ObjectMapper();
-	
+
 	private static final String tempalte1 = "{"
 	        + "                          \"dosingType\": \"org.openmrs.SimpleDosingInstructions\","
 	        + "                          \"instructions\": {" + "                            \"dose\": 300,"
@@ -44,25 +44,25 @@ public class OrderTemplatesDaoTest extends BaseModuleContextSensitiveTest {
 	        + "                            \"route\": \"160240AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\","
 	        + "                            \"frequency\": \"160858AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\","
 	        + "                          }" + "                        }";
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/OrderTemplateServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
-	
+
 	@Test
 	public void getOrderTemplate_shouldGetOrderTemplateById() throws Exception {
 		OrderTemplate existing = orderTemplatesDao.getOrderTemplate(1);
 		testOrderTemplate1(existing);
 	}
-	
+
 	@Test
 	public void getOrderTemplateByUuid_shouldGetOrderTemplateByUuid() throws Exception {
 		OrderTemplate existing = orderTemplatesDao.getOrderTemplateByUuid("01b8f6b7-dc0e-4346-b818-f3e9cd24dfdb");
 		testOrderTemplate1(existing);
 	}
-	
+
 	@Test
 	public void getAllOrderTemplates_shouldAllOrderTemplates() throws Exception {
 		List<OrderTemplate> existingTemplates = orderTemplatesDao.getAllOrderTemplates(true);
@@ -72,7 +72,7 @@ public class OrderTemplatesDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(existingTemplates.get(2).getName(), is("Paracetamol 500mg template"));
 		assertThat(existingTemplates.get(5).getRetired(), is(true));
 	}
-	
+
 	@Test
 	public void getAllOrderTemplates_shouldGetAllUnRetiredOrderTemplates() throws Exception {
 		List<OrderTemplate> existingTemplates = orderTemplatesDao.getAllOrderTemplates(false);
@@ -80,7 +80,7 @@ public class OrderTemplatesDaoTest extends BaseModuleContextSensitiveTest {
 		testOrderTemplate1(existingTemplates.get(0));
 		assertThat(existingTemplates.get(1).getName(), is("Levonorgestrel 1.5mg template"));
 	}
-	
+
 	@Test
 	public void saveOrderTemplate_shouldSaveNewTemplate() {
 		// Setup
@@ -91,12 +91,12 @@ public class OrderTemplatesDaoTest extends BaseModuleContextSensitiveTest {
 		OrderTemplate incoming = new OrderTemplate(new Concept(100014), new Drug(10058));
 		incoming.setTemplate(template);
 		incoming.setName("Abacavir/dolutegravir/lamivudine template");
-		
+
 		// Replay
 		OrderTemplate existing = orderTemplatesDao.saveOrderTemplate(incoming);
 		Assert.assertNotNull(existing.getId());
 	}
-	
+
 	@Test
 	public void saveOrderTemplate_shouldUpdateExistingTemplate() {
 		OrderTemplate existing = orderTemplatesDao.getOrderTemplate(2);
@@ -105,7 +105,7 @@ public class OrderTemplatesDaoTest extends BaseModuleContextSensitiveTest {
 		OrderTemplate updated = orderTemplatesDao.saveOrderTemplate(existing);
 		assertThat(updated.getDescription(), is("Levonorgestrel order template"));
 	}
-	
+
 	@Test
 	public void deleteOrderTemplate_shouldRemoveFromDB() {
 		OrderTemplate existing = orderTemplatesDao.getOrderTemplate(1);
@@ -114,7 +114,7 @@ public class OrderTemplatesDaoTest extends BaseModuleContextSensitiveTest {
 		existing = orderTemplatesDao.getOrderTemplate(1);
 		Assert.assertNull(existing);
 	}
-	
+
 	private static void testOrderTemplate1(OrderTemplate existing) {
 		Assert.assertNotNull(existing);
 		assertThat(existing.getUuid(), is("01b8f6b7-dc0e-4346-b818-f3e9cd24dfdb"));

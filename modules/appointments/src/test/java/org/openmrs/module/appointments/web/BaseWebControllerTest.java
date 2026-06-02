@@ -171,4 +171,3 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
         return objectMapper.readValue(response.getContentAsString(), typeReference);
     }
 }
-

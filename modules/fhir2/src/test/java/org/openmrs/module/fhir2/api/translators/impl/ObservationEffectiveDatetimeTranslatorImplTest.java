@@ -27,56 +27,56 @@ import org.openmrs.Obs;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationEffectiveDatetimeTranslatorImplTest {
-	
+
 	private ObservationEffectiveDatetimeTranslatorImpl datetimeTranslator;
-	
+
 	private Obs obs;
-	
+
 	@Before
 	public void setup() {
 		datetimeTranslator = new ObservationEffectiveDatetimeTranslatorImpl();
 		obs = new Obs();
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfCalledWithNullObject() {
 		Type type = datetimeTranslator.toFhirResource(null);
 		assertThat(type, nullValue());
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateObsDatetimeToDatetimeType() {
 		obs.setObsDatetime(new Date());
-		
+
 		Type datetimeType = datetimeTranslator.toFhirResource(obs);
 		assertThat(datetimeType, notNullValue());
 		assertThat(((DateTimeType) datetimeType).getValue(), notNullValue());
 		assertThat(((DateTimeType) datetimeType).getValue(), DateMatchers.sameDay(new Date()));
 	}
-	
+
 	@Test(expected = NullPointerException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfTypeIsNull() {
 		datetimeTranslator.toOpenmrsType(obs, null);
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDatetimeTypeToObsDatetime() {
 		DateTimeType dateTime = new DateTimeType();
 		dateTime.setValue(new Date());
-		
+
 		Obs result = datetimeTranslator.toOpenmrsType(obs, dateTime);
 		assertThat(result, notNullValue());
 		assertThat(result.getObsDatetime(), DateMatchers.sameDay(new Date()));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateInstantTypeToObsDatetime() {
 		InstantType dateTime = new InstantType();
 		dateTime.setValue(new Date());
-		
+
 		Obs result = datetimeTranslator.toOpenmrsType(obs, dateTime);
 		assertThat(result, notNullValue());
 		assertThat(result.getObsDatetime(), DateMatchers.sameDay(new Date()));
 	}
-	
+
 }

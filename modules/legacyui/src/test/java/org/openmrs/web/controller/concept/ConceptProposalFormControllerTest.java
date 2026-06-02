@@ -35,7 +35,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 public class ConceptProposalFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see ConceptProposalFormController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
@@ -43,7 +43,7 @@ public class ConceptProposalFormControllerTest extends BaseModuleWebContextSensi
 	@Verifies(value = "should create a single unique synonym and obs for all similar proposals", method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
 	public void onSubmit_shouldCreateASingleUniqueSynonymAndObsForAllSimilarProposals() throws Exception {
 		executeDataSet("org/openmrs/api/include/ConceptServiceTest-proposals.xml");
-		
+
 		ConceptService cs = Context.getConceptService();
 		ObsService os = Context.getObsService();
 		final Integer conceptproposalId = 5;
@@ -59,12 +59,12 @@ public class ConceptProposalFormControllerTest extends BaseModuleWebContextSensi
 		for (ConceptProposal conceptProposal : proposals) {
 			Assertions.assertNull(conceptProposal.getObs());
 		}
-		
+
 		// set up the controller
 		ConceptProposalFormController controller = (ConceptProposalFormController) applicationContext
 		        .getBean("conceptProposalForm");
 		controller.setApplicationContext(applicationContext);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(new MockHttpSession(null));
 		request.setMethod("POST");
@@ -74,24 +74,24 @@ public class ConceptProposalFormControllerTest extends BaseModuleWebContextSensi
 		request.addParameter("conceptNamelocale", locale.toString());
 		request.addParameter("action", "");
 		request.addParameter("actionToTake", "saveAsSynonym");
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mav = controller.handleRequest(request, response);
 		assertNotNull(mav);
 		assertTrue(mav.getModel().isEmpty());
-		
+
 		Assertions.assertEquals(cp.getOriginalText(), cp.getFinalText());
 		Assertions.assertTrue(conceptToMap.hasName(cp.getOriginalText(), locale));
 		Assertions.assertNotNull(cp.getObs());
 		//Obs should have been created for the 2 proposals with same text, obsConcept but different encounters
 		Assertions.assertEquals(2, os.getObservationsByPersonAndConcept(cp.getEncounter().getPatient(), obsConcept).size());
-		
+
 		//The proposal with a different obs concept should have been skipped
 		proposals = cs.getConceptProposals(cp.getFinalText());
 		Assertions.assertEquals(1, proposals.size());
 		Assertions.assertEquals(21, proposals.get(0).getObsConcept().getConceptId().intValue());
 	}
-	
+
 	/**
 	 * @see ConceptProposalFormController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
@@ -99,20 +99,20 @@ public class ConceptProposalFormControllerTest extends BaseModuleWebContextSensi
 	@Verifies(value = "should work properly for country locales", method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
 	public void onSubmit_shouldWorkProperlyForCountryLocales() throws Exception {
 		executeDataSet("org/openmrs/api/include/ConceptServiceTest-proposals.xml");
-		
+
 		ConceptService cs = Context.getConceptService();
-		
+
 		final Integer conceptproposalId = 5;
 		ConceptProposal cp = cs.getConceptProposal(conceptproposalId);
 		Concept conceptToMap = cs.getConcept(4);
 		Locale locale = new Locale("en", "GB");
-		
+
 		Assertions.assertFalse(conceptToMap.hasName(cp.getOriginalText(), locale));
-		
+
 		ConceptProposalFormController controller = (ConceptProposalFormController) applicationContext
 		        .getBean("conceptProposalForm");
 		controller.setApplicationContext(applicationContext);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(new MockHttpSession(null));
 		request.setMethod("POST");
@@ -122,12 +122,12 @@ public class ConceptProposalFormControllerTest extends BaseModuleWebContextSensi
 		request.addParameter("conceptNamelocale", locale.toString());
 		request.addParameter("action", "");
 		request.addParameter("actionToTake", "saveAsSynonym");
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mav = controller.handleRequest(request, response);
 		assertNotNull(mav);
 		assertTrue(mav.getModel().isEmpty());
-		
+
 		Assertions.assertEquals(cp.getOriginalText(), cp.getFinalText());
 		Assertions.assertTrue(conceptToMap.hasName(cp.getOriginalText(), locale));
 	}

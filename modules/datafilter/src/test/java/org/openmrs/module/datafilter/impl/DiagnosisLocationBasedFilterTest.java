@@ -27,29 +27,29 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DiagnosisLocationBasedFilterTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "encounters.xml");
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "diagnoses.xml");
 	}
-	
+
 	protected List<Diagnosis> getDiagnoses() {
 		return sessionFactory.getCurrentSession().createCriteria(Diagnosis.class).list();
 	}
-	
+
 	@Test
 	public void getDiagnosis_shouldReturnNoDiagnosisIfTheUserIsNotGrantedAccessToAnyBasis() {
 		reloginAs("dBeckham", "test");
 		assertEquals(0, getDiagnoses().size());
 	}
-	
+
 	@Test
 	public void getDiagnosis_shouldReturnDiagnosesBelongingToPatientsAccessibleToTheUser() {
 		reloginAs("dyorke", "test");
@@ -58,7 +58,7 @@ public class DiagnosisLocationBasedFilterTest extends BaseFilterTest {
 		assertEquals(expCount, diagnoses.size());
 		assertTrue(TestUtil.containsId(diagnoses, 1001));
 		assertTrue(TestUtil.containsId(diagnoses, 1002));
-		
+
 		service.grantAccess(Context.getAuthenticatedUser(), new Location(4001));
 		expCount = 3;
 		diagnoses = getDiagnoses();
@@ -67,7 +67,7 @@ public class DiagnosisLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(diagnoses, 1002));
 		assertTrue(TestUtil.containsId(diagnoses, 1003));
 	}
-	
+
 	@Test
 	public void getDiagnosis_shouldReturnAllDiagnosesIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -78,12 +78,12 @@ public class DiagnosisLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(diagnoses, 1002));
 		assertTrue(TestUtil.containsId(diagnoses, 1003));
 	}
-	
+
 	@Test
 	public void getDiagnosis_shouldReturnAllDiagnosesIfLocationFilteringIsDisabled() {
 		DataFilterTestUtils.disableLocationFiltering();
 		reloginAs("dyorke", "test");
 		assertEquals(3, getDiagnoses().size());
 	}
-	
+
 }

@@ -16,14 +16,14 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ConceptSearchResource1_9Test extends BaseDelegatingResourceTest<ConceptSearchResource1_9, ConceptSearchResult> {
-	
+
 	@Override
 	public ConceptSearchResult newObject() {
 		Concept concept = Context.getConceptService().getConceptByUuid(getUuidProperty());
 		return new ConceptSearchResult("Yes", concept, concept.getName(), 12d);
-		
+
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		assertPropEquals("display", getDisplayProperty());
@@ -34,9 +34,9 @@ public class ConceptSearchResource1_9Test extends BaseDelegatingResourceTest<Con
 		assertPropNotPresent("links");
 		assertPropNotPresent("word");
 		assertPropNotPresent("transientWeight");
-		
+
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		assertPropEquals("display", getDisplayProperty());
@@ -48,7 +48,7 @@ public class ConceptSearchResource1_9Test extends BaseDelegatingResourceTest<Con
 		assertPropNotPresent("word");
 		assertPropNotPresent("transientWeight");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		assertPropEquals("display", getDisplayProperty());
@@ -60,15 +60,15 @@ public class ConceptSearchResource1_9Test extends BaseDelegatingResourceTest<Con
 		assertPropNotPresent("uuid");
 		assertPropNotPresent("links");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "YES";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.CONCEPT_UUID;
 	}
-	
+
 }

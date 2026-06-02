@@ -14,7 +14,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hl7.fhir.r4.model.Patient;
 
 public class IsDeceasedMatcher extends TypeSafeDiagnosingMatcher<Patient> {
-	
+
 	@Override
 	protected boolean matchesSafely(Patient p, Description description) {
 		if (!p.hasDeceased()) {
@@ -31,7 +31,7 @@ public class IsDeceasedMatcher extends TypeSafeDiagnosingMatcher<Patient> {
 			return true;
 		}
 	}
-	
+
 	@Override
 	public void describeTo(Description description) {
 		description.appendText("a patient who is deceased");

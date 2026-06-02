@@ -20,31 +20,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class ConceptSourcesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService service;
-	
+
 	@Autowired
 	private ConceptSourcesLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-concepts.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadConceptSourcesAccordingToCsvFiles() {
-		
+
 		loader.load();
-		
+
 		{ // created with uuid and description
 			ConceptSource c = service.getConceptSourceByName("Mexico");
 			Assert.assertNotNull(c);
 			Assert.assertEquals("adbd4dc1-eb52-4670-8a69-bb646cef9cd7", c.getUuid());
 			Assert.assertEquals("Reference codes for the Mexican MoH", c.getDescription());
 		}
-		{ // retired 
+		{ // retired
 			ConceptSource c = service.getConceptSourceByName("Cambodia");
 			Assert.assertNotNull(c);
 			Assert.assertTrue(c.getRetired());

@@ -18,9 +18,9 @@ import org.openmrs.Provider;
 import java.util.HashSet;
 
 public class EncounterProviderBuilder {
-	
+
 	private EncounterProvider encounterProvider;
-	
+
 	public EncounterProviderBuilder() {
 		encounterProvider = new EncounterProvider();
 		Provider provider = new Provider();
@@ -34,7 +34,7 @@ public class EncounterProviderBuilder {
 		encounterProvider.setEncounterRole(role);
 		encounterProvider.setProvider(provider);
 	}
-	
+
 	public EncounterProvider build() {
 		return encounterProvider;
 	}

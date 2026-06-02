@@ -25,22 +25,22 @@ import static org.mockito.Mockito.when;
  * needing PowerMock to mock the static Context.getAuthenticatedUser method.
  */
 public abstract class AuthenticatedUserTestHelper {
-	
+
 	protected User authenticatedUser;
-	
+
 	protected UserContext mockUserContext;
-	
+
 	@Before
 	public void setUpMockUserContext() throws Exception {
 		authenticatedUser = new User();
 		authenticatedUser.setPerson(new Person());
-		
+
 		mockUserContext = mock(UserContext.class);
 		when(mockUserContext.getAuthenticatedUser()).thenReturn(authenticatedUser);
-		
+
 		Context.setUserContext(mockUserContext);
 	}
-	
+
 	@After
 	public void tearDownMockUserContext() throws Exception {
 		Context.clearUserContext();

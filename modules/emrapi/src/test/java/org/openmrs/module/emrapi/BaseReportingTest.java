@@ -18,17 +18,17 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import java.io.File;
 
 public abstract class BaseReportingTest extends BaseModuleContextSensitiveTest {
-	
+
 	@BeforeClass
 	public static void beforeClass() {
 		Module mod = new Module("", "reporting", "", "", "", "1.25.0", "");
 		mod.setFile(new File(""));
 		ModuleFactory.getStartedModulesMap().put(mod.getModuleId(), mod);
 	}
-	
+
 	@AfterClass
 	public static void afterClass() {
 		ModuleFactory.getStartedModulesMap().remove("reporting");
 	}
-	
+
 }

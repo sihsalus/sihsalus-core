@@ -10,5 +10,5 @@
 package org.openmrs.module.webservices.rest.web.v1_0.test.openmrs2_4;
 
 public class GenericChild extends GenericBase<Integer> {
-	
+
 }

@@ -27,11 +27,11 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
  */
 @org.openmrs.module.webservices.rest.web.annotation.Resource(name = RestConstants.VERSION_1 + "/animal", order = 1, supportedClass = Animal.class, supportedOpenmrsVersions = { "3.0.*" })
 public class InstantiateExceptionAnimalResource_1_9 extends DelegatingCrudResource<Animal> {
-	
+
 	public InstantiateExceptionAnimalResource_1_9() {
 		throw new RuntimeException("Used to test RestServiceImpl");
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#getResourceVersion()
 	 */
@@ -39,7 +39,7 @@ public class InstantiateExceptionAnimalResource_1_9 extends DelegatingCrudResour
 	public String getResourceVersion() {
 		return "1.9";
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#newDelegate()
 	 */
@@ -47,7 +47,7 @@ public class InstantiateExceptionAnimalResource_1_9 extends DelegatingCrudResour
 	public Animal newDelegate() {
 		return new Animal();
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#save(Object)
 	 */
@@ -55,7 +55,7 @@ public class InstantiateExceptionAnimalResource_1_9 extends DelegatingCrudResour
 	public Animal save(Animal delegate) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingResourceHandler#getRepresentationDescription(Representation)
 	 */
@@ -63,7 +63,7 @@ public class InstantiateExceptionAnimalResource_1_9 extends DelegatingCrudResour
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#getByUniqueId(String)
 	 */
@@ -71,7 +71,7 @@ public class InstantiateExceptionAnimalResource_1_9 extends DelegatingCrudResour
 	public Animal getByUniqueId(String uniqueId) {
 		return null;
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#delete(Object, String, RequestContext)
 	 */
@@ -79,7 +79,7 @@ public class InstantiateExceptionAnimalResource_1_9 extends DelegatingCrudResour
 	protected void delete(Animal delegate, String reason, RequestContext context) throws ResponseException {
 		throw new ResourceDoesNotSupportOperationException();
 	}
-	
+
 	/**
 	 * @see DelegatingCrudResource#purge(Object, RequestContext)
 	 */

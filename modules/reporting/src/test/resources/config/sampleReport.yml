@@ -42,5 +42,3 @@ config:
     - "DAILY"
   components:
     - "encounters"
-
-

@@ -20,7 +20,7 @@ import org.openmrs.module.reporting.evaluation.EvaluationContext;
  * internal reporting exception
  */
 public class AnEvaluatableDataSetDefinition extends EvaluatableDataSetDefinition {
-	
+
 	@Override
 	public DataSet evaluate(EvaluationContext evalContext) {
 		SimpleDataSet ds = new SimpleDataSet(this, evalContext);

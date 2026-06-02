@@ -30,6 +30,3 @@
     <obs obs_id="1001" order_id="1024" obs_group_id="1000" person_id="7" concept_id="19" encounter_id="1000" obs_datetime="2008-08-15 00:00:00.0" location_id="1" value_text="some test value" comments="" creator="1" date_created="2008-08-19 12:32:03.0" voided="false" uuid="e26cea2c-1b9f-666e-b211-f3ef6c88ae6f"/>
 
 </dataset>
-
-
-

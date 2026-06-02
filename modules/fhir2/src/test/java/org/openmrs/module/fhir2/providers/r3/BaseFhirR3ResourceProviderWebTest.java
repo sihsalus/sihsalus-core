@@ -25,24 +25,24 @@ import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public abstract class BaseFhirR3ResourceProviderWebTest<T extends IResourceProvider, U extends IBaseResource> extends BaseFhirResourceProviderWebTest<T, U> {
-	
+
 	private static final FhirContext FHIR_CONTEXT = FhirContext.forDstu3Cached();
-	
+
 	@Override
 	public String getServletName() {
 		return "fhir2R3Servlet";
 	}
-	
+
 	@Override
 	public FhirContext getFhirContext() {
 		return FHIR_CONTEXT;
 	}
-	
+
 	@Override
 	public FhirRestServlet getRestfulServer() {
 		return new FhirR3RestServlet();
 	}
-	
+
 	@Override
 	public void describeOperationOutcome(Description mismatchDescription, IBaseOperationOutcome baseOperationOutcome) {
 		if (baseOperationOutcome instanceof OperationOutcome) {
@@ -57,12 +57,12 @@ public abstract class BaseFhirR3ResourceProviderWebTest<T extends IResourceProvi
 			}
 		}
 	}
-	
+
 	@Override
 	public Class<? extends IBaseOperationOutcome> getOperationOutcomeClass() {
 		return OperationOutcome.class;
 	}
-	
+
 	@Override
 	public Bundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (Bundle) super.readBundleResponse(response);

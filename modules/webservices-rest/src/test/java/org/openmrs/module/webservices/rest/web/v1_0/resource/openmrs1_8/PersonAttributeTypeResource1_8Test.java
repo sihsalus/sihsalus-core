@@ -16,19 +16,19 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class PersonAttributeTypeResource1_8Test extends BaseDelegatingResourceTest<PersonAttributeTypeResource1_8, PersonAttributeType> {
-	
+
 	private static final String ACTIVE_LIST_INITIAL_XML = "personAttributeTypeWithConcept.xml";
-	
+
 	@BeforeEach
 	public void init() throws Exception {
 		executeDataSet(ACTIVE_LIST_INITIAL_XML);
 	}
-	
+
 	@Override
 	public PersonAttributeType newObject() {
 		return Context.getPersonService().getPersonAttributeTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -41,7 +41,7 @@ public class PersonAttributeTypeResource1_8Test extends BaseDelegatingResourceTe
 		assertPropEquals("editPrivilege", getObject().getEditPrivilege());
 		assertPropEquals("retired", getObject().getRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -55,12 +55,12 @@ public class PersonAttributeTypeResource1_8Test extends BaseDelegatingResourceTe
 		assertPropEquals("retired", getObject().getRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Race";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.PERSON_ATTRIBUTE_TYPE_UUID;

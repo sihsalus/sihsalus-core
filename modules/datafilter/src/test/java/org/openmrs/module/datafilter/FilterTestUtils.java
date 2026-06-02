@@ -14,7 +14,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.datafilter.registration.FilterRegistration;
 
 public class FilterTestUtils {
-	
+
 	public static void disableAllHibernateFilters() {
 		for (FilterRegistration registration : Util.getHibernateFilterRegistrations()) {
 			AdministrationService as = Context.getAdministrationService();
@@ -22,17 +22,17 @@ public class FilterTestUtils {
 			Context.flushSession();
 		}
 	}
-	
+
 	public static void enableFilter(String filterName) {
 		AdministrationService as = Context.getAdministrationService();
 		as.setGlobalProperty(filterName + ".disabled", null);
 		Context.flushSession();
 	}
-	
+
 	public static void disableFilter(String filterName) {
 		AdministrationService as = Context.getAdministrationService();
 		as.setGlobalProperty(filterName + ".disabled", "true");
 		Context.flushSession();
 	}
-	
+
 }

@@ -15,12 +15,12 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ConceptResource1_11Test extends BaseDelegatingResourceTest<ConceptResource1_11, Concept> {
-	
+
 	@Override
 	public Concept newObject() {
 		return Context.getConceptService().getConceptByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -28,12 +28,12 @@ public class ConceptResource1_11Test extends BaseDelegatingResourceTest<ConceptR
 		assertPropPresent("allowDecimal");
 		assertPropPresent("displayPrecision");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "CD4 COUNT";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.CONCEPT_NUMERIC_UUID;

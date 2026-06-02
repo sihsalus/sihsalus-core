@@ -23,27 +23,27 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class InpatientAdmissionTest {
-	
+
 	TestDataManager tdm;
-	
+
 	InpatientAdmission admission;
-	
+
 	Location location1;
-	
+
 	Location location2;
-	
+
 	Encounter encounter1;
-	
+
 	Encounter encounter2;
-	
+
 	Encounter encounter3;
-	
+
 	Encounter encounter4;
-	
+
 	Encounter encounter5;
-	
+
 	Encounter encounter6;
-	
+
 	@Before
 	public void setup() throws Exception {
 		tdm = new TestDataManager();
@@ -63,36 +63,36 @@ public class InpatientAdmissionTest {
 		admission.getTransferEncounters().add(encounter5);
 		admission.getDischargeEncounters().add(encounter6);
 	}
-	
+
 	@Test
 	public void shouldGetAdtEncountersInOrder() {
 		List<Encounter> encounters = admission.getAdtEncounters();
 		assertThat(encounters.size(), equalTo(6));
 		assertThat(encounters, contains(encounter1, encounter2, encounter3, encounter6, encounter5, encounter4));
 	}
-	
+
 	@Test
 	public void shouldGetAdmissionAndTransferEncountersInOrder() {
 		List<Encounter> encounters = admission.getAdmissionAndTransferEncounters();
 		assertThat(encounters.size(), equalTo(5));
 		assertThat(encounters, contains(encounter1, encounter2, encounter3, encounter5, encounter4));
 	}
-	
+
 	@Test
 	public void shouldGetFirstAdmissionOrTransferEncounter() {
 		assertThat(admission.getFirstAdmissionOrTransferEncounter(), equalTo(encounter1));
 	}
-	
+
 	@Test
 	public void shouldGetLatestAdmissionOrTransferEncounter() {
 		assertThat(admission.getLatestAdmissionOrTransferEncounter(), equalTo(encounter4));
 	}
-	
+
 	@Test
 	public void shouldGetLatestAdtEncounter() {
 		assertThat(admission.getLatestAdtEncounter(), equalTo(encounter4));
 	}
-	
+
 	@Test
 	public void shouldGetCurrentInpatientLocation() {
 		assertThat(admission.getCurrentInpatientLocation(), nullValue());
@@ -101,7 +101,7 @@ public class InpatientAdmissionTest {
 		encounter4.setLocation(location1);
 		assertThat(admission.getCurrentInpatientLocation(), equalTo(location1));
 	}
-	
+
 	@Test
 	public void shouldGetEncounterAssigningToCurrentInpatientLocation() {
 		assertThat(admission.getEncounterAssigningToCurrentInpatientLocation(), nullValue());
@@ -117,7 +117,7 @@ public class InpatientAdmissionTest {
 		encounter5.setLocation(location2);
 		assertThat(admission.getEncounterAssigningToCurrentInpatientLocation(), equalTo(encounter4));
 	}
-	
+
 	@Test
 	public void shouldGetIsDischarged() {
 		assertThat(admission.isDischarged(), equalTo(false));
@@ -125,7 +125,7 @@ public class InpatientAdmissionTest {
 		admission.getTransferEncounters().remove(encounter5);
 		assertThat(admission.isDischarged(), equalTo(true));
 	}
-	
+
 	private Encounter createEncounter(String encounterDate, String dateCreated, Integer encounterId) {
 		Encounter encounter = tdm.encounter().dateCreated(dateCreated).encounterDatetime(encounterDate).get();
 		encounter.setEncounterId(encounterId);

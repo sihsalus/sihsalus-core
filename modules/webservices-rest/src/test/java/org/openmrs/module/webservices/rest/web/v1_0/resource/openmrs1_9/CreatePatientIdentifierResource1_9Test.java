@@ -24,44 +24,44 @@ import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PatientI
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
 public class CreatePatientIdentifierResource1_9Test extends BaseModuleWebContextSensitiveTest {
-	
+
 	private PatientIdentifierResource1_8 resource;
-	
+
 	@BeforeEach
 	public void beforeEachTests() throws Exception {
 		resource = (PatientIdentifierResource1_8) Context.getService(RestService.class).getResourceBySupportedClass(
 		    PatientIdentifier.class);
 	}
-	
+
 	@Test
 	public void shouldCreatePatientIdentifier_WhenTypeIsSpecifiedByUuid() throws Exception {
-		
+
 		String personAttributeJson = "{" + "            \"identifier\": \"102-4\"," + "            \"identifierType\": {"
 		        + "              \"uuid\" : \"1a339fe9-38bc-4ab3-b180-320988c0b968\"" + "            },"
 		        + "            \"location\" : {" + "              \"uuid\" : \"8d6c993e-c2cc-11de-8d13-0010c6dffd0f\""
 		        + "            }," + "            \"preferred\": true" + "        }";
-		
+
 		SimpleObject personAttributeSimpleObject = new SimpleObject();
 		personAttributeSimpleObject.putAll(new ObjectMapper().readValue(personAttributeJson, HashMap.class));
-		
+
 		SimpleObject created = (SimpleObject) resource.create("da7f524f-27ce-4bb2-86d6-6d1d05312bd5",
 		    personAttributeSimpleObject, new RequestContext());
 		Assertions.assertEquals("102-4", created.get("identifier"));
 	}
-	
+
 	@Test
 	public void shouldCreatePatientIdentifier_WhenTypeIsSpecifiedByName() throws Exception {
 		String personAttributeJson = "{" + "            \"identifier\": \"102-4\"," + "            \"identifierType\": {"
 		        + "              \"name\" : \"OpenMRS Identification Number\"" + "            },"
 		        + "            \"location\" : {" + "              \"uuid\" : \"8d6c993e-c2cc-11de-8d13-0010c6dffd0f\""
 		        + "            }," + "            \"preferred\": true" + "        }";
-		
+
 		SimpleObject personAttributeSimpleObject = new SimpleObject();
 		personAttributeSimpleObject.putAll(new ObjectMapper().readValue(personAttributeJson, HashMap.class));
-		
+
 		SimpleObject created = (SimpleObject) resource.create("da7f524f-27ce-4bb2-86d6-6d1d05312bd5",
 		    personAttributeSimpleObject, new RequestContext());
 		Assertions.assertEquals("102-4", created.get("identifier"));
 	}
-	
+
 }

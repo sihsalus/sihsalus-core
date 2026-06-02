@@ -17,12 +17,12 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.empty;
 
 public class SessionIT extends ITBase {
-	
+
 	@Test
 	public void shouldBeUnauthenticatedByDefault() throws Exception {
 		given().auth().none().when().get("session").then().body("authenticated", is(false));
 	}
-	
+
 	@Test
 	public void shouldAuthenticateAsAdmin() throws Exception {
 		given().auth().preemptive().basic(ADMIN_USERNAME, ADMIN_PASSWORD).get("session").then()

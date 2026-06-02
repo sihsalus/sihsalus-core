@@ -17,28 +17,28 @@ import org.openmrs.module.webservices.rest.web.api.RestHelperService;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class DrugReferenceMapResource1_10Test extends BaseDelegatingResourceTest<DrugReferenceMapResource1_10, DrugReferenceMap> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_10.DRUG_REFERENCE_MAP_TEST_DATASET);
 	}
-	
+
 	@Override
 	public DrugReferenceMap newObject() {
 		return Context.getService(RestHelperService.class).getObjectByUuid(DrugReferenceMap.class,
 		    RestTestConstants1_10.DRUG_REFERENCE_MAP_UUID);
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Panadol - concept_map_type";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_10.DRUG_REFERENCE_MAP_UUID;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -49,7 +49,7 @@ public class DrugReferenceMapResource1_10Test extends BaseDelegatingResourceTest
 		assertPropPresent("conceptMapType");
 		assertPropNotPresent("auditInfo");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateDefaultRepresentation();

@@ -24,15 +24,15 @@ import java.util.concurrent.TimeoutException;
  * waiting until a task has reached a given state, such as executing or having been stopped.
  */
 public class TaskHelper {
-	
+
 	private static final Log log = LogFactory.getLog(TaskHelper.class);
-	
+
 	private SchedulerService service;
-	
+
 	public TaskHelper(SchedulerService service) {
 		this.service = service;
 	}
-	
+
 	/**
 	 * @param unit defines the unit of the offset
 	 * @param value defines the value of the offset
@@ -45,7 +45,7 @@ public class TaskHelper {
 		cal.add(unit, value);
 		return cal.getTime();
 	}
-	
+
 	/**
 	 * @param startTime defines the start time for a scheduled task
 	 * @return a task that has been scheduled and started
@@ -57,7 +57,7 @@ public class TaskHelper {
 		service.scheduleTask(taskDefinition);
 		return taskDefinition;
 	}
-	
+
 	/**
 	 * @param startTime defines the start time for a scheduled task
 	 * @return a task that has not been scheduled and has not started
@@ -66,19 +66,19 @@ public class TaskHelper {
 	public TaskDefinition getUnscheduledTaskDefinition(Date startTime) {
 		return getTaskDefinition(startTime);
 	}
-	
+
 	private TaskDefinition getTaskDefinition(Date startTime) {
 		TaskDefinition task = service.getTaskByName("Hello World Task");
-		
+
 		task.setStartTime(startTime);
 		service.saveTaskDefinition(task);
-		
+
 		return task;
 	}
-	
+
 	/**
 	 * Waits until a task is executing or until a timeout occurs.
-	 * 
+	 *
 	 * @param task the task that is expected to be executing
 	 * @param timeoutInMilliseconds defines how long to wait before raising a timeout exception
 	 * @throws InterruptedException if an interrupt occurs while waiting
@@ -89,9 +89,9 @@ public class TaskHelper {
 	public void waitUntilTaskIsExecuting(TaskDefinition task, long timeoutInMilliseconds) throws InterruptedException,
 	        TimeoutException {
 		long scheduledBefore = System.currentTimeMillis();
-		
+
 		log.debug("waiting for test task to start executing");
-		
+
 		while (!task.getTaskInstance().isExecuting()) {
 			if (System.currentTimeMillis() - scheduledBefore > timeoutInMilliseconds) {
 				throw new TimeoutException("A timeout has occurred while starting a test task. The task has been scheduled "
@@ -99,9 +99,9 @@ public class TaskHelper {
 			}
 			Thread.sleep(10);
 		}
-		
+
 		log.debug("test task has started executing " + (System.currentTimeMillis() - scheduledBefore)
 		        + " milliseconds after having been scheduled");
 	}
-	
+
 }

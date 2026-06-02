@@ -16,18 +16,18 @@ import org.openmrs.module.initializer.api.attributes.types.AttributeTypesLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class BahmniAttributeTypesLoaderTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private AttributeTypesLoader loader;
-	
+
 	@Autowired
 	BahmniProgramWorkflowService bahmniProgramWorkflowService;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/bahmni-test-metadata.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
 		// Verify setup
@@ -41,10 +41,10 @@ public class BahmniAttributeTypesLoaderTest extends DomainBaseModuleContextSensi
 			assertThat(attType.getMinOccurs(), is(0));
 			assertNull(attType.getMaxOccurs());
 		}
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verify creations
 		{
 			ProgramAttributeType attType = bahmniProgramWorkflowService
@@ -55,7 +55,7 @@ public class BahmniAttributeTypesLoaderTest extends DomainBaseModuleContextSensi
 			assertEquals("Program Assessment's description", attType.getDescription());
 			assertThat(attType.getMinOccurs(), is(1));
 			assertNull(attType.getMaxOccurs());
-			
+
 			ProgramAttributeType attType2 = bahmniProgramWorkflowService
 			        .getProgramAttributeTypeByUuid("9398c839-4f39-428c-9022-e457980ccfa8");
 			assertNotNull(attType2);
@@ -67,7 +67,7 @@ public class BahmniAttributeTypesLoaderTest extends DomainBaseModuleContextSensi
 			assertThat(attType2.getMinOccurs(), is(0));
 			assertThat(attType2.getMaxOccurs(), is(1));
 		}
-		
+
 		// Verify editions
 		{
 			ProgramAttributeType attType = bahmniProgramWorkflowService

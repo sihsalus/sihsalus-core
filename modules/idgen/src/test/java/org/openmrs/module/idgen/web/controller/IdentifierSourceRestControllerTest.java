@@ -40,7 +40,7 @@ import static org.junit.Assert.assertThat;
 import org.openmrs.module.webservices.rest.test.Util;
 
 public class IdentifierSourceRestControllerTest extends MainResourceControllerTest {
-	
+
     public static final String SEQUENTIAL_IDENTIFIER_SOURCE_UUID = "0d47284f-9e9b-4a81-a88b-8bb42bc0a901";
     public static final String REMOTE_IDENTIFIER_SOURCE_UUID = "0d47284f-9e9b-4a81-a88b-8bb42bc0a902";
     public static final String POOL_SOURCE_UUID = "0d47284f-9e9b-4a81-a88b-8bb42bc0a903";
@@ -94,24 +94,24 @@ public class IdentifierSourceRestControllerTest extends MainResourceControllerTe
         assertNotNull(result);
         assertEquals(getAllCount(), Util.getResultsSize(result));
     }
-    
+
     @Test
     public void shouldUploadReservedIdentifiers() throws Exception {
-        String reservedIdentifiers = 
+        String reservedIdentifiers =
                 "{\"reservedIdentifiers\": \"1,2,3,4\"}";
-        
+
         MockHttpServletRequest getRequest = newGetRequest(getURI() + "/" + SEQUENTIAL_IDENTIFIER_SOURCE_UUID);
         getRequest.addParameter("v", "custom:(reservedIdentifiers)");
         SimpleObject initialIdentifiers = deserialize(handle(getRequest));
         assertEquals("[]", initialIdentifiers.get("reservedIdentifiers").toString());
-        
+
         MockHttpServletRequest postRequest = newPostRequest(getURI() + "/" + SEQUENTIAL_IDENTIFIER_SOURCE_UUID, reservedIdentifiers);
         SimpleObject uploadResult = deserialize(handle(postRequest));
         assertThat(
-                uploadResult.toString(), 
+                uploadResult.toString(),
                 containsString(SEQUENTIAL_IDENTIFIER_SOURCE_UUID)
         );
-        
+
         MockHttpServletRequest getRequestAfterUpload = newGetRequest(getURI() + "/" + SEQUENTIAL_IDENTIFIER_SOURCE_UUID);
         getRequestAfterUpload.addParameter("v", "custom:(reservedIdentifiers)");
         SimpleObject identifiersAfterUpload = deserialize(handle(getRequestAfterUpload));
@@ -121,35 +121,35 @@ public class IdentifierSourceRestControllerTest extends MainResourceControllerTe
                 containsString("3"),
                 containsString("4")));
     }
-    
+
     @Test
     public void shouldGenerateIdentifiers() throws Exception {
-        String generateIdentifiers = 
+        String generateIdentifiers =
                 "{"+
                 "\"generateIdentifiers\": \"true\"," +
                 "\"comment\": \"new seq ids\"," +
                 "\"numberToGenerate\": \"5\"," +
                 "\"sourceUuid\": \""+SEQUENTIAL_IDENTIFIER_SOURCE_UUID+"\"" +
                 "}";
-        
+
         MockHttpServletRequest getRequest = newPostRequest(getURI(), generateIdentifiers);
         SimpleObject getResult = deserialize(handle(getRequest));
         assertEquals("[G-0, H-8, I-5, J-3, K-1]", getResult.get("identifiers").toString());
     }
-    
+
     @Test
     public void shouldUploadIdentifiersFromSource() throws Exception {
-        String uploadIdentifiers = 
+        String uploadIdentifiers =
                 "{\"batchSize\": \"2\"," +
                 "\"operation\": \"uploadFromSource\"}";
-        
+
         MockHttpServletRequest postRequest = newPostRequest(getURI() + "/" + POOL_SOURCE_UUID, uploadIdentifiers);
         SimpleObject uploadResult = deserialize(handle(postRequest));
         assertThat(
-                uploadResult.toString(), 
+                uploadResult.toString(),
                 containsString(POOL_SOURCE_UUID)
         );
-        
+
         MockHttpServletRequest getRequestAfterUpload = newGetRequest(getURI() + "/" + POOL_SOURCE_UUID);
         getRequestAfterUpload.addParameter("v", "custom:(identifiers)");
         SimpleObject identifiersAfterUpload = deserialize(handle(getRequestAfterUpload));
@@ -159,20 +159,20 @@ public class IdentifierSourceRestControllerTest extends MainResourceControllerTe
                 containsString("H-8")
         ));
     }
-    
+
     @Test
     public void shouldUploadIdentifiersFromFile() throws Exception {
-        String uploadIdentifiers = 
-                "{\"identifiers\": \"1,2,3,4\"," + 
+        String uploadIdentifiers =
+                "{\"identifiers\": \"1,2,3,4\"," +
                 "\"operation\": \"uploadFromFile\"}";
-        
+
         MockHttpServletRequest postRequest = newPostRequest(getURI() + "/" + POOL_SOURCE_UUID, uploadIdentifiers);
         SimpleObject uploadResult = deserialize(handle(postRequest));
         assertThat(
-                uploadResult.toString(), 
+                uploadResult.toString(),
                 containsString(POOL_SOURCE_UUID)
         );
-        
+
         MockHttpServletRequest getRequestAfterUpload = newGetRequest(getURI() + "/" + POOL_SOURCE_UUID);
         getRequestAfterUpload.addParameter("v", "custom:(identifiers)");
         SimpleObject identifiersAfterUpload = deserialize(handle(getRequestAfterUpload));
@@ -183,9 +183,9 @@ public class IdentifierSourceRestControllerTest extends MainResourceControllerTe
                 containsString("3"),
                 containsString("4")
         ));
-        
+
     }
-    
+
     @Test
     public void shouldSearchByPatientIdentifierType() throws Exception {
         MockHttpServletRequest request = newGetRequest(getURI());
@@ -225,7 +225,7 @@ public class IdentifierSourceRestControllerTest extends MainResourceControllerTe
         handle(newPostRequest(getURI() + "/" + POOL_SOURCE_UUID, name));
         assertEquals("Updated Identifier Pool Name", service.getIdentifierSourceByUuid(POOL_SOURCE_UUID).getName());
     }
-    
+
     @Test
     public void shouldSaveASequentialIdentifierGenerator() throws Exception {
         long initialIdentifierSourceCount = getAllCount();
@@ -322,12 +322,12 @@ public class IdentifierSourceRestControllerTest extends MainResourceControllerTe
         assertEquals(generatedIdentifierSource.getSource().getUuid(), getUuid());
         assertEquals(initialIdentifierSourceCount + 1, getAllCount());
     }
-    
+
     @Test
     public void shouldThrowAnExceptionWhenARequiredParameterIsMissing() throws Exception {
         expectedException.expect(org.openmrs.module.webservices.validation.ValidationException.class);
         expectedException.expectMessage(allOf(containsString("source type"), containsString("patient identifier type"), containsString("name")));
-        
+
         SimpleObject sequentialIdentifierSource = new SimpleObject();
         sequentialIdentifierSource.add("description", "test identifier source");
         sequentialIdentifierSource.add("sourceType", "");

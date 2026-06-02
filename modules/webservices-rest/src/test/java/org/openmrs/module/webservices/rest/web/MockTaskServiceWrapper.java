@@ -22,14 +22,14 @@ import java.util.List;
  * This is the Mock TaskServiceWrapper class which will act as a TaskService for the test cases
  */
 public class MockTaskServiceWrapper extends TaskServiceWrapper {
-	
+
 	public List<TaskDefinition> registeredTasks = new ArrayList<TaskDefinition>();
-	
+
 	public List<TaskDefinition> scheduledTasks = new ArrayList<TaskDefinition>();
-	
+
 	/**
 	 * It will find the respected taskDefinition for the given task Id
-	 * 
+	 *
 	 * @param id - used to find the taskDefinition from the registeredTasks
 	 * @return - return the taskDefinition if it found, else return the null
 	 */
@@ -44,10 +44,10 @@ public class MockTaskServiceWrapper extends TaskServiceWrapper {
 		}
 		return taskFound;
 	}
-	
+
 	/**
 	 * It will find the respected taskDefinition for the given task Name
-	 * 
+	 *
 	 * @param taskName - used to find the taskDefinition from the registeredTasks
 	 * @return - return the taskDefinition if it found, else return the null
 	 */
@@ -62,20 +62,20 @@ public class MockTaskServiceWrapper extends TaskServiceWrapper {
 		}
 		return taskFound;
 	}
-	
+
 	@Override
 	public Collection<TaskDefinition> getRegisteredTasks() {
 		return registeredTasks;
 	}
-	
+
 	@Override
 	public Collection<TaskDefinition> getScheduledTasks() {
 		return scheduledTasks;
 	}
-	
+
 	/**
 	 * Mock Function : It will add the taskDefinition to the registeredTasks List
-	 * 
+	 *
 	 * @param task will contain the taskDefinition to be saved
 	 */
 	@Override
@@ -84,11 +84,11 @@ public class MockTaskServiceWrapper extends TaskServiceWrapper {
 			registeredTasks.add(task);
 		}
 	}
-	
+
 	/**
 	 * Mock Function : It will remove the taskDefinition from the registeredTasks List and Scheduled
 	 * List
-	 * 
+	 *
 	 * @param task will contain the taskDefinition to be deleted
 	 * @throws SchedulerException
 	 */
@@ -101,10 +101,10 @@ public class MockTaskServiceWrapper extends TaskServiceWrapper {
 			registeredTasks.remove(task);
 		}
 	}
-	
+
 	/**
 	 * Mock Function : It will add the taskDefinition to the scheduledTasks List
-	 * 
+	 *
 	 * @param task contains the taskDefinition to be scheduled
 	 * @throws SchedulerException
 	 */
@@ -114,10 +114,10 @@ public class MockTaskServiceWrapper extends TaskServiceWrapper {
 			scheduledTasks.add(task);
 		}
 	}
-	
+
 	/**
 	 * Mock Function : It will remove the taskDefinition from the scheduledTasks List
-	 * 
+	 *
 	 * @param task contains the taskDefinition to be shutdown
 	 * @throws SchedulerException
 	 */
@@ -126,12 +126,12 @@ public class MockTaskServiceWrapper extends TaskServiceWrapper {
 		if (scheduledTasks.contains(task)) {
 			scheduledTasks.remove(task);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Mock Function : it will remove the taskDefinition from the scheduledTasks and add it again
-	 * 
+	 *
 	 * @param task contains the taskDefinition to be re-scheduled
 	 * @throws SchedulerException
 	 */

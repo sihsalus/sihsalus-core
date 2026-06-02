@@ -23,72 +23,72 @@ import org.openmrs.module.fhir2.api.translators.ObservationCategoryTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ObservationCategoryTranslatorImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private final String OBSERVATION_CATEGORY_CONCEPT_CLASS_DATA = "org/openmrs/module/fhir2/mapping/FhirObservationCategoryTest_initial_data.xml";
-	
+
 	private final String LABORATORY_CONCEPT_CLASS_UUID = "8d4907b2-c2cc-11de-8d13-0010c6dffd0f";
-	
+
 	private final String PROCEDURE_CONCEPT_CLASS_UUID = "8d490bf4-c2cc-11de-8d13-0010c6dffd0f";
-	
+
 	private final String EXAM_CONCEPT_CLASS_UUID = "8d491a9a-c2cc-11de-8d13-0010c6dffd0f";
-	
+
 	private Concept concept;
-	
+
 	private CodeableConcept codeableConcept;
-	
+
 	@Autowired
 	ObservationCategoryTranslator observationCategoryTranslator;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(OBSERVATION_CATEGORY_CONCEPT_CLASS_DATA);
 		concept = new Concept();
 	}
-	
+
 	@Test
 	public void shouldTranslateConceptClassToCodeableConceptIsnull() {
 		ConceptClass conceptClass = new ConceptClass();
 		// wrong uuid which is not in dataSet
 		conceptClass.setUuid("0");
 		concept.setConceptClass(conceptClass);
-		
+
 		codeableConcept = observationCategoryTranslator.toFhirResource(concept);
-		
+
 		assertThat(codeableConcept, equalTo(null));
 	}
-	
+
 	@Test
 	public void shouldTranslateConceptClassToCodeableConceptIsLaboratory() {
 		ConceptClass conceptClass = new ConceptClass();
 		conceptClass.setUuid(LABORATORY_CONCEPT_CLASS_UUID);
 		concept.setConceptClass(conceptClass);
-		
+
 		codeableConcept = observationCategoryTranslator.toFhirResource(concept);
-		
+
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCoding().get(0).getDisplay(), equalTo("Laboratory"));
 	}
-	
+
 	@Test
 	public void shouldTranslateConceptClassToCodeableConceptIsProcedure() {
 		ConceptClass conceptClass = new ConceptClass();
 		conceptClass.setUuid(PROCEDURE_CONCEPT_CLASS_UUID);
 		concept.setConceptClass(conceptClass);
-		
+
 		codeableConcept = observationCategoryTranslator.toFhirResource(concept);
-		
+
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCoding().get(0).getDisplay(), equalTo("Procedure"));
 	}
-	
+
 	@Test
 	public void shouldTranslateConceptClassToCodeableConceptIsExam() {
 		ConceptClass conceptClass = new ConceptClass();
 		conceptClass.setUuid(EXAM_CONCEPT_CLASS_UUID);
 		concept.setConceptClass(conceptClass);
-		
+
 		codeableConcept = observationCategoryTranslator.toFhirResource(concept);
-		
+
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCoding().get(0).getDisplay(), equalTo("Exam"));
 	}

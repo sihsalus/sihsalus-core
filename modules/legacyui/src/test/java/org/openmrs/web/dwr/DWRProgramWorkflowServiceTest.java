@@ -31,19 +31,19 @@ import org.openmrs.test.Verifies;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
 public class DWRProgramWorkflowServiceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private DWRProgramWorkflowService dwrProgramWorkflowService;
-	
+
 	protected static final String PROGRAM_WITH_OUTCOMES_XML = "org/openmrs/web/dwr/include/DWRProgramWorkflowServiceTest-initialData.xml";
-	
+
 	protected static final String PROGRAM_NEXT_STATES_XML = "org/openmrs/web/dwr/include/DWRProgramWorkflowServiceTest-initialStates.xml";
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		dwrProgramWorkflowService = new DWRProgramWorkflowService();
 		executeDataSet(PROGRAM_WITH_OUTCOMES_XML);
 	}
-	
+
 	@Test
 	@Verifies(value = "should get possible outcomes for a program", method = "getPossibleOutcomes()")
 	public void getPossibleOutcomes_shouldReturnOutcomeConceptsFromProgram() throws Exception {
@@ -51,36 +51,36 @@ public class DWRProgramWorkflowServiceTest extends BaseModuleWebContextSensitive
 		assertFalse(possibleOutcomes.isEmpty());
 		assertEquals(4, possibleOutcomes.size());
 	}
-	
+
 	@Test
 	@Verifies(value = "should return a list consisting of active, not retired, states", method = "getPossibleNextStates")
 	public void getPossibleNextStates_shouldReturnAllNext() throws Exception {
 		executeDataSet(PROGRAM_NEXT_STATES_XML);
-		
+
 		Integer patient = 11;
 		Integer workflow = 501;
 		Vector<ListItem> possibleNextStates;
-		
+
 		possibleNextStates = dwrProgramWorkflowService.getPossibleNextStates(patient, workflow);
 		assertFalse(possibleNextStates.isEmpty());
 		assertEquals(3, possibleNextStates.size());
-		
+
 	}
-	
+
 	@Test
 	@Verifies(value = "should return a list consisting of active, not retired, states", method = "getPossibleNextStates")
 	public void getPossibleNextStates_shouldReturnNonRetiredConcepts() throws Exception {
 		executeDataSet(PROGRAM_NEXT_STATES_XML);
-		
+
 		Integer patient = 11;
 		Integer workflow = 501;
 		Vector<ListItem> possibleNextStates;
-		
+
 		/* retire a concept */
 		PatientProgram pp = Context.getProgramWorkflowService().getPatientProgram(patient);
 		ProgramWorkflow pw = pp.getProgram().getWorkflow(workflow);
 		Set<ProgramWorkflowState> pwss = pw.getStates();
-		
+
 		for (ProgramWorkflowState pws : pwss) {
 			Concept cp = pws.getConcept();
 			ConceptName cn = cp.getName();
@@ -91,27 +91,27 @@ public class DWRProgramWorkflowServiceTest extends BaseModuleWebContextSensitive
 				}
 			}
 		}
-		
+
 		possibleNextStates = dwrProgramWorkflowService.getPossibleNextStates(patient, workflow);
 		assertFalse(possibleNextStates.isEmpty());
 		assertEquals(2, possibleNextStates.size());
-		
+
 	}
-	
+
 	@Test
 	@Verifies(value = "should return a list consisting of active, not retired, states", method = "getPossibleNextStates")
 	public void getPossibleNextStates_shouldReturnNonRetiredStates() throws Exception {
 		executeDataSet(PROGRAM_NEXT_STATES_XML);
-		
+
 		Integer patient = 11;
 		Integer workflow = 501;
 		Vector<ListItem> possibleNextStates;
-		
+
 		/* retire a workflow state  */
 		PatientProgram pp = Context.getProgramWorkflowService().getPatientProgram(patient);
 		ProgramWorkflow pw = pp.getProgram().getWorkflow(workflow);
 		Set<ProgramWorkflowState> pwss = pw.getStates();
-		
+
 		for (ProgramWorkflowState pws : pwss) {
 			Concept cp = pws.getConcept();
 			ConceptName cn = cp.getName();
@@ -122,13 +122,13 @@ public class DWRProgramWorkflowServiceTest extends BaseModuleWebContextSensitive
 				}
 			}
 		}
-		
+
 		possibleNextStates = dwrProgramWorkflowService.getPossibleNextStates(patient, workflow);
 		assertFalse(possibleNextStates.isEmpty());
 		assertEquals(2, possibleNextStates.size());
-		
+
 	}
-	
+
 	@Test
 	@Verifies(value = "should return a ProgramWorkflow for the given ID", method = "getProgramWorkflow")
 	public void getWorkflowById_shouldFindObjectGivenValidId() throws Exception {
@@ -138,7 +138,7 @@ public class DWRProgramWorkflowServiceTest extends BaseModuleWebContextSensitive
 		assertNotNull(programWorkflow);
 		assertEquals("79fbc48b-215f-41af-982c-5071978be018", programWorkflow.getUuid());
 	}
-	
+
 	@Test
 	@Verifies(value = "should return a ProgramWorkflow for the given Name", method = "getProgramWorkflow")
 	public void getWorkflowByName_shouldFindObjectGivenValidName() {
@@ -146,7 +146,7 @@ public class DWRProgramWorkflowServiceTest extends BaseModuleWebContextSensitive
 		ProgramWorkflow programWorkflow = dwrProgramWorkflowService.getProgramWorkflow(programWorkflowName);
 		assertEquals(2, (int) programWorkflow.getProgramWorkflowId());
 	}
-	
+
 	@Test
 	@Verifies(value = "should return a ProgramWorkflow for the given UUID", method = "getProgramWorkflow")
 	public void getWorkflowByUuid_shouldFindObjectGivenValidUuid() {
@@ -154,28 +154,28 @@ public class DWRProgramWorkflowServiceTest extends BaseModuleWebContextSensitive
 		ProgramWorkflow programWorkflow = dwrProgramWorkflowService.getProgramWorkflow(programWorkflowUuid);
 		assertEquals(1, (int) programWorkflow.getProgramWorkflowId());
 	}
-	
+
 	@Test
 	@Verifies(value = "should return null when there is no ProgramWorkflow for the given lookup", method = "getProgramWorkflow")
 	public void getProgramByName_shouldReturnNullWhenThereIsNoProgramWorkflowForGivenLookup() {
 		ProgramWorkflow workflow = dwrProgramWorkflowService.getProgramWorkflow("A name");
 		assertNull(workflow);
 	}
-	
+
 	@Test
 	@Verifies(value = "last state should be voided", method = "voidLastState")
 	public void voidLastState_shouldVoidTheLastState() throws Exception {
 		executeDataSet(PROGRAM_NEXT_STATES_XML);
-		
+
 		Integer programId = 11;
 		Integer workflowId = 501;
 		String voidReason = "Remove it";
 		String patientStateUuid = "e2d62091-7b57-11eb-b6f7-0242c0a82003";
-		
+
 		PatientState patientState = Context.getProgramWorkflowService().getPatientStateByUuid(patientStateUuid);
-		
+
 		assertFalse(patientState.getVoided());
-		
+
 		dwrProgramWorkflowService.voidLastState(programId, workflowId, voidReason);
 		patientState = Context.getProgramWorkflowService().getPatientStateByUuid(patientStateUuid);
 		assertTrue(patientState.getVoided());

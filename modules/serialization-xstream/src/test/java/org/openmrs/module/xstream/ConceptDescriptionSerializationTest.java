@@ -29,10 +29,10 @@ import static org.junit.Assert.assertEquals;
  * Test class that tests the serialization and deserialization of a conceptDescription
  */
 public class ConceptDescriptionSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a conceptDescription and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -42,12 +42,12 @@ public class ConceptDescriptionSerializationTest extends BaseModuleContextSensit
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptDescriptionSerializationTest.xml");
 		authenticate();
-		
+
 		ConceptDescription cd = (ConceptDescription) Context.getConceptService().getConceptDescriptionByUuid(
 		    "79a3efa7-3a43-4b38-ac5d-9b68aee086c6");
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(cd, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("79a3efa7-3a43-4b38-ac5d-9b68aee086c6", "/conceptDescription/@uuid", xmlOutput);
@@ -57,10 +57,10 @@ public class ConceptDescriptionSerializationTest extends BaseModuleContextSensit
 		XMLAssert.assertXpathEvaluatesTo("en", "/conceptDescription/locale", xmlOutput);
 		XMLAssert.assertXpathExists("/conceptDescription/creator", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo(sdf.format(cd.getDateCreated()), "/conceptDescription/dateCreated", xmlOutput);
-	}	
+	}
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -149,10 +149,10 @@ public class ConceptDescriptionSerializationTest extends BaseModuleContextSensit
 		xmlBuilder.append("  <creator reference=\"4\"/>\n");
 		xmlBuilder.append("  <dateCreated class=\"sql-timestamp\" id=\"28\">2008-08-15 15:27:51 CST</dateCreated>\n");
 		xmlBuilder.append("</conceptDescription>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		ConceptDescription cd = Context.getSerializationService().deserialize(xmlBuilder.toString(), ConceptDescription.class, XStreamSerializer.class);
 		assertEquals("79a3efa7-3a43-4b38-ac5d-9b68aee086c6", cd.getUuid());
 		assertEquals(9, cd.getConceptDescriptionId().intValue());

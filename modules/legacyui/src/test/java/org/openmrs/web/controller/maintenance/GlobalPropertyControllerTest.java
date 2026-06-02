@@ -29,20 +29,20 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.BindException;
 
 public class GlobalPropertyControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private MessageSource messageSource;
-	
+
 	@Autowired
 	private GlobalPropertyController controller;
-	
+
 	private AdministrationService administrationService;
-	
+
 	@BeforeEach
 	public void before() {
 		messageSource = Context.getMessageSourceService();
 		administrationService = Context.getAdministrationService();
 	}
-	
+
 	/**
 	 * @see GlobalPropertyController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 * @verifies purge not included properties
@@ -51,7 +51,7 @@ public class GlobalPropertyControllerTest extends BaseModuleWebContextSensitiveT
 	public void onSubmit_shouldPurgeNotIncludedProperties() throws Exception {
 		GlobalProperty gp = new GlobalProperty("test1", "test1_value");
 		administrationService.saveGlobalProperty(gp);
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
@@ -62,9 +62,9 @@ public class GlobalPropertyControllerTest extends BaseModuleWebContextSensitiveT
 		request.setParameter(GlobalPropertyController.PROP_NAME, keys);
 		request.setParameter(GlobalPropertyController.PROP_VAL_NAME, values);
 		request.setParameter(GlobalPropertyController.PROP_DESC_NAME, descriptions);
-		
+
 		controller.handleRequest(request, response);
-		
+
 		Assertions.assertEquals(2, administrationService.getAllGlobalProperties().size());
 		for (GlobalProperty globalProperty : administrationService.getAllGlobalProperties()) {
 			if (globalProperty.getProperty().equals("test2")) {
@@ -76,7 +76,7 @@ public class GlobalPropertyControllerTest extends BaseModuleWebContextSensitiveT
 			}
 		}
 	}
-	
+
 	/**
 	 * @see GlobalPropertyController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 * @verifies save or update included properties
@@ -85,7 +85,7 @@ public class GlobalPropertyControllerTest extends BaseModuleWebContextSensitiveT
 	public void onSubmit_shouldSaveOrUpdateIncludedProperties() throws Exception {
 		GlobalProperty gp = new GlobalProperty("test1", "test1_value");
 		administrationService.saveGlobalProperty(gp);
-		
+
 		HttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
@@ -96,9 +96,9 @@ public class GlobalPropertyControllerTest extends BaseModuleWebContextSensitiveT
 		request.setParameter(GlobalPropertyController.PROP_NAME, keys);
 		request.setParameter(GlobalPropertyController.PROP_VAL_NAME, values);
 		request.setParameter(GlobalPropertyController.PROP_DESC_NAME, descriptions);
-		
+
 		controller.handleRequest(request, response);
-		
+
 		Assertions.assertEquals(2, administrationService.getAllGlobalProperties().size());
 		for (GlobalProperty globalProperty : administrationService.getAllGlobalProperties()) {
 			if (globalProperty.getProperty().equals("test1")) {

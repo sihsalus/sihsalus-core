@@ -26,72 +26,72 @@ import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterPeriodTranslatorImplTest {
-	
+
 	private EncounterPeriodTranslator<Encounter> encounterPeriodTranslator;
-	
+
 	@Before
 	public void setup() {
 		encounterPeriodTranslator = new EncounterPeriodTranslatorImpl();
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldMapEncounterDatetimeToPeriod() {
 		Date encounterDate = new Date();
-		
+
 		Encounter encounter = new Encounter();
 		encounter.setEncounterDatetime(encounterDate);
-		
+
 		Period result = encounterPeriodTranslator.toFhirResource(encounter);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getStart(), notNullValue());
 		assertThat(result.getEnd(), nullValue());
 		assertThat(result.getStart(), equalTo(encounterDate));
 	}
-	
+
 	@Test
 	public void toOpenmrsObject_shouldMapPeriodStartToEncounterDatetime() {
 		Date encounterDate = new java.util.Date();
-		
+
 		Encounter encounter = new Encounter();
-		
+
 		Period period = new Period();
 		period.setStart(encounterDate);
-		
+
 		Encounter result = encounterPeriodTranslator.toOpenmrsType(encounter, period);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getEncounterDatetime(), equalTo(encounterDate));
 	}
-	
+
 	@Test
 	public void toOpenmrsObject_shouldMapPeriodEndToEncounterDatetimeIsNoStartProvided() {
 		Date encounterDate = new java.util.Date();
-		
+
 		Encounter encounter = new Encounter();
-		
+
 		Period period = new Period();
 		period.setEnd(encounterDate);
-		
+
 		Encounter result = encounterPeriodTranslator.toOpenmrsType(encounter, period);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getEncounterDatetime(), equalTo(encounterDate));
 	}
-	
+
 	@Test
 	public void toOpenmrsObject_shouldNotTouchEncounterDatetimeIfPeriodHasNoStartOrEnd() {
 		Date encounterDate = new java.util.Date();
-		
+
 		Encounter encounter = new Encounter();
 		encounter.setEncounterDatetime(encounterDate);
-		
+
 		Period period = new Period();
-		
+
 		Encounter result = encounterPeriodTranslator.toOpenmrsType(encounter, period);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getEncounterDatetime(), equalTo(encounterDate));
 	}
-	
+
 }

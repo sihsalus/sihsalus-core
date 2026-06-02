@@ -27,21 +27,21 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a encounterType
  */
 public class EncounterTypeShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldEncounterTypeShortSerialization() throws Exception {
-		
+
 		//prepare the necessary data
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/EncounterTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		Encounter e = Context.getEncounterService().getEncounter(4);
 		String xmlOutput = Context.getSerializationService().serialize(e, XStreamShortSerializer.class);
 		//should only serialize "uuid"
@@ -50,25 +50,25 @@ public class EncounterTypeShortSerializationTest extends BaseModuleContextSensit
 		//with short serialization, the "encounterType" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/encounter/encounterType/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldEncounterTypeShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "EncounterTypeShortSerializationTest.xml" here 
+		 * We also need to use the "EncounterTypeShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/EncounterTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<encounter id=\"1\" uuid=\"eec646cb-c847-45a7-98bc-91c8c4f70add\" voided=\"false\">\n");
@@ -106,7 +106,7 @@ public class EncounterTypeShortSerializationTest extends BaseModuleContextSensit
 		xmlBuilder.append("  <orders id=\"16\"/>\n");
 		xmlBuilder.append("  <obs id=\"17\"/>\n");
 		xmlBuilder.append("</encounter>\n");
-		
+
 		Encounter e = Context.getSerializationService().deserialize(xmlBuilder.toString(), Encounter.class,
 		    XStreamShortSerializer.class);
 		assertEquals("61ae96f4-6afe-4351-b6f8-cd4fc383cce1", e.getEncounterType().getUuid());

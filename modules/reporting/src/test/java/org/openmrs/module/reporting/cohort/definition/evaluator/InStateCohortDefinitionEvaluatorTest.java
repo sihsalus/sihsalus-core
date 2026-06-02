@@ -30,16 +30,16 @@ import java.util.Collections;
 import java.util.List;
 
 public class InStateCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link InStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -52,7 +52,7 @@ public class InStateCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(0, c.size());
 	}
-	
+
 	/**
 	 * @see {@link InStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -68,7 +68,7 @@ public class InStateCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 		Assert.assertEquals(1, c.size());
 		Assert.assertTrue(c.contains(2));
 	}
-	
+
 	/**
 	 * @see {@link InStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -89,13 +89,13 @@ public class InStateCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 	@Verifies(value = "should return patients in the given state on or before the given start date", method = "evaluate(CohortDefinition,EvaluationContext)")
 	public void evaluate_shouldReturnPatientsInTheGivenStateOnOrBeforeTheGivenStartDate() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-		
+
 		ProgramWorkflowService ps = Context.getProgramWorkflowService();
 		PatientState patientState = ps.getPatientStateByUuid("ea89deaa-23cc-4840-92fe-63d199c37eaa");
 		patientState.setStartDate(DateUtil.getDateTime(2008, 8, 1, 8, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		InStateCohortDefinition cd = new InStateCohortDefinition();
 		cd.setStates(Collections.singletonList(patientState.getState()));
 		cd.setOnOrBefore(DateUtil.getDateTime(2008, 8, 1, 9, 0, 0, 0));
@@ -106,11 +106,11 @@ public class InStateCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 		patientState.setStartDate(DateUtil.getDateTime(2008, 8, 1, 10, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
 	}
-	
+
 	/**
 	 * @see {@link InStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -118,23 +118,23 @@ public class InStateCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 	@Verifies(value = "should return patients in the given state on or after the given end date", method = "evaluate(CohortDefinition,EvaluationContext)")
 	public void evaluate_shouldReturnPatientsInTheGivenStateOnOrAfterTheGivenEndDate() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
-		
+
 		ProgramWorkflowService ps = Context.getProgramWorkflowService();
 		PatientState patientState = ps.getPatientStateByUuid("ea89deaa-23cc-4840-92fe-63d199c37eaa");
 		patientState.setEndDate(DateUtil.getDateTime(2012, 8, 1, 12, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		InStateCohortDefinition cd = new InStateCohortDefinition();
 		cd.setStates(Collections.singletonList(patientState.getState()));
 		cd.setOnOrAfter(DateUtil.getDateTime(2012, 8, 1, 11, 0, 0, 0));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
-		
+
 		patientState.setEndDate(DateUtil.getDateTime(2012, 8, 1, 10, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
 	}

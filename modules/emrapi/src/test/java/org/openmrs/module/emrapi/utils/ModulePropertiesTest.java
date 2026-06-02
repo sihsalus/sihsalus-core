@@ -23,65 +23,65 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ModulePropertiesTest {
-	
+
 	private ModuleProperties moduleProperties;
-	
+
 	private AdministrationService administrationService;
-	
+
 	private PatientService patientService;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		administrationService = mock(AdministrationService.class);
 		patientService = mock(PatientService.class);
-		
+
 		moduleProperties = new ModuleProperties() {};
 		moduleProperties.setAdministrationService(administrationService);
 		moduleProperties.setPatientService(patientService);
 	}
-	
+
 	@Test
 	public void getPatientIdentifierTypesByGlobalProperty_shouldHandleASingleType() throws Exception {
 		PatientIdentifierType identifierType = new PatientIdentifierType();
 		identifierType.setUuid("some-uuid");
-		
+
 		when(administrationService.getGlobalProperty("oneIdentifierType")).thenReturn("some-uuid");
 		when(patientService.getPatientIdentifierTypeByUuid("some-uuid")).thenReturn(identifierType);
-		
+
 		List<PatientIdentifierType> oneIdentifierType = moduleProperties
 		        .getPatientIdentifierTypesByGlobalProperty("oneIdentifierType", true);
 		assertThat(oneIdentifierType.size(), is(1));
 		assertThat(oneIdentifierType.get(0), is(identifierType));
 	}
-	
+
 	@Test
 	public void getPatientIdentifierTypesByGlobalProperty_shouldHandleMultipleTypes() throws Exception {
 		PatientIdentifierType identifierType1 = new PatientIdentifierType();
 		identifierType1.setUuid("uuid1");
 		PatientIdentifierType identifierType2 = new PatientIdentifierType();
 		identifierType1.setUuid("uuid2");
-		
+
 		when(administrationService.getGlobalProperty("twoIdentifierTypes")).thenReturn("uuid1,uuid2");
 		when(patientService.getPatientIdentifierTypeByUuid("uuid1")).thenReturn(identifierType1);
 		when(patientService.getPatientIdentifierTypeByUuid("uuid2")).thenReturn(identifierType2);
-		
+
 		List<PatientIdentifierType> oneIdentifierType = moduleProperties
 		        .getPatientIdentifierTypesByGlobalProperty("twoIdentifierTypes", true);
 		assertThat(oneIdentifierType.size(), is(2));
 		assertThat(oneIdentifierType.get(0), is(identifierType1));
 		assertThat(oneIdentifierType.get(1), is(identifierType2));
 	}
-	
+
 	@Test
 	public void getIntegerByGlobalProperty_shouldParseInteger() throws Exception {
 		when(administrationService.getGlobalProperty("someInteger")).thenReturn("123");
 		assertThat(moduleProperties.getIntegerByGlobalProperty("someInteger"), is(123));
 	}
-	
+
 	@Test(expected = IllegalStateException.class)
 	public void getIntegerByGlobalProperty_shouldFailForUnparseableInteger() throws Exception {
 		when(administrationService.getGlobalProperty("someInteger")).thenReturn("AAA");
 		moduleProperties.getIntegerByGlobalProperty("someInteger");
 	}
-	
+
 }

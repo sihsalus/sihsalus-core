@@ -36,29 +36,29 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * directory.
  */
 public abstract class DomainBaseModuleContextSensitiveTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected final Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	public static final String appDataTestDir = "testAppDataDir";
-	
+
 	private InitializerService iniz;
-	
+
 	@Autowired
 	MessageSourceService messageSourceService;
-	
+
 	@Autowired
 	InitializerMessageSource initializerMessageSource;
-	
+
 	@Autowired
 	@Qualifier("initializer.InitializerService")
 	public void setService(InitializerService iniz) {
 		this.iniz = iniz;
 	}
-	
+
 	public InitializerService getService() {
 		return iniz;
 	}
-	
+
 	/*
 	 * pre-Spring loading setup for all integration tests
 	 *
@@ -68,7 +68,7 @@ public abstract class DomainBaseModuleContextSensitiveTest extends BaseModuleCon
 		super();
 		initModules();
 	}
-	
+
 	protected void initModules() {
 		{
 			Module mod = new Module("", "addresshierarchy", "", "", "", "2.17.0");
@@ -162,11 +162,11 @@ public abstract class DomainBaseModuleContextSensitiveTest extends BaseModuleCon
 			}
 		}
 	}
-	
+
 	protected String getAppDataDirPath() {
 		return getClass().getClassLoader().getResource(appDataTestDir).getPath() + File.separator;
 	}
-	
+
 	@Override
 	public Properties getRuntimeProperties() {
 		Properties p = super.getRuntimeProperties();
@@ -174,7 +174,7 @@ public abstract class DomainBaseModuleContextSensitiveTest extends BaseModuleCon
 		OpenmrsUtil.setApplicationDataDirectory(getAppDataDirPath());
 		return p;
 	}
-	
+
 	@Before
 	public void setupAppDataDir() {
 		String path = getAppDataDirPath();
@@ -191,7 +191,7 @@ public abstract class DomainBaseModuleContextSensitiveTest extends BaseModuleCon
 		}
 		Locale.setDefault(Locale.ENGLISH);
 	}
-	
+
 	@After
 	public void tearDown() {
 		deleteFilesByExtension(iniz.getChecksumsDirPath(), CHECKSUM_FILE_EXT);

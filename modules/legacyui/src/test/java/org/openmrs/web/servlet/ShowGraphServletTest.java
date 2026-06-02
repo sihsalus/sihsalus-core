@@ -25,7 +25,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * Tests for the {@link ShowGraphServlet} class.
  */
 public class ShowGraphServletTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see ShowGraphServlet#getChart(HttpServletRequest)
 	 */
@@ -36,12 +36,12 @@ public class ShowGraphServletTest extends BaseModuleWebContextSensitiveTest {
 		request.setParameter("patientId", "7");
 		request.setParameter("conceptId", "5497"); // cd4
 		request.setParameter("units", "CUSTOM UNITS");
-		
+
 		JFreeChart chart = new ShowGraphServlet().getChart(request);
-		
+
 		Assertions.assertEquals("CUSTOM UNITS", chart.getXYPlot().getRangeAxis().getLabel());
 	}
-	
+
 	/**
 	 * @see ShowGraphServlet#getChart(HttpServletRequest)
 	 */
@@ -51,12 +51,12 @@ public class ShowGraphServletTest extends BaseModuleWebContextSensitiveTest {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter("patientId", "7");
 		request.setParameter("conceptId", "5497"); // cd4
-		
+
 		JFreeChart chart = new ShowGraphServlet().getChart(request);
-		
+
 		Assertions.assertEquals("cells/mmL", chart.getXYPlot().getRangeAxis().getLabel());
 	}
-	
+
 	/**
 	 * @see ShowGraphServlet#getFromDate(String)
 	 */
@@ -66,12 +66,12 @@ public class ShowGraphServletTest extends BaseModuleWebContextSensitiveTest {
 		Calendar lastYear = Calendar.getInstance();
 		lastYear.set(lastYear.get(Calendar.YEAR) - 1, lastYear.get(Calendar.MONTH), lastYear.get(Calendar.DAY_OF_MONTH), 0,
 		    0, 0);
-		
+
 		Date fromDate = new ShowGraphServlet().getFromDate(null);
-		
+
 		Assertions.assertEquals(lastYear.getTimeInMillis(), fromDate.getTime(), 1000);
 	}
-	
+
 	/**
 	 * @see ShowGraphServlet#getFromDate(String)
 	 */
@@ -82,7 +82,7 @@ public class ShowGraphServletTest extends BaseModuleWebContextSensitiveTest {
 		Date fromDate = new ShowGraphServlet().getFromDate(Long.toString(time));
 		Assertions.assertEquals(time.longValue(), fromDate.getTime());
 	}
-	
+
 	/**
 	 * @see ShowGraphServlet#getToDate(String)
 	 */
@@ -92,12 +92,12 @@ public class ShowGraphServletTest extends BaseModuleWebContextSensitiveTest {
 		Calendar nxtMonth = Calendar.getInstance();
 		nxtMonth.set(nxtMonth.get(Calendar.YEAR), nxtMonth.get(Calendar.MONTH), nxtMonth.get(Calendar.DAY_OF_MONTH) + 1, 0,
 		    0, 0);
-		
+
 		Date toDate = new ShowGraphServlet().getToDate(null);
-		
+
 		Assertions.assertEquals(nxtMonth.getTimeInMillis(), toDate.getTime(), 1000);
 	}
-	
+
 	/**
 	 * @see ShowGraphServlet#getToDate(String)
 	 */
@@ -108,12 +108,12 @@ public class ShowGraphServletTest extends BaseModuleWebContextSensitiveTest {
 		Calendar timeCal = Calendar.getInstance();
 		timeCal.setTimeInMillis(time);
 		timeCal.set(timeCal.get(Calendar.YEAR), timeCal.get(Calendar.MONTH), timeCal.get(Calendar.DAY_OF_MONTH) + 1, 0, 0, 0);
-		
+
 		Date toDate = new ShowGraphServlet().getToDate(Long.toString(time));
-		
+
 		Assertions.assertEquals(timeCal.getTimeInMillis(), toDate.getTime());
 	}
-	
+
 	/**
 	 * @see ShowGraphServlet#getToDate(String)
 	 */
@@ -125,5 +125,5 @@ public class ShowGraphServletTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertEquals(0, toDate.getMinutes());
 		Assertions.assertEquals(0, toDate.getSeconds());
 	}
-	
+
 }

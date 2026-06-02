@@ -41,70 +41,70 @@ import org.openmrs.test.Verifies;
  * Tests the evaluation of a CohortDataSetEvaluator
  */
 public class CohortCrossTabDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link CohortDataSetEvaluator#evaluate(DataSetDefinition,EvaluationContext)}
 	 */
 	@Test
 	@Verifies(value = "should evaluate a CohortCrossTabDataSetDefinition", method = "evaluate(DataSetDefinition,EvaluationContext)")
 	public void evaluate_shouldEvaluateACohortIndicatorDataSetDefinition() throws Exception {
-		
+
 		AgeCohortDefinition childrenOnDate = new AgeCohortDefinition();
 		childrenOnDate.addParameter(new Parameter("effectiveDate", "effectiveDate", Date.class));
 		childrenOnDate.setMaxAge(14);
-		
+
 		AgeCohortDefinition adultsOnDate = new AgeCohortDefinition();
 		adultsOnDate.addParameter(new Parameter("effectiveDate", "effectiveDate", Date.class));
 		adultsOnDate.setMinAge(15);
-		
+
 		AgeCohortDefinition unknownAge = new AgeCohortDefinition();
 		unknownAge.setUnknownAgeIncluded(true);
-		
+
 		GenderCohortDefinition males = new GenderCohortDefinition();
 		males.setMaleIncluded(true);
-		
+
 		GenderCohortDefinition females = new GenderCohortDefinition();
 		females.setFemaleIncluded(true);
-		
+
 		GenderCohortDefinition unknownGender = new GenderCohortDefinition();
 		unknownGender.setUnknownGenderIncluded(true);
-		
+
 		CohortCrossTabDataSetDefinition d = new CohortCrossTabDataSetDefinition();
 		d.addParameter(ReportingConstants.END_DATE_PARAMETER);
-		
+
 		d.addRow("male", new Mapped<CohortDefinition>(males, null));
 		d.addRow("female", new Mapped<CohortDefinition>(females, null));
 		d.addRow("unknown", new Mapped<CohortDefinition>(unknownGender, null));
-		
+
 		d.addColumn("adult", new Mapped<CohortDefinition>(adultsOnDate, ParameterizableUtil.createParameterMappings("effectiveDate=${endDate}")));
 		d.addColumn("child", new Mapped<CohortDefinition>(childrenOnDate, ParameterizableUtil.createParameterMappings("effectiveDate=${endDate}")));
 		d.addColumn("unknown", new Mapped<CohortDefinition>(unknownAge, null));
-		
+
 		EvaluationContext context = new EvaluationContext();
 		context.addParameterValue(ReportingConstants.END_DATE_PARAMETER.getName(), DateUtil.getDateTime(2000, 1, 1));
-		
+
 		ReportDefinition report = new ReportDefinition();
 		report.addParameter(ReportingConstants.END_DATE_PARAMETER);
 		report.addDataSetDefinition(d, ParameterizableUtil.createParameterMappings("endDate=${endDate}"));
-		
+
 		ReportData results = Context.getService(ReportDefinitionService.class).evaluate(report, context);
 		MapDataSet ds = (MapDataSet)results.getDataSets().values().iterator().next();
-		
+
 		Assert.assertEquals(2, ((Cohort)ds.getData(ds.getMetaData().getColumn("male.adult"))).size());
 		Assert.assertEquals(0, ((Cohort)ds.getData(ds.getMetaData().getColumn("male.child"))).size());
 		Assert.assertEquals(3, ((Cohort)ds.getData(ds.getMetaData().getColumn("male.unknown"))).size());
@@ -115,5 +115,5 @@ public class CohortCrossTabDataSetEvaluatorTest extends BaseModuleContextSensiti
 		Assert.assertEquals(0, ((Cohort)ds.getData(ds.getMetaData().getColumn("unknown.child"))).size());
 		Assert.assertEquals(1, ((Cohort)ds.getData(ds.getMetaData().getColumn("unknown.unknown"))).size());
 	}
-	
+
 }

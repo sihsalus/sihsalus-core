@@ -30,13 +30,13 @@ public class SqlCohortDefinitionValidatorTest  extends BaseModuleContextSensitiv
 	public void validate_shouldFailValidationIfQuerytIsNull() throws Exception {
 		SqlCohortDefinition sqlCohortDefinition = new SqlCohortDefinition();
 		sqlCohortDefinition.setQuery(null);
-		
+
 		Errors errors = new BindException(sqlCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(sqlCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -45,13 +45,13 @@ public class SqlCohortDefinitionValidatorTest  extends BaseModuleContextSensitiv
 	public void validate_shouldFailValidationIfLogicIsEmptyString() throws Exception {
 		SqlCohortDefinition sqlCohortDefinition = new SqlCohortDefinition();
 		sqlCohortDefinition.setQuery(" ");
-		
+
 		Errors errors = new BindException(sqlCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(sqlCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -61,10 +61,10 @@ public class SqlCohortDefinitionValidatorTest  extends BaseModuleContextSensitiv
 		SqlCohortDefinition sqlCohortDefinition = new SqlCohortDefinition();
 		sqlCohortDefinition.setName("Test CD");
 		sqlCohortDefinition.setQuery("Some Query");
-		
+
 		Errors errors = new BindException(sqlCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(sqlCohortDefinition, errors);
-		
+
 		Assert.assertFalse(errors.hasErrors());
 	}
 }

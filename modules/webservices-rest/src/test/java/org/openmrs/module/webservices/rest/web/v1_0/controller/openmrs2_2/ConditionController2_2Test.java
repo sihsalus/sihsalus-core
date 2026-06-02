@@ -42,21 +42,21 @@ import java.util.Map;
  * Tests functionality of {@link ConditionController2_2}.
  */
 public class ConditionController2_2Test extends MainResourceControllerTest {
-	
+
 	private ConditionService conditionService;
-	
+
 	private Patient patient;
-	
+
 	private Concept concept1, concept2;
-	
+
 	private ConceptName conceptName1, conceptName2;
-	
+
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants2_2.CONDITION_TEST_DATA_XML);
-		
+
 		this.conditionService = Context.getConditionService();
 		this.patient = Context.getPatientService().getPatient(2);
 		this.concept1 = Context.getConceptService().getConcept(111);
@@ -64,7 +64,7 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		this.conceptName1 = Context.getConceptService().getConceptName(1111);
 		this.conceptName2 = Context.getConceptService().getConceptName(1112);
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -72,7 +72,7 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "condition";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -80,7 +80,7 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants2_2.CODED_CONDITION_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -88,80 +88,80 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		List<Condition> activeConditions = conditionService.getActiveConditions(patient);
 		int totalConditions = 0;
-		
+
 		if (activeConditions != null) {
 			totalConditions = totalConditions + activeConditions.size();
 		}
-		
+
 		return totalConditions;
 	}
-	
+
 	@Test
 	public void shouldCreateANonCodedCondition() throws Exception {
 		CodedOrFreeText cond = new CodedOrFreeText();
 		cond.setNonCoded("Some condition");
-		
+
 		SimpleObject conditionSource = new SimpleObject();
 		conditionSource.add("condition", cond);
 		conditionSource.add("patient", patient.getUuid());
 		conditionSource.add("clinicalStatus", ConditionClinicalStatus.ACTIVE);
 		conditionSource.add("verificationStatus", ConditionVerificationStatus.CONFIRMED);
 		conditionSource.add("onsetDate", "2017-01-12 00:00:00");
-		
+
 		String json = new ObjectMapper().writeValueAsString(conditionSource);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		MockHttpServletResponse res = handle(req);
-		
+
 		SimpleObject newConditionSource = deserialize(res);
 		String uuid = newConditionSource.get("uuid");
 		LinkedHashMap nonCoded = newConditionSource.get("condition");
 		LinkedHashMap patient = newConditionSource.get("patient");
-		
+
 		Assertions.assertNotNull(conditionService.getConditionByUuid(uuid));
-		
+
 		Condition condition = conditionService.getConditionByUuid(uuid);
-		
+
 		Assertions.assertEquals(nonCoded.get("nonCoded"), condition.getCondition().getNonCoded());
 		Assertions.assertEquals(patient.get("uuid"), condition.getPatient().getUuid());
 		Assertions.assertEquals(newConditionSource.get("clinicalStatus"), condition.getClinicalStatus().toString());
 		Assertions.assertEquals(newConditionSource.get("verificationStatus"), condition.getVerificationStatus().toString());
 		Assertions.assertNotNull(newConditionSource.get("onsetDate"));
 	}
-	
+
 	@Test
 	public void shouldCreateACodedCondition() throws Exception {
 		SimpleObject codedOrFreeText = new SimpleObject();
 		codedOrFreeText.add("coded", concept1.getUuid());
 		codedOrFreeText.add("specificName", conceptName1.getUuid());
-		
+
 		SimpleObject conditionSource = new SimpleObject();
 		conditionSource.add("condition", codedOrFreeText);
 		conditionSource.add("patient", patient.getUuid());
 		conditionSource.add("clinicalStatus", ConditionClinicalStatus.ACTIVE);
 		conditionSource.add("verificationStatus", ConditionVerificationStatus.CONFIRMED);
 		conditionSource.add("onsetDate", "2017-01-12 00:00:00");
-		
+
 		String json = new ObjectMapper().writeValueAsString(conditionSource);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		MockHttpServletResponse res = handle(req);
-		
+
 		SimpleObject newConditionSource = deserialize(res);
 		String uuid = newConditionSource.get("uuid");
 		LinkedHashMap cond = newConditionSource.get("condition");
 		LinkedHashMap concept = (LinkedHashMap) cond.get("coded");
 		LinkedHashMap conceptName = (LinkedHashMap) cond.get("specificName");
 		LinkedHashMap patient = newConditionSource.get("patient");
-		
+
 		Assertions.assertNotNull(conditionService.getConditionByUuid(uuid));
-		
+
 		Condition condition = conditionService.getConditionByUuid(uuid);
-		
+
 		Assertions.assertEquals(concept.get("uuid"), condition.getCondition().getCoded().getUuid());
 		Assertions.assertEquals(conceptName.get("uuid"), condition.getCondition().getSpecificName().getUuid());
 		Assertions.assertEquals(patient.get("uuid"), condition.getPatient().getUuid());
@@ -169,7 +169,7 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		Assertions.assertEquals(newConditionSource.get("verificationStatus"), condition.getVerificationStatus().toString());
 		Assertions.assertNotNull(newConditionSource.get("onsetDate"));
 	}
-	
+
 	@Test
 	public void shouldUpdateANonCodedCondition() throws Exception {
 		final String newNonCoded = "Updated non coded condition";
@@ -178,9 +178,9 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		final Date newOnsetDate = new Date();
 		final Date newEndDate = new Date();
 		final String newAdditionalDetail = "Some extra details.";
-		
+
 		Condition condition = conditionService.getConditionByUuid(RestTestConstants2_2.NON_CODED_CONDITION_UUID);
-		
+
 		Assertions.assertNotNull(condition);
 		//sanity checks
 		Assertions.assertFalse(newNonCoded.equalsIgnoreCase(condition.getCondition().getNonCoded()));
@@ -189,19 +189,19 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		Assertions.assertFalse(newOnsetDate.equals(condition.getOnsetDate()));
 		Assertions.assertFalse(newEndDate.equals(condition.getEndDate()));
 		Assertions.assertFalse(newAdditionalDetail.equalsIgnoreCase(condition.getAdditionalDetail()));
-		
+
 		String json = "{ \"condition\":{\"coded\":null,\"specificName\":null,\"nonCoded\":\"" + newNonCoded
 		        + "\"},\"clinicalStatus\":\"" + newClinicalStatus
 		        + "\",\"verificationStatus\":\"" + newVerificationStatus + "\",\"onsetDate\":\""
 		        + DATE_FORMAT.format(newOnsetDate) + "\",\"endDate\":\"" + DATE_FORMAT.format(newEndDate)
 		        + "\",\"additionalDetail\":\"" + newAdditionalDetail + "\"}";
-		
+
 		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + RestTestConstants2_2.NON_CODED_CONDITION_UUID, json)));
 
 		// Updating a Condition creates a new entity instead of modifying the existing one,
 		// so the UUID returned in the response will differ from the original condition's UUID.
 		Condition updatedCondition = conditionService.getConditionByUuid(response.get("uuid"));
-		
+
 		Assertions.assertNotNull(updatedCondition);
 		Assertions.assertEquals(newNonCoded, updatedCondition.getCondition().getNonCoded());
 		Assertions.assertEquals(newClinicalStatus, updatedCondition.getClinicalStatus());
@@ -210,7 +210,7 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		Assertions.assertEquals(newEndDate.toString(), updatedCondition.getEndDate().toString());
 		Assertions.assertEquals(newAdditionalDetail, updatedCondition.getAdditionalDetail());
 	}
-	
+
 	@Test
 	public void shouldUpdateACodedCondition() throws Exception {
 		final String newCoded = concept2.getUuid();
@@ -220,9 +220,9 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		final Date newOnsetDate = new Date();
 		final Date newEndDate = new Date();
 		final String newAdditionalDetail = "Some extra details.";
-		
+
 		Condition condition = conditionService.getConditionByUuid(RestTestConstants2_2.CODED_CONDITION_UUID);
-		
+
 		Assertions.assertNotNull(condition);
 		//sanity checks
 		Assertions.assertFalse(newCoded.equalsIgnoreCase(condition.getCondition().getCoded().getUuid()));
@@ -232,19 +232,19 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		Assertions.assertFalse(newOnsetDate.equals(condition.getOnsetDate()));
 		Assertions.assertFalse(newEndDate.equals(condition.getEndDate()));
 		Assertions.assertFalse(newAdditionalDetail.equalsIgnoreCase(condition.getAdditionalDetail()));
-		
+
 		String json = "{\"condition\":{\"coded\":\"" + newCoded + "\",\"specificName\":\"" + newSpecificName
 		        + "\"},\"clinicalStatus\":\"" + newClinicalStatus
 		        + "\",\"verificationStatus\":\"" + newVerificationStatus + "\",\"onsetDate\":\""
 		        + DATE_FORMAT.format(newOnsetDate) + "\",\"endDate\":\"" + DATE_FORMAT.format(newEndDate)
 		        + "\",\"additionalDetail\":\"" + newAdditionalDetail + "\"}";
-		
+
 		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + RestTestConstants2_2.CODED_CONDITION_UUID, json)));
 
 		// Updating a Condition creates a new entity instead of modifying the existing one,
 		// so the UUID returned in the response will differ from the original condition's UUID.
 		Condition updatedCondition = conditionService.getConditionByUuid(response.get("uuid"));
-		
+
 		Assertions.assertNotNull(updatedCondition);
 		Assertions.assertEquals(newCoded, updatedCondition.getCondition().getCoded().getUuid());
 		Assertions.assertEquals(newSpecificName, updatedCondition.getCondition().getSpecificName().getUuid());
@@ -254,36 +254,36 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		Assertions.assertEquals(newEndDate.toString(), updatedCondition.getEndDate().toString());
 		Assertions.assertEquals(newAdditionalDetail, updatedCondition.getAdditionalDetail());
 	}
-	
+
 	@Test
 	public void shouldVoidACondition() throws Exception {
 		Condition condition = conditionService.getConditionByUuid(getUuid());
 		Assertions.assertFalse(condition.isVoided());
-		
+
 		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
 		req.addParameter("reason", "unit test");
 		handle(req);
-		
+
 		condition = conditionService.getConditionByUuid(getUuid());
 		Assertions.assertEquals(Context.getAuthenticatedUser().getUuid(), condition.getVoidedBy().getUuid());
 		Assertions.assertTrue(condition.isVoided());
 		Assertions.assertEquals("unit test", condition.getVoidReason());
 		Assertions.assertNotNull(condition.getDateVoided());
 	}
-	
+
 	@Test
 	public void shouldUnvoidACondition() throws Exception {
-		
+
 		String voidedUuid = RestTestConstants2_2.VOIDED_CONDITION_UUID;
-		
+
 		Condition condition = conditionService.getConditionByUuid(voidedUuid);
 		Assertions.assertEquals(true, condition.getVoided());
-		
+
 		SimpleObject attributes = new SimpleObject();
 		attributes.add("voided", false);
-		
+
 		String json = new ObjectMapper().writeValueAsString(attributes);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + voidedUuid);
 		req.setContent(json.getBytes());
 		SimpleObject response = deserialize(handle(req));
@@ -294,19 +294,19 @@ public class ConditionController2_2Test extends MainResourceControllerTest {
 		condition = conditionService.getConditionByUuid(response.get("uuid"));
 		Assertions.assertEquals(false, condition.getVoided());
 	}
-	
+
 	@Test
 	public void shouldPurgeCondition() throws Exception {
-		
+
 		Assertions.assertNotNull(conditionService.getConditionByUuid(getUuid()));
-		
+
 		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
 		req.addParameter("purge", "true");
 		handle(req);
-		
+
 		Assertions.assertNull(conditionService.getConditionByUuid(getUuid()));
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetAll()
 	 */

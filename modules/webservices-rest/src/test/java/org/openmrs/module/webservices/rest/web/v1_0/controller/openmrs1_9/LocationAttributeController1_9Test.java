@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests functionality of {@link LocationAttributeController}.
  */
 public class LocationAttributeController1_9Test extends MainResourceControllerTest {
-	
+
 	private LocationService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -41,7 +41,7 @@ public class LocationAttributeController1_9Test extends MainResourceControllerTe
 	public String getURI() {
 		return "location/" + RestTestConstants1_9.LOCATION_UUID + "/attribute";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -49,7 +49,7 @@ public class LocationAttributeController1_9Test extends MainResourceControllerTe
 	public String getUuid() {
 		return RestTestConstants1_9.LOCATION_ATTRIBUTE_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -57,13 +57,13 @@ public class LocationAttributeController1_9Test extends MainResourceControllerTe
 	public long getAllCount() {
 		return service.getLocationByUuid(RestTestConstants1_9.LOCATION_UUID).getActiveAttributes().size();
 	}
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_9.TEST_DATASET);
 		this.service = Context.getLocationService();
 	}
-	
+
 	@Test
 	public void shouldAddAttributeToLocation() throws Exception {
 		int before = service.getLocationByUuid(RestTestConstants1_9.LOCATION_UUID).getAttributes().size();
@@ -72,47 +72,47 @@ public class LocationAttributeController1_9Test extends MainResourceControllerTe
 		int after = service.getLocationByUuid(RestTestConstants1_9.LOCATION_UUID).getAttributes().size();
 		Assertions.assertEquals(before + 1, after);
 	}
-	
+
 	@Test
 	public void shouldEditLocationAttribute() throws Exception {
 		String json = "{ \"attributeType\":\"9516cc50-6f9f-132r-5433-001e378eb67f\" }";
-		
+
 		LocationAttribute locationAttribute = service.getLocationAttributeByUuid(getUuid());
 		Assertions.assertEquals("Audit Date", locationAttribute.getAttributeType().getName());
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
-		
+
 		locationAttribute = service.getLocationAttributeByUuid(getUuid());
 		Assertions.assertEquals("Care Date", locationAttribute.getAttributeType().getName());
 	}
-	
+
 	@Test
 	public void shouldVoidAttribute() throws Exception {
 		LocationAttribute locationAttribute = service.getLocationAttributeByUuid(getUuid());
 		Assertions.assertFalse(locationAttribute.isVoided());
-		
+
 		MockHttpServletRequest request = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
 		request.addParameter("reason", "unit test");
 		handle(request);
-		
+
 		locationAttribute = service.getLocationAttributeByUuid(getUuid());
 		Assertions.assertTrue(locationAttribute.isVoided());
 		Assertions.assertEquals("unit test", locationAttribute.getVoidReason());
 	}
-	
+
 	@Test
 	public void shouldReturnOnlyAttributesOfGivenTypeWhenSearch() throws Exception {
 		String attributeTypeUuid = "9516cc50-6f9f-11e0-8414-001e378eb67e";
 		searchForAttributeOfGivenType_AndCheckIfTypeMatches(attributeTypeUuid);
-		
+
 		String anotherAttributeTypUuid = "9516cc50-6f9f-132r-6556-001e378eb67f";
 		searchForAttributeOfGivenType_AndCheckIfTypeMatches(anotherAttributeTypUuid);
 	}
-	
+
 	/**
 	 * sends search request for attributes with given type, checks if all result attributes are of
 	 * this type
-	 * 
+	 *
 	 * @param attributeTypeUuid
 	 * @throws Exception
 	 */

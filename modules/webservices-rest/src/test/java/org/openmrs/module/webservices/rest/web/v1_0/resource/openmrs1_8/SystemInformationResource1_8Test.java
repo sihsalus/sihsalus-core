@@ -21,26 +21,26 @@ import java.util.Map;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public class SystemInformationResource1_8Test extends BaseModuleWebContextSensitiveTest {
-	
+
 	private AdministrationService administrationService;
-	
+
 	@Autowired
 	private MainResourceController mainResourceController;
-	
+
 	public String getURI() {
 		return "systeminformation";
 	}
-	
+
 	@Test
 	public void testGetAll() throws Exception {
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		SimpleObject result = mainResourceController.get(getURI(), request, response);
-		
+
 		Map<String, Map<String, String>> systemInfo = result.get("systemInfo");
-		
+
 		// Check openmrsInformation
 		Map<String, String> openmrsInformation = systemInfo.get("SystemInfo.title.openmrsInformation");
 		Assertions.assertTrue(systemInfo.containsKey("SystemInfo.title.openmrsInformation"));
@@ -48,7 +48,7 @@ public class SystemInformationResource1_8Test extends BaseModuleWebContextSensit
 		Assertions.assertTrue(openmrsInformation.containsKey("SystemInfo.OpenMRSInstallation.systemDate"));
 		Assertions.assertTrue(openmrsInformation.containsKey("SystemInfo.OpenMRSInstallation.systemTime"));
 		Assertions.assertTrue(openmrsInformation.containsKey("SystemInfo.OpenMRSInstallation.openmrsVersion"));
-		
+
 		// Check javaRuntimeEnvironmentInformation
 		Map<String, String> javRuntime = systemInfo.get("SystemInfo.title.javaRuntimeEnvironmentInformation");
 		Assertions.assertTrue(systemInfo.containsKey("SystemInfo.title.javaRuntimeEnvironmentInformation"));
@@ -58,7 +58,7 @@ public class SystemInformationResource1_8Test extends BaseModuleWebContextSensit
 		Assertions.assertTrue(javRuntime.containsKey("SystemInfo.JavaRuntimeEnv.operatingSystemVersion"));
 		Assertions.assertTrue(javRuntime.containsKey("SystemInfo.JavaRuntimeEnv.javaVersion"));
 		Assertions.assertTrue(javRuntime.containsKey("SystemInfo.JavaRuntimeEnv.javaVendor"));
-		
+
 		// Check memoryInformation
 		Map<String, String> memoryInformation = systemInfo.get("SystemInfo.title.memoryInformation");
 		Assertions.assertTrue(systemInfo.containsKey("SystemInfo.title.memoryInformation"));
@@ -66,7 +66,7 @@ public class SystemInformationResource1_8Test extends BaseModuleWebContextSensit
 		Assertions.assertTrue(memoryInformation.containsKey("SystemInfo.Memory.totalMemory"));
 		Assertions.assertTrue(memoryInformation.containsKey("SystemInfo.Memory.freeMemory"));
 		Assertions.assertTrue(memoryInformation.containsKey("SystemInfo.Memory.maximumHeapSize"));
-		
+
 		// Check dataBaseInformation
 		Map<String, String> dataBaseInformation = systemInfo.get("SystemInfo.title.dataBaseInformation");
 		Assertions.assertTrue(systemInfo.containsKey("SystemInfo.title.dataBaseInformation"));
@@ -76,7 +76,7 @@ public class SystemInformationResource1_8Test extends BaseModuleWebContextSensit
 		Assertions.assertTrue(dataBaseInformation.containsKey("SystemInfo.Database.userName"));
 		Assertions.assertTrue(dataBaseInformation.containsKey("SystemInfo.Database.driver"));
 		Assertions.assertTrue(dataBaseInformation.containsKey("SystemInfo.Database.dialect"));
-		
+
 		// Check moduleInformation
 		Map<String, String> moduleInformation = systemInfo.get("SystemInfo.title.moduleInformation");
 		Assertions.assertTrue(systemInfo.containsKey("SystemInfo.title.moduleInformation"));

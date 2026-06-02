@@ -19,13 +19,13 @@ import org.openmrs.module.datafilter.impl.BaseFilterTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DataFilterBeanFactoryPostProcessorIntegrationTest extends BaseFilterTest {
-	
+
 	private static final String[] testXMlFilters = new String[] { "datafilter_locationFilter1", "datafilter_locationFilter2",
 	        "datafilter_CareSettingFilter" };
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Test
 	public void postProcessBeanFactory_shouldRegisterFiltersToHbmFiles() {
 		assertEquals(20, Util.getHibernateFilterRegistrations().size());
@@ -35,5 +35,5 @@ public class DataFilterBeanFactoryPostProcessorIntegrationTest extends BaseFilte
 			registeredFilters.contains(filterName);
 		}
 	}
-	
+
 }

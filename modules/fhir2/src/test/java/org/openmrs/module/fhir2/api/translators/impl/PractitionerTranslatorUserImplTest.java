@@ -45,38 +45,38 @@ import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerTranslatorUserImplTest {
-	
+
 	private static final String USER_UUID = "5b598dd8-42f8-4d7d-9041-098e4ee8ad30";
-	
+
 	private static final String SYSTEM_ID = "1002";
-	
+
 	private static final String GENDER = "M";
-	
+
 	private static final String GIVEN_NAME = "John";
-	
+
 	private static final String FAMILY_NAME = "Taylor";
-	
+
 	private static final String CITY_VILLAGE = "panvilla";
-	
+
 	private static final String COUNTRY = "Kenya";
-	
+
 	@Mock
 	private GenderTranslator genderTranslator;
-	
+
 	@Mock
 	private PersonNameTranslator nameTranslator;
-	
+
 	@Mock
 	private PersonAddressTranslator addressTranslator;
-	
+
 	private BirthDateTranslator birthDateTranslator = new BirthDateTranslatorImpl();
-	
+
 	private PractitionerTranslatorUserImpl practitionerTranslatorUser;
-	
+
 	private User user;
-	
+
 	private Practitioner practitioner;
-	
+
 	@Before
 	public void setup() {
 		practitionerTranslatorUser = new PractitionerTranslatorUserImpl();
@@ -84,33 +84,33 @@ public class PractitionerTranslatorUserImplTest {
 		practitionerTranslatorUser.setAddressTranslator(addressTranslator);
 		practitionerTranslatorUser.setGenderTranslator(genderTranslator);
 		practitionerTranslatorUser.setBirthDateTranslator(birthDateTranslator);
-		
+
 		user = new User();
 		user.setUuid(USER_UUID);
 		user.setSystemId(SYSTEM_ID);
-		
+
 		Identifier identifier = new Identifier();
 		identifier.setValue((SYSTEM_ID));
 		identifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_USER_IDENTIFIER);
-		
+
 		practitioner = new Practitioner();
 		practitioner.setId(USER_UUID);
 		practitioner.addIdentifier(identifier);
-		
+
 	}
-	
+
 	@Test
 	public void shouldTranslateOpenMrsUserToFhirPractitioner() {
 		Practitioner practitioner = practitionerTranslatorUser.toFhirResource(user);
 		assertThat(practitioner, notNullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnNullWhenPractitionerIsNull() {
 		User omrsUser = practitionerTranslatorUser.toOpenmrsType(user, null);
 		assertThat(omrsUser, nullValue());
 	}
-	
+
 	@Test
 	public void shouldTranslateUserUuidToFhirPractitionerId() {
 		Practitioner practitioner = practitionerTranslatorUser.toFhirResource(user);
@@ -118,7 +118,7 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(practitioner.getId(), notNullValue());
 		assertThat(practitioner.getId(), equalTo(USER_UUID));
 	}
-	
+
 	@Test
 	public void shouldTranslateUserIdToFhirPractitionerIdentifier() {
 		Practitioner result = practitionerTranslatorUser.toFhirResource(user);
@@ -126,9 +126,9 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(result.getIdentifier(), not(empty()));
 		assertThat(result.getIdentifier().size(), equalTo(1));
 		assertThat(result.getIdentifier().get(0).getValue(), equalTo((SYSTEM_ID)));
-		
+
 	}
-	
+
 	@Test
 	public void shouldTranslateFhirPractitionerIdentifierToOpenmrsUserId() {
 		User result = practitionerTranslatorUser.toOpenmrsType(practitioner);
@@ -136,7 +136,7 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(result.getSystemId(), notNullValue());
 		assertThat(result.getSystemId(), equalTo(SYSTEM_ID));
 	}
-	
+
 	@Test
 	public void shouldTranslateUserGenderToFhirPractitionerType() {
 		Person person = new Person();
@@ -156,7 +156,7 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(practitioner.getName().get(0).getGiven().get(0).getValue(), equalTo(GIVEN_NAME));
 		assertThat(practitioner.getName().get(0).getFamily(), equalTo(FAMILY_NAME));
 	}
-	
+
 	@Test
 	public void shouldTranslateUserAddressToFhirPractitionerAddressType() {
 		Person person = new Person();
@@ -170,13 +170,13 @@ public class PractitionerTranslatorUserImplTest {
 		fhirAddress.setCountry(COUNTRY);
 		when(addressTranslator.toFhirResource(personAddress)).thenReturn(fhirAddress);
 		Practitioner practitioner = practitionerTranslatorUser.toFhirResource(user);
-		
+
 		assertThat(practitioner, notNullValue());
 		assertThat(practitioner.getAddress(), not(empty()));
 		assertThat(practitioner.getAddress().get(0).getCountry(), equalTo(COUNTRY));
 		assertThat(practitioner.getAddress().get(0).getCity(), equalTo(CITY_VILLAGE));
 	}
-	
+
 	@Test
 	public void shouldTranslateUserGenderToFhirPractitionerGender() {
 		Person person = new Person();
@@ -188,61 +188,61 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(practitioner.getGender(), notNullValue());
 		assertThat(practitioner.getGender(), equalTo(Enumerations.AdministrativeGender.MALE));
 	}
-	
+
 	@Test
 	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
 		user.setDateChanged(new Date());
-		
+
 		Practitioner result = practitionerTranslatorUser.toFhirResource(user);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
 	}
-	
+
 	@Test
 	public void shouldTranslateOpenMrsDateChangedToVersionId() {
 		user.setDateChanged(new Date());
-		
+
 		Practitioner result = practitionerTranslatorUser.toFhirResource(user);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getVersionId(), notNullValue());
 	}
-	
+
 	@Test
 	public void shouldTranslateLastUpdatedDateToDateChanged() {
 		practitioner.getMeta().setLastUpdated(new Date());
-		
+
 		User result = practitionerTranslatorUser.toOpenmrsType(practitioner);
 		assertThat(result, notNullValue());
 		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
-	
+
 	@Test
 	public void shouldTranslateToFhirBirthDate() {
-		
+
 		User user = new User();
 		Calendar calendar = Calendar.getInstance();
 		DateType dateType = new DateType();
-		
+
 		// when birthdate more than 5 year
 		calendar.set(2000, Calendar.AUGUST, 12);
 		Person person = new Person();
 		person.setBirthdateEstimated(true);
 		person.setBirthdate(calendar.getTime());
 		user.setPerson(person);
-		
+
 		Practitioner result = practitionerTranslatorUser.toFhirResource(user);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.YEAR));
 		assertThat(result.getBirthDateElement().getYear(), equalTo(2000));
-		
+
 		//when birthDate less then 5 year
 		Date date = new Date();
 		user.getPerson().setBirthdate(date);
 		dateType.setValue(date, TemporalPrecisionEnum.MONTH);
-		
+
 		result = practitionerTranslatorUser.toFhirResource(user);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.MONTH));
 		assertThat(result.getBirthDateElement().getYear(), equalTo(dateType.getYear()));

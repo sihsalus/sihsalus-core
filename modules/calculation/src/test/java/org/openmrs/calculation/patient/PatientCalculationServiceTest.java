@@ -41,21 +41,21 @@ import org.openmrs.test.Verifies;
  * Contains test methods for {@link PatientCalculationService}
  */
 public class PatientCalculationServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	private PatientCalculationService service;
-	
+
 	private static final String TEST_DATA_PATH = "org/openmrs/calculation/include/";
-	
+
 	private static final String MODULE_TEST_DATA_XML = TEST_DATA_PATH + "moduleTestData.xml";
-	
+
 	@Before
 	public void before() throws Exception {
 		executeDataSet(MODULE_TEST_DATA_XML);
 		service = Context.getService(PatientCalculationService.class);
 	}
-	
+
 	/**
-	 * @see {@link 
+	 * @see {@link
 	 *      PatientCalculationService#evaluate(Cohort,Calculation,Map<String,Object>,CalculationContext
 	 *      )}
 	 */
@@ -67,9 +67,9 @@ public class PatientCalculationServiceTest extends BaseModuleContextSensitiveTes
 		ageCalculation.getParameterDefinitionSet().add(requiredDefinition);
 		service.evaluate(2, ageCalculation);
 	}
-	
+
 	/**
-	 * @see {@link 
+	 * @see {@link
 	 *      PatientCalculationService#evaluate(Cohort,Calculation,Map<String,Object>,CalculationContext
 	 *      )}
 	 */
@@ -79,14 +79,14 @@ public class PatientCalculationServiceTest extends BaseModuleContextSensitiveTes
 		PatientCalculation ageCalculation = getAgeCalculation();
 		ParameterDefinition requiredDefinition = new SimpleParameterDefinition("testParam", "java.lang.Integer", null, true);
 		ageCalculation.getParameterDefinitionSet().add(requiredDefinition);
-		
+
 		Map<String, Object> values = new HashMap<String, Object>();
 		values.put(requiredDefinition.getKey(), "");
 		service.evaluate(2, ageCalculation, values, null);
 	}
-	
+
 	/**
-	 * @see {@link 
+	 * @see {@link
 	 *      PatientCalculationService#evaluate(Cohort,Calculation,Map<String,Object>,CalculationContext
 	 *      )}
 	 */
@@ -96,12 +96,12 @@ public class PatientCalculationServiceTest extends BaseModuleContextSensitiveTes
 		PatientCalculation ageCalculation = getAgeCalculation();
 		ParameterDefinition requiredDefinition = new SimpleParameterDefinition("testParam", "java.lang.String", null, true);
 		ageCalculation.getParameterDefinitionSet().add(requiredDefinition);
-		
+
 		Map<String, Object> values = new HashMap<String, Object>();
 		values.put(requiredDefinition.getKey(), "");
 		service.evaluate(2, ageCalculation, values, null);
 	}
-	
+
 	/**
 	 * @return an Example calculation instance
 	 */
@@ -109,7 +109,7 @@ public class PatientCalculationServiceTest extends BaseModuleContextSensitiveTes
 		ClasspathCalculationProvider p = new ClasspathCalculationProvider();
 		return (PatientCalculation) p.getCalculation(AgeCalculation.class.getName(), null);
 	}
-	
+
 	/**
 	 * @see {@link PatientCalculationService#evaluate(Cohort,PatientCalculation,Map<String,Object>,
 	 *      PatientCalculationContext)}
@@ -120,12 +120,12 @@ public class PatientCalculationServiceTest extends BaseModuleContextSensitiveTes
 		PatientCalculation ageCalculation = getAgeCalculation();
 		ParameterDefinition param = new SimpleParameterDefinition("testParam", "java.lang.Integer", null, false);
 		ageCalculation.getParameterDefinitionSet().add(param);
-		
+
 		Map<String, Object> values = new HashMap<String, Object>();
 		values.put(param.getKey(), "2s");
 		service.evaluate(2, ageCalculation, values, null);
 	}
-	
+
 	/**
 	 * @see {@link PatientCalculationService#evaluate(Cohort,PatientCalculation,Map<String,Object>,
 	 *      PatientCalculationContext)}
@@ -136,16 +136,16 @@ public class PatientCalculationServiceTest extends BaseModuleContextSensitiveTes
 		PatientCalculation ageCalculation = getAgeCalculation();
 		ParameterDefinition conceptDefinition = new SimpleParameterDefinition("conceptParam", "numericConcepts", null, false);
 		ageCalculation.getParameterDefinitionSet().add(conceptDefinition);
-		
+
 		Map<String, Object> values = new HashMap<String, Object>();
 		List<ConceptNumeric> numericConcepts = new ArrayList<ConceptNumeric>();
 		values.put(conceptDefinition.getKey(), numericConcepts);
 		service.evaluate(2, ageCalculation, values, null);
 	}
-	
+
 	/**
 	 * This test is aimed to make sure our batching mechanism is semantically correct
-	 * 
+	 *
 	 * @see {@link PatientCalculationService#evaluate(Cohort,PatientCalculation,Map<String,Object>,
 	 *      PatientCalculationContext)}
 	 */
@@ -159,7 +159,7 @@ public class PatientCalculationServiceTest extends BaseModuleContextSensitiveTes
 		for (int i = 1; i <= patientCount; ++i) {
 			cohort.add(i);
 		}
-		
+
 		Assert.assertEquals(patientCount, service.evaluate(cohort, new CountingCalculation()).size());
 		//the cohort members should remain unchanged
 		Assert.assertEquals(patientCount, cohort.size());

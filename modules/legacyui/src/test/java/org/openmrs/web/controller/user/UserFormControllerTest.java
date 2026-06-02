@@ -31,12 +31,12 @@ import jakarta.servlet.http.HttpServletResponse;
  * Tests the {@link oldUserFormController} class.
  */
 public class UserFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	protected static final String TEST_DATA = "org/openmrs/web/controller/include/UserFormControllerTest.xml";
-	
+
 	@Autowired
 	private UserFormController controller;
-	
+
 	/**
 	 * @see UserFormController#handleSubmission(WebRequest,HttpSession,String,String,String,null,
 	 *      String, User,BindingResult, HttpServletResponse)
@@ -52,7 +52,7 @@ public class UserFormControllerTest extends BaseModuleWebContextSensitiveTest {
 		    null, null, null, new String[0], "true", null, user, new BindException(user, "user"),
 		    new MockHttpServletResponse());
 	}
-	
+
 	/**
 	 * @see UserFormController#handleSubmission(WebRequest,HttpSession,String,String,String,null,
 	 *      String, User,BindingResult,HttpServletResponse)
@@ -75,7 +75,7 @@ public class UserFormControllerTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertFalse(Context.getProviderService().getProvidersByPerson(user.getPerson()).isEmpty());
 		Assertions.assertEquals(200, response.getStatus());
 	}
-	
+
 	@Test
 	public void shouldSetResponseStatusToBadRequestOnError() throws Exception {
 		executeDataSet(TEST_DATA);
@@ -88,5 +88,5 @@ public class UserFormControllerTest extends BaseModuleWebContextSensitiveTest {
 		    "addToProviderTable", user, new BindException(user, "user"), response);
 		Assertions.assertEquals(400, response.getStatus());
 	}
-	
+
 }

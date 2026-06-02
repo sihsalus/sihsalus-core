@@ -15,24 +15,24 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class CashPointsLoaderIntegrationTest extends DomainBaseModuleContextSensitive_2_7_Test {
-	
+
 	@Autowired
 	@Qualifier("locationService")
 	private LocationService locationService;
-	
+
 	@Autowired
 	private CashPointService cashPointService;
-	
+
 	@Autowired
 	private CashPointsLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-concepts-2.7.xml");
 		{
 			// To be edited
 			Location location = locationService.getLocationByUuid("c4bb4f44-726d-11eb-9439-0242ac130002");
-			
+
 			CashPoint cashPoint = new CashPoint();
 			cashPoint.setUuid("54065383-b4d4-42d2-af4d-d250a1fd2590");
 			cashPoint.setName("OPD Cash Point");
@@ -40,11 +40,11 @@ public class CashPointsLoaderIntegrationTest extends DomainBaseModuleContextSens
 			cashPoint.setLocation(location);
 			cashPointService.saveCashPoint(cashPoint);
 		}
-		
+
 		{
 			// To be retired
 			Location location = locationService.getLocationByUuid("c4bb4f44-726d-11eb-9439-0242ac130003");
-			
+
 			CashPoint cashPoint = new CashPoint();
 			cashPoint.setUuid("8e48e0be-1a31-4bd3-a54d-ace82653f8b8");
 			cashPoint.setName("MCH Cash Point");
@@ -54,12 +54,12 @@ public class CashPointsLoaderIntegrationTest extends DomainBaseModuleContextSens
 			cashPointService.saveCashPoint(cashPoint);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadCashPointsAccordingToCsvFiles() {
 		// Replay
 		loader.load();
-		
+
 		// Verify creation
 		{
 			CashPoint cashPoint = cashPointService.getCashPointByUuid("c56a108f-e3c5-4881-a5e8-a796601883b9");
@@ -68,7 +68,7 @@ public class CashPointsLoaderIntegrationTest extends DomainBaseModuleContextSens
 			assertEquals("IPD cash point for billing", cashPoint.getDescription());
 			assertEquals(locationService.getLocationByUuid("c4bb4f44-726d-11eb-9439-0242ac130003"), cashPoint.getLocation());
 		}
-		
+
 		// Verify edition
 		{
 			CashPoint cashPoint = cashPointService.getCashPointByUuid("54065383-b4d4-42d2-af4d-d250a1fd2590");
@@ -77,14 +77,14 @@ public class CashPointsLoaderIntegrationTest extends DomainBaseModuleContextSens
 			assertEquals("Opd cash point for billing (Modified)", cashPoint.getDescription());
 			assertEquals(locationService.getLocationByUuid("c4bb4f44-726d-11eb-9439-0242ac130002"), cashPoint.getLocation());
 		}
-		
+
 		// Verify retirement
 		{
 			CashPoint cashPoint = cashPointService.getCashPointByUuid("8e48e0be-1a31-4bd3-a54d-ace82653f8b8");
 			assertTrue(cashPoint.getRetired());
 			assertEquals("MCH Cash Point", cashPoint.getName());
 			assertEquals("MCH cash point for billing", cashPoint.getDescription());
-			
+
 		}
 	}
 }

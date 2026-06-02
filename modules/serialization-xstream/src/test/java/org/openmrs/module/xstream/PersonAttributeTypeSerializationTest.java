@@ -31,10 +31,10 @@ import static org.junit.Assert.assertTrue;
  * Test class that tests the serialization and deserialization of a PersonAttributeType
  */
 public class PersonAttributeTypeSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a person attribute type and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -44,11 +44,11 @@ public class PersonAttributeTypeSerializationTest extends BaseModuleContextSensi
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PersonAttributeTypeSerializationTest.xml");
 		authenticate();
-		
+
 		PersonAttributeType personAttributeType = Context.getPersonService().getPersonAttributeType(1);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(personAttributeType, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("1", "/personAttributeType/personAttributeTypeId", xmlOutput);
@@ -69,10 +69,10 @@ public class PersonAttributeTypeSerializationTest extends BaseModuleContextSensi
 		XMLAssert.assertXpathEvaluatesTo("java.lang.String", "/personAttributeType/format", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("Delete Cohorts", "/personAttributeType/editPrivilege/privilege", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -138,10 +138,10 @@ public class PersonAttributeTypeSerializationTest extends BaseModuleContextSensi
 		xmlBuilder.append("    <privilege>Delete Cohorts</privilege>\n");
 		xmlBuilder.append("  </editPrivilege>\n");
 		xmlBuilder.append("</personAttributeType>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		PersonAttributeType personAttributeType = Context.getSerializationService().deserialize(xmlBuilder.toString(),
 		    PersonAttributeType.class, XStreamSerializer.class);
 		assertEquals(1, personAttributeType.getPersonAttributeTypeId().intValue());

@@ -18,21 +18,21 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class PatientProgramAttributeResource2_2Test extends BaseDelegatingResourceTest<PatientProgramAttributeResource2_2, PatientProgramAttribute> {
-	
+
 	@Autowired
 	private ProgramWorkflowService programWorkflowService;
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet("programEnrollmentDataSet.xml");
 	}
-	
+
 	@Override
 	public PatientProgramAttribute newObject() {
-		
+
 		return programWorkflowService.getPatientProgramAttributeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -40,7 +40,7 @@ public class PatientProgramAttributeResource2_2Test extends BaseDelegatingResour
 		assertPropPresent("attributeType");
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -49,12 +49,12 @@ public class PatientProgramAttributeResource2_2Test extends BaseDelegatingResour
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "stage: Stage1";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_2.PATIENT_PROGRAM_ATTRIBUTE_UUID;

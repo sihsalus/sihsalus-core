@@ -19,30 +19,30 @@ import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class PersonAttributeTypeResourceWithConcept1_8Test extends BaseDelegatingResourceTest<PersonAttributeTypeResource1_8, PersonAttributeType> {
-	
+
 	private static final String ACTIVE_LIST_INITIAL_XML = "personAttributeTypeWithConcept.xml";
-	
+
 	@BeforeEach
 	public void init() throws Exception {
 		executeDataSet(ACTIVE_LIST_INITIAL_XML);
 	}
-	
+
 	@Override
 	public PersonAttributeType newObject() {
 		return Context.getPersonService().getPersonAttributeTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		SimpleObject concept = getRepresentation().get("concept");
 		assertEquals("d102c80f-1yz9-4da3-bb88-8122ce8868dd", concept.get("uuid"));
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Caste";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return "55e6ce9e-25bf-11e3-a013-3c0754156a5d";

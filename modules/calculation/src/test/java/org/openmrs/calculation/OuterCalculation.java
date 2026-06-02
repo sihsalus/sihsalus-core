@@ -26,7 +26,7 @@ import org.openmrs.calculation.result.CalculationResultMap;
  * Calculation using results of {@link InnerCalculation}.
  */
 public class OuterCalculation extends BaseCalculation implements PatientCalculation {
-	
+
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(java.util.Collection, java.util.Map, org.openmrs.calculation.patient.PatientCalculationContext)
 	 */
@@ -40,13 +40,13 @@ public class OuterCalculation extends BaseCalculation implements PatientCalculat
 		catch (InvalidCalculationException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		Concept concept = Context.getConceptService().getConcept(3);
 		if (!concept.isRetired()) {
 			throw new RuntimeException("Concept should have been retired by inner calculation");
 		}
-		
+
 		return new CalculationResultMap();
 	}
-	
+
 }

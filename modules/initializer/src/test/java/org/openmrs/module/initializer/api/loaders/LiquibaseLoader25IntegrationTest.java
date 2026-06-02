@@ -24,14 +24,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class LiquibaseLoader25IntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private LiquibaseLoader2_5 loader;
-	
+
 	@Autowired
 	@Qualifier("adminService")
 	private AdministrationService adminService;
-	
+
 	@Before
 	public void setup() throws Exception {
 		System.setProperty("useInMemoryDatabase", "true");
@@ -39,13 +39,13 @@ public class LiquibaseLoader25IntegrationTest extends DomainBaseModuleContextSen
 		String schemaSql = IOUtils.resourceToString("liquibase-schema.sql", StandardCharsets.UTF_8, cl);
 		adminService.executeSQL(schemaSql, false);
 	}
-	
+
 	@After
 	public void teardown() {
 		adminService.executeSQL("drop table LIQUIBASECHANGELOG", false);
 		adminService.executeSQL("drop table LIQUIBASECHANGELOGLOCK", false);
 	}
-	
+
 	@Test
 	public void load_shouldExecuteNewChangeSet() {
 		String relativePath = "configuration/liquibase/liquibase.xml";
@@ -60,7 +60,7 @@ public class LiquibaseLoader25IntegrationTest extends DomainBaseModuleContextSen
 		Assert.assertEquals("true", adminService.getGlobalProperty("test_changes_1"));
 		Assert.assertEquals("true", adminService.getGlobalProperty("test_changes_2"));
 	}
-	
+
 	@Test
 	public void load_shouldUpdateAbsolutePathToRelativePathIfNeeded() {
 		String relativePath = "configuration/liquibase/liquibase.xml";
@@ -72,13 +72,13 @@ public class LiquibaseLoader25IntegrationTest extends DomainBaseModuleContextSen
 		Assert.assertEquals(0, numChangeLogEntries(absolutePath));
 		Assert.assertEquals(1, numChangeLogEntries(relativePath));
 	}
-	
+
 	private int numChangeLogEntries(String filename) {
 		List<List<Object>> ret = adminService
 		        .executeSQL("select count(*) from liquibasechangelog where filename = '" + filename + "'", true);
 		return Integer.parseInt(ret.get(0).get(0).toString());
 	}
-	
+
 	private void insertExistingChangeLogEntry(String filename) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("INSERT INTO LIQUIBASECHANGELOG (");

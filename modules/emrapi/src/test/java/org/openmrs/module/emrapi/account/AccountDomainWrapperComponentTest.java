@@ -18,10 +18,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 public class AccountDomainWrapperComponentTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private DomainWrapperFactory factory;
-	
+
 	@Test
 	public void testThatBeanCanHavePropertiesAutowired() throws Exception {
 		AccountDomainWrapper accountDomainWrapper = factory.newAccountDomainWrapper();

@@ -31,66 +31,66 @@ import static org.hamcrest.Matchers.is;
  * @author Arthur D. Mugume, Samuel Male date: 22/09/2021
  */
 public class OrderTemplatesServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	OrderTemplatesService orderTemplatesService;
-	
+
 	@Autowired
 	ConceptService conceptService;
-	
+
 	@Autowired
 	PatientService patientService;
-	
+
 	@Autowired
 	EncounterService encounterService;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/OrderTemplateServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
-	
+
 	@Test
 	public void getOrderTemplatesByCriteria_shouldGetByConcept() {
-		
+
 		OrderTemplateCriteriaBuilder builder = new OrderTemplateCriteriaBuilder();
 		builder.setConcept(conceptService.getConcept(100011));
 		List<OrderTemplate> orderTemplates = orderTemplatesService.getOrderTemplateByCriteria(builder.build());
 		assertThat(orderTemplates.size(), is(1));
 	}
-	
+
 	@Test
 	public void getOrderTemplatesByConcept_shouldGetByConcept() {
-		
+
 		Concept concept = conceptService.getConcept(100011);
 		List<OrderTemplate> orderTemplates = orderTemplatesService.getOrderTemplatesByConcept(concept);
 		assertThat(orderTemplates.size(), is(1));
 	}
-	
+
 	@Test
 	public void getOrderTemplatesByCriteria_shouldGetByDrug() {
-		
+
 		OrderTemplateCriteriaBuilder builder = new OrderTemplateCriteriaBuilder();
 		builder.setDrug(conceptService.getDrug(10055));
 		List<OrderTemplate> orderTemplates = orderTemplatesService.getOrderTemplateByCriteria(builder.build());
 		assertThat(orderTemplates.size(), is(1));
 	}
-	
+
 	@Test
 	public void getOrderTemplatesByDrug_shouldGetByDrug() {
-		
+
 		Drug drug = conceptService.getDrug(10055);
 		List<OrderTemplate> orderTemplates = orderTemplatesService.getOrderTemplatesByDrug(drug);
 		assertThat(orderTemplates.size(), is(1));
 	}
-	
+
 	@Test
 	public void getOrderTemplatesByCriteria_shouldIncludedRetired() {
-		
+
 		OrderTemplateCriteriaBuilder builder = new OrderTemplateCriteriaBuilder();
 		List<OrderTemplate> orderTemplates = orderTemplatesService.getOrderTemplateByCriteria(builder.build());
 		assertThat(orderTemplates.size(), is(5));
-		
+
 		builder.setIncludeRetired(true);
 		orderTemplates = orderTemplatesService.getOrderTemplateByCriteria(builder.build());
 		assertThat(orderTemplates.size(), is(6));

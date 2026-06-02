@@ -27,71 +27,71 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class ConceptReferenceController1_9Test extends RestControllerTestUtils {
-	
+
 	private static final String CONCEPT_UUID = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
-	
+
 	private static final String CONCEPT_MAPPING = "Some Standardized Terminology:WGT234";
-	
+
 	public String getURI() {
 		return "conceptreferences";
 	}
-	
+
 	@Test
 	public void shouldGetConceptByUuid() throws Exception {
 		// Arrange
-		
+
 		// Act
 		SimpleObject result = deserialize(
 				handle(newGetRequest(getURI(), new MainResourceControllerTest.Parameter("references", CONCEPT_UUID))));
-		
+
 		// Assert
 		assertThat(result, notNullValue());
 		assertThat(result.size(), is(1));
 		assertThat(result.get(CONCEPT_UUID), notNullValue());
 		assertThat(((Map<String, String>) result.get(CONCEPT_UUID)).get("uuid"), equalTo(CONCEPT_UUID));
 	}
-	
+
 	@Test
 	public void shouldGetConceptByMapping() throws Exception {
 		// Arrange
-		
+
 		// Act
 		SimpleObject result = deserialize(
 				handle(newGetRequest(getURI(),
 						new MainResourceControllerTest.Parameter("references", CONCEPT_MAPPING))));
-		
+
 		// Assert
 		assertThat(result, notNullValue());
 		assertThat(result.size(), is(1));
 		assertThat(result.get(CONCEPT_MAPPING), notNullValue());
 		assertThat(((Map<String, String>) result.get(CONCEPT_MAPPING)).get("uuid"), equalTo(CONCEPT_UUID));
 	}
-	
+
 	@Test
 	public void shouldSupportMultipleConcepts() throws Exception {
 		// Arrange
-		
+
 		// Act
 		SimpleObject result = deserialize(
 				handle(newGetRequest(getURI(),
 						new MainResourceControllerTest.Parameter("references", CONCEPT_UUID + "," + CONCEPT_MAPPING))));
-		
+
 		// Assert
 		assertThat(result, notNullValue());
 		assertThat(result.size(), is(2));
 		assertThat(result.get(CONCEPT_UUID), notNullValue());
 		assertThat(result.get(CONCEPT_MAPPING), notNullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnEmptyResultWithInvalidConcept() throws Exception {
 		// Arrange
-		
+
 		// Act
 		SimpleObject result = deserialize(
 				handle(newGetRequest(getURI(),
 						new MainResourceControllerTest.Parameter("references", "aef986bd-e993-4634-ac51-8efcc407e237"))));
-		
+
 		// Assert
 		assertThat(result, notNullValue());
 		assertThat(result.size(), is(0));
@@ -146,51 +146,51 @@ public class ConceptReferenceController1_9Test extends RestControllerTestUtils {
         assertThat(result.get(CONCEPT_UUID), notNullValue());
         assertThat(((Map<String, String>) result.get(CONCEPT_UUID)).get("uuid"), equalTo(CONCEPT_UUID));
     }
-	
+
 	@Test
 	public void shouldSupportRefRepresentation() throws Exception {
 		// Arrange
-		
+
 		// Act
 		SimpleObject result = deserialize(
 				handle(newGetRequest(getURI(),
 						new MainResourceControllerTest.Parameter("references", CONCEPT_UUID),
 						new MainResourceControllerTest.Parameter("v", "ref"))));
-		
+
 		// Assert
 		assertThat(result, notNullValue());
 		assertThat(result.size(), is(1));
 		assertThat(result.get(CONCEPT_UUID), notNullValue());
 		assertThat(((Map<String, String>) result.get(CONCEPT_UUID)).get("uuid"), equalTo(CONCEPT_UUID));
 	}
-	
+
 	@Test
 	public void shouldSupportFullRepresentation() throws Exception {
 		// Arrange
-		
+
 		// Act
 		SimpleObject result = deserialize(
 				handle(newGetRequest(getURI(),
 						new MainResourceControllerTest.Parameter("references", CONCEPT_UUID),
 						new MainResourceControllerTest.Parameter("v", "full"))));
-		
+
 		// Assert
 		assertThat(result, notNullValue());
 		assertThat(result.size(), is(1));
 		assertThat(result.get(CONCEPT_UUID), notNullValue());
 		assertThat(((Map<String, String>) result.get(CONCEPT_UUID)).get("uuid"), equalTo(CONCEPT_UUID));
 	}
-	
+
 	@Test
 	public void shouldSupportCustomRepresentation() throws Exception {
 		// Arrange
-		
+
 		// Act
 		SimpleObject result = deserialize(
 				handle(newGetRequest(getURI(),
 						new MainResourceControllerTest.Parameter("references", CONCEPT_UUID),
 						new MainResourceControllerTest.Parameter("v", "custom:(uuid)"))));
-		
+
 		// Assert
 		assertThat(result, notNullValue());
 		assertThat(result.size(), is(1));

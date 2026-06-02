@@ -25,55 +25,55 @@ import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_9.SystemSe
 /**
  * A test only resource used to determine if the correct definitions are included in the swagger
  * document. Only supports the create option.
- * 
+ *
  * @see SwaggerSpecificationCreatorTest#createOnlySubresourceDefinitions()
  */
 @SubResource(parent = SystemSettingResource1_9.class, path = "subdetails", supportedClass = SubDetails.class, supportedOpenmrsVersions = {
         "2.0.* - 9.*" })
 public class SubDetailsResource extends DelegatingSubResource<SubDetails, GlobalProperty, SystemSettingResource1_9> {
-	
+
 	@Override
 	public GlobalProperty getParent(SubDetails instance) {
 		return new GlobalProperty();
 	}
-	
+
 	@Override
 	public void setParent(SubDetails instance, GlobalProperty parent) {
 	}
-	
+
 	@Override
 	public PageableResult doGetAll(GlobalProperty parent, RequestContext context) throws ResponseException {
 		throw new ResourceDoesNotSupportOperationException();
 	}
-	
+
 	@Override
 	public SubDetails getByUniqueId(String uniqueId) {
 		throw new ResourceDoesNotSupportOperationException();
 	}
-	
+
 	@Override
 	protected void delete(SubDetails delegate, String reason, RequestContext context) throws ResponseException {
 	}
-	
+
 	@Override
 	public void purge(SubDetails delegate, RequestContext context) throws ResponseException {
 	}
-	
+
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		return new DelegatingResourceDescription();
 	}
-	
+
 	@Override
 	public SubDetails newDelegate() {
 		return new SubDetails();
 	}
-	
+
 	@Override
 	public SubDetails save(SubDetails delegate) {
 		return delegate;
 	}
-	
+
 	@Override
 	public Model getCREATEModel(Representation rep) {
 		return super.getGETModel(rep);

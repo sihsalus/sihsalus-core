@@ -33,25 +33,25 @@ import org.openmrs.module.fhir2.api.translators.DiagnosisTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirDiagnosisServiceImplTest {
-	
+
 	@Mock
 	private FhirDiagnosisDao dao;
-	
+
 	@Mock
 	private DiagnosisTranslator translator;
-	
+
 	@Mock
 	private SearchQueryInclude<Condition> searchQueryInclude;
-	
+
 	@Mock
 	private SearchQuery<Diagnosis, Condition, FhirDiagnosisDao, DiagnosisTranslator, SearchQueryInclude<Condition>> searchQuery;
-	
+
 	private FhirDiagnosisServiceImpl diagnosisService;
-	
+
 	@Before
 	public void setup() {
 		diagnosisService = new FhirDiagnosisServiceImpl() {
-			
+
 			@Override
 			protected void validateObject(Diagnosis object) {
 			}
@@ -61,7 +61,7 @@ public class FhirDiagnosisServiceImplTest {
 		diagnosisService.setSearchQuery(searchQuery);
 		diagnosisService.setSearchQueryInclude(searchQueryInclude);
 	}
-	
+
 	@Test
 	public void searchDiagnoses_shouldDelegateToSearchQuery() {
 		DiagnosisSearchParams params = spy(DiagnosisSearchParams.builder().build());
@@ -69,7 +69,7 @@ public class FhirDiagnosisServiceImplTest {
 		doReturn(expectedParams).when(params).toSearchParameterMap();
 		IBundleProvider provider = mock(IBundleProvider.class);
 		when(searchQuery.getQueryResults(expectedParams, dao, translator, searchQueryInclude)).thenReturn(provider);
-		
+
 		IBundleProvider result = diagnosisService.searchDiagnoses(params);
 		assertThat(result, equalTo(provider));
 	}

@@ -15,12 +15,12 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class PersonAddressResource2_0Test extends BaseDelegatingResourceTest<PersonAddressResource2_0, PersonAddress> {
-	
+
 	@Override
 	public PersonAddress newObject() {
 		return Context.getPersonService().getPersonAddressByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -51,7 +51,7 @@ public class PersonAddressResource2_0Test extends BaseDelegatingResourceTest<Per
 		assertPropEquals("longitude", getObject().getLongitude());
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -83,15 +83,15 @@ public class PersonAddressResource2_0Test extends BaseDelegatingResourceTest<Per
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "1050 Wishard Blvd.";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.PERSON_ADDRESS_UUID;
 	}
-	
+
 }

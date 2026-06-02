@@ -21,10 +21,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 public class SchedulerFormTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	private SchedulerFormController controller;
-	
+
 	/**
 	 * See TRUNK-3970: Error when adding a task in version 1.9.3
 	 * https://tickets.openmrs.org/browse/TRUNK-3970

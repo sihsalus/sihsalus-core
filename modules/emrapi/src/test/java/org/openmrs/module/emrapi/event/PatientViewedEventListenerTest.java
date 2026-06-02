@@ -32,39 +32,39 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PatientViewedEventListenerTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private PatientService patientService;
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private AdministrationService adminService;
-	
+
 	private User user;
-	
+
 	private PatientViewedEventListener listener = new PatientViewedEventListener(null);
-	
+
 	@BeforeEach
 	public void setup() {
 		if (user == null)
 			user = userService.getUser(502);
 	}
-	
+
 	private void setInitialLastViewedPatients(List<Integer> patientIds) {
 		userService.setUserProperty(user, EmrApiConstants.USER_PROPERTY_NAME_LAST_VIEWED_PATIENT_IDS,
 		    StringUtils.join(patientIds, ","));
 	}
-	
+
 	private MapMessage createMessage(Patient patient, User user) throws Exception {
 		MapMessage message = new ActiveMQMapMessage();
 		message.setString(EmrApiConstants.EVENT_KEY_PATIENT_UUID, patient.getUuid());
 		message.setString(EmrApiConstants.EVENT_KEY_USER_UUID, user.getUuid());
-		
+
 		return message;
 	}
-	
+
 	/**
 	 * @verifies add the patient to the last viewed user property
 	 * @see PatientViewedEventListener#processMessage(javax.jms.Message)
@@ -75,15 +75,15 @@ public class PatientViewedEventListenerTest extends BaseModuleContextSensitiveTe
 		final Integer lastViewedPatientId = 8;
 		Message message = createMessage(patientService.getPatient(lastViewedPatientId), user);
 		listener.processMessage(message);
-		
+
 		List<Patient> lastViewed = GeneralUtils.getLastViewedPatients(user);
 		assertEquals(lastViewedPatientId, lastViewed.get(0).getId());
 		assertEquals(7, lastViewed.get(1).getId().intValue());
 		assertEquals(6, lastViewed.get(2).getId().intValue());
 		assertEquals(2, lastViewed.get(3).getId().intValue());
-		
+
 	}
-	
+
 	/**
 	 * @verifies remove the first patient and add the new one to the start if the list is full
 	 * @see PatientViewedEventListener#processMessage(javax.jms.Message)
@@ -93,20 +93,20 @@ public class PatientViewedEventListenerTest extends BaseModuleContextSensitiveTe
 		final Integer newLimit = 3;
 		GlobalProperty gp = new GlobalProperty(EmrApiConstants.GP_LAST_VIEWED_PATIENT_SIZE_LIMIT, newLimit.toString());
 		adminService.saveGlobalProperty(gp);
-		
+
 		final Integer patientIdToRemove = 2;
 		setInitialLastViewedPatients(Arrays.asList(patientIdToRemove, 6, 7));
 		final Integer lastSeenPatientId = 8;
 		MapMessage message = createMessage(patientService.getPatient(lastSeenPatientId), user);
 		listener.processMessage(message);
-		
+
 		List<Patient> lastViewed = GeneralUtils.getLastViewedPatients(user);
 		assertEquals(newLimit.intValue(), lastViewed.size());
 		assertEquals(lastSeenPatientId, lastViewed.get(0).getId());
 		assertEquals(7, lastViewed.get(1).getId().intValue());
 		assertEquals(6, lastViewed.get(2).getId().intValue());
 	}
-	
+
 	/**
 	 * @verifies not add a duplicate and should move the existing patient to the start
 	 * @see PatientViewedEventListener#processMessage(javax.jms.Message)
@@ -119,7 +119,7 @@ public class PatientViewedEventListenerTest extends BaseModuleContextSensitiveTe
 		setInitialLastViewedPatients(initialPatientIds);
 		MapMessage message = createMessage(patientService.getPatient(duplicatePatientId), user);
 		listener.processMessage(message);
-		
+
 		List<Patient> lastViewed = GeneralUtils.getLastViewedPatients(user);
 		assertEquals(initialSize, lastViewed.size());
 		assertEquals(duplicatePatientId, lastViewed.get(0).getId());
@@ -127,7 +127,7 @@ public class PatientViewedEventListenerTest extends BaseModuleContextSensitiveTe
 		assertEquals(7, lastViewed.get(2).getId().intValue());
 		assertEquals(6, lastViewed.get(3).getId().intValue());
 	}
-	
+
 	/**
 	 * @verifies not remove any patient if a duplicate is added to a full list
 	 * @see PatientViewedEventListener#processMessage(javax.jms.Message)
@@ -137,12 +137,12 @@ public class PatientViewedEventListenerTest extends BaseModuleContextSensitiveTe
 		final Integer newLimit = 4;
 		GlobalProperty gp = new GlobalProperty(EmrApiConstants.GP_LAST_VIEWED_PATIENT_SIZE_LIMIT, newLimit.toString());
 		adminService.saveGlobalProperty(gp);
-		
+
 		final Integer duplicatePatientId = 2;
 		setInitialLastViewedPatients(Arrays.asList(6, duplicatePatientId, 7, 8));
 		MapMessage message = createMessage(patientService.getPatient(duplicatePatientId), user);
 		listener.processMessage(message);
-		
+
 		List<Patient> lastViewed = GeneralUtils.getLastViewedPatients(user);
 		assertEquals(newLimit.intValue(), lastViewed.size());
 		//The duplicate should still have been moved to the top of the list

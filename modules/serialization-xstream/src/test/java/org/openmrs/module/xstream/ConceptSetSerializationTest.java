@@ -29,10 +29,10 @@ import static org.junit.Assert.assertEquals;
  * Test class that tests the serialization and deserialization of a conceptSet
  */
 public class ConceptSetSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a conceptSet and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -42,11 +42,11 @@ public class ConceptSetSerializationTest extends BaseModuleContextSensitiveTest 
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/ConceptSetSerializationTest.xml");
 		authenticate();
-		
+
 		ConceptSet cs = Context.getConceptService().getConceptSetByUuid("1a111827-639f-4cb4-961f-1e025bf88d90");
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(cs, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("1a111827-639f-4cb4-961f-1e025bf88d90", "/conceptSet/@uuid", xmlOutput);
@@ -57,10 +57,10 @@ public class ConceptSetSerializationTest extends BaseModuleContextSensitiveTest 
 		XMLAssert.assertXpathExists("/conceptSet/creator", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo(sdf.format(cs.getDateCreated()), "/conceptSet/dateCreated", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -176,7 +176,7 @@ public class ConceptSetSerializationTest extends BaseModuleContextSensitiveTest 
 		xmlBuilder.append("  <creator reference=\"4\"/>\n");
 		xmlBuilder.append("  <dateCreated class=\"sql-timestamp\" id=\"38\">2008-08-18 12:38:58 CST</dateCreated>\n");
 		xmlBuilder.append("</conceptSet>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 

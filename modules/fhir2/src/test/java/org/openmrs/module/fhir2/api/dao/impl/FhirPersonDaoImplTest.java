@@ -28,30 +28,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private static final String PERSON_UUID = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
-	
+
 	private static final String WRONG_PERSON_UUID = "wrong_person_uuid";
-	
+
 	private static final String PERSON_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPersonDaoImplTest_initial_data.xml";
-	
+
 	private static final String GIVEN_NAME = "John";
-	
+
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
-	
+
 	private FhirPersonDaoImpl fhirPersonDao;
-	
+
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
-	
+
 	@Before
 	public void setup() throws Exception {
 		fhirPersonDao = new FhirPersonDaoImpl();
 		fhirPersonDao.setSessionFactory(sessionFactory);
 		executeDataSet(PERSON_INITIAL_DATA_XML);
 	}
-	
+
 	@Test
 	public void getPersonByUuid_shouldReturnMatchingPerson() {
 		Person person = fhirPersonDao.get(PERSON_UUID);
@@ -60,28 +60,28 @@ public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(person.getGender(), equalTo("M"));
 		assertThat(person.getGivenName(), equalTo(GIVEN_NAME));
 	}
-	
+
 	@Test
 	public void getPersonByWithWrongUuid_shouldReturnNullPerson() {
 		Person person = fhirPersonDao.get(WRONG_PERSON_UUID);
 		assertThat(person, nullValue());
 	}
-	
+
 	@Test
 	public void getActiveAttributesByPersonAndAttributeTypeUuid_shouldReturnPersonAttribute() {
 		Person person = new Person();
 		person.setUuid(PERSON_UUID);
-		
+
 		List<PersonAttribute> attributeList = fhirPersonDao.getActiveAttributesByPersonAndAttributeTypeUuid(person,
 		    PERSON_ATTRIBUTE_TYPE_UUID);
-		
+
 		assertThat(attributeList, notNullValue());
 	}
-	
+
 	@Test
 	public void delete_shouldVoidPerson() {
 		Person person = fhirPersonDao.delete(PERSON_UUID);
-		
+
 		assertThat(person.getVoided(), equalTo(true));
 		assertThat(person.getDateVoided(), not(nullValue()));
 		assertThat(person.getVoidedBy(), equalTo(Context.getAuthenticatedUser()));

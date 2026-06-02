@@ -26,23 +26,23 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
 public class PatientIdStickerDataPdfExportControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	private PatientIdStickerDataPdfExportController patientStickerController;
-	
+
 	@Autowired
 	private InitializerService initializerService;
-	
+
 	@Autowired
 	@Qualifier(PatientDocumentsConstants.COMPONENT_REPORTMANAGER_PATIENT_ID_STICKER)
 	private PatientIdStickerReportManager reportManager;
-	
+
 	private static final String TEST_PATIENT_UUID = "5e81906d-84d2-45ed-84da-912109977026";
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet("ControllerTestDataset.xml");
-		
+
 		// Configure InitializerService with test values
 		Map<String, String> configs = new HashMap<>();
 		configs.put("report.patientIdSticker.fields.identifier", "true");
@@ -60,20 +60,20 @@ public class PatientIdStickerDataPdfExportControllerTest extends BaseModuleWebCo
 		configs.put("report.patientIdSticker.size.height", "297mm");
 		configs.put("report.patientIdSticker.size.width", "210mm");
 		configs.forEach(initializerService::addKeyValue);
-		
+
 		ReportManagerUtil.setupReport(this.reportManager);
 	}
-	
+
 	@Test
 	public void getPatientIdSticker_shouldReturnValidPdfForEnglishLocale() throws Exception {
 		Context.setLocale(Locale.ENGLISH);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		ResponseEntity<byte[]> result = patientStickerController.getPatientIdSticker(response, TEST_PATIENT_UUID, false);
 		byte[] pdfContent = result.getBody();
-		
+
 		assertNotNull(pdfContent);
-		
+
 		String allText;
 		try (PDDocument doc = PDDocument.load(pdfContent)) {
 			PDFTextStripper stripper = new PDFTextStripper();
@@ -82,22 +82,22 @@ public class PatientIdStickerDataPdfExportControllerTest extends BaseModuleWebCo
 		String cleanedText = allText.replaceAll("\\s+", " ").trim();
 		String[] expectedPhrases = { "Patient Identifier", "Patient Name", "Gender", "Date of Birth", "Age",
 		        "Bilbo Odilon Kipkorir Baggins", "M" };
-		
+
 		for (String phrase : expectedPhrases) {
 			assertTrue("PDF should contain: " + phrase, cleanedText.contains(phrase));
 		}
 	}
-	
+
 	@Test
 	public void getPatientIdSticker_shouldReturnValidPdfForArabicLocale() throws Exception {
 		Context.setLocale(new Locale("ar", "AR"));
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		ResponseEntity<byte[]> result = patientStickerController.getPatientIdSticker(response, TEST_PATIENT_UUID, false);
-		
+
 		byte[] pdfContent = result.getBody();
 		assertNotNull(pdfContent);
-		
+
 		String allText;
 		try (PDDocument doc = PDDocument.load(pdfContent)) {
 			PDFTextStripper stripper = new PDFTextStripper();
@@ -105,20 +105,20 @@ public class PatientIdStickerDataPdfExportControllerTest extends BaseModuleWebCo
 		}
 		String cleanedText = allText.replaceAll("\\s+", " ").trim();
 		String[] expectedPhrases = { "معرف المريض", "الاسم الأول", "الجنس", "تاريخ الميلاد", "العمر", "Bilbo Odilon Kipkorir Baggins", "M" };
-		
+
 		for (String phrase : expectedPhrases) {
 			assertTrue("PDF should contain: " + phrase, cleanedText.contains(phrase));
 		}
 	}
-	
+
 	@Test
 	public void getPatientIdSticker_shouldReturn404ForInvalidPatient() throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		String invalidUuid = "invalid-uuid";
-		
+
 		ResponseEntity<byte[]> responseEntity = patientStickerController.getPatientIdSticker(response, invalidUuid, false);
-		
+
 		assertNull("Response entity should be null", responseEntity);
 		assertEquals("Should return HTTP 404 status", HttpStatus.NOT_FOUND.value(), response.getStatus());
 	}

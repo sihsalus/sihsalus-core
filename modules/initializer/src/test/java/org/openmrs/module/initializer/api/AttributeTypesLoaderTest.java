@@ -19,22 +19,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class AttributeTypesLoaderTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private AttributeTypesLoader loader;
-	
+
 	@Autowired
 	@Qualifier("locationService")
 	private LocationService ls;
-	
+
 	@Autowired
 	@Qualifier("visitService")
 	private VisitService vs;
-	
+
 	@Autowired
 	@Qualifier("providerService")
 	private ProviderService ps;
-	
+
 	public static void assertCustomDatatype(String className) {
 		Assert.assertThat(className, startsWith("org.openmrs.customdatatype.datatype"));
 		try {
@@ -44,12 +44,12 @@ public class AttributeTypesLoaderTest extends DomainBaseModuleContextSensitiveTe
 			Assert.fail(className + " is not a valid OpenMRS custom data type class name.");
 		}
 	}
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
 		// Pre-load verif
@@ -74,10 +74,10 @@ public class AttributeTypesLoaderTest extends DomainBaseModuleContextSensitiveTe
 			Assert.assertThat(attType.getMinOccurs(), is(1));
 			Assert.assertThat(attType.getMaxOccurs(), is(1));
 		}
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verify creations
 		{
 			VisitAttributeType attType = vs.getVisitAttributeTypeByUuid("0bc29982-3193-11e3-93ae-92367f222671");
@@ -96,7 +96,7 @@ public class AttributeTypesLoaderTest extends DomainBaseModuleContextSensitiveTe
 			Assert.assertEquals("org.openmrs.customdatatype.datatype.FloatDatatype", attType.getDatatypeClassname());
 			Assert.assertEquals("Location Height", attType.getName());
 		}
-		
+
 		// Verify edition using UUID as pivot
 		{
 			LocationAttributeType attType = ls.getLocationAttributeTypeByUuid("9eca4f4e-707f-4bb8-8289-2f9b6e93803c");

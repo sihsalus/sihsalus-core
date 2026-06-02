@@ -28,22 +28,22 @@ import org.openmrs.test.BaseContextSensitiveTest;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class PatientIdentifierDataEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see PatientIdentifierDataEvaluator#evaluate(PatientDataDefinition,EvaluationContext)
 	 * @verifies return all identifiers of the specified types in order for each patient
@@ -51,16 +51,16 @@ public class PatientIdentifierDataEvaluatorTest extends BaseModuleContextSensiti
 	@Test
 	@SuppressWarnings("unchecked")
 	public void evaluate_shouldReturnAllIdentifiersOfTheSpecifiedTypesInOrderForEachPatient() throws Exception {
-		
+
 		EvaluationContext context = new EvaluationContext();
 		context.setBaseCohort(new Cohort("2"));
-		
+
 		PatientIdentifierDataDefinition d = new PatientIdentifierDataDefinition();
 		d.addType(Context.getPatientService().getPatientIdentifierType(1)); // "101-6", preferred
 		d.addType(Context.getPatientService().getPatientIdentifierType(2)); // "101"
-		
+
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(d, context);
-		
+
 		Object o = pd.getData().get(2);
 		List<PatientIdentifier> identifiers = (List<PatientIdentifier>) o;
 		Assert.assertEquals(3, identifiers.size());

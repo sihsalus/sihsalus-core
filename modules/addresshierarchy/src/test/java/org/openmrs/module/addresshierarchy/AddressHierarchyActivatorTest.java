@@ -39,7 +39,7 @@ public class AddressHierarchyActivatorTest extends BaseModuleContextSensitiveTes
 
     Assert.assertTrue(CollectionUtils.isEmpty(Context.getService(AddressHierarchyService.class).getAddressHierarchyLevels()));
   }
-  
+
   private void setAppDataDirPath(String strPath) {
     String path = getClass().getClassLoader().getResource(strPath).getPath() + File.separator;
     System.setProperty(OpenmrsConstants.KEY_OPENMRS_APPLICATION_DATA_DIRECTORY, path);
@@ -59,7 +59,7 @@ public class AddressHierarchyActivatorTest extends BaseModuleContextSensitiveTes
     // Verif that the test CSV was indeed loaded
     assertConfigurationAsExpected();
   }
-  
+
   private void assertConfigurationAsExpected() {
     AddressHierarchyService ahs = Context.getService(AddressHierarchyService.class);
     AddressHierarchyLevel level;
@@ -150,18 +150,18 @@ public class AddressHierarchyActivatorTest extends BaseModuleContextSensitiveTes
 
     // Verifying that CSV and additional data are there
     assertConfigurationAsExpected();
-    
+
     entries = ahs.getAddressHierarchyEntriesByLevelAndName(ahs.getAddressHierarchyLevelByAddressField(AddressField.CITY_VILLAGE), "Winthrop");
     Assert.assertEquals(entries.size(), 1);
     winthrop = entries.get(0);
     Assert.assertEquals("Winthrop", winthrop.getName());
-    
+
     entries = ahs.getAddressHierarchyEntriesByLevelAndName(ahs.getAddressHierarchyLevelByAddressField(AddressField.NEIGHBORHOOD_CELL), "Point Shirley");
     Assert.assertEquals(entries.size(), 1);
     pointShirley = entries.get(0);
     Assert.assertEquals("Point Shirley", pointShirley.getName());
   }
-  
+
   @Ignore
   @Test
   @Verifies(value = "should wipe existing entries when wipe is set to true", method = "started()")
@@ -170,9 +170,9 @@ public class AddressHierarchyActivatorTest extends BaseModuleContextSensitiveTes
     // Setup
     AddressHierarchyService ahs = Context.getService(AddressHierarchyService.class);
     ConfigDirUtil.deleteChecksums(AddressConfigurationLoader.getChecksumsPath(), true);
-    
+
     //
-    // Going through CSV 1 
+    // Going through CSV 1
     //
 
     // Replay
@@ -182,16 +182,16 @@ public class AddressHierarchyActivatorTest extends BaseModuleContextSensitiveTes
     assertConfigurationAsExpected();
 
     //
-    // Going through CSV 2 
+    // Going through CSV 2
     //
-    
+
     // Setup
     setAppDataDirPath("testAppDataDir2");
     ConfigDirUtil.deleteChecksums(AddressConfigurationLoader.getChecksumsPath(), true);
-    
+
     // Replay
     activator.started();
-    
+
     // Verif
     AddressHierarchyLevel level;
     List<AddressHierarchyEntry> entries;

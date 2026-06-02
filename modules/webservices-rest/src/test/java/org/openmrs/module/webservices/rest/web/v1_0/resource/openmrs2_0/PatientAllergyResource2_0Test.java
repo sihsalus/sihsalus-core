@@ -16,17 +16,17 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.openmrs.module.webservices.rest.web.v1_0.RestTestConstants2_0;
 
 public class PatientAllergyResource2_0Test extends BaseDelegatingResourceTest<PatientAllergyResource2_0, Allergy> {
-	
+
 	@BeforeEach
 	public void init() throws Exception {
 		executeDataSet(RestTestConstants2_0.ALLERGY_TEST_DATA_XML);
 	}
-	
+
 	@Override
 	public Allergy newObject() {
 		return Context.getPatientService().getAllergyByUuid(RestTestConstants2_0.ALLERGY_UUID);
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation(); // allergy does not have uuid so this fails
@@ -35,7 +35,7 @@ public class PatientAllergyResource2_0Test extends BaseDelegatingResourceTest<Pa
 		assertPropPresent("reactions");
 		assertPropPresent("patient");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation(); // allergy does not have uuid so this fails
@@ -47,15 +47,15 @@ public class PatientAllergyResource2_0Test extends BaseDelegatingResourceTest<Pa
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "STAVUDINE LAMIVUDINE AND NEVIRAPINE";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_0.ALLERGY_UUID;
 	}
-	
+
 }

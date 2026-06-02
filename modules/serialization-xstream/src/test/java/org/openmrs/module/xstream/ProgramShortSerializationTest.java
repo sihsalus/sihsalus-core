@@ -28,13 +28,13 @@ import static org.junit.Assert.assertEquals;
 public class ProgramShortSerializationTest extends BaseModuleContextSensitiveTest {
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void shouldProgramShortSerialization() throws Exception {
 		//prepare the necessary data
-		
+
 		ProgramWorkflow pwf = Context.getProgramWorkflowService().getWorkflowByUuid("84f0effa-dd73-46cb-b931-7cd6be6c5f81");
 		String xmlOutput = Context.getSerializationService().serialize(pwf, XStreamShortSerializer.class);
 		//should only serialize "uuid"
@@ -43,16 +43,16 @@ public class ProgramShortSerializationTest extends BaseModuleContextSensitiveTes
 		//with short serialization, the "program" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/programWorkflow/program/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void shouldProgramShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<programWorkflow id=\"1\" uuid=\"84f0effa-dd73-46cb-b931-7cd6be6c5f81\" retired=\"false\">\n");
 		xmlBuilder.append("  <creator id=\"2\" uuid=\"ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562\"/>\n");
@@ -68,7 +68,7 @@ public class ProgramShortSerializationTest extends BaseModuleContextSensitiveTes
 		xmlBuilder.append("    <programWorkflowState id=\"10\" uuid=\"e938129e-248a-482a-acea-f85127251472\"/>\n");
 		xmlBuilder.append("  </states>\n");
 		xmlBuilder.append("</programWorkflow>\n");
-		
+
 		ProgramWorkflow pwf = Context.getSerializationService().deserialize(xmlBuilder.toString(),
 				ProgramWorkflow.class, XStreamShortSerializer.class);
 		assertEquals("da4a0391-ba62-4fad-ad66-1e3722d16380", pwf.getProgram().getUuid());

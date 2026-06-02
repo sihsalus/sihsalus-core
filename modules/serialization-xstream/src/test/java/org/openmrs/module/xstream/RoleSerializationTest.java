@@ -28,10 +28,10 @@ import static org.junit.Assert.assertFalse;
  * Test class that tests the serialization and deserialization of a role
  */
 public class RoleSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * Make sure a {@link Role} can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -44,7 +44,7 @@ public class RoleSerializationTest extends BaseModuleContextSensitiveTest {
 		Role role = Context.getUserService().getRole("Data Manager");
 		//serialize and compare with a given string
 		String xmlOutput = Context.getSerializationService().serialize(role, XStreamSerializer.class);
-		
+
 		XMLAssert.assertXpathEvaluatesTo("00eb3992-92b2-102c-adee-6014420f8468", "/role/@uuid", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("Data Manager", "/role/role", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("false", "/role/@retired", xmlOutput);
@@ -56,10 +56,10 @@ public class RoleSerializationTest extends BaseModuleContextSensitiveTest {
 		XMLAssert.assertXpathExists("/role/privileges/privilege[privilege='Delete Report Objects']", xmlOutput);
 		XMLAssert.assertXpathExists("/role/inheritedRoles/role[role='Data Assistant']", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -107,7 +107,7 @@ public class RoleSerializationTest extends BaseModuleContextSensitiveTest {
 		xmlBuilder.append("    </role>\n");
 		xmlBuilder.append("  </inheritedRoles>\n");
 		xmlBuilder.append("</role>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		Role role = Context.getSerializationService()
 		        .deserialize(xmlBuilder.toString(), Role.class, XStreamSerializer.class);

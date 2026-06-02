@@ -25,23 +25,23 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 
 /**
- * 
+ *
  */
 public class BaseCohortDefinitionServiceTest extends BaseModuleContextSensitiveTest {
 
 	/**
 	 * Logger
 	 */
-	protected final Log log = LogFactory.getLog(getClass());	
-	
+	protected final Log log = LogFactory.getLog(getClass());
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -54,29 +54,29 @@ public class BaseCohortDefinitionServiceTest extends BaseModuleContextSensitiveT
 	 */
 	@Test
 	@Verifies(value = "should save sql cohort definition", method = "evaluate(CohortDefinition,EvaluationContext)")
-	public void evaluate_shouldSaveSqlCohortDefinition() throws Exception {		
+	public void evaluate_shouldSaveSqlCohortDefinition() throws Exception {
 		String name = "new name";
 		String sqlQuery = "SELECT distinct patient_id FROM patient WHERE patient_id = :patientId";
-		
+
 		SqlCohortDefinition sqlCohortDefinition = new SqlCohortDefinition(sqlQuery);
 		sqlCohortDefinition.setName(name);
-		
-		 sqlCohortDefinition = 
+
+		 sqlCohortDefinition =
 			Context.getService(CohortDefinitionService.class).saveDefinition(sqlCohortDefinition);
 
-		CohortDefinition savedCohortDefinition = 
+		CohortDefinition savedCohortDefinition =
 			Context.getService(CohortDefinitionService.class).getDefinitionByUuid(sqlCohortDefinition.getUuid());
 
-		SqlCohortDefinition savedSqlCohortDefinition = 
+		SqlCohortDefinition savedSqlCohortDefinition =
 			(SqlCohortDefinition) savedCohortDefinition;
-		
+
 		log.warn("parameters = " + sqlCohortDefinition.getParameters());
-		
+
 		Assert.assertNotNull(savedCohortDefinition);
 		Assert.assertEquals(savedCohortDefinition.getName(), name);
-		Assert.assertEquals(savedCohortDefinition.getClass(), SqlCohortDefinition.class);		
+		Assert.assertEquals(savedCohortDefinition.getClass(), SqlCohortDefinition.class);
 		Assert.assertEquals(savedSqlCohortDefinition.getQuery(), sqlQuery);
-		
+
 	}
 
 }

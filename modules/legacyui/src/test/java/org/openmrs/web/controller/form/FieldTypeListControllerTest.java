@@ -26,11 +26,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindException;
 
 public class FieldTypeListControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("webTestHelper")
 	private WebTestHelper webTestHelper;
-	
+
 	/**
 	 * @see FieldTypeListController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 * @verifies display a user friendly error message
@@ -39,9 +39,9 @@ public class FieldTypeListControllerTest extends BaseModuleWebContextSensitiveTe
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void onSubmit_shouldDisplayAUserFriendlyErrorMessage() throws Exception {
 		MockHttpServletRequest post = webTestHelper.newPOST("/admin/forms/fieldType.list");
-		
+
 		post.addParameter("fieldTypeId", "1");
-		
+
 		Response response = webTestHelper.handle(post);
 		Assertions.assertNotNull(response.session.getAttribute(WebConstants.OPENMRS_ERROR_ATTR));
 	}

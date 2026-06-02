@@ -32,28 +32,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class JsonKeyValuesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService cs;
-	
+
 	@Autowired
 	@Qualifier("personService")
 	private PersonService ps;
-	
+
 	@Autowired
 	protected InitializerService iniz;
-	
+
 	@Autowired
 	private JsonKeyValuesLoader loader;
-	
+
 	@Before
 	public void setup() {
 		ConceptSource source = new ConceptSource();
 		source.setName("Cambodia");
 		source.setDescription("Test 'Cambodia' source");
 		source = cs.saveConceptSource(source);
-		
+
 		// A concept to be fetched via JKV
 		{
 			Concept c = new Concept();
@@ -68,7 +68,7 @@ public class JsonKeyValuesLoaderIntegrationTest extends DomainBaseModuleContextS
 			}
 			cs.saveConcept(c);
 		}
-		
+
 		// A person attr. type to be fetched via JKV
 		{
 			PersonAttributeType pat = new PersonAttributeType();
@@ -78,66 +78,66 @@ public class JsonKeyValuesLoaderIntegrationTest extends DomainBaseModuleContextS
 			ps.savePersonAttributeType(pat);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldFetchConceptsFromAllPossibleKeys() {
 		// Replay
 		loader.load();
-		
+
 		Concept c1 = getService().getConceptFromKey("impl.purpose.concept.uuid");
 		Assert.assertNotNull(c1);
 		Concept c2 = getService().getConceptFromKey("impl.purpose.concept.fsn");
 		Assert.assertEquals(c1, c2);
 		Concept c3 = getService().getConceptFromKey("impl.purpose.concept.mapping");
 		Assert.assertEquals(c2, c3);
-		
+
 		Assert.assertNull(getService().getConceptFromKey("__invalid_json_key__"));
 		Assert.assertEquals(c1, getService().getConceptFromKey("__invalid_json_key__", c1));
 	}
-	
+
 	@Test
 	public void load_shouldFetchPATFromAllPossibleKeys() {
 		// Replay
 		loader.load();
-		
+
 		PersonAttributeType pat1 = getService().getPersonAttributeTypeFromKey("impl.purpose.pat.uuid");
 		Assert.assertNotNull(pat1);
 		PersonAttributeType pat2 = getService().getPersonAttributeTypeFromKey("impl.purpose.pat.name");
 		Assert.assertEquals(pat1, pat2);
-		
+
 		Assert.assertNull(getService().getPersonAttributeTypeFromKey("__invalid_json_key__"));
 		Assert.assertEquals(pat1, getService().getPersonAttributeTypeFromKey("__invalid_json_key__", pat1));
 	}
-	
+
 	@Test
 	public void load_shouldLoadStructuredJsonValue() {
 		// Replay
 		loader.load();
 		String json = getService().getValueFromKey("structured.json");
-		
+
 		// Verif
 		Assert.assertEquals("{\"foo\":\"bar\",\"fooz\":{\"baz\":\"value\"}}", json);
 	}
-	
+
 	@Test
 	public void load_shouldLoadConceptList() {
 		// Replay
 		loader.load();
 		List<Concept> concepts = getService().getConceptsFromKey("impl.purpose.concepts");
-		
+
 		// Verif
 		Assert.assertThat(concepts.size(), is(2));
 		for (Concept c : concepts) {
 			Assert.assertNotNull(c);
 		}
 	}
-	
+
 	@Test
 	public void getDirUtil_shouldConfigureDirUtilToSkipChecksums() {
-		
+
 		// Replay
 		ConfigDirUtil dirUtil = loader.getDirUtil();
-		
+
 		// Verif
 		Assert.assertEquals(true, dirUtil.skipChecksums);
 		Assert.assertEquals(iniz.getChecksumsDirPath() + File.separator + loader.getDomainName(),

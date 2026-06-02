@@ -17,20 +17,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class ProgramsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService cs;
-	
+
 	@Autowired
 	@Qualifier("programWorkflowService")
 	private ProgramWorkflowService pws;
-	
+
 	@Autowired
 	private ProgramsLoader loader;
-	
+
 	public static void setupPrograms(ConceptService cs, ProgramWorkflowService pws) {
-		
+
 		// Concepts to be used as 'program concepts'
 		{
 			Concept c = new Concept();
@@ -69,7 +69,7 @@ public class ProgramsLoaderIntegrationTest extends DomainBaseModuleContextSensit
 			c.setDatatype(cs.getConceptDatatypeByName("Text"));
 			c = cs.saveConcept(c);
 		}
-		
+
 		// Concepts to be used as 'outcomes concepts'
 		{
 			Concept c = new Concept();
@@ -95,7 +95,7 @@ public class ProgramsLoaderIntegrationTest extends DomainBaseModuleContextSensit
 			c.setConceptClass(cs.getConceptClassByName("ConvSet"));
 			c = cs.saveConcept(c);
 		}
-		
+
 		// A program to be edited
 		{
 			Program prog = new Program();
@@ -106,7 +106,7 @@ public class ProgramsLoaderIntegrationTest extends DomainBaseModuleContextSensit
 			prog.setDescription("A special oncology program with stronger and even experimental treatments.");
 			prog = pws.saveProgram(prog);
 		}
-		
+
 		// A program to be retired
 		{
 			{
@@ -133,18 +133,18 @@ public class ProgramsLoaderIntegrationTest extends DomainBaseModuleContextSensit
 			prog = pws.saveProgram(prog);
 		}
 	}
-	
+
 	@Before
 	public void setup() {
 		setupPrograms(cs, pws);
 	}
-	
+
 	@Test
 	public void load_shouldLoadProgramsAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// created programs
 		{
 			Program prog = pws.getProgramByName("TB Program");
@@ -152,7 +152,7 @@ public class ProgramsLoaderIntegrationTest extends DomainBaseModuleContextSensit
 			Assert.assertEquals(cs.getConceptByName("TB Program"), prog.getConcept());
 			Assert.assertEquals(cs.getConceptByName("TB Program Outcomes"), prog.getOutcomesConcept());
 			Assert.assertEquals("TB Program", prog.getDescription());
-			
+
 		}
 		{
 			Program prog = pws.getProgramByName("AIDS Program");
@@ -168,7 +168,7 @@ public class ProgramsLoaderIntegrationTest extends DomainBaseModuleContextSensit
 			Assert.assertEquals(cs.getConceptByName("Mental Health Program Outcomes"), prog.getOutcomesConcept());
 			Assert.assertEquals("Mental Health Program", prog.getDescription());
 		}
-		
+
 		// an edited program
 		{
 			Program prog = pws.getProgramByName("Oncology Program");
@@ -178,7 +178,7 @@ public class ProgramsLoaderIntegrationTest extends DomainBaseModuleContextSensit
 			Assert.assertEquals("Oncology Program", prog.getName());
 			Assert.assertEquals("A regular oncology program with traditional chimotherapy.", prog.getDescription());
 		}
-		
+
 		// an retired program
 		{
 			Program prog = pws.getProgramByName("Ayurvedic Medicine Program");

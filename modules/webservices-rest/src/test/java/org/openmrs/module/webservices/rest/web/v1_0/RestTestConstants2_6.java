@@ -10,8 +10,8 @@
 package org.openmrs.module.webservices.rest.web.v1_0;
 
 public class RestTestConstants2_6 {
-	
+
 	public static final String MEDICATION_DISPENSE_UUID = "f6b7b4de-596c-4d38-bb14-167fc872732c";
-	
+
 	public static final String MEDICATION_DISPENSE_TEST_DATA_XML = "medicationDispenseTestDataset.xml";
 }

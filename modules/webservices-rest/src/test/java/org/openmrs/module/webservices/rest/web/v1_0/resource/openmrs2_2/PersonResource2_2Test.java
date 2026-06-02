@@ -15,26 +15,26 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.openmrs.module.webservices.rest.web.v1_0.RestTestConstants2_2;
 
 public class PersonResource2_2Test extends BaseDelegatingResourceTest<PersonResource2_2, Person> {
-	
+
 	@Override
 	public Person newObject() {
 		return Context.getPersonService().getPersonByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Horatio Test Hornblower";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_2.PERSON_UUID;
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
 		assertPropEquals("causeOfDeathNonCoded", getObject().getCauseOfDeathNonCoded());
 	}
-	
+
 }

@@ -25,50 +25,50 @@ import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 
 public class MedicationRequestStatusTranslatorImplTest {
-	
+
 	private static final String DRUG_ORDER_UUID = "44fdc8ad-fe4d-499b-93a8-8a991c1d477e";
-	
+
 	private MedicationRequestStatusTranslatorImpl statusTranslator;
-	
+
 	private DrugOrder drugOrder;
-	
+
 	@Before
 	public void setup() {
 		statusTranslator = new MedicationRequestStatusTranslatorImpl();
-		
+
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
 		drugOrder.setDateActivated(new Date());
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateToActiveStatus() {
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.ACTIVE));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateExpiredOrderToStoppedStatus() throws ParseException {
 		drugOrder.setAutoExpireDate(new SimpleDateFormat("YYYY-MM-DD").parse("2000-10-10"));
-		
+
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.STOPPED));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDiscontinueOrderToCancelledStatus()
 	        throws NoSuchFieldException, ParseException, IllegalAccessException {
 		Field dateStopped = Order.class.getDeclaredField("dateStopped");
 		dateStopped.setAccessible(true);
 		dateStopped.set(drugOrder, new SimpleDateFormat("YYYY-MM-DD").parse("2000-10-10"));
-		
+
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.CANCELLED));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateVoidedOrderToCancelled() {
 		drugOrder.setVoided(true);
@@ -76,7 +76,7 @@ public class MedicationRequestStatusTranslatorImplTest {
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.CANCELLED));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslatedOrderWithFulfillerStatusCompletedToCompleted() {
 		drugOrder.setFulfillerStatus(Order.FulfillerStatus.COMPLETED);
@@ -84,5 +84,5 @@ public class MedicationRequestStatusTranslatorImplTest {
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.COMPLETED));
 	}
-	
+
 }

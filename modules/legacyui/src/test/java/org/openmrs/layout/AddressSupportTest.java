@@ -24,9 +24,9 @@ import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 import org.springframework.test.context.transaction.AfterTransaction;
 
 public class AddressSupportTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private static final String PERSON_ADDRESS_VALIDATOR_DATASET_PACKAGE_PATH = "org/openmrs/include/personAddressValidatorTestDataset.xml";
-	
+
 	/**
 	 * As described in TRUNK-3849, when AddressSupport was copied from package
 	 * org.openmrs.layout.web.address to org.openmrs.layout.address, and the AddressTemplate in the
@@ -36,16 +36,16 @@ public class AddressSupportTest extends BaseModuleWebContextSensitiveTest {
 	@Test
 	@Verifies(value = "should succeed even if db AddressTemplate class has changed", method = "getAddressTemplate()")
 	public void getAddressTemplate_shouldSucceedEvenIfDBAddressTemplateClassHasChanged() throws Exception {
-		
+
 		executeDataSet(PERSON_ADDRESS_VALIDATOR_DATASET_PACKAGE_PATH);
-		
+
 		//first make sure the test setup is correct even if the dataset changes -- the AddressTemplate class used by this AddressSupport class
 		//(in the 'web' package differs from the updated classname in the DB
 		String newAddressTemplateClass = "org.openmrs.layout.address.AddressTemplate";
 		String xml = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE);
 		Assertions.assertTrue(StringUtils.contains(xml, newAddressTemplateClass));
 		Assertions.assertEquals(newAddressTemplateClass, AddressTemplate.class.getName());
-		
+
 		AddressSupport addressSupport = AddressSupport.getInstance();
 		List<AddressTemplate> addressTemplates = addressSupport.getAddressTemplate();
 		Assertions.assertNotNull(addressTemplates.get(0));

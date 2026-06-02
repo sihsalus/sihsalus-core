@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SpringTestConfiguration.class, inheritLocations = false)
 public class SortWeightGeneratorTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final List<String> INITIAL_DATASET_XML = Arrays.asList(
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_locationInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_conceptsInitialDataset.xml",
@@ -36,27 +36,27 @@ public class SortWeightGeneratorTest extends BaseModuleContextSensitiveTest {
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/validators/QueueEntryValidatorTest_globalPropertyInitialDataset.xml");
-	
+
 	@Autowired
 	private QueueServicesWrapper services;
-	
+
 	@Before
 	public void setup() {
 		INITIAL_DATASET_XML.forEach(this::executeDataSet);
 	}
-	
+
 	@Test
 	public void shouldReturnConfiguredSortWeightGenerator() {
 		SortWeightGenerator generator = services.getQueueEntryService().getSortWeightGenerator();
 		assertThat(generator, notNullValue());
 		assertThat(generator instanceof BasicPrioritySortWeightGenerator, equalTo(true));
 	}
-	
+
 	@Test
 	public void shouldReturnCorrectSortWeights() {
 		SortWeightGenerator generator = services.getQueueEntryService().getSortWeightGenerator();
 		assertThat(generator, notNullValue());
-		
+
 		{
 			QueueEntry qe = services.getQueueEntryService().getQueueEntryById(1).get();
 			assertThat(qe.getSortWeight(), equalTo(0.0));

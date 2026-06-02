@@ -66,11 +66,11 @@ public class MultiPeriodIndicatorDataSetEvaluatorTest extends BaseModuleContextS
 		// patient 6's birthdate is 2007-05-27 in the standard test dataset
 		DateFormat ymd = new SimpleDateFormat("yyyy-MM-dd");
 		Assert.assertEquals(ymd.parse("2007-05-27"), Context.getPatientService().getPatient(6).getBirthdate());
-		
+
 		AgeCohortDefinition lessThanOne = new AgeCohortDefinition();
 		lessThanOne.addParameter(new Parameter("effectiveDate", "effectiveDate", Date.class));
 		lessThanOne.setMaxAge(1);
-		
+
 		CohortIndicator lessThanOneAtStart = new CohortIndicator();
 		lessThanOneAtStart.addParameter(ReportingConstants.START_DATE_PARAMETER);
 		lessThanOneAtStart.addParameter(ReportingConstants.END_DATE_PARAMETER);
@@ -78,15 +78,15 @@ public class MultiPeriodIndicatorDataSetEvaluatorTest extends BaseModuleContextS
 		Map<String, Object> mappings = new HashMap<String, Object>();
 		mappings.put("effectiveDate", "${startDate}");
 		lessThanOneAtStart.setCohortDefinition(lessThanOne, mappings);
-		
+
 		Map<String, Object> periodMappings = new HashMap<String, Object>();
 		periodMappings.put("startDate", "${startDate}");
 		periodMappings.put("endDate", "${endDate}");
 		periodMappings.put("location", "${location}");
-		
+
 		CohortIndicatorDataSetDefinition def = new CohortIndicatorDataSetDefinition();
 		def.addColumn("1", "Indicator", new Mapped<CohortIndicator>(lessThanOneAtStart, periodMappings), "");
-		
+
 		MultiPeriodIndicatorDataSetDefinition multi = new MultiPeriodIndicatorDataSetDefinition(def);
 		// for every month in 2009, which is the year that patient 6 turns 2 years old.
 		Assert.assertEquals(0, Calendar.JANUARY);
@@ -96,7 +96,7 @@ public class MultiPeriodIndicatorDataSetEvaluatorTest extends BaseModuleContextS
 			Date endDate = DateUtil.getEndOfMonth(startDate);
 			multi.addIteration(new Iteration(startDate, endDate, loc));
 		}
-		
+
 		// make sure the number changes from 1 to 0 in June
 		DataSet result = Context.getService(DataSetDefinitionService.class).evaluate(multi, null);
 		Date june1 = ymd.parse("2009-06-01");

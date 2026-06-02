@@ -33,125 +33,125 @@ import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationComponentTranslatorImplTest {
-	
+
 	private static final String OBS_UUID = "12345-abcde-54321";
-	
+
 	private static final String OBS_CONCEPT_UUID = "54321-edcba-12345";
-	
+
 	@Mock
 	private ObservationValueTranslator observationValueTranslator;
-	
+
 	@Mock
 	private ConceptTranslator conceptTranslator;
-	
+
 	private ObservationComponentTranslatorImpl observationComponentTranslator;
-	
+
 	@Before
 	public void setup() {
 		observationComponentTranslator = new ObservationComponentTranslatorImpl();
 		observationComponentTranslator.setObservationValueTranslator(observationValueTranslator);
 		observationComponentTranslator.setConceptTranslator(conceptTranslator);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertObsToObservationComponent() {
 		Obs obs = new Obs();
-		
+
 		Observation.ObservationComponentComponent result = observationComponentTranslator.toFhirResource(obs);
-		
+
 		assertThat(result, notNullValue());
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldSetObservationComponentIdToUuid() {
 		Obs obs = new Obs();
 		obs.setUuid(OBS_UUID);
-		
+
 		Observation.ObservationComponentComponent result = observationComponentTranslator.toFhirResource(obs);
-		
+
 		assertThat(result.getId(), equalTo(OBS_UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfObsNull() {
 		Observation.ObservationComponentComponent result = observationComponentTranslator.toFhirResource(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertObsConceptToCodeableConcept() {
 		Obs obs = new Obs();
 		Concept obsConcept = new Concept();
 		obsConcept.setUuid(OBS_CONCEPT_UUID);
 		obs.setConcept(obsConcept);
-		
+
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setId(OBS_CONCEPT_UUID);
 		when(conceptTranslator.toFhirResource(obsConcept)).thenReturn(codeableConcept);
-		
+
 		Observation.ObservationComponentComponent result = observationComponentTranslator.toFhirResource(obs);
-		
+
 		assertThat(result.getCode(), notNullValue());
 		assertThat(result.getCode().getId(), equalTo(OBS_CONCEPT_UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertObsValueToType() {
 		Obs obs = new Obs();
 		obs.setValueNumeric(130d);
 		when(observationValueTranslator.toFhirResource(obs)).thenReturn(new Quantity(130d));
-		
+
 		Observation.ObservationComponentComponent result = observationComponentTranslator.toFhirResource(obs);
-		
+
 		assertThat(result.getValue(), notNullValue());
 		assertThat(result.getValue(), instanceOf(Quantity.class));
 		assertThat(((Quantity) result.getValue()).getValue().doubleValue(), equalTo(130d));
 	}
-	
+
 	@Test(expected = NullPointerException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfObsIsNull() {
 		Observation.ObservationComponentComponent component = new Observation.ObservationComponentComponent();
 		observationComponentTranslator.toOpenmrsType(null, component);
 	}
-	
+
 	@Test(expected = NullPointerException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfComponentNull() {
 		Obs obs = new Obs();
 		observationComponentTranslator.toOpenmrsType(obs, null);
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetObsUuidToComponentId() {
 		Observation.ObservationComponentComponent component = new Observation.ObservationComponentComponent();
 		component.setId(OBS_UUID);
-		
+
 		Obs obs = new Obs();
 		Obs result = observationComponentTranslator.toOpenmrsType(obs, component);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(OBS_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetObsConceptToComponentCode() {
 		Observation.ObservationComponentComponent component = new Observation.ObservationComponentComponent();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setId(OBS_CONCEPT_UUID);
 		component.setCode(codeableConcept);
-		
+
 		Concept concept = new Concept();
 		concept.setUuid(OBS_CONCEPT_UUID);
 		when(conceptTranslator.toOpenmrsType(codeableConcept)).thenReturn(concept);
-		
+
 		Obs obs = new Obs();
 		Obs result = observationComponentTranslator.toOpenmrsType(obs, component);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getConcept(), notNullValue());
 		assertThat(result.getConcept().getUuid(), equalTo(OBS_CONCEPT_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetObsValue() {
 		Observation.ObservationComponentComponent component = new Observation.ObservationComponentComponent();
@@ -161,10 +161,10 @@ public class ObservationComponentTranslatorImplTest {
 			((Obs) i.getArguments()[0]).setValueNumeric(((Quantity) i.getArguments()[1]).getValue().doubleValue());
 			return i.getArguments()[0];
 		});
-		
+
 		Obs obs = new Obs();
 		Obs result = observationComponentTranslator.toOpenmrsType(obs, component);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getValueNumeric(), notNullValue());
 		assertThat(result.getValueNumeric(), equalTo(130d));

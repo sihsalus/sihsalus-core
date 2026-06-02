@@ -16,40 +16,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class TagsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("flagService")
 	private FlagService flagService;
-	
+
 	@Autowired
 	@Qualifier("userService")
 	private UserService userService;
-	
+
 	@Autowired
 	private TagsLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-concepts.xml");
-		
+
 		// Create roles for testing
 		Role clinicianRole = new Role("Clinician", "Clinician role");
 		userService.saveRole(clinicianRole);
-		
+
 		Role nurseRole = new Role("Nurse", "Nurse role");
 		userService.saveRole(nurseRole);
-		
+
 		// Create display points for testing
 		DisplayPoint patientSummary = new DisplayPoint("Patient Summary");
 		patientSummary.setUuid("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
 		patientSummary.setRetired(false);
 		flagService.saveDisplayPoint(patientSummary);
-		
+
 		DisplayPoint patientDashboard = new DisplayPoint("Patient Dashboard");
 		patientDashboard.setUuid("b2c3d4e5-f6a7-8901-bcde-f12345678901");
 		patientDashboard.setRetired(false);
 		flagService.saveDisplayPoint(patientDashboard);
-		
+
 		{
 			// To be edited
 			Tag tag = new Tag();
@@ -58,7 +58,7 @@ public class TagsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveT
 			tag.setRetired(false);
 			flagService.saveTag(tag);
 		}
-		
+
 		{
 			// To be retired
 			Tag tag = new Tag();
@@ -68,12 +68,12 @@ public class TagsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveT
 			flagService.saveTag(tag);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadTagsAccordingToCsvFiles() {
 		// Replay
 		loader.load();
-		
+
 		// Verify creation
 		{
 			Tag tag = flagService.getTagByUuid("627bf278-ba81-4436-b867-c2f6641d060b");
@@ -83,13 +83,13 @@ public class TagsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveT
 			assertNotNull(tag.getRoles());
 			assertEquals(2, tag.getRoles().size()); // Should have Clinician and Nurse roles
 		}
-		
+
 		{
 			Tag tag = flagService.getTagByUuid("728bf278-ba81-4436-b867-c2f6641d060c");
 			assertNotNull(tag);
 			assertEquals("Urgent", tag.getName());
 		}
-		
+
 		// Verify edition
 		{
 			Tag tag = flagService.getTagByUuid("526bf278-ba81-4436-b867-c2f6641d060a");
@@ -97,7 +97,7 @@ public class TagsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveT
 			assertEquals("HIV", tag.getName());
 			assertEquals("Tags for HIV-related flags", tag.getDescription());
 		}
-		
+
 		// Verify retirement
 		{
 			Tag tag = flagService.getTagByUuid("829bf278-ba81-4436-b867-c2f6641d060d");

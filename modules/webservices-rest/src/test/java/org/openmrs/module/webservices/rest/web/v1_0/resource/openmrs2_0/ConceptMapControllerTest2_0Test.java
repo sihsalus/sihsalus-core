@@ -12,5 +12,5 @@ package org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs2_0;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.openmrs1_9.ConceptMapController1_9Test;
 
 public class ConceptMapControllerTest2_0Test extends ConceptMapController1_9Test {
-	
+
 }

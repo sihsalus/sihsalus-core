@@ -32,15 +32,15 @@ import org.springframework.mock.web.MockHttpServletResponse;
  * mocked to return only the concepts under test.
  */
 public class DownloadDictionaryServletTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private static final String EXPECTED_HEADER = "Concept Id,Name,Description,Synonyms,Answers,Set Members,Class,Datatype,Changed By,Creator\n";
-	
+
 	@Mock
 	private ConceptService conceptService;
-	
+
 	@Resource(name = "conceptDAO")
 	private ConceptDAO conceptDAO;
-	
+
 	@Test
 	public void shouldPrintHeaderAndFormattedConceptLines() throws Exception {
 		String actualContent = runServletWithConcepts(conceptDAO.getConcept(3), conceptDAO.getConcept(5),
@@ -51,7 +51,7 @@ public class DownloadDictionaryServletTest extends BaseModuleWebContextSensitive
 		        + "6,\"MARRIED\",\"Some description\",\"MARRIED\",\"\",\"\",\"Misc\",\"N/A\",\"\",\"Super User\"\n";
 		Assertions.assertEquals(expectedContent, actualContent);
 	}
-	
+
 	@Test
 	public void shouldFormatMultipleAnswersWithLineBreaks() throws Exception {
 		String actualContent = runServletWithConcepts(conceptDAO.getConcept(4));
@@ -59,10 +59,10 @@ public class DownloadDictionaryServletTest extends BaseModuleWebContextSensitive
 		        + "4,\"CIVIL STATUS\",\"What is the person's marital state\",\"CIVIL STATUS\",";
 		String expectedEnd = ",\"\",\"ConvSet\",\"Coded\",\"Super User\",\"Super User\"\n";
 		String[] expectedLineBreakSections = { "SINGLE", "MARRIED" };
-		
+
 		assertContent(expectedStart, expectedEnd, expectedLineBreakSections, actualContent);
 	}
-	
+
 	@Test
 	public void shouldFormatMultipleSynonymsWithLineBreaks() throws Exception {
 		String actualContent = runServletWithConcepts(conceptDAO.getConcept(792));
@@ -71,10 +71,10 @@ public class DownloadDictionaryServletTest extends BaseModuleWebContextSensitive
 		String expectedEnd = ",\"\",\"\",\"Drug\",\"N/A\",\"Super User\",\"Super User\"\n";
 		String[] expectedLineBreakSections = { "STAVUDINE LAMIVUDINE AND NEVIRAPINE", "D4T+3TC+NVP", "TRIOMUNE-30",
 		        "D4T+3TC+NVP" };
-		
+
 		assertContent(expectedStart, expectedEnd, expectedLineBreakSections, actualContent);
 	}
-	
+
 	@Test
 	public void shouldFormatMultipleSetMembersWithLineBreaks() throws Exception {
 		String actualContent = runServletWithConcepts(conceptDAO.getConcept(23));
@@ -82,46 +82,46 @@ public class DownloadDictionaryServletTest extends BaseModuleWebContextSensitive
 		        + "23,\"FOOD CONSTRUCT\",\"Holder for all things edible\",\"FOOD CONSTRUCT\",\"\",";
 		String expectedEnd = ",\"ConvSet\",\"N/A\",\"\",\"Super User\"\n";
 		String[] expectedLineBreakSections = { "FOOD ASSISTANCE", "DATE OF FOOD ASSISTANCE", "FAVORITE FOOD, NON-CODED" };
-		
+
 		assertContent(expectedStart, expectedEnd, expectedLineBreakSections, actualContent);
 	}
-	
+
 	@Test
 	public void shouldPrintColumnsWithEmptyQuotesForNullFields() throws Exception {
 		String actualContent = runServletWithConcepts(new Concept(1));
 		String expectedContent = EXPECTED_HEADER + "1,\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"\n";
 		Assertions.assertEquals(expectedContent, actualContent);
 	}
-	
+
 	private String runServletWithConcepts(Concept... concepts) throws Exception {
 		DownloadDictionaryServlet downloadServlet = new DownloadDictionaryServlet();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET",
 		        "/moduleServlet/legacyui/downloadDictionaryServlet");
 		request.setContextPath("/somecontextpath");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		List<Concept> conceptList = Arrays.asList(concepts);
 		Mockito.when(conceptService.conceptIterator()).thenReturn(conceptList.iterator());
-		
+
 		downloadServlet.service(request, response);
 		return response.getContentAsString();
 	}
-	
+
 	private void assertContent(String expectedStart, String expectedEnd, String[] expectedLineSections, String actualContent) {
 		Assertions.assertTrue(actualContent.startsWith(expectedStart));
 		Assertions.assertTrue(actualContent.endsWith(expectedEnd));
-		
+
 		// The content with line breaks can come in any order so test for the content flexibly
 		String lineBreakContent = actualContent.substring(expectedStart.length(),
 		    actualContent.length() - expectedEnd.length());
-		
+
 		// Should start and end with "
 		Assertions.assertTrue(lineBreakContent.startsWith("\""));
 		Assertions.assertTrue(lineBreakContent.endsWith("\""));
-		
+
 		lineBreakContent = lineBreakContent.replace("\"", "");
 		List<String> actualLineBreakSections = Arrays.asList(lineBreakContent.split("\n"));
-		
+
 		Assertions.assertEquals(expectedLineSections.length, actualLineBreakSections.size());
 		for (String expectedSection : expectedLineSections) {
 			Assertions.assertTrue(actualLineBreakSections.contains(expectedSection));

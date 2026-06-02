@@ -24,18 +24,18 @@ import org.openmrs.module.initializer.api.utils.ConceptListParser;
  * This kind of test case can be used to quickly trial the parsing routines on test CSVs
  */
 public class NestedConceptLineProcessorTest {
-	
+
 	private ConceptService cs = mock(ConceptService.class);
-	
+
 	@Before
 	public void setup() {
-		
+
 		/*
 		 * fetching a concept by mapping returns a concept with the mapping as uuid this
 		 * allows to verifies that the correct children are indeed found in collections
 		 */
 		when(cs.getConceptByMapping(any(String.class), any(String.class))).thenAnswer(new Answer<Concept>() {
-			
+
 			@Override
 			public Concept answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
@@ -47,18 +47,18 @@ public class NestedConceptLineProcessorTest {
 			}
 		});
 	}
-	
+
 	@Test
 	public void fill_shouldParseAnswers() {
-		
+
 		// Setup
 		String[] headerLine = { "Answers", "Members" };
 		String[] line = { "cambodia:123; cambodia:456", null };
-		
+
 		// Replay
 		NestedConceptLineProcessor p = new NestedConceptLineProcessor(cs, new ConceptListParser(cs));
 		Concept c = p.fill(new Concept(), new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Assert.assertFalse(c.getSet());
 		Collection<ConceptAnswer> answers = c.getAnswers();
@@ -70,18 +70,18 @@ public class NestedConceptLineProcessorTest {
 		Assert.assertTrue(uuids.contains("cambodia:123"));
 		Assert.assertTrue(uuids.contains("cambodia:456"));
 	}
-	
+
 	@Test
 	public void fill_shouldParseSetMembers() {
-		
+
 		// Setup
 		String[] headerLine = { "Answers", "Members" };
 		String[] line = { null, "cambodia:123; cambodia:456" };
-		
+
 		// Replay
 		NestedConceptLineProcessor p = new NestedConceptLineProcessor(cs, new ConceptListParser(cs));
 		Concept c = p.fill(new Concept(), new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Assert.assertTrue(c.getSet());
 		List<Concept> members = c.getSetMembers();
@@ -93,30 +93,30 @@ public class NestedConceptLineProcessorTest {
 		Assert.assertTrue(uuids.contains("cambodia:123"));
 		Assert.assertTrue(uuids.contains("cambodia:456"));
 	}
-	
+
 	@Test
 	public void fill_shouldHandleNoChildren() {
-		
+
 		// Setup
 		String[] headerLine = { "Answers", "Members" };
 		String[] line = { null, null };
-		
+
 		// Replay
 		NestedConceptLineProcessor p = new NestedConceptLineProcessor(cs, new ConceptListParser(cs));
 		Concept c = p.fill(new Concept(), new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Assert.assertFalse(c.getSet());
 		Assert.assertEquals(0, c.getSetMembers().size());
 		Assert.assertEquals(0, c.getAnswers().size());
 	}
-	
+
 	public void fill_shouldHandleMissingHeaders() {
-		
+
 		// Setup
 		String[] headerLine = {};
 		String[] line = {};
-		
+
 		// Replay
 		NestedConceptLineProcessor p = new NestedConceptLineProcessor(cs, new ConceptListParser(cs));
 		Concept c = p.fill(new Concept(), new CsvLine(headerLine, line));

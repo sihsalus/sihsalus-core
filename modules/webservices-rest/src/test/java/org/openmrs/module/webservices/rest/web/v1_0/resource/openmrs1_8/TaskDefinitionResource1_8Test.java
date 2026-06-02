@@ -16,7 +16,7 @@ import org.openmrs.scheduler.TaskDefinition;
 import java.util.Date;
 
 public class TaskDefinitionResource1_8Test extends BaseDelegatingResourceTest<TaskDefinitionResource1_8, TaskDefinition> {
-	
+
 	@Override
 	public TaskDefinition newObject() {
 		//Create test Task Definition
@@ -29,17 +29,17 @@ public class TaskDefinitionResource1_8Test extends BaseDelegatingResourceTest<Ta
 		taskDefinition.setTaskClass("org.openmrs.scheduler.tasks.TestTask");
 		return taskDefinition;
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "TestTask";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.TASK_DEFINITION_UUID;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		assertPropEquals("uuid", getObject().getUuid());
@@ -49,7 +49,7 @@ public class TaskDefinitionResource1_8Test extends BaseDelegatingResourceTest<Ta
 		assertPropEquals("started", getObject().getStarted());
 		assertPropEquals("taskClass", getObject().getTaskClass());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		assertPropEquals("uuid", getObject().getUuid());
@@ -62,7 +62,7 @@ public class TaskDefinitionResource1_8Test extends BaseDelegatingResourceTest<Ta
 		assertPropEquals("startTimePattern", getObject().getStartTimePattern());
 		assertPropEquals("properties", getObject().getProperties());
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		assertPropEquals("uuid", getObject().getUuid());

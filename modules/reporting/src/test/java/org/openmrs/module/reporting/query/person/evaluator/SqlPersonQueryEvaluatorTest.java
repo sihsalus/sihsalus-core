@@ -31,7 +31,7 @@ public class SqlPersonQueryEvaluatorTest extends BaseModuleContextSensitiveTest 
 	public void setup() throws Exception {
 		executeDataSet("org/openmrs/module/reporting/include/" + new TestUtil().getTestDatasetFilename("ReportTestDataset"));
 	}
-	
+
 	@Test
 	public void evaluate_shouldEvaluateASQLQueryIntoPersonQuery() throws Exception {
 		SqlPersonQuery d = new SqlPersonQuery();
@@ -39,26 +39,26 @@ public class SqlPersonQueryEvaluatorTest extends BaseModuleContextSensitiveTest 
 		PersonQueryResult s = evaluate(d, new EvaluationContext());
 		Assert.assertEquals(6, s.getSize());
 	}
-	
+
 	@Test
 	public void evaluate_shouldFilterResultsGivenABaseFilterInAnEvaluationContext() throws Exception {
-		
+
 		PersonEvaluationContext context = new PersonEvaluationContext();
 		PersonQueryResult basePersonIds = new PersonQueryResult();
 		basePersonIds.add(2, 9, 20, 23);
 		context.setBasePersons(basePersonIds);
-		
+
 		SqlPersonQuery d = new SqlPersonQuery();
 		d.setQuery("select person_id from person where gender = 'F'");
 		Assert.assertEquals(1, evaluate(d, context).getSize());
-		
+
 		d.setQuery("select person_id from person where gender in ('M','F')");
 		Assert.assertEquals(3, evaluate(d, context).getSize());
-		
+
 		d.setQuery("select person_id from person where gender not in ('M', 'F')");
 		Assert.assertEquals(1, evaluate(d, context).getSize());
 	}
-	
+
 	public PersonQueryResult evaluate(SqlPersonQuery definition, EvaluationContext context) throws Exception {
 		return Context.getService(PersonQueryService.class).evaluate(definition, context);
 	}

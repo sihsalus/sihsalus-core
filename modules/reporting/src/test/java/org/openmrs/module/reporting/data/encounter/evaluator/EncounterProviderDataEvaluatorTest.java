@@ -38,25 +38,25 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.Assert.assertThat;
 
 public class EncounterProviderDataEvaluatorTest extends BaseModuleContextSensitiveTest {
-    
-    
+
+
     @Autowired
     private TestDataManager data;
-    
+
     @Autowired
     @Qualifier("encounterService")
     private EncounterService encounterService;
-    
+
     @Autowired
     @Qualifier("providerService")
     private ProviderService providerService;
-    
+
     @Autowired
     private EncounterDataService encounterDataService;
 
     @Test
     public void shouldReturnEncounterProviderForEncounter() throws Exception {
-   
+
         EncounterRole role = encounterService.getEncounterRole(1);
         Provider provider = saveRandomProvider();
 
@@ -68,15 +68,15 @@ public class EncounterProviderDataEvaluatorTest extends BaseModuleContextSensiti
 
         EncounterProviderDataDefinition d = new EncounterProviderDataDefinition();
         d.setEncounterRole(role);
-        
+
         EncounterEvaluationContext encounterEvaluationContext = new EncounterEvaluationContext();
         encounterEvaluationContext.setBaseEncounters(new EncounterIdSet(enc.getId()));
 
         EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
-        
+
         assertThat(ed.getData().size(), is(1));
         assertThat((Provider) ed.getData().get(enc.getId()), is(provider));
-        
+
     }
 
     @Test
@@ -109,7 +109,7 @@ public class EncounterProviderDataEvaluatorTest extends BaseModuleContextSensiti
         EvaluatedEncounterData ed = encounterDataService.evaluate(d, encounterEvaluationContext);
 
         assertThat(ed.getData().size(), is(1));
-        assertThat((List<Provider>) ed.getData().get(enc.getId()), 
+        assertThat((List<Provider>) ed.getData().get(enc.getId()),
                 containsInAnyOrder(provider1, provider3));
 
     }

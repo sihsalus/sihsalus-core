@@ -22,23 +22,23 @@ import org.junit.Test;
  * Test for Location resource narrative generation
  */
 public class LocationNarrativeTest extends BaseFhirNarrativeTest {
-	
+
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/location-example.json";
-	
+
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/location-expected.html";
-	
+
 	/**
 	 * Check that the expected narrative is generated for some example Location resource
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
 	public void shouldGenerateLocationNarrative() throws IOException {
 		Location given = parser.parseResource(Location.class,
 		    getClass().getClassLoader().getResourceAsStream(EXAMPLE_RESOURCE_PATH));
-		
+
 		Location result = parser.parseResource(Location.class, parser.encodeResourceToString(given));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getText(), notNullValue());
 		assertThat(result.getText().getStatusAsString(), equalTo("generated"));

@@ -30,7 +30,7 @@ public class MockServerLogActionWrapper<T extends ServerLogActionWrapper> extend
 
 	/**
 	 * Override method from ServerLogActionWrapper to get the logs from mockMemoryAppender
-	 * 
+	 *
 	 * @return List of log lines
 	 */
 	@Override

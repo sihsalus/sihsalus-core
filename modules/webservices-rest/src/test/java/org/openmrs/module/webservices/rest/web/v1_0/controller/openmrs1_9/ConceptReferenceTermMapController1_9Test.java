@@ -35,29 +35,29 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
  * Tests CRUD operations for {@link ConceptReferenceTerm}s via web service calls
  */
 public class ConceptReferenceTermMapController1_9Test extends MainResourceControllerTest {
-	
+
 	private RestHelperService service;
-	
+
 	@Override
 	public String getURI() {
 		return "conceptreferencetermmap";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_9.CONCEPT_REFERENCE_TERM_MAP_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 0; //not supported
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		service = Context.getService(RestHelperService.class);
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#shouldGetAll()
 	 */
@@ -68,59 +68,59 @@ public class ConceptReferenceTermMapController1_9Test extends MainResourceContro
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Test
 	public void shouldCreateConceptReferenceTermMap() throws Exception {
 		String termA = RestTestConstants1_9.CONCEPT_REFERENCE_TERM_UUID;
 		String termB = RestTestConstants1_9.CONCEPT_REFERENCE_TERM2_UUID;
 		String json = "{\"termA\": \"" + termA + "\", " + "\"termB\": \"" + termB + "\", " + "\"conceptMapType\": \""
 		        + RestTestConstants1_9.CONCEPT_MAP_TYPE_UUID + "\"}";
-		
+
 		SimpleObject result = deserialize(handle(newPostRequest(getURI(), json)));
-		
+
 		String uuid = (String) result.get("uuid");
 		ConceptReferenceTermMap termMap = service.getObjectByUuid(ConceptReferenceTermMap.class, uuid);
 		assertThat(termMap.getTermA().getUuid(), is(termA));
 		assertThat(termMap.getTermB().getUuid(), is(termB));
 		assertThat(termMap.getConceptMapType().getUuid(), is(RestTestConstants1_9.CONCEPT_MAP_TYPE_UUID));
 	}
-	
+
 	@Test
 	public void shouldEditingConceptReferenceTerm() throws Exception {
 		String json = "{\"termB\": \"" + RestTestConstants1_9.CONCEPT_REFERENCE_TERM2_UUID + "\"}";
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
 		ConceptReferenceTermMap termMap = service.getObjectByUuid(ConceptReferenceTermMap.class, getUuid());
 		assertThat(termMap.getTermB().getUuid(), is(RestTestConstants1_9.CONCEPT_REFERENCE_TERM2_UUID));
 	}
-	
+
 	@Test
 	public void shouldNotDeleteConceptReferenceTermMap() throws Exception {
 		assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
 			handle(newDeleteRequest(getURI() + "/" + getUuid()));
 		});
 	}
-	
+
 	@Test
 	public void shouldPurgeConceptReferenceTerm() throws Exception {
 		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("purge", "true")));
 		assertNull(service.getObjectByUuid(ConceptReferenceTermMap.class, getUuid()));
 	}
-	
+
 	@Test
 	public void shouldNotSearch() throws Exception {
 		assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
 			handle(newGetRequest(getURI(), new Parameter("q", "search query")));
 		});
 	}
-	
+
 	@Test
 	public void shouldFindByTermA() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("termA", "SSTRM-WGT234"))));
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, hasSize(2));
 	}
-	
+
 	@Test
 	public void shouldFindByTermAndMaptype() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("termA", "SSTRM-WGT234"),
@@ -129,7 +129,7 @@ public class ConceptReferenceTermMapController1_9Test extends MainResourceContro
 		assertThat(results, hasSize(1));
 		assertThat(BeanUtils.getProperty(results.get(0), "uuid"), is("dff198e4-562d-11e0-b169-18a905e044dc"));
 	}
-	
+
 	@Test
 	public void shouldNotFindByTermAndDifferentMaptype() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("termA", "SSTRM-WGT234"),
@@ -137,7 +137,7 @@ public class ConceptReferenceTermMapController1_9Test extends MainResourceContro
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, empty());
 	}
-	
+
 	@Test
 	public void shouldFindByTermB() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("termB", "SSTRM-CD41003"))));
@@ -145,7 +145,7 @@ public class ConceptReferenceTermMapController1_9Test extends MainResourceContro
 		assertThat(results, hasSize(1));
 		assertThat(BeanUtils.getProperty(results.get(0), "uuid"), is("dff198e4-562d-11e0-b169-18a905e044dc"));
 	}
-	
+
 	@Test
 	public void shouldFindByTermBAndMaptype() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("termB", "SSTRM-CD41003"),
@@ -154,7 +154,7 @@ public class ConceptReferenceTermMapController1_9Test extends MainResourceContro
 		assertThat(results, hasSize(1));
 		assertThat(BeanUtils.getProperty(results.get(0), "uuid"), is("dff198e4-562d-11e0-b169-18a905e044dc"));
 	}
-	
+
 	@Test
 	public void shouldFindByMapsAndTo() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("maps", "SSTRM-WGT234"),
@@ -163,7 +163,7 @@ public class ConceptReferenceTermMapController1_9Test extends MainResourceContro
 		assertThat(results, hasSize(1));
 		assertThat(BeanUtils.getProperty(results.get(0), "uuid"), is("dff198e4-562d-11e0-b169-18a905e044dc"));
 	}
-	
+
 	@Test
 	public void shouldNotFindByMapsAndDifferentTo() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("maps", "SSTRM-WGT234"),
@@ -171,14 +171,14 @@ public class ConceptReferenceTermMapController1_9Test extends MainResourceContro
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, hasSize(1));
 	}
-	
+
 	@Test
 	public void shouldFindByMaps() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("maps", "SSTRM-WGT234"))));
 		List<Object> results = Util.getResultsList(result);
 		assertThat(results, hasSize(2));
 	}
-	
+
 	@Test
 	public void shouldFindByMapsAndMaptype() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("maps", "SSTRM-CD41003"),

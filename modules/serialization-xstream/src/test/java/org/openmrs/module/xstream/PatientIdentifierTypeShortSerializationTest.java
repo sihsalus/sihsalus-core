@@ -27,21 +27,21 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a patientIdentifierType
  */
 public class PatientIdentifierTypeShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldPatientIdentifierTypeShortSerialization() throws Exception {
-		
+
 		//prepare the necessary data
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PatientIdentifierTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		PatientIdentifier pi = Context.getPatientService()
 		        .getPatientIdentifierByUuid("8a9aac6e-3f9f-4ed2-8fb5-25215f8bb614");
 		String xmlOutput = Context.getSerializationService().serialize(pi, XStreamShortSerializer.class);
@@ -51,25 +51,25 @@ public class PatientIdentifierTypeShortSerializationTest extends BaseModuleConte
 		//with short serialization, the "identifierType" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/patientIdentifier/identifierType/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldPatientIdentifierTypeShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "PatientIdentifierTypeShortSerializationTest.xml" here 
+		 * We also need to use the "PatientIdentifierTypeShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PatientIdentifierTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<patientIdentifier id=\"1\" uuid=\"8a9aac6e-3f9f-4ed2-8fb5-25215f8bb614\" voided=\"false\">\n");
@@ -91,7 +91,7 @@ public class PatientIdentifierTypeShortSerializationTest extends BaseModuleConte
 		xmlBuilder.append("  </location>\n");
 		xmlBuilder.append("  <preferred>true</preferred>\n");
 		xmlBuilder.append("</patientIdentifier>\n");
-		
+
 		PatientIdentifier pi = Context.getSerializationService().deserialize(xmlBuilder.toString(), PatientIdentifier.class,
 		    XStreamShortSerializer.class);
 		assertEquals("1a339fe9-38bc-4ab3-b180-320988c0b968", pi.getIdentifierType().getUuid());

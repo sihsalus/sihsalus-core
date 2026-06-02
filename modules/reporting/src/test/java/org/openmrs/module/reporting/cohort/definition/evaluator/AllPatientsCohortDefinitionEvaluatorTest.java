@@ -26,26 +26,26 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * This tests the evaluation of an AllPatientsCohortDefinition
  */
 public class AllPatientsCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	@Test
 	public void evaluate_shouldReturnAllNonVoidedPatientsOptionallyLimitedToThoseInThePassedContext() throws Exception {
-		
+
 		AllPatientsCohortDefinition cd = new AllPatientsCohortDefinition();
 		EvaluationContext context = new EvaluationContext();
-		
+
 		// Should return all 9 non-voided patients without a base cohort defined
 		EvaluatedCohort allPats = Context.getService(CohortDefinitionService.class).evaluate(cd, context);
 		Assert.assertEquals(9, allPats.size());
-		
+
 		// Should return all patients in the base cohort if it is defined
 		context.setBaseCohort(new Cohort("2,7,20"));
 		allPats = Context.getService(CohortDefinitionService.class).evaluate(cd, context);

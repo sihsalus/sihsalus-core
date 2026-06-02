@@ -467,9 +467,9 @@ public class AddressHierarchyServiceI18nTest extends I18nModuleContextSensitiveT
 		}
 
 		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(1)));
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(2))); 
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(4))); 
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(7))); 
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(2)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(4)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(7)));
 	}
 
 	@Test
@@ -495,10 +495,10 @@ public class AddressHierarchyServiceI18nTest extends I18nModuleContextSensitiveT
 		}
 
 		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(1)));
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(2))); 
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(4))); 
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(7))); 
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(17)));  
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(2)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(4)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(7)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(17)));
 
 	}
 
@@ -571,8 +571,8 @@ public class AddressHierarchyServiceI18nTest extends I18nModuleContextSensitiveT
 
 		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(1)));
 		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(2)));
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(5))); 
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(12)));  
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(5)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(12)));
 	}
 
 
@@ -611,8 +611,8 @@ public class AddressHierarchyServiceI18nTest extends I18nModuleContextSensitiveT
 		}
 
 		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(2)));
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(5))); 
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(12)));  
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(5)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(12)));
 	}
 
 	@Test
@@ -621,7 +621,7 @@ public class AddressHierarchyServiceI18nTest extends I18nModuleContextSensitiveT
 
 		AddressHierarchyService ahService = Context.getService(AddressHierarchyService.class);
 
-		// create a person address with non-unique city entry 
+		// create a person address with non-unique city entry
 		PersonAddress address = new PersonAddress();
 		address.setCityVillage("scituate");
 
@@ -672,8 +672,8 @@ public class AddressHierarchyServiceI18nTest extends I18nModuleContextSensitiveT
 		}
 
 		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(2)));
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(5))); 
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(12)));  
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(5)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(12)));
 	}
 
 	@Test
@@ -683,7 +683,7 @@ public class AddressHierarchyServiceI18nTest extends I18nModuleContextSensitiveT
 
 		// now perform the same test but set the date changed to be AFTER the patient save
 
-		// try the same address as previously, but now try to trigger it via the updateAddressToEntryMapsForPatientsWithDateChangedAfter()  
+		// try the same address as previously, but now try to trigger it via the updateAddressToEntryMapsForPatientsWithDateChangedAfter()
 		PersonAddress address = new PersonAddress();
 		address.setStateProvince("massachusetts");
 		address.setCountyDistrict("suffolk county");
@@ -750,8 +750,8 @@ public class AddressHierarchyServiceI18nTest extends I18nModuleContextSensitiveT
 
 		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(1)));
 		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(3)));
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(14)));  
-		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(15)));  
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(14)));
+		Assert.assertTrue(entries.contains(Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(15)));
 	}
 
 	@Test

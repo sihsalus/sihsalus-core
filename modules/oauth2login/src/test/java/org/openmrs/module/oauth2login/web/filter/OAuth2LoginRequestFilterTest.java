@@ -42,9 +42,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
 public class OAuth2LoginRequestFilterTest {
-	
+
 	private final OAuth2LoginRequestFilter filter = new OAuth2LoginRequestFilter();
-	
+
 	@Before
 	public void setup() {
 		PowerMockito.mockStatic(Context.class);
@@ -54,23 +54,23 @@ public class OAuth2LoginRequestFilterTest {
 		when(filterConfig.getInitParameter(eq("requestURIs"))).thenReturn("/ws/rest/v1/session");
 		filter.init(filterConfig);
 	}
-	
+
 	@Test
 	public void defaultLogoutUri_shouldRedirectToLogoutUri() throws Exception {
 		// setup
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
-		
+
 		// replay
 		request.setServletPath("/logout");
 		filter.doFilter(request, response, chain);
-		
+
 		// verify
 		verify(response, times(1)).sendRedirect("/oauth2logout");
 		verifyZeroInteractions(chain);
 	}
-	
+
 	@Test
 	public void logoutUri_shouldRedirectToLoginUri() throws Exception {
 		// setup
@@ -78,111 +78,111 @@ public class OAuth2LoginRequestFilterTest {
 		HttpSession session = mock(HttpSession.class);
 		when(session.getAttribute("manual-logout")).thenReturn("true");
 		when(request.getContextPath()).thenReturn("");
-		
+
 		when(request.getSession()).thenReturn(session);
 		//		when(request.getServletPath()).thenReturn("/oauth2logout");
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
-		
+
 		OAuth2LoginRequestFilter filterSpy = spy(filter);
 		// replay
 		filterSpy.doFilter(request, response, chain);
-		
+
 		verify(response, times(1)).sendRedirect("/oauth2logout");
 		verifyZeroInteractions(chain);
 	}
-	
+
 	@Test
 	public void secureUri_shouldRedirectToLoginUriWhenNotAuthenticated() throws Exception {
 		// setup
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
-		
+
 		Context.setUserContext(new UserContext(null));
 		when(Context.isAuthenticated()).thenReturn(false);
-		
+
 		// replay
 		request.setServletPath("/getPatient");
 		filter.doFilter(request, response, chain);
-		
+
 		// verify
 		verify(response, times(1)).sendRedirect("/oauth2login");
 		verifyZeroInteractions(chain);
 	}
-	
+
 	@Test
 	public void servletHandledPath_shouldProceedWhenNotAuthenticated() throws Exception {
 		// setup
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
-		
+
 		Context.setUserContext(new UserContext(null));
 		when(Context.isAuthenticated()).thenReturn(false);
-		
+
 		// replay
 		request.setServletPath("/oauth2login");
 		filter.doFilter(request, response, chain);
-		
+
 		// verify
 		verify(response, never()).sendRedirect(any(String.class));
 		verify(chain, times(1)).doFilter(request, response);
 	}
-	
+
 	@Test
 	public void requestUriHandledUri_shouldProceedWhenNotAuthenticated() throws Exception {
 		// setup
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
-		
+
 		Context.setUserContext(new UserContext(null));
 		when(Context.isAuthenticated()).thenReturn(false);
-		
+
 		// replay
 		request.setRequestURI("/openmrs/ws/rest/v1/session");
 		request.setContextPath("/openmrs");
 		filter.doFilter(request, response, chain);
-		
+
 		// verify
 		verify(response, never()).sendRedirect(any(String.class));
 		verify(chain, times(1)).doFilter(request, response);
 	}
-	
+
 	@Test
 	public void secureUri_shouldProceedWhenAuthenticated() throws Exception {
 		// setup
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
-		
+
 		Context.setUserContext(new UserContext(null));
 		when(Context.isAuthenticated()).thenReturn(true);
-		
+
 		// replay
 		request.setServletPath("/getPatient");
 		filter.doFilter(request, response, chain);
-		
+
 		// verify
 		verify(response, never()).sendRedirect(any(String.class));
 		verify(chain, times(1)).doFilter(request, response);
 	}
-	
+
 	@Test
 	public void doFilter_shouldRedirectToLogoutUriForLegacyUiRequests() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
-		
+
 		request.setServletPath("/ms");
 		request.setRequestURI("/ms/logout");
 		filter.doFilter(request, response, chain);
-		
+
 		verify(response).sendRedirect("/oauth2logout");
 		verifyZeroInteractions(chain);
 	}
-	
+
 	@Test
 	public void doFilter_shouldSetLocationHeaderToRedirectUrlRestLogoutRequest() throws Exception {
 		final String idToken = "myToken";
@@ -192,15 +192,15 @@ public class OAuth2LoginRequestFilterTest {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain chain = mock(FilterChain.class);
-		
+
 		request.setServletPath("/ws");
 		request.setRequestURI("/ws/rest/v1/session");
 		request.setMethod("DELETE");
 		filter.doFilter(request, response, chain);
-		
+
 		verify(chain).doFilter(request, response);
 		verify(response).setHeader("Location",
 		    "http://localhost:8081/auth/realms/demo/protocol/openid-connect/logout?id_token_hint=" + idToken);
 	}
-	
+
 }

@@ -28,14 +28,14 @@ import static org.openmrs.module.webservices.rest.web.RestTestConstants1_8.PERSO
  * Tests functionality of {@link PersonNameController}.
  */
 public class PersonNameController2_1Test extends MainResourceControllerTest {
-	
+
 	private PersonService service;
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getPersonService();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -43,7 +43,7 @@ public class PersonNameController2_1Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "person/" + PERSON_UUID + "/name";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -51,7 +51,7 @@ public class PersonNameController2_1Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return service.getPersonByUuid(PERSON_UUID).getNames().size();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -59,21 +59,21 @@ public class PersonNameController2_1Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return PERSON_NAME_UUID;
 	}
-	
+
 	@Test
 	public void shouldAddNameToPerson() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject personName = new SimpleObject();
 		personName.add("givenName", "name1");
-		
+
 		String json = new ObjectMapper().writeValueAsString(personName);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newPersonName = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(newPersonName, "uuid"));
 		Assertions.assertEquals(originalCount + 1, getAllCount());
 	}

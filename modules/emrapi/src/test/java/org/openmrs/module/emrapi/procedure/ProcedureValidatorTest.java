@@ -28,51 +28,51 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Unit tests for {@link ProcedureValidator}.
  */
 class ProcedureValidatorTest {
-	
+
 	private ProcedureValidator validator;
-	
+
 	private Procedure procedure;
-	
+
 	private Errors errors;
-	
+
 	@BeforeEach
 	void setUp() {
 		validator = new ProcedureValidator();
 		procedure = buildValidProcedure();
 		errors = new BindException(procedure, "procedure");
 	}
-	
+
 	@Test
 	void supports_shouldSupportProcedureClass() {
 		assertTrue(validator.supports(Procedure.class));
 	}
-	
+
 	@Test
 	void supports_shouldNotSupportOtherClasses() {
 		assertFalse(validator.supports(Object.class));
 		assertFalse(validator.supports(String.class));
 	}
-	
+
 	@Test
 	void validate_shouldPassForValidProcedure() {
 		validator.validate(procedure, errors);
 		assertFalse(errors.hasErrors());
 	}
-	
+
 	@Test
 	void validate_shouldRejectNonProcedureTarget() {
 		Object notAProcedure = new Object();
 		validator.validate(notAProcedure, errors);
 		assertTrue(hasErrorCode("ProcedureValidator.onlySupportsProcedure"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenPatientIsNull() {
 		procedure.setPatient(null);
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.patientRequired"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenBothProcedureCodedAndNonCodedAreNull() {
 		procedure.setProcedureCoded(null);
@@ -80,7 +80,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.procedureRequired"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenBothProcedureCodedAndNonCodedAreProvided() {
 		procedure.setProcedureCoded(new Concept());
@@ -88,7 +88,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.procedureCodedAndNonCodedMutuallyExclusive"));
 	}
-	
+
 	@Test
 	void validate_shouldPassWhenOnlyProcedureCodedIsProvided() {
 		procedure.setProcedureCoded(new Concept());
@@ -97,7 +97,7 @@ class ProcedureValidatorTest {
 		assertFalse(hasErrorCode("Procedure.error.procedureRequired"));
 		assertFalse(hasErrorCode("Procedure.error.procedureCodedAndNonCodedMutuallyExclusive"));
 	}
-	
+
 	@Test
 	void validate_shouldPassWhenOnlyProcedureNonCodedIsProvided() {
 		procedure.setProcedureCoded(null);
@@ -106,14 +106,14 @@ class ProcedureValidatorTest {
 		assertFalse(hasErrorCode("Procedure.error.procedureRequired"));
 		assertFalse(hasErrorCode("Procedure.error.procedureCodedAndNonCodedMutuallyExclusive"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenBodySiteIsNull() {
 		procedure.setBodySite(null);
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.bodySiteRequired"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenBothStartDateTimeAndEstimatedStartDateAreNull() {
 		procedure.setStartDateTime(null);
@@ -121,7 +121,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.startDateTimeRequired"));
 	}
-	
+
 	@Test
 	void validate_shouldPassWhenOnlyStartDateTimeIsProvided() {
 		procedure.setStartDateTime(new Date());
@@ -130,7 +130,7 @@ class ProcedureValidatorTest {
 		assertFalse(hasErrorCode("Procedure.error.startDateTimeRequired"));
 		assertFalse(hasErrorCode("Procedure.error.startDateTimeAndEstimatedDateMutuallyExclusive"));
 	}
-	
+
 	@Test
 	void validate_shouldPassWhenOnlyEstimatedStartDateIsProvided() {
 		procedure.setStartDateTime(null);
@@ -139,7 +139,7 @@ class ProcedureValidatorTest {
 		assertFalse(hasErrorCode("Procedure.error.startDateTimeRequired"));
 		assertFalse(hasErrorCode("Procedure.error.startDateTimeAndEstimatedDateMutuallyExclusive"));
 	}
-	
+
 	// should fail if both start date and estimated start date are provided for a new procedure
 	@Test
 	void validate_shouldRejectWhenBothStartDateTimeAndEstimatedStartDateAreProvidedForNewProcedure() {
@@ -149,7 +149,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.startDateTimeAndEstimatedDateMutuallyExclusiveForNewProcedures"));
 	}
-	
+
 	// should fail if end date is before start date
 	@Test
 	void validate_shouldRejectWhenEndDateTimeIsBeforeStartDateTime() {
@@ -158,7 +158,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.endDateTimeBeforeStartDateTime"));
 	}
-	
+
 	// should fail if end date is before estimated start date
 	@Test
 	void validate_shouldRejectWhenEndDateTimeIsBeforeEstimatedStartDate() {
@@ -168,7 +168,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.endDateTimeBeforeStartDateTime"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenDurationIsProvidedWithoutDurationUnit() {
 		procedure.setDuration(30);
@@ -176,7 +176,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.durationUnitRequired"));
 	}
-	
+
 	@Test
 	void validate_shouldPassWhenDurationAndDurationUnitAreBothProvided() {
 		procedure.setDuration(30);
@@ -184,7 +184,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertFalse(hasErrorCode("Procedure.error.durationUnitRequired"));
 	}
-	
+
 	@Test
 	void validate_shouldPassWhenDurationIsNull() {
 		procedure.setDuration(null);
@@ -192,14 +192,14 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertFalse(hasErrorCode("Procedure.error.durationUnitRequired"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenStatusIsNull() {
 		procedure.setStatus(null);
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.statusRequired"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenVoidedWithoutVoidReason() {
 		procedure.setVoided(true);
@@ -207,7 +207,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.voidReasonRequiredWhenVoided"));
 	}
-	
+
 	@Test
 	void validate_shouldRejectWhenVoidedWithBlankVoidReason() {
 		procedure.setVoided(true);
@@ -215,7 +215,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertTrue(hasErrorCode("Procedure.error.voidReasonRequiredWhenVoided"));
 	}
-	
+
 	@Test
 	void validate_shouldPassWhenVoidedWithVoidReason() {
 		procedure.setVoided(true);
@@ -223,7 +223,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertFalse(hasErrorCode("Procedure.error.voidReasonRequiredWhenVoided"));
 	}
-	
+
 	@Test
 	void validate_shouldPassWhenNotVoidedWithoutVoidReason() {
 		procedure.setVoided(false);
@@ -231,7 +231,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertFalse(hasErrorCode("Procedure.error.voidReasonRequiredWhenVoided"));
 	}
-	
+
 	@Test
 	void validate_shouldAllowRetiredTypesWhenUpdating() {
 		procedure.setProcedureId(123); // Simulate existing procedure
@@ -243,7 +243,7 @@ class ProcedureValidatorTest {
 		validator.validate(procedure, errors);
 		assertFalse(hasErrorCode("Procedure.error.procedureTypeRetired"));
 	}
-	
+
 	private Procedure buildValidProcedure() {
 		Procedure p = new Procedure();
 		p.setPatient(new Patient());
@@ -254,15 +254,15 @@ class ProcedureValidatorTest {
 		p.setEstimatedStartDate(null);
 		p.setStatus(new Concept());
 		p.setVoided(false);
-		
+
 		ProcedureType type = new ProcedureType();
 		type.setUuid("some-non-current-uuid");
 		type.setRetired(false);
 		p.setProcedureType(type);
-		
+
 		return p;
 	}
-	
+
 	private boolean hasErrorCode(String code) {
 		return errors.getAllErrors().stream().anyMatch(e -> e.getCode().equals(code));
 	}

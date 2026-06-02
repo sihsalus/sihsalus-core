@@ -41,61 +41,61 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
 
 @ExtendWith(MockitoExtension.class)
 public class DrugOrderBillingStrategyTest {
-	
+
 	@Mock
 	private StockManagementService stockManagementService;
-	
+
 	@Mock
 	private ItemPriceService itemPriceService;
-	
+
 	@Mock
 	private BillExemptionService billExemptionService;
-	
+
 	@InjectMocks
 	private DrugOrderBillingStrategy strategy;
-	
+
 	private Drug drug;
-	
+
 	private DrugOrder drugOrder;
-	
+
 	private StockItem stockItem;
-	
+
 	@BeforeEach
 	public void setup() {
 		drug = new Drug();
 		drug.setDrugId(1);
 		drug.setConcept(new Concept());
-		
+
 		drugOrder = new DrugOrder();
 		drugOrder.setDrug(drug);
 		drugOrder.setQuantity(5.0);
 		drugOrder.setUuid("test-order-uuid");
-		
+
 		stockItem = new StockItem();
 		stockItem.setUuid("test-stock-item-uuid");
 		stockItem.setPurchasePrice(new BigDecimal("100.00"));
 	}
-	
+
 	@Test
 	public void supportsOrder_shouldReturnTrueForDrugOrder() {
 		assertTrue(strategy.supportsOrder(drugOrder));
 	}
-	
+
 	@Test
 	public void supportsOrder_shouldReturnFalseForTestOrder() {
 		assertFalse(strategy.supportsOrder(new TestOrder()));
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldCreateLineItemWithItemPrice() {
 		CashierItemPrice itemPrice = new CashierItemPrice();
 		itemPrice.setPrice(new BigDecimal("200.00"));
-		
+
 		when(stockManagementService.getStockItemByDrug(1)).thenReturn(Collections.singletonList(stockItem));
 		when(itemPriceService.getItemPrice(stockItem)).thenReturn(Collections.singletonList(itemPrice));
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(drugOrder);
-		
+
 		assertTrue(result.isPresent());
 		BillLineItem lineItem = result.get();
 		assertEquals(new BigDecimal("200.00"), lineItem.getPrice());
@@ -103,56 +103,56 @@ public class DrugOrderBillingStrategyTest {
 		assertEquals(BillStatus.PENDING, lineItem.getPaymentStatus());
 		assertEquals(stockItem, lineItem.getItem());
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldFallBackToPurchasePrice() {
 		when(stockManagementService.getStockItemByDrug(1)).thenReturn(Collections.singletonList(stockItem));
 		when(itemPriceService.getItemPrice(stockItem)).thenReturn(Collections.emptyList());
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(drugOrder);
-		
+
 		assertTrue(result.isPresent());
 		assertEquals(new BigDecimal("100.00"), result.get().getPrice());
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldReturnZeroPriceWhenNoPriceAvailable() {
 		stockItem.setPurchasePrice(null);
 		when(stockManagementService.getStockItemByDrug(1)).thenReturn(Collections.singletonList(stockItem));
 		when(itemPriceService.getItemPrice(stockItem)).thenReturn(Collections.emptyList());
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(drugOrder);
-		
+
 		assertTrue(result.isPresent());
 		assertEquals(BigDecimal.ZERO, result.get().getPrice());
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldReturnEmptyWhenNoStockItem() {
 		when(stockManagementService.getStockItemByDrug(1)).thenReturn(Collections.emptyList());
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(drugOrder);
-		
+
 		assertFalse(result.isPresent());
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldReturnEmptyWhenDrugIsNull() {
 		drugOrder.setDrug(null);
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(drugOrder);
-		
+
 		assertFalse(result.isPresent());
 	}
-	
+
 	@Test
 	public void createBillLineItem_shouldDefaultQuantityToZeroWhenNull() {
 		drugOrder.setQuantity(null);
 		when(stockManagementService.getStockItemByDrug(1)).thenReturn(Collections.singletonList(stockItem));
 		when(itemPriceService.getItemPrice(stockItem)).thenReturn(Collections.emptyList());
-		
+
 		Optional<BillLineItem> result = strategy.createBillLineItem(drugOrder);
-		
+
 		assertTrue(result.isPresent());
 		assertEquals(0, result.get().getQuantity());
 	}

@@ -26,19 +26,19 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EncounterAllFiltersTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private EncounterService encounterService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "encounters.xml");
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "privilegedEncounters.xml");
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnNoEncountersIfTheUserIsNotGrantedAnyAccess() {
 		reloginAs("dBeckham", "test");
@@ -47,7 +47,7 @@ public class EncounterAllFiltersTest extends BaseFilterTest {
 		assertEquals(expCount, encounterService.getCountOfEncounters(name, false).intValue());
 		assertEquals(expCount, encounterService.getEncounters(name, 0, Integer.MAX_VALUE, false).size());
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnEncountersBelongingToPatientsAccessibleToTheUser() {
 		reloginAs("dyorke", "test");
@@ -58,7 +58,7 @@ public class EncounterAllFiltersTest extends BaseFilterTest {
 		assertEquals(expCount, encounters.size());
 		assertTrue(TestUtil.containsId(encounters, 1000));
 		assertTrue(TestUtil.containsId(encounters, 1001));
-		
+
 		service.grantAccess(Context.getAuthenticatedUser(), new Location(4001));
 		DataFilterTestUtils.addPrivilege(BaseEncTypeViewPrivilegeBasedFilterTest.PRIV_MANAGE_CHEMO_PATIENTS);
 		//TODO Update test data to include another Enc that requires a different privilege
@@ -71,7 +71,7 @@ public class EncounterAllFiltersTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(encounters, 1002));
 		assertTrue(TestUtil.containsId(encounters, 2001));
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnAllEncountersIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -85,7 +85,7 @@ public class EncounterAllFiltersTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(encounters, 1002));
 		assertTrue(TestUtil.containsId(encounters, 2001));
 	}
-	
+
 	@Test
 	public void getEncounters_shouldReturnAllEncountersIfAllFiltersAreDisabled() {
 		DataFilterTestUtils.disableLocationFiltering();
@@ -96,5 +96,5 @@ public class EncounterAllFiltersTest extends BaseFilterTest {
 		//In core this method already filters encounters by privilege
 		assertEquals(3, encounterService.getEncounters(name, 0, Integer.MAX_VALUE, false).size());
 	}
-	
+
 }

@@ -27,7 +27,7 @@ import org.openmrs.test.Verifies;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 
 public class DWRObservationServiceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see org.openmrs.web.dwr.DWRObsService#createObs(Integer, Integer, Integer, String, String)
 	 */
@@ -49,7 +49,7 @@ public class DWRObservationServiceTest extends BaseModuleWebContextSensitiveTest
 		assertNotNull(addedObs.getValueCoded());
 		assertEquals(answerConcept, addedObs.getValueCoded());
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.dwr.DWRObsService#createObs(Integer, Integer, Integer, String, String)
 	 */
@@ -75,7 +75,7 @@ public class DWRObservationServiceTest extends BaseModuleWebContextSensitiveTest
 		assertNotNull(addedObs.getValueCoded());
 		assertEquals(booleanConcept, addedObs.getValueCoded());
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.dwr.DWRObsService#createObs(Integer, Integer, Integer, String, String)
 	 */
@@ -101,7 +101,7 @@ public class DWRObservationServiceTest extends BaseModuleWebContextSensitiveTest
 		assertNotNull(addedObs.getValueCoded());
 		assertEquals(booleanConcept, addedObs.getValueCoded());
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.dwr.DWRObsService#createObs(Integer, Integer, Integer, String, String)
 	 */
@@ -127,7 +127,7 @@ public class DWRObservationServiceTest extends BaseModuleWebContextSensitiveTest
 		assertNotNull(addedObs.getValueCoded());
 		assertEquals(booleanConcept, addedObs.getValueCoded());
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.dwr.DWRObsService#createObs(Integer, Integer, Integer, String, String)
 	 */
@@ -153,7 +153,7 @@ public class DWRObservationServiceTest extends BaseModuleWebContextSensitiveTest
 		assertNotNull(addedObs.getValueCoded());
 		assertEquals(booleanConcept, addedObs.getValueCoded());
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.dwr.DWRObsService#createObs(Integer, Integer, Integer, String, String)
 	 */
@@ -179,7 +179,7 @@ public class DWRObservationServiceTest extends BaseModuleWebContextSensitiveTest
 		assertNotNull(addedObs.getValueCoded());
 		assertEquals(booleanConcept, addedObs.getValueCoded());
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.dwr.DWRObsService#createObs(Integer, Integer, Integer, String, String)
 	 */

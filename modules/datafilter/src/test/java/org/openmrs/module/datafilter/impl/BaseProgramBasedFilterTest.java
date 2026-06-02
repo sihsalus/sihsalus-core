@@ -13,14 +13,14 @@ import org.junit.Before;
 import org.openmrs.module.datafilter.FilterTestUtils;
 
 public abstract class BaseProgramBasedFilterTest extends BaseFilterTest {
-	
+
 	protected final static String ROLE_COORDINATOR_PROG_1 = "Program 1 Coordinator";
-	
+
 	@Before
 	public void beforeProgramBasedFilterMethod() {
 		FilterTestUtils.disableAllHibernateFilters();
 		FilterTestUtils.enableFilter(ImplConstants.PROGRAM_BASED_FILTER_NAME_USER);
 		FilterTestUtils.enableFilter(ImplConstants.PROGRAM_BASED_FILTER_NAME_PROVIDER);
 	}
-	
+
 }

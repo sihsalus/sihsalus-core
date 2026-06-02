@@ -29,7 +29,7 @@ import java.util.HashMap;
  * test class for testing evaluation of QueryCountIndicators
  */
 public class QueryCountIndicatorEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
@@ -37,7 +37,7 @@ public class QueryCountIndicatorEvaluatorTest extends BaseModuleContextSensitive
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	@Test
 	public void evaluate_shouldSupportPersonQueries() throws Exception {
 		SqlPersonQuery q = new SqlPersonQuery();

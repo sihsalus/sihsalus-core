@@ -29,45 +29,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class FhirDiagnosticReportDaoImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
-	
+
 	private static final String DIAGNOSTIC_REPORT_UUID = "1e589127-f391-4d0c-8e98-e0a158b2be22";
-	
+
 	private static final String OBS_UUID = "dc386962-1c42-49ea-bed2-97650c66f742";
-	
+
 	private FhirDiagnosticReportDaoImpl dao;
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Autowired
 	@Qualifier("patientService")
 	private PatientService patientService;
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService conceptService;
-	
+
 	@Autowired
 	@Qualifier("obsService")
 	private ObsService obsService;
-	
+
 	@Before
 	public void setup() throws Exception {
 		dao = new FhirDiagnosticReportDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 		executeDataSet(DATA_XML);
 	}
-	
+
 	@Test
 	public void get_shouldGetFhirDiagnosticReportByUuid() {
 		FhirDiagnosticReport result = dao.get(DIAGNOSTIC_REPORT_UUID);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
-	
+
 	@Test
 	public void saveOrUpdate_shouldSaveNewFhirDiagnosticReport() {
 		FhirDiagnosticReport newDiagnosticReport = new FhirDiagnosticReport();
@@ -76,30 +76,30 @@ public class FhirDiagnosticReportDaoImplTest extends BaseFhirContextSensitiveTes
 		newDiagnosticReport.setSubject(patientService.getPatient(7));
 		newDiagnosticReport.setCode(conceptService.getConcept(5085));
 		newDiagnosticReport.getResults().add(obsService.getObsByUuid(OBS_UUID));
-		
+
 		FhirDiagnosticReport result = dao.createOrUpdate(newDiagnosticReport);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getSubject().getId(), equalTo(7));
 		assertThat(result.getResults(), hasSize(equalTo(1)));
 		assertThat(result.getResults().iterator().next().getUuid(), equalTo(OBS_UUID));
 	}
-	
+
 	@Test
 	public void saveOrUpdate_shouldUpdateExistingFhirDiagnosticReport() {
 		FhirDiagnosticReport existingObsGroup = dao.get(DIAGNOSTIC_REPORT_UUID);
-		
+
 		Obs newMember = new Obs();
 		newMember.setConcept(conceptService.getConcept(19));
 		newMember.setObsDatetime(new Date());
 		newMember.setEncounter(existingObsGroup.getEncounter());
 		newMember.setPerson(existingObsGroup.getSubject());
 		newMember.setValueText("blah blah blah");
-		
+
 		existingObsGroup.getResults().add(newMember);
-		
+
 		FhirDiagnosticReport result = dao.createOrUpdate(existingObsGroup);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(DIAGNOSTIC_REPORT_UUID));
 		assertThat(result.getResults(), hasSize(equalTo(3)));

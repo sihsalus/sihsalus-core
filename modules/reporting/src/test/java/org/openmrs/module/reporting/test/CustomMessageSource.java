@@ -41,13 +41,13 @@ import java.util.TreeMap;
  */
 @Component
 public class CustomMessageSource extends AbstractMessageSource implements MutableMessageSource, ApplicationContextAware {
-	
+
 	protected static final Log log = LogFactory.getLog(CustomMessageSource.class);
 	private Map<Locale, PresentationMessageMap> cache = null;
 	private boolean showMessageCode = false;
-	
+
 	public static final String GLOBAL_PROPERTY_SHOW_MESSAGE_CODES = "custommessage.showMessageCodes";
-	
+
 	/**
 	 * @see ApplicationContextAware#setApplicationContext(ApplicationContext)
 	 */
@@ -58,7 +58,7 @@ public class CustomMessageSource extends AbstractMessageSource implements Mutabl
 		setParentMessageSource(activeSource);
 		svc.setActiveMessageSource(this);
 	}
-	
+
 	/**
 	 * @return the cached messages, merged from the custom source and the parent source
 	 */
@@ -68,14 +68,14 @@ public class CustomMessageSource extends AbstractMessageSource implements Mutabl
 		}
 		return cache;
 	}
-	
+
 	/**
 	 * @return all message codes defined in the system
 	 */
 	public Set<String> getAllMessageCodes() {
 		return getAllMessagesByCode().keySet();
 	}
-	
+
 	/**
 	 * @return a Map from code to Map of Locale string to message
 	 */
@@ -95,7 +95,7 @@ public class CustomMessageSource extends AbstractMessageSource implements Mutabl
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * @param pm the presentation message to add to the cache
 	 * @param override if true, should override any existing message
@@ -110,7 +110,7 @@ public class CustomMessageSource extends AbstractMessageSource implements Mutabl
 			pmm.put(pm.getCode(), pm);
 		}
 	}
-	
+
 	/**
 	 * Refreshes the cache, merged from the custom source and the parent source
 	 */
@@ -257,7 +257,7 @@ public class CustomMessageSource extends AbstractMessageSource implements Mutabl
 		}
 		return s;
 	}
-	
+
 	/**
 	 * Convenience method to get the parent message source as a MutableMessageSource
 	 */

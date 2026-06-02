@@ -27,7 +27,7 @@ import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
  * Test the methods in {@link DWRPatientsServiceTest}
  */
 public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see DWRPatientService#findPatients(String,boolean)
 	 */
@@ -41,7 +41,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 		Collection<Object> resultObjects = dwrService.findPatients("Other", false);
 		Assertions.assertEquals(1, resultObjects.size());
 	}
-	
+
 	/**
 	 * @see DWRPatientService#findPatients(String,null)
 	 */
@@ -55,7 +55,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 		Collection<Object> resultObjects = dwrService.findPatients("Super", false);
 		Assertions.assertEquals(1, resultObjects.size());
 	}
-	
+
 	/**
 	 * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
 	 */
@@ -68,7 +68,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNull(resultObjects.get("searchAgain"));
 		Assertions.assertNull(resultObjects.get("notification"));
 	}
-	
+
 	/**
 	 * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
 	 */
@@ -81,7 +81,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertNull(resultObjects.get("searchAgain"));
 		Assertions.assertNull(resultObjects.get("notification"));
 	}
-	
+
 	/**
 	 * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
 	 */
@@ -95,7 +95,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertEquals("Joh", resultObjects.get("searchAgain"));
 		Assertions.assertNotNull(resultObjects.get("notification"));
 	}
-	
+
 	/**
 	 * @see DWRPatientService#findCountAndPatients(String,Integer,Integer,null)
 	 */
@@ -106,21 +106,21 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 		final String identifier = "XYZ";
 		//should have no patient with this identifiers
 		Assertions.assertEquals(0, ps.getCountOfPatients(identifier).intValue());
-		
+
 		Patient patient = ps.getPatient(2);
 		PatientIdentifier pId = new PatientIdentifier(identifier, ps.getPatientIdentifierType(5), Context
 		        .getLocationService().getLocation(1));
 		patient.addIdentifier(pId);
 		ps.savePatient(patient);
 		updateSearchIndex();
-		
+
 		//Let's do this in a case insensitive way
 		Map<String, Object> resultObjects = new DWRPatientService().findCountAndPatients(identifier.toLowerCase(), 0, null,
 		    true);
 		Assertions.assertEquals(1, resultObjects.get("count"));
 		Assertions.assertEquals(1, ((List<?>) resultObjects.get("objectList")).size());
 	}
-	
+
 	/**
 	 * @see DWRPatientService#findPatientsByIdentifier(String,Integer,Integer,null)
 	 */
@@ -133,5 +133,5 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 		        .findPatientsByIdentifier(new String[] { "Identifier1", "Identifier2" });
 		Assertions.assertEquals(2, resultObjects.size());
 	}
-	
+
 }

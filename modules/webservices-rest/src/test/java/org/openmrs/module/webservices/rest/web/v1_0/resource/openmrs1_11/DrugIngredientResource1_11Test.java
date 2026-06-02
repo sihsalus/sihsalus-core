@@ -14,7 +14,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class DrugIngredientResource1_11Test extends BaseDelegatingResourceTest<DrugIngredientResource1_11, DrugIngredient> {
-	
+
 	@Override
 	public DrugIngredient newObject() {
 		DrugIngredient ingredient = new DrugIngredient();
@@ -24,7 +24,7 @@ public class DrugIngredientResource1_11Test extends BaseDelegatingResourceTest<D
 		ingredient.setUnits(Context.getConceptService().getConcept(8));
 		return ingredient;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -33,7 +33,7 @@ public class DrugIngredientResource1_11Test extends BaseDelegatingResourceTest<D
 		assertPropPresent("ingredient");
 		assertPropPresent("units");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -42,12 +42,12 @@ public class DrugIngredientResource1_11Test extends BaseDelegatingResourceTest<D
 		assertPropPresent("ingredient");
 		assertPropPresent("units");
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return "e322c90c-7cd9-4e25-bdff-f21d387759b6";
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "COUGH SYRUP";

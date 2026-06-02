@@ -22,23 +22,23 @@ import org.openmrs.module.reporting.common.DateUtil;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String CONDITION_TEST_DATASET = "org/openmrs/module/reporting/include/ConditionCohortDefinitionEvaluatorTestDataSet.xml";
-	
+
 	private ConditionCohortDefinition cd;
-	
+
 	@Before
 	public void setup() throws Exception {
 		initializeInMemoryDatabase();
 		cd = new ConditionCohortDefinition();
 		executeDataSet(CONDITION_TEST_DATASET);
 	}
-	
+
 	@After
 	public void tearDown() {
 		cd = null;
 	}
-	
+
 	@Test
 	public void evaluateShouldReturnAllPatients() throws Exception {
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
@@ -49,7 +49,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(5));
 		Assert.assertEquals(5, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithConcept() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -61,7 +61,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(4));
 		Assert.assertEquals(4, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithConceptAndNonCodedValue() throws Exception {
 		cd.setConditionNonCoded("NON-CODED-CONDITION");
@@ -70,7 +70,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(4));
 		Assert.assertEquals(2, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithCreatedOnOrAfter() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -82,7 +82,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(3));
 		Assert.assertEquals(3, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithOnSetDateOnOrAfter() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -94,7 +94,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(3));
 		Assert.assertEquals(3, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithEndDateOnOrAfter() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -106,9 +106,9 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(3));
 		Assert.assertEquals(3, cohort.size());
 	}
-	
-	
-	
+
+
+
 	@Test
 	public void evaluateShouldFilterPatientsWithCreatedOnOrBefore() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -119,7 +119,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(4));
 		Assert.assertEquals(2, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithOnSetDateOnOrBefore() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -130,7 +130,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(4));
 		Assert.assertEquals(2, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithEndDateOnOrBefore() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -140,9 +140,9 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(4));
 		Assert.assertEquals(1, cohort.size());
 	}
-	
-	
-	
+
+
+
 	@Test
 	public void evaluateShouldFilterPatientsBetweenDateRanges() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -153,7 +153,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(3));
 		Assert.assertEquals(1, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithActiveOnDate() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);
@@ -164,7 +164,7 @@ public class ConditionCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		Assert.assertTrue(cohort.contains(4));
 		Assert.assertEquals(2, cohort.size());
 	}
-	
+
 	@Test
 	public void evaluateShouldFilterPatientsWithAllParams() throws Exception {
 		Concept concept = Context.getConceptService().getConcept(409);

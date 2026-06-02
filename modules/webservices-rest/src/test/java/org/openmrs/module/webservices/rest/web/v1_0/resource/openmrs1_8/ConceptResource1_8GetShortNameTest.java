@@ -35,7 +35,7 @@ public class ConceptResource1_8GetShortNameTest extends BaseModuleWebContextSens
 		Concept concept = Context.getConceptService().getConceptByUuid(RestTestConstants1_8.CONCEPT_UUID);
 		Locale locale = new Locale("en");
 		Context.setLocale(locale);
-		
+
 		ConceptName shortName = new ConceptName("BP", locale);
 		shortName.setConceptNameType(ConceptNameType.SHORT);
 		concept.addName(shortName);

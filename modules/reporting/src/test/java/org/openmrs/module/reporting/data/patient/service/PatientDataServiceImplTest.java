@@ -46,24 +46,24 @@ import static org.junit.Assert.assertThat;
 public class PatientDataServiceImplTest extends BaseModuleContextSensitiveTest {
 
     protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
     public static final String TEST_PATIENT_ATTR_TYPE_UUID = "test-patient-attr-type-uuid";
 
     @Autowired
     private AllDefinitionLibraries libraries;
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see PatientDataServiceImpl#evaluate(org.openmrs.module.reporting.data.patient.definition.PatientDataDefinition, org.openmrs.module.reporting.evaluation.EvaluationContext)
 	 * @verifies evaluate a patient query
@@ -74,7 +74,7 @@ public class PatientDataServiceImplTest extends BaseModuleContextSensitiveTest {
 		PatientData data = Context.getService(PatientDataService.class).evaluate(definition, new EvaluationContext());
 		Assert.assertNotNull(data);
 	}
-	
+
 	/**
 	 * @see PatientDataServiceImpl#saveDefinition(org.openmrs.module.reporting.evaluation.Definition)
 	 * @verifies save a patient query

@@ -24,9 +24,9 @@ import org.openmrs.ConceptComplex;
 import org.openmrs.ConceptNumeric;
 
 public class EventClassScannerTest {
-	
+
 	private final EventClassScanner classScanner = new EventClassScanner();
-	
+
 	@Test
 	public void shouldGetClassesThatMatchTheSpecifiedType() throws Exception {
 		List<Class<? extends Concept>> classes = classScanner.getClasses(Concept.class);

@@ -62,13 +62,12 @@ public class ProviderSearchHandler2_8Test extends RestControllerTestUtils {
 
     @Test
     public void shouldThrowExceptionIfInvalidRole() throws Exception {
-    	assertThrows(APIException.class, () -> {
+	assertThrows(APIException.class, () -> {
 	        MockHttpServletRequest req = request(RequestMethod.GET, "provider");
 	        req.addParameter("providerRoles", "bogus");
 	        SimpleObject result = deserialize(handle(req));
 	        List<Provider> providers = (List<Provider>) result.get("results");
-    	});
+	});
     }
 
 }
-

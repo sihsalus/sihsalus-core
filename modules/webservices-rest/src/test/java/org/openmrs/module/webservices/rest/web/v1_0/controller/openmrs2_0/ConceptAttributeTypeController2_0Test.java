@@ -75,22 +75,22 @@ public class ConceptAttributeTypeController2_0Test extends MainResourceControlle
         Assertions.assertEquals(originalCount + 1 , getAllCount());
 
     }
-    
+
     @Test
     public void shouldPurgeConceptAttributeType() throws Exception {
-    	final String UUID = "9516cc50-6f9f-11e0-8414-001e378eb67f";
-    	Assertions.assertNotNull(service.getConceptAttributeTypeByUuid(UUID));
-    	MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + UUID);
-    	req.addParameter("purge", "true");
-    	handle(req);
-    	Assertions.assertNull(service.getConceptAttributeTypeByUuid(UUID));
+	final String UUID = "9516cc50-6f9f-11e0-8414-001e378eb67f";
+	Assertions.assertNotNull(service.getConceptAttributeTypeByUuid(UUID));
+	MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + UUID);
+	req.addParameter("purge", "true");
+	handle(req);
+	Assertions.assertNull(service.getConceptAttributeTypeByUuid(UUID));
     }
-    
+
 	@Test
 	public void shouldListAllConceptAttributeTypes() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(result);
 		Assertions.assertEquals(getAllCount(), Util.getResultsSize(result));
 	}
@@ -111,15 +111,15 @@ public class ConceptAttributeTypeController2_0Test extends MainResourceControlle
         Assertions.assertEquals("Dummy description update", updatedConceptAttributeType.getDescription());
         Assertions.assertEquals("org.openmrs.customdatatype.datatype.LongFreeTextDatatype", updatedConceptAttributeType.getDatatypeClassname());
     }
-    
+
     @Test
     public void shouldGetAConceptAttributeTypeByUuid() throws Exception {
-    	MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-    	SimpleObject result = deserialize(handle(req));
-    	
-    	ConceptAttributeType conceptAttributeType = service.getConceptAttributeTypeByUuid(getUuid());
-    	Assertions.assertEquals(conceptAttributeType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
-    	Assertions.assertEquals(conceptAttributeType.getName(), PropertyUtils.getProperty(result, "name"));
+	MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+	SimpleObject result = deserialize(handle(req));
+
+	ConceptAttributeType conceptAttributeType = service.getConceptAttributeTypeByUuid(getUuid());
+	Assertions.assertEquals(conceptAttributeType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
+	Assertions.assertEquals(conceptAttributeType.getName(), PropertyUtils.getProperty(result, "name"));
     }
 
     @Test

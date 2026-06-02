@@ -15,7 +15,7 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class FormResource1_8Test extends BaseDelegatingResourceTest<FormResource1_8, Form> {
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#newObject()
 	 */
@@ -23,7 +23,7 @@ public class FormResource1_8Test extends BaseDelegatingResourceTest<FormResource
 	public Form newObject() {
 		return Context.getFormService().getFormByUuid(getUuidProperty());
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getDisplayProperty()
 	 */
@@ -31,7 +31,7 @@ public class FormResource1_8Test extends BaseDelegatingResourceTest<FormResource
 	public String getDisplayProperty() {
 		return "Basic Form";
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getUuidProperty()
 	 */
@@ -39,7 +39,7 @@ public class FormResource1_8Test extends BaseDelegatingResourceTest<FormResource
 	public String getUuidProperty() {
 		return RestTestConstants1_8.FORM_UUID;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -52,7 +52,7 @@ public class FormResource1_8Test extends BaseDelegatingResourceTest<FormResource
 		assertPropEquals("published", getObject().getPublished());
 		assertPropPresent("formFields");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -66,5 +66,5 @@ public class FormResource1_8Test extends BaseDelegatingResourceTest<FormResource
 		assertPropPresent("formFields");
 		assertPropPresent("auditInfo");
 	}
-	
+
 }

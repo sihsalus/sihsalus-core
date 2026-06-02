@@ -28,10 +28,10 @@ import org.springframework.web.servlet.ModelAndView;
  * Tests methods on the {@link PortletController} class
  */
 public class PortletControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * Convenience method to get the "model" from the controller's handleRequest method
-	 * 
+	 *
 	 * @param patientId the patient id to fetch
 	 * @return the Map from string to object of everything in the generated "model"
 	 * @throws Exception
@@ -39,18 +39,18 @@ public class PortletControllerTest extends BaseModuleWebContextSensitiveTest {
 	private Map<String, Object> getModelFromController(Integer patientId) throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		HttpServletResponse response = new MockHttpServletResponse();
-		
+
 		request.setAttribute(WebConstants.INIT_REQ_UNIQUE_ID, "1");
 		request.getSession().setAttribute(WebConstants.OPENMRS_PORTLET_LAST_REQ_ID, "0");
 		request.setAttribute("jakarta.servlet.include.servlet_path", "testPortlet");
 		request.setAttribute("org.openmrs.portlet.parameters", new HashMap());
 		request.setAttribute("org.openmrs.portlet.patientId", patientId);
-		
+
 		ModelAndView modelAndView = new PortletController().handleRequest(request, response);
-		
+
 		return (Map<String, Object>) modelAndView.getModel().get("model");
 	}
-	
+
 	/**
 	 * @see PortletController#handleRequest(HttpServletRequest,HttpServletResponse)
 	 */
@@ -61,7 +61,7 @@ public class PortletControllerTest extends BaseModuleWebContextSensitiveTest {
 		Map<String, Object> modelmap = getModelFromController(7);
 		Assertions.assertEquals("61.7", modelmap.get("patientBmiAsString"));
 	}
-	
+
 	/**
 	 * @see PortletController#handleRequest(HttpServletRequest,HttpServletResponse)
 	 */

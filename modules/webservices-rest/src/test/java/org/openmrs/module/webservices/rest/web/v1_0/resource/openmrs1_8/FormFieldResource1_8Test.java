@@ -15,7 +15,7 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class FormFieldResource1_8Test extends BaseDelegatingResourceTest<FormFieldResource1_8, FormField> {
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#newObject()
 	 */
@@ -23,7 +23,7 @@ public class FormFieldResource1_8Test extends BaseDelegatingResourceTest<FormFie
 	public FormField newObject() {
 		return Context.getFormService().getFormFieldByUuid(getUuidProperty());
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getDisplayProperty()
 	 */
@@ -31,7 +31,7 @@ public class FormFieldResource1_8Test extends BaseDelegatingResourceTest<FormFie
 	public String getDisplayProperty() {
 		return null;
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getUuidProperty()
 	 */
@@ -39,5 +39,5 @@ public class FormFieldResource1_8Test extends BaseDelegatingResourceTest<FormFie
 	public String getUuidProperty() {
 		return RestTestConstants1_8.FORM_FIELD_UUID;
 	}
-	
+
 }

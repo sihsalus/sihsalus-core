@@ -34,19 +34,19 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 
 public class CodedObsCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link CodedObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
-	 * 
+	 *
 	 */
 	@Test
 	@Verifies(value = "should test any with many properties specified", method = "evaluate(CohortDefinition,EvaluationContext)")
@@ -63,10 +63,10 @@ public class CodedObsCohortDefinitionEvaluatorTest extends BaseModuleContextSens
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(7));
 	}
-	
+
 	/**
 	 * @see {@link CodedObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
-	 * 
+	 *
 	 */
 	@Test
 	@Verifies(value = "should test last with many properties specified", method = "evaluate(CohortDefinition,EvaluationContext)")
@@ -82,7 +82,7 @@ public class CodedObsCohortDefinitionEvaluatorTest extends BaseModuleContextSens
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(7));
 	}
-	
+
 	/**
 	 * @see {@link CodedObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -94,37 +94,37 @@ public class CodedObsCohortDefinitionEvaluatorTest extends BaseModuleContextSens
 		cd.setQuestion(new Concept(21)); // FOOD ASSISTANCE FOR ENTIRE FAMILY, in the reporting test dataset
 		cd.setOperator(SetComparator.IN);
 		cd.setValueList(Collections.singletonList(new Concept(7))); // YES, in the reporting test dataset
-		
+
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(1, cohort.size());
 
 		cd.setEncounterTypeList(Collections.singletonList(new EncounterType(1)));
 		cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(1, cohort.size());
-		
+
 		cd.setEncounterTypeList(Collections.singletonList(new EncounterType(2)));
 		cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertEquals(0, cohort.size());
 	}
-	
+
 	/**
 	 * @see {@link CodedObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
-	 * 
+	 *
 	 */
 	@Ignore
 	@Test
 	@Verifies(value = "should not return voided patients", method = "evaluate(CohortDefinition,EvaluationContext)")
 	public void evaluate_shouldNotReturnVoidedPatients() throws Exception {
-		
+
 		CodedObsCohortDefinition cd = new CodedObsCohortDefinition();
 		cd.setTimeModifier(TimeModifier.ANY);
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(cohort.contains(7));
-		
+
 		Patient patient = Context.getPatientService().getPatient(7);
 		Context.getPatientService().voidPatient(patient, "testing");
 		Context.flushSession();
-		
+
 		cohort = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(cohort.contains(7));
 	}

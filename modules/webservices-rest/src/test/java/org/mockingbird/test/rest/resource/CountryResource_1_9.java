@@ -21,7 +21,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.Resource;
  */
 @org.openmrs.module.webservices.rest.web.annotation.Resource(name = RestConstants.VERSION_1 + "/country", order = 1, supportedClass = Country.class, supportedOpenmrsVersions = { "3.0.*" })
 public class CountryResource_1_9 implements Resource {
-	
+
 	@Override
 	public String getUri(Object instance) {
 		return "v1/country";

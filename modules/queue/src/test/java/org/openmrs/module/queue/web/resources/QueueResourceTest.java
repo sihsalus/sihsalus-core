@@ -55,46 +55,46 @@ import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 
 @ExtendWith(MockitoExtension.class)
 public class QueueResourceTest extends BaseQueueResourceTest<Queue, QueueResource> {
-	
+
 	private static final String QUEUE_UUID = "6hje567a-fca0-11e5-9e59-08002719a7";
-	
+
 	private static final String QUEUE_NAME = "queue name";
-	
+
 	private static final String LOCATION_UUID = "kra567a-fca0-11e5-9e59-08002719a9";
-	
+
 	@Mock
 	private QueueService queueService;
-	
+
 	private Queue queue;
-	
+
 	@Mock
 	private QueueServicesWrapper queueServicesWrapper;
-	
+
 	private QueueResource resource;
-	
+
 	RequestContext requestContext;
-	
+
 	HttpServletRequest request;
-	
+
 	Map<String, String[]> parameterMap;
-	
+
 	ArgumentCaptor<QueueSearchCriteria> queueSearchCriteriaCaptor;
-	
+
 	@BeforeEach
 	public void setup() {
 		this.cleanup();
 		queue = new Queue();
 		queue.setUuid(QUEUE_UUID);
 		queue.setName(QUEUE_NAME);
-		
+
 		this.prepareMocks();
 		lenient().when(queueServicesWrapper.getQueueService()).thenReturn(queueService);
-		
+
 		QueueSearchCriteriaParser parser = new QueueSearchCriteriaParser(queueServicesWrapper);
 		resource = new QueueResource(queueServicesWrapper, parser);
 		this.setResource(resource);
 		this.setObject(queue);
-		
+
 		requestContext = mock(RequestContext.class);
 		request = mock(HttpServletRequest.class);
 		lenient().when(requestContext.getRequest()).thenReturn(request);
@@ -102,73 +102,73 @@ public class QueueResourceTest extends BaseQueueResourceTest<Queue, QueueResourc
 		lenient().when(request.getParameterMap()).thenReturn(parameterMap);
 		queueSearchCriteriaCaptor = ArgumentCaptor.forClass(QueueSearchCriteria.class);
 	}
-	
+
 	@Test
 	public void shouldGetQueueService() {
 		assertThat(queueService, notNullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnDefaultRepresentation() {
 		verifyDefaultRepresentation("name", "description", "uuid");
 	}
-	
+
 	@Test
 	public void shouldReturnFullRepresentation() {
 		verifyFullRepresentation("name", "location", "service", "display", "description", "uuid", "auditInfo");
 	}
-	
+
 	@Test
 	public void shouldReturnNullForCustomRepresentation() {
 		CustomRepresentation customRepresentation = new CustomRepresentation("custom-representation");
 		assertThat(getResource().getRepresentationDescription(customRepresentation), is(nullValue()));
 	}
-	
+
 	@Test
 	public void shouldNOTReturnNullForDefaultRepresentation() {
 		assertThat(getResource().getRepresentationDescription(new DefaultRepresentation()), is(notNullValue()));
 	}
-	
+
 	@Test
 	public void shouldNOTReturnNullForFullRepresentation() {
 		assertThat(getResource().getRepresentationDescription(new FullRepresentation()), is(notNullValue()));
 	}
-	
+
 	@Test
 	public void shouldNOTReturnNullForRefRepresentation() {
 		assertThat(getResource().getRepresentationDescription(new RefRepresentation()), is(notNullValue()));
 	}
-	
+
 	@Test
 	public void shouldGetResourceByUniqueUuid() {
 		when(queueService.getQueueByUuid(QUEUE_UUID)).thenReturn(Optional.of(queue));
-		
+
 		Queue result = getResource().getByUniqueId(QUEUE_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(QUEUE_UUID));
 		assertThat(result.getName(), is(QUEUE_NAME));
 	}
-	
+
 	@Test
 	public void shouldCreateNewResource() {
 		when(queueService.saveQueue(getObject())).thenReturn(getObject());
-		
+
 		Queue newlyCreatedObject = getResource().save(getObject());
 		assertThat(newlyCreatedObject, notNullValue());
 		assertThat(newlyCreatedObject.getUuid(), is(QUEUE_UUID));
 		assertThat(newlyCreatedObject.getName(), is(QUEUE_NAME));
 	}
-	
+
 	@Test
 	public void shouldInstantiateNewDelegate() {
 		assertThat(getResource().newDelegate(), notNullValue());
 	}
-	
+
 	@Test
 	public void verifyResourceVersion() {
 		assertThat(getResource().getResourceVersion(), is("2.3"));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByLocation() {
 		List<Location> vals = Arrays.asList(new Location(), new Location());
@@ -181,7 +181,7 @@ public class QueueResourceTest extends BaseQueueResourceTest<Queue, QueueResourc
 		assertThat(criteria.getLocations(), Matchers.hasSize(2));
 		assertThat(criteria.getLocations(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldSearchQueueEntriesByService() {
 		List<Concept> vals = Arrays.asList(new Concept(), new Concept());
@@ -194,7 +194,7 @@ public class QueueResourceTest extends BaseQueueResourceTest<Queue, QueueResourc
 		assertThat(criteria.getServices(), Matchers.hasSize(2));
 		assertThat(criteria.getServices(), containsInAnyOrder(vals.get(0), vals.get(1)));
 	}
-	
+
 	@Test
 	public void shouldGetAllQueues() {
 		Queue queueMock = mock(Queue.class);

@@ -15,12 +15,12 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_9;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ConceptReferenceTermResource1_9Test extends BaseDelegatingResourceTest<ConceptReferenceTermResource1_9, ConceptReferenceTerm> {
-	
+
 	@Override
 	public ConceptReferenceTerm newObject() {
 		return Context.getConceptService().getConceptReferenceTermByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -31,7 +31,7 @@ public class ConceptReferenceTermResource1_9Test extends BaseDelegatingResourceT
 		assertPropEquals("retired", getObject().isRetired());
 		assertPropPresent("conceptSource");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -43,15 +43,15 @@ public class ConceptReferenceTermResource1_9Test extends BaseDelegatingResourceT
 		assertPropPresent("conceptSource");
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Some Standardized Terminology: 127cd4689 (cd4died term2)";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_9.CONCEPT_REFERENCE_TERM_UUID;
 	}
-	
+
 }

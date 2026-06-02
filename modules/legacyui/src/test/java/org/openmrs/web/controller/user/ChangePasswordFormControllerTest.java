@@ -32,9 +32,9 @@ import org.springframework.validation.ObjectError;
  * {@link org.openmrs.web.controller.user.ChangePasswordFormController}
  */
 public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private final String oldPassword = "test";
-	
+
 	/**
 	 * @see ChangePasswordFormController#formBackingObject()
 	 */
@@ -46,7 +46,7 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 		assertNotNull(user);
 		assertEquals(Context.getAuthenticatedUser(), user);
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -56,14 +56,14 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldDisplayErrorMessageWhenPasswordAndConfirmPasswordAreNotSame() throws Exception {
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		String result = controller.handleSubmission(new MockHttpSession(), oldPassword, "password", "differentPassword", "",
 		    "", "", Context.getAuthenticatedUser(), errors);
-		
+
 		assertTrue(errors.hasErrors());
 		assertEquals("error.password.match", errors.getGlobalError().getCode());
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -73,14 +73,14 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldRedirectToIndexPageWhenPasswordAndConfirmPasswordAreTheSame() throws Exception {
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		String result = controller.handleSubmission(new MockHttpSession(), oldPassword, "Passw0rd", "Passw0rd", "", "", "",
 		    Context.getAuthenticatedUser(), errors);
-		
+
 		assertTrue(!errors.hasErrors());
 		assertEquals("redirect:/index.htm", result);
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult) test =
@@ -90,14 +90,14 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldDisplayErrorMessageWhenPasswordIsEmpty() throws Exception {
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		String result = controller.handleSubmission(new MockHttpSession(), oldPassword, "", "", "", "", "",
 		    Context.getAuthenticatedUser(), errors);
-		
+
 		assertTrue(errors.hasErrors());
 		assertEquals("error.password.weak", errors.getGlobalError().getCode());
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -107,14 +107,14 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldDiplayErrorMessageOnWeakPasswords() throws Exception {
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		String result = controller.handleSubmission(new MockHttpSession(), oldPassword, "password", "password", "", "", "",
 		    Context.getAuthenticatedUser(), errors);
-		
+
 		assertTrue(errors.hasErrors());
 		assertEquals("error.password.requireMixedCase", errors.getGlobalError().getCode());
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -124,14 +124,14 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldDiplayErrorMessageIfQuestionIsEmptyAndAnswerIsNotEmpty() throws Exception {
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		String result = controller.handleSubmission(new MockHttpSession(), oldPassword, "Passw0rd", "Passw0rd", "",
 		    "answer", "answer", Context.getAuthenticatedUser(), errors);
-		
+
 		assertTrue(errors.hasErrors());
 		assertEquals("auth.question.empty", errors.getGlobalError().getCode());
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -141,14 +141,14 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldDiplayErrorMessageIfAnswerAndConfirmAnswerAreNotTheSame() throws Exception {
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		String result = controller.handleSubmission(new MockHttpSession(), oldPassword, "Passw0rd", "Passw0rd", "question",
 		    "answer", "confirmanswer", Context.getAuthenticatedUser(), errors);
-		
+
 		assertTrue(errors.hasErrors());
 		assertEquals("error.options.secretAnswer.match", errors.getGlobalError().getCode());
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -158,14 +158,14 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldDisplayErrorMessageIfQuestionIsNotEmptyAndAnswerIsEmpty() throws Exception {
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		String result = controller.handleSubmission(new MockHttpSession(), oldPassword, "Passw0rd", "Passw0rd", "question",
 		    "", "", Context.getAuthenticatedUser(), errors);
-		
+
 		assertTrue(errors.hasErrors());
 		assertEquals("auth.question.fill", errors.getGlobalError().getCode());
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -175,14 +175,14 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldProceedToHomePageIfOperationIsSuccesful() throws Exception {
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		String result = controller.handleSubmission(new MockHttpSession(), oldPassword, "Passw0rd", "Passw0rd", "question",
 		    "answer", "answer", Context.getAuthenticatedUser(), errors);
-		
+
 		assertTrue(!errors.hasErrors());
 		assertEquals("redirect:/index.htm", result);
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -192,20 +192,20 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldChangeTheUserPropertyForcePasswordChangeToFalse() throws Exception {
 		User user = Context.getAuthenticatedUser();
 		new UserProperties(user.getUserProperties()).setSupposedToChangePassword(true);
-		
+
 		UserService us = Context.getUserService();
 		us.saveUser(user);
-		
+
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		controller.handleSubmission(new MockHttpSession(), oldPassword, "Passw0rd", "Passw0rd", "", "", "",
 		    Context.getAuthenticatedUser(), errors);
-		
+
 		User modifiedUser = us.getUser(user.getId());
 		assertTrue(!new UserProperties(modifiedUser.getUserProperties()).isSupposedToChangePassword());
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -215,20 +215,20 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldNotChangeTheUserPropertyForcePasswordChangeToFalse() throws Exception {
 		User user = Context.getAuthenticatedUser();
 		new UserProperties(user.getUserProperties()).setSupposedToChangePassword(true);
-		
+
 		UserService us = Context.getUserService();
 		us.saveUser(user);
-		
+
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		controller.handleSubmission(new MockHttpSession(), oldPassword, "Passw0rd", "Pasw0rd", "", "", "",
 		    Context.getAuthenticatedUser(), errors);
-		
+
 		User modifiedUser = us.getUser(user.getId());
 		assertTrue(new UserProperties(modifiedUser.getUserProperties()).isSupposedToChangePassword());
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#formBackingObject()
 	 */
@@ -242,7 +242,7 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 		    "", "", Context.getAuthenticatedUser(), errors);
 		assertEquals("/module/legacyui/admin/users/changePasswordForm", result);
 	}
-	
+
 	/**
 	 * @see ChangePasswordFormController#handleSubmission(HttpSession, String, String, String,
 	 *      String, String, User, BindingResult)
@@ -252,19 +252,19 @@ public class ChangePasswordFormControllerTest extends BaseModuleWebContextSensit
 	public void handleSubmission_shouldSetTheUserSecretQuestionAndAnswer() throws Exception {
 		User user = Context.getAuthenticatedUser();
 		new UserProperties(user.getUserProperties()).setSupposedToChangePassword(true);
-		
+
 		UserService us = Context.getUserService();
 		us.saveUser(user);
-		
+
 		ChangePasswordFormController controller = new ChangePasswordFormController();
 		BindException errors = new BindException(controller.formBackingObject(), "user");
-		
+
 		controller.handleSubmission(new MockHttpSession(), oldPassword, "Passw0rd", "Passw0rd", "test_question",
 		    "test_answer", "test_answer", Context.getAuthenticatedUser(), errors);
-		
+
 		User modifiedUser = us.getUser(user.getId());
-		
+
 		assertTrue(us.isSecretAnswer(modifiedUser, "test_answer"));
 	}
-	
+
 }

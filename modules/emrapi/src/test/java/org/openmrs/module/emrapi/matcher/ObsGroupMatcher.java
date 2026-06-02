@@ -22,13 +22,13 @@ import java.util.List;
  *
  */
 public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
-	
+
 	private boolean expectVoided = false;
-	
+
 	private Concept expectedGroupingConcept;
-	
+
 	private List<Obs> expected = new ArrayList<Obs>();
-	
+
 	public void describeTo(Description description) {
 		String s = expectVoided ? "Voided group" : "Group";
 		if (expectedGroupingConcept != null) {
@@ -52,19 +52,19 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 		}
 		description.appendText(s);
 	}
-	
+
 	@Override
 	public boolean matches(Obs argument) {
 		Obs actual = (Obs) argument;
-		
+
 		if (expectedGroupingConcept != null && !expectedGroupingConcept.equals(actual.getConcept())) {
 			return false;
 		}
-		
+
 		if (expectVoided != actual.isVoided()) {
 			return false;
 		}
-		
+
 		for (Obs expectedObs : expected) {
 			boolean found = false;
 			for (Obs candidate : actual.getGroupMembers(true)) {
@@ -77,10 +77,10 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private boolean matchingObs(Obs expected, Obs actual) {
 		try {
 			return sameIfSpecified(expected, actual, "concept") && sameIfSpecified(expected, actual, "voided")
@@ -90,7 +90,7 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 			throw new RuntimeException(ex);
 		}
 	}
-	
+
 	private boolean sameIfSpecified(Obs expected, Obs actual, String property) throws Exception {
 		Object expectedProperty = PropertyUtils.getProperty(expected, property);
 		if (expectedProperty == null) {
@@ -100,12 +100,12 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 			return actualProperty != null && expectedProperty.equals(actualProperty);
 		}
 	}
-	
+
 	public ObsGroupMatcher withGroupingConcept(Concept groupingConcept) {
 		this.expectedGroupingConcept = groupingConcept;
 		return this;
 	}
-	
+
 	public ObsGroupMatcher withNonVoidedObs(Concept concept, Concept valueCoded) {
 		Obs obs = new Obs();
 		obs.setVoided(false);
@@ -114,7 +114,7 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 		expected.add(obs);
 		return this;
 	}
-	
+
 	public ObsGroupMatcher withVoidedObs(Concept concept, Concept valueCoded) {
 		Obs obs = new Obs();
 		obs.setVoided(true);
@@ -123,7 +123,7 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 		expected.add(obs);
 		return this;
 	}
-	
+
 	public ObsGroupMatcher withNonVoidedObs(Concept concept, String valueText) {
 		Obs obs = new Obs();
 		obs.setVoided(false);
@@ -132,7 +132,7 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 		expected.add(obs);
 		return this;
 	}
-	
+
 	public ObsGroupMatcher withVoidedObs(Concept concept, String valueText) {
 		Obs obs = new Obs();
 		obs.setVoided(true);
@@ -141,12 +141,12 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 		expected.add(obs);
 		return this;
 	}
-	
+
 	public ObsGroupMatcher thatIsVoided() {
 		expectVoided = true;
 		return this;
 	}
-	
+
 	public ObsGroupMatcher withObs(Concept concept, Concept valueCoded) {
 		Obs obs = new Obs();
 		obs.setVoided(null);
@@ -155,7 +155,7 @@ public class ObsGroupMatcher implements ArgumentMatcher<Obs> {
 		expected.add(obs);
 		return this;
 	}
-	
+
 	public ObsGroupMatcher withObs(Concept concept, String valueText) {
 		Obs obs = new Obs();
 		obs.setVoided(null);

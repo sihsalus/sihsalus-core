@@ -22,7 +22,7 @@ import org.openmrs.util.OpenmrsUtil;
  * Utilities requires for unit tests
  */
 public class Util {
-	
+
 	public static void log(String label, Object object) {
 		String toPrint;
 		try {
@@ -37,7 +37,7 @@ public class Util {
 			toPrint = label + ": " + toPrint;
 		System.out.println(toPrint);
 	}
-	
+
 	/**
 	 * @param object
 	 * @param path something like "obs[0]/concept/uuid"
@@ -46,7 +46,7 @@ public class Util {
 	public static Object getByPath(Object object, String path) {
 		return getByPath(object, path.split("/"));
 	}
-	
+
 	/**
 	 * @param object
 	 * @param pathElements something like { "obs[0]", "concept", "uuid" }
@@ -82,7 +82,7 @@ public class Util {
 			throw new RuntimeException("Failed to get path " + OpenmrsUtil.join(Arrays.asList(pathElements), " . "), ex);
 		}
 	}
-	
+
 	/**
 	 * @param result the SimpleObject that contains results
 	 * @return
@@ -91,7 +91,7 @@ public class Util {
 	public static List<Object> getResultsList(SimpleObject result) throws Exception {
 		return (List<Object>) PropertyUtils.getProperty(result, "results");
 	}
-	
+
 	/**
 	 * @param result
 	 * @return
@@ -100,5 +100,5 @@ public class Util {
 	public static int getResultsSize(SimpleObject result) throws Exception {
 		return getResultsList(result).size();
 	}
-	
+
 }

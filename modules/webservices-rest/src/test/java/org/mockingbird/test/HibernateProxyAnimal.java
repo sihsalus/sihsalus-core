@@ -19,12 +19,12 @@ import org.hibernate.proxy.LazyInitializer;
  * {@link org.openmrs.module.webservices.rest.web.OpenmrsClassScanner} and its classpath pattern.
  */
 public class HibernateProxyAnimal extends Animal implements HibernateProxy {
-	
+
 	@Override
 	public Object writeReplace() {
 		return null;
 	}
-	
+
 	@Override
 	public LazyInitializer getHibernateLazyInitializer() {
 		return null;

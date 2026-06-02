@@ -24,7 +24,7 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.util.PrivilegeConstants;
 
 public abstract class BaseFilterTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Override
 	public Properties getRuntimeProperties() {
 		Properties props = super.getRuntimeProperties();
@@ -32,17 +32,17 @@ public abstract class BaseFilterTest extends BaseModuleContextSensitiveTest {
 		props.setProperty(Environment.URL, props.getProperty(Environment.URL) + ";DB_CLOSE_ON_EXIT=FALSE");
 		return props;
 	}
-	
+
 	@Before
 	public void beforeTestMethod() {
 		executeDataSet(TestConstants.MODULE_TEST_DATASET_XML);
 	}
-	
+
 	protected void reloginAs(String username, String password) {
 		Context.logout();
 		Context.authenticate(new UsernamePasswordCredentials(username, password));
 	}
-	
+
 	@Override
 	public void updateSearchIndex() {
 		//Disable the interceptor so we can update the search index
@@ -55,12 +55,12 @@ public abstract class BaseFilterTest extends BaseModuleContextSensitiveTest {
 		} else {
 			originalValue = gp.getPropertyValue();
 		}
-		
+
 		gp.setPropertyValue("false");
 		as.saveGlobalProperty(gp);
 		Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES);
 		Context.flushSession();
-		
+
 		try {
 			super.updateSearchIndex();
 		}
@@ -72,5 +72,5 @@ public abstract class BaseFilterTest extends BaseModuleContextSensitiveTest {
 			Context.flushSession();
 		}
 	}
-	
+
 }

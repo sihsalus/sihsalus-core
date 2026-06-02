@@ -35,92 +35,92 @@ import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConceptSourceServiceImplTest {
-	
+
 	@Mock
 	private FhirConceptSourceDao dao;
-	
+
 	private FhirConceptSourceServiceImpl fhirConceptSourceService;
-	
+
 	@Before
 	public void setup() {
 		fhirConceptSourceService = new FhirConceptSourceServiceImpl();
 		fhirConceptSourceService.setDao(dao);
 	}
-	
+
 	@Test
 	public void getFhirConceptSources_shouldReturnFhirConceptSources() {
 		Collection<FhirConceptSource> sources = Lists.newArrayList(new FhirConceptSource(), new FhirConceptSource());
 		when(dao.getFhirConceptSources()).thenReturn(sources);
-		
+
 		Collection<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSources();
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, not(empty()));
 	}
-	
+
 	@Test
 	public void getFhirConceptSources_shouldReturnEmptyCollectionWhenNoSourcesFound() {
 		when(dao.getFhirConceptSources()).thenReturn(new ArrayList<>());
-		
+
 		Collection<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSources();
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, empty());
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByUrl_shouldReturnConceptSourceForUrl() {
 		FhirConceptSource source = new FhirConceptSource();
 		when(dao.getFhirConceptSourceByUrl("http://www.example.com")).thenReturn(Optional.of(source));
-		
+
 		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByUrl("http://www.example.com");
-		
+
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), equalTo(source));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByUrl_shouldReturnEmptyWhenNoConceptSourceFound() {
 		when(dao.getFhirConceptSourceByUrl("http://www.example.com")).thenReturn(Optional.empty());
-		
+
 		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByUrl("http://www.example.com");
-		
+
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByConceptSource_shouldReturnSourceWherePresent() {
 		FhirConceptSource fhirSource = new FhirConceptSource();
 		ConceptSource source = new ConceptSource();
 		when(dao.getFhirConceptSourceByConceptSource(source)).thenReturn(Optional.of(fhirSource));
-		
+
 		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSource(source);
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), equalTo(fhirSource));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByConceptSource_shouldReturnEmptyOptionalWhereNoFhirConceptSourceExists() {
 		ConceptSource conceptSource = new ConceptSource();
 		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSource(conceptSource);
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void getConceptSourceByHl7Code_shouldReturnSourceForHl7Code() {
 		ConceptSource source = new ConceptSource();
 		when(dao.getConceptSourceByHl7Code("SCT")).thenReturn(Optional.of(source));
-		
+
 		Optional<ConceptSource> result = fhirConceptSourceService.getConceptSourceByHl7Code("SCT");
-		
+
 		assertThat(result, not(OptionalMatchers.empty()));
 		assertThat(result, contains(equalTo(source)));
 	}
-	
+
 	@Test
 	public void getFhirConceptSourceByHl7Code_shouldReturnNullForMissingSourceName() {
 		Optional<ConceptSource> result = fhirConceptSourceService.getConceptSourceByHl7Code("SNOMED CT");
-		
+
 		assertThat(result, OptionalMatchers.empty());
 	}
 }

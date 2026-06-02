@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class DiagnosisMapperTest {
-	
+
 	@Test
 	public void shouldMapEmrapiDiagnosisToEncounterTransactionDiagnosis() throws Exception {
 		DiagnosisMapper diagnosisMapper = new DiagnosisMapper();
@@ -34,9 +34,9 @@ public class DiagnosisMapperTest {
 		existingObs.setEncounter(new Encounter());
 		existingObs.setComment("comment");
 		diagnosis.setExistingObs(existingObs);
-		
+
 		EncounterTransaction.Diagnosis etDiagnosis = diagnosisMapper.convert(diagnosis);
-		
+
 		assertEquals(Diagnosis.Certainty.CONFIRMED.toString(), etDiagnosis.getCertainty());
 		assertEquals(Diagnosis.Order.PRIMARY.toString(), etDiagnosis.getOrder());
 		assertEquals("cold", etDiagnosis.getFreeTextAnswer());

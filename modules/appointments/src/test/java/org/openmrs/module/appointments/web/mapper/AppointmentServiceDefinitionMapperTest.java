@@ -221,7 +221,7 @@ public class AppointmentServiceDefinitionMapperTest {
         assertNotNull(appointmentServiceFullResponse.getWeeklyAvailability());
         assertEquals(appointmentServiceFullResponse.getWeeklyAvailability().size(), 1);
     }
-    
+
     @Test
     public void shouldCreateDefaultResponseFromAppointmentServicesList() throws Exception {
         AppointmentServiceDefinition cardiologyService = createAppointmentService("Cardiology-OPD", Time.valueOf("09:00:00"),
@@ -231,7 +231,7 @@ public class AppointmentServiceDefinitionMapperTest {
         HashSet<ServiceWeeklyAvailability> availabilityList = new HashSet<>();
         availabilityList.add(availability);
         cardiologyService.setWeeklyAvailability(availabilityList);
-        
+
         AppointmentServiceDefinition chemoTherapyService = createAppointmentService("Chemotherapy", Time.valueOf("11:00:00"),
                 Time.valueOf("18:30:00"), 30, 10);
         ServiceWeeklyAvailability serviceWeeklyAvailability = new ServiceWeeklyAvailability();
@@ -239,7 +239,7 @@ public class AppointmentServiceDefinitionMapperTest {
         HashSet<ServiceWeeklyAvailability> availabilities = new HashSet<>();
         availabilities.add(serviceWeeklyAvailability);
         chemoTherapyService.setWeeklyAvailability(availabilities);
-        
+
         List<AppointmentServiceDefinition> appointmentServiceDefinitions = new ArrayList<>();
         appointmentServiceDefinitions.add(cardiologyService);
         appointmentServiceDefinitions.add(chemoTherapyService);
@@ -493,7 +493,7 @@ public class AppointmentServiceDefinitionMapperTest {
         speciality = new Speciality();
         speciality.setName("cardiology");
         appointmentServiceDefinition.setSpeciality(speciality);
-        
+
         return appointmentServiceDefinition;
     }
 

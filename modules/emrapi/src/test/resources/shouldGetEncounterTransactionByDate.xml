@@ -39,4 +39,3 @@
     <encounter_type encounter_type_id="1" name="Registration Encounter" description="Some desc" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="2b377dba-62c3-4e53-91ef-b51c68899891"/>
     <encounter_type encounter_type_id="2" name="OPD Encounter" description="Some desc" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="4f3c2244-9d6a-439e-b88a-6e8873489ea7"/>
 </dataset>
-

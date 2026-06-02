@@ -26,42 +26,42 @@ import org.openmrs.module.fhir2.api.translators.EpisodeOfCareTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEpisodeOfCareServiceImplTest {
-	
+
 	private static final String EPISODE_OF_CARE_UUID = "9119b9f8-af3d-4ad8-9e2e-2317c3de91c6";
-	
+
 	@Mock
 	private FhirEpisodeOfCareDao dao;
-	
+
 	@Mock
 	private EpisodeOfCareTranslator episodeOfCareTranslator;
-	
+
 	private FhirEpisodeOfCareServiceImpl episodeOfCareService;
-	
+
 	private PatientProgram patientProgram;
-	
+
 	private EpisodeOfCare episodeOfCare;
-	
+
 	@Before
 	public void setUp() {
 		episodeOfCareService = new FhirEpisodeOfCareServiceImpl();
-		
+
 		episodeOfCareService.setDao(dao);
 		episodeOfCareService.setTranslator(episodeOfCareTranslator);
-		
+
 		patientProgram = new PatientProgram();
 		patientProgram.setUuid(EPISODE_OF_CARE_UUID);
-		
+
 		episodeOfCare = new EpisodeOfCare();
 		episodeOfCare.setId(EPISODE_OF_CARE_UUID);
 	}
-	
+
 	@Test
 	public void get_shouldGetEncounterByUuid() {
 		when(dao.get(EPISODE_OF_CARE_UUID)).thenReturn(patientProgram);
 		when(episodeOfCareTranslator.toFhirResource(patientProgram)).thenReturn(episodeOfCare);
-		
+
 		EpisodeOfCare actualEpisodeOfCare = episodeOfCareService.get(EPISODE_OF_CARE_UUID);
-		
+
 		assertThat(actualEpisodeOfCare, notNullValue());
 		assertThat(actualEpisodeOfCare.getId(), notNullValue());
 		assertThat(actualEpisodeOfCare.getId(), equalTo(EPISODE_OF_CARE_UUID));

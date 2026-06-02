@@ -25,25 +25,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class OrderFrequenciesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("orderService")
 	private OrderService os;
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService cs;
-	
+
 	@Autowired
 	private OrderFrequenciesLoader loader;
-	
+
 	private Concept hourlyConcept;
-	
+
 	private Concept bidailyConcept;
-	
+
 	@Before
 	public void setup() {
-		
+
 		// Concepts to be used as a 'frequency'
 		{
 			hourlyConcept = new Concept();
@@ -59,7 +59,7 @@ public class OrderFrequenciesLoaderIntegrationTest extends DomainBaseModuleConte
 			bidailyConcept.setDatatype(cs.getConceptDatatypeByName("N/A"));
 			bidailyConcept = cs.saveConcept(bidailyConcept);
 		}
-		
+
 		// An order frequency to be edited
 		{
 			Concept freqConcept = new Concept();
@@ -67,7 +67,7 @@ public class OrderFrequenciesLoaderIntegrationTest extends DomainBaseModuleConte
 			freqConcept.setConceptClass(cs.getConceptClassByName("Frequency"));
 			freqConcept.setDatatype(cs.getConceptDatatypeByName("N/A"));
 			freqConcept = cs.saveConcept(freqConcept);
-			
+
 			OrderFrequency freq = new OrderFrequency();
 			freq.setUuid("136ebdb7-e989-47cf-8ec2-4e8b2ffe0ab3");
 			freq.setConcept(freqConcept);
@@ -81,7 +81,7 @@ public class OrderFrequenciesLoaderIntegrationTest extends DomainBaseModuleConte
 			freqConcept.setConceptClass(cs.getConceptClassByName("Frequency"));
 			freqConcept.setDatatype(cs.getConceptDatatypeByName("N/A"));
 			freqConcept = cs.saveConcept(freqConcept);
-			
+
 			OrderFrequency freq = new OrderFrequency();
 			freq.setUuid("4b33b729-1fe3-4fa5-acc4-084beb069b68");
 			freq.setConcept(freqConcept);
@@ -89,27 +89,27 @@ public class OrderFrequenciesLoaderIntegrationTest extends DomainBaseModuleConte
 			freq = os.saveOrderFrequency(freq);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadOrderFrequenciesAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// created frequency
 		{
 			OrderFrequency freq = os.getOrderFrequencyByConcept(hourlyConcept);
 			Assert.assertNotNull(freq);
 			Assert.assertEquals(0, Double.compare(24.0, freq.getFrequencyPerDay()));
 		}
-		
+
 		// retired frequency
 		{
 			OrderFrequency freq = os.getOrderFrequencyByUuid("4b33b729-1fe3-4fa5-acc4-084beb069b68");
 			Assert.assertNotNull(freq);
 			Assert.assertTrue(freq.getRetired());
 		}
-		
+
 		// edited frequency
 		{
 			OrderFrequency freq = os.getOrderFrequencyByUuid("136ebdb7-e989-47cf-8ec2-4e8b2ffe0ab3");

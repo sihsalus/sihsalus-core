@@ -29,86 +29,86 @@ import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VisitReferenceTranslatorImplTest {
-	
+
 	private static final String VISIT_UUID = "276379ef-07ce-4108-b5e0-c4dc21964b4f";
-	
+
 	@Mock
 	private FhirVisitDao dao;
-	
+
 	private VisitReferenceTranslatorImpl visitReferenceTranslator;
-	
+
 	@Before
 	public void setup() {
 		visitReferenceTranslator = new VisitReferenceTranslatorImpl();
 		visitReferenceTranslator.setDao(dao);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertVisitToReference() {
 		Visit visit = new Visit();
 		visit.setUuid(VISIT_UUID);
-		
+
 		Reference result = visitReferenceTranslator.toFhirResource(visit);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.ENCOUNTER));
 		assertThat(getReferenceId(result).orElse(null), equalTo(VISIT_UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfVisitNull() {
 		Reference result = visitReferenceTranslator.toFhirResource(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldConvertReferenceToVisit() {
 		Reference encounterReference = new Reference().setReference(FhirConstants.ENCOUNTER + "/" + VISIT_UUID)
 		        .setType(FhirConstants.ENCOUNTER).setIdentifier(new Identifier().setValue(VISIT_UUID));
-		
+
 		Visit visit = new Visit();
 		visit.setUuid(VISIT_UUID);
-		
+
 		when(dao.get(VISIT_UUID)).thenReturn(visit);
 		Visit result = visitReferenceTranslator.toOpenmrsType(encounterReference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(VISIT_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
 		Visit result = visitReferenceTranslator.toOpenmrsType(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfEncounterHasNoIdentifier() {
 		Reference encounterReference = new Reference().setReference(FhirConstants.ENCOUNTER + "/" + VISIT_UUID)
 		        .setType(FhirConstants.ENCOUNTER);
-		
+
 		Visit result = visitReferenceTranslator.toOpenmrsType(encounterReference);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfEncounterIdentifierHasNoValue() {
 		Reference encounterReference = new Reference().setReference(FhirConstants.ENCOUNTER + "/" + VISIT_UUID)
 		        .setType(FhirConstants.ENCOUNTER).setIdentifier(new Identifier());
-		
+
 		Visit result = visitReferenceTranslator.toOpenmrsType(encounterReference);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsNotForEncounter() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + VISIT_UUID).setType("Unknown");
-		
+
 		visitReferenceTranslator.toOpenmrsType(reference);
 	}
-	
+
 }

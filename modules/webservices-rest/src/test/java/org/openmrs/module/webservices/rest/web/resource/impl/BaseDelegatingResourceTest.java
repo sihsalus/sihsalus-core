@@ -48,25 +48,25 @@ import java.util.Locale;
  * Typically aside from implementing abstract methods of this class, you will want to override
  * {@link #validateRefRepresentation()}, {@link #validateDefaultRepresentation()} and
  * {@link #validateFullRepresentation()}.
- * 
+ *
  * @param <R> resource
  * @param <T> object
  */
 public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResource<T>, T> extends BaseModuleWebContextSensitiveTest {
-	
+
 	private T object;
-	
+
 	private R resource;
-	
+
 	private SimpleObject representation;
-	
+
 	/**
 	 * Creates an instance of an object that will be used to test the resource.
-	 * 
+	 *
 	 * @return the new object
 	 */
 	public abstract T newObject();
-	
+
 	/**
 	 * Needs to be implemented in order to validate the display property in each representation.
 	 * <p>
@@ -74,28 +74,28 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 	 * {@link #asRepresentation_shouldReturnValidFullRepresentation()} and
 	 * {@link #asRepresentation_shouldReturnValidRefRepresentation()} to test precisely each
 	 * representation.
-	 * 
+	 *
 	 * @return the display property
 	 */
 	public abstract String getDisplayProperty();
-	
+
 	/**
 	 * Needs to be implemented in order to validate the uuid property in each representation.
 	 * <p>
 	 * It is called by {@link #asRepresentation_shouldReturnValidDefaultRepresentation()},
 	 * {@link #asRepresentation_shouldReturnValidFullRepresentation()} and
 	 * {@link #asRepresentation_shouldReturnValidRefRepresentation()}.
-	 * 
+	 *
 	 * @return the uuid property
 	 */
 	public abstract String getUuidProperty();
-	
+
 	/**
 	 * Validates RefRepresentation of the object returned by the resource.
 	 * <p>
 	 * Tests the value of the uuid and display property and the presence of a self link in the links
 	 * property.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void validateRefRepresentation() throws Exception {
@@ -103,7 +103,7 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 		assertPropEquals("display", getDisplayProperty());
 		assertPropPresent("links");
 		assertPropNotPresent("resourceVersion");
-		
+
 		@SuppressWarnings("unchecked")
 		List<Hyperlink> links = (List<Hyperlink>) getRepresentation().get("links");
 		boolean self = false;
@@ -116,12 +116,12 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 		}
 		Assertions.assertTrue(self);
 	}
-	
+
 	/**
 	 * Validates DefaultRepresentation of the object returned by the resource.
 	 * <p>
 	 * Tests the value of the uuid property and the presence of the links property.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void validateDefaultRepresentation() throws Exception {
@@ -129,12 +129,12 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 		assertPropPresent("links");
 		assertPropPresent("resourceVersion");
 	}
-	
+
 	/**
 	 * Validates FullRepresentation of the object returned by the resource.
 	 * <p>
 	 * Tests the value of the uuid property and the presence of the links property.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void validateFullRepresentation() throws Exception {
@@ -142,10 +142,10 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 		assertPropPresent("links");
 		assertPropPresent("resourceVersion");
 	}
-	
+
 	/**
 	 * Instantiates BaseDelegatingResource.
-	 * 
+	 *
 	 * @return the new resource
 	 */
 	public R newResource() {
@@ -154,10 +154,10 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 		Class<T> clazz = (Class<T>) t.getActualTypeArguments()[1];
 		return (R) Context.getService(RestService.class).getResourceBySupportedClass(clazz);
 	}
-	
+
 	/**
 	 * Returns an instance of an object to test the resource.
-	 * 
+	 *
 	 * @return the object
 	 */
 	public T getObject() {
@@ -167,20 +167,20 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 		Assertions.assertNotNull(object, "newObject must not return null");
 		return object;
 	}
-	
+
 	/**
 	 * Returns a created representation.
-	 * 
+	 *
 	 * @return the representation
 	 */
 	public SimpleObject getRepresentation() {
 		Assertions.assertNotNull(representation, "representation must not be null");
 		return representation;
 	}
-	
+
 	/**
 	 * Returns an instantiated resource.
-	 * 
+	 *
 	 * @return the resource
 	 */
 	public R getResource() {
@@ -190,46 +190,46 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 		Assertions.assertNotNull(resource, "newResource must not return null");
 		return resource;
 	}
-	
+
 	/**
 	 * Creates {@link Representation#REF}.
 	 * <p>
 	 * Calls {@link BaseDelegatingResource#asRepresentation(Object, Representation)} on the resource
 	 * with the given object.
-	 * 
+	 *
 	 * @return the representation
 	 * @throws Exception
 	 */
 	public SimpleObject newRefRepresentation() throws Exception {
 		return getResource().asRepresentation(getObject(), Representation.REF);
 	}
-	
+
 	/**
 	 * Creates {@link Representation#DEFAULT}.
 	 * <p>
 	 * Calls {@link BaseDelegatingResource#asRepresentation(Object, Representation)} on the resource
 	 * with the given object.
-	 * 
+	 *
 	 * @return the representation
 	 * @throws Exception
 	 */
 	public SimpleObject newDefaultRepresentation() throws Exception {
 		return getResource().asRepresentation(getObject(), Representation.DEFAULT);
 	}
-	
+
 	/**
 	 * Creates {@link Representation#FULL}.
 	 * <p>
 	 * Calls {@link BaseDelegatingResource#asRepresentation(Object, Representation)} on the resource
 	 * with the given object.
-	 * 
+	 *
 	 * @return the representation
 	 * @throws Exception
 	 */
 	public SimpleObject getFullRepresentation() throws Exception {
 		return getResource().asRepresentation(getObject(), Representation.FULL);
 	}
-	
+
 	/**
 	 * Equivalent to:
 	 * <p>
@@ -238,7 +238,7 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 	 * </code>
 	 * <p>
 	 * Performs data conversion like formatting a date for your convenience.
-	 * 
+	 *
 	 * @param property
 	 * @param value
 	 */
@@ -250,20 +250,20 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 		}
 		Assertions.assertEquals(value, getRepresentation().get(property), property);
 	}
-	
+
 	/**
 	 * Equivalent to:
 	 * <p>
 	 * <code>
 	 * Assertions.assertTrue(getRepresentation().containsKey(property));
 	 * </code>
-	 * 
+	 *
 	 * @param property
 	 */
 	public void assertPropPresent(String property) {
 		assertThat(getRepresentation(), hasKey(property));
 	}
-	
+
 	/**
 	 * Equivalent to:
 	 * <p>
@@ -277,40 +277,40 @@ public abstract class BaseDelegatingResourceTest<R extends BaseDelegatingResourc
 
 	/**
 	 * Tests {@link Representation#REF}
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void asRepresentation_shouldReturnValidRefRepresentation() throws Exception {
 		representation = newRefRepresentation();
-		
+
 		validateRefRepresentation();
 	}
-	
+
 	/**
 	 * Tests {@link Representation#DEFAULT}
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void asRepresentation_shouldReturnValidDefaultRepresentation() throws Exception {
 		representation = newDefaultRepresentation();
-		
+
 		validateDefaultRepresentation();
 	}
-	
+
 	/**
 	 * Tests {@link Representation#FULL}
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void asRepresentation_shouldReturnValidFullRepresentation() throws Exception {
 		representation = getFullRepresentation();
-		
+
 		validateFullRepresentation();
 	}
-	
+
 	protected String findSelfLink(SimpleObject object) {
 		List<Hyperlink> links = (List<Hyperlink>) object.get("links");
 		for (Hyperlink link : links) {

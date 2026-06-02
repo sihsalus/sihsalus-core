@@ -59,9 +59,9 @@ public class EncounterController2_2Test  extends MainResourceControllerTest {
     @Override
     @Test
     public void shouldGetAll() throws Exception {
-    	assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
+	assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
 	        super.shouldGetAll();
-    	});
+	});
     }
 
     @Test

@@ -29,31 +29,31 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 public class EmrApiPatientDataLibraryComponentTest extends BaseReportingTest {
-	
+
 	@Autowired
 	private PatientDataService pds;
-	
+
 	@Autowired
 	private PatientService patientService;
-	
+
 	@Autowired
 	private EmrApiPatientDataLibrary library;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("baseTestDataset.xml");
 	}
-	
+
 	@Test
 	public void shouldFetchPrimaryIdentifier() throws Exception {
 		test(library.getPrimaryIdentifier(), patientService.getPatientIdentifier(4)); // primary key of patient identifier 6TS-4 in standard test dataset
 	}
-	
+
 	// TODO:
-	
+
 	private Object eval(PatientDataDefinition definition) throws EvaluationException {
 		Cohort cohort = new Cohort(Arrays.asList(7));
-		
+
 		EvaluationContext context = new EvaluationContext();
 		context.setBaseCohort(cohort);
 		context.addParameterValue("startDate", DateUtil.parseYmd("2013-01-01"));
@@ -61,10 +61,10 @@ public class EmrApiPatientDataLibraryComponentTest extends BaseReportingTest {
 		EvaluatedPatientData data = pds.evaluate(definition, context);
 		return data.getData().get(7);
 	}
-	
+
 	private void test(PatientDataDefinition definition, Object expectedValue) throws EvaluationException {
 		Object actualValue = eval(definition);
 		assertThat(actualValue, is(expectedValue));
 	}
-	
+
 }

@@ -23,10 +23,10 @@ import org.openmrs.module.fhir2.web.util.FhirVersionUtils.FhirVersion;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirVersionUtilsTest {
-	
+
 	@Mock
 	private HttpServletRequest httpServletRequest;
-	
+
 	@Test
 	public void shouldReturnR4ForWs() {
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Patient");
@@ -34,7 +34,7 @@ public class FhirVersionUtilsTest {
 		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
 		assertThat(version, equalTo(FhirVersion.R4));
 	}
-	
+
 	@Test
 	public void shouldReturnR3ForWs() {
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R3/Patient");
@@ -42,7 +42,7 @@ public class FhirVersionUtilsTest {
 		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
 		assertThat(version, equalTo(FhirVersion.R3));
 	}
-	
+
 	@Test
 	public void shouldReturnUnknowForWs() {
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/Patient");
@@ -50,7 +50,7 @@ public class FhirVersionUtilsTest {
 		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
 		assertThat(version, equalTo(FhirVersion.UNKNOWN));
 	}
-	
+
 	@Test
 	public void shouldReturnR4NoSlash() {
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4");
@@ -58,7 +58,7 @@ public class FhirVersionUtilsTest {
 		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
 		assertThat(version, equalTo(FhirVersion.R4));
 	}
-	
+
 	@Test
 	public void shouldReturnR4QuestionMark() {
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4?param=12");
@@ -66,7 +66,7 @@ public class FhirVersionUtilsTest {
 		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
 		assertThat(version, equalTo(FhirVersion.R4));
 	}
-	
+
 	@Test
 	public void shouldReturnR4ForMs() {
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ms/fhir2Servlet/Patient");
@@ -74,7 +74,7 @@ public class FhirVersionUtilsTest {
 		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
 		assertThat(version, equalTo(FhirVersion.R4));
 	}
-	
+
 	@Test
 	public void shouldReturnR3ForMs() {
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ms/fhir2R3Servlet/Patient");

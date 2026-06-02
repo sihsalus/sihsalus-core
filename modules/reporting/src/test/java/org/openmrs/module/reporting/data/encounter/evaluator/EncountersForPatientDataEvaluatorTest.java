@@ -56,10 +56,10 @@ public class EncountersForPatientDataEvaluatorTest extends BaseModuleContextSens
 
         EvaluationContext context = new EvaluationContext();
         PatientBuilder patientBuilder = data.randomPatient();
-        
+
         LocalDate visitDate = LocalDate.parse("2013-10-01");
         int minimumAge = LocalDate.now().getYear() - visitDate.getYear() + 1;
-        
+
         patientBuilder.age(SimpleRandom.randomInt(minimumAge, 90));
         Patient patient = patientBuilder.save();
         // add an older closed visit

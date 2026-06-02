@@ -16,21 +16,21 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class PrivilegeResource1_8Test extends BaseDelegatingResourceTest<PrivilegeResource1_8, Privilege> {
-	
+
 	private String uuid;
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#newObject()
 	 */
 	@Override
 	public Privilege newObject() {
 		Privilege privilege = new Privilege("PrivilegeResourceTest Privilege", "This privilege is only for testing.");
-		privilege.setUuid(UUID.randomUUID().toString()); //Uuid isn't assigned during creation until 1.8.1. 
+		privilege.setUuid(UUID.randomUUID().toString()); //Uuid isn't assigned during creation until 1.8.1.
 		uuid = privilege.getUuid();
 		Context.getUserService().savePrivilege(privilege);
 		return privilege;
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getDisplayProperty()
 	 */
@@ -38,7 +38,7 @@ public class PrivilegeResource1_8Test extends BaseDelegatingResourceTest<Privile
 	public String getDisplayProperty() {
 		return "PrivilegeResourceTest Privilege";
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getUuidProperty()
 	 */

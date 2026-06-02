@@ -30,39 +30,39 @@ import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerReferenceTranslatorProviderImplTest {
-	
+
 	private static final String PRACTITIONER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
-	
+
 	@Mock
 	private FhirPractitionerDao practitionerDao;
-	
+
 	private PractitionerReferenceTranslatorProviderImpl referenceTranslatorProvider;
-	
+
 	private Provider provider;
-	
+
 	@Before
 	public void setup() {
 		referenceTranslatorProvider = new PractitionerReferenceTranslatorProviderImpl();
 		referenceTranslatorProvider.setPractitionerDao(practitionerDao);
-		
+
 		provider = new Provider();
 		provider.setUuid(PRACTITIONER_UUID);
 	}
-	
+
 	@Test
 	public void shouldConvertProviderToFhirPractitionerReference() {
-		
+
 		Reference result = referenceTranslatorProvider.toFhirResource(provider);
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.PRACTITIONER));
 		assertThat(getReferenceId(result).orElse(null), equalTo(PRACTITIONER_UUID));
 	}
-	
+
 	@Test
 	public void shouldReturnNullIfProviderIsNull() {
 		assertThat(referenceTranslatorProvider.toFhirResource(null), nullValue());
 	}
-	
+
 	@Test
 	public void shouldConvertReferenceToProvider() {
 		Reference practitionerReference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID)
@@ -70,24 +70,24 @@ public class PractitionerReferenceTranslatorProviderImplTest {
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
 		when(practitionerDao.get(PRACTITIONER_UUID)).thenReturn(provider);
-		
+
 		Provider result = referenceTranslatorProvider.toOpenmrsType(practitionerReference);
-		
+
 		assertThat(result, Matchers.notNullValue());
 		assertThat(result.getUuid(), Matchers.equalTo(PRACTITIONER_UUID));
 	}
-	
+
 	@Test
 	public void shouldReturnNullIfReferenceNull() {
 		Provider result = referenceTranslatorProvider.toOpenmrsType(null);
-		
+
 		assertThat(result, Matchers.nullValue());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionIfReferenceIsNotForPractitioner() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + PRACTITIONER_UUID).setType("Unknown");
-		
+
 		referenceTranslatorProvider.toOpenmrsType(reference);
 	}
 }

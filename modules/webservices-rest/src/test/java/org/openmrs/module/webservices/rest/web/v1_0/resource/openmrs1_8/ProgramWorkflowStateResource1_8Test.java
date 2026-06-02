@@ -15,19 +15,19 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ProgramWorkflowStateResource1_8Test extends BaseDelegatingResourceTest<ProgramWorkflowStateResource1_8, ProgramWorkflowState> {
-	
+
 	@Override
 	public ProgramWorkflowState newObject() {
 		return Context.getProgramWorkflowService().getStateByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		super.validateRefRepresentation();
 		assertPropEquals("retired", getObject().getRetired());
 		assertPropPresent("concept");
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -35,7 +35,7 @@ public class ProgramWorkflowStateResource1_8Test extends BaseDelegatingResourceT
 		assertPropEquals("retired", getObject().getRetired());
 		assertPropPresent("concept");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -43,13 +43,13 @@ public class ProgramWorkflowStateResource1_8Test extends BaseDelegatingResourceT
 		assertPropEquals("retired", getObject().getRetired());
 		assertPropPresent("concept");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return getObject().getName();
-		
+
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.STATE_UUID;

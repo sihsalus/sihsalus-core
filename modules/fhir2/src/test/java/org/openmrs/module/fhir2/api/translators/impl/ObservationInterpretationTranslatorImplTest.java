@@ -22,20 +22,20 @@ import org.openmrs.module.fhir2.FhirConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationInterpretationTranslatorImplTest {
-	
+
 	private ObservationInterpretationTranslatorImpl observationInterpretationTranslator;
-	
+
 	private Obs obs;
-	
+
 	private CodeableConcept interpretation;
-	
+
 	@Before
 	public void setUp() {
 		observationInterpretationTranslator = new ObservationInterpretationTranslatorImpl();
 		obs = new Obs();
 		interpretation = new CodeableConcept();
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateNormalInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.NORMAL);
@@ -45,7 +45,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Normal"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Normal"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateAbnormalInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.ABNORMAL);
@@ -55,7 +55,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Abnormal"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Abnormal"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateCriticallyAbnormalInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.CRITICALLY_ABNORMAL);
@@ -65,7 +65,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Critically Abnormal"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Critically Abnormal"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateCriticallyHighInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.CRITICALLY_HIGH);
@@ -75,7 +75,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Critically High"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Critically High"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateCriticallyLowInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.CRITICALLY_LOW);
@@ -85,7 +85,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Critically Low"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Critically Low"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateHighInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.HIGH);
@@ -95,7 +95,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("High"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("High"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateLowInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.LOW);
@@ -105,7 +105,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Low"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Low"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateOffScaleLowInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.OFF_SCALE_LOW);
@@ -115,7 +115,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Off Scale Low"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Off Scale Low"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateOffScaleHighInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.OFF_SCALE_HIGH);
@@ -125,7 +125,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Off Scale High"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Off Scale High"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateSignificantChangeDownInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.SIGNIFICANT_CHANGE_DOWN);
@@ -135,7 +135,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Significant Change Down"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Significant Change Down"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateSignificantChangeUpInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.SIGNIFICANT_CHANGE_UP);
@@ -145,7 +145,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Significant Change Up"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Significant Change Up"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateResistantInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.RESISTANT);
@@ -155,7 +155,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Resistant"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Resistant"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateSusceptibleInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.SUSCEPTIBLE);
@@ -165,7 +165,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Susceptible"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Susceptible"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateIntermediateInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.INTERMEDIATE);
@@ -175,7 +175,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Intermediate"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Intermediate"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslatePositiveInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.POSITIVE);
@@ -185,7 +185,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Positive"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Positive"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateNegativeInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.NEGATIVE);
@@ -195,7 +195,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Negative"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Negative"));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateVerySusceptibleInterpretationCorrectly() {
 		obs.setInterpretation(Obs.Interpretation.VERY_SUSCEPTIBLE);
@@ -207,20 +207,20 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getSystem(),
 		    Matchers.is(FhirConstants.OPENMRS_FHIR_EXT_VS_INTERPRETATION));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNoFhirInterpretationWhenObsInterpretationIsNull() {
 		obs.setInterpretation(null);
 		CodeableConcept interpretation = observationInterpretationTranslator.toFhirResource(obs);
 		MatcherAssert.assertThat(interpretation, Matchers.nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfInterpretationSizeIsZero() {
 		observationInterpretationTranslator.toOpenmrsType(obs, interpretation);
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateNormalCodeCorrectly() {
 		Coding coding = new Coding();
@@ -230,7 +230,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.NORMAL));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateAbnormalCodeCorrectly() {
 		Coding coding = new Coding();
@@ -240,7 +240,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.ABNORMAL));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateCriticallyAbnormalCodeCorrectly() {
 		Coding coding = new Coding();
@@ -250,7 +250,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.CRITICALLY_ABNORMAL));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateCriticallyHighCodeCorrectly() {
 		Coding coding = new Coding();
@@ -260,7 +260,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.CRITICALLY_HIGH));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateCriticallyLowCodeCorrectly() {
 		Coding coding = new Coding();
@@ -270,7 +270,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.CRITICALLY_LOW));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateHighCodeCorrectly() {
 		Coding coding = new Coding();
@@ -280,7 +280,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.HIGH));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateLowCodeCorrectly() {
 		Coding coding = new Coding();
@@ -290,7 +290,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.LOW));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateOffScaleLowCodeCorrectly() {
 		Coding coding = new Coding();
@@ -300,7 +300,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.OFF_SCALE_LOW));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateOffScaleHighCodeCorrectly() {
 		Coding coding = new Coding();
@@ -310,7 +310,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.OFF_SCALE_HIGH));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateSignificantChangeDownCodeCorrectly() {
 		Coding coding = new Coding();
@@ -320,7 +320,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.SIGNIFICANT_CHANGE_DOWN));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateSignificantChangeUpCodeCorrectly() {
 		Coding coding = new Coding();
@@ -330,7 +330,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.SIGNIFICANT_CHANGE_UP));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateResistantCodeCorrectly() {
 		Coding coding = new Coding();
@@ -340,7 +340,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.RESISTANT));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateSusceptibleCodeCorrectly() {
 		Coding coding = new Coding();
@@ -350,7 +350,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.SUSCEPTIBLE));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateIntermediateCodeCorrectly() {
 		Coding coding = new Coding();
@@ -360,7 +360,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.INTERMEDIATE));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslatePositiveCodeCorrectly() {
 		Coding coding = new Coding();
@@ -370,7 +370,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.POSITIVE));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateNegativeCodeCorrectly() {
 		Coding coding = new Coding();
@@ -380,7 +380,7 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.notNullValue());
 		MatcherAssert.assertThat(obs.getInterpretation(), Matchers.is(Obs.Interpretation.NEGATIVE));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateVerySusceptibleCodeCorrectly() {
 		Coding coding = new Coding();

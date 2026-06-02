@@ -37,7 +37,7 @@ import static org.openmrs.module.reporting.config.ReportLoader.getReportingDescr
 public class ReportLoaderIntegrationTest extends BaseModuleContextSensitiveTest {
 
     public static final String appDataTestDir = "testAppDataDir";
-    
+
     @Autowired @Qualifier("reportingReportDefinitionService")
     ReportDefinitionService reportDefinitionService;
 

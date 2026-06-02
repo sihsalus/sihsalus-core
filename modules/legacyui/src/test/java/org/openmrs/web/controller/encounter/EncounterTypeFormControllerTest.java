@@ -22,62 +22,62 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.servlet.ModelAndView;
 
 public class EncounterTypeFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Test
 	public void shouldNotDeleteEncounterTypeWhenEncounterTypesAreLocked() throws Exception {
 		// dataset to lock encounter types
 		executeDataSet("org/openmrs/web/encounter/include/EncounterTypeFormControllerTest.xml");
-		
+
 		EncounterService es = Context.getEncounterService();
-		
+
 		EncounterTypeFormController controller = (EncounterTypeFormController) applicationContext
 		        .getBean("encounterTypeForm");
 		controller.setApplicationContext(applicationContext);
 		controller.setSuccessView("index.htm");
 		controller.setFormView("EncounterType.form");
-		
+
 		// setting up the request and doing an initial "get" equivalent to the user loading the page for the first time
 		MockHttpServletRequest request = new MockHttpServletRequest("GET",
 		        "/admin/encounters/encounterType.form?encounterTypeId=1");
 		request.setSession(new MockHttpSession(null));
 		HttpServletResponse response = new MockHttpServletResponse();
 		controller.handleRequest(request, response);
-		
+
 		// set this to be a page submission
 		request.setMethod("POST");
-		
+
 		request.addParameter("action", "Delete EncounterType"); // so that the form is processed
-		
+
 		// send the parameters to the controller
 		ModelAndView mav = controller.handleRequest(request, response);
-		
+
 		Assertions.assertEquals("EncounterType.form", mav.getViewName(), "The purge attempt should have failed!");
 		Assertions.assertSame(controller.getFormView(), mav.getViewName());
 		Assertions.assertNotNull(es.getEncounterType(1));
 	}
-	
+
 	@Test
 	public void shouldSaveEncounterTypeWhenEncounterTypesAreNotLocked() throws Exception {
 		EncounterService es = Context.getEncounterService();
-		
+
 		EncounterTypeFormController controller = (EncounterTypeFormController) applicationContext
 		        .getBean("encounterTypeForm");
 		controller.setApplicationContext(applicationContext);
 		controller.setSuccessView("index.htm");
 		controller.setFormView("EncounterType.form");
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET",
 		        "/admin/encounters/encounterType.form?encounterTypeId=1");
 		request.setSession(new MockHttpSession(null));
 		HttpServletResponse response = new MockHttpServletResponse();
 		controller.handleRequest(request, response);
-		
+
 		request.setMethod("POST");
-		
+
 		request.addParameter("action", "Save EncounterType");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
-		
+
 		Assertions.assertSame(controller.getFormView(), mav.getViewName());
 		Assertions.assertNotEquals("index.htm", mav.getViewName(), "The save attempt should have passed!");
 		Assertions.assertNotNull(es.getEncounterType(1));

@@ -16,12 +16,12 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class PatientResource1_9Test extends BaseDelegatingResourceTest<PatientResource1_9, Patient> {
-	
+
 	@Override
 	public Patient newObject() {
 		return Context.getService(PatientService.class).getPatientByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -29,7 +29,7 @@ public class PatientResource1_9Test extends BaseDelegatingResourceTest<PatientRe
 		assertPropPresent("person");
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -38,15 +38,15 @@ public class PatientResource1_9Test extends BaseDelegatingResourceTest<PatientRe
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "101-6 - Horatio Test Hornblower";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.PATIENT_UUID;
 	}
-	
+
 }

@@ -18,12 +18,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RequestProcedureStepTest {
-	
+
 	@Test
 	public void testConstructorAndGetters() {
 		RequestProcedureStep step = new RequestProcedureStep();
 		RequestProcedure procedure = new RequestProcedure();
-		
+
 		step.setRequestProcedure(procedure);
 		step.setModality("CT");
 		step.setAetTitle("AET123");
@@ -34,7 +34,7 @@ public class RequestProcedureStepTest {
 		step.setPerformedProcedureStepStatus("Scheduled");
 		step.setStationName("Station A");
 		step.setProcedureStepLocation("Room 5");
-		
+
 		assertEquals(procedure, step.getRequestProcedure());
 		assertEquals("CT", step.getModality());
 		assertEquals("AET123", step.getAetTitle());
@@ -46,13 +46,13 @@ public class RequestProcedureStepTest {
 		assertEquals("Station A", step.getStationName());
 		assertEquals("Room 5", step.getProcedureStepLocation());
 	}
-	
+
 	@Test
 	public void testAllArgsConstructor() {
 		RequestProcedure procedure = new RequestProcedure();
 		RequestProcedureStep step = new RequestProcedureStep(0, procedure, "MRI", "Dr. Cuddy", "MRI Brain", "AET456",
 		        "2025-07-04", "10:00", "in progress", "Station B", "Room 2");
-		
+
 		assertEquals(procedure, step.getRequestProcedure());
 		assertEquals("MRI", step.getModality());
 		assertEquals("Dr. Cuddy", step.getScheduledPerformingPhysician());

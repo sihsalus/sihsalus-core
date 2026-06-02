@@ -32,14 +32,14 @@ import java.util.List;
 import java.util.Set;
 
 public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	ShortPatientFormValidator validator = null;
-	
+
 	PatientService ps = null;
-	
+
 	/**
 	 * Run this before each unit test in this class.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@BeforeEach
@@ -47,7 +47,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator = new ShortPatientFormValidator();
 		ps = Context.getPatientService();
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -62,7 +62,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasGlobalErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -77,7 +77,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasGlobalErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -92,7 +92,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -105,14 +105,14 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		//remove all the active identifiers
 		for (PatientIdentifier activeIdentifier : activeIdentifiers)
 			patientIdentifiers.remove(activeIdentifier);
-		
+
 		p.setIdentifiers(patientIdentifiers);
 		ShortPatientModel model = new ShortPatientModel(p);
 		Errors errors = new BindException(model, "patientModel");
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasGlobalErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -130,7 +130,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasFieldErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -147,7 +147,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasFieldErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -161,7 +161,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasFieldErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -177,7 +177,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasFieldErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -196,7 +196,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasFieldErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -210,7 +210,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasFieldErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -229,9 +229,9 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		Errors errors = new BindException(model, "patientModel");
 		validator.validate(model, errors);
 		Assertions.assertEquals(false, errors.hasErrors());
-		
+
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -247,7 +247,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasFieldErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -262,7 +262,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		patient.addName(name);
 		Context.getPatientService().savePatient(patient);
 		Assertions.assertNotNull(name.getId());//should have been added
-		
+
 		ShortPatientModel model = new ShortPatientModel(patient);
 		//should still be the preferred name for the test to pass
 		Assertions.assertEquals(oldName.getId(), model.getPersonName().getId());
@@ -270,12 +270,12 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		model.getPersonName().setGivenName("My");//should be case insensitive
 		model.getPersonName().setMiddleName("duplicate");
 		model.getPersonName().setFamilyName("name");
-		
+
 		Errors errors = new BindException(model, "patientModel");
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object,Errors)
 	 */
@@ -294,19 +294,19 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		patient.addAddress(address);
 		Context.getPatientService().savePatient(patient);
 		Assertions.assertNotNull(address.getId());//should have been added
-		
+
 		ShortPatientModel model = new ShortPatientModel(patient);
 		//should still be the preferred address for the test to pass
 		Assertions.assertEquals(oldAddress.getId(), model.getPersonAddress().getId());
 		//change to a duplicate name
 		model.getPersonAddress().setAddress1("Address1");//should be case insensitive
 		model.getPersonAddress().setAddress2("address2");
-		
+
 		Errors errors = new BindException(model, "patientModel");
 		validator.validate(model, errors);
 		Assertions.assertEquals(true, errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see ShortPatientFormValidator#validate(Object, Errors)
 	 */
@@ -321,14 +321,14 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		patient.addName(name);
 		Context.getPatientService().savePatient(patient);
 		Assertions.assertNotNull(name.getId());//should have been added
-		
+
 		ShortPatientModel model = new ShortPatientModel(patient);
-		
+
 		//change to a voided name to check whether issue is fixed
 		model.getPersonName().setGivenName("rasanjana");
 		model.getPersonName().setMiddleName("C");
 		model.getPersonName().setFamilyName("perera");
-		
+
 		//Check validator has errors
 		Errors errors = new BindException(model, "patientModel");
 		validator.validate(model, errors);
@@ -336,7 +336,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		ObjectError error = errors.getAllErrors().get(0);
 		Assertions.assertTrue(error.getDefaultMessage().contains("Please restore the existing name"));
 	}
-	
+
 	@Test
 	@Verifies(value = "should ignore duplicate voided address", method = "validate(Object,Errors)")
 	public void validate_shouldIgnoreDuplicateVoidedAddress() throws Exception {
@@ -346,7 +346,7 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		oldAddress.setAddress1("Address1");
 		oldAddress.setAddress2("address1");
 		Context.getPatientService().savePatient(patient);
-		
+
 		PersonAddress address = (PersonAddress) oldAddress.clone();
 		address.setPersonAddressId(null);
 		address.setUuid(null);
@@ -359,14 +359,14 @@ public class ShortPatientFormValidatorTest extends BaseModuleWebContextSensitive
 		oldAddress.setVoided(true);
 		oldAddress.setVoidReason("test duplicate address");
 		Context.getPatientService().savePatient(patient);
-		
+
 		ShortPatientModel model = new ShortPatientModel(patient);
 		//the second address should be now the active address
 		Assertions.assertEquals(address.getId(), model.getPersonAddress().getId());
 		//change to a duplicate name
 		model.getPersonAddress().setAddress1("address1");//should be case insensitive
 		model.getPersonAddress().setAddress2("address1");
-		
+
 		Errors errors = new BindException(model, "patientModel");
 		validator.validate(model, errors);
 		Assertions.assertEquals(false, errors.hasErrors());

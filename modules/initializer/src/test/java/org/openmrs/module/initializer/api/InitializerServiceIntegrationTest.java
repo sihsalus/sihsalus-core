@@ -27,39 +27,39 @@ import java.util.Locale;
 import static org.junit.Assert.assertEquals;
 
 public class InitializerServiceIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("initializer.InitializerService")
 	InitializerService initializerService;
-	
+
 	@Autowired
 	ConceptService conceptService;
-	
+
 	@Autowired
 	@Qualifier("adminService")
 	AdministrationService administrationService;
-	
+
 	@Test
 	public void getUnretiredConceptsByFullySpecifiedName_shouldReturnExactNameCaseInsensitive() {
 		ConceptDatatype numeric = conceptService.getConceptDatatypeByName("Numeric");
 		ConceptClass finding = conceptService.getConceptClassByName("Finding");
 		Locale enGb = new Locale("en", "GB");
-		
+
 		Concept cd4Count = conceptService.getConcept(5497);
 		assertEquals("CD4 COUNT", cd4Count.getFullySpecifiedName(enGb).getName());
-		
+
 		administrationService.setGlobalProperty(OpenmrsConstants.GP_CASE_SENSITIVE_DATABASE_STRING_COMPARISON, "true");
-		
+
 		List<Concept> concepts = initializerService.getUnretiredConceptsByFullySpecifiedName("cd4 Count");
 		assertEquals(1, concepts.size());
 		assertEquals(cd4Count, concepts.get(0));
-		
+
 		Concept cd4Percent = new Concept();
 		cd4Percent.setDatatype(numeric);
 		cd4Percent.setConceptClass(finding);
 		cd4Percent.setFullySpecifiedName(new ConceptName("cd4%", enGb));
 		conceptService.saveConcept(cd4Percent);
-		
+
 		concepts = initializerService.getUnretiredConceptsByFullySpecifiedName("CD4%");
 		assertEquals(1, concepts.size());
 		assertEquals(cd4Percent, concepts.get(0));

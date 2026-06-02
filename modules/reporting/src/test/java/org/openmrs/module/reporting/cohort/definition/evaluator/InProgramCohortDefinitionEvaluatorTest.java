@@ -28,19 +28,19 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 
 public class InProgramCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	ProgramWorkflowService ps;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 		ps = Context.getProgramWorkflowService();
 	}
-	
+
 	/**
 	 * @see {@link InProgramCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -52,21 +52,21 @@ public class InProgramCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		pp.setDateEnrolled(DateUtil.getDateTime(2008, 8, 1, 8, 0, 0, 0));
 		ps.savePatientProgram(pp);
 		Context.flushSession();
-		
+
 		InProgramCohortDefinition cd = new InProgramCohortDefinition();
 		cd.setOnOrBefore(DateUtil.getDateTime(2008, 8, 1, 9, 0, 0, 0));
 		cd.setPrograms(Collections.singletonList(pp.getProgram()));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(pp.getPatient().getPatientId()));
-		
+
 		pp.setDateEnrolled(DateUtil.getDateTime(2008, 8, 1, 10, 0, 0, 0));
 		ps.savePatientProgram(pp);
 		Context.flushSession();
-		
+
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(c.contains(pp.getPatient().getPatientId()));
 	}
-	
+
 	/**
 	 * @see {@link InProgramCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -78,14 +78,14 @@ public class InProgramCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		pp.setDateEnrolled(DateUtil.getDateTime(2008, 7, 30, 10, 0, 0, 0));
 		ps.savePatientProgram(pp);
 		Context.flushSession();
-		
+
 		InProgramCohortDefinition cd = new InProgramCohortDefinition();
 		cd.setOnOrBefore(DateUtil.getDateTime(2008, 7, 30));
 		cd.setPrograms(Collections.singletonList(pp.getProgram()));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(pp.getPatient().getPatientId()));
 	}
-	
+
 	/**
 	 * @see {@link InProgramCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -96,17 +96,17 @@ public class InProgramCohortDefinitionEvaluatorTest extends BaseModuleContextSen
 		pp.setDateCompleted(DateUtil.getDateTime(2009, 11, 1, 12, 0, 0, 0));
 		ps.savePatientProgram(pp);
 		Context.flushSession();//the patient program will be fetched from the database
-		
+
 		InProgramCohortDefinition cd = new InProgramCohortDefinition();
 		cd.setOnOrAfter(DateUtil.getDateTime(2009, 11, 1, 11, 0, 0, 0));
 		cd.setPrograms(Collections.singletonList(pp.getProgram()));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(pp.getPatient().getPatientId()));
-		
+
 		pp.setDateCompleted(DateUtil.getDateTime(2009, 11, 1, 10, 0, 0, 0));
 		ps.savePatientProgram(pp);
 		Context.flushSession();
-		
+
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(c.contains(pp.getPatient().getPatientId()));
 	}

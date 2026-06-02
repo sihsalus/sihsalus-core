@@ -16,7 +16,7 @@ import org.openmrs.PersonAddress;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class PersonAddressConverterTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see PersonAddressConverter#convert(Object)
 	 * @verifies convert a Person name into a String using a format expression

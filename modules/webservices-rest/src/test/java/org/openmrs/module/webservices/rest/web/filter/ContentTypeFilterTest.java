@@ -26,15 +26,15 @@ import java.util.List;
  * Tests for the {@link ContentTypeFilter} class.
  */
 public class ContentTypeFilterTest {
-	
+
 	private ContentTypeFilter testFilter;
-	
+
 	private MockFilterChain mockChain;
-	
+
 	private MockHttpServletRequest req;
-	
+
 	private MockHttpServletResponse resp;
-	
+
 	@BeforeEach
 	public void init() {
 		testFilter = new ContentTypeFilter();
@@ -42,72 +42,72 @@ public class ContentTypeFilterTest {
 		req = new MockHttpServletRequest();
 		resp = new MockHttpServletResponse();
 	}
-	
+
 	@Test
 	public void doFilter_shouldNotAllowXmlContent() throws IOException, ServletException {
-		
+
 		List<String> xmlContentTypes = Arrays.asList("application/xml", "text/xml", "application/xml;utf-8");
-		
+
 		for (String contentType : xmlContentTypes) {
 			init();
 			req.setContentType(contentType);
 			req.setMethod("POST");
 			req.setRequestURI("/ws/rest/v1/obs");
 			testFilter.doFilter(req, resp, mockChain);
-			
+
 			Assertions.assertEquals(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, resp.getStatus());
 		}
 	}
-	
+
 	@Test
 	public void doFilter_shouldAllowJSONContent() throws IOException, ServletException {
 		req.setContentType("application/json");
 		req.setMethod("POST");
 		req.setRequestURI("/ws/rest/v1/obs");
 		testFilter.doFilter(req, resp, mockChain);
-		
+
 		Assertions.assertNotEquals(resp.getStatus(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
+
 	@Test
 	public void doFilter_shouldAllowJSONContentTypeWithParameter() throws IOException, ServletException {
 		req.setContentType("application/json;charset=UTF-8");
 		req.setMethod("POST");
 		req.setRequestURI("/ws/rest/v1/obs");
 		testFilter.doFilter(req, resp, mockChain);
-		
+
 		Assertions.assertNotEquals(resp.getStatus(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
+
 	@Test
 	public void doFilter_shouldAllowMultipartFormDataContentTypeWithParameter() throws IOException, ServletException {
 		req.setContentType("multipart/form-data; boundary=----WebKitFormBoundaryREl4lGYAfON7BGOo");
 		req.setMethod("POST");
 		req.setRequestURI("/ws/rest/v1/obs");
 		testFilter.doFilter(req, resp, mockChain);
-		
+
 		Assertions.assertNotEquals(resp.getStatus(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
+
 	@Test
 	public void doFilter_shouldAllowNullContentType() throws IOException, ServletException {
 		req.setMethod("POST");
 		req.setRequestURI("/ws/rest/v1/obs");
-		
+
 		Assertions.assertEquals(null, req.getContentType());
-		
+
 		testFilter.doFilter(req, resp, mockChain);
-		
+
 		Assertions.assertNotEquals(resp.getStatus(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
+
 	@Test
 	public void doFilter_shouldAllowGetRequest() throws IOException, ServletException {
 		ContentTypeFilter testFilter = new ContentTypeFilter();
 		req.setMethod("GET");
 		req.setRequestURI("/ws/rest/v1/patient?sometestparam=bla");
 		testFilter.doFilter(req, resp, mockChain);
-		
+
 		Assertions.assertNotEquals(resp.getStatus(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 }

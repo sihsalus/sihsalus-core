@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestReportProcessor implements ReportProcessor {
 
-	
+
 	private Log log = LogFactory.getLog(this.getClass());
 
 	/**
@@ -33,7 +33,7 @@ public class TestReportProcessor implements ReportProcessor {
 	public List<String> getConfigurationPropertyNames() {
 		return new ArrayList<String>();
 	}
-	
+
 	/**
 	 * This adds an error message to the report -- I just want the processor to do something, so i know that it ran
 	 * @param report the Report to process
@@ -43,4 +43,3 @@ public class TestReportProcessor implements ReportProcessor {
 		report.setErrorMessage("TestReportProcessor.process was called corretly.");
 	}
 }
-

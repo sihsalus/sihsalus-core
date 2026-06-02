@@ -27,21 +27,21 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a patient
  */
 public class PatientShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldPatientShortSerialization() throws Exception {
-		
+
 		//prepare the necessary data
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PatientShortSerializationTest.xml");
 		authenticate();
-		
+
 		PatientIdentifier pi = Context.getPatientService()
 		        .getPatientIdentifierByUuid("ff41928c-3bca-48d9-a4dc-9198f6b2873b");
 		String xmlOutput = Context.getSerializationService().serialize(pi, XStreamShortSerializer.class);
@@ -51,25 +51,25 @@ public class PatientShortSerializationTest extends BaseModuleContextSensitiveTes
 		//with short serialization, the "patient" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/patientIdentifier/patient/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldPatientShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "PatientShortSerializationTest.xml" here 
+		 * We also need to use the "PatientShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PatientShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<patientIdentifier id=\"1\" uuid=\"ff41928c-3bca-48d9-a4dc-9198f6b2873b\" voided=\"false\">\n");
@@ -96,7 +96,7 @@ public class PatientShortSerializationTest extends BaseModuleContextSensitiveTes
 		xmlBuilder.append("  </location>\n");
 		xmlBuilder.append("  <preferred>false</preferred>\n");
 		xmlBuilder.append("</patientIdentifier>\n");
-		
+
 		PatientIdentifier pi = Context.getSerializationService().deserialize(xmlBuilder.toString(), PatientIdentifier.class,
 		    XStreamShortSerializer.class);
 		assertEquals("da7f524f-27ce-4bb2-86d6-6d1d05312bd5", pi.getPatient().getUuid());

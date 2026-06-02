@@ -39,7 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SpringTestConfiguration.class, inheritLocations = false)
 public class QueueEntryServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final List<String> INITIAL_DATASET_XML = Arrays.asList(
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_locationInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_conceptsInitialDataset.xml",
@@ -48,34 +48,34 @@ public class QueueEntryServiceTest extends BaseModuleContextSensitiveTest {
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/validators/QueueEntryValidatorTest_globalPropertyInitialDataset.xml");
-	
+
 	private static final String PATIENT_UUID = "90b38324-e2fd-4feb-95b7-9e9a2a8876fg";
-	
+
 	private static final String STATUS_CONCEPT_UUID = "56b910bd-298c-4ecf-a632-661ae2f7865y";
-	
+
 	private static final String PRIORITY_CONCEPT_UUID = "90b910bd-298c-4ecf-a632-661ae2f446op";
-	
+
 	private static final String TEST_QUEUE_UUID = "5ob8gj90-9090-4kbc-80dc-2e5d30252bb3";
-	
+
 	@Autowired
 	@Qualifier("queue.QueueEntryService")
 	private QueueEntryService queueEntryService;
-	
+
 	@Autowired
 	@Qualifier("queue.QueueService")
 	private QueueService queueService;
-	
+
 	@Autowired
 	private PatientService patientService;
-	
+
 	@Autowired
 	private ConceptService conceptService;
-	
+
 	@Before
 	public void setup() {
 		INITIAL_DATASET_XML.forEach(this::executeDataSet);
 	}
-	
+
 	@Test
 	public void transitionQueueEntryShouldNotEndInitialIfNewIsDuplicate() {
 		QueueEntry queueEntry = queueEntryService.getQueueEntryById(3).get();
@@ -84,7 +84,7 @@ public class QueueEntryServiceTest extends BaseModuleContextSensitiveTest {
 		Patient patient = patientService.getPatientByUuid(PATIENT_UUID);
 		Concept status = conceptService.getConceptByUuid(STATUS_CONCEPT_UUID);
 		Concept priority = conceptService.getConceptByUuid(PRIORITY_CONCEPT_UUID);
-		
+
 		// Create an overlapping entry in the target queue that will conflict with the transition's new entry
 		QueueEntry overlappingEntry = new QueueEntry();
 		overlappingEntry.setQueue(targetQueue);
@@ -93,7 +93,7 @@ public class QueueEntryServiceTest extends BaseModuleContextSensitiveTest {
 		overlappingEntry.setPriority(priority);
 		overlappingEntry.setStartedAt(DateUtils.addHours(new Date(), -1));
 		queueEntryService.saveQueueEntry(overlappingEntry);
-		
+
 		QueueEntryTransition transition = new QueueEntryTransition();
 		transition.setQueueEntryToTransition(queueEntry);
 		transition.setNewQueue(targetQueue);
@@ -106,7 +106,7 @@ public class QueueEntryServiceTest extends BaseModuleContextSensitiveTest {
 			assertThat(e.getMessage(), containsString("queue.entry.error.duplicate"));
 		}
 	}
-	
+
 	@Test
 	public void transitionQueueEntryShouldEndInitialIfNewIsNotDuplicate() {
 		QueueEntry queueEntry = queueEntryService.getQueueEntryById(2).get();

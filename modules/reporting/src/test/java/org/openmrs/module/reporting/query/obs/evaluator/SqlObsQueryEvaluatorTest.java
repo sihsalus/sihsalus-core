@@ -48,7 +48,7 @@ public class SqlObsQueryEvaluatorTest extends BaseModuleContextSensitiveTest {
 		ObsQueryResult s = evaluate(d, new EvaluationContext());
 		Assert.assertEquals(8, s.getSize());
 	}
-	
+
 	@Test
 	public void evaluate_shouldFilterResultsGivenABaseObsQueryInAnEvaluationContext() throws Exception {
 		ObsEvaluationContext context = new ObsEvaluationContext();

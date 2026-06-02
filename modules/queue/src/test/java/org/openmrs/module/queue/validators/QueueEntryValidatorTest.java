@@ -39,38 +39,38 @@ import org.springframework.validation.FieldError;
 
 @ContextConfiguration(classes = SpringTestConfiguration.class, inheritLocations = false)
 public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String VALID_STATUS_CONCEPT = "31b910bd-298c-4ecf-a632-661ae2f4460y";
-	
+
 	private static final String INVALID_STATUS_CONCEPT_UUID = "67b910bd-298c-4ecf-a632-661ae2f446op";
-	
+
 	private static final String VALID_PRIORITY_CONCEPT = "90b910bd-298c-4ecf-a632-661ae2f446op";
-	
+
 	private static final String INVALID_PRIORITY_CONCEPT_UUID = "67b910bd-298c-4ecf-a632-661ae2f446op";
-	
+
 	private static final String QUEUE_UUID = "3eb7fe43-2813-4kbc-80dc-2e5d30252bb5";
-	
+
 	private static final String PATIENT_UUID = "90b38324-e2fd-4feb-95b7-9e9a2a8876fg";
-	
+
 	private static final List<String> INITIAL_CONCEPTS_DATASETS = Arrays.asList(
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_locationInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_conceptsInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_patientInitialDataset.xml",
 	    "org/openmrs/module/queue/validators/QueueEntryValidatorTest_globalPropertyInitialDataset.xml");
-	
+
 	private Errors errors;
-	
+
 	private QueueEntry queueEntry;
-	
+
 	private Visit visit;
-	
+
 	@Autowired
 	private QueueEntryValidator validator;
-	
+
 	@Autowired
 	private QueueServicesWrapper services;
-	
+
 	@Before
 	public void setup() {
 		INITIAL_CONCEPTS_DATASETS.forEach(this::executeDataSet);
@@ -84,81 +84,81 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		visit.setStopDatetime(DateUtils.addHours(new Date(), -1));
 		errors = new BindException(queueEntry, queueEntry.getClass().getName());
 	}
-	
+
 	@Test
 	public void validatorNotNull() {
 		assertThat(validator, is(notNullValue()));
 	}
-	
+
 	@Test
 	public void shouldSupportQueueEntry() {
 		assertThat(validator.supports(QueueEntry.class), is(true));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryWithNullStatus() {
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError queueEntryStatusFieldError = errors.getFieldError("status");
 		assertThat(queueEntryStatusFieldError, is(notNullValue()));
 		assertThat(queueEntryStatusFieldError.getField(), is("status"));
 		assertThat(queueEntryStatusFieldError.getCode(), is("queueEntry.status.null"));
 		assertThat(queueEntryStatusFieldError.getDefaultMessage(), is("The property status should not be null"));
 	}
-	
+
 	@Test
 	public void shouldNotRejectQueueEntryWithValidConceptStatus() {
 		Concept validStatusConcept = Context.getConceptService().getConceptByUuid(VALID_STATUS_CONCEPT);
 		queueEntry.setStatus(validStatusConcept);
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError queueEntryStatusFieldError = errors.getFieldError("status");
 		assertThat(queueEntryStatusFieldError, is(nullValue()));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryWithInValidConceptStatus() {
 		Concept InValidStatusConcept = Context.getConceptService().getConceptByUuid(INVALID_STATUS_CONCEPT_UUID);
 		queueEntry.setStatus(InValidStatusConcept);
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError queueEntryStatusFieldError = errors.getFieldError("status");
 		assertThat(queueEntryStatusFieldError, is(notNullValue()));
 		assertThat(queueEntryStatusFieldError.getCode(), is("queueEntry.status.invalid"));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryWithNullStartedAtDate() {
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError queueEntryStatusFieldError = errors.getFieldError("startedAt");
 		assertThat(queueEntryStatusFieldError, is(notNullValue()));
 		assertThat(queueEntryStatusFieldError.getCode(), is("queueEntry.startedAt.null"));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryIfEndedAtIsBeforeStartedAtDate() {
 		queueEntry.setStartedAt(new Date());
 		queueEntry.setEndedAt(yesterday());
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError queueEntryStatusFieldError = errors.getFieldError("endedAt");
 		assertThat(queueEntryStatusFieldError, is(notNullValue()));
 		assertThat(queueEntryStatusFieldError.getCode(), is("queueEntry.endedAt.invalid"));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryIfEndedAtIsEqualToStartedAtDate() {
 		Date now = new Date();
 		queueEntry.setStartedAt(now);
 		queueEntry.setEndedAt(new Date(now.getTime()));
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError endedAtFieldError = errors.getFieldError("endedAt");
 		assertThat(endedAtFieldError, is(notNullValue()));
 		assertThat(endedAtFieldError.getCode(), is("queueEntry.endedAt.invalid"));
 	}
-	
+
 	@Test
 	public void shouldNotRejectIfQueueEntryStartedAndEndedDuringVisit() {
 		queueEntry.setVisit(visit);
@@ -170,7 +170,7 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		FieldError endedAtFieldError = errors.getFieldError("endedAt");
 		assertThat(endedAtFieldError, is(nullValue()));
 	}
-	
+
 	@Test
 	public void shouldRejectIfQueueEntryStartedBeforeVisitStartDate() {
 		queueEntry.setVisit(visit);
@@ -180,7 +180,7 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		assertThat(startedAtFieldError, is(notNullValue()));
 		assertThat(startedAtFieldError.getCode(), is("queue.entry.error.cannotStartBeforeVisitStartDate"));
 	}
-	
+
 	@Test
 	public void shouldRejectIfQueueEntryStartedAfterVisitEndDate() {
 		queueEntry.setVisit(visit);
@@ -190,7 +190,7 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		assertThat(startedAtFieldError, is(notNullValue()));
 		assertThat(startedAtFieldError.getCode(), is("queue.entry.error.cannotStartAfterVisitStopDate"));
 	}
-	
+
 	@Test
 	public void shouldRejectIfQueueEntryEndedAfterVisitEndDate() {
 		queueEntry.setVisit(visit);
@@ -201,7 +201,7 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		assertThat(endedAtFieldError, is(notNullValue()));
 		assertThat(endedAtFieldError.getCode(), is("queue.entry.error.cannotEndAfterVisitStopDate"));
 	}
-	
+
 	@Test
 	public void shouldRejectIfQueueEntryNotEndedWhenVisitStopped() {
 		queueEntry.setVisit(visit);
@@ -211,57 +211,57 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		assertThat(endedAtFieldError, is(notNullValue()));
 		assertThat(endedAtFieldError.getCode(), is("queue.entry.error.cannotEndAfterVisitStopDate"));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryWithNullQueue() {
 		queueEntry.setQueue(null);
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError queueFieldError = errors.getFieldError("queue");
 		assertThat(queueFieldError, is(notNullValue()));
 		assertThat(queueFieldError.getCode(), is("queueEntry.queue.null"));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryWithNullPatient() {
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError patientFieldError = errors.getFieldError("patient");
 		assertThat(patientFieldError, is(notNullValue()));
 		assertThat(patientFieldError.getCode(), is("queueEntry.patient.null"));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryWithNullPriority() {
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError priorityFieldError = errors.getFieldError("priority");
 		assertThat(priorityFieldError, is(notNullValue()));
 		assertThat(priorityFieldError.getCode(), is("queueEntry.priority.null"));
 		assertThat(priorityFieldError.getDefaultMessage(), is("The property priority should not be null"));
 	}
-	
+
 	@Test
 	public void shouldNotRejectQueueEntryWithValidConceptPriority() {
 		Concept validPriorityConcept = Context.getConceptService().getConceptByUuid(VALID_PRIORITY_CONCEPT);
 		queueEntry.setPriority(validPriorityConcept);
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError priorityFieldError = errors.getFieldError("priority");
 		assertThat(priorityFieldError, is(nullValue()));
 	}
-	
+
 	@Test
 	public void shouldRejectQueueEntryWithInvalidConceptPriority() {
 		Concept invalidPriorityConcept = Context.getConceptService().getConceptByUuid(INVALID_PRIORITY_CONCEPT_UUID);
 		queueEntry.setPriority(invalidPriorityConcept);
 		validator.validate(queueEntry, errors);
-		
+
 		FieldError priorityFieldError = errors.getFieldError("priority");
 		assertThat(priorityFieldError, is(notNullValue()));
 		assertThat(priorityFieldError.getCode(), is("queueEntry.priority.invalid"));
 	}
-	
+
 	@Test
 	public void shouldRejectDuplicateQueueEntry() {
 		Queue queue = services.getQueueService().getQueueByUuid(QUEUE_UUID).orElse(null);
@@ -270,7 +270,7 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		assertThat(patient, is(notNullValue()));
 		Concept validStatus = Context.getConceptService().getConceptByUuid(VALID_STATUS_CONCEPT);
 		Concept validPriority = Context.getConceptService().getConceptByUuid(VALID_PRIORITY_CONCEPT);
-		
+
 		QueueEntry existingEntry = new QueueEntry();
 		existingEntry.setQueue(queue);
 		existingEntry.setPatient(patient);
@@ -278,21 +278,21 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		existingEntry.setPriority(validPriority);
 		existingEntry.setStartedAt(new Date());
 		services.getQueueEntryService().saveQueueEntry(existingEntry);
-		
+
 		QueueEntry duplicateEntry = new QueueEntry();
 		duplicateEntry.setQueue(queue);
 		duplicateEntry.setPatient(patient);
 		duplicateEntry.setStatus(validStatus);
 		duplicateEntry.setPriority(validPriority);
 		duplicateEntry.setStartedAt(new Date());
-		
+
 		Errors duplicateErrors = new BindException(duplicateEntry, duplicateEntry.getClass().getName());
 		validator.validate(duplicateEntry, duplicateErrors);
-		
+
 		assertThat(duplicateErrors.hasGlobalErrors(), is(true));
 		assertThat(duplicateErrors.getGlobalError().getCode(), is("queue.entry.error.duplicate"));
 	}
-	
+
 	@Test
 	public void shouldNotRejectSameQueueEntryOnUpdate() {
 		Queue queue = services.getQueueService().getQueueByUuid(QUEUE_UUID).orElse(null);
@@ -301,7 +301,7 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		assertThat(patient, is(notNullValue()));
 		Concept validStatus = Context.getConceptService().getConceptByUuid(VALID_STATUS_CONCEPT);
 		Concept validPriority = Context.getConceptService().getConceptByUuid(VALID_PRIORITY_CONCEPT);
-		
+
 		QueueEntry entry = new QueueEntry();
 		entry.setQueue(queue);
 		entry.setPatient(patient);
@@ -309,13 +309,13 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		entry.setPriority(validPriority);
 		entry.setStartedAt(new Date());
 		QueueEntry savedEntry = services.getQueueEntryService().saveQueueEntry(entry);
-		
+
 		Errors updateErrors = new BindException(savedEntry, savedEntry.getClass().getName());
 		validator.validate(savedEntry, updateErrors);
-		
+
 		assertThat(updateErrors.hasGlobalErrors(), is(false));
 	}
-	
+
 	@Test
 	public void shouldNotRejectNonOverlappingQueueEntriesForSamePatientAndQueue() {
 		Queue queue = services.getQueueService().getQueueByUuid(QUEUE_UUID).orElse(null);
@@ -324,7 +324,7 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		assertThat(patient, is(notNullValue()));
 		Concept validStatus = Context.getConceptService().getConceptByUuid(VALID_STATUS_CONCEPT);
 		Concept validPriority = Context.getConceptService().getConceptByUuid(VALID_PRIORITY_CONCEPT);
-		
+
 		Date now = new Date();
 		QueueEntry firstEntry = new QueueEntry();
 		firstEntry.setQueue(queue);
@@ -334,20 +334,20 @@ public class QueueEntryValidatorTest extends BaseModuleContextSensitiveTest {
 		firstEntry.setStartedAt(DateUtils.addHours(now, -1));
 		firstEntry.setEndedAt(now);
 		services.getQueueEntryService().saveQueueEntry(firstEntry);
-		
+
 		QueueEntry secondEntry = new QueueEntry();
 		secondEntry.setQueue(queue);
 		secondEntry.setPatient(patient);
 		secondEntry.setStatus(validStatus);
 		secondEntry.setPriority(validPriority);
 		secondEntry.setStartedAt(now);
-		
+
 		Errors secondEntryErrors = new BindException(secondEntry, secondEntry.getClass().getName());
 		validator.validate(secondEntry, secondEntryErrors);
-		
+
 		assertThat(secondEntryErrors.hasGlobalErrors(), is(false));
 	}
-	
+
 	private Date yesterday() {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DATE, -1);

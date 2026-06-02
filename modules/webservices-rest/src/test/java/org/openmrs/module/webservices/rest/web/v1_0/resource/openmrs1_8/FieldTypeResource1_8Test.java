@@ -15,7 +15,7 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class FieldTypeResource1_8Test extends BaseDelegatingResourceTest<FieldTypeResource1_8, FieldType> {
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#newObject()
 	 */
@@ -23,7 +23,7 @@ public class FieldTypeResource1_8Test extends BaseDelegatingResourceTest<FieldTy
 	public FieldType newObject() {
 		return Context.getFormService().getFieldTypeByUuid(getUuidProperty());
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getDisplayProperty()
 	 */
@@ -31,7 +31,7 @@ public class FieldTypeResource1_8Test extends BaseDelegatingResourceTest<FieldTy
 	public String getDisplayProperty() {
 		return "some field type";
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getUuidProperty()
 	 */
@@ -39,5 +39,5 @@ public class FieldTypeResource1_8Test extends BaseDelegatingResourceTest<FieldTy
 	public String getUuidProperty() {
 		return RestTestConstants1_8.FIELD_TYPE_UUID;
 	}
-	
+
 }

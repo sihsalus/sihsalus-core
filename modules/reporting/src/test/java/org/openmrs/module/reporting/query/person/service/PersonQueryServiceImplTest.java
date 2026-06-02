@@ -25,22 +25,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * Test the PersonQueryServiceImpl
  */
 public class PersonQueryServiceImplTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see PersonQueryServiceImpl#evaluate(PersonQuery,EvaluationContext)
 	 * @verifies evaluate a person query
@@ -51,7 +51,7 @@ public class PersonQueryServiceImplTest extends BaseModuleContextSensitiveTest {
 		PersonQueryResult r = Context.getService(PersonQueryService.class).evaluate(q, new EvaluationContext());
 		Assert.assertNotNull(r);
 	}
-	
+
 	/**
 	 * @see PersonQueryServiceImpl#saveDefinition(PersonQuery)
 	 * @verifies save a person query
@@ -66,5 +66,5 @@ public class PersonQueryServiceImplTest extends BaseModuleContextSensitiveTest {
 		PersonQuery loadedQuery = Context.getService(PersonQueryService.class).getDefinitionByUuid(q.getUuid());
 		Assert.assertEquals(q, loadedQuery);
 	}
-	
+
 }

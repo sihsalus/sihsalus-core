@@ -27,13 +27,13 @@ import static org.junit.Assert.*;
  * Tests methods in {@link RequestProcedureStepDao}
  */
 public class RequestProcedureStepDAOTest extends BaseModuleContextSensitiveTest {
-	
+
 	private RequestProcedureStepDao requestProcedureStepDao;
-	
+
 	private RequestProcedureDao requestProcedureDao;
-	
+
 	private static final String REQUEST_PROCEDURE_STEP_TEST_DATASET = "testRequestProcedureStepDataset.xml";
-	
+
 	@Before
 	public void setUp() throws Exception {
 		executeDataSet(REQUEST_PROCEDURE_STEP_TEST_DATASET);
@@ -41,13 +41,13 @@ public class RequestProcedureStepDAOTest extends BaseModuleContextSensitiveTest 
 		requestProcedureDao = (RequestProcedureDao) applicationContext.getBean("imaging.RequestProcedureDao");
 		requestProcedureStepDao = (RequestProcedureStepDao) applicationContext.getBean("imaging.RequestProcedureStepDao");
 	}
-	
+
 	@Test
 	public void testGetAll_shouldReturnAllSteps() {
 		List<RequestProcedureStep> steps = requestProcedureStepDao.getAll();
 		assertEquals(3, steps.size());
 	}
-	
+
 	@Test
 	public void testGetAllStepByRequestProcedure_shouldReturnAssociatedSteps() {
 		RequestProcedure procedure = requestProcedureDao.get(1);
@@ -57,7 +57,7 @@ public class RequestProcedureStepDAOTest extends BaseModuleContextSensitiveTest 
 		assertEquals("Chest Scan", stepList.get(2).getRequestedProcedureDescription());
 		assertEquals("CT", stepList.get(1).getModality());
 	}
-	
+
 	@Test
 	public void testGetById_shouldReturnCorrectProcedureStep() {
 		RequestProcedureStep step = requestProcedureStepDao.get(1);
@@ -67,10 +67,10 @@ public class RequestProcedureStepDAOTest extends BaseModuleContextSensitiveTest 
 		assertEquals("CT Station", step.getStationName());
 		assertEquals("Dr. Physician1", step.getScheduledPerformingPhysician());
 	}
-	
+
 	@Test
 	public void testSave_shouldAddNewStep() {
-		
+
 		RequestProcedure procedure = requestProcedureDao.get(1);
 		RequestProcedureStep newStep = new RequestProcedureStep();
 		newStep.setRequestProcedure(procedure);
@@ -84,39 +84,39 @@ public class RequestProcedureStepDAOTest extends BaseModuleContextSensitiveTest 
 		newStep.setPerformedProcedureStepStatus("scheduled");
 		newStep.setStationName("CT Room");
 		newStep.setProcedureStepLocation("Radiology");
-		
+
 		requestProcedureStepDao.save(newStep);
-		
+
 		List<RequestProcedureStep> stepList = requestProcedureStepDao.getAllStepByRequestProcedure(procedure);
 		assertEquals(4, stepList.size());
-		
+
 		//		RequestProcedureStep retrieved = requestProcedureStepDao.get(3);
 		//		assertNotNull(retrieved);
 		//		assertEquals("CT Scan Chest New", retrieved.getRequestedProcedureDescription());
 	}
-	
+
 	@Test
 	public void testRemove_shouldDeleteStep() {
 		RequestProcedureStep step = requestProcedureStepDao.get(1);
 		assertNotNull(step);
 		requestProcedureStepDao.remove(step);
-		
+
 		RequestProcedureStep deleted = requestProcedureStepDao.get(1);
 		assertNull(deleted);
-		
+
 		List<RequestProcedureStep> stepList = requestProcedureStepDao.getAll();
 		assertEquals(2, stepList.size());
 	}
-	
+
 	@Test
 	public void testUpdate_shouldUpdateStepData() {
 		RequestProcedureStep step = requestProcedureStepDao.get(1);
 		assertNotNull(step);
-		
+
 		step.setScheduledPerformingPhysician("Physician in station");
 		step.setPerformedProcedureStepStatus("completed");
 		requestProcedureStepDao.update(step);
-		
+
 		RequestProcedureStep updtedStep = requestProcedureStepDao.get(1);
 		assertNotNull(updtedStep);
 		assertEquals("Physician in station", updtedStep.getScheduledPerformingPhysician());

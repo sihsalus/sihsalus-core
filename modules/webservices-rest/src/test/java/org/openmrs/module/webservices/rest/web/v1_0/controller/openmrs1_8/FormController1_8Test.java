@@ -27,9 +27,9 @@ import org.apache.commons.beanutils.PropertyUtils;
  * Tests functionality of {@link FormController}.
  */
 public class FormController1_8Test extends MainResourceControllerTest {
-	
+
 	private FormService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -37,7 +37,7 @@ public class FormController1_8Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "form";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -45,7 +45,7 @@ public class FormController1_8Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_8.FORM_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -53,12 +53,12 @@ public class FormController1_8Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return 1;
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getFormService();
 	}
-	
+
 	@Test
 	public void shouldUnRetireAForm() throws Exception {
 		Form form = service.getFormByUuid(getUuid());
@@ -67,14 +67,14 @@ public class FormController1_8Test extends MainResourceControllerTest {
 		service.saveForm(form);
 		form = service.getFormByUuid(getUuid());
 		assertTrue(form.isRetired());
-		
+
 		String json = "{\"deleted\": \"false\"}";
 		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
-		
+
 		form = service.getFormByUuid(getUuid());
 		assertFalse(form.isRetired());
 		assertEquals("false", PropertyUtils.getProperty(response, "retired").toString());
-		
+
 	}
-	
+
 }

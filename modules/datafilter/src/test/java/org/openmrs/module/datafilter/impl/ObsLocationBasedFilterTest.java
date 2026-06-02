@@ -31,19 +31,19 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ObsLocationBasedFilterTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private ObsService obsService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "encounters.xml");
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "observations.xml");
 	}
-	
+
 	private List<Obs> getObservations() {
 		List<Concept> questions = Collections.singletonList(new Concept(5089));
 		List<Encounter> encounters = new ArrayList<>();
@@ -53,13 +53,13 @@ public class ObsLocationBasedFilterTest extends BaseFilterTest {
 		return obsService.getObservations(null, encounters, questions, null, null, null, null, null, null, null, null,
 		    false);
 	}
-	
+
 	@Test
 	public void getObs_shouldReturnNoObsIfTheUserIsNotGrantedAccessToAnyBasis() {
 		reloginAs("dBeckham", "test");
 		assertEquals(0, getObservations().size());
 	}
-	
+
 	@Test
 	public void getObs_shouldReturnObsBelongingToPatientsAccessibleToTheUser() {
 		reloginAs("dyorke", "test");
@@ -68,7 +68,7 @@ public class ObsLocationBasedFilterTest extends BaseFilterTest {
 		assertEquals(expCount, observations.size());
 		assertTrue(TestUtil.containsId(observations, 1001));
 		assertTrue(TestUtil.containsId(observations, 1002));
-		
+
 		service.grantAccess(Context.getAuthenticatedUser(), new Location(4001));
 		expCount = 3;
 		observations = getObservations();
@@ -77,7 +77,7 @@ public class ObsLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(observations, 1002));
 		assertTrue(TestUtil.containsId(observations, 1003));
 	}
-	
+
 	@Test
 	public void getObs_shouldReturnAllObsIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -88,12 +88,12 @@ public class ObsLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(observations, 1002));
 		assertTrue(TestUtil.containsId(observations, 1003));
 	}
-	
+
 	@Test
 	public void getObs_shouldReturnAllObsIfLocationFilteringIsDisabled() {
 		DataFilterTestUtils.disableLocationFiltering();
 		reloginAs("dyorke", "test");
 		assertEquals(3, getObservations().size());
 	}
-	
+
 }

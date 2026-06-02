@@ -34,93 +34,93 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests functionality of {@link EncounterTypeController}.
  */
 public class EncounterTypeController1_8Test extends MainResourceControllerTest {
-	
+
 	private EncounterService service;
-	
+
 	@Override
 	public String getURI() {
 		return "encountertype";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_8.ENCOUNTER_TYPE_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return service.getAllEncounterTypes(false).size();
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getEncounterService();
 	}
-	
+
 	@Test
 	public void shouldGetAnEncounterTypeByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		EncounterType encounterType = service.getEncounterTypeByUuid(getUuid());
 		assertEquals(encounterType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(encounterType.getName(), PropertyUtils.getProperty(result, "name"));
 		assertEquals(encounterType.getDescription(), PropertyUtils.getProperty(result, "description"));
 	}
-	
+
 	@Test
 	public void shouldGetAEncounterTypeByName() throws Exception {
 		final String name = "Scheduled";
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + name);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		EncounterType encounterType = service.getEncounterType(name);
 		assertEquals(encounterType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(encounterType.getName(), PropertyUtils.getProperty(result, "name"));
 	}
-	
+
 	@Test
 	public void shouldListAllEncounterTypes() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(result);
 		assertEquals(getAllCount(), Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldCreateAEncounterType() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject encounterType = new SimpleObject();
 		encounterType.add("name", "test name");
 		encounterType.add("description", "test description");
-		
+
 		String json = new ObjectMapper().writeValueAsString(encounterType);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newEncounterType = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(newEncounterType, "uuid"));
 		assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldEditingAnEncounterType() throws Exception {
 		final String newName = "updated name";
 		SimpleObject encounterType = new SimpleObject();
 		encounterType.add("name", newName);
-		
+
 		String json = new ObjectMapper().writeValueAsString(encounterType);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
 		req.setContent(json.getBytes());
 		handle(req);
 		assertEquals(newName, service.getEncounterTypeByUuid(getUuid()).getName());
 	}
-	
+
 	@Test
 	public void shouldRetireAEncounterType() throws Exception {
 		assertEquals(false, service.getEncounterTypeByUuid(getUuid()).isRetired());
@@ -132,7 +132,7 @@ public class EncounterTypeController1_8Test extends MainResourceControllerTest {
 		assertEquals(true, service.getEncounterTypeByUuid(getUuid()).isRetired());
 		assertEquals(reason, service.getEncounterTypeByUuid(getUuid()).getRetireReason());
 	}
-	
+
 	@Test
 	public void shouldUnRetireAnEncounterType() throws Exception {
 		EncounterType encounterType = service.getEncounterTypeByUuid(getUuid());
@@ -141,16 +141,16 @@ public class EncounterTypeController1_8Test extends MainResourceControllerTest {
 		service.saveEncounterType(encounterType);
 		encounterType = service.getEncounterTypeByUuid(getUuid());
 		assertTrue(encounterType.isRetired());
-		
+
 		String json = "{\"deleted\": \"false\"}";
 		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
-		
+
 		encounterType = service.getEncounterTypeByUuid(getUuid());
 		assertFalse(encounterType.isRetired());
 		assertEquals("false", PropertyUtils.getProperty(response, "retired").toString());
-		
+
 	}
-	
+
 	@Test
 	public void shouldPurgeAEncounterType() throws Exception {
 		final String uuid = "02c533ab-b74b-4ee4-b6e5-ffb6d09a0ac8";
@@ -160,16 +160,16 @@ public class EncounterTypeController1_8Test extends MainResourceControllerTest {
 		handle(req);
 		assertNull(service.getEncounterTypeByUuid(uuid));
 	}
-	
+
 	@Test
 	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	@Test
 	public void shouldSearchAndReturnAListOfEncounterTypesMatchingTheQueryString() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());

@@ -28,27 +28,27 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class EmrEncounterDAOComponentTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private EmrEncounterDAO emrEncounterDAO;
-	
+
 	@Autowired
 	private ConceptService conceptService;
-	
+
 	@Autowired
 	private PatientService patientService;
-	
+
 	@Autowired
 	private ObsService obsService;
-	
+
 	@Autowired
 	private EncounterService encounterService;
-	
+
 	@BeforeEach
 	public void beforeAllTests() throws Exception {
 		executeDataSet("emrEncounterDAOComponentTestDataset.xml");
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldFetchEncounterByObsTextValue() {
 		Concept concept = conceptService.getConcept(19);
@@ -56,34 +56,34 @@ public class EmrEncounterDAOComponentTest extends BaseModuleContextSensitiveTest
 		assertThat(encounters.size(), is(1));
 		assertThat(encounters.get(0).getId(), is(1000));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldReturnEmptyListIfNoObsWithThatValue() {
 		Concept concept = conceptService.getConcept(19);
 		List<Encounter> encounters = emrEncounterDAO.getEncountersByObsValueText(concept, "some bogus value", null, false);
 		assertThat(encounters.size(), is(0));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldReturnEmptyListIfNoObsWithThatValueForSelectedConcept() {
 		Concept concept = conceptService.getConcept(18); // not the concept that has the PB and J obs
 		List<Encounter> encounters = emrEncounterDAO.getEncountersByObsValueText(concept, "some test value", null, false);
 		assertThat(encounters.size(), is(0));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldFindMatchEvenIfNoConceptSpecified() {
 		List<Encounter> encounters = emrEncounterDAO.getEncountersByObsValueText(null, "some test value", null, false);
 		assertThat(encounters.size(), is(1));
 		assertThat(encounters.get(0).getId(), is(1000));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldIncludeAllObsIfIncludeAllTrue() {
 		List<Encounter> encounters = emrEncounterDAO.getEncountersByObsValueText(null, "some test value", null, true);
 		assertThat(encounters.size(), is(2));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldExcludeEncountersIfNotOfProperType() {
 		EncounterType encounterType = encounterService.getEncounterType(1);
@@ -91,7 +91,7 @@ public class EmrEncounterDAOComponentTest extends BaseModuleContextSensitiveTest
 		    false);
 		assertThat(encounters.size(), is(0));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldIncludeEncountersOfProperType() {
 		EncounterType encounterType = encounterService.getEncounterType(2);
@@ -100,14 +100,14 @@ public class EmrEncounterDAOComponentTest extends BaseModuleContextSensitiveTest
 		assertThat(encounters.size(), is(1));
 		assertThat(encounters.get(0).getId(), is(1000));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldNotReturnTheSameEncounterTwice() {
 		List<Encounter> encounters = emrEncounterDAO.getEncountersByObsValueText(null, "duplicate", null, false);
 		assertThat(encounters.size(), is(1));
 		assertThat(encounters.get(0).getId(), is(1000));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldCorrectlyIncludePatient() {
 		Concept concept = conceptService.getConcept(19);
@@ -117,7 +117,7 @@ public class EmrEncounterDAOComponentTest extends BaseModuleContextSensitiveTest
 		assertThat(encounters.size(), is(1));
 		assertThat(encounters.get(0).getId(), is(1000));
 	}
-	
+
 	@Test
 	public void getEncountersByObsValueText_shouldCorrectlyExcludePatient() {
 		Concept concept = conceptService.getConcept(19);

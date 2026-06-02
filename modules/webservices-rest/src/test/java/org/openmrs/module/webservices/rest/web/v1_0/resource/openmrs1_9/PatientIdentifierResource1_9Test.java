@@ -17,12 +17,12 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class PatientIdentifierResource1_9Test extends BaseDelegatingResourceTest<PatientIdentifierResource1_8, PatientIdentifier> {
-	
+
 	@Override
 	public PatientIdentifier newObject() {
 		return Context.getService(PatientService.class).getPatientIdentifierByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -32,7 +32,7 @@ public class PatientIdentifierResource1_9Test extends BaseDelegatingResourceTest
 		assertPropEquals("preferred", getObject().getPreferred());
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -43,15 +43,15 @@ public class PatientIdentifierResource1_9Test extends BaseDelegatingResourceTest
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "OpenMRS Identification Number = 101-6";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.PATIENT_IDENTIFIER_UUID;
 	}
-	
+
 }

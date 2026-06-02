@@ -28,7 +28,7 @@ public class AddressTemplateController2_0Test extends MainResourceControllerTest
 	public String getURI() {
 		return "addresstemplate";
 	}
-	
+
 	@Test
 	public void shouldGetAddressTemplate() throws Exception {
 		String xml;
@@ -36,18 +36,18 @@ public class AddressTemplateController2_0Test extends MainResourceControllerTest
 			xml = IOUtils.toString(inputStream, "UTF-8");
 		}
 		Context.getAdministrationService().setGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE, xml);
-		
+
 		MockHttpServletRequest req = newGetRequest(getURI());
-		
+
 		SimpleObject result = deserialize(handle(req));
-		
+
 		String json;
 		try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("addressTemplate.json")) {
 			json = IOUtils.toString(inputStream, "UTF-8");
 		}
 		assertThat(result, Matchers.is(SimpleObject.parseJson(json)));
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return null;
@@ -57,24 +57,24 @@ public class AddressTemplateController2_0Test extends MainResourceControllerTest
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	@Override
 	public void shouldGetAll() throws Exception {
-		
+
 	}
-	
+
 	@Override
 	public void shouldGetRefByUuid() throws Exception {
-		
+
 	}
-	
+
 	@Override
 	public void shouldGetDefaultByUuid() throws Exception {
-		
+
 	}
-	
+
 	@Override
 	public void shouldGetFullByUuid() throws Exception {
-		
+
 	}
 }

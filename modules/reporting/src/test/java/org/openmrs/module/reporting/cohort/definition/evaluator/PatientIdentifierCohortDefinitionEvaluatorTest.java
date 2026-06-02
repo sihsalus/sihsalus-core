@@ -28,22 +28,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * Test for the {@link PatientIdentifierCohortDefinitionEvaluator}
  */
 public class PatientIdentifierCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see PatientIdentifierCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)
 	 * @verifies return patients who have identifiers of the passed types
@@ -112,7 +112,7 @@ public class PatientIdentifierCohortDefinitionEvaluatorTest extends BaseModuleCo
 			EvaluatedCohort c = Context.getService(CohortDefinitionService.class).evaluate(picd, new EvaluationContext());
 			Assert.assertEquals(1, c.size());
 			Assert.assertTrue(c.contains(21));
-		}	
+		}
 		{
 			picd.setTextToMatch("%TEST%");
 			EvaluatedCohort c = Context.getService(CohortDefinitionService.class).evaluate(picd, new EvaluationContext());

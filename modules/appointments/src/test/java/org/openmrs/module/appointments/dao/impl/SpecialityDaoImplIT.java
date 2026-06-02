@@ -35,7 +35,7 @@ public class SpecialityDaoImplIT  extends BaseIntegrationTest {
         Speciality speciality = specialities.get(0);
         assertEquals("Ortho", speciality.getName());
     }
-    
+
     @Test
     public void shouldSaveSpeciality() throws Exception {
         List<Speciality> allSpecialities = specialityDao.getAllSpecialities();

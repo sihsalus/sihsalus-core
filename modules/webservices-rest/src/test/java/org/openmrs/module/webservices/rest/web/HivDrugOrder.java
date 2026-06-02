@@ -15,10 +15,10 @@ import org.openmrs.DrugOrder;
  * This is a contrived example for testing purposes
  */
 public class HivDrugOrder extends DrugOrder {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	// just a plain DrugOrder works fine for testing.
 	// We use @PropertySetter and @PropertyGetter in the subclass handler to expose a virtual "standardRegimenCode" property
-	
+
 }

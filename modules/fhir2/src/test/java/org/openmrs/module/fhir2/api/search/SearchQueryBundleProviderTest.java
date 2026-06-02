@@ -40,49 +40,49 @@ import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SearchQueryBundleProviderTest {
-	
+
 	@Mock
 	private ObservationTranslator translator;
-	
+
 	@Mock
 	private FhirObservationDao observationDao;
-	
+
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
-	
+
 	@Mock
 	private SearchQueryInclude<Observation> searchQueryInclude;
-	
+
 	private SearchQueryBundleProvider<Obs, Observation> searchQueryBundleProvider;
-	
+
 	@Before
 	public void setup() {
 		searchQueryBundleProvider = new SearchQueryBundleProvider<>(new SearchParameterMap(), observationDao, translator,
 		        globalPropertyService, searchQueryInclude);
 	}
-	
+
 	@Test
 	public void shouldReturnPreferredPageSize() {
 		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
-		
+
 		assertThat(searchQueryBundleProvider.preferredPageSize(), notNullValue());
 		assertThat(searchQueryBundleProvider.preferredPageSize(), equalTo(10));
 	}
-	
+
 	@Test
 	public void shouldGetDatePublished() {
 		IPrimitiveType<Date> result = searchQueryBundleProvider.getPublished();
 		assertThat(result, notNullValue());
 		assertThat(result.getValue(), DateMatchers.sameDay(new Date()));
 	}
-	
+
 	@Test
 	public void shouldReturnEmptyListWhenNoResults() {
 		when(observationDao.getSearchResults(any())).thenReturn(Collections.emptyList());
 		List<IBaseResource> resources = searchQueryBundleProvider.getResources(0, 10);
 		assertThat(resources, empty());
 	}
-	
+
 	@Test
 	public void shouldReturnDifferentUuid() {
 		assertThat(searchQueryBundleProvider.getUuid(), notNullValue());

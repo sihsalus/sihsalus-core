@@ -16,7 +16,7 @@ import org.openmrs.module.cohort.CohortMemberAttributeType;
 import org.openmrs.module.cohort.CohortType;
 
 public class TestDataUtils {
-	
+
 	public static CohortType COHORT_TYPE() {
 		CohortType cohortType = new CohortType();
 		cohortType.setId(1);
@@ -25,7 +25,7 @@ public class TestDataUtils {
 		cohortType.setDescription("Test cohort description");
 		return cohortType;
 	}
-	
+
 	public static CohortAttributeType COHORT_ATTRIBUTE_TYPE() {
 		CohortAttributeType cohortAttributeType = new CohortAttributeType();
 		cohortAttributeType.setUuid("32816782-d578-401c-8475-8ccbb26ce001");
@@ -35,7 +35,7 @@ public class TestDataUtils {
 		cohortAttributeType.setCohortAttributeTypeId(400);
 		return cohortAttributeType;
 	}
-	
+
 	public static CohortAttribute COHORT_ATTRIBUTE() {
 		CohortAttribute cohortAttribute = new CohortAttribute();
 		cohortAttribute.setId(1);
@@ -45,7 +45,7 @@ public class TestDataUtils {
 		cohortAttribute.setAttributeType(COHORT_ATTRIBUTE_TYPE());
 		return cohortAttribute;
 	}
-	
+
 	public static CohortMemberAttributeType COHORT_MEMBER_ATTRIBUTE_TYPE() {
 		CohortMemberAttributeType cohortMemberAttributeType = new CohortMemberAttributeType();
 		cohortMemberAttributeType.setId(1);
@@ -55,7 +55,7 @@ public class TestDataUtils {
 		cohortMemberAttributeType.setDatatypeClassname("java.lang.String");
 		return cohortMemberAttributeType;
 	}
-	
+
 	public static CohortMemberAttribute COHORT_MEMBER_ATTRIBUTE() {
 		CohortMemberAttribute cohortMemberAttribute = new CohortMemberAttribute();
 		cohortMemberAttribute.setId(1);

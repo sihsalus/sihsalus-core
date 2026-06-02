@@ -41,7 +41,7 @@ public class TestUtil {
 		String xml = Context.getSerializationService().serialize(object, XStreamSerializer.class);
 		Object deserializedObject = Context.getSerializationService().deserialize(xml, object.getClass(),
 			    XStreamSerializer.class);
-		
+
 		List<Field> fields = Reflect.getAllFields(object.getClass());
 		for (Field field : fields) {
 			Assert.assertEquals(field.get(object), field.get(deserializedObject));

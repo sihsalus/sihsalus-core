@@ -19,7 +19,7 @@ import org.openmrs.module.reporting.common.DateUtil;
 import org.openmrs.module.reporting.data.converter.DateConverter;
 
 public class DateConverterTest {
-	
+
 	/**
 	 * @see DateConverter#convert(Object)
 	 * @verifies convert a Date into a String with the passed format

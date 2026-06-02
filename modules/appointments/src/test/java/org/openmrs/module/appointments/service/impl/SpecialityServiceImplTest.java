@@ -70,7 +70,7 @@ public class SpecialityServiceImplTest {
         assertEquals(new Integer(1), specialities.get(0).getId());
         assertEquals(creator, specialities.get(0).getCreator());
     }
-    
+
     @Test
     public void shouldCreateSpeciality() throws Exception {
        Speciality speciality = new Speciality();

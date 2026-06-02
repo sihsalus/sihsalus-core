@@ -94,7 +94,7 @@ public class EncounterSearchHandler2_0Test extends RestControllerTestUtils {
     /**
      * @verifies returns encounters and totalCount filtered by patient uuid and limit
      * i.e. (limit 1, results size should not be the same as totalCount). Same as
-     * previous test, but invokes the default SearchHandler explicitly via the URI. 
+     * previous test, but invokes the default SearchHandler explicitly via the URI.
      *
      * @see EncounterSearchHandler2_0#search(RequestContext)
      * @throws Exception

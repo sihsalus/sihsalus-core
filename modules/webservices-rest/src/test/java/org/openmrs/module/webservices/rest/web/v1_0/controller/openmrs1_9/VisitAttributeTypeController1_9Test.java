@@ -32,9 +32,9 @@ import jakarta.servlet.http.HttpServletResponse;
  * Contains tests for {@link VisitAttributeTypeController} CRUD operations
  */
 public class VisitAttributeTypeController1_9Test extends MainResourceControllerTest {
-	
+
 	private VisitService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -42,7 +42,7 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 	public String getURI() {
 		return "visitattributetype";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -50,7 +50,7 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 	public String getUuid() {
 		return RestTestConstants1_9.VISIT_ATTRIBUTE_TYPE_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -64,13 +64,13 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 		}
 		return count;
 	}
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		service = Context.getVisitService();
 		executeDataSet(RestTestConstants1_9.TEST_DATASET);
 	}
-	
+
 	/**
 	 * @see VisitAttributeTypeController#create(SimpleObject, jakarta.servlet.http.HttpServletRequest,
 	 *      HttpServletResponse)
@@ -79,12 +79,12 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 	public void create_shouldCreateANewVisitAttributeType() throws Exception {
 		int before = service.getAllVisitAttributeTypes().size();
 		String json = "{ \"name\":\"Some attributeType\",\"description\":\"Attribute Type for visit\",\"datatypeClassname\":\"org.openmrs.customdatatype.datatype.FreeTextDatatype\"}";
-		
+
 		handle(newPostRequest(getURI(), json));
-		
+
 		Assertions.assertEquals(before + 1, service.getAllVisitAttributeTypes().size());
 	}
-	
+
 	/**
 	 * @see VisitAttributeTypeController#update(String, SimpleObject,
 	 *      jakarta.servlet.http.HttpServletRequest, HttpServletResponse)
@@ -92,12 +92,12 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 	@Test
 	public void update_shouldChangeAPropertyOnAVisitAttributeType() throws Exception {
 		String json = "{\"description\":\"Updated description\"}";
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
-		
+
 		Assertions.assertEquals("Updated description", service.getVisitAttributeType(1).getDescription());
 	}
-	
+
 	/**
 	 * @see VisitAttributeTypeController#delete(String, String,
 	 *      jakarta.servlet.http.HttpServletRequest, HttpServletResponse)
@@ -106,14 +106,14 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 	public void delete_shouldRetireAVisitAttributeType() throws Exception {
 		VisitAttributeType visitAttributeType = service.getVisitAttributeType(1);
 		Assertions.assertFalse(visitAttributeType.isRetired());
-		
+
 		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("reason", "test")));
-		
+
 		visitAttributeType = service.getVisitAttributeType(1);
 		Assertions.assertTrue(visitAttributeType.isRetired());
 		Assertions.assertEquals("test", visitAttributeType.getRetireReason());
 	}
-	
+
 	/**
 	 * @see VisitAttributeTypeController#getAll(jakarta.servlet.http.HttpServletRequest,
 	 *      HttpServletResponse)
@@ -122,10 +122,10 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 	public void getAll_shouldGellVisitAttributeTypesIfIncludeAllIsSetToTrue() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter(
 		        RestConstants.REQUEST_PROPERTY_FOR_INCLUDE_ALL, "true"))));
-		
+
 		Assertions.assertEquals(5, Util.getResultsSize(result));
 	}
-	
+
 	/**
 	 * @see VisitAttributeTypeController#search(String, jakarta.servlet.http.HttpServletRequest,
 	 *      HttpServletResponse)
@@ -133,10 +133,10 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 	@Test
 	public void search_shouldFindMatchingVisitAttributeTypesExcludingRetiredOnes() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("q", "date"))));
-		
+
 		Assertions.assertEquals(2, Util.getResultsSize(result));
 	}
-	
+
 	/**
 	 * @see VisitAttributeTypeController#search(String, jakarta.servlet.http.HttpServletRequest,
 	 *      HttpServletResponse)
@@ -145,10 +145,10 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 	public void search_shouldFindAllMatchingVisitAttributeTypesIfIncludeAllIsSetToTrue() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("q", "date"), new Parameter(
 		        RestConstants.REQUEST_PROPERTY_FOR_INCLUDE_ALL, "true"))));
-		
+
 		Assertions.assertEquals(3, Util.getResultsSize(result));
 	}
-	
+
 	/**
 	 * @See {@link VisitAttributeTypeController#purge(String, jakarta.servlet.http.HttpServletRequest, HttpServletResponse)}
 	 */
@@ -157,18 +157,18 @@ public class VisitAttributeTypeController1_9Test extends MainResourceControllerT
 		final String visitAttributeTypeUuid = "6770f6d6-7673-11e0-8f03-001e378eb67g";
 		Assertions.assertNotNull(service.getVisitAttributeTypeByUuid(visitAttributeTypeUuid));
 		int originalCount = service.getAllVisitAttributeTypes().size();
-		
+
 		handle(newDeleteRequest(getURI() + "/" + visitAttributeTypeUuid, new Parameter("purge", "true")));
-		
+
 		Assertions.assertNull(service.getVisitAttributeTypeByUuid(visitAttributeTypeUuid));
 		Assertions.assertEquals(originalCount - 1, service.getAllVisitAttributeTypes().size());
 	}
-	
+
 	@Test
 	public void shouldGetAVisitAttributeTypeByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		VisitAttributeType visitAttributeType = service.getVisitAttributeTypeByUuid(getUuid());
 		assertEquals(visitAttributeType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(visitAttributeType.getName(), PropertyUtils.getProperty(result, "name"));

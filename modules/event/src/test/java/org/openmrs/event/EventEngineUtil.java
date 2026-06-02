@@ -17,11 +17,11 @@ package org.openmrs.event;
  * Gives access to the {@link Event} implementation.
  */
 public class EventEngineUtil {
-	
+
 	public static void setEventEngine(EventEngine eventEngine) {
 		Event.eventEngine = eventEngine;
 	}
-	
+
 	public static EventEngine getEventEngine() {
 		return Event.eventEngine;
 	}

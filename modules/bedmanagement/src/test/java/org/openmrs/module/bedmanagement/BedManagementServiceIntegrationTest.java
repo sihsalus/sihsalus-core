@@ -24,43 +24,43 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class BedManagementServiceIntegrationTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private BedManagementService bedManagementService;
-	
+
 	private int bedIdFromDataSetup = 11;
-	
+
 	@Before
 	public void beforeAllTests() throws Exception {
 		executeDataSet("testPatientsDataset.xml");
 		executeDataSet("bedManagementDAOComponentTestDataset.xml");
 	}
-	
+
 	@Test
 	public void getAllLocationsBy_gets_locations_for_a_tag() {
 		List<AdmissionLocation> admissionLocationList = bedManagementService.getAdmissionLocations();
 		assertThat(admissionLocationList.size(), is(3));
-		
+
 		AdmissionLocation cardioWard = getWard(admissionLocationList, "Cardio ward on first floor");
 		Assert.assertEquals(10, cardioWard.getTotalBeds());
 		Assert.assertEquals(1, cardioWard.getOccupiedBeds());
-		
+
 		AdmissionLocation orthoWard = getWard(admissionLocationList, "Orthopaedic ward");
 		Assert.assertEquals(6, orthoWard.getTotalBeds());
 		Assert.assertEquals(2, orthoWard.getOccupiedBeds());
 	}
-	
+
 	@Test
 	public void getBedsForWard_gets_all_bed_layouts_for_ward() {
 		LocationService locationService = Context.getLocationService();
-		
+
 		Location ward = locationService.getLocationByUuid("19e023e8-20ee-4237-ade6-9e68f897b7a9");
 		AdmissionLocation admissionLocation = bedManagementService.getAdmissionLocationByLocation(ward);
-		
+
 		assertEquals(6, admissionLocation.getBedLayouts().size());
 		assertEquals("Physical Location for Orthopaedic ward", admissionLocation.getBedLayouts().get(0).getLocation());
 	}
-	
+
 	private AdmissionLocation getWard(List<AdmissionLocation> admissionLocationList, String wardName) {
 		for (AdmissionLocation admissionLocation : admissionLocationList) {
 			if (admissionLocation.getWard().getName().equals(wardName))
@@ -68,23 +68,23 @@ public class BedManagementServiceIntegrationTest extends BaseModuleContextSensit
 		}
 		return null;
 	}
-	
+
 	@Test
 	public void shouldReturnBedAssignmentDetailsByPatient() {
 		PatientService patientService = Context.getPatientService();
 		Patient patient = patientService.getPatient(3);
-		
+
 		LocationService locationService = Context.getLocationService();
 		Location ward = locationService.getLocation(123452);
 		String bedNumFromDataSetup = "307-a";
-		
+
 		BedDetails bedDetails = bedManagementService.getBedAssignmentDetailsByPatient(patient);
 		assertEquals(ward.getId(), bedDetails.getPhysicalLocation().getId());
 		assertEquals(bedIdFromDataSetup, bedDetails.getBedId());
 		assertEquals(bedNumFromDataSetup, bedDetails.getBedNumber());
-		
+
 	}
-	
+
 	@Test
 	public void shouldReturnEmptyBedAssignmentDetailsForNewPatient() {
 		PatientService patientService = Context.getPatientService();
@@ -92,7 +92,7 @@ public class BedManagementServiceIntegrationTest extends BaseModuleContextSensit
 		BedDetails bedDetails = bedManagementService.getBedAssignmentDetailsByPatient(patient);
 		assertEquals(null, bedDetails);
 	}
-	
+
 	@Test
 	public void shouldGetBedDetailsById() {
 		int deluxeBedId = 1;
@@ -102,26 +102,26 @@ public class BedManagementServiceIntegrationTest extends BaseModuleContextSensit
 		assertNotNull(details.getCurrentAssignments());
 		assertEquals("deluxe", details.getBedType().getName());
 	}
-	
+
 	@Test
 	public void shouldAssignUnassignExistingPatientFromBed() throws Exception {
 		int bedId = 9;
 		PatientService patientService = Context.getPatientService();
 		Patient patient = patientService.getPatient(3);
-		
+
 		EncounterService encounterService = Context.getEncounterService();
 		List<Encounter> encountersByPatient = encounterService.getEncountersByPatient(patient);
-		
+
 		BedDetails bedDetails = bedManagementService.getBedAssignmentDetailsByPatient(patient);
 		assertNotNull(bedDetails);
 		Assert.assertEquals(11, bedDetails.getBedId());
-		
+
 		bedManagementService.assignPatientToBed(patient, encountersByPatient.get(0), String.valueOf(bedId));
-		
+
 		bedDetails = bedManagementService.getBedAssignmentDetailsByPatient(patient);
 		assertEquals(bedId, bedDetails.getBedId());
 	}
-	
+
 	@Test
 	public void shouldUnAssingPatientFromBed() throws Exception {
 		PatientService patientService = Context.getPatientService();
@@ -133,7 +133,7 @@ public class BedManagementServiceIntegrationTest extends BaseModuleContextSensit
 		bedDetails = bedManagementService.getBedAssignmentDetailsByPatient(patient);
 		assertNull(bedDetails);
 	}
-	
+
 	@Test
 	public void shouldAssignPatientToBed() throws Exception {
 		PatientService patientService = Context.getPatientService();

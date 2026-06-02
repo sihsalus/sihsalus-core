@@ -35,7 +35,7 @@ public class AddressConfigurationLoaderTest {
 	@Test
 	public void should_readFromString() throws Exception {
 		AddressConfiguration expectedConfig = getAddressConfiguration();
-		
+
 		String serialized = IOUtils.toString(OpenmrsClassLoader.getInstance().getResourceAsStream(CONFIG_RESOURCE), "UTF-8");
 		AddressConfiguration actualConfig = AddressConfigurationLoader.readFromString(serialized);
 		Assert.assertEquals(expectedConfig, actualConfig);

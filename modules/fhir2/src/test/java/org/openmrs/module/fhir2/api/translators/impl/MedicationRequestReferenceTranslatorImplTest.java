@@ -29,20 +29,20 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestReferenceTranslatorImplTest {
-	
+
 	private static final String DRUG_ORDER_UUID = "12345-abcde-12345";
-	
+
 	@Mock
 	private FhirMedicationRequestDao dao;
-	
+
 	private MedicationRequestReferenceTranslatorImpl translator;
-	
+
 	@Before
 	public void setup() {
 		translator = new MedicationRequestReferenceTranslatorImpl();
 		translator.setMedicationRequestDao(dao);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertDrugOrderToReference() {
 		DrugOrder drugOrder = new DrugOrder();
@@ -52,13 +52,13 @@ public class MedicationRequestReferenceTranslatorImplTest {
 		assertThat(result.getType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(getReferenceId(result).orElse(null), equalTo(DRUG_ORDER_UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfDrugOrderNull() {
 		Reference result = translator.toFhirResource(null);
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldConvertReferenceToDrugOrder() {
 		Reference ref = new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + DRUG_ORDER_UUID)
@@ -66,18 +66,18 @@ public class MedicationRequestReferenceTranslatorImplTest {
 		DrugOrder drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
 		when(dao.get(DRUG_ORDER_UUID)).thenReturn(drugOrder);
-		
+
 		DrugOrder result = translator.toOpenmrsType(ref);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(DRUG_ORDER_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
 		DrugOrder result = translator.toOpenmrsType(null);
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceHasNoIdentifier() {
 		Reference ref = new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + DRUG_ORDER_UUID)
@@ -85,16 +85,16 @@ public class MedicationRequestReferenceTranslatorImplTest {
 		DrugOrder result = translator.toOpenmrsType(ref);
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfDrugOrderIdentifierHasNoValue() {
 		Reference ref = new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + DRUG_ORDER_UUID)
 		        .setType(FhirConstants.MEDICATION_REQUEST).setIdentifier(new Identifier());
-		
+
 		DrugOrder result = translator.toOpenmrsType(ref);
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsntForMedicationRequest() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + DRUG_ORDER_UUID).setType("Unknown");

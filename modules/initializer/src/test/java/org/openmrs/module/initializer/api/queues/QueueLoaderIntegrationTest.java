@@ -19,22 +19,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class QueueLoaderIntegrationTest extends DomainBaseModuleContextSensitive_2_3_Test {
-	
+
 	@Autowired
 	@Qualifier("queue.QueueService")
 	private QueueService queueService;
-	
+
 	@Autowired
 	private QueueLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-queues.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() throws Exception {
-		
+
 		// Initial Queue
 		{
 			Queue queue = queueService.getQueueByUuid("2a0e0eee-6888-11ee-ab8d-0242ac120002").orElse(null);
@@ -44,9 +44,9 @@ public class QueueLoaderIntegrationTest extends DomainBaseModuleContextSensitive
 			Assert.assertEquals(2001, queue.getService().getConceptId().intValue());
 			Assert.assertEquals(1, queue.getLocation().getLocationId().intValue());
 		}
-		
+
 		loader.load();
-		
+
 		// Revised Queue
 		{
 			Queue queue = queueService.getQueueByUuid("2a0e0eee-6888-11ee-ab8d-0242ac120002").orElse(null);

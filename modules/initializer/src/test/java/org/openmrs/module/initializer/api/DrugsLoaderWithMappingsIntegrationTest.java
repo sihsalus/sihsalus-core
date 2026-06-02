@@ -26,17 +26,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class DrugsLoaderWithMappingsIntegrationTest extends DomainBaseModuleContextSensitive_2_3_Test {
-	
+
 	@Autowired
 	@Qualifier("conceptService")
 	private ConceptService cs;
-	
+
 	@Autowired
 	private DrugsLoader loader;
-	
+
 	@Before
 	public void setup() {
-		
+
 		// A concept to be used as 'dosage form'
 		{
 			Concept c = new Concept();
@@ -81,7 +81,7 @@ public class DrugsLoaderWithMappingsIntegrationTest extends DomainBaseModuleCont
 			c.setConceptClass(cs.getConceptClassByName("Drug"));
 			c.setDatatype(cs.getConceptDatatypeByName("Text"));
 			c = cs.saveConcept(c);
-			
+
 			Drug d = new Drug();
 			d.setUuid("2bcf7212-d218-4572-8893-25c4b5b71934");
 			d.setName("Metronidazole 500mg Tablet");
@@ -94,7 +94,7 @@ public class DrugsLoaderWithMappingsIntegrationTest extends DomainBaseModuleCont
 			c.setConceptClass(cs.getConceptClassByName("Drug"));
 			c.setDatatype(cs.getConceptDatatypeByName("Text"));
 			c = cs.saveConcept(c);
-			
+
 			Drug d = new Drug();
 			d.setUuid("42f010f8-26fe-102b-80cb-0017a47871b2");
 			d.setName("d4T 30");
@@ -116,13 +116,13 @@ public class DrugsLoaderWithMappingsIntegrationTest extends DomainBaseModuleCont
 			cs.saveConceptSource(source);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadDrugsAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// a vanilla drug
 		{
 			Drug d = cs.getDrug("Cetirizine 10mg Tablet");
@@ -131,7 +131,7 @@ public class DrugsLoaderWithMappingsIntegrationTest extends DomainBaseModuleCont
 			Assert.assertEquals(cs.getConceptByName("Tablet"), d.getDosageForm());
 			assertMappings(d, "SAME-AS:CS1:M1");
 		}
-		
+
 		// a drug without dosage form
 		{
 			Drug d = cs.getDrug("Erythromycine 500mg Tablet");
@@ -140,7 +140,7 @@ public class DrugsLoaderWithMappingsIntegrationTest extends DomainBaseModuleCont
 			Assert.assertNull(d.getDosageForm());
 			assertMappings(d, "SAME-AS:CS1:M2", "SAME-AS:CS1:M3");
 		}
-		
+
 		// an edited drug
 		{
 			Drug d = cs.getDrug("Metronidazole 500mg Tablet");
@@ -175,7 +175,7 @@ public class DrugsLoaderWithMappingsIntegrationTest extends DomainBaseModuleCont
 			assertMappings(d, "SAME-AS:CS1:M7", "SAME-AS:CS1:M8");
 		}
 	}
-	
+
 	protected void assertMappings(Drug d, String... mappings) {
 		Assert.assertEquals(d.getDrugReferenceMaps().size(), mappings.length);
 		for (String mapping : mappings) {

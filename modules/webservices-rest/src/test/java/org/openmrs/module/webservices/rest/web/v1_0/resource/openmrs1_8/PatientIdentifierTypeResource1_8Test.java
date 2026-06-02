@@ -16,12 +16,12 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class PatientIdentifierTypeResource1_8Test extends BaseDelegatingResourceTest<PatientIdentifierTypeResource1_8, PatientIdentifierType> {
-	
+
 	@Override
 	public PatientIdentifierType newObject() {
 		return Context.getService(PatientService.class).getPatientIdentifierTypeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -34,7 +34,7 @@ public class PatientIdentifierTypeResource1_8Test extends BaseDelegatingResource
 		assertPropPresent("locationBehavior");
 		assertPropEquals("retired", getObject().getRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -48,12 +48,12 @@ public class PatientIdentifierTypeResource1_8Test extends BaseDelegatingResource
 		assertPropEquals("retired", getObject().getRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "OpenMRS Identification Number";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.PATIENT_IDENTIFIER_TYPE_UUID;

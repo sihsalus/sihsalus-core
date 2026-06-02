@@ -34,55 +34,55 @@ import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterParticipantTranslatorImplTest {
-	
+
 	private static final String PROVIDER_UUID = "122344-234xx23-2323kk-232k2h2";
-	
+
 	private static final String PROVIDER_URI = FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID;
-	
+
 	@Mock
 	private FhirPractitionerDao practitionerDao;
-	
+
 	@Mock
 	private EncounterService encounterService;
-	
+
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
-	
+
 	private EncounterParticipantTranslatorImpl participantTranslator;
-	
+
 	private EncounterProvider encounterProvider;
-	
+
 	private Encounter.EncounterParticipantComponent encounterParticipantComponent;
-	
+
 	private Provider provider;
-	
+
 	@Before
 	public void setUp() {
 		participantTranslator = new EncounterParticipantTranslatorImpl();
 		participantTranslator.setPractitionerDao(practitionerDao);
 		participantTranslator.setGlobalPropertyService(globalPropertyService);
-		
+
 		encounterProvider = new EncounterProvider();
 		provider = new Provider();
 		provider.setUuid(PROVIDER_UUID);
 		encounterProvider.setProvider(provider);
 		participantTranslator.setEncounterService(encounterService);
-		
+
 		encounterParticipantComponent = new Encounter.EncounterParticipantComponent();
 		Reference reference = new Reference(PROVIDER_URI);
 		encounterParticipantComponent.setIndividual(reference);
-		
+
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PROVIDER_UUID);
 	}
-	
+
 	@Test
 	public void shouldTranslateEncounterProviderToFhirType() {
 		Encounter.EncounterParticipantComponent result = participantTranslator.toFhirResource(encounterProvider);
 		assertThat(result, notNullValue());
 		assertThat(result.hasIndividual(), is(true));
 	}
-	
+
 	@Test
 	public void shouldTranslateEncounterProviderToFhirTypeWithCorrectIndividualReference() {
 		Encounter.EncounterParticipantComponent result = participantTranslator.toFhirResource(encounterProvider);
@@ -90,7 +90,7 @@ public class EncounterParticipantTranslatorImplTest {
 		assertThat(result.getIndividual(), notNullValue());
 		assertThat(result.getIndividual().getReference(), equalTo(PROVIDER_URI));
 	}
-	
+
 	@Test
 	public void shouldTranslateEncounterParticipantToOpenMrsType() {
 		when(encounterService.getEncounterRoleByUuid(EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID))
@@ -99,26 +99,26 @@ public class EncounterParticipantTranslatorImplTest {
 		    encounterParticipantComponent);
 		assertThat(encounterProvider, notNullValue());
 	}
-	
+
 	@Test
 	public void shouldTranslateEncounterParticipantToEncounterProviderWithCorrectProvider() {
 		when(practitionerDao.get(PROVIDER_UUID)).thenReturn(provider);
 		when(encounterService.getEncounterRoleByUuid(EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID))
 		        .thenReturn(new EncounterRole());
-		
+
 		EncounterProvider encounterProvider = participantTranslator.toOpenmrsType(new EncounterProvider(),
 		    encounterParticipantComponent);
-		
+
 		assertThat(encounterProvider, notNullValue());
 		assertThat(encounterProvider.getProvider(), notNullValue());
 		assertThat(encounterProvider.getProvider().getUuid(), equalTo(PROVIDER_UUID));
 	}
-	
+
 	@Test(expected = NullPointerException.class)
 	public void shouldThrowExceptionWhenEncounterParticipantIsNull() {
 		participantTranslator.toOpenmrsType(new EncounterProvider(), null);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldThrowExceptionWhenUnknownRoleIsNull() {
 		assertThrows(IllegalStateException.class,

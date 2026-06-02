@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 public class PatientProfileResourceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private PatientProfileResource resource;
-	
+
 	@Before
 	public void beforeEachTests() throws Exception {
 		resource = (PatientProfileResource) Context.getService(RestService.class)
@@ -38,7 +38,7 @@ public class PatientProfileResourceTest extends BaseModuleWebContextSensitiveTes
 		File personImageDirectory = new File(OpenmrsUtil.getApplicationDataDirectory() + "/person_images");
 		personImageDirectory.mkdirs();
 	}
-	
+
 	@Test
 	public void shouldCreatePatient() throws Exception {
 		SimpleObject patientProfileCreateObject = new SimpleObject();
@@ -53,7 +53,7 @@ public class PatientProfileResourceTest extends BaseModuleWebContextSensitiveTes
 		Assert.assertEquals("6d9002ea-a96b-4889-af78-82d48c57a110",
 		    ((Map) (((Map) relationships.get(0)).get("relationshipType"))).get("uuid"));
 	}
-	
+
 	@Test
 	public void shouldUpdatePatient() throws Exception {
 		SimpleObject patientProfileUpdateObject = new SimpleObject();
@@ -63,5 +63,5 @@ public class PatientProfileResourceTest extends BaseModuleWebContextSensitiveTes
 		    patientProfileUpdateObject, new RequestContext());
 		Assert.assertEquals("101-6 - dull skull", ((Map) created.get("patient")).get("display"));
 	}
-	
+
 }

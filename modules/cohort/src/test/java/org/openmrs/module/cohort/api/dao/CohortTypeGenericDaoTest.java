@@ -29,50 +29,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class CohortTypeGenericDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String COHORT_TYPE_INITIAL_TEST_DATA_XML = "org/openmrs/module/cohort/api/hibernate/db/CohortTypeDaoTest_initialTestData.xml";
-	
+
 	private static final String COHORT_TYPE_UUID = "94517bf9-d8d7-4726-b4f1-a2dff6b36e2d";
-	
+
 	private static final int COHORT_TYPE_ID = 101;
-	
+
 	private static final String COHORT_TYPE_NAME = "cohort type name";
-	
+
 	@Autowired
 	@Qualifier("cohortTypeDao")
 	private GenericDao<CohortType> dao;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(COHORT_TYPE_INITIAL_TEST_DATA_XML);
 	}
-	
+
 	@Test
 	public void shouldFindCohortTypeByID() {
 		CohortType cohortType = dao
 		        .findByUniqueProp(PropValue.builder().property("cohortTypeId").value(COHORT_TYPE_ID).build());
 		assertThat(cohortType, notNullValue());
 		assertThat(cohortType.getCohortTypeId(), equalTo(COHORT_TYPE_ID));
-		
+
 	}
-	
+
 	@Test
 	public void shouldFindCohortTypeByUuid() {
 		CohortType cohortType = dao.get(COHORT_TYPE_UUID);
 		assertThat(cohortType, notNullValue());
 		assertThat(cohortType.getUuid(), equalTo(COHORT_TYPE_UUID));
-		
+
 	}
-	
+
 	@Test
 	public void shouldFindCohortTypeByName() {
 		CohortType cohortType = dao.findByUniqueProp(PropValue.builder().property("name").value(COHORT_TYPE_NAME).build());
 		assertThat(cohortType, notNullValue());
 		assertThat(cohortType.getUuid(), equalTo(COHORT_TYPE_UUID));
 		assertThat(cohortType.getName(), equalTo(COHORT_TYPE_NAME));
-		
+
 	}
-	
+
 	@Test
 	public void shouldVoidCohortType() {
 		CohortType cohortType = dao.get(COHORT_TYPE_UUID);
@@ -82,7 +82,7 @@ public class CohortTypeGenericDaoTest extends BaseModuleContextSensitiveTest {
 		CohortType voidedCohortType = dao.get(COHORT_TYPE_UUID);
 		assertThat(voidedCohortType, nullValue());
 	}
-	
+
 	@Test
 	public void shouldPurgeCohortType() {
 		CohortType cohortType = dao.get(COHORT_TYPE_UUID);
@@ -91,7 +91,7 @@ public class CohortTypeGenericDaoTest extends BaseModuleContextSensitiveTest {
 		CohortType afterAttemptPurge = dao.get(COHORT_TYPE_UUID);
 		assertNull(afterAttemptPurge);
 	}
-	
+
 	@Test(expected = PersistenceException.class)
 	public void shouldThrowExceptionForPurgeCohortType() {
 		CohortType cohortType = dao.get("94517bf9-d9d6-4726-b4f1-a2dff6b36e2d");
@@ -99,5 +99,5 @@ public class CohortTypeGenericDaoTest extends BaseModuleContextSensitiveTest {
 		dao.delete(cohortType);
 		Context.flushSession();
 	}
-	
+
 }

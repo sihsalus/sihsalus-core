@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Tests unitarios para FuaServiceImpl 
+ * Tests unitarios para FuaServiceImpl
  *
  * Se utiliza un "InMemoryFuaDao" que extiende FuaDao y sobreescribe los métodos
  * necesarios para verificar el comportamiento del servicio sin tocar base de datos
@@ -29,7 +29,7 @@ public class FuaServiceTest {
     public void setUp() {
         inMemoryDao = new InMemoryFuaDao();
         fuaService = new FuaServiceImpl();
-        fuaService.setDao(inMemoryDao); 
+        fuaService.setDao(inMemoryDao);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class FuaServiceTest {
         Integer fuaId = 123;
         FuaEstado nuevoEstado = new FuaEstado();
 
-        inMemoryDao.fuaToReturn = null; 
+        inMemoryDao.fuaToReturn = null;
 
         // when
         fuaService.updateEstadoFua(fuaId, nuevoEstado);
@@ -89,7 +89,7 @@ public class FuaServiceTest {
     public void updateEstadoFua_shouldThrowIfNuevoEstadoIsNull() {
         // given
         Integer fuaId = 10;
-        inMemoryDao.fuaToReturn = new Fua(); 
+        inMemoryDao.fuaToReturn = new Fua();
 
         // when
         fuaService.updateEstadoFua(fuaId, null);
@@ -185,7 +185,7 @@ public class FuaServiceTest {
     }
 
 
-    
+
     private static class InMemoryFuaDao extends FuaDao {
 
         // Campos para inspeccionar luego en los asserts

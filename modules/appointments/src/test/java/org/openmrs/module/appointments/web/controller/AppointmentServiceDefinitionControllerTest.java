@@ -97,24 +97,24 @@ public class AppointmentServiceDefinitionControllerTest {
         List<AppointmentServiceDefinition> appointmentServiceDefinitionList = new ArrayList<>();
         appointmentServiceDefinitionList.add(appointmentServiceDefinition);
         when(appointmentServiceDefinitionService.getAllAppointmentServices(false)).thenReturn(appointmentServiceDefinitionList);
-        
+
         appointmentServiceController.getAllAppointmentServices();
         verify(appointmentServiceDefinitionService, times(1)).getAllAppointmentServices(false);
         verify(appointmentServiceMapper, times(1)).constructDefaultResponseForServiceList(appointmentServiceDefinitionList);
     }
-    
+
     @Test
     public void shouldGetAppointmentServiceByUUID() throws Exception {
         String uuid = "c36006d4-9fbb-4f20-866b-0ece245615b1";
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         appointmentServiceDefinition.setUuid(uuid);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(uuid)).thenReturn(appointmentServiceDefinition);
-        
+
         appointmentServiceController.getAppointmentServiceByUuid(uuid);
         verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(uuid);
         verify(appointmentServiceMapper, times(1)).constructResponse(appointmentServiceDefinition);
     }
-    
+
     @Test(expected = RuntimeException.class)
     public void shouldThrowExceptionIfServiceNotFound() throws Exception {
         appointmentServiceController.getAppointmentServiceByUuid("random");

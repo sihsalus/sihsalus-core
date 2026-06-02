@@ -28,17 +28,17 @@ import java.util.Map;
 import org.openmrs.Concept;
 
 public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	private static final Locale LOCALE_SW = new Locale("sw");
-	
+
 	private static final Locale LOCALE_HT = new Locale("ht");
-	
+
 	@Autowired
 	private OpenConceptLabLoader loader;
-	
+
 	@Autowired
 	private ConceptService conceptService;
-	
+
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void setupDaemonToken() {
@@ -51,23 +51,23 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		DaemonToken daemonToken = new DaemonToken("openconceptlab");
 		daemonTokens.put(daemonToken.getId(), daemonToken);
 		new OpenConceptLabActivator().setDaemonToken(daemonToken);
 	}
-	
+
 	@After
 	public void deleteAllData() throws Exception {
 		// this is necessary or else future test cases will fail because of two sources named CIEL
 		super.deleteAllData();
 	}
-	
+
 	@Test
 	public void load_shouldImportOCLPackages() {
-		// Replay        
+		// Replay
 		loader.load();
-		
+
 		// Verify by UUID
 		{
 			Concept c = conceptService.getConceptByUuid("1419AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -81,7 +81,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Finding", c.getConceptClass().getName());
 			Assert.assertEquals("Text", c.getDatatype().getName());
 		}
-		
+
 		// Verify by UUID
 		{
 			Concept c = conceptService.getConceptByUuid("163100AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -94,7 +94,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Question", c.getConceptClass().getName());
 			Assert.assertEquals("Coded", c.getDatatype().getName());
 		}
-		
+
 		// Verify by UUID
 		{
 			Context.setLocale(Locale.ENGLISH);
@@ -105,7 +105,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Procedure", c.getConceptClass().getName());
 			Assert.assertEquals("N/A", c.getDatatype().getName());
 		}
-		
+
 		// Verify by name
 		{
 			Context.setLocale(Locale.ENGLISH);
@@ -120,7 +120,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Finding", c.getConceptClass().getName());
 			Assert.assertEquals("Text", c.getDatatype().getName());
 		}
-		
+
 		// Verify by name
 		{
 			Context.setLocale(Locale.ENGLISH);
@@ -134,7 +134,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Question", c.getConceptClass().getName());
 			Assert.assertEquals("Coded", c.getDatatype().getName());
 		}
-		
+
 		// Verify by Mapping
 		{
 			Concept c = conceptService.getConceptByMapping("1419", "CIEL");
@@ -148,7 +148,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Finding", c.getConceptClass().getName());
 			Assert.assertEquals("Text", c.getDatatype().getName());
 		}
-		
+
 		// Verify by Mapping
 		{
 			Concept c = conceptService.getConceptByMapping("163100", "CIEL");
@@ -161,7 +161,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Question", c.getConceptClass().getName());
 			Assert.assertEquals("Coded", c.getDatatype().getName());
 		}
-		
+
 		// Verify by Mapping
 		{
 			Concept c = conceptService.getConceptByMapping("166011", "CIEL");
@@ -173,7 +173,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Question", c.getConceptClass().getName());
 			Assert.assertEquals("Text", c.getDatatype().getName());
 		}
-		
+
 		// Verify in another locale
 		{
 			Context.setLocale(Locale.FRENCH);
@@ -183,7 +183,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Finding", c.getConceptClass().getName());
 			Assert.assertEquals("Text", c.getDatatype().getName());
 		}
-		
+
 		// Verify just one name is enough
 		{
 			Context.setLocale(Locale.ENGLISH);
@@ -195,7 +195,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("Drug", c.getConceptClass().getName());
 			Assert.assertEquals("N/A", c.getDatatype().getName());
 		}
-		
+
 		// Verify failures
 		{
 			Context.setLocale(Locale.ENGLISH);
@@ -206,7 +206,7 @@ public class OpenConceptLabLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertNull(conceptService.getConceptByUuid("162337AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB"));
 			Assert.assertNull(conceptService.getConceptByName("DIPTHERIAYY"));
 		}
-		
+
 		// Verify retirement
 		{
 			Concept c = conceptService.getConceptByUuid("162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");

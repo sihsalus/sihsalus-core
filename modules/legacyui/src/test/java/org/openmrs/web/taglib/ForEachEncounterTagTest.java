@@ -28,7 +28,7 @@ import org.springframework.mock.web.MockPageContext;
  * Contains tests for the {@link ForEachEncounterTag}
  */
 public class ForEachEncounterTagTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see ForEachEncounterTag#doStartTag()
 	 * @regression TRUNK-2465
@@ -55,7 +55,7 @@ public class ForEachEncounterTagTest extends BaseModuleWebContextSensitiveTest {
 		Assertions.assertEquals(16, tag.matchingEncs.get(1).getId().intValue());
 		Assertions.assertEquals(7, tag.matchingEncs.get(2).getId().intValue());
 	}
-	
+
 	/**
 	 * @see ForEachEncounterTag#doStartTag()
 	 */

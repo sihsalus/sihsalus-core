@@ -35,23 +35,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ObservationMapperTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Mock
 	private Concept concept;
-	
+
 	@Mock
 	private ConceptNumeric conceptNumeric;
-	
+
 	@Mock
 	private ConceptDatatype conceptDatatype;
-	
+
 	@Mock
 	private DrugMapper drugMapper;
-	
+
 	private ObservationMapper observationMapper;
-	
+
 	private ObsBuilder obsBuilder;
-	
+
 	@BeforeEach
 	public void setUp() {
 		User creator = mock(User.class);
@@ -67,33 +67,33 @@ public class ObservationMapperTest extends BaseModuleContextSensitiveTest {
 		when(concept.getDatatype()).thenReturn(conceptDatatype);
 		when(concept.getConceptClass()).thenReturn(getConceptClass("conceptClassName"));
 	}
-	
+
 	@Test
 	public void shouldMapObservationWithNumericValue() {
 		when(conceptDatatype.isNumeric()).thenReturn(true);
 		Obs obs = obsBuilder.setValue(100.0).setFormField("form uuid", "formFieldPath").get();
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals(obs.getUuid(), observation.getUuid());
 		assertEquals(100.0, observation.getValue());
 		assertEquals(observation.getFormNamespace(), "form uuid");
 		assertEquals(observation.getFormFieldPath(), "formFieldPath");
 	}
-	
+
 	@Test
 	public void shouldMapObservationWithCodedValue() {
 		when(conceptDatatype.isCoded()).thenReturn(true);
 		Concept concept = new ConceptBuilder(null, new ConceptDatatype(2), null).addName("concept-name").get();
 		Obs obs = obsBuilder.setValue(concept).get();
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals(obs.getUuid(), observation.getUuid());
 		EncounterTransaction.Concept answer = (EncounterTransaction.Concept) observation.getValue();
 		assertEquals(concept.getName().getName(), answer.getName());
 	}
-	
+
 	@Test
 	public void shouldMapObservationWithValueAsDrug() {
 		when(conceptDatatype.isCoded()).thenReturn(true);
@@ -101,77 +101,77 @@ public class ObservationMapperTest extends BaseModuleContextSensitiveTest {
 		Obs obs = obsBuilder.setValue(drug).get();
 		EncounterTransaction.Drug mappedDrug = new EncounterTransaction.Drug();
 		when(drugMapper.map(drug)).thenReturn(mappedDrug);
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals(obs.getUuid(), observation.getUuid());
 		assertEquals(mappedDrug, observation.getValue());
 	}
-	
+
 	@Test
 	public void shouldMapObservationWithBooleanValue() {
 		when(conceptDatatype.isBoolean()).thenReturn(true);
 		Obs obs = obsBuilder.setValue(true).get();
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals(true, observation.getValue());
 	}
-	
+
 	@Test
 	public void shouldMapVoidedObservation() {
 		when(conceptDatatype.isNumeric()).thenReturn(true);
 		Obs obs = obsBuilder.setVoided(true).setVoidedReason("reason").get();
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals(obs.getUuid(), observation.getUuid());
 		assertEquals(obs.getVoided(), observation.getVoided());
 		assertEquals(obs.getVoidReason(), observation.getVoidReason());
 	}
-	
+
 	@Test
 	public void shouldMapConceptClassAndComment() {
 		when(conceptDatatype.isNumeric()).thenReturn(true);
 		Obs obs = obsBuilder.setComment("Intermittent Pain").get();
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals(obs.getComment(), observation.getComment());
 		assertEquals(obs.getConcept().getConceptClass().getName(), observation.getConcept().getConceptClass());
 	}
-	
+
 	@Test
 	public void shouldMapDateTime() {
 		when(conceptDatatype.isDateTime()).thenReturn(true);
 		Obs obs = obsBuilder.setValue("2015-02-01 03:45:09").get();
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals(observation.getValue(), obs.getValueDatetime());
 	}
-	
+
 	@Test
 	public void shouldMapDate() {
 		when(conceptDatatype.isDate()).thenReturn(true);
 		Obs obs = obsBuilder.setValue("2015-02-01").get();
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals(observation.getValue(), obs.getValueDate());
 	}
-	
+
 	@Test
 	public void shouldMapCreator() {
 		when(conceptDatatype.isDate()).thenReturn(true);
 		Obs obs = obsBuilder.setValue("2015-02-01").get();
-		
+
 		EncounterTransaction.Observation observation = observationMapper.map(obs);
-		
+
 		assertEquals("uuid", observation.getCreator().getUuid());
 		assertEquals("superman", observation.getCreator().getPersonName());
 	}
-	
+
 	private ConceptClass getConceptClass(String conceptClassName) {
 		ConceptClass conceptClass = new ConceptClass();
 		conceptClass.setName(conceptClassName);

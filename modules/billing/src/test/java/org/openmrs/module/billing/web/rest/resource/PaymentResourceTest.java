@@ -36,26 +36,26 @@ import org.openmrs.module.billing.api.model.Payment;
  * Unit tests for {@link PaymentResource}
  */
 public class PaymentResourceTest {
-	
+
 	private PaymentResource resource;
-	
+
 	private BillService billService;
-	
+
 	private MockedStatic<Context> contextMock;
-	
+
 	private MockedStatic<ProviderUtil> providerUtilMock;
-	
+
 	@BeforeEach
 	public void setUp() {
 		resource = new PaymentResource();
 		billService = mock(BillService.class);
-		
+
 		contextMock = mockStatic(Context.class);
 		contextMock.when(() -> Context.getService(BillService.class)).thenReturn(billService);
-		
+
 		providerUtilMock = mockStatic(ProviderUtil.class);
 	}
-	
+
 	@AfterEach
 	public void tearDown() {
 		if (contextMock != null) {
@@ -65,50 +65,50 @@ public class PaymentResourceTest {
 			providerUtilMock.close();
 		}
 	}
-	
+
 	@Test
 	public void save_shouldSetCashierFromAuthenticatedProvider() {
 		Provider cashier = new Provider();
 		cashier.setId(1);
 		providerUtilMock.when(ProviderUtil::getCurrentProvider).thenReturn(cashier);
-		
+
 		Bill bill = new Bill();
 		bill.setId(1);
 		Payment payment = new Payment();
 		payment.setBill(bill);
 		payment.setAmount(BigDecimal.TEN);
 		payment.setAmountTendered(BigDecimal.TEN);
-		
+
 		when(billService.saveBill(bill)).thenReturn(bill);
-		
+
 		resource.save(payment);
-		
+
 		assertNotNull(payment.getCashier(), "Cashier should be set on the payment");
 		assertSame(cashier, payment.getCashier(), "Cashier should be the current provider");
 		verify(billService).saveBill(bill);
 	}
-	
+
 	@Test
 	public void save_shouldThrowAPIExceptionWhenNoProviderLinkedToUser() {
 		providerUtilMock.when(ProviderUtil::getCurrentProvider).thenReturn(null);
-		
+
 		Bill bill = new Bill();
 		bill.setId(1);
 		Payment payment = new Payment();
 		payment.setBill(bill);
-		
+
 		assertThrows(APIException.class, () -> resource.save(payment));
 	}
-	
+
 	@Test
 	public void save_shouldUseClientProvidedCashierWhenSet() {
 		Provider clientCashier = new Provider();
 		clientCashier.setId(2);
-		
+
 		Provider authenticatedCashier = new Provider();
 		authenticatedCashier.setId(99);
 		providerUtilMock.when(ProviderUtil::getCurrentProvider).thenReturn(authenticatedCashier);
-		
+
 		Bill bill = new Bill();
 		bill.setId(1);
 		Payment payment = new Payment();
@@ -116,51 +116,51 @@ public class PaymentResourceTest {
 		payment.setAmount(BigDecimal.TEN);
 		payment.setAmountTendered(BigDecimal.TEN);
 		payment.setCashier(clientCashier);
-		
+
 		when(billService.saveBill(bill)).thenReturn(bill);
-		
+
 		resource.save(payment);
-		
+
 		assertSame(clientCashier, payment.getCashier(), "Client-provided cashier should not be overwritten");
 	}
-	
+
 	@Test
 	public void save_shouldFallbackToAuthenticatedUserWhenNoCashierProvided() {
 		Provider cashier = new Provider();
 		cashier.setId(1);
 		providerUtilMock.when(ProviderUtil::getCurrentProvider).thenReturn(cashier);
-		
+
 		Bill bill = new Bill();
 		bill.setId(1);
 		Payment payment = new Payment();
 		payment.setBill(bill);
 		payment.setAmount(BigDecimal.TEN);
 		payment.setAmountTendered(BigDecimal.TEN);
-		
+
 		when(billService.saveBill(bill)).thenReturn(bill);
-		
+
 		resource.save(payment);
-		
+
 		assertSame(cashier, payment.getCashier(), "Authenticated user's provider should be used as fallback");
 	}
-	
+
 	@Test
 	public void save_shouldSetCashierBeforeAddingPaymentToBill() {
 		Provider cashier = new Provider();
 		cashier.setId(1);
 		providerUtilMock.when(ProviderUtil::getCurrentProvider).thenReturn(cashier);
-		
+
 		Bill bill = new Bill();
 		bill.setId(1);
 		Payment payment = new Payment();
 		payment.setBill(bill);
 		payment.setAmount(BigDecimal.TEN);
 		payment.setAmountTendered(BigDecimal.TEN);
-		
+
 		when(billService.saveBill(bill)).thenReturn(bill);
-		
+
 		resource.save(payment);
-		
+
 		assertNotNull(payment.getCashier());
 		assertTrue(bill.getPayments().contains(payment));
 	}

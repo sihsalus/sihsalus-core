@@ -99,9 +99,9 @@ public class SequentialIdentifierGeneratorTest {
 		generator.setFirstIdentifierBase("000");
 		generator.setMinLength(11);
 		generator.setMaxLength(13);
- 		assertThat(generator.getNextSequenceValue(), is(-1l));
+		assertThat(generator.getNextSequenceValue(), is(-1l));
 	}
-	
+
 	@Test
 	public void getIdentifierForSeed_shouldGenerateLocationPrefixedIdFromLocationBasedPrefixProvider() {
 		SequentialIdentifierGenerator generator = new SequentialIdentifierGenerator();
@@ -110,7 +110,7 @@ public class SequentialIdentifierGeneratorTest {
 		generator.setName("Location Prefixed Sequential Identifier Source");
 		generator.setPrefix(
 		    SequentialIdentifierGenerator.CONFIGURATION_PREFIX + LocationBasedPrefixProvider.class.getSimpleName());
-		
+
 		UserContext userContext = mock(UserContext.class);
 		AdministrationService as = mock(AdministrationService.class);
 		when(Context.getAdministrationService()).thenReturn(as);
@@ -119,7 +119,7 @@ public class SequentialIdentifierGeneratorTest {
 		        .thenReturn("Location Code");
 		when(userContext.getLocation()).thenReturn(createLocationTree(true));
 		when(Context.getRegisteredComponent("LocationBasedPrefixProvider", PrefixProvider.class)).thenReturn(new LocationBasedPrefixProvider());
-		
+
 		assertThat(generator.getIdentifierForSeed(1L), is("LOC_2-001"));
 	}
 
@@ -143,39 +143,39 @@ public class SequentialIdentifierGeneratorTest {
 
 		assertThat(generator.getIdentifierForSeed(1L), is("001-LOC_2"));
 	}
-	
+
 	private Location createLocationTree(boolean isPrefix) {
 		LocationAttributeType prefixAttrType = new LocationAttributeType();
 		prefixAttrType.setName("Location Code");
 		prefixAttrType.setMinOccurs(0);
 		prefixAttrType.setMaxOccurs(1);
 		prefixAttrType.setDatatypeClassname("org.openmrs.customdatatype.datatype.FreeTextDatatype");
-		
+
 		Location location1 = new Location();
 		Location location2 = new Location();
 		location2.setParentLocation(location1);
-		
+
 		LocationAttribute location2PrefixAtt = new LocationAttribute();
 		location2PrefixAtt.setAttributeType(prefixAttrType);
 		location2PrefixAtt.setValue(isPrefix ? "LOC_2-" : "-LOC_2");
 		location2.addAttribute(location2PrefixAtt);
-		
+
 		Location location3 = new Location();
 		location3.setParentLocation(location2);
-		
+
 		Location location4 = new Location();
 		location4.setParentLocation(location3);
-		
+
 		return location4;
 	}
-	
+
 	@Test
 	public void getPrefixProvider_shouldDefaultProperly() {
 		SequentialIdentifierGenerator gen = new SequentialIdentifierGenerator();
-		
+
 		Assert.assertEquals("pre-", gen.getPrefixProvider("pre-").getValue());
 		Assert.assertEquals("  -", gen.getPrefixProvider("  -").getValue());
-		
+
 		Assert.assertEquals("", gen.getPrefixProvider(null).getValue());
 		Assert.assertEquals("", gen.getPrefixProvider("").getValue());
 		Assert.assertEquals("", gen.getPrefixProvider(" ").getValue());

@@ -49,10 +49,10 @@ import static org.junit.Assert.assertTrue;
  * Various utils to help with testing
  */
 public class TestUtils {
-	
+
 	/**
 	 * To test things like: assertContainsElementWithProperty(listOfPatients, "patientId", 2)
-	 * 
+	 *
 	 * @param collection
 	 * @param property
 	 * @param value
@@ -71,11 +71,11 @@ public class TestUtils {
 		Assert.fail(
 		    "Collection does not contain an element with " + property + " = " + value + ". Collection: " + collection);
 	}
-	
+
 	public static <T> ArgumentMatcher<T> containsElementsWithProperties(final String property,
 	        final T... expectedPropertyValues) {
 		return new ArgumentMatcher<T>() {
-			
+
 			@Override
 			public boolean matches(Object o) {
 				assertTrue(o instanceof Collection);
@@ -87,11 +87,11 @@ public class TestUtils {
 			}
 		};
 	}
-	
+
 	public static <T> ArgumentMatcher<T> isCollectionOfExactlyElementsWithProperties(final String property,
 	        final Object... expectedPropertyValues) {
 		return new ArgumentMatcher<T>() {
-			
+
 			@Override
 			public boolean matches(Object o) {
 				assertTrue(o instanceof Collection);
@@ -104,7 +104,7 @@ public class TestUtils {
 			}
 		};
 	}
-	
+
 	/**
 	 * Tests whether the substring is contained in the actual string.
 	 */
@@ -115,12 +115,12 @@ public class TestUtils {
 		if (actual == null) {
 			Assert.fail(substring + " is not contained in " + actual);
 		}
-		
+
 		if (!actual.contains(substring)) {
 			Assert.fail(substring + " is not contained in " + actual);
 		}
 	}
-	
+
 	/**
 	 * Tests whether the two strings are equal, ignoring white space and capitalization.
 	 */
@@ -135,7 +135,7 @@ public class TestUtils {
 			Assert.fail(expected + " does not match " + actual);
 		}
 	}
-	
+
 	/**
 	 * Tests whether the substring is contained in the actual string. Allows for inclusion of regular
 	 * expressions in the substring. Ignores white space. Ignores capitalization.
@@ -147,13 +147,13 @@ public class TestUtils {
 		if (actual == null) {
 			Assert.fail(substring + " is not contained in " + actual);
 		}
-		
+
 		if (!Pattern.compile(stripWhitespaceAndConvertToLowerCase(substring), Pattern.DOTALL)
 		        .matcher(stripWhitespaceAndConvertToLowerCase(actual)).find()) {
 			Assert.fail(substring + " is not contained in " + actual);
 		}
 	}
-	
+
 	/**
 	 * Tests whether the substring is NOT contained in the actual string. Allows for inclusion of
 	 * regular expressions in the substring. Ignores white space. Ignores capitalization.
@@ -165,63 +165,63 @@ public class TestUtils {
 		if (actual == null) {
 			return;
 		}
-		
+
 		if (Pattern.compile(stripWhitespaceAndConvertToLowerCase(substring), Pattern.DOTALL)
 		        .matcher(stripWhitespaceAndConvertToLowerCase(actual)).find()) {
 			Assert.fail(substring + " found in  " + actual);
 		}
 	}
-	
+
 	private static String stripWhitespaceAndConvertToLowerCase(String string) {
 		string = string.toLowerCase();
 		string = string.replaceAll("\\s", "");
 		return string;
 	}
-	
+
 	//use DateMatchers.within(2, SECONDS, date)
 	@Deprecated
 	public static Matcher<Date> isJustNow() {
 		return new TypeSafeMatcher<Date>() {
-			
+
 			@Override
 			public void describeTo(Description description) {
-				
+
 			}
-			
+
 			@Override
 			protected boolean matchesSafely(Date date) {
 				return Math.abs(System.currentTimeMillis() - ((Date) date).getTime()) < 2000;
 			}
-			
+
 		};
 	}
-	
+
 	/**
 	 * Creates an argument matcher that tests equality based on the equals method, the developer doesn't
 	 * have to type cast the returned argument when pass it to
 	 * {@link org.mockito.Mockito#argThat(org.hamcrest.Matcher)} as it would be the case if we used
 	 * {@link org.mockito.internal.matchers.Equals} matcher
-	 * 
+	 *
 	 * @param object
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Matcher<T> equalsMatcher(final T object) {
 		return new TypeSafeMatcher<T>() {
-			
+
 			@Override
 			public void describeTo(Description description) {
-				
+
 			}
-			
+
 			@Override
 			protected boolean matchesSafely(T t) {
 				return OpenmrsUtil.nullSafeEquals(object, t);
 			}
-			
+
 		};
 	}
-	
+
 	public static String join(Iterable<?> iter, String separator) {
 		StringBuilder ret = new StringBuilder();
 		boolean first = true;
@@ -235,7 +235,7 @@ public class TestUtils {
 		}
 		return ret.toString();
 	}
-	
+
 	public static String join(Object[] array, String separator) {
 		StringBuilder ret = new StringBuilder();
 		boolean first = true;
@@ -249,7 +249,7 @@ public class TestUtils {
 		}
 		return ret.toString();
 	}
-	
+
 	public static boolean sameProviders(Map<EncounterRole, Set<Provider>> a, Map<EncounterRole, Set<Provider>> b) {
 		Collection<EncounterRole> roles = CollectionUtils.union(a.keySet(), b.keySet());
 		for (EncounterRole role : roles) {
@@ -267,20 +267,20 @@ public class TestUtils {
 		}
 		return true;
 	}
-	
+
 	public static Matcher<Encounter> hasProviders(final Map<EncounterRole, Set<Provider>> providers) {
 		return new TypeSafeMatcher<Encounter>() {
-			
+
 			@Override
 			public void describeTo(Description description) {
-				
+
 			}
-			
+
 			@Override
 			protected boolean matchesSafely(Encounter encounter) {
 				return sameProviders(encounter.getProvidersByRoles(), providers);
 			}
-			
+
 		};
 	}
 }

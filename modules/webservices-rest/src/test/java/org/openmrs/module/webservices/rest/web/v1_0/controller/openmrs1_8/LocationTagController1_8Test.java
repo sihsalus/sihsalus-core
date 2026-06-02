@@ -28,17 +28,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests functionality of {@link LocationTagController}.
  */
 public class LocationTagController1_8Test extends MainResourceControllerTest {
-	
+
 	private LocationService service;
-	
+
 	private static final String LOCATION_TAG_INITIAL_XML = "customLocationTagDataset.xml";
-	
+
 	@BeforeEach
 	public void init() throws Exception {
 		service = Context.getLocationService();
 		executeDataSet(LOCATION_TAG_INITIAL_XML);
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -46,7 +46,7 @@ public class LocationTagController1_8Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "locationtag";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -54,7 +54,7 @@ public class LocationTagController1_8Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return service.getAllLocationTags(false).size();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -62,55 +62,55 @@ public class LocationTagController1_8Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_8.LOCATION_TAG_UUID;
 	}
-	
+
 	@Test
 	public void shouldCreateALocationTag() throws Exception {
-		
+
 		long originalCount = getAllCount();
-		
+
 		SimpleObject locationTag = new SimpleObject();
 		locationTag.add("name", "Location Tag name");
 		locationTag.add("description", "Location Tag description");
-		
+
 		String json = new ObjectMapper().writeValueAsString(locationTag);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newLocationTag = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(newLocationTag, "uuid"));
 		Assertions.assertEquals(originalCount + 1, getAllCount());
-		
+
 	}
-	
+
 	@Test
 	public void shouldGetALocationTagByUuid() throws Exception {
-		
+
 		LocationTag locationTag = service.getLocationTag(1);
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + locationTag.getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(result);
 		Assertions.assertEquals(locationTag.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertEquals(locationTag.getName(), PropertyUtils.getProperty(result, "name"));
-		
+
 	}
-	
+
 	@Test
 	public void shouldListAll() throws Exception {
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(result);
 		Assertions.assertEquals(getAllCount(), Util.getResultsSize(result));
-		
+
 	}
-	
+
 	@Test
 	public void shouldUpdateLocationTag() throws Exception {
-		
+
 		final String EDITED_NAME = "Location Tag edited";
 		final String EDITED_DESCRIPTION = "New Location Tag Description";
 		LocationTag locationTag = service.getLocationTagByUuid(getUuid());
@@ -121,39 +121,39 @@ public class LocationTagController1_8Test extends MainResourceControllerTest {
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
 		req.setContent(json.getBytes());
 		handle(req);
-		
+
 		LocationTag editedLocationTag = service.getLocationTagByUuid(getUuid());
 		Assertions.assertNotNull(editedLocationTag);
 		Assertions.assertEquals(EDITED_NAME, editedLocationTag.getName());
-		Assertions.assertEquals(EDITED_DESCRIPTION, editedLocationTag.getDescription());		
+		Assertions.assertEquals(EDITED_DESCRIPTION, editedLocationTag.getDescription());
 	}
-	
+
 	@Test
 	public void shouldPurgeLocationTag() throws Exception {
-		
+
 		LocationTag locationTag = service.getLocationTag(3);
 		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + locationTag.getUuid());
 		req.addParameter("purge", "true");
 		handle(req);
-		
+
 		Assertions.assertNull(service.getLocationTag(3));
 	}
-	
+
 	@Test
 	public void shouldRetireLocationTag() throws Exception {
-		
+
 		LocationTag locationTag = service.getLocationTag(2);
 		Assertions.assertFalse(locationTag.isRetired());
-		
+
 		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + locationTag.getUuid());
 		req.addParameter("!purge", "");
 		req.addParameter("reason", "random reason");
 		handle(req);
-		
+
 		LocationTag retiredLocationTag = service.getLocationTag(2);
 		Assertions.assertTrue(retiredLocationTag.isRetired());
 		Assertions.assertEquals("random reason", retiredLocationTag.getRetireReason());
-		
+
 	}
-	
+
 }

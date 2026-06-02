@@ -17,7 +17,7 @@ import org.openmrs.module.reporting.common.DateUtil;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class BirthdateConverterTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see BirthdateConverter#convert(Object)
 	 * @verifies convert a birthdate to String

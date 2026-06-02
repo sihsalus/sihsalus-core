@@ -37,29 +37,29 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
-	
+
 	private ExemptionRuleEngine ruleEngine;
-	
+
 	private BillExemptionService billExemptionService;
-	
+
 	private ConceptService conceptService;
-	
+
 	private PatientService patientService;
-	
+
 	@BeforeEach
 	public void setup() {
 		List<ExemptionEvaluator> evaluators = new ArrayList<>();
 		evaluators.add(new JSExemptionEvaluator());
 		ruleEngine = new ExemptionRuleEngine(evaluators);
-		
+
 		billExemptionService = Context.getService(BillExemptionService.class);
 		conceptService = Context.getConceptService();
 		patientService = Context.getPatientService();
-		
+
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillExemptionTest.xml");
 	}
-	
+
 	/**
 	 * @see ExemptionRuleEngine#evaluateRule(BillExemptionRule, Map)
 	 */
@@ -68,15 +68,15 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 		BillExemptionRule rule = new BillExemptionRule();
 		rule.setScriptType(ScriptType.JAVASCRIPT);
 		rule.setScript("age < 18");
-		
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("age", 10);
-		
+
 		boolean result = ruleEngine.evaluateRule(rule, variables);
-		
+
 		assertTrue(result);
 	}
-	
+
 	/**
 	 * @see ExemptionRuleEngine#evaluateRule(BillExemptionRule, Map)
 	 */
@@ -85,15 +85,15 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 		BillExemptionRule rule = new BillExemptionRule();
 		rule.setScriptType(ScriptType.JAVASCRIPT);
 		rule.setScript("age < 18");
-		
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("age", 25);
-		
+
 		boolean result = ruleEngine.evaluateRule(rule, variables);
-		
+
 		assertFalse(result);
 	}
-	
+
 	/**
 	 * @see ExemptionRuleEngine#isExemptionApplicable(BillExemption, Map)
 	 */
@@ -103,15 +103,15 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(exemption);
 		assertNotNull(exemption.getRules());
 		assertFalse(exemption.getRules().isEmpty());
-		
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("patientAge", 3);
-		
+
 		boolean result = ruleEngine.isExemptionApplicable(exemption, variables);
-		
+
 		assertTrue(result);
 	}
-	
+
 	/**
 	 * @see ExemptionRuleEngine#isExemptionApplicable(BillExemption, Map)
 	 */
@@ -119,15 +119,15 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 	public void isExemptionApplicable_shouldReturnFalseWhenNoRuleMatches() {
 		BillExemption exemption = billExemptionService.getBillingExemptionById(1);
 		assertNotNull(exemption);
-		
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("patientAge", 25);
-		
+
 		boolean result = ruleEngine.isExemptionApplicable(exemption, variables);
-		
+
 		assertFalse(result);
 	}
-	
+
 	/**
 	 * Integration test mimicking actual order exemption check
 	 */
@@ -135,21 +135,21 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 	public void checkIfOrderIsExempted_shouldExemptChildrenUnderFive() {
 		Patient patient = patientService.getPatient(2);
 		assertNotNull(patient);
-		
+
 		Concept concept = conceptService.getConcept(100);
 		assertNotNull(concept);
-		
+
 		Order order = new Order();
 		order.setPatient(patient);
 		order.setConcept(concept);
-		
+
 		List<BillExemption> exemptions = billExemptionService.getExemptionsByConcept(concept, ExemptionType.SERVICE, false);
-		
+
 		assertNotNull(exemptions);
 		assertFalse(exemptions.isEmpty());
-		
+
 		Map<String, Object> variables = buildVariablesMapForOrder(order);
-		
+
 		boolean isExempted = false;
 		for (BillExemption exemption : exemptions) {
 			if (ruleEngine.isExemptionApplicable(exemption, variables)) {
@@ -157,10 +157,10 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 				break;
 			}
 		}
-		
+
 		assertTrue(isExempted);
 	}
-	
+
 	/**
 	 * Integration test with active programs
 	 */
@@ -168,26 +168,26 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 	public void checkIfOrderIsExempted_shouldCheckActivePrograms() {
 		Patient patient = patientService.getPatient(2);
 		assertNotNull(patient);
-		
+
 		Concept concept = conceptService.getConcept(100);
 		assertNotNull(concept);
-		
+
 		Order order = new Order();
 		order.setPatient(patient);
 		order.setConcept(concept);
-		
+
 		Set<String> activePrograms = new HashSet<>();
 		activePrograms.add("HIV Program");
 		activePrograms.add("TB Program");
-		
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("order", order);
 		variables.put("patient", patient);
 		variables.put("patientAge", 4);
 		variables.put("activePrograms", activePrograms);
-		
+
 		List<BillExemption> exemptions = billExemptionService.getExemptionsByConcept(concept, ExemptionType.SERVICE, false);
-		
+
 		boolean isExempted = false;
 		for (BillExemption exemption : exemptions) {
 			if (ruleEngine.isExemptionApplicable(exemption, variables)) {
@@ -195,10 +195,10 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 				break;
 			}
 		}
-		
+
 		assertTrue(isExempted);
 	}
-	
+
 	/**
 	 * Test with elderly patient (>= 65 years)
 	 */
@@ -206,24 +206,24 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 	public void checkIfOrderIsExempted_shouldExemptElderlyPatients() {
 		Patient patient = patientService.getPatient(2);
 		assertNotNull(patient);
-		
+
 		Concept commodityConcept = conceptService.getConcept(102);
 		assertNotNull(commodityConcept);
-		
+
 		Order order = new Order();
 		order.setPatient(patient);
 		order.setConcept(commodityConcept);
-		
+
 		List<BillExemption> exemptions = billExemptionService.getExemptionsByConcept(commodityConcept,
 		    ExemptionType.COMMODITY, false);
-		
+
 		assertNotNull(exemptions);
 		assertFalse(exemptions.isEmpty());
-		
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("order", order);
 		variables.put("patientAge", 70);
-		
+
 		boolean isExempted = false;
 		for (BillExemption exemption : exemptions) {
 			if (ruleEngine.isExemptionApplicable(exemption, variables)) {
@@ -231,10 +231,10 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 				break;
 			}
 		}
-		
+
 		assertTrue(isExempted);
 	}
-	
+
 	/**
 	 * Test that non-exempted orders return false
 	 */
@@ -242,20 +242,20 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 	public void checkIfOrderIsExempted_shouldNotExemptNonQualifyingOrders() {
 		Patient patient = patientService.getPatient(2);
 		assertNotNull(patient);
-		
+
 		Concept concept = conceptService.getConcept(100);
 		assertNotNull(concept);
-		
+
 		Order order = new Order();
 		order.setPatient(patient);
 		order.setConcept(concept);
-		
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("order", order);
 		variables.put("patientAge", 30);
-		
+
 		List<BillExemption> exemptions = billExemptionService.getExemptionsByConcept(concept, ExemptionType.SERVICE, false);
-		
+
 		boolean isExempted = false;
 		for (BillExemption exemption : exemptions) {
 			if (ruleEngine.isExemptionApplicable(exemption, variables)) {
@@ -263,18 +263,18 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 				break;
 			}
 		}
-		
+
 		assertFalse(isExempted);
 	}
-	
+
 	private Map<String, Object> buildVariablesMapForOrder(Order order) {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("order", order);
 		variables.put("patientAge", 4);
-		
+
 		Set<String> activePrograms = new HashSet<>();
 		variables.put("activePrograms", activePrograms);
-		
+
 		return variables;
 	}
 }

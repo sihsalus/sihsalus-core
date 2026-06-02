@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mockStatic;
  */
 @ExtendWith(MockitoExtension.class)
 public class PortletTagTest {
-	
+
 	/**
 	 * @see org.openmrs.web.taglib.PortletTag#generatePortletUrl(String, String)
 	 */
@@ -34,15 +34,15 @@ public class PortletTagTest {
 	public void getModulePortletUrl_shouldReturnTheCorrectUrlForACorePortlet() {
 		String portletUrl = "test.portlet";
 		String moduleId = null;
-		
+
 		// Instantiate the portlet and generate the url
 		PortletTag portlet = new PortletTag();
 		String result = portlet.generatePortletUrl(portletUrl, moduleId);
-		
+
 		// Verify the portlet url
 		assertEquals("/portlets/" + portletUrl, result);
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.taglib.PortletTag#generatePortletUrl(String, String)
 	 */
@@ -51,10 +51,10 @@ public class PortletTagTest {
 	public void getModulePortletUrl_shouldReturnTheCorrectUrlForAModulePortlet() {
 		String portletUrl = "test.portlet";
 		String moduleId = "moduleId";
-		
+
 		// Setup the mocking for the ModuleFactory
 		try (MockedStatic<ModuleFactory> mock = mockStatic(ModuleFactory.class)) {
-			
+
 			mock.when(() -> ModuleFactory.getModuleById(moduleId)).thenReturn(new Module(moduleId));
 
 			// Instantiate the portlet and get the module url
@@ -65,7 +65,7 @@ public class PortletTagTest {
 			assertEquals("/module/" + moduleId + "/portlets/" + portletUrl, result);
 		}
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.taglib.PortletTag#generatePortletUrl(String, String)
 	 */
@@ -74,7 +74,7 @@ public class PortletTagTest {
 	public void getModulePortletUrl_shouldReplacePeriodInAModuleIdWithAForwardSlashWhenBuildingAModulePortletUrl() {
 		String portletUrl = "test.portlet";
 		String moduleId = "module.id";
-		
+
 		try (MockedStatic<ModuleFactory> mock = mockStatic(ModuleFactory.class)) {
 			mock.when(() -> ModuleFactory.getModuleById(moduleId)).thenReturn(new Module(moduleId));
 
@@ -85,7 +85,7 @@ public class PortletTagTest {
 		}
 
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.taglib.PortletTag#generatePortletUrl(String, String)
 	 */
@@ -106,7 +106,7 @@ public class PortletTagTest {
 			assertEquals(moduleId, portlet.getModuleId());
 		}
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.taglib.PortletTag#generatePortletUrl(String, String)
 	 */
@@ -115,7 +115,7 @@ public class PortletTagTest {
 	public void getModulePortletUrl_shouldReturnACorePortletUrlWhenTheSpecifiedModuleCannotBeFound() {
 		String portletUrl = "test.portlet";
 		String moduleId = "moduleId";
-		
+
 		// Setup the mocking for ModuleFactory to return null to test when the module is not found
 		try (MockedStatic<ModuleFactory> mock = mockStatic(ModuleFactory.class)) {
 			mock.when(() -> ModuleFactory.getModuleById(moduleId)).thenReturn(null);
@@ -126,7 +126,7 @@ public class PortletTagTest {
 			assertEquals("/portlets/" + portletUrl, result);
 		}
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.taglib.PortletTag#generatePortletUrl(String, String)
 	 */
@@ -135,13 +135,13 @@ public class PortletTagTest {
 	public void getModulePortletUrl_shouldAppendDotPortletToTheUrlIfNotSpecified() {
 		String portletUrl = "test";
 		String moduleId = null;
-		
+
 		PortletTag portlet = new PortletTag();
 		String result = portlet.generatePortletUrl(portletUrl, moduleId);
-		
+
 		assertEquals("/portlets/" + portletUrl + ".portlet", result);
 	}
-	
+
 	/**
 	 * @see org.openmrs.web.taglib.PortletTag#generatePortletUrl(String, String)
 	 */
@@ -150,13 +150,13 @@ public class PortletTagTest {
 	public void getModulePortletUrl_shouldTreatBothAnEmptyAndNullModuleIdAsCorePortlets() {
 		String portletUrl = "test.portlet";
 		String moduleId = null;
-		
+
 		PortletTag portlet = new PortletTag();
-		
+
 		// Test with a null module id
 		String result = portlet.generatePortletUrl(portletUrl, moduleId);
 		assertEquals("/portlets/" + portletUrl, result);
-		
+
 		// Test with an empty module id
 		moduleId = "";
 		result = portlet.generatePortletUrl(portletUrl, moduleId);

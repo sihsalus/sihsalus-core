@@ -16,14 +16,14 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
  * Tests functionality of {@link ObsReferenceRangeResource2_7}.
  */
 public class ObsReferenceRangeResource2_7Test extends BaseDelegatingResourceTest<ObsReferenceRangeResource2_7, ObsReferenceRange> {
-	
+
 	@Override
 	public ObsReferenceRange newObject() {
 		ObsReferenceRange referenceRange = new ObsReferenceRange();
 		referenceRange.setUuid(RestConstants2_7.OBS_REFERENCE_RANGE_UUID);
 		return referenceRange;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -36,7 +36,7 @@ public class ObsReferenceRangeResource2_7Test extends BaseDelegatingResourceTest
 		assertPropEquals("lowAbsolute", getObject().getLowAbsolute());
 		assertPropEquals("lowCritical", getObject().getLowCritical());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		validateDefaultRepresentation();

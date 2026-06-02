@@ -35,37 +35,37 @@ import org.springframework.web.util.TagUtils;
  * Contains tests for {@link OpenmrsMessageTag} class
  */
 public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private static final String TEST_CODE = "test.code";
-	
+
 	private static final String TEST_CODE_TWO_ARGS = "test.code.two_args";
-	
+
 	private static final String TEST_CODE_ONE_ARG = "test.code.one_arg";
-	
+
 	private OpenmrsMessageTag openmrsMessageTag;
-	
+
 	private MockPageContext mockPageContext;
-	
+
 	@BeforeEach
 	public void createMockPageContext() throws Exception {
-		
+
 		MockServletContext sc = new MockServletContext();
 		SimpleWebApplicationContext wac = new SimpleWebApplicationContext();
 		wac.setServletContext(sc);
 		wac.setNamespace("test");
 		wac.refresh();
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		request.addPreferredLocale(Context.getLocale());
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
-		
+
 		openmrsMessageTag = new OpenmrsMessageTag();
 		mockPageContext = new MockPageContext(sc, request, response);
 		openmrsMessageTag.setPageContext(mockPageContext);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -75,10 +75,10 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 		String expectedOutput = "this is a test";
 		DefaultMessageSourceResolvable message = new DefaultMessageSourceResolvable(new String[] { "test" }, expectedOutput);
 		openmrsMessageTag.setMessage(message);
-		
+
 		checkDoEndTagEvaluation(expectedOutput);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -86,18 +86,18 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 	@Verifies(value = "resolve a message of the wrong type fails", method = "doEndTag()")
 	public void doEndTag_shouldFailEvaluateRandomObjectMessage() throws Exception {
 		final Object message = new Object() {
-			
+
 			@Override
 			public String toString() {
 				return "this is *only* a test.";
 			}
 		};
-		
+
 		openmrsMessageTag.setMessage(message);
-		
+
 		checkDoEndTagEvaluationException();
 	}
-	
+
 	@Test
 	@Verifies(value = "resolve a Tag with var not set to null", method = "doEndTag()")
 	public void doEndTag_shouldEvaluateVarIfIsNotNull() throws Exception {
@@ -107,10 +107,10 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 		DefaultMessageSourceResolvable message = new DefaultMessageSourceResolvable(new String[] { "test" }, expectedOutput);
 		openmrsMessageTag.setMessage(message);
 		openmrsMessageTag.setScope(TagUtils.SCOPE_PAGE);
-		
+
 		checkDoEndTagEvaluationOfVar(varName, PageContext.PAGE_SCOPE, expectedOutput);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -122,30 +122,30 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 		final DefaultMessageSourceResolvable message = new DefaultMessageSourceResolvable(new String[] { "test" },
 		        unescapedText);
 		openmrsMessageTag.setMessage(message);
-		
+
 		checkDoEndTagEvaluation("\\'Eensy Weensy\\' spider");
 	}
-	
+
 	@Test
 	@Verifies(value = "a single argument works", method = "doEndTag()")
 	public void doEndTag_singleArgument() throws Exception {
 		openmrsMessageTag.setArguments("singleArgument");
 		openmrsMessageTag.setCode(TEST_CODE_ONE_ARG);
 		openmrsMessageTag.setBodyContent(new MockBodyContent("doesn't matter", new MockHttpServletResponse()));
-		
+
 		checkDoEndTagEvaluation("this is a test with arg1: singleArgument");
 	}
-	
+
 	@Test
 	@Verifies(value = "an array of arguments with more than one element works", method = "doEndTag()")
 	public void doEndTag_doubleArgument() throws Exception {
 		openmrsMessageTag.setArguments("firstArgument,secondArgument");
 		openmrsMessageTag.setCode(TEST_CODE_TWO_ARGS);
 		openmrsMessageTag.setBodyContent(new MockBodyContent("doesn't matter", new MockHttpServletResponse()));
-		
+
 		checkDoEndTagEvaluation("this is a test with arg1: firstArgument, and arg2: secondArgument");
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -157,10 +157,10 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 		final DefaultMessageSourceResolvable message = new DefaultMessageSourceResolvable(new String[] { "test" },
 		        unescapedText);
 		openmrsMessageTag.setMessage(message);
-		
+
 		checkDoEndTagEvaluation(unescapedText);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -169,26 +169,26 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 	public void doEndTag_shouldResolveMessageByCode() throws Exception {
 		String expectedOutput = "this is a test";
 		openmrsMessageTag.setCode(TEST_CODE);
-		
+
 		checkDoEndTagEvaluation(expectedOutput);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
 	@Test
 	@Verifies(value = "resolve message in locale that different from default", method = "doEndTag()")
 	public void doEndTag_shouldResolveMessageInLocaleThatDifferentFromDefault() throws Exception {
-		
+
 		MockHttpServletRequest request = (MockHttpServletRequest) mockPageContext.getRequest();
 		request.addPreferredLocale(Locale.FRENCH);
-		
+
 		String expectedOutput = "il s'agit d'un essai";
 		openmrsMessageTag.setCode(TEST_CODE);
-		
+
 		checkDoEndTagEvaluation(expectedOutput);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -197,10 +197,10 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 	public void doEndTag_shouldReturnCodeIfNoMessageResolved() throws Exception {
 		String expectedOutput = "test.wrong.code";
 		openmrsMessageTag.setCode("test.wrong.code");
-		
+
 		checkDoEndTagEvaluation(expectedOutput);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -210,10 +210,10 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 		String expectedOutput = "test body content";
 		openmrsMessageTag.setBodyContent(new MockBodyContent(expectedOutput, new MockHttpServletResponse()));
 		openmrsMessageTag.setCode("test.wrong.code");
-		
+
 		checkDoEndTagEvaluation(expectedOutput);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -223,10 +223,10 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 		String expectedOutput = "test content";
 		openmrsMessageTag.setText(expectedOutput);
 		openmrsMessageTag.setCode("test.wrong.code");
-		
+
 		checkDoEndTagEvaluation(expectedOutput);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -237,10 +237,10 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 		openmrsMessageTag.setBodyContent(new MockBodyContent(expectedOutput, new MockHttpServletResponse()));
 		openmrsMessageTag.setText("test content");
 		openmrsMessageTag.setCode("test.wrong.code");
-		
+
 		checkDoEndTagEvaluation(expectedOutput);
 	}
-	
+
 	/**
 	 * @see OpenmrsMessageTag#doEndTag()
 	 */
@@ -252,52 +252,52 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 		openmrsMessageTag.setText("test content");
 		openmrsMessageTag.setCode(expectedOutput);
 		openmrsMessageTag.setLocale("uk");
-		
+
 		checkDoEndTagEvaluation(expectedOutput);
 	}
-	
+
 	/**
 	 * Convenient method that checks that {@link OpenmrsMessageTag#doEndTag()} throws an exception.
 	 */
 	private void checkDoEndTagEvaluationException() {
 		try {
 			openmrsMessageTag.doEndTag();
-			
+
 			Assertions.assertTrue(false, "doEndTag should have thrown an exception");
 		}
 		catch (Exception e) {
 			//Do nothing.  Test successful
 		}
 	}
-	
+
 	private void checkDoEndTagEvaluationOfVar(String varName, int scope, String expectedOutput) throws Exception {
 		final int tagReturnValue = openmrsMessageTag.doEndTag();
 		final String output = (String) mockPageContext.getAttribute(varName, scope);
-		
+
 		Assertions.assertEquals(TagSupport.EVAL_PAGE, tagReturnValue, "Tag should return 'EVAL_PAGE'");
 		Assertions.assertEquals(output, expectedOutput, String.format("Variable '%s' should be '%s'", varName, expectedOutput));
 	}
-	
+
 	/**
 	 * Convenient method that checks results of evaluation of {@link OpenmrsMessageTag#doEndTag()}
 	 * method
-	 * 
+	 *
 	 * @param expectedOutput the expected output of tag evaluation
 	 * @throws Exception if any evaluation error occurs
 	 */
 	private void checkDoEndTagEvaluation(String expectedOutput) throws Exception {
 		int tagReturnValue = openmrsMessageTag.doEndTag();
 		String output = ((MockHttpServletResponse) mockPageContext.getResponse()).getContentAsString();
-		
+
 		Assertions.assertEquals(TagSupport.EVAL_PAGE, tagReturnValue, "Tag should return 'EVAL_PAGE'");
 		Assertions.assertEquals(expectedOutput, output, String.format("Output should be '%s'", expectedOutput));
 	}
-	
+
 	/**
 	 * Mock web application context to be used in tests as messages source
 	 */
 	public static class SimpleWebApplicationContext extends StaticWebApplicationContext {
-		
+
 		/**
 		 * @see org.springframework.context.support.AbstractApplicationContext#refresh()
 		 */
@@ -309,6 +309,6 @@ public class OpenmrsMessageTagTest extends BaseModuleWebContextSensitiveTest {
 			addMessage(TEST_CODE_TWO_ARGS, Context.getLocale(), "this is a test with arg1: {0}, and arg2: {1}");
 			super.refresh();
 		}
-		
+
 	}
 }

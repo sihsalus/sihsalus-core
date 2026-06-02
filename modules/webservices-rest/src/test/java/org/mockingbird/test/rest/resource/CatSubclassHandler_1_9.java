@@ -29,77 +29,77 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
  */
 @org.openmrs.module.webservices.rest.web.annotation.SubClassHandler(supportedClass = Cat.class, supportedOpenmrsVersions = { "1.9.*" })
 public class CatSubclassHandler_1_9 implements DelegatingSubclassHandler<Animal, Cat> {
-	
+
 	@Override
 	public String getTypeName() {
 		return "cat";
 	}
-	
+
 	@Override
 	public Class<Animal> getSuperclass() {
 		return Animal.class;
 	}
-	
+
 	@Override
 	public Class<Cat> getSubclassHandled() {
 		return Cat.class;
 	}
-	
+
 	@Override
 	public PageableResult getAllByType(RequestContext context) throws ResourceDoesNotSupportOperationException {
 		return null;
 	}
-	
+
 	@Override
 	public String getResourceVersion() {
 		return null;
 	}
-	
+
 	@Override
 	public Cat newDelegate() {
 		return null;
 	}
-	
+
 	@Override
 	public Cat newDelegate(SimpleObject object) {
 		return null;
 	}
-	
+
 	@Override
 	public Cat save(Cat delegate) {
 		return null;
 	}
-	
+
 	@Override
 	public void purge(Cat delegate, RequestContext context) throws ResponseException {
-		
+
 	}
-	
+
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		return null;
 	}
-	
+
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
 		return null;
 	}
-	
+
 	@Override
 	public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
 		return null;
 	}
-	
+
 	@Override
 	public Model getGETModel(Representation representation) {
 		return null;
 	}
-	
+
 	@Override
 	public Model getCREATEModel(Representation representation) {
 		return null;
 	}
-	
+
 	@Override
 	public Model getUPDATEModel(Representation representation) {
 		return null;

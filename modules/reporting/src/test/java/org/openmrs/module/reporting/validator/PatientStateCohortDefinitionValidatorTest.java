@@ -26,7 +26,7 @@ import org.springframework.validation.Errors;
  * Tests methods on the {@link CohortDefinitionValidator} class.
  */
 public class PatientStateCohortDefinitionValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -35,13 +35,13 @@ public class PatientStateCohortDefinitionValidatorTest extends BaseModuleContext
 	public void validate_shouldFailValidationIfStatesIsNull() throws Exception {
 		PatientStateCohortDefinition patientStateCohortDefinition = new PatientStateCohortDefinition();
 		patientStateCohortDefinition.setStates(null);
-		
+
 		Errors errors = new BindException(patientStateCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(patientStateCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -50,13 +50,13 @@ public class PatientStateCohortDefinitionValidatorTest extends BaseModuleContext
 	public void validate_shouldFailValidationIfStatesIsEmpty() throws Exception {
 		PatientStateCohortDefinition patientStateCohortDefinition = new PatientStateCohortDefinition();
 		patientStateCohortDefinition.setStates(new ArrayList<ProgramWorkflowState>());
-		
+
 		Errors errors = new BindException(patientStateCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(patientStateCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -68,14 +68,14 @@ public class PatientStateCohortDefinitionValidatorTest extends BaseModuleContext
 		programWorkflowState.setName("Name");
 		programWorkflowState.setConcept(Context.getConceptService().getConcept(10));
 		states.add(programWorkflowState);
-		
+
 		PatientStateCohortDefinition patientStateCohortDefinition = new PatientStateCohortDefinition();
 		patientStateCohortDefinition.setName("Test CD");
 		patientStateCohortDefinition.setStates(states);
-		
+
 		Errors errors = new BindException(patientStateCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(patientStateCohortDefinition, errors);
-		
+
 		Assert.assertFalse(errors.hasErrors());
 	}
 }

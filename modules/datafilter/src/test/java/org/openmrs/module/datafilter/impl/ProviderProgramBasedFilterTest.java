@@ -31,24 +31,24 @@ import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProviderProgramBasedFilterTest extends BaseProgramBasedFilterTest {
-	
+
 	@Autowired
 	private ProviderService providerService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "persons.xml");
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "users.xml");
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "providers.xml");
 	}
-	
+
 	private Collection<Provider> getProviders() {
 		return providerService.getProviders("Mulemba", null, null, null, true);
 	}
-	
+
 	@Test
 	public void getProviders_shouldExcludeProvidersWithProgramRolesForAUserThatHasNoRoles() {
 		reloginAs("smulemba", "test");
@@ -64,7 +64,7 @@ public class ProviderProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		assertTrue(TestUtil.containsId(providers, 100005));
 		assertTrue(TestUtil.containsId(providers, 100006));
 	}
-	
+
 	@Test
 	public void getProviders_shouldExcludeProvidersWithProgramRolesForAUserThatHasNoProgramRoles() {
 		reloginAs("tmulemba", "test");
@@ -78,7 +78,7 @@ public class ProviderProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		assertTrue(TestUtil.containsId(providers, 100005));
 		assertTrue(TestUtil.containsId(providers, 100006));
 	}
-	
+
 	@Test
 	public void getProviders_shouldReturnProvidersWithAccessToTheSameProgramsAsTheAuthenticatedUser() {
 		reloginAs("cmulemba", "test");
@@ -95,7 +95,7 @@ public class ProviderProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		assertTrue(TestUtil.containsId(providers, 100006));
 		//Should include a user with any of the roles the user has
 		assertTrue(TestUtil.containsId(providers, 100007));
-		
+
 		service.grantAccess(new Role(ROLE_COORDINATOR_PROG_1), new Program(10002));
 		expCount = 7;
 		providers = getProviders();
@@ -108,18 +108,18 @@ public class ProviderProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 		assertTrue(TestUtil.containsId(providers, 100006));
 		assertTrue(TestUtil.containsId(providers, 100007));
 	}
-	
+
 	@Test
 	public void getProviders_shouldReturnAllProvidersIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
 		assertEquals(7, getProviders().size());
 	}
-	
+
 	@Test
 	public void getProviders_shouldReturnAllProvidersIfTheFilterIsDisabled() {
 		FilterTestUtils.disableFilter(ImplConstants.PROGRAM_BASED_FILTER_NAME_PROVIDER);
 		reloginAs("dyorke", "test");
 		assertEquals(7, getProviders().size());
 	}
-	
+
 }

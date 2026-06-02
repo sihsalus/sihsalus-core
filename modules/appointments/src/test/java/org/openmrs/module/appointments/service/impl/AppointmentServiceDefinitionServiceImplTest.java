@@ -219,7 +219,7 @@ public class AppointmentServiceDefinitionServiceImplTest {
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         appointmentServiceDefinition.setName(serviceName);
         appointmentServiceDefinition.setUuid("otherUuid");
-    
+
         appointmentServiceService.save(appointmentServiceDefinition);
     }
 

@@ -33,26 +33,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class LocationsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("locationService")
 	private LocationService ls;
-	
+
 	@Autowired
 	private LocationsLoader loader;
-	
+
 	@Autowired
 	private DateDatatype dateDatatype;
-	
+
 	private Locale localeEn = Locale.ENGLISH;
-	
+
 	private Locale localeKm = new Locale("km", "KH");
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-metadata.xml");
 	}
-	
+
 	@Test
 	public void load_shouldLoadAccordingToCsvFiles() {
 		// Pre-load verif
@@ -63,7 +63,7 @@ public class LocationsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			Assert.assertThat(loc.getDescription(), nullValue());
 			Assert.assertThat(loc.getParentLocation(), nullValue());
 			Assert.assertThat(loc.getTags().size(), is(0));
-			
+
 			Collection<LocationAttribute> attributes = loc.getActiveAttributes();
 			Assert.assertThat(attributes.size(), is(1));
 			Assert.assertEquals("2016-04-14",
@@ -76,10 +76,10 @@ public class LocationsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			Assert.assertEquals("Legacy location that must be retired", loc.getDescription());
 			Assert.assertThat(loc.getRetired(), is(false));
 		}
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verify fetch by name
 		{
 			Location loc = ls.getLocation("LOCATION_NO_UUID");
@@ -93,13 +93,13 @@ public class LocationsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			Assert.assertEquals("Siem Reap", loc.getCountyDistrict());
 			Assert.assertEquals("Siem Reap", loc.getStateProvince());
 			Assert.assertEquals("Cambodia", loc.getCountry());
-			
+
 			Set<LocationTag> tags = loc.getTags();
 			Assert.assertThat(tags, notNullValue());
 			Assert.assertThat(tags.size(), is(2));
 			Assert.assertThat(tags.contains(ls.getLocationTagByName("Login Location")), is(true));
 			Assert.assertThat(tags.contains(ls.getLocationTagByName("Another Location Tag")), is(true));
-			
+
 			Collection<LocationAttribute> attributes = loc.getActiveAttributes();
 			Assert.assertThat(attributes.size(), is(2));
 			Assert.assertEquals("CODE-TLC-123", ((LocationAttribute) attributes.toArray()[0]).getValue());
@@ -110,7 +110,7 @@ public class LocationsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 		{
 			Location loc = ls.getLocation("OPD Room");
 			Assert.assertEquals(ls.getLocation("The Lake Clinic-Cambodia"), loc.getParentLocation());
-			
+
 			Set<LocationTag> tags = loc.getTags();
 			Assert.assertThat(tags, notNullValue());
 			Assert.assertThat(tags.size(), is(1));
@@ -128,17 +128,17 @@ public class LocationsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			Assert.assertEquals("Acme Clinic", loc.getName());
 			Assert.assertEquals("This now becomes a child of TLC", loc.getDescription());
 			Assert.assertEquals(ls.getLocation("The Lake Clinic-Cambodia"), loc.getParentLocation());
-			
+
 			Set<LocationTag> tags = loc.getTags();
 			Assert.assertThat(tags, notNullValue());
 			Assert.assertThat(tags.size(), is(1));
 			Assert.assertThat(tags.contains(ls.getLocationTagByName("Login Location")), is(true));
-			
+
 			Collection<LocationAttribute> attributes = loc.getActiveAttributes();
 			Assert.assertThat(attributes.size(), is(1));
 			Assert.assertEquals("2019-03-13",
 			    dateDatatype.serialize((Date) ((LocationAttribute) attributes.toArray()[0]).getValue()));
-			
+
 		}
 		// Verify retire
 		{
@@ -150,7 +150,7 @@ public class LocationsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			Location loc = ls.getLocationByUuid("2b9824a3-92f0-4966-8f34-1b105624b267");
 			Assert.assertNull(loc);
 		}
-		
+
 		// verify Locations domain i18n on entries with display:xy fields
 		{
 			Assert.assertEquals("Acme Clinic (translated)", Context.getMessageSourceService()
@@ -171,17 +171,17 @@ public class LocationsLoaderIntegrationTest extends DomainBaseModuleContextSensi
 			Assert.assertEquals("ui.i18n.Location.name.1cb58794-3c49-11ea-b3eb-f7801304f314",
 			    Context.getMessageSourceService().getMessage("ui.i18n.Location.name.1cb58794-3c49-11ea-b3eb-f7801304f314",
 			        null, localeKm));
-			
+
 			Assert.assertEquals("org.openmrs.Location.1cb58794-3c49-11ea-b3eb-f7801304f314",
 			    Context.getMessageSourceService().getMessage("org.openmrs.Location.1cb58794-3c49-11ea-b3eb-f7801304f314",
 			        null, localeEn));
 			Assert.assertEquals("org.openmrs.Location.1cb58794-3c49-11ea-b3eb-f7801304f314",
 			    Context.getMessageSourceService().getMessage("org.openmrs.Location.1cb58794-3c49-11ea-b3eb-f7801304f314",
 			        null, localeKm));
-			
+
 			Location loc = ls.getLocation("The Lake Clinic-Cambodia");
 			Assert.assertNotNull(loc);
-			
+
 			String uuid = loc.getUuid();
 			Assert.assertEquals("ui.i18n.Location.name." + uuid,
 			    Context.getMessageSourceService().getMessage("ui.i18n.Location.name." + uuid, null, localeEn));

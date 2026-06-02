@@ -15,105 +15,105 @@ import org.openmrs.module.stockmanagement.api.model.*;
 import org.openmrs.module.stockmanagement.api.utils.DateUtil;
 
 public class EntityUtil {
-	
+
 	public static final String BASE_DATASET_DIR = "org/openmrs/module/stockmanagement/api/";
-	
+
 	public static final String STOCK_OPERATION_TYPE_DATA_SET = BASE_DATASET_DIR + "StockOperationType.xml";
-	
+
 	public static final String STOCK_ITEMS_IMPORT_CSV = BASE_DATASET_DIR + "StockItemsImport2.csv";
-	
+
 	private static Random random = new Random();
-	
+
 	private Drug drug;
-	
+
 	private User user;
-	
+
 	private Location location;
-	
+
 	private Role role;
-	
+
 	private Concept concept;
-	
+
 	private Patient patient;
-	
+
 	private Party party;
-	
+
 	public EntityUtil(Drug drug, User user, Location location, Role role, Concept concept, Patient patient) {
 		this.drug = drug;
 		this.user = user;
 		this.location = location;
-		
+
 		this.role = role;
 		this.concept = concept;
 		this.patient = patient;
 	}
-	
+
 	public Order getOrder() {
 		int[] orders = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		int index = random.nextInt(orders.length - 1);
 		return Context.getOrderService().getOrder(orders[index]);
 	}
-	
+
 	public Encounter getEncounter() {
 		int[] encounters = { 3, 4, 5, 6 };
 		int index = random.nextInt(encounters.length - 1);
 		return Context.getEncounterService().getEncounter(encounters[index]);
 	}
-	
+
 	public boolean getRandomBool() {
 		return random.nextBoolean();
 	}
-	
+
 	public Date getRandomDate() {
 		int day = random.nextInt(365);
 		day = getRandomBool() ? day : day * -1;
 		Date date = new Date();
 		return DateUtils.addDays(date, day);
 	}
-	
+
 	public Double getRandomDouble() {
 		return random.nextDouble();
 	}
-	
+
 	public float getRandomFloat() {
 		return random.nextFloat();
 	}
-	
+
 	public long getRandomLong() {
 		return random.nextLong();
 	}
-	
+
 	public int getRandomInt() {
 		return random.nextInt();
 	}
-	
+
 	public BigDecimal getRandomBigDecimal() {
 		return new BigDecimal(Math.random());
 	}
-	
+
 	public short getRandomShort() {
 		return (short) random.nextInt(Short.MAX_VALUE);
 	}
-	
+
 	public byte getRandomByte() {
 		byte[] bytes = new byte[1];
 		random.nextBytes(bytes);
 		return bytes[0];
 	}
-	
+
 	public String getLocationTag() {
 		return "Store";
 	}
-	
+
 	public String getRandomString(int length) {
 		return RandomStringUtils.randomAlphabetic(length);
 	}
-	
+
 	public Object getRandomEnum(Class classType) {
 		Field f = null;
 		try {
 			f = classType.getDeclaredField("$VALUES");
-			
+
 			f.setAccessible(true);
 			Object o = f.get(null);
 			Object[] list = (Object[]) o;
@@ -123,7 +123,7 @@ public class EntityUtil {
 			throw new RuntimeException();
 		}
 	}
-	
+
 	public void setProperty(Object object, String field, Object value) {
 		try {
 			Field f = object.getClass().getDeclaredField(field);
@@ -134,19 +134,19 @@ public class EntityUtil {
 			throw new RuntimeException();
 		}
 	}
-	
+
 	public Drug getDrug() {
 		return drug;
 	}
-	
+
 	public User getUser() {
 		return user;
 	}
-	
+
 	public Location getLocation() {
 		return location;
 	}
-	
+
 	public Party getParty(StockManagementDao dao) {
 		Location location = getLocation();
 		Party party1 = dao.getPartyByLocation(location);
@@ -159,19 +159,19 @@ public class EntityUtil {
 		}
 		return party1;
 	}
-	
+
 	public Role getRole() {
 		return role;
 	}
-	
+
 	public Patient getPatient() {
 		return patient;
 	}
-	
+
 	public Concept getConcept() {
 		return concept;
 	}
-	
+
 	public LocationTree newLocationTree(StockManagementDao dao) {
 		LocationTree locationTree = new LocationTree();
 		locationTree.setParentLocationId(1);
@@ -179,20 +179,20 @@ public class EntityUtil {
 		locationTree.setDepth(getRandomInt());
 		return locationTree;
 	}
-	
+
 	public StockItemTransaction newStockItemTransaction(StockManagementDao dao) {
 		StockItem stockItem = newStockItem(dao, false);
 		dao.saveStockItem(stockItem);
-		
+
 		StockBatch stockBatch = newStockBatch(dao);
 		dao.saveStockBatch(stockBatch);
-		
+
 		StockItemPackagingUOM stockItemPackagingUOM = newStockItemPackagingUOM(dao);
 		dao.saveStockItemPackagingUOM(stockItemPackagingUOM);
-		
+
 		return newStockItemTransaction(dao, stockItem, stockBatch, stockItemPackagingUOM);
 	}
-	
+
 	public StockItemTransaction newStockItemTransaction(StockManagementDao dao, StockItem stockItem, StockBatch stockBatch,
 	        StockItemPackagingUOM stockItemPackagingUOM) {
 		StockItemTransaction stockItemTransaction = new StockItemTransaction();
@@ -209,17 +209,17 @@ public class EntityUtil {
 		stockItemTransaction.setStockItemPackagingUOM(stockItemPackagingUOM);
 		return stockItemTransaction;
 	}
-	
+
 	public StockItemPackagingUOM newStockItemPackagingUOM(StockManagementDao dao) {
 		return newStockItemPackagingUOM(dao, false);
 	}
-	
+
 	public StockItemPackagingUOM newStockItemPackagingUOM(StockManagementDao dao, boolean associateStockItemUoms) {
 		StockItem stockItem = newStockItem(dao, false);
 		dao.saveStockItem(stockItem);
 		return newStockItemPackagingUOM(dao, associateStockItemUoms, stockItem);
 	}
-	
+
 	public StockItemPackagingUOM newStockItemPackagingUOM(StockManagementDao dao, boolean associateStockItemUoms,
 	        StockItem stockItem) {
 		StockItemPackagingUOM stockItemPackagingUOM = new StockItemPackagingUOM();
@@ -236,7 +236,7 @@ public class EntityUtil {
 		stockItemPackagingUOM.setStockItem(stockItem);
 		return stockItemPackagingUOM;
 	}
-	
+
 	public UserRoleScopeOperationType newUserRoleScopeOperationType(StockManagementDao dao) {
 		UserRoleScopeOperationType userRoleScopeOperationType = new UserRoleScopeOperationType();
 		userRoleScopeOperationType.setCreator(getUser());
@@ -255,7 +255,7 @@ public class EntityUtil {
 		userRoleScopeOperationType.setStockOperationType(stockOperationType);
 		return userRoleScopeOperationType;
 	}
-	
+
 	public StockOperationType newStockOperationType(StockManagementDao dao) {/*
 	                                                                         StockOperationType stockOperationType = new StockOperationType();
 	                                                                         stockOperationType.setCreator(getUser());
@@ -278,7 +278,7 @@ public class EntityUtil {
 	                                                                         return stockOperationType;*/
 		return dao.getAllStockOperationTypes().get(0);
 	}
-	
+
 	public StockItem newStockItem(StockManagementDao dao, boolean associateUoMs) {
 		StockItem stockItem = new StockItem();
 		stockItem.setCreator(getUser());
@@ -309,13 +309,13 @@ public class EntityUtil {
 		}
 		return stockItem;
 	}
-	
+
 	public StockBatch newStockBatch(StockManagementDao dao) {
 		StockItem stockItem = newStockItem(dao, false);
 		dao.saveStockItem(stockItem);
 		return newStockBatch(dao, stockItem);
 	}
-	
+
 	public StockBatch newStockBatch(StockManagementDao dao, StockItem stockItem) {
 		StockBatch stockBatch = new StockBatch();
 		stockBatch.setCreator(getUser());
@@ -334,7 +334,7 @@ public class EntityUtil {
 		stockBatch.setStockItem(stockItem);
 		return stockBatch;
 	}
-	
+
 	public UserRoleScope newUserRoleScope(StockManagementDao dao) {
 		UserRoleScope userRoleScope = new UserRoleScope();
 		userRoleScope.setCreator(getUser());
@@ -353,7 +353,7 @@ public class EntityUtil {
 		userRoleScope.setEnabled(getRandomBool());
 		return userRoleScope;
 	}
-	
+
 	public UserRoleScopeLocation newUserRoleScopeLocation(StockManagementDao dao) {
 		UserRoleScopeLocation userRoleScopeLocation = new UserRoleScopeLocation();
 		userRoleScopeLocation.setCreator(getUser());
@@ -371,7 +371,7 @@ public class EntityUtil {
 		userRoleScopeLocation.setEnableDescendants(getRandomBool());
 		return userRoleScopeLocation;
 	}
-	
+
 	public StockRule newStockRule(StockManagementDao dao) {
 		StockItem stockItem = newStockItem(dao, false);
 		dao.saveStockItem(stockItem);
@@ -379,7 +379,7 @@ public class EntityUtil {
 		dao.saveStockItemPackagingUOM(stockItemPackagingUOM);
 		return newStockRule(dao, stockItem, stockItemPackagingUOM);
 	}
-	
+
 	public StockRule newStockRule(StockManagementDao dao, StockItem stockItem, StockItemPackagingUOM stockItemPackagingUOM) {
 		StockRule stockRule = new StockRule();
 		stockRule.setCreator(getUser());
@@ -406,7 +406,7 @@ public class EntityUtil {
 		stockRule.setMailRole(getRandomString(255));
 		return stockRule;
 	}
-	
+
 	public StockOperationItem newStockOperationItem(StockManagementDao dao) {
 		StockOperationItem stockOperationItem = new StockOperationItem();
 		stockOperationItem.setCreator(getUser());
@@ -433,7 +433,7 @@ public class EntityUtil {
 		stockOperationItem.setStockOperation(stockOperation);
 		return stockOperationItem;
 	}
-	
+
 	public StockOperation newStockOperation(StockManagementDao dao) {
 		StockOperation stockOperation = new StockOperation();
 		stockOperation.setCreator(getUser());
@@ -476,7 +476,7 @@ public class EntityUtil {
 		stockOperation.setRejectedDate(getRandomDate());
 		return stockOperation;
 	}
-	
+
 	public StockOperationTypeLocationScope newStockOperationTypeLocationScope(StockManagementDao dao) {
 		StockOperationTypeLocationScope stockOperationTypeLocationScope = new StockOperationTypeLocationScope();
 		stockOperationTypeLocationScope.setCreator(getUser());
@@ -493,7 +493,7 @@ public class EntityUtil {
 		stockOperationTypeLocationScope.setLocationTag(getLocationTag());
 		return stockOperationTypeLocationScope;
 	}
-	
+
 	public StockSource newStockSource(StockManagementDao dao) {
 		StockSource stockSource = new StockSource();
 		stockSource.setCreator(getUser());
@@ -509,7 +509,7 @@ public class EntityUtil {
 		stockSource.setSourceType(getConcept());
 		return stockSource;
 	}
-	
+
 	public Party newParty(StockManagementDao dao) {
 		Party party = new Party();
 		party.setCreator(getUser());
@@ -526,7 +526,7 @@ public class EntityUtil {
 		party.setStockSource(stockSource);
 		return party;
 	}
-	
+
 	public StockOperationLink newStockOperationLink(StockManagementDao dao) {
 		StockOperationLink stockOperationLink = new StockOperationLink();
 		stockOperationLink.setCreator(getUser());
@@ -545,7 +545,7 @@ public class EntityUtil {
 		stockOperationLink.setChild(child);
 		return stockOperationLink;
 	}
-	
+
 	public OrderItem newOrderItem(StockManagementDao dao, StockItem stockItem, StockItemPackagingUOM stockItemPackagingUOM) {
 		OrderItem orderItem = new OrderItem();
 		orderItem.setCreator(getUser());
@@ -563,7 +563,7 @@ public class EntityUtil {
 		orderItem.setFulfilmentLocation(getLocation());
 		return orderItem;
 	}
-	
+
 	public BatchJobOwner newBatchJobOwner(StockManagementDao dao) {
 		BatchJobOwner batchJobOwner = new BatchJobOwner();
 		BatchJob batchJob = newBatchJob(dao);
@@ -573,7 +573,7 @@ public class EntityUtil {
 		batchJobOwner.setDateCreated(getRandomDate());
 		return batchJobOwner;
 	}
-	
+
 	public BatchJob newBatchJob(StockManagementDao dao) {
 		BatchJob batchJob = new BatchJob();
 		batchJob.setCreator(getUser());

@@ -22,12 +22,12 @@ import org.openmrs.util.OpenmrsConstants;
  * Allows to execute tests only on the specific version of OpenMRS.
  */
 public class OpenmrsProfileRule implements ExecutionCondition {
-	
+
 	private final String[] openmrsVersions;
-	
+
 	/**
 	 * Allows to specify versions of OpenMRS on which tests should be executed.
-	 * 
+	 *
 	 * @param openmrsVersion
 	 * @param openmrsVersions
 	 */
@@ -36,16 +36,16 @@ public class OpenmrsProfileRule implements ExecutionCondition {
 		this.openmrsVersions = Arrays.copyOf(openmrsVersions, length + 1);
 		this.openmrsVersions[length] = openmrsVersion;
 	}
-	
+
 	/**
 	 * Allows to specify a version of OpenMRS on which tests should be executed.
-	 * 
+	 *
 	 * @param openmrsVersion
 	 */
 	public OpenmrsProfileRule(String openmrsVersion) {
 		this.openmrsVersions = new String[] { openmrsVersion };
 	}
-	
+
 	@Override
 	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
 		for (String openmrsVersion : openmrsVersions) {
@@ -56,5 +56,5 @@ public class OpenmrsProfileRule implements ExecutionCondition {
 		return ConditionEvaluationResult.disabled("Test disabled (run only on OpenMRS "
 		        + StringUtils.join(openmrsVersions, ",") + ")");
 	}
-	
+
 }

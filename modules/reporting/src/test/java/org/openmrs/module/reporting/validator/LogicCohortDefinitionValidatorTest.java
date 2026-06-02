@@ -21,7 +21,7 @@ import org.springframework.validation.Errors;
  * Tests methods on the {@link CohortDefinitionValidator} class.
  */
 public class LogicCohortDefinitionValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -30,13 +30,13 @@ public class LogicCohortDefinitionValidatorTest extends BaseModuleContextSensiti
 	public void validate_shouldFailValidationIfLogicIsNull() throws Exception {
 		LogicCohortDefinition logicCohortDefinition = new LogicCohortDefinition();
 		logicCohortDefinition.setLogic(null);
-		
+
 		Errors errors = new BindException(logicCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(logicCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -45,13 +45,13 @@ public class LogicCohortDefinitionValidatorTest extends BaseModuleContextSensiti
 	public void validate_shouldFailValidationIfLogicIsEmptyString() throws Exception {
 		LogicCohortDefinition logicCohortDefinition = new LogicCohortDefinition();
 		logicCohortDefinition.setLogic(" ");
-		
+
 		Errors errors = new BindException(logicCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(logicCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -61,10 +61,10 @@ public class LogicCohortDefinitionValidatorTest extends BaseModuleContextSensiti
 		LogicCohortDefinition logicCohortDefinition = new LogicCohortDefinition();
 		logicCohortDefinition.setName("Test CD");
 		logicCohortDefinition.setLogic("Some Value");
-		
+
 		Errors errors = new BindException(logicCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(logicCohortDefinition, errors);
-		
+
 		Assert.assertFalse(errors.hasErrors());
 	}
 }

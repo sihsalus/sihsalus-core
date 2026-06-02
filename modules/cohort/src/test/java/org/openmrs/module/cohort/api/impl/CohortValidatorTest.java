@@ -15,10 +15,10 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
 public class CohortValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	CohortMValidator validator;
-	
+
 	@Test
 	public void saveCohort_shouldFailValidationOnExistingName() {
 		CohortM cohort = new CohortM();
@@ -26,16 +26,16 @@ public class CohortValidatorTest extends BaseModuleContextSensitiveTest {
 		cohort.setName("Test Cohort");
 		cohort.setDescription("Test Cohort Description");
 		Context.getService(CohortService.class).saveCohortM(cohort);
-		
+
 		CohortM invalidCohort = new CohortM();
 		invalidCohort.setCohortType(new CohortType());
 		invalidCohort.setName("Test Cohort");
 		Errors errors = new BeanPropertyBindingResult(invalidCohort, "invalidCohort");
 		validator.validate(invalidCohort, errors);
-		
+
 		assertThat(errors.getErrorCount(), equalTo(1));
 	}
-	
+
 	@Test
 	public void saveCohort_shouldPassValidationOnUpdatingWhileKeepingName() {
 		CohortM cohort = new CohortM();
@@ -46,7 +46,7 @@ public class CohortValidatorTest extends BaseModuleContextSensitiveTest {
 		cohort.setDescription("Updated Cohort description");
 		Errors errors = new BeanPropertyBindingResult(cohort, "invalid cohort");
 		validator.validate(cohort, errors);
-		
+
 		assertThat(errors.getErrorCount(), equalTo(0));
 	}
 }

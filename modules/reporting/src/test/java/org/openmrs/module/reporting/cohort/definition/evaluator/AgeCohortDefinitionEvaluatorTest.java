@@ -53,20 +53,20 @@ public class AgeCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 		p.setBirthdate(DateUtil.getDateTime(2007, 5, 27));
 		patientService.savePatient(p);
 	}
-	
+
 	@Test
 	public void evaluate_shouldReturnOnlyPatientsBornOnOrBeforeTheEvaluationDate() throws Exception {
 		testAgeRange(3, null, null, false, null, null); // Using the default evaluation date
 		testAgeRange(2, null, null, false, "2007-01-01", null); // Using the set evaluation date
 	}
-	
+
 	@Test
 	public void evaluate_shouldReturnOnlyNonVoidedPatients() throws Exception {
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(new AgeCohortDefinition(), null);
 		Assert.assertEquals(3, cohort.getSize());
 		Assert.assertFalse(cohort.contains(999));
 	}
-	
+
 	@Test
 	public void evaluate_shouldReturnOnlyPatientsInTheGivenAgeRange() throws Exception {
 		// Test year calculations
@@ -79,7 +79,7 @@ public class AgeCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 		testAgeRange(1, 23, 23, false, "2009-05-26", DurationUnit.MONTHS);
 		testAgeRange(1, 24, 24, false, "2009-05-27", DurationUnit.MONTHS);
 	}
-	
+
 	@Test
 	public void evaluate_shouldOnlyReturnPatientsWithUnknownAgeIfSpecified() throws Exception {
 		testAgeRange(3, null, null, false, null, null);
@@ -107,7 +107,7 @@ public class AgeCohortDefinitionEvaluatorTest extends BaseModuleContextSensitive
 	 * @param unknown
 	 * @param ymdEffectiveDate
 	 * @param ageUnits
-	 * @throws EvaluationException 
+	 * @throws EvaluationException
 	 */
 	private void testAgeRange(int numPats, Integer minAge, Integer maxAge, boolean unknown, String ymdEffectiveDate, DurationUnit ageUnits) throws EvaluationException {
 		AgeCohortDefinition acd = new AgeCohortDefinition();

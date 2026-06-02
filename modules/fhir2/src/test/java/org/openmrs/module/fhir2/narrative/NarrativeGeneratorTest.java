@@ -34,11 +34,11 @@ import org.openmrs.util.OpenmrsUtil;
  * OpenMRSNarrativeTemplateManifest and OpenMRSNarrativeTemplate)
  */
 public class NarrativeGeneratorTest {
-	
+
 	protected final FhirContext ctx = FhirContext.forR4();
-	
+
 	protected final BaseResource dummyResource = new Patient();
-	
+
 	/**
 	 * Check that IOException is thrown when no valid prefix is present in property file path
 	 */
@@ -46,15 +46,15 @@ public class NarrativeGeneratorTest {
 	public void shouldThrowIOExceptionWhenNoValidPrefixInPath() {
 		String givenPath = "some/random/path/without/prefix.properties";
 		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(null, givenPath));
-		
+
 		String expectedErrorMessage = "Invalid resource name: '" + givenPath
 		        + "' (must start with classpath: or file: or openmrs:)";
-		
+
 		Throwable e = assertThrows(InternalErrorException.class,
 		    () -> ctx.getNarrativeGenerator().populateResourceNarrative(ctx, dummyResource));
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
-	
+
 	/**
 	 * Check that IOException is thrown when property file classpath is incorrect
 	 */
@@ -62,14 +62,14 @@ public class NarrativeGeneratorTest {
 	public void shouldThrowIOExcpetionForIncorrectClassPath() {
 		String givenPath = "classpath:some/random/class/path.properties";
 		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(null, givenPath));
-		
+
 		String expectedErrorMessage = "Can not find '" + givenPath.substring("classpath:".length()) + "' on classpath";
-		
+
 		Throwable e = assertThrows(InternalErrorException.class,
 		    () -> ctx.getNarrativeGenerator().populateResourceNarrative(ctx, dummyResource));
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
-	
+
 	/**
 	 * Check that IOException is thrown when property file filepath is incorrect
 	 */
@@ -77,15 +77,15 @@ public class NarrativeGeneratorTest {
 	public void shouldThrowIOExcpetionForIncorrectFilePath() {
 		String givenPath = "file:some/random/file/path.properties";
 		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(null, givenPath));
-		
+
 		File file = new File(givenPath.substring("file:".length()));
 		String expectedErrorMessage = "File not found: " + file.getAbsolutePath();
-		
+
 		Throwable e = assertThrows(InternalErrorException.class,
 		    () -> ctx.getNarrativeGenerator().populateResourceNarrative(ctx, dummyResource));
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
-	
+
 	/**
 	 * Check that IOException is thrown when property file OpenMRS relative path is incorrect
 	 */
@@ -93,18 +93,18 @@ public class NarrativeGeneratorTest {
 	public void shouldThrowIOExcpetionForIncorrectOpenmrsPath() {
 		String givenPath = "openmrs:some/random/openmrs/path.properties";
 		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(null, givenPath));
-		
+
 		File file = new File(OpenmrsUtil.getApplicationDataDirectory(), givenPath.substring("openmrs:".length()));
 		String expectedErrorMessage = "File not found: " + file.getAbsolutePath();
-		
+
 		Throwable e = assertThrows(InternalErrorException.class,
 		    () -> ctx.getNarrativeGenerator().populateResourceNarrative(ctx, dummyResource));
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
-	
+
 	/**
 	 * Check that property values are correctly mapped from property file to the template
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -117,19 +117,19 @@ public class NarrativeGeneratorTest {
 		TemplateTypeEnum expectedTemplateType = TemplateTypeEnum.THYMELEAF;
 		String expectedContextPath = "testContextPath";
 		String expectedNarrative = "<div>testNarrativeContent</div>";
-		
+
 		OpenmrsNarrativeTemplateManifest manifest = OpenmrsNarrativeTemplateManifest
 		        .forManifestFileLocation(Collections.singletonList(testNarrativePropFile));
 		INarrativeTemplate template = manifest.getTemplateByName(ctx, EnumSet.of(TemplateTypeEnum.THYMELEAF), "testRes")
 		        .get(0);
-		
+
 		assertEquals(template.getAppliesToProfiles(), expectedProfiles);
 		assertEquals(template.getAppliesToResourceTypes(), expectedResourceType);
 		assertEquals(template.getTemplateType(), expectedTemplateType);
 		assertEquals(template.getContextPath(), expectedContextPath);
 		assertEquals(template.getTemplateText().trim(), expectedNarrative.trim());
 	}
-	
+
 	/**
 	 * Check that ConfigurationException is thrown when property name is invalid
 	 */
@@ -139,7 +139,7 @@ public class NarrativeGeneratorTest {
 		String expectedErrorMessage = "Invalid property name: testRes.invalidPropertyName"
 		        + " - the key must end in one of the expected extensions "
 		        + "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'";
-		
+
 		Throwable e = assertThrows(ConfigurationException.class, () -> OpenmrsNarrativeTemplateManifest
 		        .forManifestFileLocation(Collections.singletonList(testNarrativePropFile)));
 		assertEquals(e.getMessage(), expectedErrorMessage);

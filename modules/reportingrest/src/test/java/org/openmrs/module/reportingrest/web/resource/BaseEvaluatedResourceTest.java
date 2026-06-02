@@ -91,8 +91,8 @@ public abstract class BaseEvaluatedResourceTest<R extends EvaluatedResource<T>, 
     protected boolean hasLink(Object obj, String rel, String uriEndsWith) throws Exception {
 	    List<Hyperlink> links = (List<Hyperlink>) path(obj, "links");
 	    for (Hyperlink link : links) {
-	    	if (link.getRel().equals(rel) && link.getUri().endsWith(uriEndsWith))
-	    		return true;
+		if (link.getRel().equals(rel) && link.getUri().endsWith(uriEndsWith))
+			return true;
 	    }
 	    return false;
     }

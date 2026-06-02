@@ -60,74 +60,74 @@ import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationDispenseTranslatorImplTest {
-	
+
 	public static final String MEDICATION_DISPENSE_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
-	
+
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
-	
+
 	@Mock
 	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
-	
+
 	@Mock
 	private MedicationRequestReferenceTranslator medicationRequestReferenceTranslator;
-	
+
 	@Mock
 	private ConceptTranslator conceptTranslator;
-	
+
 	@Mock
 	private LocationReferenceTranslator locationReferenceTranslator;
-	
+
 	@Mock
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
-	
+
 	@Mock
 	private MedicationDispenseStatusTranslator medicationDispenseStatusTranslator;
-	
+
 	@Mock
 	private MedicationRequestStatusTranslator statusTranslator;
-	
+
 	@Mock
 	private MedicationReferenceTranslator medicationReferenceTranslator;
-	
+
 	@Mock
 	private MedicationRequestPriorityTranslator medicationRequestPriorityTranslator;
-	
+
 	@Mock
 	private MedicationRequestTimingRepeatComponentTranslator medicationRequestTimingRepeatComponentTranslator;
-	
+
 	@Mock
 	private OrderIdentifierTranslator orderIdentifierTranslator;
-	
+
 	@Mock
 	private OrderService orderService;
-	
+
 	private MedicationDispense openmrsDispense;
-	
+
 	private org.hl7.fhir.r4.model.MedicationDispense fhirDispense;
-	
+
 	private Date dateCreated;
-	
+
 	private MedicationDispenseTranslatorImpl translator;
-	
+
 	@Before
 	public void setup() {
 		MedicationQuantityCodingTranslatorImpl quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
 		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
-		
+
 		MedicationRequestDispenseRequestComponentTranslatorImpl dispenseRequestTranslator = new MedicationRequestDispenseRequestComponentTranslatorImpl();
 		dispenseRequestTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
-		
+
 		MedicationRequestTimingTranslatorImpl timingTranslator = new MedicationRequestTimingTranslatorImpl();
 		timingTranslator.setTimingRepeatComponentTranslator(medicationRequestTimingRepeatComponentTranslator);
 		timingTranslator.setConceptTranslator(conceptTranslator);
 		timingTranslator.setOrderService(orderService);
-		
+
 		DosageTranslatorImpl dosageTranslator = new DosageTranslatorImpl();
 		dosageTranslator.setConceptTranslator(conceptTranslator);
 		dosageTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		dosageTranslator.setTimingTranslator(timingTranslator);
-		
+
 		MedicationRequestTranslatorImpl medicationRequestTranslator = new MedicationRequestTranslatorImpl();
 		medicationRequestTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		medicationRequestTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
@@ -139,7 +139,7 @@ public class MedicationDispenseTranslatorImplTest {
 		medicationRequestTranslator.setStatusTranslator(statusTranslator);
 		medicationRequestTranslator.setMedicationRequestDispenseRequestComponentTranslator(dispenseRequestTranslator);
 		medicationRequestTranslator.setMedicationRequestPriorityTranslator(medicationRequestPriorityTranslator);
-		
+
 		translator = new MedicationDispenseTranslatorImpl();
 		translator.setPatientReferenceTranslator(patientReferenceTranslator);
 		translator.setEncounterReferenceTranslator(encounterReferenceTranslator);
@@ -149,107 +149,107 @@ public class MedicationDispenseTranslatorImplTest {
 		translator.setLocationReferenceTranslator(locationReferenceTranslator);
 		translator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 		translator.setMedicationDispenseStatusTranslator(medicationDispenseStatusTranslator);
-		
+
 		dateCreated = new Date();
 		openmrsDispense = new MedicationDispense();
 		openmrsDispense.setUuid(MEDICATION_DISPENSE_UUID);
 		openmrsDispense.setDateCreated(dateCreated);
-		
+
 		fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
 		fhirDispense.setId(MEDICATION_DISPENSE_UUID);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateId() {
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getId(), equalTo(MEDICATION_DISPENSE_UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslatePatient() {
 		Patient openmrsObject = new Patient();
 		Reference fhirObject = newReference();
 		when(patientReferenceTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
-		
+
 		openmrsDispense.setPatient(openmrsObject);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getSubject(), notNullValue());
 		assertThat(dispense.getSubject(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateEncounter() {
 		Encounter openmrsObject = new Encounter();
 		Reference fhirObject = newReference();
 		when(encounterReferenceTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
-		
+
 		openmrsDispense.setEncounter(openmrsObject);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getContext(), notNullValue());
 		assertThat(dispense.getContext(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrder() {
 		DrugOrder openmrsObject = new DrugOrder();
 		Reference fhirObject = newReference();
 		when(medicationRequestReferenceTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
-		
+
 		openmrsDispense.setDrugOrder(openmrsObject);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getAuthorizingPrescription().size(), equalTo(1));
 		assertThat(dispense.getAuthorizingPrescriptionFirstRep(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateStatus() {
 		Concept openmrsObject = new Concept();
 		org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseStatus fhirObject = org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseStatus.COMPLETED;
 		when(medicationDispenseStatusTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
-		
+
 		openmrsDispense.setStatus(openmrsObject);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getStatus(), notNullValue());
 		assertThat(dispense.getStatus(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateStatusReason() {
 		Concept openmrsObject = new Concept();
 		CodeableConcept fhirObject = newCodeableConcept();
 		when(conceptTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
-		
+
 		openmrsDispense.setStatusReason(openmrsObject);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getStatusReason(), notNullValue());
 		assertThat(dispense.getStatusReason(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateLocation() {
 		Location openmrsObject = new Location();
 		Reference fhirObject = newReference();
 		when(locationReferenceTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
-		
+
 		openmrsDispense.setLocation(openmrsObject);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getLocation(), notNullValue());
 		assertThat(dispense.getLocation(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateType() {
 		Concept openmrsObject = new Concept();
 		CodeableConcept fhirObject = newCodeableConcept();
 		when(conceptTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
-		
+
 		openmrsDispense.setType(openmrsObject);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getType(), notNullValue());
 		assertThat(dispense.getType(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDatePrepared() {
 		openmrsDispense.setDatePrepared(new Date());
@@ -257,7 +257,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getWhenPrepared(), notNullValue());
 		assertThat(dispense.getWhenPrepared(), equalTo(openmrsDispense.getDatePrepared()));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDateHandedOver() {
 		openmrsDispense.setDateHandedOver(new Date());
@@ -265,38 +265,38 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getWhenHandedOver(), notNullValue());
 		assertThat(dispense.getWhenHandedOver(), equalTo(openmrsDispense.getDateHandedOver()));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDateLastUpdated() {
 		Date dateCreated = new DateTime("2012-01-01").toDate();
 		Date dateChanged = new DateTime("2012-02-01").toDate();
-		
+
 		// should use date created if only date created
 		openmrsDispense.setDateCreated(dateCreated);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getMeta().getLastUpdated(), notNullValue());
 		assertThat(dispense.getMeta().getLastUpdated(), equalTo(openmrsDispense.getDateCreated()));
-		
+
 		// but use date updated if it exists
 		openmrsDispense.setDateCreated(dateCreated);
 		openmrsDispense.setDateChanged(dateChanged);
 		dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getMeta().getLastUpdated(), notNullValue());
 		assertThat(dispense.getMeta().getLastUpdated(), equalTo(openmrsDispense.getDateChanged()));
-		
+
 	}
-	
+
 	@Test
 	public void shouldTranslateOpenMrsDateChangedToVersionId() {
 		org.openmrs.MedicationDispense medicationDispense = new org.openmrs.MedicationDispense();
 		medicationDispense.setDateChanged(new Date());
-		
+
 		org.hl7.fhir.r4.model.MedicationDispense result = translator.toFhirResource(medicationDispense);
-		
+
 		assertThat(result, Matchers.notNullValue());
 		assertThat(result.getMeta().getVersionId(), Matchers.notNullValue());
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateMedicationConcept() {
 		Concept openmrsObject = new Concept();
@@ -307,7 +307,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getMedicationCodeableConcept(), equalTo(fhirObject));
 		assertThat(dispense.hasMedicationReference(), equalTo(false));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateMedicationDrug() {
 		Drug openmrsObject = new Drug();
@@ -318,7 +318,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getMedicationReference(), equalTo(fhirObject));
 		assertThat(dispense.hasMedicationCodeableConcept(), equalTo(false));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDoseQuantityAndUnits() {
 		String uuid = "b485f97d-3836-4aed-8c90-81b536cc6e3a";
@@ -333,7 +333,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertNull(quantity.getSystem());
 		assertThat(quantity.getCode(), equalTo(uuid));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDoseRoute() {
 		Concept openmrsObject = new Concept();
@@ -344,7 +344,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getDosageInstructionFirstRep().getRoute(), notNullValue());
 		assertThat(dispense.getDosageInstructionFirstRep().getRoute(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDoseFrequency() {
 		OrderFrequency frequencyConcept = new OrderFrequency();
@@ -357,7 +357,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getDosageInstructionFirstRep().getTiming().getCode(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDoseAsNeeded() {
 		openmrsDispense.setAsNeeded(true);
@@ -365,7 +365,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getDosageInstructionFirstRep().getAsNeededBooleanType().getValue(), equalTo(true));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDosingInstructions() {
 		openmrsDispense.setDosingInstructions("These are dosing instructions");
@@ -373,7 +373,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getDosageInstructionFirstRep().getText(), equalTo(openmrsDispense.getDosingInstructions()));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDispenseQuantityAndUnits() {
 		String uuid = "b485f97d-3836-4aed-8c90-81b536cc6e3a";
@@ -388,7 +388,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertNull(quantity.getSystem());
 		assertThat(quantity.getCode(), equalTo(uuid));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDispenser() {
 		Provider openmrsObject = new Provider();
@@ -400,14 +400,14 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getPerformer().get(0).getActor(), equalTo(fhirObject));
 		assertThat(dispense.getPerformer().get(0).getFunction().hasCoding(), equalTo(false));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateWasSubstituted() {
 		openmrsDispense.setWasSubstituted(true);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getSubstitution().getWasSubstituted(), equalTo(true));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateSubstitutionType() {
 		Concept openmrsObject = new Concept();
@@ -417,7 +417,7 @@ public class MedicationDispenseTranslatorImplTest {
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getSubstitution().getType(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateSubstitutionReason() {
 		Concept openmrsObject = new Concept();
@@ -427,7 +427,7 @@ public class MedicationDispenseTranslatorImplTest {
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getSubstitution().getReasonFirstRep(), equalTo(fhirObject));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateRecordedExtension() {
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
@@ -435,86 +435,86 @@ public class MedicationDispenseTranslatorImplTest {
 		    ((DateTimeType) dispense.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_RECORDED).getValue()).getValue(),
 		    equalTo(dateCreated));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateId() {
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getUuid(), equalTo(MEDICATION_DISPENSE_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateEncounter() {
 		Encounter openmrsObject = new Encounter();
 		Reference fhirObject = newReference();
 		when(encounterReferenceTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
-		
+
 		fhirDispense.setContext(fhirObject);
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getEncounter(), notNullValue());
 		assertThat(dispense.getEncounter(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDrugOrder() {
 		DrugOrder openmrsObject = new DrugOrder();
 		Reference fhirObject = newReference();
 		when(medicationRequestReferenceTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
-		
+
 		fhirDispense.addAuthorizingPrescription(fhirObject);
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getDrugOrder(), notNullValue());
 		assertThat(dispense.getDrugOrder(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateStatus() {
 		Concept openmrsObject = new Concept();
 		org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseStatus fhirObject = org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseStatus.COMPLETED.COMPLETED;
 		when(medicationDispenseStatusTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
-		
+
 		fhirDispense.setStatus(fhirObject);
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getStatus(), notNullValue());
 		assertThat(dispense.getStatus(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateStatusReason() {
 		Concept openmrsObject = new Concept();
 		CodeableConcept fhirObject = newCodeableConcept();
 		when(conceptTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
-		
+
 		fhirDispense.setStatusReason(fhirObject);
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getStatusReason(), notNullValue());
 		assertThat(dispense.getStatusReason(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateLocation() {
 		Location openmrsObject = new Location();
 		Reference fhirObject = newReference();
 		when(locationReferenceTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
-		
+
 		fhirDispense.setLocation(fhirObject);
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getLocation(), notNullValue());
 		assertThat(dispense.getLocation(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateType() {
 		Concept openmrsObject = new Concept();
 		CodeableConcept fhirObject = newCodeableConcept();
 		when(conceptTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
-		
+
 		fhirDispense.setType(fhirObject);
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getType(), notNullValue());
 		assertThat(dispense.getType(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDatePrepared() {
 		fhirDispense.setWhenPrepared(new Date());
@@ -522,7 +522,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getDatePrepared(), notNullValue());
 		assertThat(dispense.getDatePrepared(), equalTo(fhirDispense.getWhenPrepared()));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDateHandedOver() {
 		fhirDispense.setWhenHandedOver(new Date());
@@ -530,7 +530,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getDateHandedOver(), notNullValue());
 		assertThat(dispense.getDateHandedOver(), equalTo(fhirDispense.getWhenHandedOver()));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateMedicationConcept() {
 		Concept openmrsObject = new Concept();
@@ -541,7 +541,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getConcept(), equalTo(openmrsObject));
 		assertThat(dispense.getDrug(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateMedicationDrug() {
 		Drug openmrsObject = new Drug();
@@ -552,7 +552,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getDrug(), equalTo(openmrsObject));
 		assertThat(dispense.getConcept(), equalTo(dispense.getDrug().getConcept()));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDoseQuantityAndUnits() {
 		Concept openmrsObject = new Concept();
@@ -568,7 +568,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getDose(), equalTo(100d));
 		assertThat(dispense.getDoseUnits(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDoseRoute() {
 		Concept openmrsObject = new Concept();
@@ -579,7 +579,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getRoute(), notNullValue());
 		assertThat(dispense.getRoute(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDoseFrequency() {
 		OrderFrequency frequencyConcept = new OrderFrequency();
@@ -593,7 +593,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getFrequency(), equalTo(frequencyConcept));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDoseAsNeeded() {
 		fhirDispense.addDosageInstruction().setAsNeeded(new BooleanType(true));
@@ -601,7 +601,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getAsNeeded(), equalTo(true));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDosingInstructions() {
 		fhirDispense.addDosageInstruction().setText("These are dosing instructions");
@@ -609,7 +609,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getDosingInstructions(), equalTo("These are dosing instructions"));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDispenseQuantityAndUnits() {
 		Concept openmrsObject = new Concept();
@@ -623,7 +623,7 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getQuantity(), equalTo(100d));
 		assertThat(dispense.getQuantityUnits(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateDispenser() {
 		Provider openmrsObject = new Provider();
@@ -633,7 +633,7 @@ public class MedicationDispenseTranslatorImplTest {
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getDispenser(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateWasSubstituted() {
 		fhirDispense.setSubstitution(
@@ -641,7 +641,7 @@ public class MedicationDispenseTranslatorImplTest {
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getWasSubstituted(), equalTo(true));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateSubstitutionType() {
 		Concept openmrsObject = new Concept();
@@ -652,7 +652,7 @@ public class MedicationDispenseTranslatorImplTest {
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getSubstitutionType(), equalTo(openmrsObject));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateSubstitutionReason() {
 		Concept openmrsObject = new Concept();
@@ -663,7 +663,7 @@ public class MedicationDispenseTranslatorImplTest {
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense.getSubstitutionReason(), equalTo(openmrsObject));
 	}
-	
+
 	/**
 	 * The following set of tests confirm that if we set a specific Medication Dispense FHIR field to
 	 * null, when updating an OpenMRS Medication Dispense, that field is set to null
@@ -673,84 +673,84 @@ public class MedicationDispenseTranslatorImplTest {
 		Encounter encounter = new Encounter();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setEncounter(encounter);
-		
+
 		fhirDispense.setContext(null);
 		;
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getEncounter(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDrugOrderToNull() {
 		DrugOrder drugOrder = new DrugOrder();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setDrugOrder(drugOrder);
-		
+
 		fhirDispense.addAuthorizingPrescription(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getDrugOrder(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetStatusReasonToNull() {
 		Concept statusReason = new Concept();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setStatusReason(statusReason);
-		
+
 		fhirDispense.setStatusReason(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getStatusReason(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetLocationToNull() {
 		Location location = new Location();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setLocation(location);
-		
+
 		fhirDispense.setLocation(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getLocation(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetTypeToNull() {
 		Concept type = new Concept();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setType(type);
-		
+
 		fhirDispense.setType(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getType(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDatePreparedToNull() {
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setDatePrepared(new Date());
-		
+
 		fhirDispense.setWhenPrepared(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getDatePrepared(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDateHandedOverToNull() {
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setDateHandedOver(new Date());
-		
+
 		fhirDispense.setWhenHandedOver(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getDateHandedOver(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDoseQuantityAndUnitsToNull() {
 		Concept doseUnits = new Concept();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setDose(100d);
 		medicationDispense.setDoseUnits(doseUnits);
-		
+
 		Dosage.DosageDoseAndRateComponent doseAndRateComponent = new Dosage.DosageDoseAndRateComponent();
 		doseAndRateComponent.setDose(null);
 		fhirDispense.addDosageInstruction(new Dosage().addDoseAndRate(doseAndRateComponent));
@@ -758,73 +758,73 @@ public class MedicationDispenseTranslatorImplTest {
 		assertThat(dispense.getDose(), nullValue());
 		assertThat(dispense.getDoseUnits(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetRouteToNull() {
 		Concept route = new Concept();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setRoute(route);
-		
+
 		fhirDispense.addDosageInstruction().setRoute(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getRoute(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDoseFrequencyToNull() {
 		OrderFrequency frequencyConcept = new OrderFrequency();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setFrequency(frequencyConcept);
-		
+
 		fhirDispense.addDosageInstruction().setTiming(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getFrequency(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDoseAsNeededToNull() {
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setAsNeeded(true);
-		
+
 		fhirDispense.addDosageInstruction().setAsNeeded(null);
 		MedicationDispense dispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(dispense.getAsNeeded(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDosingInstructionsToNull() {
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setDosingInstructions("These are dosing instructions");
-		
+
 		fhirDispense.addDosageInstruction().setText(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getDosingInstructions(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDispenseQuantityAndUnitsToNull() {
 		Concept quantityUnits = new Concept();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setQuantity(100d);
 		medicationDispense.setQuantityUnits(quantityUnits);
-		
+
 		fhirDispense.setQuantity(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getQuantity(), nullValue());
 		assertThat(medicationDispense.getQuantityUnits(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetDispenserToNull() {
 		Provider provider = new Provider();
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setDispenser(provider);
-		
+
 		fhirDispense.addPerformer().setActor(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getDispenser(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetSubstitutionToNull() {
 		Concept substitutionType = new Concept();
@@ -833,14 +833,14 @@ public class MedicationDispenseTranslatorImplTest {
 		medicationDispense.setWasSubstituted(true);
 		medicationDispense.setSubstitutionType(substitutionType);
 		medicationDispense.setSubstitutionReason(substitutionReason);
-		
+
 		fhirDispense.setSubstitution(null);
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getWasSubstituted(), nullValue());
 		assertThat(medicationDispense.getSubstitutionType(), nullValue());
 		assertThat(medicationDispense.getSubstitutionReason(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetSubstitutionTypeToNull() {
 		Concept substitutionType = new Concept();
@@ -848,13 +848,13 @@ public class MedicationDispenseTranslatorImplTest {
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setWasSubstituted(true);
 		medicationDispense.setSubstitutionType(substitutionType);
-		
+
 		fhirDispense.setSubstitution(new org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseSubstitutionComponent()
 		        .setType(null).setWasSubstituted(true));
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getSubstitutionType(), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldSetSubstitutionReasonToNull() {
 		Concept substitutionReason = new Concept();
@@ -862,19 +862,19 @@ public class MedicationDispenseTranslatorImplTest {
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setWasSubstituted(true);
 		medicationDispense.setSubstitutionReason(substitutionReason);
-		
+
 		fhirDispense.setSubstitution(new org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseSubstitutionComponent()
 		        .setReason(null).setWasSubstituted(true));
 		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
 		assertThat(medicationDispense.getSubstitutionReason(), nullValue());
 	}
-	
+
 	private CodeableConcept newCodeableConcept() {
 		CodeableConcept c = new CodeableConcept();
 		c.addCoding(new Coding("system", "code", "display"));
 		return c;
 	}
-	
+
 	private Reference newReference() {
 		Reference r = new Reference();
 		r.setReference("reference");

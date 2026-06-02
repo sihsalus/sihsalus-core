@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 
 public class MostRecentEncounterForPatientQueryEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
 
@@ -38,12 +38,12 @@ public class MostRecentEncounterForPatientQueryEvaluatorTest extends BaseModuleC
 
 	@Autowired
 	EncounterQueryService encounterQueryService;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see {@link MostRecentEncounterForPatientQueryEvaluator#evaluate(EncounterQuery,EvaluationContext)}
 	 */
@@ -53,7 +53,7 @@ public class MostRecentEncounterForPatientQueryEvaluatorTest extends BaseModuleC
 
 		Date date = new Date();
 		Encounter enc = tdm.encounter().location(1).encounterType(1).encounterDatetime(date).patient(7).save();
-		
+
 		MostRecentEncounterForPatientQuery query = new MostRecentEncounterForPatientQuery();
 		query.setOnOrBefore(DateUtil.getStartOfDay(date));
 		Cohort cohort = new Cohort("7");
@@ -62,5 +62,5 @@ public class MostRecentEncounterForPatientQueryEvaluatorTest extends BaseModuleC
 		EncounterQueryResult result = encounterQueryService.evaluate(query, context);
 		Assert.assertEquals(enc.getEncounterId(), result.getMemberIds().iterator().next());
 	}
-	
+
 }

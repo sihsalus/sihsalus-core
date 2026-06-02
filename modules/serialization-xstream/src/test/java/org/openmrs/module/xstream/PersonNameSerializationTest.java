@@ -31,10 +31,10 @@ import static org.junit.Assert.assertTrue;
  * Test class that tests the serialization and deserialization of a PersonName
  */
 public class PersonNameSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a person name and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -45,9 +45,9 @@ public class PersonNameSerializationTest extends BaseModuleContextSensitiveTest 
 		executeDataSet("org/openmrs/module/xstream/include/PersonNameSerializationTest.xml");
 		authenticate();
 		PersonName pn = Context.getPersonService().getPersonNameByUuid("399e3a7b-6482-487d-94ce-c07bb3ca3cc7");
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		//serialize and compare with a give string
 		String xmlOutput = Context.getSerializationService().serialize(pn, XStreamSerializer.class);
 		XMLAssert.assertXpathEvaluatesTo("2", "//personName/personNameId", xmlOutput);
@@ -55,7 +55,7 @@ public class PersonNameSerializationTest extends BaseModuleContextSensitiveTest 
 		XMLAssert.assertXpathExists("/personName/creator", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("2", "/personName/person/personId", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("Mr.", "/personName/prefix", xmlOutput);
-		
+
 		XMLAssert.assertXpathEvaluatesTo("Horatio", "/personName/givenName", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("Test", "/personName/middleName", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("Hornblower", "/personName/familyName", xmlOutput);
@@ -64,10 +64,10 @@ public class PersonNameSerializationTest extends BaseModuleContextSensitiveTest 
 		XMLAssert.assertXpathEvaluatesTo("false", "/personName/@voided", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("399e3a7b-6482-487d-94ce-c07bb3ca3cc7", "/personName/@uuid", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -158,12 +158,12 @@ public class PersonNameSerializationTest extends BaseModuleContextSensitiveTest 
 		xmlBuilder.append("  <voided>false</voided>\n");
 		xmlBuilder.append("  <voidReason></voidReason>\n");
 		xmlBuilder.append("</personName>\n");
-		
+
 		//deserialize and make sure everything has been put into object
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 		PersonName pn = Context.getSerializationService().deserialize(xmlBuilder.toString(), PersonName.class,
 		    XStreamSerializer.class);
-		
+
 		assertEquals(2, pn.getPersonNameId().intValue());
 		assertEquals("399e3a7b-6482-487d-94ce-c07bb3ca3cc7", pn.getUuid());
 		assertEquals(1, pn.getCreator().getUserId().intValue());

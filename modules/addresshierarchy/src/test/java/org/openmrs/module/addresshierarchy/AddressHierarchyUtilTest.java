@@ -20,9 +20,9 @@ import org.springframework.test.annotation.DirtiesContext;
 public class AddressHierarchyUtilTest extends BaseModuleContextSensitiveTest {
 
 	protected final Log log = LogFactory.getLog(getClass());
-	
+
 	protected static final String XML_DATASET_PACKAGE_PATH = "org/openmrs/module/addresshierarchy/include/addressHierarchy-dataset.xml";
-	
+
 	@Before
 	public void setupDatabase() throws Exception {
 		initializeInMemoryDatabase();
@@ -31,7 +31,7 @@ public class AddressHierarchyUtilTest extends BaseModuleContextSensitiveTest {
 		executeDataSet(EXAMPLE_XML_DATASET_PACKAGE_PATH);
 		executeDataSet(XML_DATASET_PACKAGE_PATH);
 	}
-	
+
 	@Test
 	@Verifies(value = "should fetch a value off a PersonAddress field", method = "getAddressFieldValue()")
 	public void getAddressFieldValue_shouldFetchAddressFieldValue() throws Exception {
@@ -39,7 +39,7 @@ public class AddressHierarchyUtilTest extends BaseModuleContextSensitiveTest {
 		address.setCountry("United States");
 		Assert.assertEquals("United States", AddressHierarchyUtil.getAddressFieldValue(address, AddressField.COUNTRY));
 	}
-	
+
 	@Test
 	@Verifies(value = "should set a value on a PersonAddress field", method = "getAddressFieldValue()")
 	public void setAddressFieldValue_shouldSetAddressFieldValue() throws Exception {
@@ -47,7 +47,7 @@ public class AddressHierarchyUtilTest extends BaseModuleContextSensitiveTest {
 		AddressHierarchyUtil.setAddressFieldValue(address, AddressField.COUNTRY, "United States");
 		Assert.assertEquals("United States", address.getCountry());
 	}
-	
+
 	@Test
 	@Verifies(value = "should return false if not a descendant", method = "isDescendantOf()")
 	public void isDescendantOf_shouldReturnFalseIfNotDescendant() {
@@ -55,7 +55,7 @@ public class AddressHierarchyUtilTest extends BaseModuleContextSensitiveTest {
 		AddressHierarchyEntry ancestor = Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(3);
 		Assert.assertFalse(AddressHierarchyUtil.isDescendantOf(descendant, ancestor));
 	}
-	
+
 	@Test
 	@Verifies(value = "should return true if descendant", method = "isDescendantOf()")
 	public void isDescendantOf_shouldReturnTrueIfNotDescendant() {
@@ -63,5 +63,5 @@ public class AddressHierarchyUtilTest extends BaseModuleContextSensitiveTest {
 		AddressHierarchyEntry ancestor = Context.getService(AddressHierarchyService.class).getAddressHierarchyEntry(2);
 		Assert.assertTrue(AddressHierarchyUtil.isDescendantOf(descendant, ancestor));
 	}
-	
+
 }

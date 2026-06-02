@@ -28,7 +28,7 @@ public class FuaEstadoVersionServiceTest {
 
         FuaEstadoVersion result = service.saveFuaEstadoVersion(estado, descripcion);
 
-        
+
         assertNotNull("El DAO debe haber recibido una versión", inMemoryDao.lastSavedVersion);
         // El servicio debe devolver lo que devuelve el DAO
         assertSame(inMemoryDao.lastSavedVersion, result);

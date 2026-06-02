@@ -18,7 +18,7 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * Base class for OpenHMIS tests
  */
 public abstract class BaseModuleContextTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Override
 	public void executeDataSet(String datasetFilename) {
 		Connection conn = super.getConnection();
@@ -29,11 +29,11 @@ public abstract class BaseModuleContextTest extends BaseModuleContextSensitiveTe
 			catch (SQLException e) {
 				throw new RuntimeException(e);
 			}
-			
+
 			// If a versioned file exists and we need to be using a versioned file based on the OMRS version,
 			// make sure we get the correct file name if it exists
 			String datasetFilenameToUse = TestUtil.getVersionedFileIfExists(datasetFilename);
-			
+
 			super.executeDataSet(datasetFilenameToUse);
 		}
 		finally {

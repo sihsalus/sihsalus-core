@@ -18,18 +18,18 @@ import org.openmrs.module.billing.api.model.CashierOptions;
 import org.openmrs.module.billing.base.BaseModuleContextTest;
 
 public class ICashierOptionsServiceTest extends BaseModuleContextTest {
-	
+
 	public static final String OPTIONS_DATASET_VALID = TestConstants.BASE_DATASET_DIR + "CashierOptionsTestValid.xml";
-	
+
 	public static final String OPTIONS_DATASET_INVALID = TestConstants.BASE_DATASET_DIR + "CashierOptionsTestInvalid.xml";
-	
+
 	private ICashierOptionsService cashierOptionsService;
-	
+
 	@Before
 	public void before() {
 		cashierOptionsService = Context.getService(ICashierOptionsService.class);
 	}
-	
+
 	/**
 	 * @verifies Load options
 	 * @see ICashierOptionsService#getOptions()
@@ -39,7 +39,7 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 		executeDataSet(OPTIONS_DATASET_VALID);
 		//		executeDataSet(IDepartmentDataServiceTest.DEPARTMENT_DATASET);
 		//		executeDataSet(IItemDataServiceTest.ITEM_DATASET);
-		
+
 		CashierOptions options = cashierOptionsService.getOptions();
 		Assert.assertNull(options.getRoundingItemUuid());
 		Assert.assertEquals(3, options.getDefaultReceiptReportId());
@@ -47,7 +47,7 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 		Assert.assertEquals(0, (int) options.getRoundToNearest());
 		Assert.assertTrue(options.isTimesheetRequired());
 	}
-	
+
 	/**
 	 * @verifies Revert to defaults if there are problems loading options
 	 * @see ICashierOptionsService#getOptions()
@@ -63,5 +63,5 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 		Assert.assertEquals(reference.getRoundToNearest(), options.getRoundToNearest());
 		Assert.assertEquals(reference.isTimesheetRequired(), options.isTimesheetRequired());
 	}
-	
+
 }

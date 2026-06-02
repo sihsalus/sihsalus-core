@@ -28,9 +28,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests functionality of {@link ConceptAttributeController}.
  */
 public class ConceptAttributeController2_0Test extends MainResourceControllerTest {
-	
+
 	private ConceptService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -38,7 +38,7 @@ public class ConceptAttributeController2_0Test extends MainResourceControllerTes
 	public String getURI() {
 		return "concept/" + RestTestConstants2_0.CONCEPT_UUID + "/attribute";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -46,7 +46,7 @@ public class ConceptAttributeController2_0Test extends MainResourceControllerTes
 	public String getUuid() {
 		return RestTestConstants2_0.CONCEPT_ATTRIBUTE_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -54,13 +54,13 @@ public class ConceptAttributeController2_0Test extends MainResourceControllerTes
 	public long getAllCount() {
 		return service.getConceptByUuid(RestTestConstants2_0.CONCEPT_UUID).getActiveAttributes().size();
 	}
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants2_0.CONCEPT_ATTRIBUTE_DATA_SET);
 		this.service = Context.getConceptService();
 	}
-	
+
 	@Test
 	public void shouldAddAttributeToConcept() throws Exception {
 		int before = service.getConceptByUuid(RestTestConstants2_0.CONCEPT_UUID).getAttributes().size();
@@ -70,35 +70,35 @@ public class ConceptAttributeController2_0Test extends MainResourceControllerTes
 		int after = service.getConceptByUuid(RestTestConstants2_0.CONCEPT_UUID).getAttributes().size();
 		Assertions.assertEquals(before + 1, after);
 	}
-	
+
 	@Test
 	public void shouldEditConceptAttribute() throws Exception {
 		String json = "{ \"attributeType\":\"" + RestTestConstants2_0.CONCEPT_ATTRIBUTE_TYPE_UUID
 		        + "\", \"value\": \"2015-04-12\" }";
-		
+
 		ConceptAttribute conceptAttribute = service.getConceptAttributeByUuid(getUuid());
 		Assertions.assertEquals("2011-04-25", conceptAttribute.getValueReference());
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
-		
+
 		conceptAttribute = service.getConceptAttributeByUuid(getUuid());
 		Assertions.assertEquals("2015-04-12", conceptAttribute.getValueReference());
 	}
-	
+
 	@Test
 	public void shouldVoidAttribute() throws Exception {
 		ConceptAttribute conceptAttribute = service.getConceptAttributeByUuid(getUuid());
 		Assertions.assertFalse(conceptAttribute.isVoided());
-		
+
 		MockHttpServletRequest request = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
 		request.addParameter("reason", "unit test");
 		handle(request);
-		
+
 		conceptAttribute = service.getConceptAttributeByUuid(getUuid());
 		Assertions.assertTrue(conceptAttribute.isVoided());
 		Assertions.assertEquals("unit test", conceptAttribute.getVoidReason());
 	}
-	
+
 	@Test
 	public void shouldGetAConceptAttributeByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());

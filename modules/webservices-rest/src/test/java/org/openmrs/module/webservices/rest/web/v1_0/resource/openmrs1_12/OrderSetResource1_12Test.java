@@ -19,17 +19,17 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
  * Contains tests for the {@link OrderSetResource1_12}
  */
 public class OrderSetResource1_12Test extends BaseDelegatingResourceTest<OrderSetResource1_12, OrderSet> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_12.TEST_DATA_SET);
 	}
-	
+
 	@Override
 	public OrderSet newObject() {
 		return Context.getOrderSetService().getOrderSetByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -38,7 +38,7 @@ public class OrderSetResource1_12Test extends BaseDelegatingResourceTest<OrderSe
 		assertPropEquals("description", getObject().getDescription());
 		assertPropEquals("operator", getObject().getOperator());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -48,12 +48,12 @@ public class OrderSetResource1_12Test extends BaseDelegatingResourceTest<OrderSe
 		assertPropEquals("retireBy", getObject().getRetiredBy());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "orderSet1";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_12.ORDER_SET_UUID;

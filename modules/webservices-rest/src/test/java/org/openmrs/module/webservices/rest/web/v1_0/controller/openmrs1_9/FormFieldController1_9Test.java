@@ -16,7 +16,7 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
  * Tests functionality of {@link FormFieldController}.
  */
 public class FormFieldController1_9Test extends MainResourceControllerTest {
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -24,7 +24,7 @@ public class FormFieldController1_9Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "form/" + RestTestConstants1_8.FORM_UUID + "/formfield";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -32,7 +32,7 @@ public class FormFieldController1_9Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_8.FORM_FIELD_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -40,5 +40,5 @@ public class FormFieldController1_9Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return 3;
 	}
-	
+
 }

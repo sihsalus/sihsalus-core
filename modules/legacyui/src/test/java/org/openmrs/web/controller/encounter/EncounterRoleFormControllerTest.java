@@ -24,9 +24,9 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindException;
 
 public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	protected static final String ENC_INITIAL_DATA_XML = "org/openmrs/api/include/EncounterServiceTest-initialData.xml";
-	
+
 	/**
 	 * @verifies save a new encounter role object
 	 * @see EncounterRoleFormController#save(javax.servlet.http.HttpSession,
@@ -43,9 +43,9 @@ public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensiti
 		BindException errors = new BindException(encounterRole, "encounterRole");
 		controller.save(session, encounterRole, errors);
 		Assertions.assertNotNull(encounterRole.getId());
-		
+
 	}
-	
+
 	/**
 	 * @verifies raise an error if validation of encounter role fails
 	 * @see EncounterRoleFormController#save(javax.servlet.http.HttpSession,
@@ -63,7 +63,7 @@ public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertNull(encounterRole.getId());
 		Assertions.assertEquals(1, errors.getErrorCount());
 	}
-	
+
 	/**
 	 * @verifies edit and save an existing encounter
 	 * @see EncounterRoleFormController#save(javax.servlet.http.HttpSession,
@@ -86,7 +86,7 @@ public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertEquals(roleName, encounterRole.getName());
 		Assertions.assertEquals(description, encounterRole.getDescription());
 	}
-	
+
 	/**
 	 * @verifies retire an existing encounter
 	 * @see EncounterRoleFormController#retire(javax.servlet.http.HttpSession,
@@ -106,7 +106,7 @@ public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertTrue(encounterRole.isRetired());
 		Assertions.assertEquals("EncounterRole.retiredSuccessfully", session.getAttribute(WebConstants.OPENMRS_MSG_ATTR));
 	}
-	
+
 	/**
 	 * @verifies unretire an existing encounter
 	 * @see EncounterRoleFormController#unretire(javax.servlet.http.HttpSession,
@@ -124,7 +124,7 @@ public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertFalse(encounterRole.isRetired());
 		Assertions.assertEquals("EncounterRole.unretired", session.getAttribute(WebConstants.OPENMRS_MSG_ATTR));
 	}
-	
+
 	/**
 	 * @verifies purge an existing encounter
 	 * @see EncounterRoleFormController#purge(javax.servlet.http.HttpSession,
@@ -141,7 +141,7 @@ public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensiti
 		controller.purge(session, encounterRole, errors);
 		Assertions.assertEquals("EncounterRole.purgedSuccessfully", session.getAttribute(WebConstants.OPENMRS_MSG_ATTR));
 	}
-	
+
 	/**
 	 * @verifies add list of encounter role objects to the model
 	 * @see EncounterRoleFormController#getEncounterList(org.springframework.ui.ModelMap)
@@ -155,7 +155,7 @@ public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensiti
 		Assertions.assertEquals("/module/legacyui/admin/encounters/encounterRoleList", viewName);
 		Assertions.assertEquals(3, ((List) modelMap.get("encounterRoles")).size());
 	}
-	
+
 	/**
 	 * @verifies raise an error if retire reason is not filled
 	 * @see EncounterRoleFormController#retire(javax.servlet.http.HttpSession,
@@ -173,5 +173,5 @@ public class EncounterRoleFormControllerTest extends BaseModuleWebContextSensiti
 		controller.retire(session, encounterRole, errors);
 		Assertions.assertEquals(1, errors.getErrorCount());
 	}
-	
+
 }

@@ -22,23 +22,23 @@ import org.junit.Test;
  * Test for Person resource narrative generation
  */
 public class PersonNarrativeTest extends BaseFhirNarrativeTest {
-	
+
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/person-example.json";
-	
+
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/person-expected.html";
-	
+
 	/**
 	 * Check that the expected narrative is generated for some example Person resource
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
 	public void shouldGeneratePersonNarrative() throws IOException {
 		Person given = parser.parseResource(Person.class,
 		    getClass().getClassLoader().getResourceAsStream(EXAMPLE_RESOURCE_PATH));
-		
+
 		Person result = parser.parseResource(Person.class, parser.encodeResourceToString(given));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getText(), notNullValue());
 		assertThat(result.getText().getStatusAsString(), equalTo("generated"));

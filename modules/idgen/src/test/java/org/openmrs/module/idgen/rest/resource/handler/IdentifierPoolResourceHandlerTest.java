@@ -36,18 +36,18 @@ import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class IdentifierPoolResourceHandlerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	IdentifierSourceService service;
-	
+
 	@Autowired
 	private IdentifierPoolResourceHandler handler;
-	
+
 	@Test
 	public void newDelegate_shouldReturnIdentifierPoolDelegateInstance() throws Exception {
 		assertTrue(handler.newDelegate().getClass().isAssignableFrom(IdentifierPool.class));
 	}
-	
+
 	@Test
 	public void save_shouldSaveIdentifierToPool() throws Exception {
 		IdentifierPool pool = new IdentifierPool();
@@ -62,7 +62,7 @@ public class IdentifierPoolResourceHandlerTest extends BaseModuleWebContextSensi
 		assertEquals("Sample Pool", src.getName());
 
 	}
-	
+
 	@Test
 	public void getRepresentationDescription_shouldReturnRepresentationDescriptionFromRepresentation() throws Exception  {
 		Representation defaultRep = new DefaultRepresentation();
@@ -72,7 +72,7 @@ public class IdentifierPoolResourceHandlerTest extends BaseModuleWebContextSensi
 		assertNotNull(properties.get("display"));
 		assertNull(properties.get("url"));
 		assertEquals(DefaultRepresentation.class, properties.get("identifierType").getRep().getClass());
-		
+
 		Representation fullRep = new FullRepresentation();
 		properties = handler.getRepresentationDescription(fullRep).getProperties();
 		assertNotNull(properties.get("uuid"));
@@ -82,7 +82,7 @@ public class IdentifierPoolResourceHandlerTest extends BaseModuleWebContextSensi
 		assertNotNull(properties.get("user"));
 		assertNotNull(properties.get("password"));
 		assertEquals(FullRepresentation.class, properties.get("identifierType").getRep().getClass());
-		
+
 		Representation refRep = new RefRepresentation();
 		properties = handler.getRepresentationDescription(refRep).getProperties();
 		assertNotNull(properties.get("uuid"));
@@ -92,7 +92,7 @@ public class IdentifierPoolResourceHandlerTest extends BaseModuleWebContextSensi
 		assertNull(properties.get("password"));
 		assertEquals(RefRepresentation.class, properties.get("identifierType").getRep().getClass());
 	}
-	
+
 	@Test
 	public void getCreatableProperties_shouldReturnCreatableProperties() throws Exception  {
 		Map<String, Property> properties = handler.getCreatableProperties().getProperties();
@@ -105,7 +105,7 @@ public class IdentifierPoolResourceHandlerTest extends BaseModuleWebContextSensi
 		assertTrue(properties.keySet().contains("batchSize"));
 		assertTrue(properties.keySet().contains("minPoolSize"));
 	}
-	
+
 	@Test
 	public void getUpdatableProperties_shouldReturnUpdatableProperties() throws Exception  {
 		Map<String, Property> properties = handler.getUpdatableProperties().getProperties();
@@ -115,12 +115,12 @@ public class IdentifierPoolResourceHandlerTest extends BaseModuleWebContextSensi
 		assertTrue(properties.keySet().contains("source"));
 		assertTrue(properties.keySet().contains("batchSize"));
 		assertTrue(properties.keySet().contains("minPoolSize"));
-		
+
 	}
-	
-	@Test 
+
+	@Test
 	public void getTypeName_shouldReturnTypeName() throws Exception  {
 		assertEquals("identifierpool", handler.getTypeName());
 	}
-	
+
 }

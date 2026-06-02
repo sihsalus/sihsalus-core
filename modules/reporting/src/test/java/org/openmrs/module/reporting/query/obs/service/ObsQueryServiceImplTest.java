@@ -26,22 +26,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * Test the ObsQueryServiceImpl
  */
 public class ObsQueryServiceImplTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 	}
-	
+
 	/**
 	 * @see ObsQueryServiceImpl#evaluate(ObsQuery,EvaluationContext)
 	 * @verifies evaluate an obs query
@@ -53,7 +53,7 @@ public class ObsQueryServiceImplTest extends BaseModuleContextSensitiveTest {
 		ObsQueryResult r = Context.getService(ObsQueryService.class).evaluate(q, new EvaluationContext());
 		Assert.assertNotNull(r);
 	}
-	
+
 	/**
 	 * @see ObsQueryServiceImpl#saveDefinition(ObsQuery)
 	 * @verifies save an obs query
@@ -68,5 +68,5 @@ public class ObsQueryServiceImplTest extends BaseModuleContextSensitiveTest {
 		ObsQuery loadedQuery = Context.getService(ObsQueryService.class).getDefinitionByUuid(q.getUuid());
 		Assert.assertEquals(q, loadedQuery);
 	}
-	
+
 }

@@ -26,7 +26,7 @@ import org.springframework.validation.BindException;
  * Tests the {@link ProgramFormController} class.
  */
 public class ProgramFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see ProgramFormController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
@@ -34,21 +34,21 @@ public class ProgramFormControllerTest extends BaseModuleWebContextSensitiveTest
 	@Transactional(readOnly = true)
 	@Verifies(value = "should save workflows with program", method = "onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)")
 	public void onSubmit_shouldSaveWorkflowsWithProgram() throws Exception {
-		
+
 		// sanity check to make sure that program #3 doesn't have any workflows already:
 		Assertions.assertEquals(0, Context.getProgramWorkflowService().getProgram(3).getAllWorkflows().size());
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "");
 		request.setParameter("programId", "3");
 		request.setParameter("allWorkflows", ":3"); // set one workflow on this program
-		
+
 		ProgramFormController controller = (ProgramFormController) applicationContext.getBean("programForm");
 		controller.handleRequest(request, new MockHttpServletResponse());
-		
+
 		Assertions.assertNotSame(0, Context.getProgramWorkflowService().getProgram(3).getAllWorkflows().size());
 		Assertions.assertEquals(1, Context.getProgramWorkflowService().getProgram(3).getAllWorkflows().size());
 	}
-	
+
 	/**
 	 * @see ProgramFormController#onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 * @verifies edit existing workflows within programs
@@ -59,20 +59,20 @@ public class ProgramFormControllerTest extends BaseModuleWebContextSensitiveTest
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "");
 		request.setParameter("programId", "3");
 		request.setParameter("allWorkflows", ":3 4"); // set two workflows on this program
-		
+
 		ProgramFormController controller = (ProgramFormController) applicationContext.getBean("programForm");
 		controller.handleRequest(request, new MockHttpServletResponse());
 
 		Context.clearSession();
-		
+
 		Assertions.assertEquals(2, Context.getProgramWorkflowService().getProgram(3).getWorkflows().size());
-		
+
 		request = new MockHttpServletRequest("POST", "");
 		request.setParameter("programId", "3");
 		request.setParameter("allWorkflows", ":5"); // set one workflow on this program
-		
+
 		controller.handleRequest(request, new MockHttpServletResponse());
-		
+
 		Assertions.assertEquals(1, Context.getProgramWorkflowService().getProgram(3).getWorkflows().size());
 		Assertions.assertEquals(5, Context.getProgramWorkflowService().getProgram(3).getWorkflows().iterator().next()
 		        .getConcept().getConceptId().intValue());

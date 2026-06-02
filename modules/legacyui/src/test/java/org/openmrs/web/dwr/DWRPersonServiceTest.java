@@ -20,7 +20,7 @@ import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
  * Test the different aspects of {@link DWRPersonService}
  */
 public class DWRPersonServiceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see DWRPersonService#findPeopleByRoles(String,null,String)
 	 */
@@ -28,13 +28,13 @@ public class DWRPersonServiceTest extends BaseModuleWebContextSensitiveTest {
 	@Verifies(value = "should match on patient identifiers", method = "findPeopleByRoles(String,null,String)")
 	public void findPeopleByRoles_shouldMatchOnPatientIdentifiers() throws Exception {
 		DWRPersonService dwrPersonService = new DWRPersonService();
-		
+
 		List<Object> persons = dwrPersonService.findPeopleByRoles("12345K", false, null);
-		
+
 		Assertions.assertEquals(1, persons.size());
 		Assertions.assertEquals(new PersonListItem(6), persons.get(0));
 	}
-	
+
 	/**
 	 * @see DWRPersonService#findPeopleByRoles(String,null,String)
 	 */
@@ -43,5 +43,5 @@ public class DWRPersonServiceTest extends BaseModuleWebContextSensitiveTest {
 	public void findPeopleByRoles_shouldAllowNullRolesParameter() throws Exception {
 		new DWRPersonService().findPeopleByRoles("some string", false, null);
 	}
-	
+
 }

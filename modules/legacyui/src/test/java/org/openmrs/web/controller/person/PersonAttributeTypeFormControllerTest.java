@@ -25,20 +25,20 @@ import org.springframework.web.servlet.ModelAndView;
  * Tests the {@link PersonAttributeTypeFormController}
  */
 public class PersonAttributeTypeFormControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	private MockHttpServletRequest request;
-	
+
 	private HttpServletResponse response;
-	
+
 	private PersonAttributeTypeFormController controller;
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet("org/openmrs/web/controller/include/PersonAttributeTypeFormControllerTest.xml");
 		controller = (PersonAttributeTypeFormController) applicationContext.getBean("personAttributeTypeForm");
 		controller.setFormView("index.htm");
 		controller.setSuccessView("PersonAttributeType.form");
-		
+
 		request = new MockHttpServletRequest("POST", "/admin/person/personAttributeType.form?personAttributeTypeId=1");
 		request.setSession(new MockHttpSession(null));
 		request.setContentType("application/x-www-form-urlencoded");
@@ -46,42 +46,42 @@ public class PersonAttributeTypeFormControllerTest extends BaseModuleWebContextS
 		request.addParameter("format", "java.lang.String");
 		response = new MockHttpServletResponse();
 	}
-	
+
 	@Test
 	public void shouldNotSavePersonAttributeTypeWhenPersonAttributeTypesAreLocked() throws Exception {
 		request.addParameter("save", "Save Person Attribute Type");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The save attempt should have failed!");
 		Assertions.assertNotEquals("PersonAttributeType.form", mav.getViewName());
 		Assertions.assertNotNull(Context.getPersonService().getPersonAttributeType(1));
 	}
-	
+
 	@Test
 	public void shouldNotDeletePersonAttributeTypeWhenPersonAttributeTypesAreLocked() throws Exception {
 		request.addParameter("purge", "Delete Person Attribute Type");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The delete attempt should have failed!");
 		Assertions.assertNotEquals("PersonAttributeType.form", mav.getViewName());
 		Assertions.assertNotNull(Context.getPersonService().getPersonAttributeType(1));
 	}
-	
+
 	@Test
 	public void shouldNotRetirePersonAttributeTypeWhenPersonAttributeTypesAreLocked() throws Exception {
 		request.addParameter("retire", "Retire Person Attribute Type");
 		request.addParameter("retireReason", "Same reason");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The retire attempt should have failed!");
 		Assertions.assertNotEquals("PersonAttributeType.form", mav.getViewName());
 		Assertions.assertNotNull(Context.getPersonService().getPersonAttributeType(1));
 	}
-	
+
 	@Test
 	public void shouldNotUnretirePersonAttributeTypeWhenPersonAttributeTypesAreLocked() throws Exception {
 		request.addParameter("unretire", "Unretire Person Attribute Type");
-		
+
 		ModelAndView mav = controller.handleRequest(request, response);
 		Assertions.assertEquals("index.htm", mav.getViewName(), "The unretire attempt should have failed!");
 		Assertions.assertNotEquals("PersonAttributeType.form", mav.getViewName());

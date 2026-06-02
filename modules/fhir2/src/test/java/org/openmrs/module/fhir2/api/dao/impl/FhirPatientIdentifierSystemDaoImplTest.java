@@ -30,27 +30,27 @@ import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirPatientIdentifierSystemDaoImplTest extends BaseFhirContextSensitiveTest {
-	
+
 	private FhirPatientIdentifierSystemDaoImpl dao;
-	
+
 	private static final String PATIENT_IDENTIFIER_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPatientIdentifierSystemDaoImplTest_initial_data.xml";
-	
+
 	@Autowired
 	private SessionFactory sessionFactory;
-	
+
 	@Autowired
 	PatientService patientService;
-	
+
 	@Autowired
 	FhirPatientIdentifierSystemService systemService;
-	
+
 	@Before
 	public void setup() throws Exception {
 		dao = new FhirPatientIdentifierSystemDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 		executeDataSet(PATIENT_IDENTIFIER_DATA_XML);
 	}
-	
+
 	@Test
 	public void shouldReturnUrlByPatientIdentifierType() {
 		PatientIdentifierType patientIdentifierType = patientService.getPatientIdentifierType(1);
@@ -58,36 +58,36 @@ public class FhirPatientIdentifierSystemDaoImplTest extends BaseFhirContextSensi
 		assertThat(url, notNullValue());
 		assertThat(url, equalTo("www.example.com"));
 	}
-	
+
 	@Test
 	public void shouldReturnPatientIdentifierTypeByUrl() {
 		PatientIdentifierType expectedIdentifierType = patientService.getPatientIdentifierType(1);
 		String url = systemService.getUrlByPatientIdentifierType(expectedIdentifierType);
-		
+
 		PatientIdentifierType actualIdentifierType = dao.getPatientIdentifierTypeByUrl(url);
 		assertNotNull(actualIdentifierType);
 		assertEquals(expectedIdentifierType, actualIdentifierType);
 	}
-	
+
 	@Test
 	public void shouldReturnNullForInvalidUrl() {
 		PatientIdentifierType actualIdentifierType = dao.getPatientIdentifierTypeByUrl("invalidUrl");
 		assertNull(actualIdentifierType);
 	}
-	
+
 	@Test
 	public void shouldReturnNullForNullUrl() {
 		PatientIdentifierType actualIdentifierType = dao.getPatientIdentifierTypeByUrl(null);
 		assertNull(actualIdentifierType);
 	}
-	
+
 	@Test
 	public void shouldReturnNullIfPatientIdentifierTypeNotFound() {
 		PatientIdentifierType patientIdentifierType = patientService.getPatientIdentifierType(2);
 		String url = dao.getUrlByPatientIdentifierType(patientIdentifierType);
 		assertThat(url, nullValue());
 	}
-	
+
 	@Test
 	public void shouldGetFhirPatientIdentifierSystemByPatientIdentifierType() {
 		PatientIdentifierType identifierType = patientService.getPatientIdentifierType(1);
@@ -95,14 +95,14 @@ public class FhirPatientIdentifierSystemDaoImplTest extends BaseFhirContextSensi
 		assertThat(fhirSystem.isPresent(), equalTo(true));
 		assertThat(fhirSystem.get().getUrl(), equalTo("www.example.com"));
 	}
-	
+
 	@Test
 	public void shouldGetNoPatientIdentifierSystemByPatientIdentifierTypeNotFound() {
 		PatientIdentifierType identifierType = patientService.getPatientIdentifierType(2);
 		Optional<FhirPatientIdentifierSystem> fhirSystem = dao.getFhirPatientIdentifierSystem(identifierType);
 		assertThat(fhirSystem.isPresent(), equalTo(false));
 	}
-	
+
 	@Test
 	public void shouldSavePatientIdentifierSystem() {
 		PatientIdentifierType identifierType = patientService.getPatientIdentifierType(2);

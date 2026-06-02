@@ -23,17 +23,17 @@ import org.openmrs.module.initializer.api.utils.LocationTagListParser;
  * This kind of test case can be used to quickly trial the parsing routines on test CSVs
  */
 public class LocationLineProcessorTest {
-	
+
 	private LocationService ls = mock(LocationService.class);
-	
+
 	@Before
 	public void setup() {
-		
+
 		/*
 		 * fetching a location tag by name returns a location tag with the name set
 		 */
 		when(ls.getLocationTagByName(any(String.class))).thenAnswer(new Answer<LocationTag>() {
-			
+
 			@Override
 			public LocationTag answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
@@ -43,18 +43,18 @@ public class LocationLineProcessorTest {
 			}
 		});
 	}
-	
+
 	@Test
 	public void fill_shouldParseTags() {
-		
+
 		// Setup
 		String[] headerLine = { "Tags" };
 		String[] line = { "Login Location; Visit Location" };
-		
+
 		// Replay
 		LocationLineProcessor p = new LocationLineProcessor(ls, new LocationTagListParser(ls));
 		Location c = p.fill(new Location(), new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Set<LocationTag> tags = c.getTags();
 		Assert.assertEquals(2, tags.size());
@@ -65,20 +65,20 @@ public class LocationLineProcessorTest {
 		Assert.assertTrue(names.contains("Login Location"));
 		Assert.assertTrue(names.contains("Visit Location"));
 	}
-	
+
 	@Test
 	public void fill_shouldLeaveUnspecifiedTagsIntactWhenUsingTagPrefixHeaders() {
-		
+
 		// Setup
 		String[] headerLine = { "Tag|Visit Location" };
 		String[] line = { "true" };
 		Location loc = new Location();
 		loc.addTag(ls.getLocationTagByName("Login Location"));
-		
+
 		// Replay
 		LocationLineProcessor p = new LocationLineProcessor(ls, new LocationTagListParser(ls));
 		Location c = p.fill(loc, new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Set<LocationTag> tags = c.getTags();
 		Assert.assertEquals(2, tags.size());
@@ -89,7 +89,7 @@ public class LocationLineProcessorTest {
 		Assert.assertTrue(names.contains("Login Location"));
 		Assert.assertTrue(names.contains("Visit Location"));
 	}
-	
+
 	@Test
 	public void fill_shouldClearOldTagsWhenUsingTagHeader() {
 		// Setup
@@ -97,11 +97,11 @@ public class LocationLineProcessorTest {
 		String[] line = { "Visit Location" };
 		Location loc = new Location();
 		loc.addTag(ls.getLocationTagByName("Login Location"));
-		
+
 		// Replay
 		LocationLineProcessor p = new LocationLineProcessor(ls, new LocationTagListParser(ls));
 		Location c = p.fill(loc, new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Set<LocationTag> tags = c.getTags();
 		Assert.assertEquals(1, tags.size());
@@ -112,30 +112,30 @@ public class LocationLineProcessorTest {
 		Assert.assertFalse(names.contains("Login Location"));
 		Assert.assertTrue(names.contains("Visit Location"));
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void fill_shouldFailIfParentDoesNotExist() {
-		
+
 		// Setup
 		String[] headerLine = { BaseLineProcessor.HEADER_NAME, BaseLineProcessor.PARENT };
 		String[] line = { "Test Location", "nonexistent_location" };
 		when(ls.getLocationByUuid("nonexistent_location")).thenReturn(null);
-		
+
 		LocationLineProcessor locationLineProcessor = new LocationLineProcessor(ls, new LocationTagListParser(ls));
 		locationLineProcessor.fill(new Location(), new CsvLine(headerLine, line));
 	}
-	
+
 	@Test
 	public void fill_shouldParseIfParentIsNull() {
-		
+
 		// Setup
 		String[] headerLine = { BaseLineProcessor.HEADER_NAME, BaseLineProcessor.PARENT };
 		String[] line = { "Test Location", null };
-		
+
 		// Replay
 		LocationLineProcessor locationLineProcessor = new LocationLineProcessor(ls, new LocationTagListParser(ls));
 		Location location = locationLineProcessor.fill(new Location(), new CsvLine(headerLine, line));
-		
+
 		// Verif
 		Assert.assertTrue(location.getName().equals("Test Location"));
 	}

@@ -22,7 +22,7 @@ import org.springframework.ui.ModelMap;
  * Tests the controller behind the /admin/users/users.list page
  */
 public class UserListControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see UserListController#displayUsers(ModelMap,String,String,Role,Boolean)
 	 * @verifies get all users if no name given
@@ -33,7 +33,7 @@ public class UserListControllerTest extends BaseModuleWebContextSensitiveTest {
 		List<User> users = controller.getUsers("Search", "", null, false);
 		Assertions.assertEquals(2, users.size());
 	}
-	
+
 	/**
 	 * @see UserListController#displayUsers(ModelMap,String,String,Role,Boolean)
 	 * @verifies get users just given action parameter
@@ -44,7 +44,7 @@ public class UserListControllerTest extends BaseModuleWebContextSensitiveTest {
 		List<User> users = controller.getUsers("Search", null, null, null);
 		Assertions.assertEquals(2, users.size());
 	}
-	
+
 	/**
 	 * @see UserListController#displayUsers(ModelMap,String,String,Role,Boolean)
 	 * @verifies get users with a given role
@@ -55,7 +55,7 @@ public class UserListControllerTest extends BaseModuleWebContextSensitiveTest {
 		List<User> users = controller.getUsers("Search", null, new Role("Provider"), null);
 		Assertions.assertEquals(1, users.size());
 	}
-	
+
 	/**
 	 * @see UserListController#displayUsers(ModelMap,String,String,Role,Boolean)
 	 * @verifies include disabled users if requested

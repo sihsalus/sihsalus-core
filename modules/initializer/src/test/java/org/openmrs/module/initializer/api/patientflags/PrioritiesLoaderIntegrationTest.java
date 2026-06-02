@@ -13,18 +13,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class PrioritiesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("flagService")
 	private FlagService flagService;
-	
+
 	@Autowired
 	private PrioritiesLoader loader;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/test-concepts.xml");
-		
+
 		{
 			// To be edited
 			Priority priority = new Priority();
@@ -35,7 +35,7 @@ public class PrioritiesLoaderIntegrationTest extends DomainBaseModuleContextSens
 			priority.setRetired(false);
 			flagService.savePriority(priority);
 		}
-		
+
 		{
 			// To be retired
 			Priority priority = new Priority();
@@ -47,12 +47,12 @@ public class PrioritiesLoaderIntegrationTest extends DomainBaseModuleContextSens
 			flagService.savePriority(priority);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadPrioritiesAccordingToCsvFiles() {
 		// Replay
 		loader.load();
-		
+
 		// Verify creation with blank style (null, legacy field not used in OpenMRS 3+)
 		{
 			Priority priority = flagService.getPriorityByUuid("627bf278-ba81-4436-b867-c2f6641d060b");
@@ -62,7 +62,7 @@ public class PrioritiesLoaderIntegrationTest extends DomainBaseModuleContextSens
 			assertEquals(Integer.valueOf(2), priority.getRank());
 			assertEquals("Medium priority flags", priority.getDescription());
 		}
-		
+
 		{
 			Priority priority = flagService.getPriorityByUuid("728bf278-ba81-4436-b867-c2f6641d060c");
 			assertNotNull(priority);
@@ -70,7 +70,7 @@ public class PrioritiesLoaderIntegrationTest extends DomainBaseModuleContextSens
 			assertEquals("/**/", priority.getStyle()); // Blank style stored as null
 			assertEquals(Integer.valueOf(3), priority.getRank());
 		}
-		
+
 		// Verify editing
 		{
 			Priority priority = flagService.getPriorityByUuid("526bf278-ba81-4436-b867-c2f6641d060a");
@@ -79,7 +79,7 @@ public class PrioritiesLoaderIntegrationTest extends DomainBaseModuleContextSens
 			assertEquals("color:red", priority.getStyle()); // Updated from blue
 			assertEquals(Integer.valueOf(1), priority.getRank()); // Updated from 10
 		}
-		
+
 		// Verify retirement (style set to placeholder from CSV)
 		{
 			Priority priority = flagService.getPriorityByUuid("829bf278-ba81-4436-b867-c2f6641d060d");

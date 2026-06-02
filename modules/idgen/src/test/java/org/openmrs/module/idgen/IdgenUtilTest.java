@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.openmrs.test.Verifies;
 
 public class IdgenUtilTest {
-	
+
 	/**
 	 * @see {@link IdgenUtil#convertFromBase(String,char[])}
 	 */
@@ -30,8 +30,7 @@ public class IdgenUtilTest {
 		String hexValue = IdgenUtil.convertToBase(numericValue, hexChars, 0);
 		Assert.assertEquals("A32F1243E", hexValue);
 		long back = IdgenUtil.convertFromBase(hexValue, hexChars);
-		Assert.assertEquals(numericValue, back);	
+		Assert.assertEquals(numericValue, back);
 	}
 
 }
-

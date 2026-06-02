@@ -22,31 +22,31 @@ import org.openmrs.module.initializer.api.loaders.AmpathFormsLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class AmpathFormsLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	private static final String FORM_FOLDER_PATH = "src/test/resources/forms/";
-	
+
 	@Autowired
 	private AmpathFormsLoader ampathFormsLoader;
-	
+
 	@Autowired
 	private DatatypeService datatypeService;
-	
+
 	@Autowired
 	private FormService formService;
-	
+
 	@After
 	public void clean() throws IOException {
-		
+
 		// Delete created form files
 		FileUtils.deleteDirectory(new File(FORM_FOLDER_PATH));
 		FileUtils
 		        .deleteQuietly(new File(ampathFormsLoader.getDirUtil().getDomainDirPath() + "/test_form_clob_changed.json"));
 		FileUtils.deleteQuietly(new File(ampathFormsLoader.getDirUtil().getDomainDirPath() + "/test_form_new_version.json"));
 	}
-	
+
 	@Test
 	public void load_shouldLoadFormWithAllAttributesSpecified() throws Exception {
-		
+
 		// Replay
 		ampathFormsLoader.load();
 		Form form = formService.getForm("Test Form 1");
@@ -65,15 +65,15 @@ public class AmpathFormsLoaderIntegrationTest extends DomainBaseModuleContextSen
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode actualObj = mapper.readTree(clob.getValue());
 		Assert.assertEquals("\"Page 1\"", actualObj.get("pages").getElements().next().get("label").toString());
-		// Verify Form Resource 
+		// Verify Form Resource
 		Assert.assertNotNull(formResource);
 		Assert.assertEquals(clob.getUuid(), formResource.getValueReference());
-		
+
 	}
-	
+
 	@Test
 	public void load_shouldLoadAndUpdateClobButNotForm() throws Exception {
-		
+
 		// Test that initial version loads in with expected values
 		// Replay
 		ampathFormsLoader.load();
@@ -96,17 +96,17 @@ public class AmpathFormsLoaderIntegrationTest extends DomainBaseModuleContextSen
 		// Verify Form Resource
 		Assert.assertNotNull(formResource);
 		Assert.assertEquals(clob.getUuid(), formResource.getValueReference());
-		
+
 		String test_file_updated = "src/test/resources/testdata/testAmpathforms/test_form_clob_changed.json";
 		File srcFile = new File(test_file_updated);
 		File dstFile = new File(ampathFormsLoader.getDirUtil().getDomainDirPath() + "/test_form_clob_changed.json");
-		
+
 		FileUtils.copyFile(srcFile, dstFile);
-		
+
 		// Replay
 		ampathFormsLoader.load();
 		form = formService.getForm("Test Form 1");
-		
+
 		// Verify form unchanged
 		Assert.assertEquals("Test Form 1", form.getName());
 		Assert.assertEquals(Boolean.TRUE, form.getPublished());
@@ -120,10 +120,10 @@ public class AmpathFormsLoaderIntegrationTest extends DomainBaseModuleContextSen
 		JsonNode actualObj1 = mapper2.readTree(clob.getValue());
 		Assert.assertEquals("\"Page 1 changed\"", actualObj1.get("pages").getElements().next().get("label").toString());
 	}
-	
+
 	@Test
 	public void load_shouldRetireAndCreateNewForm() throws Exception {
-		
+
 		// Test that initial version loads in with expected values
 		// Replay
 		ampathFormsLoader.load();
@@ -143,22 +143,22 @@ public class AmpathFormsLoaderIntegrationTest extends DomainBaseModuleContextSen
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode actualObj = mapper.readTree(clob.getValue());
 		Assert.assertEquals("\"Page 1\"", actualObj.get("pages").getElements().next().get("label").toString());
-		// Verify Form Resource 
+		// Verify Form Resource
 		Assert.assertNotNull(formResource);
 		Assert.assertEquals(clob.getUuid(), formResource.getValueReference());
-		
+
 		String test_file_updated = "src/test/resources/testdata/testAmpathforms/test_form_new_version.json";
 		File srcFile = new File(test_file_updated);
 		File dstFile = new File(ampathFormsLoader.getDirUtil().getDomainDirPath() + "/test_form_new_version.json");
 		FileUtils.copyFile(srcFile, dstFile);
-		
+
 		// Test that new version loads in with expected values
 		// Replay
 		ampathFormsLoader.load();
 		Form form2 = formService.getForm("Test Form 1");
 		Form initialForm = formService.getFormByUuid(form.getUuid());
 		Assert.assertEquals(Boolean.TRUE, initialForm.getRetired());
-		
+
 		// Verify Form Changed
 		Assert.assertEquals("Test Form 1", form2.getName());
 		Assert.assertEquals(Boolean.TRUE, form2.getPublished());
@@ -166,7 +166,7 @@ public class AmpathFormsLoaderIntegrationTest extends DomainBaseModuleContextSen
 		Assert.assertEquals(Boolean.FALSE, form2.getRetired());
 		Assert.assertEquals("Emergency", form2.getEncounterType().getName());
 		Assert.assertEquals("Test 1 Description Updated", form2.getDescription());
-		
+
 		// Verify Clob Changed
 		ClobDatatypeStorage clob2 = datatypeService
 		        .getClobDatatypeStorageByUuid(formService.getFormResource(form2, "JSON schema").getValueReference());
@@ -175,15 +175,15 @@ public class AmpathFormsLoaderIntegrationTest extends DomainBaseModuleContextSen
 		ObjectMapper mapper2 = new ObjectMapper();
 		JsonNode actualObj1 = mapper2.readTree(clob2.getValue());
 		Assert.assertEquals("\"Page X\"", actualObj1.get("pages").getElements().next().get("label").toString());
-		
-		// Verify Form Resource 
+
+		// Verify Form Resource
 		FormResource formResource2 = formService.getFormResource(form2, "JSON schema");
 		Assert.assertNotNull(formResource2);
 		Assert.assertEquals(clob2.getUuid(), formResource2.getValueReference());
-		
+
 		List<Form> forms = formService.getAllForms(true);
 		// There is an initial Basic form
 		Assert.assertEquals(3, forms.size());
 	}
-	
+
 }

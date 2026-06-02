@@ -24,12 +24,12 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  * Tests the ParameterUtil methods
  */
 public class ParameterUtilTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * Tests that fields annotated as {@link EvalProperty} are added as Parameters
 	 */
 	@Test
-	public void shouldHaveAllAnnotatedFieldsAsParameters() throws Exception {		
+	public void shouldHaveAllAnnotatedFieldsAsParameters() throws Exception {
 		AgeCohortDefinition def = new AgeCohortDefinition();
 		List<Property> props = DefinitionUtil.getConfigurationProperties(def);
 		Assert.assertEquals(6, props.size());
@@ -39,12 +39,12 @@ public class ParameterUtilTest extends BaseModuleContextSensitiveTest {
 			}
 		}
 	}
-	
+
 	/**
 	 * Tests that fields annotated as {@link EvalProperty} are added as Parameters from superclasses
 	 */
 	@Test
-	public void shouldHaveAllInheritedAnnotatedFieldsAsParameters() throws Exception {		
+	public void shouldHaveAllInheritedAnnotatedFieldsAsParameters() throws Exception {
 		NumericObsCohortDefinition def = new NumericObsCohortDefinition();
 		// NOTE: This should be changed to 11 when groupingConcept field is implemented
 		Assert.assertEquals(10, DefinitionUtil.getConfigurationProperties(def).size());

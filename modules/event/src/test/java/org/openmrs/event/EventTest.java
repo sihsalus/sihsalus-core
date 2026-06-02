@@ -37,7 +37,7 @@ import java.util.UUID;
 
 @SuppressWarnings("deprecation")
 public class EventTest extends BaseEventTest {
-	
+
 	/**
 	 * @see Event#subscribe(Class, String, EventListener)
 	 */
@@ -55,14 +55,14 @@ public class EventTest extends BaseEventTest {
 		concept.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		concept.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(concept);
-		
+
 		concept.setVersion("new random version");
 		cs.saveConcept(concept);
-		
+
 		cs.purgeConcept(concept);
-		
+
 		listener.waitForEvents();
-		
+
 		Assertions.assertEquals(0, listener.getCreatedCount());
 		Assertions.assertEquals(1, listener.getUpdatedCount());
 		Assertions.assertEquals(0, listener.getDeletedCount());
@@ -97,7 +97,7 @@ public class EventTest extends BaseEventTest {
         Assertions.assertEquals(1, listener.getUpdatedCount());
         Assertions.assertEquals(0, listener.getDeletedCount());
     }
-	
+
 	/**
 	 * @see Event#subscribe(Class,String,EventListener)
 	 */
@@ -108,17 +108,17 @@ public class EventTest extends BaseEventTest {
 		ConceptService cs = Context.getConceptService();
 		MockEventListener listener = new MockEventListener(6);
 		Event.subscribe(Concept.class, (String) null, listener);
-		
+
 		Concept concept = new Concept();
 		concept.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		concept.setConceptClass(cs.getConceptClassByName("Misc"));
 		ConceptName name = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
 		concept.addName(name);
 		cs.saveConcept(concept);
-		
+
 		concept.setVersion("new random version");
 		cs.saveConcept(concept);
-		
+
 		cs.purgeConcept(concept);
 
 		//Should work for subclasses
@@ -139,7 +139,7 @@ public class EventTest extends BaseEventTest {
 		Assertions.assertEquals(2, listener.getUpdatedCount());
 		Assertions.assertEquals(2, listener.getDeletedCount());
 	}
-	
+
 	/**
 	 * @see {@link Event#unsubscribe(Destination,EventListener)}
 	 */
@@ -151,32 +151,32 @@ public class EventTest extends BaseEventTest {
 		MockEventListener listener = new MockEventListener(1);
 		String action = Action.CREATED.toString();
 		Event.subscribe(Concept.class, action, listener);
-		
+
 		Concept concept1 = new Concept();
 		ConceptName name1 = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
 		concept1.addName(name1);
 		concept1.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		concept1.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(concept1);
-		
+
 		listener.waitForEvents();
-		
+
 		Assertions.assertEquals(1, listener.getCreatedCount());
-		
+
 		Event.unsubscribe(Event.getDestination(Concept.class, action), listener);
-		
+
 		Concept concept2 = new Concept();
 		ConceptName name2 = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
 		concept2.addName(name2);
 		concept2.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		concept2.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(concept2);
-		
+
 		Thread.sleep(100);
-		
+
 		Assertions.assertEquals(1, listener.getCreatedCount());
 	}
-	
+
 	/**
 	 * @see {@link Event#unsubscribe(Class,Action,EventListener)}
 	 */
@@ -187,7 +187,7 @@ public class EventTest extends BaseEventTest {
 		ConceptService cs = Context.getConceptService();
 		MockEventListener listener = new MockEventListener(6);
 		Event.subscribe(Concept.class, (String) null, listener);
-		
+
 		Event.unsubscribe(Concept.class, (Event.Action) null, listener);
 		Concept concept2 = new Concept();
 		ConceptName name2 = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
@@ -195,11 +195,11 @@ public class EventTest extends BaseEventTest {
 		concept2.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		concept2.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(concept2);
-		
+
 		concept2.setVersion("New version");
 		cs.saveConcept(concept2);
 		cs.purgeConcept(concept2);
-		
+
 		//Should work for subclasses
 		ConceptNumeric cn2 = new ConceptNumeric();
 		cn2.setDatatype(cs.getConceptDatatype(1));
@@ -208,18 +208,18 @@ public class EventTest extends BaseEventTest {
 		cn2.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		cn2.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(cn2);
-		
+
 		cn2.setVersion("new random version");
 		cs.saveConcept(cn2);
 		cs.purgeConcept(cn2);
-		
+
 		listener.waitForEvents();
-		
+
 		Assertions.assertEquals(0, listener.getCreatedCount());
 		Assertions.assertEquals(0, listener.getUpdatedCount());
 		Assertions.assertEquals(0, listener.getDeletedCount());
 	}
-	
+
 	/**
 	 * @see Event#unsubscribe(Class,Action,EventListener)
 	 */
@@ -230,18 +230,18 @@ public class EventTest extends BaseEventTest {
 		ConceptService cs = Context.getConceptService();
 		MockEventListener listener = new MockEventListener(1);
 		Event.subscribe(Concept.class, (String) null, listener);
-		
+
 		Concept concept1 = new Concept();
 		ConceptName name1 = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
 		concept1.addName(name1);
 		concept1.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		concept1.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(concept1);
-		
+
 		listener.waitForEvents();
-		
+
 		Assertions.assertEquals(1, listener.getCreatedCount());
-		
+
 		Event.unsubscribe(Concept.class, Action.CREATED, listener);
 		Concept concept2 = new Concept();
 		ConceptName name2 = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
@@ -250,9 +250,9 @@ public class EventTest extends BaseEventTest {
 		concept2.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(concept2);
 		cs.purgeConcept(concept1);
-		
+
 		Thread.sleep(100);
-		
+
 		Assertions.assertEquals(1, listener.getCreatedCount());
 		Assertions.assertEquals(1, listener.getDeletedCount());
 	}
@@ -293,7 +293,7 @@ public class EventTest extends BaseEventTest {
         Assertions.assertEquals(1, listener.getCreatedCount());
         Assertions.assertEquals(1, listener.getDeletedCount());
     }
-	
+
 	/**
 	 * @see {@link Event#unsubscribe(Destination,EventListener)}
 	 */
@@ -306,42 +306,42 @@ public class EventTest extends BaseEventTest {
 		MockEventListener listener2 = new AnotherTestEventListener(1);
 		Event.subscribe(Concept.class, Action.UPDATED.toString(), listener1);
 		Event.subscribe(Concept.class, Action.UPDATED.toString(), listener2);
-		
+
 		Concept concept = cs.getConcept(3);
 		concept.setVersion("new random version");
 		cs.saveConcept(concept);
-		
+
 		listener1.waitForEvents();
 		listener2.waitForEvents();
-		
+
 		Assertions.assertEquals(1, listener1.getUpdatedCount());
 		Assertions.assertEquals(1, listener2.getUpdatedCount());
-		
+
 		listener1.setExpectedEventsCount(0);
 		listener2.setExpectedEventsCount(1);
-		
+
 		Event.unsubscribe(Concept.class, Action.UPDATED, listener1);
 		concept.setVersion("another random version");
 		cs.saveConcept(concept);
-		
+
 		listener1.waitForEvents();
 		listener2.waitForEvents();
-		
+
 		Assertions.assertEquals(1, listener1.getUpdatedCount());
 		Assertions.assertEquals(2, listener2.getUpdatedCount());
 	}
-	
+
 	public class AnotherTestEventListener extends MockEventListener {
-		
+
 		/**
 		 * @param expectedEventsCount
 		 */
 		public AnotherTestEventListener(int expectedEventsCount) {
 			super(expectedEventsCount);
 		}
-		
+
 	}
-	
+
 	/**
 	 * @see {@link Event#unsetSubscription(SubscribableEventListener)}
 	 */
@@ -349,12 +349,12 @@ public class EventTest extends BaseEventTest {
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	@Verifies(value = "should remove given subscriptions", method = "unsetSubscription(SubscribableEventListener)")
 	public void unsetSubscription_shouldRemoveGivenSubscriptions() throws Exception {
-		
+
 		Event event = new Event();
-		
+
 		TestSubscribableEventListener listener = new TestSubscribableEventListener(3);
 		event.setSubscription(listener);
-		
+
 		ConceptService cs = Context.getConceptService();
 		Concept concept1 = new Concept();
 		ConceptName name1 = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
@@ -362,17 +362,17 @@ public class EventTest extends BaseEventTest {
 		concept1.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		concept1.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(concept1);
-		
+
 		concept1.setVersion("new random version");
 		cs.saveConcept(concept1);
 		cs.purgeConcept(concept1);
-		
+
 		listener.waitForEvents();
-		
+
 		Assertions.assertEquals(1, listener.getCreatedCount());
 		Assertions.assertEquals(1, listener.getUpdatedCount());
 		Assertions.assertEquals(1, listener.getDeletedCount());
-		
+
 		event.unsetSubscription(listener);
 		Concept concept2 = new Concept();
 		ConceptName name2 = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
@@ -382,23 +382,23 @@ public class EventTest extends BaseEventTest {
 		cs.saveConcept(concept2);
 		cs.saveConcept(concept2);
 		cs.purgeConcept(concept2);
-		
+
 		Thread.sleep(100);
-		
+
 		Assertions.assertEquals(1, listener.getCreatedCount());
 		Assertions.assertEquals(1, listener.getUpdatedCount());
 		Assertions.assertEquals(1, listener.getDeletedCount());
 	}
-	
+
 	private class TestSubscribableEventListener extends MockEventListener implements SubscribableEventListener {
-		
+
 		/**
 		 * @param expectedEventsCount
 		 */
 		public TestSubscribableEventListener(int expectedEventsCount) {
 			super(expectedEventsCount);
 		}
-		
+
 		/**
 		 * @return a list of classes that this can handle
 		 */
@@ -407,7 +407,7 @@ public class EventTest extends BaseEventTest {
 			objectList.add(Concept.class);
 			return objectList;
 		}
-		
+
 		/**
 		 * @return a list of Actions this listener can deal with
 		 */
@@ -419,7 +419,7 @@ public class EventTest extends BaseEventTest {
 			return actionList;
 		}
 	}
-	
+
 	/**
 	 * @see {@link Event#subscribe(Class,String,EventListener)}
 	 */
@@ -431,19 +431,19 @@ public class EventTest extends BaseEventTest {
 		MockEventListener listener = new MockEventListener(1);
 		Event.subscribe(Concept.class, Action.CREATED.toString(), listener);
 		Event.subscribe(Concept.class, Action.CREATED.toString(), listener);
-		
+
 		Concept concept = new Concept();
 		ConceptName name = new ConceptName(UUID.randomUUID().toString(), Locale.ENGLISH);
 		concept.addName(name);
 		concept.setDatatype(cs.getConceptDatatypeByName("N/A"));
 		concept.setConceptClass(cs.getConceptClassByName("Misc"));
 		cs.saveConcept(concept);
-		
+
 		listener.waitForEvents();
-		
+
 		Assertions.assertEquals(1, listener.getCreatedCount());
 	}
-	
+
 	/**
 	 * @see {@link Event#fireEvent(String, EventMessage)}
 	 */
@@ -452,17 +452,17 @@ public class EventTest extends BaseEventTest {
 		EventMessageListener listener = new EventMessageListener(1);
 		final String dest = "org.openmrs.test";
 		Event.subscribe(dest, listener);
-		
+
 		final String city = "indianapolis";
 		final String state = "indiana";
 		EventMessage eventMessage = new EventMessage();
 		eventMessage.put("city", city);
 		eventMessage.put("state", state);
-		
+
 		Event.fireEvent(dest, eventMessage);
-		
+
 		listener.waitForEvents();
-		
+
 		Assertions.assertEquals(city, listener.getCity());
 		Assertions.assertEquals(state, listener.getState());
 	}

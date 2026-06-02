@@ -46,7 +46,7 @@ import org.springframework.util.ReflectionUtils;
  * Contains tests for Representation Descriptions of all resources
  */
 public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * This test looks at all subclasses of DelegatingCrudResource, and test all {@link RepHandler}
 	 * methods to make sure they are all capable of running without exceptions. It also checks that
@@ -58,23 +58,23 @@ public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTes
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		//only match subclasses of BaseDelegatingResource
 		provider.addIncludeFilter(new AssignableTypeFilter(BaseDelegatingResource.class));
-		
-		// scan in org.openmrs.module.webservices.rest.web.resource package 
+
+		// scan in org.openmrs.module.webservices.rest.web.resource package
 		Set<BeanDefinition> components = provider
 		        .findCandidateComponents("org.openmrs.module.webservices.rest.web.resource");
 		if (CollectionUtils.isEmpty(components))
 			Assertions.fail("Faile to load any resource classes");
-		
+
 		for (BeanDefinition component : components) {
 			Class resourceClass = Class.forName(component.getBeanClassName());
 			for (Method method : ReflectionUtils.getAllDeclaredMethods(resourceClass)) {
 				ParameterizedType parameterizedType = (ParameterizedType) resourceClass.getGenericSuperclass();
 				Class openmrsClass = (Class) parameterizedType.getActualTypeArguments()[0];
 				//User Resource is special in that the Actual parameterized Type isn't a standard domain object, so we also
-				//need to look up fields and methods from the org.openmrs.User class 
+				//need to look up fields and methods from the org.openmrs.User class
 				boolean isUserResource = resourceClass.equals(UserResource1_8.class);
 				List<Object> refDescriptions = new ArrayList<Object>();
-				
+
 				if (method.getName().equals("getRepresentationDescription")
 				        && method.getDeclaringClass().equals(resourceClass)) {
 					//get all the rep definitions for all representations
@@ -82,7 +82,7 @@ public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTes
 					refDescriptions.add(method.invoke(resourceClass.newInstance(), new Object[] { Representation.DEFAULT }));
 					refDescriptions.add(method.invoke(resourceClass.newInstance(), new Object[] { Representation.FULL }));
 				}
-				
+
 				for (Object value : refDescriptions) {
 					if (value != null) {
 						DelegatingResourceDescription des = (DelegatingResourceDescription) value;
@@ -96,8 +96,8 @@ public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTes
 								}
 								if (!hasFieldOrPropertySetter)
 									hasFieldOrPropertySetter = hasSetterMethod(key, resourceClass);
-								
-								//TODO replace this hacky way that we are using to check if there is a get method for a 
+
+								//TODO replace this hacky way that we are using to check if there is a get method for a
 								//collection that has no actual getter e.g activeIdentifers and activeAttributes for Patient
 								if (!hasFieldOrPropertySetter) {
 									hasFieldOrPropertySetter = (ReflectionUtils.findMethod(openmrsClass,
@@ -106,10 +106,10 @@ public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTes
 										hasFieldOrPropertySetter = (ReflectionUtils.findMethod(User.class, "get"
 										        + StringUtils.capitalize(key)) != null);
 								}
-								
+
 								if (!hasFieldOrPropertySetter)
 									hasFieldOrPropertySetter = isallowedMissingProperty(resourceClass, key);
-								
+
 								Assertions.assertTrue(hasFieldOrPropertySetter, "No property found for '" + key + "' for " + openmrsClass
 								        + " nor setter method on resource " + resourceClass);
 							}
@@ -119,11 +119,11 @@ public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTes
 			}
 		}
 	}
-	
+
 	/**
 	 * Convenience method that checks of the specified resource class has a method for setting the
 	 * given property
-	 * 
+	 *
 	 * @param propName
 	 * @param resource
 	 * @return
@@ -136,14 +136,14 @@ public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTes
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Convenience method that checks if the specified property is included among the allowed
 	 * missing properties of the given resource class via reflection
-	 * 
+	 *
 	 * @param clazz
 	 * @param fieldName
 	 * @return
@@ -163,7 +163,7 @@ public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTes
 		}
 		return false;
 	}
-	
+
 	@Test
 	public void convert_shouldConvertASimpleObjectThatIncludesAUuid() {
 		final String uuid = "91f6c840-da25-11e8-ae91-0242ac110002";

@@ -50,7 +50,7 @@ public class ObjectUtilTest extends BaseModuleContextSensitiveTest {
         new ReportingModuleActivator().contextRefreshed();
         ReportingConstants.clearGlobalPropertyCache();
 	}
-    
+
 	@Test
 	public void sortShouldSortSimpleStrings() throws Exception {
 		List<String> list = Arrays.asList(new String[] { "Daniel", "Abbas", "Kizito" });
@@ -59,178 +59,178 @@ public class ObjectUtilTest extends BaseModuleContextSensitiveTest {
 		Assert.assertEquals("Daniel", list.get(1));
 		Assert.assertEquals("Kizito", list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortObjectThatImplementComparable() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleName", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleName", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleName", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), null);
 		Assert.assertEquals(personName3, list.get(0));
 		Assert.assertEquals(personName2, list.get(1));
 		Assert.assertEquals(personName1, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortObjectThatImplementComparableAsc() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleName", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleName", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleName", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "asc");
 		Assert.assertEquals(personName3, list.get(0));
 		Assert.assertEquals(personName2, list.get(1));
 		Assert.assertEquals(personName1, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortObjectThatImplementComparableDesc() throws Exception {
 		PersonName personName1 = new PersonName("givenNameb", "middleName", "familyName");
 		PersonName personName2 = new PersonName("givenNamea", "middleName", "familyName");
 		PersonName personName3 = new PersonName("givenNamec", "middleName", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "desc");
 		Assert.assertEquals(personName3, list.get(0));
 		Assert.assertEquals(personName1, list.get(1));
 		Assert.assertEquals(personName2, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortOnSinglePropertyWithDefaultSortOrder() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "givenName");
 		Assert.assertEquals(personName3, list.get(0));
 		Assert.assertEquals(personName2, list.get(1));
 		Assert.assertEquals(personName1, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortOnSinglePropertyAsc() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "givenName asc");
 		Assert.assertEquals(personName3, list.get(0));
 		Assert.assertEquals(personName2, list.get(1));
 		Assert.assertEquals(personName1, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortOnSinglePropertyDesc() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "givenName desc");
 		Assert.assertEquals(personName1, list.get(0));
 		Assert.assertEquals(personName2, list.get(1));
 		Assert.assertEquals(personName3, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortOnTwoProperties() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "middleName, givenName");
 		Assert.assertEquals(personName1, list.get(0));
 		Assert.assertEquals(personName2, list.get(1));
 		Assert.assertEquals(personName3, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortOnThreeProperties() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "familyName, middleName, givenName");
 		Assert.assertEquals(personName1, list.get(0));
 		Assert.assertEquals(personName2, list.get(1));
 		Assert.assertEquals(personName3, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortOnNestedProperties() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		personName1.setCreator(new User(3));
 		personName2.setCreator(new User(1));
 		personName3.setCreator(new User(2));
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "familyName, creator.userId");
 		Assert.assertEquals(personName2, list.get(0));
 		Assert.assertEquals(personName3, list.get(1));
 		Assert.assertEquals(personName1, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortOnNestedPropertiesDesc() throws Exception {
 		PersonName personName1 = new PersonName("givenNamec", "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		personName1.setCreator(new User(3));
 		personName2.setCreator(new User(1));
 		personName3.setCreator(new User(2));
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "familyName, creator.userId desc");
 		Assert.assertEquals(personName1, list.get(0));
 		Assert.assertEquals(personName3, list.get(1));
 		Assert.assertEquals(personName2, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortNullsLastAsc() throws Exception {
 		PersonName personName1 = new PersonName(null, "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "givenName");
 		Assert.assertEquals(personName3, list.get(0));
 		Assert.assertEquals(personName2, list.get(1));
 		Assert.assertEquals(personName1, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortNullsLastDesc() throws Exception {
 		PersonName personName1 = new PersonName(null, "middleNamea", "familyName");
 		PersonName personName2 = new PersonName("givenNameb", "middleNameb", "familyName");
 		PersonName personName3 = new PersonName("givenNamea", "middleNamec", "familyName");
-		
+
 		List<PersonName> list = Arrays.asList(new PersonName[] { personName1, personName2, personName3 });
 		list = ObjectUtil.sort((list), "givenName desc");
 		Assert.assertEquals(personName2, list.get(0));
 		Assert.assertEquals(personName3, list.get(1));
 		Assert.assertEquals(personName1, list.get(2));
 	}
-	
+
 	@Test
 	public void shouldSortObjectThatDontImplementComparable() throws Exception {
 		ConceptClass conceptClass1 = new ConceptClass(3);
 		ConceptClass conceptClass2 = new ConceptClass(1);
 		ConceptClass conceptClass3 = new ConceptClass(4);
 		ConceptClass conceptClass4 = new ConceptClass(2);
-		
+
 		List<ConceptClass> list = Arrays.asList(new ConceptClass[] { conceptClass1, conceptClass2, conceptClass3, conceptClass4 });
 		list = org.openmrs.module.reporting.common.ObjectUtil.sort((list), "conceptClassId");
 		Assert.assertEquals(conceptClass2, list.get(0));
@@ -350,7 +350,7 @@ public class ObjectUtilTest extends BaseModuleContextSensitiveTest {
 
         Concept yes = Context.getConceptService().getConcept(7);
 	    yes.getPreferredName(Locale.ENGLISH).setConceptNameType(ConceptNameType.FULLY_SPECIFIED);
-        
+
         ConceptName oui = new ConceptName();
         oui.setName("Oui");
         oui.setLocale(new Locale("fr"));
@@ -358,11 +358,11 @@ public class ObjectUtilTest extends BaseModuleContextSensitiveTest {
         ConceptName si = new ConceptName();
         si.setName("Si");
         si.setLocale(new Locale("es"));
-        
+
         yes.addName(oui);
         yes.addName(si);
-        
-        Context.getConceptService().saveConcept(yes);        
+
+        Context.getConceptService().saveConcept(yes);
     }
 
     private Obs createObsWithValueCodedYes() {

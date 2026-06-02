@@ -28,27 +28,27 @@ import java.util.Date;
 import java.util.Locale;
 
 public class ConditionResource2_2Test extends BaseDelegatingResourceTest<ConditionResource2_2, Condition> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants2_2.CONDITION_TEST_DATA_XML);
 	}
-	
+
 	@Override
 	public Condition newObject() {
 		return Context.getConditionService().getConditionByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Concept 1";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_2.CODED_CONDITION_UUID;
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -60,7 +60,7 @@ public class ConditionResource2_2Test extends BaseDelegatingResourceTest<Conditi
 		assertPropEquals("endDate", getObject().getEndDate());
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -73,7 +73,7 @@ public class ConditionResource2_2Test extends BaseDelegatingResourceTest<Conditi
 		assertPropEquals("additionalDetail", getObject().getAdditionalDetail());
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Test
 	public void testDisplayProperty() {
 		Locale definedNameLocale = new Locale("en", "US");
@@ -83,7 +83,7 @@ public class ConditionResource2_2Test extends BaseDelegatingResourceTest<Conditi
 		fullySpecifiedName.setConceptNameType(ConceptNameType.FULLY_SPECIFIED);
 		fullySpecifiedName.setLocalePreferred(false);
 		concept.addName(fullySpecifiedName);
-		
+
 		CodedOrFreeText codedOrFreeText = new CodedOrFreeText(concept, fullySpecifiedName, "");
 		ConditionClinicalStatus clinicalStatus = ConditionClinicalStatus.ACTIVE;
 		ConditionVerificationStatus verificationStatus = ConditionVerificationStatus.CONFIRMED;
@@ -91,7 +91,7 @@ public class ConditionResource2_2Test extends BaseDelegatingResourceTest<Conditi
 		Date onsetDate = new Date();
 		String additionalDetail = "additionalDetail";
 		int conditionId = 20;
-		
+
 		Condition condition = new Condition();
 		condition.setConditionId(conditionId);
 		condition.setCondition(codedOrFreeText);
@@ -100,10 +100,10 @@ public class ConditionResource2_2Test extends BaseDelegatingResourceTest<Conditi
 		condition.setAdditionalDetail(additionalDetail);
 		condition.setOnsetDate(onsetDate);
 		condition.setPatient(patient);
-		
+
 		ConditionResource2_2 resource = new ConditionResource2_2();
 		String result = resource.getDisplayString(condition);
-		
+
 		Assertions.assertEquals("some name", result);
 	}
 }

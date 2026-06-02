@@ -31,82 +31,82 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Tests functionality of {@link EncounterRoleController}.
  */
 public class EncounterRoleController1_9Test extends MainResourceControllerTest {
-	
+
 	private EncounterService service;
-	
+
 	@Override
 	public String getURI() {
 		return "encounterrole";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_9.ENCOUNTER_ROLE_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return service.getAllEncounterRoles(false).size();
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getEncounterService();
 	}
-	
+
 	@Test
 	public void shouldGetAnEncounterRoleByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		EncounterRole encounterRole = service.getEncounterRoleByUuid(getUuid());
 		assertEquals(encounterRole.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(encounterRole.getName(), PropertyUtils.getProperty(result, "name"));
 		assertEquals(encounterRole.getDescription(), PropertyUtils.getProperty(result, "description"));
 	}
-	
+
 	@Test
 	public void shouldListAllEncounterRoles() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(result);
 		assertEquals(getAllCount(), Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldCreateAEncounterRole() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject encounterRole = new SimpleObject();
 		encounterRole.add("name", "test name");
 		encounterRole.add("description", "test description");
-		
+
 		String json = new ObjectMapper().writeValueAsString(encounterRole);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newEncounterRole = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(newEncounterRole, "uuid"));
 		assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 	@Test
 	public void shouldEditingAnEncounterRole() throws Exception {
 		final String newName = "updated name";
 		SimpleObject encounterRole = new SimpleObject();
 		encounterRole.add("name", newName);
-		
+
 		String json = new ObjectMapper().writeValueAsString(encounterRole);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
 		req.setContent(json.getBytes());
 		handle(req);
 		assertEquals(newName, service.getEncounterRoleByUuid(getUuid()).getName());
 	}
-	
+
 	@Test
 	public void shouldRetireAEncounterRole() throws Exception {
 		assertEquals(false, service.getEncounterRoleByUuid(getUuid()).isRetired());
@@ -118,13 +118,13 @@ public class EncounterRoleController1_9Test extends MainResourceControllerTest {
 		assertEquals(true, service.getEncounterRoleByUuid(getUuid()).isRetired());
 		assertEquals(reason, service.getEncounterRoleByUuid(getUuid()).getRetireReason());
 	}
-	
+
 	@Test
 	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
 }

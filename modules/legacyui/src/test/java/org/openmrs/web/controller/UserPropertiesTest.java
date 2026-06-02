@@ -23,10 +23,10 @@ import org.openmrs.web.user.UserProperties;
  * Test cases for behavior in the User class
  */
 public class UserPropertiesTest {
-	
+
 	/**
 	 * Add the user property 'forcePassword' when setSupposedToChangePassword is set to true.
-	 * 
+	 *
 	 * @see UserProperties#setSupposedToChangePassword(Boolean)
 	 */
 	@Test
@@ -35,16 +35,16 @@ public class UserPropertiesTest {
 		User user = new User();
 		UserProperties userProperties = new UserProperties(user.getUserProperties());
 		userProperties.setSupposedToChangePassword(true);
-		
+
 		Map<String, String> properties = user.getUserProperties();
-		
+
 		assertTrue(properties.containsKey(OpenmrsConstants.USER_PROPERTY_CHANGE_PASSWORD));
 		assertTrue(Boolean.valueOf(properties.get(OpenmrsConstants.USER_PROPERTY_CHANGE_PASSWORD)));
 	}
-	
+
 	/**
 	 * Do nothing if the setSupposedToChangePassword is set to false.
-	 * 
+	 *
 	 * @see UserProperties#setSupposedToChangePassword(Boolean)
 	 */
 	@Test
@@ -53,13 +53,13 @@ public class UserPropertiesTest {
 		User user = new User();
 		UserProperties userProperties = new UserProperties(user.getUserProperties());
 		userProperties.setSupposedToChangePassword(false);
-		
+
 		assertFalse(user.getUserProperties().containsKey(OpenmrsConstants.USER_PROPERTY_CHANGE_PASSWORD));
 	}
-	
+
 	/**
 	 * Remove the existing 'forcePassword' property if setSupposedToChangePassword is set to false.
-	 * 
+	 *
 	 * @see UserProperties#setSupposedToChangePassword(Boolean)
 	 */
 	@Test
@@ -67,31 +67,31 @@ public class UserPropertiesTest {
 	public void setSupposedToChangePassword_shouldRemoveForcePasswordFromUserPropertyIfValueIsSetAsFalse() throws Exception {
 		User user = new User();
 		user.setUserProperty(OpenmrsConstants.USER_PROPERTY_CHANGE_PASSWORD, String.valueOf(true));
-		
+
 		UserProperties userProperties = new UserProperties(user.getUserProperties());
 		userProperties.setSupposedToChangePassword(false);
 		assertFalse(user.getUserProperties().containsKey(OpenmrsConstants.USER_PROPERTY_CHANGE_PASSWORD));
-		
+
 	}
-	
+
 	/**
 	 * Do nothing if the setSupposedToChangePassword is set to null.
-	 * 
+	 *
 	 * @see UserProperties#setSupposedToChangePassword(Boolean)
 	 */
 	@Test
 	@Verifies(value = "do not add forcePassword property in user properties when set to null", method = "setSupposedToChangePassword(Boolean)")
 	public void setSupposedToChangePassword_shouldNotAddForcePasswordToUserPropertyWhenValueIsSetAsNull() throws Exception {
 		User user = new User();
-		
+
 		UserProperties userProperties = new UserProperties(user.getUserProperties());
 		userProperties.setSupposedToChangePassword(null);
 		assertFalse(user.getUserProperties().containsKey(OpenmrsConstants.USER_PROPERTY_CHANGE_PASSWORD));
 	}
-	
+
 	/**
 	 * Remove the existing 'forcePassword' property if setSupposedToChangePassword is set to null.
-	 * 
+	 *
 	 * @see UserProperties#setSupposedToChangePassword(Boolean)
 	 */
 	@Test
@@ -99,13 +99,13 @@ public class UserPropertiesTest {
 	public void setSupposedToChangePassword_shouldRemoveForcePasswordFromUserPropertyIfValueIsSetAsNull() throws Exception {
 		User user = new User();
 		user.setUserProperty(OpenmrsConstants.USER_PROPERTY_CHANGE_PASSWORD, String.valueOf(true));
-		
+
 		UserProperties userProperties = new UserProperties(user.getUserProperties());
 		userProperties.setSupposedToChangePassword(null);
 		assertFalse(user.getUserProperties().containsKey(OpenmrsConstants.USER_PROPERTY_CHANGE_PASSWORD));
-		
+
 	}
-	
+
 	/**
 	 * @see UserProperties#isSupposedToChangePassword()
 	 */
@@ -116,13 +116,13 @@ public class UserPropertiesTest {
 		User user = new User();
 		UserProperties userProperties = new UserProperties(user.getUserProperties());
 		assertFalse(userProperties.isSupposedToChangePassword());
-		
+
 		userProperties.setSupposedToChangePassword(true);
 		assertTrue(userProperties.isSupposedToChangePassword());
-		
+
 		userProperties.setSupposedToChangePassword(false);
 		assertFalse(userProperties.isSupposedToChangePassword());
-		
+
 		userProperties.setSupposedToChangePassword(null);
 		assertFalse(userProperties.isSupposedToChangePassword());
 	}

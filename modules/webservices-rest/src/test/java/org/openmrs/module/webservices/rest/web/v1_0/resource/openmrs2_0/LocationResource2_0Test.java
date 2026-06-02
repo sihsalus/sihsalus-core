@@ -14,17 +14,17 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class LocationResource2_0Test extends BaseDelegatingResourceTest<LocationResource2_0, Location> {
-	
+
 	@Override
 	public Location newObject() {
 		return Context.getLocationService().getLocationByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		super.validateRefRepresentation();
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -58,7 +58,7 @@ public class LocationResource2_0Test extends BaseDelegatingResourceTest<Location
 		assertPropPresent("childLocations");
 		assertPropEquals("retired", getObject().isRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -93,12 +93,12 @@ public class LocationResource2_0Test extends BaseDelegatingResourceTest<Location
 		assertPropEquals("retired", getObject().isRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Never Never Land";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return "167ce20c-4785-4285-9119-d197268f7f4a";

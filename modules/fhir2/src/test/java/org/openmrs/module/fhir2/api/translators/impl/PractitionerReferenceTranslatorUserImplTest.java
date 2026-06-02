@@ -30,68 +30,68 @@ import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerReferenceTranslatorUserImplTest {
-	
+
 	private static final String USER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
-	
+
 	private static final String PRACTITIONER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
-	
+
 	@Mock
 	private FhirUserDao userDao;
-	
+
 	private PractitionerReferenceTranslatorUserImpl practitionerReferenceTranslatorUser;
-	
+
 	@Before
 	public void setup() {
 		practitionerReferenceTranslatorUser = new PractitionerReferenceTranslatorUserImpl();
 		practitionerReferenceTranslatorUser.setUserDao(userDao);
-		
+
 	}
-	
+
 	@Test
 	public void shouldConvertUserToFhirPractitionerReference() {
 		User user = new User();
 		user.setUuid(USER_UUID);
-		
+
 		Reference result = practitionerReferenceTranslatorUser.toFhirResource(user);
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.PRACTITIONER));
 		assertThat(getReferenceId(result).orElse(null), equalTo(USER_UUID));
 	}
-	
+
 	@Test
 	public void shouldReturnNullIfCreatorIsNull() {
 		assertThat(practitionerReferenceTranslatorUser.toFhirResource(null), nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldConvertReferenceToUser() {
 		Reference creatorReference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID)
 		        .setType(FhirConstants.PRACTITIONER);
 		User user = new User();
 		user.setUuid(USER_UUID);
-		
+
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-		
+
 		when(userDao.get(USER_UUID)).thenReturn(user);
-		
+
 		User result = practitionerReferenceTranslatorUser.toOpenmrsType(creatorReference);
-		
+
 		assertThat(result, Matchers.notNullValue());
 		assertThat(result.getUuid(), Matchers.equalTo(USER_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
 		User result = practitionerReferenceTranslatorUser.toOpenmrsType(null);
-		
+
 		assertThat(result, Matchers.nullValue());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsntForCreator() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + USER_UUID).setType("Unknown");
-		
+
 		practitionerReferenceTranslatorUser.toOpenmrsType(reference);
 	}
 }

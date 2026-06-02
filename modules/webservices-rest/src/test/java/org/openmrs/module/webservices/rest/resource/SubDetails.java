@@ -13,5 +13,5 @@ package org.openmrs.module.webservices.rest.resource;
  * @see SubDetailsResource
  */
 public class SubDetails {
-	
+
 }

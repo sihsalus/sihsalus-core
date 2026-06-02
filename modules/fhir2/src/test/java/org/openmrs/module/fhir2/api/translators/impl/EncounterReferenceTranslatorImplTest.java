@@ -29,39 +29,39 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterReferenceTranslatorImplTest {
-	
+
 	private static final String ENCOUNTER_UUID = "12345-abcde-12345";
-	
+
 	@Mock
 	private FhirEncounterDao dao;
-	
+
 	private EncounterReferenceTranslatorImpl encounterReferenceTranslator;
-	
+
 	@Before
 	public void setup() {
 		encounterReferenceTranslator = new EncounterReferenceTranslatorImpl();
 		encounterReferenceTranslator.setEncounterDao(dao);
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertEncounterToReference() {
 		Encounter encounter = new Encounter();
 		encounter.setUuid(ENCOUNTER_UUID);
-		
+
 		Reference result = encounterReferenceTranslator.toFhirResource(encounter);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.ENCOUNTER));
 		assertThat(getReferenceId(result).orElse(null), equalTo(ENCOUNTER_UUID));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfEncounterNull() {
 		Reference result = encounterReferenceTranslator.toFhirResource(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldConvertReferenceToEncounter() {
 		Reference encounterReference = new Reference().setReference(FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID)
@@ -69,44 +69,44 @@ public class EncounterReferenceTranslatorImplTest {
 		Encounter encounter = new Encounter();
 		encounter.setUuid(ENCOUNTER_UUID);
 		when(dao.get(ENCOUNTER_UUID)).thenReturn(encounter);
-		
+
 		Encounter result = encounterReferenceTranslator.toOpenmrsType(encounterReference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(ENCOUNTER_UUID));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
 		Encounter result = encounterReferenceTranslator.toOpenmrsType(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfEncounterHasNoIdentifier() {
 		Reference encounterReference = new Reference().setReference(FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID)
 		        .setType(FhirConstants.ENCOUNTER);
-		
+
 		Encounter result = encounterReferenceTranslator.toOpenmrsType(encounterReference);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfEncounterIdentifierHasNoValue() {
 		Reference encounterReference = new Reference().setReference(FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID)
 		        .setType(FhirConstants.ENCOUNTER).setIdentifier(new Identifier());
-		
+
 		Encounter result = encounterReferenceTranslator.toOpenmrsType(encounterReference);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsNotForEncounter() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + ENCOUNTER_UUID).setType("Unknown");
-		
+
 		encounterReferenceTranslator.toOpenmrsType(reference);
 	}
 }

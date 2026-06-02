@@ -27,21 +27,21 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a location
  */
 public class LocationShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldLocationShortSerialization() throws Exception {
-		
+
 		//prepare the necessary data
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/EncounterTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		Encounter e = Context.getEncounterService().getEncounter(4);
 		String xmlOutput = Context.getSerializationService().serialize(e, XStreamShortSerializer.class);
 		//should only serialize "uuid"
@@ -49,25 +49,25 @@ public class LocationShortSerializationTest extends BaseModuleContextSensitiveTe
 		//with short serialization, the "location" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/encounter/location/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldEncounterTypeShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "EncounterTypeShortSerializationTest.xml" here 
+		 * We also need to use the "EncounterTypeShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/EncounterTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<encounter id=\"1\" uuid=\"eec646cb-c847-45a7-98bc-91c8c4f70add\" voided=\"false\">\n");
@@ -97,7 +97,7 @@ public class LocationShortSerializationTest extends BaseModuleContextSensitiveTe
 		xmlBuilder.append("  <orders id=\"16\"/>\n");
 		xmlBuilder.append("  <obs id=\"17\"/>\n");
 		xmlBuilder.append("</encounter>\n");
-		
+
 		Encounter e = Context.getSerializationService().deserialize(xmlBuilder.toString(), Encounter.class,
 		    XStreamShortSerializer.class);
 		assertEquals("dc5c1fcc-0459-4201-bf70-0b90535ba362", e.getLocation().getUuid());

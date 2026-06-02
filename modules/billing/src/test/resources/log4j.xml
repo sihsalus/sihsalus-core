@@ -43,8 +43,8 @@
 	</logger>
 	 -->
 
-	<!-- 
-		This controls the LoggingAdvice class that wraps around the OpenMRS services 
+	<!--
+		This controls the LoggingAdvice class that wraps around the OpenMRS services
 		WARN == don't log anything special for the services
 		INFO == log all setters
 		DEBUG == log all setters & getters &  execution time

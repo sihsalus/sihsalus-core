@@ -22,18 +22,18 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 public class MockIBundleProvider<U extends IBaseResource> implements IBundleProvider {
-	
+
 	private final Date datePublished;
-	
+
 	private final List<U> mockResultList;
-	
+
 	@Getter
 	private final String uuid;
-	
+
 	private final Integer size;
-	
+
 	private final Integer preferredPageSize;
-	
+
 	public MockIBundleProvider(List<U> mockResultList, Integer preferredPageSize, Integer count) {
 		this.size = count;
 		this.uuid = FhirUtils.newUuid();
@@ -41,24 +41,24 @@ public class MockIBundleProvider<U extends IBaseResource> implements IBundleProv
 		this.mockResultList = mockResultList;
 		this.preferredPageSize = preferredPageSize;
 	}
-	
+
 	@Override
 	public IPrimitiveType<Date> getPublished() {
 		return new InstantType(datePublished);
 	}
-	
+
 	@Nonnull
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<IBaseResource> getResources(int i, int i1) {
 		return (List<IBaseResource>) this.mockResultList;
 	}
-	
+
 	@Override
 	public Integer preferredPageSize() {
 		return preferredPageSize;
 	}
-	
+
 	@Override
 	public Integer size() {
 		return size;

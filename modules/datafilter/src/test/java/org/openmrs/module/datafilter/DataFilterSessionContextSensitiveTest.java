@@ -28,19 +28,19 @@ import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DataFilterSessionContextSensitiveTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private SessionFactoryImplementor sessionFactory;
-	
+
 	private CurrentSessionContext currentSessionContext;
-	
+
 	@Before
 	public void setup() {
 		if (currentSessionContext == null) {
 			currentSessionContext = Whitebox.getInternalState(sessionFactory, CurrentSessionContext.class);
 		}
 	}
-	
+
 	@Test
 	public void currentSession_shouldNotEnableFiltersForWhichTheAuthenticatedUserHasASpecificByPassPrivilege() {
 		reloginAs("dyorke", "test");
@@ -49,14 +49,14 @@ public class DataFilterSessionContextSensitiveTest extends BaseFilterTest {
 		        .collect(Collectors.toList());
 		disabledFilters
 		        .forEach(filterName -> Context.addProxyPrivilege(filterName + DataFilterConstants.BYPASS_PRIV_SUFFIX));
-		
+
 		Session session = currentSessionContext.currentSession();
-		
+
 		List<HibernateFilterRegistration> filters = Util.getHibernateFilterRegistrations();
 		List<String> enabledFilterNames = filters.stream().filter(f -> !disabledFilters.contains(f.getName()))
 		        .map(f -> f.getName()).collect(Collectors.toList());
 		enabledFilterNames.forEach(f -> assertNotNull(session.getEnabledFilter(f)));
 		disabledFilters.forEach(f -> assertNull(session.getEnabledFilter(f)));
 	}
-	
+
 }

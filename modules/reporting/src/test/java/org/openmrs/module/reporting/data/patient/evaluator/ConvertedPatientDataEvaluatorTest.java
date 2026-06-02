@@ -55,10 +55,10 @@ public class ConvertedPatientDataEvaluatorTest extends BaseModuleContextSensitiv
 	@Test
 	@SuppressWarnings("unchecked")
 	public void evaluate_shouldReturnConvertedData() throws Exception {
-		
+
 		EvaluationContext context = new EvaluationContext();
 		context.setBaseCohort(new Cohort("2"));
-		
+
 		PreferredIdentifierDataDefinition d = new PreferredIdentifierDataDefinition();
 		d.setIdentifierType(Context.getPatientService().getPatientIdentifierType(1));
 
@@ -68,9 +68,9 @@ public class ConvertedPatientDataEvaluatorTest extends BaseModuleContextSensitiv
 		PropertyConverter pc = new PropertyConverter();
 		pc.setPropertyName("identifier");
 		cd.addConverter(pc);
-		
+
 		EvaluatedPatientData pd = Context.getService(PatientDataService.class).evaluate(cd, context);
-		
+
 		Object o = pd.getData().get(2);
 		Assert.assertEquals(String.class, o.getClass());
 		Assert.assertEquals("101-6", o);

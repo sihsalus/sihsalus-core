@@ -28,14 +28,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.request.WebRequest;
 
 public class PersonAttributeTypeController1_8Test extends MainResourceControllerTest {
-	
+
 	private PersonService service;
-	
+
 	@BeforeEach
 	public void init() {
 		service = Context.getPersonService();
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeController#createPersonAttributeType(SimpleObject,WebRequest)
 	 * @throws Exception
@@ -43,26 +43,26 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 	 */
 	@Test
 	public void createPersonAttributeType_shouldCreateANewPersonAttributeType() throws Exception {
-		
+
 		long originalCount = getAllCount();
-		
+
 		SimpleObject obj = new SimpleObject();
 		obj.add("name", "Some attributeType");
 		obj.add("description", "Attribute Type for test");
 		obj.add("format", "java.lang.String");
 		obj.add("searchable", "false");
-		
+
 		String json = new ObjectMapper().writeValueAsString(obj);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newPersonAttributeType = deserialize(handle(req));
-		
+
 		Util.log("Created person attribute type", newPersonAttributeType);
 		Assertions.assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeController#getPersonAttributeType(PersonAttributeType,WebRequest)
 	 * @throws Exception
@@ -70,18 +70,18 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 	 */
 	@Test
 	public void getPersonAttributeType_shouldGetADefaultRepresentationOfAPersonAttributeType() throws Exception {
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(result);
 		Util.log("Person fetched (default)", result);
-		
+
 		Assertions.assertEquals(getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "name"));
 		Assertions.assertNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeController#getPersonAttributeType(String,WebRequest)
 	 * @throws Exception
@@ -89,19 +89,19 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 	 */
 	@Test
 	public void getPersonAttributeType_shouldGetAFullRepresentationOfAPersonAttributeType() throws Exception {
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(result);
 		Util.log("Person fetched (full)", result);
-		
+
 		Assertions.assertEquals(getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "name"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeController#updatePersonAttributeType(PersonAttributeType,SimpleObject,WebRequest)
 	 * @throws Exception
@@ -109,25 +109,25 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 	 */
 	@Test
 	public void updatePersonAttributeType_shouldChangeAPropertyOnAPersonAttributeType() throws Exception {
-		
+
 		final String newDescription = "Updated description";
-		
+
 		PersonAttributeType obj = service.getPersonAttributeTypeByUuid(getUuid());
 		Assertions.assertNotNull(obj);
 		Assertions.assertFalse(newDescription.equals(obj.getDescription()));
 		Util.log("Old PersonAttributeType Description: ", obj.getDescription());
-		
+
 		String json = "{\"description\":\"Updated description\"}";
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
 		req.setContent(json.getBytes());
 		handle(req);
-		
+
 		PersonAttributeType editedAttr = service.getPersonAttributeTypeByUuid(getUuid());
 		Assertions.assertNotNull(editedAttr);
 		Assertions.assertEquals(newDescription, editedAttr.getDescription());
 		Util.log("Edited PersonAttributeType Description: ", editedAttr.getDescription());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeController#retirePersonAttributeType(PersonAttributeType,String,WebRequest)
 	 * @throws Exception
@@ -135,27 +135,27 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 	 */
 	@Test
 	public void retirePersonAttributeType_shouldRetireAPersonAttributeType() throws Exception {
-		
+
 		final String nonRetiredAttribute = "a0f5521c-dbbd-4c10-81b2-1b7ab18330df";
-		
+
 		PersonAttributeType obj = service.getPersonAttributeTypeByUuid(nonRetiredAttribute);
 		Assertions.assertNotNull(obj);
 		Assertions.assertFalse(obj.isRetired());
-		
+
 		MockHttpServletRequest delRequest = request(RequestMethod.DELETE, getURI() + "/" + nonRetiredAttribute);
 		delRequest.addParameter("!purge", "");
 		delRequest.addParameter("reason", "unit test");
 		handle(delRequest);
-		
+
 		obj = service.getPersonAttributeTypeByUuid(nonRetiredAttribute);
 		Assertions.assertNotNull(obj);
 		Assertions.assertTrue(obj.isRetired());
 		Assertions.assertTrue("unit test".equals(obj.getRetireReason()));
 	}
-	
+
 	@Test
 	public void shouldUnRetireAPersonAttributeType() throws Exception {
-		
+
 		final String nonRetiredAttribute = "a0f5521c-dbbd-4c10-81b2-1b7ab18330df";
 		PersonAttributeType personAttrType = service.getPersonAttributeTypeByUuid(nonRetiredAttribute);
 		personAttrType.setRetired(true);
@@ -163,16 +163,16 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 		service.savePersonAttributeType(personAttrType);
 		personAttrType = service.getPersonAttributeTypeByUuid(nonRetiredAttribute);
 		Assertions.assertTrue(personAttrType.isRetired());
-		
+
 		String json = "{\"deleted\": \"false\"}";
 		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + nonRetiredAttribute, json)));
-		
+
 		personAttrType = service.getPersonAttributeTypeByUuid(nonRetiredAttribute);
 		Assertions.assertFalse(personAttrType.isRetired());
 		Assertions.assertEquals("false", PropertyUtils.getProperty(response, "retired").toString());
-		
+
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeController#findPersonAttributeTypes(String,WebRequest,HttpServletResponse)
 	 * @throws Exception
@@ -180,17 +180,17 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 	 */
 	@Test
 	public void findPersonAttributeTypes_shouldReturnNoResultsIfThereAreNoMatchingPersons() throws Exception {
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("q", "foo-bar-baz");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		Assertions.assertNotNull(result);
-		
+
 		List<PersonAttributeType> hits = (List<PersonAttributeType>) result.get("results");
 		Assertions.assertEquals(0, hits.size());
 	}
-	
+
 	/**
 	 * @see PersonAttributeTypeController#findPersonAttributeTypes(String,WebRequest,HttpServletResponse)
 	 * @throws Exception
@@ -198,27 +198,27 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 	 */
 	@Test
 	public void findPersonAttributeTypes_shouldFindMatchingPersonAttributeTypes() throws Exception {
-		
+
 		final String uuidFound = "54fc8400-1683-4d71-a1ac-98d40836ff7c";
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		req.addParameter("q", "Birthplace");
-		
+
 		SimpleObject result = deserialize(handle(req));
 		Assertions.assertNotNull(result);
 		Util.log("findPersonAttributeTypes", result);
-		
+
 		List<PersonAttributeType> results = (List<PersonAttributeType>) result.get("results");
 		Util.log("Found " + results.size() + " personAttributeType(s)", results);
 		Assertions.assertEquals(1, results.size());
-		
+
 		Object obj = results.get(0);
 		Assertions.assertEquals(uuidFound, PropertyUtils.getProperty(obj, "uuid"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(obj, "links"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(obj, "display"));
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -226,20 +226,20 @@ public class PersonAttributeTypeController1_8Test extends MainResourceController
 	public String getURI() {
 		return "personattributetype";
 	}
-	
+
 	/**
 	 * Return UUID for Race PersonAttributeType
-	 * 
+	 *
 	 * @see MainResourceControllerTest#getUuid()
 	 */
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_8.PERSON_ATTRIBUTE_TYPE_UUID;
 	}
-	
+
 	/**
 	 * Return all PersonAttributeTypes regardless of retired status
-	 * 
+	 *
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
 	@Override

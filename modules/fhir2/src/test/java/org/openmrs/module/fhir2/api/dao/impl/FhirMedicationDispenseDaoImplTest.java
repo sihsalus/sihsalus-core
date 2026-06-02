@@ -40,37 +40,37 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiveTest {
-	
+
 	public static final String EXISTING_DISPENSE_UUID = "1bcb299c-b687-11ec-8065-0242ac110002";
-	
+
 	public static final String NEW_DISPENSE_UUID = "a15e4988-d07a-11ec-8307-0242ac110002";
-	
+
 	public static final String COMPLETED_STATUS_UUID = "7d8791fb-b67e-11ec-8065-0242ac110002";
-	
+
 	@Autowired
 	private PatientService patientService;
-	
+
 	@Autowired
 	private EncounterService encounterService;
-	
+
 	@Autowired
 	private OrderService orderService;
-	
+
 	@Autowired
 	private ConceptService conceptService;
-	
+
 	@Autowired
 	private ObjectProvider<FhirMedicationDispenseDao<MedicationDispense>> daoProvider;
-	
+
 	private FhirMedicationDispenseDao<MedicationDispense> dao;
-	
+
 	@Before
 	public void setUp() {
 		dao = daoProvider.getObject();
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
-	
+
 	@Test
 	public void shouldRetrieveMedicationDispenseByUuid() {
 		MedicationDispense dispense = dao.get(EXISTING_DISPENSE_UUID);
@@ -78,13 +78,13 @@ public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiv
 		assertThat(dispense.getUuid(), notNullValue());
 		assertThat(dispense.getUuid(), equalTo(EXISTING_DISPENSE_UUID));
 	}
-	
+
 	@Test
 	public void shouldReturnNullWhenGetMedicationDispneseByWrongUuid() {
 		MedicationDispense dispense = dao.get(NEW_DISPENSE_UUID);
 		assertThat(dispense, nullValue());
 	}
-	
+
 	@Test
 	public void shouldSaveNewMedicationDispense() {
 		MedicationDispense dispense = new MedicationDispense();
@@ -93,27 +93,27 @@ public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiv
 		dispense.setConcept(conceptService.getConcept(792));
 		dispense.setStatus(conceptService.getConcept(11112));
 		dao.createOrUpdate(dispense);
-		
+
 		MedicationDispense result = dao.get(NEW_DISPENSE_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(NEW_DISPENSE_UUID));
 	}
-	
+
 	@Test
 	public void shouldUpdateExistingDispense() {
 		MedicationDispense dispense = dao.get(EXISTING_DISPENSE_UUID);
 		assertThat(dispense.getStatus().getUuid(), not(equalTo(COMPLETED_STATUS_UUID)));
-		
+
 		dispense.setStatus(conceptService.getConceptByUuid(COMPLETED_STATUS_UUID));
 		dao.createOrUpdate(dispense);
-		
+
 		MedicationDispense result = dao.get(EXISTING_DISPENSE_UUID);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(EXISTING_DISPENSE_UUID));
 		assertThat(result.getStatus().getUuid(), equalTo(COMPLETED_STATUS_UUID));
 	}
-	
+
 	@Test
 	public void shouldGetSearchResultUuidsForMatchingPatients() {
 		String patientUuid = patientService.getPatient(7).getUuid();
@@ -123,11 +123,11 @@ public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiv
 		patientAndParam.addValue(patientOrParam);
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientAndParam);
-		
+
 		List<MedicationDispense> results = dao.getSearchResults(theParams);
 		assertThat(results, containsInAnyOrder(hasId(10), hasId(11)));
 	}
-	
+
 	@Test
 	public void shouldGetSearchResultUuidsForMatchingEncounters() {
 		String encounterUuid = encounterService.getEncounter(3).getUuid();
@@ -135,11 +135,11 @@ public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiv
 		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(encounterUuid)));
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, param);
-		
+
 		List<MedicationDispense> results = dao.getSearchResults(theParams);
 		assertThat(results, containsInAnyOrder(hasId(10)));
 	}
-	
+
 	@Test
 	public void shouldGetSearchResultUuidsForMatchingDrugOrders() {
 		String drugOrderUuid = orderService.getOrder(2).getUuid();
@@ -147,24 +147,24 @@ public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiv
 		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(drugOrderUuid)));
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, param);
-		
+
 		List<MedicationDispense> results = dao.getSearchResults(theParams);
-		
+
 		assertThat(results, containsInAnyOrder(hasId(1)));
 	}
-	
+
 	@Test
 	public void shouldDeleteExistingDispense() {
 		MedicationDispense dispense = dao.get(EXISTING_DISPENSE_UUID);
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getVoided(), equalTo(Boolean.FALSE));
-		
+
 		dao.delete(EXISTING_DISPENSE_UUID);
-		
+
 		MedicationDispense result = dao.get(EXISTING_DISPENSE_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(EXISTING_DISPENSE_UUID));
 		assertThat(result.getVoided(), equalTo(Boolean.TRUE));
-		
+
 	}
 }

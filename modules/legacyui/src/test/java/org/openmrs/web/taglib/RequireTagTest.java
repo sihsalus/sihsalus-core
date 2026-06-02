@@ -26,7 +26,7 @@ import org.springframework.mock.web.MockPageContext;
  * Tests for the {@link RequireTag} taglib controller.
  */
 public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see RequireTag#doStartTag()
 	 */
@@ -37,17 +37,17 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/web/taglib/include/RequireTagTest.xml");
 		Context.authenticate("whirleygiguser", "test");
-		
+
 		RequireTag tag = new RequireTag();
 		tag.setPageContext(new MockPageContext());
 		tag.setAnyPrivilege("Manage WhirleyGigs, Manage WhoopDeDoos");
-		
+
 		// the tag passes
 		Assertions.assertEquals(Tag.SKIP_BODY, tag.doStartTag());
-		
+
 		Context.logout();
 	}
-	
+
 	/**
 	 * @see RequireTag#doStartTag()
 	 */
@@ -58,17 +58,17 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/web/taglib/include/RequireTagTest.xml");
 		Context.authenticate("overallmanager", "test");
-		
+
 		RequireTag tag = new RequireTag();
 		tag.setPageContext(new MockPageContext());
 		tag.setAllPrivileges("Manage WhirleyGigs, Manage WhoopDeDoos, Manage Thingamajigs");
-		
+
 		// the tag passes
 		Assertions.assertEquals(Tag.SKIP_BODY, tag.doStartTag());
-		
+
 		Context.logout();
 	}
-	
+
 	/**
 	 * @see RequireTag#doStartTag()
 	 */
@@ -79,17 +79,17 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/web/taglib/include/RequireTagTest.xml");
 		Context.authenticate("whirleygiguser", "test");
-		
+
 		RequireTag tag = new RequireTag();
 		tag.setPageContext(new MockPageContext());
 		tag.setPrivilege("Manage WhirleyGigs");
-		
+
 		// the tag passes
 		Assertions.assertEquals(Tag.SKIP_BODY, tag.doStartTag());
-		
+
 		Context.logout();
 	}
-	
+
 	/**
 	 * @see RequireTag#doStartTag()
 	 */
@@ -100,17 +100,17 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/web/taglib/include/RequireTagTest.xml");
 		Context.authenticate("whirleygiguser", "test");
-		
+
 		RequireTag tag = new RequireTag();
 		tag.setPageContext(new MockPageContext());
 		tag.setAllPrivileges("Manage WhirleyGigs, Manage WhoopDeDoos, Manage Thingamajigs");
-		
+
 		// the tag passes
 		Assertions.assertEquals(Tag.SKIP_PAGE, tag.doStartTag());
-		
+
 		Context.logout();
 	}
-	
+
 	/**
 	 * @see RequireTag#doStartTag()
 	 */
@@ -121,17 +121,17 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/web/taglib/include/RequireTagTest.xml");
 		Context.authenticate("whirleygiguser", "test");
-		
+
 		RequireTag tag = new RequireTag();
 		tag.setPageContext(new MockPageContext());
 		tag.setAnyPrivilege("Random Privilege, Other Random Privilege");
-		
+
 		// the tag passes
 		Assertions.assertEquals(Tag.SKIP_PAGE, tag.doStartTag());
-		
+
 		Context.logout();
 	}
-	
+
 	/**
 	 * @see RequireTag#doStartTag()
 	 */
@@ -142,17 +142,17 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/web/taglib/include/RequireTagTest.xml");
 		Context.authenticate("overallmanager", "test");
-		
+
 		RequireTag tag = new RequireTag();
 		tag.setPageContext(new MockPageContext());
 		tag.setPrivilege("Some Random Privilege");
-		
+
 		// the tag passes
 		Assertions.assertEquals(Tag.SKIP_PAGE, tag.doStartTag());
-		
+
 		Context.logout();
 	}
-	
+
 	/**
 	 * @see RequireTag#doStartTag()
 	 */
@@ -163,7 +163,7 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/web/taglib/include/RequireTagTest.xml");
 		Context.authenticate("whirleygiguser", "test");
-		
+
 		RequireTag tag = new RequireTag();
 		MockPageContext pageContext = new MockPageContext();
 		final String referer = "/denied.htm";
@@ -172,16 +172,16 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		tag.setAllPrivileges("Manage WhirleyGigs,Manage Thingamajigs");
 		String redirect = "/myRedirect.html";
 		tag.setRedirect(redirect);
-		
+
 		Assertions.assertEquals(Tag.SKIP_PAGE, tag.doStartTag());
 		Assertions.assertEquals(true, pageContext.getAttribute(WebConstants.INSUFFICIENT_PRIVILEGES, PageContext.SESSION_SCOPE));
 		Assertions.assertNotNull(pageContext.getAttribute(WebConstants.REQUIRED_PRIVILEGES, PageContext.SESSION_SCOPE));
 		Assertions.assertEquals(redirect, pageContext.getAttribute(WebConstants.DENIED_PAGE, PageContext.SESSION_SCOPE)
 		        .toString());
-		
+
 		Context.logout();
 	}
-	
+
 	/**
 	 * @see RequireTag#doStartTag()
 	 */
@@ -192,7 +192,7 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/web/taglib/include/RequireTagTest.xml");
 		Context.authenticate("whirleygiguser", "test");
-		
+
 		RequireTag tag = new RequireTag();
 		MockPageContext pageContext = new MockPageContext();
 		final String referer = "/denied.htm";
@@ -200,13 +200,13 @@ public class RequireTagTest extends BaseModuleWebContextSensitiveTest {
 		tag.setPageContext(pageContext);
 		tag.setAllPrivileges("Manage WhirleyGigs,Manage Thingamajigs");
 		tag.setRedirect("");
-		
+
 		Assertions.assertEquals(Tag.SKIP_PAGE, tag.doStartTag());
 		Assertions.assertEquals(true, pageContext.getAttribute(WebConstants.INSUFFICIENT_PRIVILEGES, PageContext.SESSION_SCOPE));
 		Assertions.assertNotNull(pageContext.getAttribute(WebConstants.REQUIRED_PRIVILEGES, PageContext.SESSION_SCOPE));
 		Assertions.assertEquals(referer, pageContext.getAttribute(WebConstants.DENIED_PAGE, PageContext.SESSION_SCOPE)
 		        .toString());
-		
+
 		Context.logout();
 	}
 }

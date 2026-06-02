@@ -49,15 +49,15 @@ import java.util.Date;
 public class PatientDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
 
 	protected static Log log = LogFactory.getLog(PatientDataSetEvaluatorTest.class);
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -72,7 +72,7 @@ public class PatientDataSetEvaluatorTest extends BaseModuleContextSensitiveTest 
 		SimpleDataSet dataset = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, getEvaluationContext());
 		Assert.assertEquals("M", dataset.getColumnValue(2, "Sexe"));
 	}
-	
+
 	@Test
 	public void evaluate_shouldExportPatientData() throws Exception {
 		PatientDataSetDefinition d = new PatientDataSetDefinition();
@@ -80,13 +80,13 @@ public class PatientDataSetEvaluatorTest extends BaseModuleContextSensitiveTest 
 		SimpleDataSet dataset = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, getEvaluationContext());
 		Assert.assertEquals(2, dataset.getColumnValue(2, "EMR ID"));
 	}
-	
+
     @Test(expected = IllegalArgumentException.class)
 	public void evaluate_shouldFailToExportEncounterData() throws Exception {
 		PatientDataSetDefinition d = new PatientDataSetDefinition();
 		d.addColumn("Encounter Date", new EncounterDatetimeDataDefinition(), (String) null);
 	}
-	
+
 	@Test
 	public void evaluate_shouldExportConvertedData() throws Exception {
 		PatientDataSetDefinition d = new PatientDataSetDefinition();
@@ -94,73 +94,73 @@ public class PatientDataSetEvaluatorTest extends BaseModuleContextSensitiveTest 
 		SimpleDataSet dataset = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, getEvaluationContext());
 		Assert.assertEquals("08/Apr/1975", dataset.getColumnValue(2, "birthdate"));
 	}
-	
+
 	@Test
 	public void evaluate_shouldExportParameterizedData() throws Exception {
 		PatientDataSetDefinition d = new PatientDataSetDefinition();
 		d.addColumn("EMR ID", new PatientIdDataDefinition(), (String) null);
-		
+
 		AgeDataDefinition ageOnDate = new AgeDataDefinition();
 		ageOnDate.addParameter(new Parameter("effectiveDate", "Effective Date", Date.class));
 
 		d.addColumn("Age At Start", ageOnDate, "effectiveDate=${startDate}", new AgeConverter());
 		d.addColumn("Age At End", ageOnDate, "effectiveDate=${endDate}", new AgeConverter());
 		d.addColumn("Age in Months At End", ageOnDate, "effectiveDate=${endDate}", new AgeConverter("{m}"));
-		
+
 		SimpleDataSet dataset = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, getEvaluationContext());
 		Assert.assertEquals(35, dataset.getColumnValue(2, "Age At Start"));
 		Assert.assertEquals(36, dataset.getColumnValue(2, "Age At End"));
 		//DataSetUtil.printDataSet(dataset, System.out);
 	}
-	
+
 	@Test
 	public void evaluate_shouldEvaluateAgainstALimitedPatientSet() throws Exception {
-		
+
 		PatientDataSetDefinition d = new PatientDataSetDefinition();
 		d.addColumn("Sexe", new GenderDataDefinition(), (String) null);
-		
+
 		EvaluationContext context = new EvaluationContext();
-		
+
 		SimpleDataSet dataset = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, context);
 		Assert.assertEquals("M", dataset.getColumnValue(2, "Sexe"));
 		Assert.assertEquals("F", dataset.getColumnValue(7, "Sexe"));
 		Assert.assertNull(dataset.getColumnValue(501, "Sexe"));
 		Assert.assertEquals(9, dataset.getRows().size());
-		
+
 		Cohort c = new Cohort("2,6,8");
 		context.setBaseCohort(c);
-		
+
 		dataset = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, context);
 		Assert.assertEquals("M", dataset.getColumnValue(2, "Sexe"));
 		Assert.assertEquals(3, dataset.getRows().size());
 	}
-	
+
 	@Test
 	public void evaluate_shouldExportAMultiColumnDataItem() throws Exception {
-		
+
 		PatientDataSetDefinition d = new PatientDataSetDefinition();
 		d.addColumn("EMR ID", new PatientIdDataDefinition(), (String) null);
 
 		EncounterDataSetDefinition encounterDataSet = new EncounterDataSetDefinition();
 		encounterDataSet.addParameter(new Parameter("effectiveDate", "Effective Date", Date.class));
-		
+
 		MostRecentEncounterForPatientQuery encounterQuery = new MostRecentEncounterForPatientQuery();
 		encounterQuery.addParameter(new Parameter("onOrBefore", "On or Before Date", Date.class));
 		encounterDataSet.addRowFilter(encounterQuery, "onOrBefore=${effectiveDate}");
-		
+
 		encounterDataSet.addColumn("Last Encounter Type", new EncounterTypeDataDefinition(), null, new ObjectFormatter());
 		encounterDataSet.addColumn("Last Encounter Date", new EncounterDatetimeDataDefinition(), null, new DateConverter("yyyy-MM-dd"));
-		
+
 		d.addColumns("Last Scheduled Visit", encounterDataSet, "effectiveDate=${endDate}", new ObjectFormatter());
 		d.addSortCriteria("Last Encounter Date", SortDirection.ASC);
-		
+
 		SimpleDataSet dataset = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, getEvaluationContext());
 		//DataSetUtil.printDataSet(dataset, System.out);
 	}
-	
+
 	@Test
 	public void evaluate_shouldExportAndFlattenAMultiValueDataItem() throws Exception {
-		
+
 		PatientDataSetDefinition d = new PatientDataSetDefinition();
 		d.addColumn("EMR ID", new PatientIdDataDefinition(), (String) null);
 
@@ -168,15 +168,15 @@ public class PatientDataSetEvaluatorTest extends BaseModuleContextSensitiveTest 
 		encounterDataSet.addRowFilter(new AllEncounterQuery(), "");
 		encounterDataSet.addColumn("Encounter Type", new EncounterTypeDataDefinition(), null, new ObjectFormatter());
 		encounterDataSet.addColumn("Encounter Date", new EncounterDatetimeDataDefinition(), null, new DateConverter("yyyy-MM-dd"));
-		
+
 		d.addColumns("Last 3 Encounters", encounterDataSet, null, TimeQualifier.LAST, 3);
-		
+
 		SimpleDataSet dataset = (SimpleDataSet)Context.getService(DataSetDefinitionService.class).evaluate(d, getEvaluationContext());
 		//DataSetUtil.printDataSet(dataset, System.out);
 	}
-	
+
 	//***** UTILITY METHODS *****
-	
+
 	public EvaluationContext getEvaluationContext() {
 		EvaluationContext context = new EvaluationContext();
 		context.addParameterValue("startDate", DateUtil.getDateTime(2010, 7, 1));

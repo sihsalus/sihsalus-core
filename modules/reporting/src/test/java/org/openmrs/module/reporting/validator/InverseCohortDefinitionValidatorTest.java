@@ -22,7 +22,7 @@ import org.springframework.validation.Errors;
  * Tests methods on the {@link CohortDefinitionValidator} class.
  */
 public class InverseCohortDefinitionValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -31,13 +31,13 @@ public class InverseCohortDefinitionValidatorTest extends BaseModuleContextSensi
 	public void validate_shouldFailValidationIfBaseDefinitionIsNull() throws Exception {
 		InverseCohortDefinition inverseCohortDefinition = new InverseCohortDefinition();
 		inverseCohortDefinition.setBaseDefinition(null);
-		
+
 		Errors errors = new BindException(inverseCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(inverseCohortDefinition, errors);
-		
+
 		Assert.assertTrue(errors.hasErrors());
 	}
-	
+
 	/**
 	 * @see {@link CohortDefinitionValidator#validate(Object,Errors)}
 	 */
@@ -47,10 +47,10 @@ public class InverseCohortDefinitionValidatorTest extends BaseModuleContextSensi
 		InverseCohortDefinition inverseCohortDefinition = new InverseCohortDefinition();
 		inverseCohortDefinition.setName("Test CD");
 		inverseCohortDefinition.setBaseDefinition(new SqlCohortDefinition());
-		
+
 		Errors errors = new BindException(inverseCohortDefinition, "cohortDefinition");
 		new CohortDefinitionValidator().validate(inverseCohortDefinition, errors);
-		
+
 		Assert.assertFalse(errors.hasErrors());
 	}
 }

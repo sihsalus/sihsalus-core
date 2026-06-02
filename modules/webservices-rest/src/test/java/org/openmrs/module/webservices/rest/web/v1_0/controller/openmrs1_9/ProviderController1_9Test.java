@@ -31,12 +31,12 @@ import java.util.Date;
 import java.util.List;
 
 public class ProviderController1_9Test extends MainResourceControllerTest {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_9.TEST_DATASET);
 	}
-	
+
 	/**
 	 * @see ProviderController#createProvider(SimpleObject,WebRequest)
 	 * @verifies create a new Provider
@@ -45,11 +45,11 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 	public void createProvider_shouldCreateANewProvider() throws Exception {
 		int before = Context.getProviderService().getAllProviders().size();
 		String json = "{ \"person\": \"da7f524f-27ce-4bb2-86d6-6d1d05312bd5\", \"identifier\":\"abc123ez\" }";
-		
+
 		handle(newPostRequest(getURI(), json));
 		Assertions.assertEquals(before + 1, Context.getProviderService().getAllProviders().size());
 	}
-	
+
 	/**
 	 * @verifies create a new Provider with Attributes
 	 */
@@ -64,7 +64,7 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 		Provider provider = Context.getProviderService().getAllProviders().get(1);
 		Assertions.assertEquals(1, provider.getAttributes().size());
 	}
-	
+
 	/**
 	 * @see ProviderController#updateProvider(Provider,SimpleObject,WebRequest)
 	 * @verifies should fail when changing a person property on a Provider
@@ -75,11 +75,11 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 			Date now = new Date();
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			String json = "{\"birthdate\":\"" + df.format(now) + "\"}";
-		
+
 			handle(newPostRequest(getURI() + "/" + RestTestConstants1_9.PROVIDER_UUID, json));
 		});
 	}
-	
+
 	/**
 	 * @see ProviderController#voidProvider(Provider,String,WebRequest)
 	 * @verifies void a Provider
@@ -88,16 +88,16 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 	public void voidProvider_shouldRetireAProvider() throws Exception {
 		Provider pat = Context.getProviderService().getProvider(2);
 		Assertions.assertFalse(pat.isRetired());
-		
+
 		MockHttpServletRequest request = request(RequestMethod.DELETE, getURI() + "/" + RestTestConstants1_9.PROVIDER_UUID);
 		request.addParameter("reason", "unit test");
 		handle(request);
-		
+
 		pat = Context.getProviderService().getProvider(2);
 		Assertions.assertTrue(pat.isRetired());
 		Assertions.assertEquals("unit test", pat.getRetireReason());
 	}
-	
+
 	/**
 	 * @see ProviderController#findProviders(String,WebRequest,HttpServletResponse)
 	 * @verifies return no results if there are no matching Providers
@@ -106,11 +106,11 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 	public void findProviders_shouldReturnNoResultsIfThereAreNoMatchingProviders() throws Exception {
 		MockHttpServletRequest request = newGetRequest(getURI());
 		request.addParameter("q", "zzzznobody");
-		
+
 		List<?> results = (List<?>) deserialize(handle(request)).get("results");
 		Assertions.assertEquals(0, results.size());
 	}
-	
+
 	/**
 	 * @see ProviderController#findProviders(String,WebRequest,HttpServletResponse)
 	 * @verifies find matching Providers
@@ -119,7 +119,7 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 	public void findProviders_shouldFindMatchingProviders() throws Exception {
 		MockHttpServletRequest request = newGetRequest(getURI());
 		request.addParameter("q", "Hornblower");
-		
+
 		List<?> results = (List<?>) deserialize(handle(request)).get("results");
 		Assertions.assertEquals(1, results.size());
 		Object result = results.get(0);
@@ -127,32 +127,32 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "links"));
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "display"));
 	}
-	
+
 	@Test
 	public void shouldFindProviderByUserUuid() throws Exception {
 		MockHttpServletRequest request = newGetRequest(getURI());
 		request.addParameter("user", "c98a1558-e131-11de-babe-001e378eb67e");
-		
+
 		List<?> results = (List<?>) deserialize(handle(request)).get("results");
 		Assertions.assertNotSame(0, results.size());
-		
+
 		Object next = results.iterator().next();
 		Assertions.assertEquals(getUuid(), (String) PropertyUtils.getProperty(next, "uuid"));
 	}
-	
+
 	@Test
 	public void shouldEditAProvider() throws Exception {
 		final String EDITED_PERSON_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
 		Provider provider = Context.getProviderService().getProviderByUuid(getUuid());
 		Assertions.assertFalse(EDITED_PERSON_UUID.equals(provider.getPerson().getUuid()));
-		
+
 		String json = "{\"person\":\"" + EDITED_PERSON_UUID + "\"" + "}";
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
-		
+
 		Provider updatedProvider = Context.getProviderService().getProviderByUuid(getUuid());
 		Assertions.assertEquals(EDITED_PERSON_UUID, updatedProvider.getPerson().getUuid());
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -160,7 +160,7 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "provider";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -168,7 +168,7 @@ public class ProviderController1_9Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_9.PROVIDER_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */

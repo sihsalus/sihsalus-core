@@ -27,15 +27,15 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
  * Base class for narrative generation tests
  */
 public class BaseFhirNarrativeTest {
-	
+
 	protected static TimeZone defaultTimeZone;
-	
+
 	protected final FhirContext ctx = FhirContext.forR4();
-	
+
 	protected IParser parser;
-	
+
 	protected ReloadableResourceBundleMessageSource messageSource;
-	
+
 	/**
 	 * Setup a common timezone before all the tests to avoid assertion errors in narrative generation
 	 * tests due to timezone mismatch
@@ -45,7 +45,7 @@ public class BaseFhirNarrativeTest {
 		defaultTimeZone = TimeZone.getDefault();
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 	}
-	
+
 	/**
 	 * Set OpenMRSThymeleafNarrativeGenerator as the narrative generator for the FhirContext and
 	 * initialize the parser
@@ -54,15 +54,15 @@ public class BaseFhirNarrativeTest {
 	public void setup() {
 		messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:messages");
-		
+
 		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(messageSource,
 		        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE, FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE));
 		parser = ctx.newJsonParser();
 	}
-	
+
 	/**
 	 * A utility to read expected narrative files in tests
-	 * 
+	 *
 	 * @param resource
 	 * @return narrative file content as a String
 	 * @throws IOException
@@ -70,7 +70,7 @@ public class BaseFhirNarrativeTest {
 	protected String readNarrativeFile(String resource) throws IOException {
 		return resourceToString(resource, StandardCharsets.UTF_8, getClass().getClassLoader()).trim();
 	}
-	
+
 	/**
 	 * Reset the timezone to defaultTimeZone after all tests are run
 	 */

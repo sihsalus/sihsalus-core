@@ -31,7 +31,7 @@ public class SequentialIdentifierGeneratorIT extends IdgenBaseTest {
 			gen.getPrefixProvider("provider:fooBarBean");
 		});
 	}
-	
+
 	@Test
 	public void getPrefixProvider_shouldThrowWhenMissingPrefixProviderBean() {
 		assertThrows(APIException.class, () -> {
@@ -39,7 +39,7 @@ public class SequentialIdentifierGeneratorIT extends IdgenBaseTest {
 			gen.getPrefixProvider("provider");
 		});
 	}
-	
+
 	@Test
 	public void getPrefixProvider_shouldThrowWhenBlankPrefixProviderBean() {
 		// replay

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.openmrs.module.Module;
 
 public class ModuleListControllerTest {
-	
+
 	/**
 	 * @see ModuleListController#sortStartupOrder(List)
 	 * @verifies sort modules correctly
@@ -31,7 +31,7 @@ public class ModuleListControllerTest {
 		    "kenyaemr",
 		    "org.openmrs.module.uiframework,org.openmrs.module.uilibrary,org.openmrs.module.appframework,org.openmrs.module.metadatasharing,org.openmrs.module.htmlformentry");
 		Module uilibrary = mockModule("uilibrary", "org.openmrs.module.uiframework");
-		
+
 		List<Module> list = new ModuleListController().sortStartupOrder(Arrays.asList(appframework, kenyaemr, kenyaemr,
 		    uilibrary));
 		Assertions.assertSame(uilibrary, list.get(0));
@@ -39,7 +39,7 @@ public class ModuleListControllerTest {
 		Assertions.assertSame(kenyaemr, list.get(2));
 		Assertions.assertSame(kenyaemr, list.get(3));
 	}
-	
+
 	/**
 	 * @param moduleId
 	 * @param requiredModules

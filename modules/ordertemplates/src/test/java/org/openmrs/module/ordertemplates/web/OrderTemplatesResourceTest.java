@@ -17,20 +17,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class OrderTemplatesResourceTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	OrderTemplatesService service;
-	
+
 	ObjectMapper jackson = new ObjectMapper();
-	
+
 	OrderTemplatesResource resource;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet("testdata/OrderTemplateServiceTest-initialData.xml");
 		resource = new OrderTemplatesResource();
 	}
-	
+
 	@Test
 	public void testCreateOrderTemplate() throws IOException {
 		// setup
@@ -45,7 +45,7 @@ public class OrderTemplatesResourceTest extends BaseModuleWebContextSensitiveTes
 		SimpleObject payLoad = jackson.readValue(json, SimpleObject.class);
 		String templateUuid = "35f83cd4-64ev-4en7-a5f3-364d3b14a63m";
 		assertThat(service.getOrderTemplateByUuid(templateUuid), nullValue());
-		
+
 		// replay and verify
 		SimpleObject created = (SimpleObject) resource.create(payLoad, new RequestContext());
 		assertThat(created, notNullValue());
@@ -54,7 +54,7 @@ public class OrderTemplatesResourceTest extends BaseModuleWebContextSensitiveTes
 		assertThat(wasCreated.getId(), notNullValue());
 		assertThat(wasCreated.getName(), is("Abacavir/dolutegravir/lamivudine template"));
 	}
-	
+
 	@Test
 	public void testRetrieveOne() {
 		OrderTemplate existing = resource.getByUniqueId("01b8f6b7-dc0e-4346-b818-f3e9cd24dfdb");

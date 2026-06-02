@@ -36,13 +36,13 @@ import static org.mockito.Mockito.when;
  *
  */
 public class DiagnosisMetadataTest {
-	
+
 	private ConceptMapType sameAs;
-	
+
 	private ConceptSource emrConceptSource;
-	
+
 	private ConceptService conceptService;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		sameAs = new ConceptMapType();
@@ -50,7 +50,7 @@ public class DiagnosisMetadataTest {
 		emrConceptSource.setName(EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
 		conceptService = mock(ConceptService.class);
 	}
-	
+
 	@Test
 	public void testConstructor() throws Exception {
 		Concept codedDiagnosis = setupConcept(conceptService, "Coded Diagnosis",
@@ -69,14 +69,14 @@ public class DiagnosisMetadataTest {
 		        setupConcept(conceptService, "Confirmed", EmrApiConstants.CONCEPT_CODE_DIAGNOSIS_CERTAINTY_CONFIRMED)));
 		diagnosisCertainty.addAnswer(new ConceptAnswer(
 		        setupConcept(conceptService, "Presumed", EmrApiConstants.CONCEPT_CODE_DIAGNOSIS_CERTAINTY_PRESUMED)));
-		
+
 		Concept diagnosisSet = setupConcept(conceptService, "Diagnosis Set",
 		    EmrApiConstants.CONCEPT_CODE_DIAGNOSIS_CONCEPT_SET);
 		diagnosisSet.addSetMember(codedDiagnosis);
 		diagnosisSet.addSetMember(nonCodedDiagnosis);
 		diagnosisSet.addSetMember(diagnosisOrder);
 		diagnosisSet.addSetMember(diagnosisCertainty);
-		
+
 		DiagnosisMetadata diagnosisMetadata = new DiagnosisMetadata(conceptService, emrConceptSource);
 		assertThat(diagnosisMetadata.getDiagnosisSetConcept(), is(diagnosisSet));
 		assertThat(diagnosisMetadata.getCodedDiagnosisConcept(), is(codedDiagnosis));
@@ -84,7 +84,7 @@ public class DiagnosisMetadataTest {
 		assertThat(diagnosisMetadata.getDiagnosisOrderConcept(), is(diagnosisOrder));
 		assertThat(diagnosisMetadata.getDiagnosisCertaintyConcept(), is(diagnosisCertainty));
 	}
-	
+
 	private Concept setupConcept(ConceptService mockConceptService, String name, String mappingCode) {
 		Concept concept = new Concept();
 		concept.addName(new ConceptName(name, Locale.ENGLISH));
@@ -92,21 +92,21 @@ public class DiagnosisMetadataTest {
 		when(mockConceptService.getConceptByMapping(mappingCode, emrConceptSource.getName())).thenReturn(concept);
 		return concept;
 	}
-	
+
 	@Test
 	public void buildDiagnosisObsGroup_should_createNewObsGroup() throws Exception {
 		String nonCodedAnswer = "Free text";
-		
+
 		EmrApiProperties emrApiProperties = mock(EmrApiProperties.class);
 		MockMetadataTestUtil.setupMockConceptService(conceptService, emrApiProperties);
 		MockMetadataTestUtil.setupDiagnosisMetadata(emrApiProperties, conceptService);
-		
+
 		Diagnosis diagnosis = new Diagnosis(new CodedOrFreeTextAnswer(nonCodedAnswer), Diagnosis.Order.PRIMARY);
 		diagnosis.setCertainty(Diagnosis.Certainty.PRESUMED);
-		
+
 		DiagnosisMetadata dmd = emrApiProperties.getDiagnosisMetadata();
 		Obs obs = dmd.buildDiagnosisObsGroup(diagnosis);
-		
+
 		assertThat(obs.getConcept(), is(dmd.getDiagnosisSetConcept()));
 		assertThat(obs.getGroupMembers().size(), is(3));
 		assertTrue(hasGroupMember(obs, dmd.getDiagnosisOrderConcept(), dmd.getConceptFor(Diagnosis.Order.PRIMARY), false));
@@ -114,29 +114,29 @@ public class DiagnosisMetadataTest {
 		    hasGroupMember(obs, dmd.getDiagnosisCertaintyConcept(), dmd.getConceptFor(Diagnosis.Certainty.PRESUMED), false));
 		assertTrue(hasGroupMember(obs, dmd.getNonCodedDiagnosisConcept(), nonCodedAnswer, false));
 	}
-	
+
 	@Test
 	public void buildDiagnosisObsGroup_should_editExistingObsGroup() throws Exception {
 		String oldNonCodedAnswer = "Free text";
 		String newNonCodedAnswer = "Another answer";
-		
+
 		EmrApiProperties emrApiProperties = mock(EmrApiProperties.class);
 		MockMetadataTestUtil.setupMockConceptService(conceptService, emrApiProperties);
 		MockMetadataTestUtil.setupDiagnosisMetadata(emrApiProperties, conceptService);
-		
+
 		// first, build the original obs
 		Diagnosis diagnosis = new Diagnosis(new CodedOrFreeTextAnswer(oldNonCodedAnswer), Diagnosis.Order.PRIMARY);
 		diagnosis.setCertainty(Diagnosis.Certainty.PRESUMED);
-		
+
 		DiagnosisMetadata dmd = emrApiProperties.getDiagnosisMetadata();
 		Obs obs = dmd.buildDiagnosisObsGroup(diagnosis);
-		
+
 		// now modify it
 		diagnosis.setExistingObs(obs);
 		diagnosis.setCertainty(Diagnosis.Certainty.CONFIRMED);
 		diagnosis.setDiagnosis(new CodedOrFreeTextAnswer(newNonCodedAnswer));
 		obs = dmd.buildDiagnosisObsGroup(diagnosis);
-		
+
 		assertThat(obs.getConcept(), is(dmd.getDiagnosisSetConcept()));
 		assertThat(obs.getGroupMembers(false).size(), is(3));
 		assertThat(obs.getGroupMembers(true).size(), is(5));
@@ -147,14 +147,14 @@ public class DiagnosisMetadataTest {
 		assertTrue(
 		    hasGroupMember(obs, dmd.getDiagnosisCertaintyConcept(), dmd.getConceptFor(Diagnosis.Certainty.PRESUMED), true));
 		assertTrue(hasGroupMember(obs, dmd.getNonCodedDiagnosisConcept(), oldNonCodedAnswer, true));
-		
+
 	}
-	
+
 	private boolean hasGroupMember(Obs obsGroup, Concept question, Object answer, boolean isVoided) {
 		return obsGroup.getGroupMembers(true).stream().anyMatch(obs -> obs.getConcept().equals(question)
 		        && obs.isVoided() == isVoided
 		        && ((answer instanceof Concept && obs.getValueCoded() != null && obs.getValueCoded().equals(answer))
 		                || (answer instanceof String && obs.getValueText() != null && obs.getValueText().equals(answer))));
 	}
-	
+
 }

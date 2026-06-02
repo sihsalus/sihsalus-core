@@ -13,18 +13,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.Assert.*;
 
 public class HibernateBedTagMapDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	BedTagMapDao bedTagMapDao;
-	
+
 	@Autowired
 	BedManagementDao bedManagementDao;
-	
+
 	@Before
 	public void beforeAllTests() throws Exception {
 		executeDataSet("bedTagMapTestDataSet.xml");
 	}
-	
+
 	@Test
 	public void shouldGetBedTagMapByUuid() throws Exception {
 		BedTagMap bedTagMap = bedTagMapDao.getBedTagMapByUuid("5580cddd-c290-66c8-8d3a-96dc33d199f4");
@@ -34,26 +34,26 @@ public class HibernateBedTagMapDaoTest extends BaseModuleContextSensitiveTest {
 		assertEquals(bed, bedTagMap.getBed());
 		assertEquals(bedTag, bedTagMap.getBedTag());
 	}
-	
+
 	@Test
 	public void shouldReturnNullIfNoBedTagMapForGivenUuid() throws Exception {
 		BedTagMap bedTagMap = bedTagMapDao.getBedTagMapByUuid("wrong uuid");
 		assertNull(bedTagMap);
 	}
-	
+
 	@Test
 	public void shouldGetBedTagByUuid() throws Exception {
 		BedTag bedTag = bedTagMapDao.getBedTagByUuid("5580cddd-c290-66c8-8d3a-96dc33d199f1");
 		assertNotNull(bedTag);
 		assertEquals("Oxygen", bedTag.getName());
 	}
-	
+
 	@Test
 	public void shouldReturnNullIfNoBedTagForGivenUuid() throws Exception {
 		BedTag bedTag = bedTagMapDao.getBedTagByUuid("wrong uuid");
 		assertNull(bedTag);
 	}
-	
+
 	@Test
 	public void shouldGetBedTagMapForAGivenBedAndBedTag() throws Exception {
 		Bed bed = bedManagementDao.getBedByUuid("5580cddd-c290-66c8-8d3a-96dc33d199fb");
@@ -63,7 +63,7 @@ public class HibernateBedTagMapDaoTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(actualBedTagMap);
 		assertEquals(expectedBedTagMap, actualBedTagMap);
 	}
-	
+
 	@Test
 	public void shouldReturnNullWhenGivenBedAndBedTagAreNotMapped() throws Exception {
 		Bed bed = bedManagementDao.getBedByUuid("5580cddd-c290-66c8-8d3a-96dc33d199fb");
@@ -71,7 +71,7 @@ public class HibernateBedTagMapDaoTest extends BaseModuleContextSensitiveTest {
 		BedTagMap actualBedTagMap = bedTagMapDao.getBedTagMapWithBedAndTag(bed, bedTag);
 		assertNull(actualBedTagMap);
 	}
-	
+
 	@Test
 	public void shouldAssignBedWithATag() throws Exception {
 		Bed bed = bedManagementDao.getBedByUuid("5580cddd-c290-66c8-8d3a-96dc33d199fb");

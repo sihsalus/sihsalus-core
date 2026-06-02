@@ -21,23 +21,23 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assume.assumeThat;
 
 public class LiquibaseLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private LiquibaseLoader loader;
-	
+
 	@Before
 	public void setup() {
 		System.setProperty("useInMemoryDatabase", "true");
 	}
-	
+
 	@Test
 	public void load_shouldLoadStructuredLiquibaseChangesets() throws Exception {
 		// TODO This test fails on GitHub Actions but the failure cannot be reproduced so for now, skip it
 		assumeThat(System.getenv("GITHUB_ENV"), nullValue());
-		
+
 		// Replay
 		loader.load();
-		
+
 		// Verify
 		Assert.assertNotNull(Context.getConceptService().getConceptByUuid("fbb05a72-b923-4b35-bbb6-5cbcfdc295ed"));
 		Assert.assertNotNull(Context.getConceptService().getConceptByUuid("ae848d15-6a04-4ad5-b711-a4cf711a566e"));

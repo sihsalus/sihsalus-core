@@ -12,14 +12,14 @@ package org.openmrs.module.datafilter.impl;
 import org.junit.Before;
 
 public abstract class BaseEncTypeViewPrivilegeBasedFilterTest extends BaseFilterTest {
-	
+
 	protected final static String PRIV_MANAGE_CHEMO_PATIENTS = "Manage Chemo Patients";
-	
+
 	protected final static String PRIV_MANAGE_ADMISSION_FORM = "Manage Admission Form";
-	
+
 	@Before
 	public void beforePrivilegeBasedFilterMethod() {
 		DataFilterTestUtils.disableLocationFiltering();
 	}
-	
+
 }

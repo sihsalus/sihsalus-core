@@ -28,21 +28,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests {@link SearchConfig}.
  */
 public class SearchConfigTest {
-	
+
 	/**
 	 * @verifies create an instance of search config
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldCreateAnInstanceOfSearchConfig() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by encounter").withRequiredParameters(
 		    "encounter").build();
 		SearchConfig searchConfig = new SearchConfig("default", "v1/order", asList("1.8.*", "1.9.*"), asList(searchQuery1,
 		    searchQuery2));
-		
+
 		assertThat(searchConfig.getId(), is("default"));
 		assertThat(searchConfig.getSupportedResource(), is("v1/order"));
 		assertThat(searchConfig.getSupportedOpenmrsVersions().size(), is(2));
@@ -52,14 +52,14 @@ public class SearchConfigTest {
 		assertThat(searchConfig.getSearchQueries(), hasItem(searchQuery1));
 		assertThat(searchConfig.getSearchQueries(), hasItem(searchQuery2));
 	}
-	
+
 	/**
 	 * @verifies fail if given id is null
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldFailIfGivenIdIsNull() throws Exception {
-		
+
 		NullPointerException ex = assertThrows(NullPointerException.class, () -> {
 			String id = null;
 			new SearchConfig(id, "v1/order", asList("1.8.*"), asList(new SearchQuery.Builder("Enables to search")
@@ -67,28 +67,28 @@ public class SearchConfigTest {
 		});
 		assertThat(ex.getMessage(), containsString("id must not be empty"));
 	}
-	
+
 	/**
 	 * @verifies fail if given id is empty
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldFailIfGivenIdIsEmpty() throws Exception {
-		
+
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
 			new SearchConfig("", "v1/order", asList("1.8.*"), asList(new SearchQuery.Builder("Enables to search")
 			        .withOptionalParameters("id").build()));
 		});
 		assertThat(ex.getMessage(), containsString("id must not be empty"));
 	}
-	
+
 	/**
 	 * @verifies fail if given supported resource is null
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldFailIfGivenSupportedResourceIsNull() throws Exception {
-		
+
 		NullPointerException ex = assertThrows(NullPointerException.class, () -> {
 			String supportedResource = null;
 			new SearchConfig("default", supportedResource, asList("1.8.*"), asList(new SearchQuery.Builder("Enables to search")
@@ -96,28 +96,28 @@ public class SearchConfigTest {
 		});
 		assertThat(ex.getMessage(), containsString("supportedResource must not be empty"));
 	}
-	
+
 	/**
 	 * @verifies fail if given supported resource is empty
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldFailIfGivenSupportedResourceIsEmpty() throws Exception {
-		
+
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
 			new SearchConfig("default", "", asList("1.8.*"), asList(new SearchQuery.Builder("Enables to search")
 			        .withOptionalParameters("id").build()));
 		});
 		assertThat(ex.getMessage(), containsString("supportedResource must not be empty"));
 	}
-	
+
 	/**
 	 * @verifies fail if given supported openmrs versions is null
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldFailIfGivenSupportedOpenmrsVersionsIsNull() throws Exception {
-		
+
 		NullPointerException ex = assertThrows(NullPointerException.class, () -> {
 			List<String> supportedOpenmrsVersions = null;
 			new SearchConfig("default", "v1/order", supportedOpenmrsVersions,
@@ -125,14 +125,14 @@ public class SearchConfigTest {
 		});
 		assertThat(ex.getMessage(), containsString("supportedOpenmrsVersions must not be empty"));
 	}
-	
+
 	/**
 	 * @verifies fail if given supported openmrs versions is empty
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldFailIfGivenSupportedOpenmrsVersionsIsEmpty() throws Exception {
-		
+
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
 			List<String> supportedOpenmrsVersions = Collections.emptyList();
 			new SearchConfig("default", "v1/order", supportedOpenmrsVersions,
@@ -140,35 +140,35 @@ public class SearchConfigTest {
 		});
 		assertThat(ex.getMessage(), containsString("supportedOpenmrsVersions must not be empty"));
 	}
-	
+
 	/**
 	 * @verifies fail if given search queries is null
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldFailIfGivenSearchQueriesIsNull() throws Exception {
-		
+
 		NullPointerException ex = assertThrows(NullPointerException.class, () -> {
 			List<SearchQuery> searchQueries = null;
 			new SearchConfig("default", "v1/order", "1.8.*", searchQueries);
 		});
 		assertThat(ex.getMessage(), containsString("searchQueries must not be empty"));
 	}
-	
+
 	/**
 	 * @verifies fail if given search queries is empty
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldFailIfGivenSearchQueriesIsEmpty() throws Exception {
-		
+
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
 			List<SearchQuery> searchQueries = Collections.emptyList();
 			new SearchConfig("default", "v1/order", "1.8.*", searchQueries);
 		});
 		assertThat(ex.getMessage(), containsString("searchQueries must not be empty"));
 	}
-	
+
 	/**
 	 * @verifies create an instance of search config
 	 * @see SearchConfig#SearchConfig(String, String, String, SearchQuery)
@@ -176,11 +176,11 @@ public class SearchConfigTest {
 	@Test
 	public void SearchConfig_shouldCreateAnInstanceOfSearchConfig_ConstructorStringStringStringSearchQuery()
 	        throws Exception {
-		
+
 		SearchQuery searchQuery = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig = new SearchConfig("default", "v1/order", "1.8.*", searchQuery);
-		
+
 		assertThat(searchConfig.getId(), is("default"));
 		assertThat(searchConfig.getSupportedResource(), is("v1/order"));
 		assertThat(searchConfig.getSupportedOpenmrsVersions().size(), is(1));
@@ -188,18 +188,18 @@ public class SearchConfigTest {
 		assertThat(searchConfig.getSearchQueries().size(), is(1));
 		assertThat(searchConfig.getSearchQueries(), hasItem(searchQuery));
 	}
-	
+
 	/**
 	 * @verifies create an instance of search config
 	 * @see SearchConfig#SearchConfig(String, String, java.util.Collection, SearchQuery)
 	 */
 	@Test
 	public void SearchConfig_shouldCreateAnInstanceOfSearchConfig_ConstructorString() throws Exception {
-		
+
 		SearchQuery searchQuery = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig = new SearchConfig("default", "v1/order", asList("1.8.*", "1.9.*"), searchQuery);
-		
+
 		assertThat(searchConfig.getId(), is("default"));
 		assertThat(searchConfig.getSupportedResource(), is("v1/order"));
 		assertThat(searchConfig.getSupportedOpenmrsVersions().size(), is(2));
@@ -208,21 +208,21 @@ public class SearchConfigTest {
 		assertThat(searchConfig.getSearchQueries().size(), is(1));
 		assertThat(searchConfig.getSearchQueries(), hasItem(searchQuery));
 	}
-	
+
 	/**
 	 * @verifies create an instance of search config
 	 * @see SearchConfig#SearchConfig(String, String, String, java.util.Collection)
 	 */
 	@Test
 	public void SearchConfig_shouldCreateAnInstanceOfSearchConfig_ConstructorStringStringStringCollection() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by encounter").withRequiredParameters(
 		    "encounter").build();
 		SearchConfig searchConfig = new SearchConfig("default", "v1/order", "1.8.*", Arrays.asList(searchQuery1,
 		    searchQuery2));
-		
+
 		assertThat(searchConfig.getId(), is("default"));
 		assertThat(searchConfig.getSupportedResource(), is("v1/order"));
 		assertThat(searchConfig.getSupportedOpenmrsVersions().size(), is(1));
@@ -231,41 +231,41 @@ public class SearchConfigTest {
 		assertThat(searchConfig.getSearchQueries(), hasItem(searchQuery1));
 		assertThat(searchConfig.getSearchQueries(), hasItem(searchQuery2));
 	}
-	
+
 	/**
 	 * @verifies return same hashcode for equal search configs
 	 * @see SearchConfig#hashCode()
 	 */
 	@Test
 	public void hashCode_shouldReturnSameHashcodeForEqualSearchConfigs() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig2 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery2);
-		
+
 		assertTrue(searchConfig1.equals(searchConfig2));
-		
+
 		assertThat(searchConfig1.hashCode(), is(searchConfig2.hashCode()));
 	}
-	
+
 	/**
 	 * @verifies return true if given this
 	 * @see SearchConfig#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnTrueIfGivenThis() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		assertTrue(searchConfig1.equals(searchConfig1));
 	}
-	
+
 	/**
 	 * @verifies return true if this id and supported openmrs version and supported resource are
 	 *           equal to given search configs
@@ -274,107 +274,107 @@ public class SearchConfigTest {
 	@Test
 	public void equals_shouldReturnTrueIfThisIdAndSupportedOpenmrsVersionAndSupportedResourceAreEqualToGivenSearchConfigs()
 	        throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig2 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery2);
-		
+
 		assertTrue(searchConfig1.equals(searchConfig2));
 	}
-	
+
 	/**
 	 * @verifies be symmetric
 	 * @see SearchConfig#equals(Object)
 	 */
 	@Test
 	public void equals_shouldBeSymmetric() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig2 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery2);
-		
+
 		assertTrue(searchConfig1.equals(searchConfig2));
 		assertTrue(searchConfig2.equals(searchConfig1));
 	}
-	
+
 	/**
 	 * @verifies be transitive
 	 * @see SearchConfig#equals(Object)
 	 */
 	@Test
 	public void equals_shouldBeTransitive() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig2 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery2);
-		
+
 		SearchQuery searchQuery3 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig3 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery3);
-		
+
 		assertTrue(searchConfig1.equals(searchConfig2));
 		assertTrue(searchConfig1.equals(searchConfig3));
 		assertTrue(searchConfig2.equals(searchConfig3));
 	}
-	
+
 	/**
 	 * @verifies return false if given null
 	 * @see SearchConfig#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnFalseIfGivenNull() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		assertFalse(searchConfig1.equals(null));
 	}
-	
+
 	/**
 	 * @verifies return false if given an object which is not an instanceof this class
 	 * @see SearchConfig#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnFalseIfGivenAnObjectWhichIsNotAnInstanceofThisClass() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		assertFalse(searchConfig1.equals("String"));
 	}
-	
+
 	/**
 	 * @verifies return false if this id is not equal to the given search configs id
 	 * @see SearchConfig#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnFalseIfThisIdIsNotEqualToTheGivenSearchConfigsId() throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig2 = new SearchConfig("other", "v1/order", "1.8.*", searchQuery2);
-		
+
 		assertFalse(searchConfig1.equals(searchConfig2));
 	}
-	
+
 	/**
 	 * @verifies return false if this supported openmrs version is not equal to given search configs
 	 *           supported openmrs version
@@ -383,18 +383,18 @@ public class SearchConfigTest {
 	@Test
 	public void equals_shouldReturnFalseIfThisSupportedOpenmrsVersionIsNotEqualToGivenSearchConfigsSupportedOpenmrsVersion()
 	        throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig2 = new SearchConfig("default", "v1/order", "1.9.*", searchQuery2);
-		
+
 		assertFalse(searchConfig1.equals(searchConfig2));
 	}
-	
+
 	/**
 	 * @verifies return false if this supported resource is not equal to given search configs
 	 *           supported resource
@@ -403,15 +403,15 @@ public class SearchConfigTest {
 	@Test
 	public void equals_shouldReturnFalseIfThisSupportedResourceIsNotEqualToGivenSearchConfigsSupportedResource()
 	        throws Exception {
-		
+
 		SearchQuery searchQuery1 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig1 = new SearchConfig("default", "v1/order", "1.8.*", searchQuery1);
-		
+
 		SearchQuery searchQuery2 = new SearchQuery.Builder("Enables to search by patient").withRequiredParameters("patient")
 		        .build();
 		SearchConfig searchConfig2 = new SearchConfig("default", "v2/order", "1.8.*", searchQuery2);
-		
+
 		assertFalse(searchConfig1.equals(searchConfig2));
 	}
 }

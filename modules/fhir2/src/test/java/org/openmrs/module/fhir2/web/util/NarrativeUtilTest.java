@@ -16,59 +16,59 @@ import static org.hamcrest.Matchers.nullValue;
 import org.junit.Test;
 
 public class NarrativeUtilTest {
-	
+
 	@Test
 	public void shouldReturnNullWhenPathIsNull() {
 		String propFilePathGiven = null;
-		
+
 		String propFilePathResult = NarrativeUtils.getValidatedPropertiesFilePath(propFilePathGiven);
-		
+
 		assertThat(propFilePathResult, nullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnNullWhenFilePathIsEmpty() {
 		String propFilePathGiven = "file:";
-		
+
 		String propFilePathResult = NarrativeUtils.getValidatedPropertiesFilePath(propFilePathGiven);
-		
+
 		assertThat(propFilePathResult, nullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnNullWhenDoesNotEndWithProperties() {
 		String propFilePathGiven = "file:somepath/which/does/not/end/with/properties/extension";
-		
+
 		String propFilePathResult = NarrativeUtils.getValidatedPropertiesFilePath(propFilePathGiven);
-		
+
 		assertThat(propFilePathResult, nullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnFilePrefixedPathIfPrefixNotPresent() {
 		String propFilePathGiven = "somepath/which/does/not/have/file/prefix/filename.properties";
-		
+
 		String propFilePathResult = NarrativeUtils.getValidatedPropertiesFilePath(propFilePathGiven);
-		
+
 		assertThat(propFilePathResult, equalTo(String.join(":", "file", propFilePathGiven)));
 	}
-	
+
 	@Test
 	public void shouldReturnNullWhenClassPathIsEmpty() {
 		String propFilePathGiven = "classpath: ";
-		
+
 		String propFilePathResult = NarrativeUtils.getValidatedPropertiesFilePath(propFilePathGiven);
-		
+
 		assertThat(propFilePathResult, nullValue());
 	}
-	
+
 	@Test
 	public void shouldReturnNullWhenOpenmrsRelativePathIsEmpty() {
 		String propFilePathGiven = "openmrs: ";
-		
+
 		String propFilePathResult = NarrativeUtils.getValidatedPropertiesFilePath(propFilePathGiven);
-		
+
 		assertThat(propFilePathResult, nullValue());
 	}
-	
+
 }

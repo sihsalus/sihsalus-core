@@ -16,9 +16,9 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class FieldAnswerResource1_8Test extends BaseDelegatingResourceTest<FieldAnswerResource1_8, FieldAnswer> {
-	
+
 	private String fieldAnswerUUID;
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#newObject()
 	 */
@@ -28,12 +28,12 @@ public class FieldAnswerResource1_8Test extends BaseDelegatingResourceTest<Field
 		FieldAnswer fieldAnswer = new FieldAnswer();
 		fieldAnswer.setConcept(Context.getConceptService().getConceptByUuid(RestTestConstants1_8.CONCEPT_UUID));
 		fieldAnswer.setField(field);
-		
+
 		fieldAnswerUUID = fieldAnswer.getUuid();
-		
+
 		return fieldAnswer;
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getDisplayProperty()
 	 */
@@ -41,7 +41,7 @@ public class FieldAnswerResource1_8Test extends BaseDelegatingResourceTest<Field
 	public String getDisplayProperty() {
 		return "Some concept - YES";
 	}
-	
+
 	/**
 	 * @see BaseDelegatingResourceTest#getUuidProperty()
 	 */
@@ -49,5 +49,5 @@ public class FieldAnswerResource1_8Test extends BaseDelegatingResourceTest<Field
 	public String getUuidProperty() {
 		return fieldAnswerUUID;
 	}
-	
+
 }

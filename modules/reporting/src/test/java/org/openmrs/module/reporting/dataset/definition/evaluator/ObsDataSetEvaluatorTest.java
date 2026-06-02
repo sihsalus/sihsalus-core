@@ -46,7 +46,7 @@ public class ObsDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
 
     @Autowired
     private TestDataManager data;
-    
+
     @Autowired
     @Qualifier("conceptService")
     private ConceptService conceptService;
@@ -63,7 +63,7 @@ public class ObsDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
         // pick a concept that has no existing obs in the test dataset
         Concept concept = conceptService.getConcept(10002);
 		Concept valueCoded = conceptService.getConcept(792);
-        
+
         Patient patient = data.randomPatient().save();
         Encounter enc = data.randomEncounter().patient(patient).save();
         Obs obs1 = data.obs().concept(concept).value(valueCoded).encounter(enc).save();
@@ -89,7 +89,7 @@ public class ObsDataSetEvaluatorTest extends BaseModuleContextSensitiveTest {
 
         assertThat(results.size(), is(2));
         assertThat(results, containsInAnyOrder(obs1.getId(), obs2.getId()));
-        
+
     }
 
 

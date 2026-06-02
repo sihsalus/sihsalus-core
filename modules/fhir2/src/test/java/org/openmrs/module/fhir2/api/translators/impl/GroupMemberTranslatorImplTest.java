@@ -30,62 +30,62 @@ import org.openmrs.module.fhir2.model.GroupMember;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GroupMemberTranslatorImplTest {
-	
+
 	private static final String COHORT_UUID = "787e12bd-314e-4cc4-9b4d-1cdff9be9545";
-	
+
 	private static final String COHORT_NAME = "Patient with VL > 2";
-	
+
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
-	
+
 	@Mock
 	private FhirPatientDao patientDao;
-	
+
 	private GroupMemberTranslatorImpl groupMemberTranslator;
-	
+
 	@Before
 	public void setup() {
 		groupMemberTranslator = new GroupMemberTranslatorImpl();
 		groupMemberTranslator.setPatientDao(patientDao);
 		groupMemberTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 	}
-	
+
 	@Before
 	public void init() {
 		Cohort cohort = new Cohort();
 		cohort.setUuid(COHORT_UUID);
 		cohort.setName(COHORT_NAME);
-		
+
 		Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
 		groupMemberComponent.setId(COHORT_UUID);
 	}
-	
+
 	@Test
 	public void shouldTranslateCohortMemberToFHIRType() {
 		Reference patientReference = mock(Reference.class);
 		Patient patient = mock(Patient.class);
 		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
 		when(patientDao.getPatientById(1)).thenReturn(patient);
-		
+
 		GroupMember component = groupMemberTranslator.toFhirResource(1);
 		assertThat(component, notNullValue());
 		assertThat(component.getEntity(), notNullValue());
 		assertThat(component.hasEntity(), is(true));
 	}
-	
+
 	@Test
 	public void shouldTranslateGroupMemberComponentToOpenMRSType() {
 		Reference patientReference = mock(Reference.class);
 		Patient patient = mock(Patient.class);
 		when(patient.getPatientId()).thenReturn(1);
 		when(patientReferenceTranslator.toOpenmrsType(patientReference)).thenReturn(patient);
-		
+
 		Group.GroupMemberComponent component = new Group.GroupMemberComponent();
 		component.setEntity(patientReference);
-		
+
 		Integer patientId = groupMemberTranslator.toOpenmrsType(new GroupMember(component.getEntity()));
 		assertThat(patientId, notNullValue());
 		assertThat(patientId, is(1));
 	}
-	
+
 }

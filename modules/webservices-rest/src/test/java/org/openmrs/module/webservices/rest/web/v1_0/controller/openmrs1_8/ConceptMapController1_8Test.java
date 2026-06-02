@@ -34,36 +34,36 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
  * Tests CRUD operations for {@link ConceptMapType}s via web service calls
  */
 public class ConceptMapController1_8Test extends MainResourceControllerTest {
-	
+
 	private ConceptService service;
-	
+
 	private RestHelperService restHelperService;
-	
+
 	private String conceptMapUuid;
-	
+
 	@RegisterExtension
 	public OpenmrsProfileRule openmrsProfileRule = new OpenmrsProfileRule("1.8.*");
-	
+
 	@Override
 	public String getURI() {
 		return "concept/" + RestTestConstants1_8.CONCEPT2_UUID + "/mapping";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return conceptMapUuid;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return service.getConceptByUuid(RestTestConstants1_8.CONCEPT2_UUID).getConceptMappings().size();
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		service = Context.getConceptService();
 		restHelperService = Context.getService(RestHelperService.class);
-		
+
 		Concept concept = service.getConceptByUuid(RestTestConstants1_8.CONCEPT2_UUID);
 		ConceptMap next = concept.getConceptMappings().iterator().next();
 		//The UUID property is not set in standardTestDataset.xml.
@@ -71,38 +71,38 @@ public class ConceptMapController1_8Test extends MainResourceControllerTest {
 		service.saveConcept(concept);
 		conceptMapUuid = next.getUuid();
 	}
-	
+
 	@Test
 	public void shouldCreateConceptMap() throws Exception {
 		String json = "{\"source\": \"" + RestTestConstants1_8.CONCEPT_SOURCE_UUID + "\", \"sourceCode\": \"test\"}";
-		
+
 		SimpleObject newConceptMap = deserialize(handle(newPostRequest(getURI(), json)));
-		
+
 		String uuid = (String) newConceptMap.get("uuid");
-		
+
 		ConceptMap conceptMap = restHelperService.getObjectByUuid(ConceptMap.class, uuid);
 		assertThat(conceptMap.getConcept().getUuid(), is(RestTestConstants1_8.CONCEPT2_UUID));
 		assertThat(conceptMap.getConceptReferenceTerm().getConceptSource().getUuid(), is(RestTestConstants1_8.CONCEPT_SOURCE_UUID));
 		assertThat(conceptMap.getConceptReferenceTerm().getCode(), is("test"));
 	}
-	
+
 	@Test
 	public void shouldEditConceptMap() throws Exception {
 		String json = "{\"sourceCode\": \"test\"}";
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), json));
-		
+
 		ConceptMap conceptMap = restHelperService.getObjectByUuid(ConceptMap.class, getUuid());
 		assertThat(conceptMap.getConceptReferenceTerm().getCode(), is("test"));
 	}
-	
+
 	@Test
 	public void shouldNotDeleteConceptMap() throws Exception {
 		assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
 			handle(newDeleteRequest(getURI() + "/" + getUuid()));
 		});
 	}
-	
+
 	@Test
 	public void shouldPurgeConceptMap() throws Exception {
 		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("purge", "")));

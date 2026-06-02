@@ -26,14 +26,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests functionality of {@link ConceptSourceController}.
  */
 public class ConceptSourceController2_1Test extends MainResourceControllerTest {
-	
+
 	private ConceptService service;
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getConceptService();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -41,7 +41,7 @@ public class ConceptSourceController2_1Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "conceptsource";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -49,7 +49,7 @@ public class ConceptSourceController2_1Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return service.getAllConceptSources(false).size();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -57,25 +57,25 @@ public class ConceptSourceController2_1Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants2_1.CONCEPT_SOURCE_UUID;
 	}
-	
+
 	@Test
 	public void shouldCreateAConceptSource() throws Exception {
 		long originalCount = getAllCount();
-		
+
 		SimpleObject conceptSource = new SimpleObject();
 		conceptSource.add("name", "test name");
 		conceptSource.add("description", "test description");
 		conceptSource.add("uniqueId", "some_random_unique_id");
-		
+
 		String json = new ObjectMapper().writeValueAsString(conceptSource);
-		
+
 		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 		req.setContent(json.getBytes());
-		
+
 		SimpleObject newConceptSource = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(newConceptSource, "uuid"));
 		Assertions.assertEquals(originalCount + 1, getAllCount());
 	}
-	
+
 }

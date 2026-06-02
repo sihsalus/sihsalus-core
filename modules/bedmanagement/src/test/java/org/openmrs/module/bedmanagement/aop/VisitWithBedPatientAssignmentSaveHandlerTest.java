@@ -20,30 +20,30 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class VisitWithBedPatientAssignmentSaveHandlerTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private BedManagementService bedManagementService;
-	
+
 	@Before
 	public void beforeAllTests() throws Exception {
 		executeDataSet("testPatientsDataset.xml");
 		executeDataSet("bedManagementDAOComponentTestDataset.xml");
 	}
-	
+
 	@Test
 	public void testBedAssignmentEndsWhenisitEnds() {
 		VisitService visitService = Context.getVisitService();
 		PatientService patientService = Context.getPatientService();
 		Patient patient = patientService.getPatient(1001);
 		Visit visit = visitService.getVisit(1001);
-		
+
 		BedDetails bedDetails = bedManagementService.getBedAssignmentDetailsByPatient(patient);
-		
+
 		assertThat("Invalid test data, patient has no bed assigned", bedDetails, is(notNullValue()));
 		Date now = new Date();
 		visit.setStopDatetime(now);
 		visitService.endVisit(visit, now);
-		
+
 		BedDetails updatedBedDetails = bedManagementService.getBedAssignmentDetailsByPatient(patient);
 		assertThat("Bed failed to unassign when corresponding visit ends", updatedBedDetails, is(nullValue()));
 	}

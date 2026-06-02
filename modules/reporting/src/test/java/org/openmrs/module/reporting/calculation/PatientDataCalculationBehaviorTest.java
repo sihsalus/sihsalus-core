@@ -31,19 +31,19 @@ import org.openmrs.module.reporting.common.TestUtil;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class PatientDataCalculationBehaviorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	private PatientService ps;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 		ps = Context.getPatientService();
 	}
-	
+
 	@Test
 	public void evaluate_shouldEvaluateAPatientCalculation() throws Exception {
 		Integer patientId1 = 2;
@@ -54,17 +54,17 @@ public class PatientDataCalculationBehaviorTest extends BaseModuleContextSensiti
 		    "org.openmrs.module.reporting.data.patient.definition.PatientIdentifierDataDefinition", null);
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("types", ps.getAllPatientIdentifierTypes(false));
-		
+
 		CalculationResultMap results = calculation.evaluate(Arrays.asList(patientId1, patientId2), parameters, null);
-		
+
 		Assert.assertEquals(identifiers2.iterator().next(), ResultUtil.getFirst(results.get(patientId2)).getValue());
-		
+
 		ListResult lr = (ListResult) results.get(patientId1);
 		Assert.assertEquals(3, lr.size());
-		
+
 		Assert.assertTrue(CollectionUtils.isEqualCollection(identifiers1, lr.getValues()));
 	}
-	
+
 	@Test
 	public void evaluate_shouldEvaluateAPatientCalculationWithTheSpecifiedParameterValues() throws Exception {
 		Integer patientId1 = 2;
@@ -77,13 +77,13 @@ public class PatientDataCalculationBehaviorTest extends BaseModuleContextSensiti
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("types", Collections.singletonList(type));
 		parameters.put("includeFirstNonNullOnly", true);
-		
+
 		CalculationResultMap results = calculation.evaluate(Arrays.asList(patientId1, patientId2), parameters, null);
-		
+
 		Assert.assertEquals(id1, ResultUtil.getFirst(results.get(patientId1)).getValue());
 		Assert.assertEquals(id2, ResultUtil.getFirst(results.get(patientId2)).getValue());
 	}
-	
+
 	@Test
 	public void evaluate_shouldEvaluateTheSpecifiedPersonCalculation() throws Exception {
 		Integer patientId1 = 2;
@@ -92,9 +92,9 @@ public class PatientDataCalculationBehaviorTest extends BaseModuleContextSensiti
 		String gender2 = ps.getPatient(patientId2).getGender();
 		PatientDataCalculation calculation = new PatientDataCalculationProvider().getCalculation(
 		    "org.openmrs.module.reporting.data.person.definition.GenderDataDefinition", null);
-		
+
 		CalculationResultMap results = calculation.evaluate(Arrays.asList(patientId1, patientId2), null, null);
-		
+
 		Assert.assertEquals(gender1, ResultUtil.getFirst(results.get(patientId1)).getValue());
 		Assert.assertEquals(gender2, ResultUtil.getFirst(results.get(patientId2)).getValue());
 	}

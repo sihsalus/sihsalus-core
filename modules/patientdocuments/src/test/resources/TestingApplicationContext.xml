@@ -9,7 +9,7 @@
 
     <!-- Enable component scanning for the module -->
     <context:component-scan base-package="org.openmrs.module.patientdocuments"/>
-    
+
     <!-- Minimal test configuration -->
     <bean id="sessionFactory" class="org.openmrs.api.db.hibernate.HibernateSessionFactoryBean">
         <property name="configLocations">

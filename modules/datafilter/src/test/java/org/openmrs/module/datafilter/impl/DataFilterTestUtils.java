@@ -34,7 +34,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.util.PrivilegeConstants;
 
 public class DataFilterTestUtils {
-	
+
 	public static void disableLocationFiltering() {
 		AdministrationService as = Context.getAdministrationService();
 		as.setGlobalProperty(GP_LOCATION_BASED_FULL_TEXT_FILTER_PATIENT, "true");
@@ -49,14 +49,14 @@ public class DataFilterTestUtils {
 		as.setGlobalProperty(GP_LOCATION_FILTER_NAME, "true");
 		Context.flushSession();
 	}
-	
+
 	public static void disableProgramBasedFiltering() {
 		AdministrationService as = Context.getAdministrationService();
 		as.setGlobalProperty(GP_PROGRAM_BASED_FILTER_NAME_USER, "true");
 		as.setGlobalProperty(GP_PROGRAM_BASED_FILTER_NAME_PROVIDER, "true");
 		Context.flushSession();
 	}
-	
+
 	public static void disableEncTypeViewPrivilegeFiltering() {
 		AdministrationService as = Context.getAdministrationService();
 		as.setGlobalProperty(GP_ENC_TYPE_PRIV_BASED_FILTER_NAME_OBS, "true");
@@ -66,7 +66,7 @@ public class DataFilterTestUtils {
 		as.setGlobalProperty(GP_ENC_TYPE_PRIV_BASED_FILTER_NAME_ENCOUNTER_TYPE, "true");
 		Context.flushSession();
 	}
-	
+
 	public static void addPrivilege(String privilege) {
 		Context.addProxyPrivilege(PrivilegeConstants.MANAGE_ROLES);
 		try {
@@ -80,5 +80,5 @@ public class DataFilterTestUtils {
 			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_ROLES);
 		}
 	}
-	
+
 }

@@ -35,11 +35,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 public class OrderableController1_10Test extends MainResourceControllerTest {
-	
+
 	private ConceptService service;
-	
+
 	private boolean isIndexUpToDate = false;
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		service = Context.getConceptService();
@@ -48,7 +48,7 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 			isIndexUpToDate = true;
 		}
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -56,7 +56,7 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "orderable";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -64,7 +64,7 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return "";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -72,20 +72,20 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Test
 	public void shouldReturnOrderableConceptClasses() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.addParameter("q", "cough");
 		SimpleObject result = deserialize(handle(req));
-		
+
 		List<Object> results = (List<Object>) result.get("results");
-		
+
 		Assertions.assertTrue(results instanceof List);
 		assertThat(results, containsInAnyOrder(isConceptWithUuid(RestTestConstants1_10.COUGH_SYRUP_UUID)));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldReturnOrdersWithDrugConceptOnly() throws Exception {
@@ -98,7 +98,7 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 			String uuid = (String) Util.getByPath(result, String.format("results[%d]/concept/uuid", i));
 			assertThat(service.getConceptByUuid(uuid).getConceptClass().getUuid(), is("3d065ed4-b0b9-4710-9a17-6d8c4fd259b7"));
 		}
-		
+
 		// test with test concept uuid
 		req = request(RequestMethod.GET, getURI());
 		req.addParameter("q", "");
@@ -110,7 +110,7 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 			assertThat(service.getConceptByUuid(uuid).getConceptClass().getUuid(), is("97097dd9-b092-4b68-a2dc-e5e5be961d42"));
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldReturnDrugOrderTypeOnly() throws Exception {
@@ -118,10 +118,10 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 		req.addParameter("q", "");
 		req.addParameter("orderTypes", "131168f4-15f5-102d-96e4-000c29c2a5d7");
 		SimpleObject result = deserialize(handle(req));
-		
+
 		List<Object> hits = (List<Object>) result.get("results");
 		assertThat(hits.size(), is(4));
-		
+
 		// test with lab test order type uuid
 		req = request(RequestMethod.GET, getURI());
 		req.addParameter("q", "");
@@ -130,27 +130,27 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 		hits = (List<Object>) result.get("results");
 		assertThat(hits.size(), is(3));
 	}
-	
+
 	private Matcher<? super Object> isConceptWithUuid(final String uuid) {
 		return new TypeSafeMatcher<Object>(
 		                                   Object.class) {
-			
+
 			@Override
 			public void describeTo(Description description) {
 			}
-			
+
 			@Override
 			protected boolean matchesSafely(Object item) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> safeItem = (Map<String, Object>) item;
 				@SuppressWarnings("unchecked")
 				Map<String, Object> concept = (Map<String, Object>) safeItem.get("concept");
-				
+
 				return uuid.equals(concept.get("uuid"));
 			}
 		};
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetAll() throws Exception {
@@ -158,20 +158,20 @@ public class OrderableController1_10Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Override
 	@Disabled
 	public void shouldGetDefaultByUuid() throws Exception {
 	}
-	
+
 	@Override
 	@Disabled
 	public void shouldGetFullByUuid() throws Exception {
 	}
-	
+
 	@Override
 	@Disabled
 	public void shouldGetRefByUuid() throws Exception {
 	}
-	
+
 }

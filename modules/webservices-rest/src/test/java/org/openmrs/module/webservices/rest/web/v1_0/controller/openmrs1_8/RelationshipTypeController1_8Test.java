@@ -27,9 +27,9 @@ import java.util.List;
  * Contains tests for {@link RelationshipTypeController} CRUD operations
  */
 public class RelationshipTypeController1_8Test extends MainResourceControllerTest {
-	
+
 	private PersonService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -37,7 +37,7 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 	public String getURI() {
 		return "relationshiptype";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -45,7 +45,7 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 	public String getUuid() {
 		return RestTestConstants1_8.RELATIONSHIP_TYPE_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -59,12 +59,12 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 		}
 		return count;
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getPersonService();
 	}
-	
+
 	@Test
 	public void shouldGetARelationshipTypeByName() throws Exception {
 		Object result = deserialize(handle(newGetRequest(getURI() + "/Doctor")));
@@ -73,7 +73,7 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 		Assertions.assertEquals("Relationship from a primary care provider to the patient",
 		    PropertyUtils.getProperty(result, "description"));
 	}
-	
+
 	@Test
 	public void shouldCreateARelationshipType() throws Exception {
 		int originalCount = service.getAllRelationshipTypes().size();
@@ -82,7 +82,7 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 		Assertions.assertNotNull(PropertyUtils.getProperty(newRelationshipType, "uuid"));
 		Assertions.assertEquals(originalCount + 1, service.getAllRelationshipTypes().size());
 	}
-	
+
 	@Test
 	public void shouldEditARelationshipType() throws Exception {
 		String json = "{ \"aIsToB\":\"Teacher\",\"bIsToA\":\"Student\",\"weight\":\"0\",\"description\":\"new description\"}";
@@ -91,7 +91,7 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 		Assertions.assertNotNull(updated);
 		Assertions.assertEquals("new description", updated.getDescription());
 	}
-	
+
 	@Test
 	public void shouldRetireARelationshipType() throws Exception {
 		RelationshipType relationshipType = service.getRelationshipTypeByUuid(RestTestConstants1_8.RELATIONSHIP_TYPE_UUID);
@@ -101,7 +101,7 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 		Assertions.assertTrue(relationshipType.isRetired());
 		Assertions.assertEquals("test reason", relationshipType.getRetireReason());
 	}
-	
+
 	@Test
 	public void shouldUnRetireARelationshipType() throws Exception {
 		RelationshipType relationshipType = service.getRelationshipTypeByUuid(RestTestConstants1_8.RELATIONSHIP_TYPE_UUID);
@@ -110,16 +110,16 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 		service.saveRelationshipType(relationshipType);
 		relationshipType = service.getRelationshipTypeByUuid(RestTestConstants1_8.RELATIONSHIP_TYPE_UUID);
 		Assertions.assertTrue(relationshipType.isRetired());
-		
+
 		String json = "{\"deleted\": \"false\"}";
 		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
-		
+
 		relationshipType = service.getRelationshipTypeByUuid(RestTestConstants1_8.RELATIONSHIP_TYPE_UUID);
 		Assertions.assertFalse(relationshipType.isRetired());
 		Assertions.assertEquals("false", PropertyUtils.getProperty(response, "retired").toString());
-		
+
 	}
-	
+
 	@Test
 	public void shouldPurgeARelationshipType() throws Exception {
 		String uuid = "2a5f4ff4-a179-4b8a-aa4c-40f71956eabc";
@@ -129,14 +129,14 @@ public class RelationshipTypeController1_8Test extends MainResourceControllerTes
 		Assertions.assertNull(service.getRelationshipTypeByUuid(uuid));
 		Assertions.assertEquals(originalCount - 1, service.getAllRelationshipTypes().size());
 	}
-	
+
 	@Test
 	public void shouldSearchAndReturnAListOfRelationshipTypesMatchingTheQueryString() throws Exception {
 		SimpleObject result = deserialize(handle(newGetRequest(getURI(), new Parameter("q", "Doc"))));
 		List<Object> hits = Util.getResultsList(result);
 		Assertions.assertEquals(1, hits.size());
 		Assertions.assertEquals(RestTestConstants1_8.RELATIONSHIP_TYPE_UUID, PropertyUtils.getProperty(hits.get(0), "uuid"));
-		
+
 	}
-	
+
 }

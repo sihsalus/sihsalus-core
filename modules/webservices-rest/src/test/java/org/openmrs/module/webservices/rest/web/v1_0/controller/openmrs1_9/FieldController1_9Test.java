@@ -27,9 +27,9 @@ import org.apache.commons.beanutils.PropertyUtils;
  * Tests functionality of {@link FieldController}.
  */
 public class FieldController1_9Test extends MainResourceControllerTest {
-	
+
 	private FormService service;
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -37,7 +37,7 @@ public class FieldController1_9Test extends MainResourceControllerTest {
 	public String getURI() {
 		return "field";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -45,7 +45,7 @@ public class FieldController1_9Test extends MainResourceControllerTest {
 	public String getUuid() {
 		return RestTestConstants1_8.FIELD_UUID;
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -53,12 +53,12 @@ public class FieldController1_9Test extends MainResourceControllerTest {
 	public long getAllCount() {
 		return 1;
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getFormService();
 	}
-	
+
 	@Test
 	public void shouldUnRetireAField() throws Exception {
 		Field field = service.getFieldByUuid(getUuid());
@@ -67,13 +67,13 @@ public class FieldController1_9Test extends MainResourceControllerTest {
 		service.saveField(field);
 		field = service.getFieldByUuid(getUuid());
 		assertTrue(field.isRetired());
-		
+
 		String json = "{\"deleted\": \"false\"}";
 		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
-		
+
 		field = service.getFieldByUuid(getUuid());
 		assertFalse(field.isRetired());
 		assertEquals("false", PropertyUtils.getProperty(response, "retired").toString());
-		
+
 	}
 }

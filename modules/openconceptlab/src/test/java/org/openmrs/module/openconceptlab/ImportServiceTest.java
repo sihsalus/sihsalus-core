@@ -128,12 +128,12 @@ public class ImportServiceTest extends BaseModuleContextSensitiveTest {
      */
     @Test
     public void scheduleUpdate_shouldThrowIllegalStateExceptionIfAnotherUpdateIsInProgress() throws Exception {
-    	Import firstUpdate = new Import();
-    	importService.startImport(firstUpdate);
+	Import firstUpdate = new Import();
+	importService.startImport(firstUpdate);
 
-    	Import secondUpdate = new Import();
-    	exception.expect(IllegalStateException.class);
-    	importService.startImport(secondUpdate);
+	Import secondUpdate = new Import();
+	exception.expect(IllegalStateException.class);
+	importService.startImport(secondUpdate);
     }
 
 	/**
@@ -142,9 +142,9 @@ public class ImportServiceTest extends BaseModuleContextSensitiveTest {
      */
     @Test
     public void stopUpdate_shouldThrowIllegalArgumentExceptionIfNotScheduled() throws Exception {
-    	Import update = new Import();
-    	exception.expect(IllegalArgumentException.class);
-    	importService.stopImport(update);
+	Import update = new Import();
+	exception.expect(IllegalArgumentException.class);
+	importService.stopImport(update);
     }
 
 	/**
@@ -153,12 +153,12 @@ public class ImportServiceTest extends BaseModuleContextSensitiveTest {
      */
     @Test
     public void stopUpdate_shouldThrowIllegalStateExceptionIfTryingToStopTwice() throws Exception {
-    	Import update = new Import();
-    	importService.startImport(update);
-    	importService.stopImport(update);
+	Import update = new Import();
+	importService.startImport(update);
+	importService.stopImport(update);
 
-    	exception.expect(IllegalStateException.class);
-    	importService.stopImport(update);
+	exception.expect(IllegalStateException.class);
+	importService.stopImport(update);
     }
 
 	/**
@@ -330,7 +330,7 @@ public class ImportServiceTest extends BaseModuleContextSensitiveTest {
 
 		File responseZip = null;
 		Concept concept = null;
-    	try {
+	try {
 			Subscription subscription = new Subscription();
 			subscription.setUrl(subscriptionUrl);
 			subscription.setToken(subscriptionToken);
@@ -373,13 +373,13 @@ public class ImportServiceTest extends BaseModuleContextSensitiveTest {
 
 		}
 		finally {
-    		if (concept != null) {
+		if (concept != null) {
 				conceptService.purgeConcept(concept);
 			}
 			if (responseZip != null && responseZip.exists()) {
 				responseZip.delete();
 			}
-    		importService.unsubscribe();
+		importService.unsubscribe();
 		}
 	}
 
@@ -387,9 +387,9 @@ public class ImportServiceTest extends BaseModuleContextSensitiveTest {
 	@Transactional(propagation = Propagation.NEVER)
 	@Test
 	public void update_shouldDoFollowupUpdate() throws Exception {
-    	final String initialConceptUuid = "159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    	final String followupConceptUuid = "1002AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    	final String subscriptionUrl = "https://api.staging.openconceptlab.org/orgs/openmrs/collections/reference-application/";
+	final String initialConceptUuid = "159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	final String followupConceptUuid = "1002AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	final String subscriptionUrl = "https://api.staging.openconceptlab.org/orgs/openmrs/collections/reference-application/";
 		final String subscriptionToken = "53fc72f0498a707a26e4d903c0f24c2db24d1e35";
 		final String initialResponseTestResourcePath = "refapp-collection-response-v1/response.zip";
 		final String followupResponseTestResourcePath = "refapp-collection-response-v2/response.zip";
@@ -566,7 +566,7 @@ public class ImportServiceTest extends BaseModuleContextSensitiveTest {
     @Test
 	public void update_shouldFetchLatestReferenceApplicationCollectionConcepts() throws Exception {
 		Concept concept = null;
-    	try {
+	try {
 			Subscription subscription = new Subscription();
 			subscription.setUrl("https://api.staging.openconceptlab.org/orgs/openmrs/collections/reference-application");
 			subscription.setToken("53fc72f0498a707a26e4d903c0f24c2db24d1e35");
@@ -596,7 +596,7 @@ public class ImportServiceTest extends BaseModuleContextSensitiveTest {
 			assertThat(concept, is(notNullValue()));
 		}
 		finally {
-    		if (concept != null) {
+		if (concept != null) {
 				conceptService.purgeConcept(concept);
 			}
 			importService.unsubscribe();

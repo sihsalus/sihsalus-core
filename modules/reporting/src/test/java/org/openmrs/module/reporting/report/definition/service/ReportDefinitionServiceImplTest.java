@@ -25,13 +25,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class ReportDefinitionServiceImplTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private ReportDefinitionService reportDefinitionService;
-	
+
 	@Autowired
 	private ReportService reportService;
-	
+
 	/**
 	 * @see ReportDefinitionServiceImpl#purgeDefinition(ReportDefinition)
 	 * @verifies purge report designs
@@ -43,9 +43,9 @@ public class ReportDefinitionServiceImplTest extends BaseModuleContextSensitiveT
 		assertThat(reportService.getReportDesign(4), notNullValue());
 		Context.clearSession();
 
-    	ReportDefinition definition = reportDefinitionService.getDefinition(80);
-    	reportDefinitionService.purgeDefinition(definition);
-	    
+	ReportDefinition definition = reportDefinitionService.getDefinition(80);
+	reportDefinitionService.purgeDefinition(definition);
+
 		assertThat(reportService.getReportDesign(3), nullValue());
 		assertThat(reportService.getReportDesign(4), nullValue());
 	}

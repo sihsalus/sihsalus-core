@@ -34,5 +34,5 @@ public class EvaluatableCohortDefinitionEvaluatorTest extends BaseModuleContextS
 		assertThat(cohort.size(), is(1));
 		assertThat(cohort.getDefinition(), Is.<CohortDefinition>is(evaluatableCohortDefinition));
 	}
-	
+
 }

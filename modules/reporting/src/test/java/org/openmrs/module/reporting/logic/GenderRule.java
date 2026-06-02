@@ -24,36 +24,36 @@ import org.openmrs.logic.rule.RuleParameterInfo;
  * Mock implementation of Logic Service to get around issues using the actual Logic Service implementations
  */
 public class GenderRule implements Rule {
-	
+
 	/**
 	 * @see Rule#eval(LogicContext, Patient, Map)
 	 */
-	public Result eval(LogicContext context, Integer patientId, Map<String, Object> parameters) throws LogicException {	
+	public Result eval(LogicContext context, Integer patientId, Map<String, Object> parameters) throws LogicException {
 		Patient patient = context.getPatient(patientId);
-		return new Result(patient.getGender());	
+		return new Result(patient.getGender());
 	}
-	
+
 	/**
 	 * @see org.openmrs.logic.Rule#getParameterList()
 	 */
 	public Set<RuleParameterInfo> getParameterList() {
 		return null;
 	}
-	
+
 	/**
 	 * @see org.openmrs.logic.Rule#getDependencies()
 	 */
 	public String[] getDependencies() {
 		return null;
 	}
-	
+
 	/**
 	 * @see org.openmrs.logic.Rule#getTTL()
 	 */
 	public int getTTL() {
 		return 60 * 60 * 24; // 1 day
 	}
-	
+
 	/**
 	 * @see org.openmrs.logic.Rule#getDefaultDatatype()
 	 */

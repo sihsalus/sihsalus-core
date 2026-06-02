@@ -32,7 +32,7 @@ import org.springframework.validation.FieldError;
 
 @ContextConfiguration(classes = SpringTestConfiguration.class, inheritLocations = false)
 public class VisitWithQueueEntriesValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final List<String> INITIAL_DATASET_XML = Arrays.asList(
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_locationInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_conceptsInitialDataset.xml",
@@ -41,20 +41,20 @@ public class VisitWithQueueEntriesValidatorTest extends BaseModuleContextSensiti
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/validators/QueueEntryValidatorTest_globalPropertyInitialDataset.xml");
-	
+
 	private Visit visit;
-	
+
 	private QueueEntry queueEntry;
-	
+
 	private Errors errors;
-	
+
 	@Autowired
 	@Qualifier("queue.QueueEntryService")
 	private QueueEntryService queueEntryService;
-	
+
 	@Autowired
 	private VisitWithQueueEntriesValidator validator;
-	
+
 	@Before
 	public void setup() {
 		INITIAL_DATASET_XML.forEach(this::executeDataSet);
@@ -62,30 +62,30 @@ public class VisitWithQueueEntriesValidatorTest extends BaseModuleContextSensiti
 		visit = queueEntry.getVisit();
 		errors = new BindException(visit, visit.getClass().getName());
 	}
-	
+
 	@Test
 	public void validatorNotNull() {
 		assertNotNull(validator);
 	}
-	
+
 	@Test
 	public void shouldSupportVisit() {
 		assertTrue(validator.supports(Visit.class));
 	}
-	
+
 	@Test
 	public void shouldNotRejectQueueEntryByDefault() {
 		validator.validate(visit, errors);
 		assertFalse(errors.hasErrors());
 	}
-	
+
 	@Test
 	public void shouldNotRejectIfQueueEntryStartedAtEqualsVisitStartDate() {
 		visit.setStartDatetime(queueEntry.getStartedAt());
 		validator.validate(visit, errors);
 		assertFalse(errors.hasErrors());
 	}
-	
+
 	@Test
 	public void shouldNotRejectIfQueueEntryEndedAtAtEqualsVisitEndDate() {
 		queueEntry.setEndedAt(DateUtils.addSeconds(queueEntry.getStartedAt(), 1));
@@ -94,7 +94,7 @@ public class VisitWithQueueEntriesValidatorTest extends BaseModuleContextSensiti
 		validator.validate(visit, errors);
 		assertFalse(errors.hasErrors());
 	}
-	
+
 	@Test
 	public void shouldRejectIfQueueEntryStartedBeforeVisitStartDate() {
 		visit.setStartDatetime(DateUtils.addMilliseconds(queueEntry.getStartedAt(), 1));
@@ -103,7 +103,7 @@ public class VisitWithQueueEntriesValidatorTest extends BaseModuleContextSensiti
 		assertNotNull(startDatetimeFieldError);
 		assertThat(startDatetimeFieldError.getCode(), is("queue.entry.error.cannotStartBeforeVisitStartDate"));
 	}
-	
+
 	@Test
 	public void shouldRejectIfQueueEntryStartedAfterVisitEndDate() {
 		visit.setStopDatetime(DateUtils.addMilliseconds(queueEntry.getStartedAt(), -1));
@@ -112,7 +112,7 @@ public class VisitWithQueueEntriesValidatorTest extends BaseModuleContextSensiti
 		assertNotNull(stopDatetimeFieldError);
 		assertThat(stopDatetimeFieldError.getCode(), is("queue.entry.error.cannotStartAfterVisitStopDate"));
 	}
-	
+
 	@Test
 	public void shouldRejectIfQueueEntryEndedAfterVisitEndDate() {
 		queueEntry.setEndedAt(DateUtils.addHours(queueEntry.getStartedAt(), 1));

@@ -29,35 +29,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class CohortMemberAttributeGenericDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	//The order is salient
 	private static final String[] COHORT_MEMBER_ATTRIBUTE_INITIAL_TEST_DATA_XML = new String[] {
 	        "org/openmrs/module/cohort/api/hibernate/db/CohortDaoTest_initialTestData.xml",
 	        "org/openmrs/module/cohort/api/hibernate/db/CohortMemberDaoTest_initialTestData.xml",
 	        "org/openmrs/module/cohort/api/hibernate/db/CohortMemberAttributeTypeDaoTest_initialTestData.xml",
 	        "org/openmrs/module/cohort/api/hibernate/db/CohortMemberAttributeDaoTest_initialTestData.xml" };
-	
+
 	private static final String COHORT_MEMBER_ATTRIBUTE_UUID = "ddadadd8-8034-4a28-9441-2eb2e7679e10";
-	
+
 	private static final String COHORT_MEMBER_ATTRIBUTE_TYPE_UUID = "9eb7fe43-2813-4ebc-80dc-2e5d30251bb7";
-	
+
 	private static final int COHORT_MEMBER_ATTRIBUTE_ID = 1;
-	
+
 	private static final int TEST_COHORT_MEMBER_ATTRIBUTE_ID = 100;
-	
+
 	private static final String COHORT_MEMBER_ATTRIBUTE_VALUE = "cohortMemberAttribute";
-	
+
 	@Autowired
 	@Qualifier("cohortMemberAttributeDao")
 	private GenericDao<CohortMemberAttribute> dao;
-	
+
 	@Before
 	public void setup() throws Exception {
 		for (String dataset : COHORT_MEMBER_ATTRIBUTE_INITIAL_TEST_DATA_XML) {
 			executeDataSet(dataset);
 		}
 	}
-	
+
 	@Test
 	public void shouldGetCohortMemberAttributeByUuid() {
 		CohortMemberAttribute cohortMemberAttribute = dao.get(COHORT_MEMBER_ATTRIBUTE_UUID);
@@ -66,44 +66,44 @@ public class CohortMemberAttributeGenericDaoTest extends BaseModuleContextSensit
 		assertThat(cohortMemberAttribute.getId(), is(COHORT_MEMBER_ATTRIBUTE_ID));
 		assertThat(cohortMemberAttribute.getUuid(), equalTo(COHORT_MEMBER_ATTRIBUTE_UUID));
 	}
-	
+
 	@Test
 	public void shouldGetCohortMemberAttributesByTypeUuid() {
 		Collection<CohortMemberAttribute> memberAttributes = dao.findBy(PropValue.builder().property("uuid")
 		        .associationPath(Optional.of("attributeType")).value(COHORT_MEMBER_ATTRIBUTE_TYPE_UUID).build());
-		
+
 		assertThat(memberAttributes, notNullValue());
 		assertThat(memberAttributes, hasSize(1));
 	}
-	
+
 	@Test
 	public void shouldCreateNewCohortMemberAttribute() {
 		CohortMemberAttribute cohortAttribute = dao.createOrUpdate(TestDataUtils.COHORT_MEMBER_ATTRIBUTE());
-		
+
 		assertThat(cohortAttribute, notNullValue());
 		assertThat(cohortAttribute.getId(), notNullValue());
 		assertThat(cohortAttribute.getId(), equalTo(TEST_COHORT_MEMBER_ATTRIBUTE_ID));
 		assertThat(cohortAttribute.getValue(), equalTo(COHORT_MEMBER_ATTRIBUTE_VALUE));
 	}
-	
+
 	@Test
 	public void shouldVoidCohortMemberAttribute() {
 		CohortMemberAttribute attributeToVoid = dao.get(COHORT_MEMBER_ATTRIBUTE_UUID);
 		attributeToVoid.setVoided(true);
 		attributeToVoid.setVoidReason("Voided via cohort rest call");
 		dao.createOrUpdate(attributeToVoid);
-		
+
 		CohortMemberAttribute attribute = dao.get(COHORT_MEMBER_ATTRIBUTE_UUID, true);
-		
+
 		assertThat(attribute, notNullValue());
 		assertThat(attribute.getVoided(), is(true));
 		assertThat(attribute.getVoidReason(), is("Voided via cohort rest call"));
 	}
-	
+
 	@Test
 	public void shouldPurgeCohortMemberAttribute() {
 		dao.delete(dao.get(COHORT_MEMBER_ATTRIBUTE_UUID));
-		
+
 		assertThat(dao.get(COHORT_MEMBER_ATTRIBUTE_UUID), nullValue());
 	}
 }

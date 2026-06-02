@@ -31,18 +31,18 @@ import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
  * Integration tests for {@link CashPointService}.
  */
 public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	public static final String CASH_POINT_DATASET = TestConstants.BASE_DATASET_DIR + "CashPointTest.xml";
-	
+
 	private CashPointService service;
-	
+
 	@BeforeEach
 	public void before() {
 		service = Context.getService(CashPointService.class);
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(CASH_POINT_DATASET);
 	}
-	
+
 	/**
 	 * Asserts that two cash points are equal.
 	 *
@@ -51,7 +51,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 */
 	public static void assertCashPoint(CashPoint expected, CashPoint actual) {
 		assertOpenmrsMetadata(expected, actual);
-		
+
 		assertEquals(expected.getName(), actual.getName());
 		assertEquals(expected.getDescription(), actual.getDescription());
 		if (expected.getLocation() == null) {
@@ -60,7 +60,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 			assertEquals(expected.getLocation().getId(), actual.getLocation().getId());
 		}
 	}
-	
+
 	/**
 	 * Asserts that two cash point entities are equal.
 	 *
@@ -70,19 +70,19 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	protected void assertEntity(CashPoint expected, CashPoint actual) {
 		assertCashPoint(expected, actual);
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocation(Location, boolean)
 	 */
 	@Test
 	public void getCashPointsByLocation_shouldReturnCashPointsForLocationWithCashPoints() {
 		Location location = Context.getLocationService().getLocation(1);
-		
+
 		List<CashPoint> results = service.getCashPointsByLocation(location, false);
 		assertNotNull(results);
 		assertEquals(1, results.size());
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocation(Location, boolean)
 	 */
@@ -93,21 +93,21 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		cashPoint.setRetireReason("reason");
 		service.saveCashPoint(cashPoint);
 		Location location = Context.getLocationService().getLocation(0);
-		
+
 		Context.flushSession();
-		
+
 		List<CashPoint> cashPoints = service.getCashPointsByLocation(location, false);
 		assertNotNull(cashPoints);
 		assertEquals(2, cashPoints.size());
 		assertEquals(4, (int) Iterators.get(cashPoints.iterator(), 0).getId());
 		assertEquals(5, (int) Iterators.get(cashPoints.iterator(), 1).getId());
-		
+
 		List<CashPoint> cashPoints1 = service.getCashPointsByLocation(location, true);
 		assertNotNull(cashPoints1);
 		assertEquals(3, cashPoints1.size());
 		assertEquals(0, (int) Iterators.get(cashPoints1.iterator(), 0).getId());
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocation(Location, boolean)
 	 */
@@ -116,12 +116,12 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		List<CashPoint> cashPoint = service.getCashPointsByLocation(Context.getLocationService().getLocation(0), false);
 		assertNotNull(cashPoint);
 		assertEquals(3, cashPoint.size());
-		
+
 		assertEquals(0, (int) Iterators.get(cashPoint.iterator(), 0).getId());
 		assertEquals(4, (int) Iterators.get(cashPoint.iterator(), 1).getId());
 		assertEquals(5, (int) Iterators.get(cashPoint.iterator(), 2).getId());
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -130,7 +130,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		assertThrows(IllegalArgumentException.class,
 		    () -> service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(1), null, false));
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -139,7 +139,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		assertThrows(IllegalArgumentException.class,
 		    () -> service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(1), "", false));
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -148,19 +148,19 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		    () -> service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(1),
 		        StringUtils.repeat("A", 256), false));
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
 	@Test
 	public void getCashPointsByLocationAndName_shouldReturnCashPointsMatchingLocationAndName() {
 		Location location = Context.getLocationService().getLocation(1);
-		
+
 		List<CashPoint> results = service.getCashPointsByLocationAndName(location, "Test", false);
 		assertNotNull(results);
 		assertEquals(1, results.size());
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -171,21 +171,21 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		cashPoint.setRetireReason("reason");
 		service.saveCashPoint(cashPoint);
 		Location location = Context.getLocationService().getLocation(0);
-		
+
 		Context.flushSession();
-		
+
 		List<CashPoint> results = service.getCashPointsByLocationAndName(location, "Test", false);
 		assertNotNull(results);
 		assertEquals(2, results.size());
 		assertEquals(4, (int) Iterators.get(results.iterator(), 0).getId());
 		assertEquals(5, (int) Iterators.get(results.iterator(), 1).getId());
-		
+
 		List<CashPoint> results1 = service.getCashPointsByLocationAndName(location, "Test", true);
 		assertNotNull(results1);
 		assertEquals(3, results1.size());
 		assertEquals(0, (int) Iterators.get(results1.iterator(), 0).getId());
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -196,10 +196,10 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(results);
 		assertEquals(1, results.size());
 		assertEquals(0, (int) Iterators.get(results.iterator(), 0).getId());
-		
+
 		CashPoint cashPoint = service.getCashPoint(0);
 		assertEntity(cashPoint, results.get(0));
-		
+
 		List<CashPoint> results1 = service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(2),
 		    "Test", false);
 		assertNotNull(results1);
@@ -207,7 +207,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		assertEquals(2, (int) Iterators.get(results1.iterator(), 0).getId());
 		assertEquals(6, (int) Iterators.get(results1.iterator(), 1).getId());
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -217,12 +217,12 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 		    "Test", false);
 		assertNotNull(cashPoint);
 		assertEquals(3, cashPoint.size());
-		
+
 		assertEquals(0, (int) Iterators.get(cashPoint.iterator(), 0).getId());
 		assertEquals(4, (int) Iterators.get(cashPoint.iterator(), 1).getId());
 		assertEquals(5, (int) Iterators.get(cashPoint.iterator(), 2).getId());
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocation(Location, boolean)
 	 */
@@ -230,7 +230,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	public void getCashPointsByLocation_shouldThrowIllegalArgumentExceptionIfLocationIsNull() {
 		assertThrows(IllegalArgumentException.class, () -> service.getCashPointsByLocation(null, false));
 	}
-	
+
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */

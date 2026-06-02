@@ -15,20 +15,20 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_10;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class CareSettingResource1_10Test extends BaseDelegatingResourceTest<CareSettingResource1_10, CareSetting> {
-	
+
 	@Override
 	public CareSetting newObject() {
 		return Context.getOrderService().getCareSettingByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "OUTPATIENT";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_10.CARE_SETTING_UUID;
 	}
-	
+
 }

@@ -28,29 +28,29 @@ import org.openmrs.test.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class VisitLocationBasedFilterTest extends BaseFilterTest {
-	
+
 	@Autowired
 	private VisitService visitService;
-	
+
 	@Autowired
 	private DataFilterService service;
-	
+
 	@Before
 	public void before() {
 		executeDataSet(TestConstants.ROOT_PACKAGE_DIR + "visits.xml");
 	}
-	
+
 	private Collection<Visit> getVisits() {
 		return visitService.getVisits(Collections.singleton(new VisitType(2000)), null, null, null, null, null, null, null,
 		    null, true, true);
 	}
-	
+
 	@Test
 	public void getVisits_shouldReturnNoVisitsIfTheUserIsNotGrantedAccessToAnyBasis() {
 		reloginAs("dBeckham", "test");
 		assertEquals(0, getVisits().size());
 	}
-	
+
 	@Test
 	public void getVisits_shouldReturnVisitsBelongingToPatientsAccessibleToTheUser() {
 		reloginAs("dyorke", "test");
@@ -59,7 +59,7 @@ public class VisitLocationBasedFilterTest extends BaseFilterTest {
 		assertEquals(expCount, visits.size());
 		assertTrue(TestUtil.containsId(visits, 1000));
 		assertTrue(TestUtil.containsId(visits, 1001));
-		
+
 		service.grantAccess(Context.getAuthenticatedUser(), new Location(4001));
 		expCount = 3;
 		visits = getVisits();
@@ -68,7 +68,7 @@ public class VisitLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(visits, 1001));
 		assertTrue(TestUtil.containsId(visits, 1002));
 	}
-	
+
 	@Test
 	public void getVisits_shouldReturnAllVisitsIfTheAuthenticatedUserIsASuperUser() {
 		assertTrue(Context.getAuthenticatedUser().isSuperUser());
@@ -79,12 +79,12 @@ public class VisitLocationBasedFilterTest extends BaseFilterTest {
 		assertTrue(TestUtil.containsId(visits, 1001));
 		assertTrue(TestUtil.containsId(visits, 1002));
 	}
-	
+
 	@Test
 	public void getVisits_shouldReturnAllVisitsIfLocationFilteringIsDisabled() {
 		DataFilterTestUtils.disableLocationFiltering();
 		reloginAs("dyorke", "test");
 		assertEquals(3, getVisits().size());
 	}
-	
+
 }

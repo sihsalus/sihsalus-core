@@ -1334,16 +1334,16 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
         weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
     }
-    
+
     @Test
     public void setAppointments_shouldThrowWhenFrequecyIsDecreasedSuchThatEndDateIsInPast() {
         Date date = new Date();
-        
+
         RecurringAppointmentRequest recurringRequest = getAppointmentRequest(addDays(date, +7), addHours(addDays(date, +7), +1));
         recurringRequest.setRecurringPattern(new RecurringPatternBuilder().setPeriod(1).setFrequency(2).get());
-        
+
         Mockito.when(appointmentMapper.fromRequest(recurringRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
-        
+
         AppointmentRecurringPattern recurringPattern = getAppointmentRecurringPattern(1, 4, null, null);
         recurringPattern.setAppointments(new HashSet<Appointment>() {{
             add(new AppointmentBuilder().withStartDateTime(addDays(date, -7)).withEndDateTime(addHours(addDays(date, -7), +1)).build());

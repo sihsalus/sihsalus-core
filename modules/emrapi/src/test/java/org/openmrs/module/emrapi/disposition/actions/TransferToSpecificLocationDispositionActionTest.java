@@ -43,21 +43,21 @@ import static org.mockito.Mockito.when;
  *
  */
 public class TransferToSpecificLocationDispositionActionTest extends AuthenticatedUserTestHelper {
-	
+
 	private TransferToSpecificLocationDispositionAction action;
-	
+
 	private AdtService adtService;
-	
+
 	private LocationService locationService;
-	
+
 	private DispositionService dispositionService;
-	
+
 	private DispositionDescriptor dispositionDescriptor;
-	
+
 	private VisitDomainWrapper visitDomainWrapper;
-	
+
 	private Concept dispositionObsGroupConcept = new Concept();
-	
+
 	@Before
 	public void setUp() throws Exception {
 		locationService = mock(LocationService.class);
@@ -65,19 +65,19 @@ public class TransferToSpecificLocationDispositionActionTest extends Authenticat
 		dispositionService = mock(DispositionService.class);
 		dispositionDescriptor = mock(DispositionDescriptor.class);
 		visitDomainWrapper = mock(VisitDomainWrapper.class);
-		
+
 		when(dispositionService.getDispositionDescriptor()).thenReturn(dispositionDescriptor);
 		when(adtService.wrap(any(Visit.class))).thenReturn(visitDomainWrapper);
-		
+
 		action = new TransferToSpecificLocationDispositionAction();
 		action.setLocationService(locationService);
 		action.setAdtService(adtService);
 		action.setDispositionService(dispositionService);
 	}
-	
+
 	@Test
 	public void testActionShouldCreateTransferAction() throws Exception {
-		
+
 		final Location toLocation = new Location();
 		final Visit visit = new Visit();
 		final Encounter encounter = new Encounter();
@@ -85,19 +85,19 @@ public class TransferToSpecificLocationDispositionActionTest extends Authenticat
 		encounter.setVisit(visit);
 		encounter.addProvider(new EncounterRole(), new Provider());
 		encounter.setEncounterDatetime(encounterDate);
-		
+
 		final Obs dispositionObsGroup = new Obs();
 		dispositionObsGroup.setConcept(dispositionObsGroupConcept);
 		encounter.addObs(dispositionObsGroup);
-		
+
 		Location anotherLocation = new Location();
 		when(visitDomainWrapper.isAdmitted(encounterDate)).thenReturn(true);
 		when(visitDomainWrapper.getInpatientLocation(encounterDate)).thenReturn(anotherLocation);
 		when(dispositionDescriptor.getInternalTransferLocation(dispositionObsGroup, locationService)).thenReturn(toLocation);
-		
+
 		action.action(new EncounterDomainWrapper(encounter), dispositionObsGroup, null);
 		verify(adtService).createAdtEncounterFor(argThat(new ArgumentMatcher<AdtAction>() {
-			
+
 			@Override
 			public boolean matches(AdtAction adtAction) {
 				return adtAction.getVisit().equals(visit) && adtAction.getLocation().equals(toLocation)
@@ -107,10 +107,10 @@ public class TransferToSpecificLocationDispositionActionTest extends Authenticat
 			}
 		}));
 	}
-	
+
 	@Test
 	public void testActionShouldDoNothingIfAlreadyAdmittedToTransferLocation() throws Exception {
-		
+
 		final Location toLocation = new Location();
 		final Visit visit = new Visit();
 		final Encounter encounter = new Encounter();
@@ -118,22 +118,22 @@ public class TransferToSpecificLocationDispositionActionTest extends Authenticat
 		encounter.setVisit(visit);
 		encounter.addProvider(new EncounterRole(), new Provider());
 		encounter.setEncounterDatetime(encounterDate);
-		
+
 		final Obs dispositionObsGroup = new Obs();
 		dispositionObsGroup.setConcept(dispositionObsGroupConcept);
 		encounter.addObs(dispositionObsGroup);
-		
+
 		when(visitDomainWrapper.isAdmitted(encounterDate)).thenReturn(true);
 		when(visitDomainWrapper.getInpatientLocation(encounterDate)).thenReturn(toLocation); // current location the same as transfer location
 		when(dispositionDescriptor.getInternalTransferLocation(dispositionObsGroup, locationService)).thenReturn(toLocation);
-		
+
 		action.action(new EncounterDomainWrapper(encounter), dispositionObsGroup, null);
 		verify(adtService, never()).createAdtEncounterFor(any(AdtAction.class));
 	}
-	
+
 	@Test
 	public void testActionShouldCreateTransferEncounterIfPatientNotAdmitted() throws Exception {
-		
+
 		final Location toLocation = new Location();
 		final Visit visit = new Visit();
 		final Encounter encounter = new Encounter();
@@ -141,18 +141,18 @@ public class TransferToSpecificLocationDispositionActionTest extends Authenticat
 		encounter.setVisit(visit);
 		encounter.addProvider(new EncounterRole(), new Provider());
 		encounter.setEncounterDatetime(encounterDate);
-		
+
 		final Obs dispositionObsGroup = new Obs();
 		dispositionObsGroup.setConcept(dispositionObsGroupConcept);
 		encounter.addObs(dispositionObsGroup);
-		
+
 		when(visitDomainWrapper.isAdmitted(encounterDate)).thenReturn(false);
 		when(dispositionDescriptor.getInternalTransferLocation(dispositionObsGroup, locationService)).thenReturn(toLocation);
-		
+
 		action.action(new EncounterDomainWrapper(encounter), dispositionObsGroup, null);
-		
+
 		verify(adtService).createAdtEncounterFor(argThat(new ArgumentMatcher<AdtAction>() {
-			
+
 			@Override
 			public boolean matches(AdtAction adtAction) {
 				return adtAction.getVisit().equals(visit) && adtAction.getLocation().equals(toLocation)
@@ -161,7 +161,7 @@ public class TransferToSpecificLocationDispositionActionTest extends Authenticat
 				        && adtAction.getType().equals(AdtAction.Type.TRANSFER);
 			}
 		}));
-		
+
 	}
-	
+
 }

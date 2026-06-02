@@ -19,7 +19,7 @@ import java.io.File;
  * that case it is necessary for each context sensitive test to update the search index.
  */
 public abstract class DomainBaseModuleContextSensitive_2_3_Test extends DomainBaseModuleContextSensitiveTest {
-	
+
 	public DomainBaseModuleContextSensitive_2_3_Test() {
 		super();
 		{
@@ -28,7 +28,7 @@ public abstract class DomainBaseModuleContextSensitive_2_3_Test extends DomainBa
 			ModuleFactory.getStartedModulesMap().put(mod.getModuleId(), mod);
 		}
 	}
-	
+
 	@Override
 	public void updateSearchIndex() {
 		// to prevent Data Filter's 'Illegal Record Access'

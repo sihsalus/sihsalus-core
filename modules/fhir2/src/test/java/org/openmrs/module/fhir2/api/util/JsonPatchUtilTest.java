@@ -26,12 +26,12 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Test;
 
 public class JsonPatchUtilTest {
-	
+
 	private static final String JSON_PATCH_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequest_patch.json";
-	
+
 	@Test
 	public void shouldPatchMedicationRequest() {
-		
+
 		String medicationRequestPatchJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_REQUEST_PATH)) {
 			Objects.requireNonNull(is);
@@ -40,22 +40,22 @@ public class JsonPatchUtilTest {
 		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		MedicationRequest medicationRequest = new MedicationRequest();
 		String id = "123abc";
 		medicationRequest.setId(id);
-		
+
 		Extension extension = new Extension();
 		extension.setUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);
 		extension.setValue(new CodeType("RECEIVED"));
 		medicationRequest.addExtension(extension);
-		
+
 		MedicationRequest patchedMedicationRequest = JsonPatchUtils.applyJsonMergePatch(FhirContext.forR4(),
 		    medicationRequest, medicationRequestPatchJson);
-		
+
 		Extension resultExtension = patchedMedicationRequest
 		        .getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);
 		assertThat(resultExtension.getValue().toString(), equalTo("COMPLETED"));
-		
+
 	}
 }

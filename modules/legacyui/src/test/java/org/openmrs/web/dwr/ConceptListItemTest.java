@@ -20,11 +20,11 @@ import org.openmrs.ConceptDatatype;
 import org.openmrs.ConceptName;
 
 public class ConceptListItemTest {
-	
+
 	/**
 	 * Tests that the constructor sets the preferred name if any even if the matched name is marked
 	 * as fully specified
-	 * 
+	 *
 	 * @see ConceptListItem#ConceptListItem(Concept, ConceptName, Locale)
 	 */
 	@Test
@@ -41,7 +41,7 @@ public class ConceptListItemTest {
 		concept.setPreferredName(name2);
 		assertEquals(expectedPrefName, new ConceptListItem(concept, hit, locale).getPreferredName());
 	}
-	
+
 	/**
 	 * @see ConceptListItem#ConceptListItem(Concept, ConceptName, Locale)
 	 * @throws Exception
@@ -60,7 +60,7 @@ public class ConceptListItemTest {
 		concept.setFullySpecifiedName(name2);
 		assertEquals(expectedPrefName, new ConceptListItem(concept, hit, locale).getPreferredName());
 	}
-	
+
 	/**
 	 * @see ConceptListItem#ConceptListItem(Concept, ConceptName, Locale)
 	 * @throws Exception
@@ -81,7 +81,7 @@ public class ConceptListItemTest {
 		concept.setPreferredName(name2);
 		assertEquals(expectedPrefName, new ConceptListItem(concept, hit, locale).getPreferredName());
 	}
-	
+
 	/**
 	 * @see ConceptListItem#ConceptListItem(Concept, ConceptName, Locale)
 	 * @throws Exception

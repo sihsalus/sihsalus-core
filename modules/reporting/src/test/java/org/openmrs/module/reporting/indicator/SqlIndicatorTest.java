@@ -35,7 +35,7 @@ public class SqlIndicatorTest extends BaseModuleContextSensitiveTest {
 
 	@Autowired
 	IndicatorService indicatorService;
-	
+
 	@Test
 	public void sqlIndicator_shouldEvaluateSqlIndicator() throws Exception {
 		assertIndicatorValue("SELECT distinct(251) as res from patient", 251);
@@ -79,12 +79,12 @@ public class SqlIndicatorTest extends BaseModuleContextSensitiveTest {
 	public void sqlIndicator_shouldEvaluateSqlIndicatorDecimals() throws Exception {
 		assertIndicatorValue("SELECT distinct(.222) as res from patient", "SELECT distinct(.44) as res2 from patient", null);
 	}
-	
+
     @Test(expected = EvaluationException.class)
 	public void sqlIndicator_shouldNotAllowQueriesThatReturnMoreThanOneColumn() throws Exception {
 		assertIndicatorValue("SELECT distinct(.222) as res, 33 as res2 from patient", null);
 	}
-	
+
 	@Test(expected = EvaluationException.class)
 	public void sqlIndicator_shouldNotAllowQueriesThatReturnMoreThanOneRow() throws Exception {
 		assertIndicatorValue("SELECT person_id from person", null);

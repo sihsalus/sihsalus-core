@@ -37,37 +37,37 @@ import org.openmrs.module.fhir2.api.FhirGroupService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GroupFhirResourceProviderTest {
-	
+
 	private static final String COHORT_UUID = "ce8bfad7-c87e-4af0-80cd-c2015c7dff93";
-	
+
 	private static final String BAD_COHORT_UUID = "51f069dc-e204-40f4-90d6-080385bed91f";
-	
+
 	@Mock
 	private FhirGroupService fhirGroupService;
-	
+
 	private GroupFhirResourceProvider resourceProvider;
-	
+
 	private org.hl7.fhir.r4.model.Group group;
-	
+
 	@Before
 	public void setup() {
 		resourceProvider = new GroupFhirResourceProvider();
 		resourceProvider.setGroupService(fhirGroupService);
-		
+
 		group = new org.hl7.fhir.r4.model.Group();
 		group.setId(COHORT_UUID);
 	}
-	
+
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(Group.class));
 		assertThat(resourceProvider.getResourceType().getName(), equalTo(Group.class.getName()));
 	}
-	
+
 	@Test
 	public void getGroupByUuid_shouldReturnMatchingGroup() {
 		when(fhirGroupService.get(COHORT_UUID)).thenReturn(group);
-		
+
 		IdType id = new IdType();
 		id.setValue(COHORT_UUID);
 		Group group = resourceProvider.getGroupByUuid(id);
@@ -75,7 +75,7 @@ public class GroupFhirResourceProviderTest {
 		assertThat(group.getId(), notNullValue());
 		assertThat(group.getId(), equalTo(COHORT_UUID));
 	}
-	
+
 	@Test(expected = ResourceNotFoundException.class)
 	public void getGroupByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
@@ -83,75 +83,75 @@ public class GroupFhirResourceProviderTest {
 		Group group = resourceProvider.getGroupByUuid(id);
 		assertThat(group, nullValue());
 	}
-	
+
 	@Test
 	public void shouldCreateNewGroup() {
 		when(fhirGroupService.create(any(org.hl7.fhir.r4.model.Group.class))).thenReturn(group);
-		
+
 		MethodOutcome result = resourceProvider.createGroup((Group) VersionConvertorFactory_30_40.convertResource(group));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(group.getId()));
 		assertThat(result.getResource().getStructureFhirVersionEnum(), equalTo(FhirVersionEnum.DSTU3));
 	}
-	
+
 	@Test
 	public void shouldUpdateExistingGroup() {
 		org.hl7.fhir.r4.model.Group.GroupMemberComponent groupMemberComponent = mock(
 		    org.hl7.fhir.r4.model.Group.GroupMemberComponent.class);
-		
+
 		group.setActual(false);
 		group.addMember(groupMemberComponent);
-		
+
 		when(fhirGroupService.update(eq(COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class))).thenReturn(group);
-		
+
 		MethodOutcome result = resourceProvider.updateGroup(new IdType().setValue(COHORT_UUID),
 		    (Group) VersionConvertorFactory_30_40.convertResource(group));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(group.getId()));
 		assertThat(result.getResource().getStructureFhirVersionEnum(), equalTo(FhirVersionEnum.DSTU3));
 	}
-	
+
 	@Test(expected = InvalidRequestException.class)
 	public void updateGroupShouldThrowInvalidRequestForUuidMismatch() {
 		when(fhirGroupService.update(eq(BAD_COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
 		        .thenThrow(InvalidRequestException.class);
-		
+
 		resourceProvider.updateGroup(new IdType().setValue(BAD_COHORT_UUID),
 		    (Group) VersionConvertorFactory_30_40.convertResource(group));
 	}
-	
+
 	@Test(expected = InvalidRequestException.class)
 	public void ShouldThrowInvalidRequestForMissingIdInGroupToUpdate() {
 		org.hl7.fhir.r4.model.Group noIdGroup = new org.hl7.fhir.r4.model.Group();
-		
+
 		when(fhirGroupService.update(eq(COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
 		        .thenThrow(InvalidRequestException.class);
-		
+
 		resourceProvider.updateGroup(new IdType().setValue(COHORT_UUID),
 		    (Group) VersionConvertorFactory_30_40.convertResource(noIdGroup));
 	}
-	
+
 	@Test(expected = MethodNotAllowedException.class)
 	public void shouldThrowMethodNotAllowedIfGroupToUpdateDoesNotExist() {
 		org.hl7.fhir.r4.model.Group wrongGroup = new org.hl7.fhir.r4.model.Group();
 		wrongGroup.setId(BAD_COHORT_UUID);
-		
+
 		when(fhirGroupService.update(eq(BAD_COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
 		        .thenThrow(MethodNotAllowedException.class);
-		
+
 		resourceProvider.updateGroup(new IdType().setValue(BAD_COHORT_UUID),
 		    (Group) VersionConvertorFactory_30_40.convertResource(wrongGroup));
 	}
-	
+
 	@Test
 	public void shouldDeleteRequestedGroup() {
 		OperationOutcome result = resourceProvider.deleteGroup(new IdType().setValue(COHORT_UUID));
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));

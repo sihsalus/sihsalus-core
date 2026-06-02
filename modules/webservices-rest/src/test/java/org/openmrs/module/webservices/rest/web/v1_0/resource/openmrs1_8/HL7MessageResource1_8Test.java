@@ -17,12 +17,12 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.openmrs.module.webservices.rest.web.v1_0.wrapper.openmrs1_8.IncomingHl7Message1_8;
 
 public class HL7MessageResource1_8Test extends BaseDelegatingResourceTest<HL7MessageResource1_8, IncomingHl7Message1_8> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_8.RESOURCE_TEST_DATASET);
 	}
-	
+
 	@Override
 	public IncomingHl7Message1_8 newObject() {
 		HL7InQueue msg = new HL7InQueue();
@@ -32,13 +32,13 @@ public class HL7MessageResource1_8Test extends BaseDelegatingResourceTest<HL7Mes
 		Context.getHL7Service().saveHL7InQueue(msg);
 		return new IncomingHl7Message1_8(msg);
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
 		assertPropEquals("messageState", getObject().getMessageState());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -47,15 +47,15 @@ public class HL7MessageResource1_8Test extends BaseDelegatingResourceTest<HL7Mes
 		assertPropEquals("data", getObject().getData());
 		assertPropEquals("messageState", getObject().getMessageState());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "sourceKey";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return getObject().getUuid();
 	}
-	
+
 }

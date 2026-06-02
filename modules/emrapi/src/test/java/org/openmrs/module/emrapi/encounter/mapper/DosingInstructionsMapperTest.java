@@ -27,18 +27,18 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.openmrs.module.emrapi.encounter.domain.EncounterTransaction.DosingInstructions;
 
 public class DosingInstructionsMapperTest {
-	
+
 	@Mock
 	private OrderMetadataService orderMetadataService;
-	
+
 	@Mock
 	private ConceptService conceptService;
-	
+
 	@Before
 	public void setup() {
 		initMocks(this);
 	}
-	
+
 	@Test
 	public void shouldMapDosingInstructionsToDrugOrder() {
 		DosingInstructions dosingInstructions = DosingInstructionsBuilder.sample();
@@ -53,13 +53,13 @@ public class DosingInstructionsMapperTest {
 		Concept quantityUnits = new Concept();
 		when(orderMetadataService.getDispenseUnitsConceptByName(dosingInstructions.getQuantityUnits()))
 		        .thenReturn(quantityUnits);
-		
+
 		DrugOrder drugOrder = new DrugOrder();
 		DosingInstructionsMapper dosingInstructionsMapper = new DosingInstructionsMapper(conceptService,
 		        orderMetadataService);
-		
+
 		dosingInstructionsMapper.map(dosingInstructions, drugOrder);
-		
+
 		assertThat(drugOrder.getDosingInstructions(), is(equalTo("AC")));
 		assertThat(drugOrder.getDose(), is(equalTo(2.0)));
 		assertThat(drugOrder.getDoseUnits(), is(capsuleConcept));
@@ -70,16 +70,16 @@ public class DosingInstructionsMapperTest {
 		assertThat(drugOrder.getQuantityUnits(), is(equalTo(quantityUnits)));
 		assertThat(drugOrder.getNumRefills(), is(equalTo(dosingInstructions.getNumberOfRefills())));
 	}
-	
+
 	@Test
 	public void shouldDefaultNumRefillsToZeroIfNotAvailable() {
 		DosingInstructions dosingInstructions = DosingInstructionsBuilder.sample();
 		dosingInstructions.setNumberOfRefills(null);
 		DrugOrder drugOrder = new DrugOrder();
-		
+
 		DosingInstructionsMapper dosingInstructionsMapper = new DosingInstructionsMapper(conceptService,
 		        orderMetadataService);
-		
+
 		dosingInstructionsMapper.map(dosingInstructions, drugOrder);
 		assertThat(drugOrder.getNumRefills(), is(equalTo(0)));
 	}

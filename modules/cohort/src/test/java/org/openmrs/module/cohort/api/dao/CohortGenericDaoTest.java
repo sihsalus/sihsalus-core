@@ -30,34 +30,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class CohortGenericDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String[] COHORT_INITIAL_TEST_DATA_XML = {
 	        "org/openmrs/module/cohort/api/hibernate/db/CohortDaoTest_initialTestData.xml",
 	        "org/openmrs/module/cohort/api/hibernate/db/CohortMemberDaoTest_initialTestData.xml" };
-	
+
 	private static final String COHORT_UUID = "7f9a2479-c14a-4bfc-bcaa-632860258519";
-	
+
 	private static final String LOCATION_UUID = "65ab9667-7432-49af-8be8-65a4b58fc78k";
-	
+
 	private static final String COHORT_NAME = "COVID-19 patients";
-	
+
 	private static final int COHORT_ID = 12;
-	
+
 	private static final String COHORT_NAME1 = "cohort name";
-	
+
 	private static final String COHORT_DESCRIPTION = "Cohort description";
-	
+
 	@Autowired
 	@Qualifier("cohortDao")
 	private GenericDao<CohortM> dao;
-	
+
 	@Before
 	public void setup() throws Exception {
 		for (String data : COHORT_INITIAL_TEST_DATA_XML) {
 			executeDataSet(data);
 		}
 	}
-	
+
 	@Test
 	public void shouldGetCohortByName() {
 		CohortM cohort = dao.findByUniqueProp(
@@ -66,7 +66,7 @@ public class CohortGenericDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(cohort.getName(), notNullValue());
 		assertThat(cohort.getName(), equalTo(COHORT_NAME));
 	}
-	
+
 	@Test
 	public void shouldGetCohortMById() {
 		CohortM cohort = dao.findByUniqueProp(
@@ -76,7 +76,7 @@ public class CohortGenericDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(cohort.getCohortId(), equalTo(COHORT_ID));
 		assertThat(cohort.size(), equalTo(1));
 	}
-	
+
 	@Test
 	public void shouldGetCohortMByUuid() {
 		CohortM cohort = dao.get(COHORT_UUID);
@@ -87,7 +87,7 @@ public class CohortGenericDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(cohort.getUuid(), equalTo(COHORT_UUID));
 		assertThat(cohort.size(), equalTo(1));
 	}
-	
+
 	@Test
 	public void shouldGetCohortUuid() {
 		CohortM cohort = dao.get(COHORT_UUID);
@@ -95,7 +95,7 @@ public class CohortGenericDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(cohort.getUuid(), notNullValue());
 		assertThat(cohort.getUuid(), equalTo(COHORT_UUID));
 	}
-	
+
 	@Test
 	public void shouldCreateNewCohort() {
 		CohortM cohortM = new CohortM();
@@ -104,18 +104,18 @@ public class CohortGenericDaoTest extends BaseModuleContextSensitiveTest {
 		cohortM.setName(COHORT_NAME1);
 		cohortM.setGroupCohort(false);
 		cohortM.setDescription(COHORT_DESCRIPTION);
-		
+
 		CohortM createdCohort = dao.createOrUpdate(cohortM);
 		assertThat(createdCohort, notNullValue());
 		assertThat(createdCohort.getCohortId(), equalTo(cohortM.getCohortId()));
 		assertThat(createdCohort.getName(), is(cohortM.getName()));
 	}
-	
+
 	@Test
 	public void findByLocationUuid_shouldReturnNonVoidedCollectionOfCohortsMatchingTheLocation() {
 		Collection<CohortM> cohorts = dao.findBy(
 		    PropValue.builder().property("uuid").associationPath(Optional.of("location")).value(LOCATION_UUID).build());
-		
+
 		assertThat(cohorts, notNullValue());
 		assertThat(cohorts, hasSize(1));
 		for (CohortM cohort : cohorts) {
@@ -123,33 +123,33 @@ public class CohortGenericDaoTest extends BaseModuleContextSensitiveTest {
 			assertThat(cohort.getLocation().getUuid(), equalTo(LOCATION_UUID));
 		}
 	}
-	
+
 	@Test
 	public void findByLocationUuid_shouldReturnCohortsMatchingGivenLocationIncludingVoidedCohorts() {
 		Collection<CohortM> cohorts = dao.findBy(
 		    PropValue.builder().property("uuid").associationPath(Optional.of("location")).value(LOCATION_UUID).build(),
 		    true);
-		
+
 		assertThat(cohorts, notNullValue());
 		assertThat(cohorts, hasSize(2));
-		
+
 		for (CohortM cohort : cohorts) {
 			assertThat(cohort.getLocation(), notNullValue());
 			assertThat(cohort.getLocation().getUuid(), equalTo(LOCATION_UUID));
 			assertThat(cohort.getLocation().getName(), is("Cohort-21 Location"));
 		}
 	}
-	
+
 	@Test
 	public void getByUuid_shouldReturnNullForVoidedOrRetiredCohort() {
 		CohortM cohortToVoid = dao.get(COHORT_UUID);
 		cohortToVoid.setVoided(true);
 		cohortToVoid.setVoidReason("Voided by cohort test");
 		dao.createOrUpdate(cohortToVoid);
-		
+
 		assertThat(dao.get(COHORT_UUID), nullValue());
 	}
-	
+
 	@Test
 	public void shouldVoidCohortM() {
 		CohortM cohortToVoid = dao.get(COHORT_UUID);

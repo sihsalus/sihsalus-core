@@ -19,60 +19,60 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BedTypeResourceTest extends MainResourceControllerTest {
-	
+
 	@Before
 	public void init() throws Exception {
 		executeDataSet("bedManagementDAOComponentTestDataset.xml");
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "bedtype";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return "6f9faf08-0fd5-11e8-adb7-080027b38971";
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	@Test
 	public void shouldReturnAllBedTypes() throws Exception {
 		MockHttpServletRequest request = request(RequestMethod.GET, getURI());
 		SimpleObject object = deserialize(handle(request));
 		List results = (ArrayList) object.get("results");
-		
+
 		Assert.assertEquals(3, results.size());
 		Assert.assertEquals("deluxe", PropertyUtils.getProperty(results.get(0), "name"));
 		Assert.assertEquals("luxury", PropertyUtils.getProperty(results.get(1), "name"));
 		Assert.assertEquals("normal", PropertyUtils.getProperty(results.get(2), "name"));
 	}
-	
+
 	@Test
 	public void shouldReturnBedTypeById() throws Exception {
 		MockHttpServletRequest request = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject bedType = deserialize(handle(request));
-		
+
 		Assert.assertEquals("6f9faf08-0fd5-11e8-adb7-080027b38971", bedType.get("uuid"));
 		Assert.assertEquals("deluxe", bedType.get("name"));
 	}
-	
+
 	@Test
 	public void shouldSearchBedTypeByName() throws Exception {
 		MockHttpServletRequest request = request(RequestMethod.GET, getURI());
 		request.addParameter("name", "luxury");
 		SimpleObject object = deserialize(handle(request));
 		List results = (ArrayList) object.get("results");
-		
+
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals("6f9fb240-0fd5-11e8-adb7-080027b38973", PropertyUtils.getProperty(results.get(0), "uuid"));
 		Assert.assertEquals("luxury", PropertyUtils.getProperty(results.get(0), "name"));
 	}
-	
+
 	@Test
 	public void shouldAddNewBedType() throws Exception {
 		MockHttpServletRequest request = request(RequestMethod.POST, getURI());
@@ -83,11 +83,11 @@ public class BedTypeResourceTest extends MainResourceControllerTest {
 		String json = new ObjectMapper().writeValueAsString(postParameters);
 		request.setContent(json.getBytes());
 		SimpleObject bedType = deserialize(handle(request));
-		
+
 		Assert.assertNotNull(bedType.get("uuid"));
 		assertEquals("Large Bed", bedType.get("name"));
 	}
-	
+
 	@Test
 	public void shouldUpdateBedTypeById() throws Exception {
 		MockHttpServletRequest request = request(RequestMethod.POST, getURI() + "/" + getUuid());
@@ -98,12 +98,12 @@ public class BedTypeResourceTest extends MainResourceControllerTest {
 		String json = new ObjectMapper().writeValueAsString(postParameters);
 		request.setContent(json.getBytes());
 		SimpleObject bedType = deserialize(handle(request));
-		
+
 		Assert.assertEquals("6f9faf08-0fd5-11e8-adb7-080027b38971", bedType.get("uuid"));
 		Assert.assertEquals("Vip Bed", bedType.get("name"));
 		Assert.assertEquals("VIP", bedType.get("displayName"));
 	}
-	
+
 	@Test
 	public void onDeleteBedTypeByIdShouldThrowException() {
 		try {
@@ -116,7 +116,7 @@ public class BedTypeResourceTest extends MainResourceControllerTest {
 			assertTrue(t instanceof ConstraintViolationException);
 		}
 	}
-	
+
 	@Test(expected = ObjectNotFoundException.class)
 	public void shouldDeleteNewBedType() throws Exception {
 		MockHttpServletRequest request = request(RequestMethod.POST, getURI());
@@ -128,18 +128,18 @@ public class BedTypeResourceTest extends MainResourceControllerTest {
 		request.setContent(json.getBytes());
 		SimpleObject bedType = deserialize(handle(request));
 		Integer bedTypeId = bedType.get("id");
-		
+
 		MockHttpServletRequest deleteRequest = request(RequestMethod.DELETE, getURI() + "/" + bedTypeId);
 		handle(deleteRequest);
-		
+
 		MockHttpServletRequest getRequest = request(RequestMethod.GET, getURI() + "/" + bedTypeId);
 		handle(getRequest);
 	}
-	
+
 	@Test
 	public void shouldRetireBedType() throws Exception {
 		String uuid = "6f9fb341-0fd5-11e8-adb7-080027b38972";
-		
+
 		MockHttpServletRequest retireRequest = request(RequestMethod.POST, getURI() + "/" + uuid);
 		SimpleObject retireParameters = new SimpleObject();
 		retireParameters.put("retired", "true");
@@ -147,17 +147,17 @@ public class BedTypeResourceTest extends MainResourceControllerTest {
 		String retireJson = new ObjectMapper().writeValueAsString(retireParameters);
 		retireRequest.setContent(retireJson.getBytes());
 		handle(retireRequest);
-		
+
 		MockHttpServletRequest getRequest = request(RequestMethod.GET, getURI());
 		SimpleObject object = deserialize(handle(getRequest));
 		List results = object.get("results");
 		assertEquals(results.size(), 2);
 	}
-	
+
 	@Test(expected = APIException.class)
 	public void shouldThrowExceptionWhenRetireReasonIsBlank() throws Exception {
 		String uuid = "6f9fb341-0fd5-11e8-adb7-080027b38972";
-		
+
 		MockHttpServletRequest retireRequest = request(RequestMethod.POST, getURI() + "/" + uuid);
 		SimpleObject retireParameters = new SimpleObject();
 		retireParameters.put("retired", "true");

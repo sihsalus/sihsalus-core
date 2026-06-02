@@ -88,7 +88,7 @@ public class TestHelper {
 	 * This initialization routine configure a lot of boilerplate settings to mimic
 	 * the actual environment. This method should be invoked when setting up unit
 	 * tests.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	public void init() throws IOException {
@@ -191,7 +191,7 @@ public class TestHelper {
 
 	/**
 	 * Boilerplate method to save an image attachment.
-	 * 
+	 *
 	 * @param imagePath
 	 *            The path of the image resource.
 	 */

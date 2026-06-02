@@ -33,231 +33,231 @@ import java.util.List;
 
 
 public class DrugOrderCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String TEST_DATA = "org/openmrs/module/reporting/include/DrugOrderCohortEvaluationData.xml";
 	private DrugOrderCohortDefinition cohortDefinition;
 
-  	@Before
-  	public void setup() throws Exception {
-  		cohortDefinition = new DrugOrderCohortDefinition();
-  		executeDataSet(TEST_DATA);
-  	}
+	@Before
+	public void setup() throws Exception {
+		cohortDefinition = new DrugOrderCohortDefinition();
+		executeDataSet(TEST_DATA);
+	}
 
-  	@After
-  	public void tearDown() {
-  		cohortDefinition = null;
-  	}
+	@After
+	public void tearDown() {
+		cohortDefinition = null;
+	}
 
-  	@Test
-  	public void evaluateShouldReturnAllPatients() throws Exception {
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(7));
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertEquals(5, cohort.size());
-  	}
+	@Test
+	public void evaluateShouldReturnAllPatients() throws Exception {
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
 
-  	@Test
-  	public void evaluateShouldReturnAllPatientsCurrentlyActiveOnDrugs() throws Exception { 
-  		cohortDefinition.setActiveOnOrAfter(new Date());
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertTrue(cohort.contains(7));
-  		Assert.assertEquals(3, cohort.size());
-  	}
-  	
-  	@Test
-  	public void evaluateShouldReturnAllPatientsCurrentlyNotActiveOnDrugs() throws Exception { 
-  		
-  		cohortDefinition.setActiveOnOrBefore(DateUtils.addDays(new Date(2013, 12, 2), -1));
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertEquals(3, cohort.size());
-  	}
-  	
-  	@Test
-  	public void evaluateShouldReturnAllPatientsThatHaveTakenAnyofListedDrugs() throws Exception {
-  		List drugSetList = new ArrayList<Concept>();
-  		drugSetList.add(new Concept(88));
-  		drugSetList.add(new Concept(792));
-  		cohortDefinition.setDrugSets(drugSetList);
-  		cohortDefinition.setWhich(Match.ANY);
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(7));
-  		Assert.assertEquals(2, cohort.size());
-  		
-  	}
-  	
-  	@Test
-  	public void evaluateShouldReturnAllPatientsThatHaveTakenAnyListedDrugByDefault() throws Exception {
-  		List drugSetList = new ArrayList<Concept>();
-  		drugSetList.add(new Concept(3));
-  		drugSetList.add(new Concept(792));
-  		cohortDefinition.setDrugSets(drugSetList);
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertEquals(4, cohort.size());
-  		
-  	}
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(7));
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertEquals(5, cohort.size());
+	}
 
-  	@Test
-  	public void evaluateShouldReturnAllPatientsThatHaveTakenAnyofDrugs() throws Exception {
-  		List drugs = new ArrayList<Drug>();
-  		drugs.add(new Drug(3));
-  		drugs.add(new Drug(2));
-  		cohortDefinition.setDrugs(drugs);
-  		cohortDefinition.setWhich(Match.ANY);
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(7));
-  		Assert.assertEquals(2, cohort.size());
-  		
-  	}
-  	
-  	@Test
-  	public void evaluateShouldReturnAllPatientsThatHaveTakenAnyDrugByDefault() throws Exception {
-  		List drugs = new ArrayList<Drug>();
-  		drugs.add(new Drug(11));
-  		drugs.add(new Drug(2));
-  		cohortDefinition.setDrugs(drugs);
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertEquals(4, cohort.size());
-  		
-  	}
+	@Test
+	public void evaluateShouldReturnAllPatientsCurrentlyActiveOnDrugs() throws Exception {
+		cohortDefinition.setActiveOnOrAfter(new Date());
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertTrue(cohort.contains(7));
+		Assert.assertEquals(3, cohort.size());
+	}
 
-  	@Test
-  	public void evaluateShouldReturnAllPatientsThatHaveNeverTakenDrugs() throws Exception {
-  		List drugs = new ArrayList<Concept>();
-  		drugs.add(new Drug(3));
-  		drugs.add(new Drug(2));
-  		cohortDefinition.setDrugs(drugs);
-  		cohortDefinition.setWhich(Match.NONE);
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertEquals(3, cohort.size());
-  	}
-  	
-  	@Test
-  	public void evaluateShouldReturnAllPatientsThatHaveNeverTakenListedDrugs() throws Exception {
-  		List drugSetList = new ArrayList<Concept>();
-  		drugSetList.add(new Concept(88));
-  		drugSetList.add(new Concept(792));
-  		cohortDefinition.setDrugSets(drugSetList);
-  		cohortDefinition.setWhich(Match.NONE);
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertEquals(3, cohort.size());
-  	}
+	@Test
+	public void evaluateShouldReturnAllPatientsCurrentlyNotActiveOnDrugs() throws Exception {
 
-  	@Test
-  	public void evaluateShouldReturnAllPatientsThatHaveTakenAllListedDrugs() throws Exception { 
-  		List drugSetList = new ArrayList<Concept>();
-  		drugSetList.add(new Concept(88));
-  		drugSetList.add(new Concept(792));
-  		cohortDefinition.setDrugSets(drugSetList);
-  		cohortDefinition.setWhich(Match.ALL);
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertEquals(1, cohort.size());
-  		Assert.assertTrue(cohort.contains(2));
-  	}
-	
-  	@Test
-  	public void evaluateShouldReturnAllPatientsNotActiveOnDrugsAfterDate() throws Exception { 
-  		cohortDefinition.setActiveOnOrBefore(DateUtil.getDateTime(2013, 12, 2));
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertEquals(2, cohort.size());
-  	}
+		cohortDefinition.setActiveOnOrBefore(DateUtils.addDays(new Date(2013, 12, 2), -1));
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertEquals(3, cohort.size());
+	}
 
-  	@Test
-  	public void evaluateShouldReturnAllPatientsCurrentlyActiveOnDrugsFromDate() throws Exception { 
-  		cohortDefinition.setActiveOnOrAfter(DateUtil.getDateTime(2013, 12, 7));
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertTrue(cohort.contains(7));
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertEquals(4, cohort.size());
-  	}
-  	@Test
-  	public void evaluateShouldReturnAllPatientsWhoStartedTakingDrugsBeforeSpecifiedDate() throws Exception {
-  		cohortDefinition.setActivatedOnOrBefore(DateUtil.getDateTime(2008, 8, 2));
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertEquals(2, cohort.size());
-  	}
+	@Test
+	public void evaluateShouldReturnAllPatientsThatHaveTakenAnyofListedDrugs() throws Exception {
+		List drugSetList = new ArrayList<Concept>();
+		drugSetList.add(new Concept(88));
+		drugSetList.add(new Concept(792));
+		cohortDefinition.setDrugSets(drugSetList);
+		cohortDefinition.setWhich(Match.ANY);
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(7));
+		Assert.assertEquals(2, cohort.size());
 
-  	@Test
-  	public void evaluateShouldReturnAllPatientsWhoStartedTakingDrugsAfterSpecifiedDate() throws Exception {
-  		cohortDefinition.setActivatedOnOrAfter(DateUtil.getDateTime(2008, 8, 10));
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(7));
-  		Assert.assertEquals(2, cohort.size());
-  	}
+	}
 
-  	@Test
-  	public void evaluateShouldReturnAllPatientsOnDrugsOnSpecifiedDate() throws Exception {
-  		cohortDefinition.setActiveOnDate(DateUtil.getDateTime(2007, 12, 3));
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertEquals(1, cohort.size());
-  	}
-  	
-  	@Test
-  	public void evaluateShouldReturnAllPatientsTakingAnyDrugWithinADateRange() throws Exception {
-  		cohortDefinition.setActivatedOnOrAfter(DateUtil.getDateTime(2008, 8, 1));
-  		cohortDefinition.setActivatedOnOrBefore(DateUtil.getDateTime(2008, 8, 8));
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(7));
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertEquals(5, cohort.size());
-  	}
+	@Test
+	public void evaluateShouldReturnAllPatientsThatHaveTakenAnyListedDrugByDefault() throws Exception {
+		List drugSetList = new ArrayList<Concept>();
+		drugSetList.add(new Concept(3));
+		drugSetList.add(new Concept(792));
+		cohortDefinition.setDrugSets(drugSetList);
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertEquals(4, cohort.size());
 
-  	@Test
-  	public void evaluateShouldReturnAllPatientsTakingSpecifiedDrugBeforeDate() throws Exception {
-  		List drugSetList = new ArrayList<Concept>();
-  		drugSetList.add(new Concept(88));
-  		cohortDefinition.setDrugSets(drugSetList);
-  		cohortDefinition.setActivatedOnOrBefore(DateUtil.getDateTime(2008, 8, 2));
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  	}
+	}
 
-  	@Test
-  	public void evaluateShouldReturnAllInSpecifiedCareSetting() throws Exception {    
-  		CareSetting careSetting = Context.getService(OrderService.class).getCareSetting(1);
-  		cohortDefinition.setCareSetting(careSetting);
-  		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
-  		Assert.assertTrue(cohort.contains(2));
-  		Assert.assertTrue(cohort.contains(7));
-  		Assert.assertTrue(cohort.contains(8));
-  		Assert.assertTrue(cohort.contains(21));
-  		Assert.assertTrue(cohort.contains(22));
-  		Assert.assertEquals(5, cohort.size());
+	@Test
+	public void evaluateShouldReturnAllPatientsThatHaveTakenAnyofDrugs() throws Exception {
+		List drugs = new ArrayList<Drug>();
+		drugs.add(new Drug(3));
+		drugs.add(new Drug(2));
+		cohortDefinition.setDrugs(drugs);
+		cohortDefinition.setWhich(Match.ANY);
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(7));
+		Assert.assertEquals(2, cohort.size());
 
-  	}
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsThatHaveTakenAnyDrugByDefault() throws Exception {
+		List drugs = new ArrayList<Drug>();
+		drugs.add(new Drug(11));
+		drugs.add(new Drug(2));
+		cohortDefinition.setDrugs(drugs);
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertEquals(4, cohort.size());
+
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsThatHaveNeverTakenDrugs() throws Exception {
+		List drugs = new ArrayList<Concept>();
+		drugs.add(new Drug(3));
+		drugs.add(new Drug(2));
+		cohortDefinition.setDrugs(drugs);
+		cohortDefinition.setWhich(Match.NONE);
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertEquals(3, cohort.size());
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsThatHaveNeverTakenListedDrugs() throws Exception {
+		List drugSetList = new ArrayList<Concept>();
+		drugSetList.add(new Concept(88));
+		drugSetList.add(new Concept(792));
+		cohortDefinition.setDrugSets(drugSetList);
+		cohortDefinition.setWhich(Match.NONE);
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertEquals(3, cohort.size());
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsThatHaveTakenAllListedDrugs() throws Exception {
+		List drugSetList = new ArrayList<Concept>();
+		drugSetList.add(new Concept(88));
+		drugSetList.add(new Concept(792));
+		cohortDefinition.setDrugSets(drugSetList);
+		cohortDefinition.setWhich(Match.ALL);
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertEquals(1, cohort.size());
+		Assert.assertTrue(cohort.contains(2));
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsNotActiveOnDrugsAfterDate() throws Exception {
+		cohortDefinition.setActiveOnOrBefore(DateUtil.getDateTime(2013, 12, 2));
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertEquals(2, cohort.size());
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsCurrentlyActiveOnDrugsFromDate() throws Exception {
+		cohortDefinition.setActiveOnOrAfter(DateUtil.getDateTime(2013, 12, 7));
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertTrue(cohort.contains(7));
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertEquals(4, cohort.size());
+	}
+	@Test
+	public void evaluateShouldReturnAllPatientsWhoStartedTakingDrugsBeforeSpecifiedDate() throws Exception {
+		cohortDefinition.setActivatedOnOrBefore(DateUtil.getDateTime(2008, 8, 2));
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertEquals(2, cohort.size());
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsWhoStartedTakingDrugsAfterSpecifiedDate() throws Exception {
+		cohortDefinition.setActivatedOnOrAfter(DateUtil.getDateTime(2008, 8, 10));
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(7));
+		Assert.assertEquals(2, cohort.size());
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsOnDrugsOnSpecifiedDate() throws Exception {
+		cohortDefinition.setActiveOnDate(DateUtil.getDateTime(2007, 12, 3));
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertEquals(1, cohort.size());
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsTakingAnyDrugWithinADateRange() throws Exception {
+		cohortDefinition.setActivatedOnOrAfter(DateUtil.getDateTime(2008, 8, 1));
+		cohortDefinition.setActivatedOnOrBefore(DateUtil.getDateTime(2008, 8, 8));
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(7));
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertEquals(5, cohort.size());
+	}
+
+	@Test
+	public void evaluateShouldReturnAllPatientsTakingSpecifiedDrugBeforeDate() throws Exception {
+		List drugSetList = new ArrayList<Concept>();
+		drugSetList.add(new Concept(88));
+		cohortDefinition.setDrugSets(drugSetList);
+		cohortDefinition.setActivatedOnOrBefore(DateUtil.getDateTime(2008, 8, 2));
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+	}
+
+	@Test
+	public void evaluateShouldReturnAllInSpecifiedCareSetting() throws Exception {
+		CareSetting careSetting = Context.getService(OrderService.class).getCareSetting(1);
+		cohortDefinition.setCareSetting(careSetting);
+		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
+		Assert.assertTrue(cohort.contains(2));
+		Assert.assertTrue(cohort.contains(7));
+		Assert.assertTrue(cohort.contains(8));
+		Assert.assertTrue(cohort.contains(21));
+		Assert.assertTrue(cohort.contains(22));
+		Assert.assertEquals(5, cohort.size());
+
+	}
 }

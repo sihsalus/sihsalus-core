@@ -106,4 +106,3 @@ public class DuplicateIdentifiersPoolComponentTest extends IdgenBaseTest {
         return Context.getService(IdentifierSourceService.class);
     }
 }
-

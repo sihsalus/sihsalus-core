@@ -26,52 +26,52 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
  */
 @org.openmrs.module.webservices.rest.web.annotation.SubResource(path = "class", parent = AnimalResource_1_9.class, supportedClass = AnimalClass.class, supportedOpenmrsVersions = { "3.0.*" })
 public class AnimalClassResource_1_9 extends DelegatingSubResource<AnimalClass, Animal, AnimalResource_1_9> {
-	
+
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		return null;
 	}
-	
+
 	@Override
 	public Animal getParent(AnimalClass instance) {
 		return null;
 	}
-	
+
 	@Override
 	public void setParent(AnimalClass instance, Animal parent) {
-		
+
 	}
-	
+
 	@Override
 	public PageableResult doGetAll(Animal parent, RequestContext context) throws ResponseException {
 		return null;
 	}
-	
+
 	@Override
 	public AnimalClass getByUniqueId(String uniqueId) {
 		return null;
 	}
-	
+
 	@Override
 	protected void delete(AnimalClass delegate, String reason, RequestContext context) throws ResponseException {
-		
+
 	}
-	
+
 	@Override
 	public void purge(AnimalClass delegate, RequestContext context) throws ResponseException {
-		
+
 	}
-	
+
 	@Override
 	public String getUri(Object instance) {
 		return "name";
 	}
-	
+
 	@Override
 	public AnimalClass newDelegate() {
 		return null;
 	}
-	
+
 	@Override
 	public AnimalClass save(AnimalClass delegate) {
 		return null;

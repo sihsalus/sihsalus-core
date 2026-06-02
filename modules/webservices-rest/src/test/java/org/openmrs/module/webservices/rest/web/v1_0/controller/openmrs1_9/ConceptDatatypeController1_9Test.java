@@ -31,14 +31,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Tests functionality of {@link ConceptDatatypeController}.
  */
 public class ConceptDatatypeController1_9Test extends MainResourceControllerTest {
-	
+
 	private ConceptService service;
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getConceptService();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getURI()
 	 */
@@ -46,7 +46,7 @@ public class ConceptDatatypeController1_9Test extends MainResourceControllerTest
 	public String getURI() {
 		return "conceptdatatype";
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getAllCount()
 	 */
@@ -54,7 +54,7 @@ public class ConceptDatatypeController1_9Test extends MainResourceControllerTest
 	public long getAllCount() {
 		return service.getAllConceptDatatypes().size();
 	}
-	
+
 	/**
 	 * @see MainResourceControllerTest#getUuid()
 	 */
@@ -62,70 +62,70 @@ public class ConceptDatatypeController1_9Test extends MainResourceControllerTest
 	public String getUuid() {
 		return RestTestConstants1_8.CONCEPT_DATATYPE_UUID;
 	}
-	
+
 	@Test
 	public void shouldGetAConceptDatatypeByUuid() throws Exception {
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		ConceptDatatype conceptDataType = service.getConceptDatatypeByUuid(getUuid());
 		Assertions.assertEquals(conceptDataType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertEquals(conceptDataType.getName(), PropertyUtils.getProperty(result, "name"));
 	}
-	
+
 	@Test
 	public void shouldGetAConceptDatatypeByName() throws Exception {
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/Coded");
 		SimpleObject result = deserialize(handle(req));
-		
+
 		ConceptDatatype conceptDataType = service.getConceptDatatypeByName("Coded");
 		Assertions.assertEquals(conceptDataType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		Assertions.assertEquals(conceptDataType.getName(), PropertyUtils.getProperty(result, "name"));
 	}
-	
+
 	@Test
 	public void shouldListAllConceptDatatypes() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(result);
 		Assertions.assertEquals(getAllCount(), Util.getResultsSize(result));
 	}
-	
+
 	@Test
 	public void shouldCreateAConceptDatatype() throws Exception {
 		assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
 			SimpleObject conceptDataType = new SimpleObject();
 			conceptDataType.add("name", "test name");
 			conceptDataType.add("description", "test description");
-		
+
 			String json = new ObjectMapper().writeValueAsString(conceptDataType);
-		
+
 			MockHttpServletRequest req = request(RequestMethod.POST, getURI());
 			req.setContent(json.getBytes());
-		
+
 			handle(req);
 		});
 	}
-	
+
 	@Test
 	public void shouldNotSupportEditingAConceptDatatype() throws Exception {
 		assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
-		
+
 			SimpleObject conceptDataType = new SimpleObject();
 			conceptDataType.add("name", "updated name");
-		
+
 			String json = new ObjectMapper().writeValueAsString(conceptDataType);
-		
+
 			MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
 			req.setContent(json.getBytes());
 			handle(req);
-		
+
 		});
 	}
-	
+
 	@Test
 	public void shouldNotSupportRetiringAConceptDatatype() throws Exception {
 		assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
@@ -134,7 +134,7 @@ public class ConceptDatatypeController1_9Test extends MainResourceControllerTest
 			handle(req);
 		});
 	}
-	
+
 	@Test
 	public void shouldNotSupportPurgingAConceptDatatype() throws Exception {
 		assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
@@ -143,14 +143,14 @@ public class ConceptDatatypeController1_9Test extends MainResourceControllerTest
 			handle(req);
 		});
 	}
-	
+
 	@Test
 	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Assertions.assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 }

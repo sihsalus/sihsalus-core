@@ -33,11 +33,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests for {@link CashPointServiceImpl}.
  */
 public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
-	
+
 	private CashPointService cashPointService;
-	
+
 	private LocationService locationService;
-	
+
 	@BeforeEach
 	public void setup() {
 		cashPointService = Context.getService(CashPointService.class);
@@ -45,7 +45,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "CashPointTest.xml");
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocation(Location, boolean)
 	 */
@@ -53,7 +53,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 	public void getCashPointsByLocation_shouldThrowIllegalArgumentExceptionIfLocationIsNull() {
 		assertThrows(IllegalArgumentException.class, () -> cashPointService.getCashPointsByLocation(null, false));
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocation(Location, boolean)
 	 */
@@ -68,7 +68,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 			assertEquals(location.getId(), cashPoint.getLocation().getId());
 		}
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocation(Location, boolean)
 	 */
@@ -80,7 +80,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(cashPoints);
 		assertTrue(cashPoints.isEmpty());
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -89,7 +89,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertThrows(IllegalArgumentException.class,
 		    () -> cashPointService.getCashPointsByLocationAndName(null, "Test", false));
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -99,7 +99,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertThrows(IllegalArgumentException.class,
 		    () -> cashPointService.getCashPointsByLocationAndName(location, null, false));
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -109,7 +109,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertThrows(IllegalArgumentException.class,
 		    () -> cashPointService.getCashPointsByLocationAndName(location, "", false));
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -120,7 +120,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertThrows(IllegalArgumentException.class,
 		    () -> cashPointService.getCashPointsByLocationAndName(location, longName, false));
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -135,7 +135,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 			assertTrue(cashPoint.getName().startsWith("Test"));
 		}
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
@@ -146,7 +146,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(cashPoints);
 		assertTrue(cashPoints.isEmpty());
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPoint(Integer)
 	 */
@@ -156,7 +156,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(cashPoint);
 		assertEquals(0, cashPoint.getId());
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getCashPointByUuid(String)
 	 */
@@ -166,7 +166,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(cashPoint);
 		assertEquals("4028814B39BB04B90139BB04B98B0000", cashPoint.getUuid());
 	}
-	
+
 	/**
 	 * @see CashPointServiceImpl#getAllCashPoints(boolean)
 	 */

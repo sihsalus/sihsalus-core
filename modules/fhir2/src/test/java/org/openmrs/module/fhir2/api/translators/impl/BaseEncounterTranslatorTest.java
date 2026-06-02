@@ -26,38 +26,38 @@ import org.openmrs.module.fhir2.api.dao.impl.FhirEncounterClassMapDaoImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseEncounterTranslatorTest {
-	
+
 	private static final String LOCATION_UUID = "276379ef-07ce-4108-b5e0-c4dc21964b4f";
-	
+
 	@Mock
 	private FhirEncounterClassMapDaoImpl encounterClassMap;
-	
+
 	private BaseEncounterTranslator baseEncounterTranslator;
-	
+
 	@Before
 	public void setup() {
 		baseEncounterTranslator = new BaseEncounterTranslator() {};
 		baseEncounterTranslator.setEncounterClassMap(encounterClassMap);
 	}
-	
+
 	@Test
 	public void shouldMapLocationToClass() {
 		Location location = new Location();
 		location.setUuid(LOCATION_UUID);
 		when(encounterClassMap.getFhirClass(LOCATION_UUID)).thenReturn("AMB");
-		
+
 		Coding result = baseEncounterTranslator.mapLocationToClass(location);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, notNullValue());
 		assertThat(result.getSystem(), is(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI));
 		assertThat(result.getCode(), is("AMB"));
 	}
-	
+
 	@Test
 	public void shouldMapLocationToAMBCodeWhenLocationIsNull() {
 		Coding result = baseEncounterTranslator.mapLocationToClass(null);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getSystem(), is(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI));
 		assertThat(result.getCode(), is("AMB"));

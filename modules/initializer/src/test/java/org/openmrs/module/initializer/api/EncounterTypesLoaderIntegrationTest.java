@@ -25,25 +25,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class EncounterTypesLoaderIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	@Qualifier("encounterService")
 	private EncounterService es;
-	
+
 	@Autowired
 	@Qualifier("userService")
 	private UserService us;
-	
+
 	@Autowired
 	private EncounterTypesLoader loader;
-	
+
 	private Locale localeEn = Locale.ENGLISH;
-	
+
 	private Locale localeKm = new Locale("km", "KH");
-	
+
 	@Before
 	public void setup() {
-		
+
 		// a couple of privileges
 		{
 			us.savePrivilege(new Privilege("Can: View X-ray encounter"));
@@ -63,13 +63,13 @@ public class EncounterTypesLoaderIntegrationTest extends DomainBaseModuleContext
 			es.saveEncounterType(et);
 		}
 	}
-	
+
 	@Test
 	public void load_shouldLoadEncounterTypesAccordingToCsvFiles() {
-		
+
 		// Replay
 		loader.load();
-		
+
 		// verif
 		{
 			EncounterType et = es.getEncounterType("Triage Encounter");
@@ -129,14 +129,14 @@ public class EncounterTypesLoaderIntegrationTest extends DomainBaseModuleContext
 			Assert.assertEquals("ui.i18n.EncounterType.name.439559c2-a3a4-4a25-b4b2-1a0299e287ee",
 			    Context.getMessageSourceService()
 			            .getMessage("ui.i18n.EncounterType.name.439559c2-a3a4-4a25-b4b2-1a0299e287ee", null, localeKm));
-			
+
 			Assert.assertEquals("org.openmrs.EncounterType.439559c2-a3a4-4a25-b4b2-1a0299e287ee",
 			    Context.getMessageSourceService()
 			            .getMessage("org.openmrs.EncounterType.439559c2-a3a4-4a25-b4b2-1a0299e287ee", null, localeEn));
 			Assert.assertEquals("org.openmrs.EncounterType.439559c2-a3a4-4a25-b4b2-1a0299e287ee",
 			    Context.getMessageSourceService()
 			            .getMessage("org.openmrs.EncounterType.439559c2-a3a4-4a25-b4b2-1a0299e287ee", null, localeKm));
-			
+
 			EncounterType et = es.getEncounterType("Triage Encounter");
 			String uuid = et.getUuid();
 			Assert.assertEquals("ui.i18n.EncounterType.name." + uuid,

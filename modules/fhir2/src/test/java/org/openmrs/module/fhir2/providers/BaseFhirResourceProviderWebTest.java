@@ -54,73 +54,73 @@ import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
 public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvider, U extends IBaseResource> {
-	
+
 	private ServletConfig servletConfig;
-	
+
 	private IParser parser;
-	
+
 	private LoggingInterceptor interceptor;
-	
+
 	private FhirRestServlet servlet;
-	
+
 	@Mock
 	private ContextDAO contextDAO;
-	
+
 	@Mock
 	private UserContext userContext;
-	
+
 	@Mock
 	private User user;
-	
+
 	// This must be implemented by subclasses
 	public abstract T getResourceProvider();
-	
+
 	@Before
 	public void setup() throws ServletException {
 		when(userContext.getAuthenticatedUser()).thenReturn(user);
-		
+
 		Context.setDAO(contextDAO);
 		Context.openSession();
 		Context.setUserContext(userContext);
-		
+
 		parser = getFhirContext().newJsonParser();
-		
+
 		interceptor = new LoggingInterceptor();
 		interceptor.setLoggerName("org.openmrs.module.fhir2.accessLog");
-		
+
 		MockServletContext servletContext = new MockServletContext();
 		servletConfig = new MockServletConfig(servletContext, getServletName());
-		
+
 		setupFhirServlet();
 	}
-	
+
 	@After
 	public void tearDown() {
 		Context.closeSession();
 	}
-	
+
 	// These are expected to be implemented by version-specific sub-classes
 	public abstract String getServletName();
-	
+
 	public abstract FhirContext getFhirContext();
-	
+
 	public abstract FhirRestServlet getRestfulServer();
-	
+
 	public abstract void describeOperationOutcome(Description mismatchDescription, IBaseOperationOutcome operationOutcome);
-	
+
 	public abstract Class<? extends IBaseOperationOutcome> getOperationOutcomeClass();
-	
+
 	public void setupFhirServlet() throws ServletException {
 		servlet = getRestfulServer();
 		servlet.setFhirContext(getFhirContext());
 		servlet.setLoggingInterceptor(interceptor);
 		servlet.setGlobalPropertyService(new FhirGlobalPropertyServiceImpl() {
-			
+
 			@Override
 			public String getGlobalProperty(String property, String defaultValue) {
 				return defaultValue;
 			}
-			
+
 			@Override
 			public int getGlobalPropertyAsInteger(String property, int defaultValue) throws APIException {
 				switch (property) {
@@ -132,138 +132,138 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 				return -1;
 			}
 		});
-		
+
 		servlet.setResourceProviders(getResourceProvider());
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:messages");
 		servlet.setMessageSource(messageSource);
 		servlet.init(servletConfig);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isOk() {
 		return new IsOkMatcher();
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isNotFound() {
 		return statusEquals(HttpStatus.NOT_FOUND);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isCreated() {
 		return statusEquals(HttpStatus.CREATED);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isBadRequest() {
 		return statusEquals(HttpStatus.BAD_REQUEST);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isMethodNotAllowed() {
 		return statusEquals(HttpStatus.METHOD_NOT_ALLOWED);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> statusEquals(final int status) {
 		return new StatusEqualsMatcher(status);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> statusEquals(HttpStatus status) {
 		return statusEquals(status.value());
 	}
-	
+
 	public FhirRequestBuilder get(@Nonnull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.GET, "http://localhost:8080/" + getServletName() + uri);
 	}
-	
+
 	public FhirRequestBuilder post(@Nonnull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.POST, "http://localhost:8080/" + getServletName() + uri);
 	}
-	
+
 	public FhirRequestBuilder put(@Nonnull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.PUT, "http://localhost:8080/" + getServletName() + uri);
 	}
-	
+
 	public FhirRequestBuilder delete(@Nonnull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.DELETE, "http://localhost:8080/" + getServletName() + uri);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (U) parser.parseResource(response.getContentAsString());
 	}
-	
+
 	public IBaseBundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (IBaseBundle) parser.parseResource(response.getContentAsString());
 	}
-	
+
 	public IBaseOperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return parser.parseResource(getOperationOutcomeClass(), response.getContentAsString());
 	}
-	
+
 	public static class FhirMediaTypes {
-		
+
 		public static final MediaType JSON;
-		
+
 		public static final MediaType XML;
-		
+
 		static {
 			JSON = MediaType.valueOf("application/fhir+json");
 			XML = MediaType.valueOf("application/fhir+xml");
 		}
-		
+
 		private FhirMediaTypes() {
 		}
 	}
-	
+
 	private abstract class HttpResponseMatcher extends TypeSafeMatcher<MockHttpServletResponse> {
-		
+
 		@SneakyThrows
 		@Override
 		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
 			IBaseOperationOutcome operationOutcome = readOperationOutcome(item);
-			
+
 			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
-			
+
 			if (operationOutcome != null) {
 				describeOperationOutcome(mismatchDescription, operationOutcome);
 			}
 		}
 	}
-	
+
 	private class IsOkMatcher extends HttpResponseMatcher {
-		
+
 		@Override
 		protected boolean matchesSafely(MockHttpServletResponse item) {
 			int status = item.getStatus();
 			return status >= HttpStatus.OK.value() && status < HttpStatus.BAD_REQUEST.value();
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("response with HTTP status indicating request was handled successfully");
 		}
 	}
-	
+
 	private class StatusEqualsMatcher extends HttpResponseMatcher {
-		
+
 		private final int status;
-		
+
 		private StatusEqualsMatcher(int status) {
 			this.status = status;
 		}
-		
+
 		@Override
 		protected boolean matchesSafely(MockHttpServletResponse item) {
 			return item.getStatus() == status;
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("response with HTTP status ").appendValue(status);
 		}
 	}
-	
+
 	public class FhirRequestBuilder {
-		
+
 		private final MockHttpServletRequest request;
-		
+
 		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) throws MalformedURLException {
 			request = new MockHttpServletRequest();
 			request.setMethod(requestType.toString());
@@ -271,18 +271,18 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 			request.setRequestURI(url.getPath());
 			request.setQueryString(url.getQuery());
 		}
-		
+
 		public FhirRequestBuilder accept(@Nonnull MediaType mediaType) {
 			request.addHeader(ACCEPT, mediaType.toString());
 			return this;
 		}
-		
+
 		public FhirRequestBuilder jsonContent(@Nonnull String json) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.JSON.toString());
 			request.setContent(json.getBytes());
 			return this;
 		}
-		
+
 		public MockHttpServletResponse go() throws ServletException, IOException {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			servlet.service(request, response);

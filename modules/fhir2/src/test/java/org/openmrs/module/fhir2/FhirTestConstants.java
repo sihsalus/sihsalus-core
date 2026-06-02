@@ -10,13 +10,13 @@
 package org.openmrs.module.fhir2;
 
 public class FhirTestConstants {
-	
+
 	public static final String LOINC_SYSTEM_URL = "http://loinc.org";
-	
+
 	public static final String CIEL_SYSTEM_URN = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
-	
+
 	public static final String PATIENT = "Patient";
-	
+
 	public static final String PRACTITIONER = "Practitioner";
-	
+
 }

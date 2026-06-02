@@ -28,10 +28,10 @@ import java.text.SimpleDateFormat;
  * Test class that tests the serialization and deserialization of a cohort
  */
 public class CohortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * create a cohort and make sure it can be serialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -41,11 +41,11 @@ public class CohortSerializationTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/CohortSerializationTest.xml");
 		authenticate();
-		
+
 		Cohort cohort = Context.getCohortService().getCohort(1);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-		
+
 		User user = Context.getUserService().getUser(501);
 		User user2 = Context.getUserService().getUser(502);
 		cohort.getCreator().setCreator(user);
@@ -64,10 +64,10 @@ public class CohortSerializationTest extends BaseModuleContextSensitiveTest {
 		XMLAssert.assertXpathExists("/cohort/memberIds[int=7]", xmlOutput);
 		XMLAssert.assertXpathExists("/cohort/memberIds[int=8]", xmlOutput);
 	}
-	
+
 	/**
 	 * Construct a serialized xml string and make sure it can be deserialized correctly
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -75,7 +75,7 @@ public class CohortSerializationTest extends BaseModuleContextSensitiveTest {
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/CohortSerializationTest.xml");
 		authenticate();
-		
+
 		TestUtil.testDeserialize(Context.getCohortService().getCohort(1));
 	}
 }

@@ -16,5 +16,5 @@ package org.mockingbird.test;
  * {@link org.openmrs.module.webservices.rest.web.OpenmrsClassScanner} and its classpath pattern.
  */
 public class Cat extends Animal {
-	
+
 }

@@ -19,17 +19,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class ConceptAttributeResource2_0Test extends BaseDelegatingResourceTest<ConceptAttributeResource2_0, ConceptAttribute> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants2_0.CONCEPT_ATTRIBUTE_DATA_SET);
 	}
-	
+
 	@Override
 	public ConceptAttribute newObject() {
 		return Context.getConceptService().getConceptAttributeByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -37,7 +37,7 @@ public class ConceptAttributeResource2_0Test extends BaseDelegatingResourceTest<
 		assertPropPresent("attributeType");
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -46,7 +46,7 @@ public class ConceptAttributeResource2_0Test extends BaseDelegatingResourceTest<
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		try {
@@ -57,7 +57,7 @@ public class ConceptAttributeResource2_0Test extends BaseDelegatingResourceTest<
 			return null;
 		}
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_0.CONCEPT_ATTRIBUTE_UUID;

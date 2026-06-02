@@ -20,7 +20,7 @@ import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public class RequestContextTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * @see RequestContext#setLimit(Integer)
 	 * @verifies not accept a value less than one
@@ -31,7 +31,7 @@ public class RequestContextTest extends BaseModuleWebContextSensitiveTest {
 			new RequestContext().setLimit(0);
 		});
 	}
-	
+
 	/**
 	 * @see RequestContext#setLimit(Integer)
 	 * @verifies not accept a null value
@@ -42,45 +42,45 @@ public class RequestContextTest extends BaseModuleWebContextSensitiveTest {
 			new RequestContext().setLimit(null);
 		});
 	}
-	
+
 	/**
 	 * @see RequestContext#getParameter(String)
 	 * @verifies return null if request is null
 	 */
 	@Test
 	public void getParameter_shouldReturnNullIfRequestIsNull() throws Exception {
-		
+
 		RequestContext requestContext = new RequestContext();
-		
+
 		assertNull(requestContext.getParameter("UNKOWN"));
 	}
-	
+
 	/**
 	 * @see RequestContext#getParameter(String)
 	 * @verifies return null if the wanted request parameter is not present in the request
 	 */
 	@Test
 	public void getParameter_shouldReturnNullIfTheWantedRequestParameterIsNotPresentInTheRequest() throws Exception {
-		
+
 		RequestContext requestContext = new RequestContext();
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		requestContext.setRequest(request);
-		
+
 		assertNull(requestContext.getParameter("UNKOWN"));
 	}
-	
+
 	/**
 	 * @see RequestContext#getParameter(String)
 	 * @verifies return the request parameter of given name if present in the request
 	 */
 	@Test
 	public void getParameter_shouldReturnTheRequestParameterOfGivenNameIfPresentInTheRequest() throws Exception {
-		
+
 		RequestContext requestContext = new RequestContext();
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("includeAll", "true");
 		requestContext.setRequest(request);
-		
+
 		assertThat(requestContext.getParameter("includeAll"), is("true"));
 	}
 }

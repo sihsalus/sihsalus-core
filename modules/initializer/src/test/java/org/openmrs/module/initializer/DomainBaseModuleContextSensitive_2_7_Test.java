@@ -6,7 +6,7 @@ import org.openmrs.module.ModuleFactory;
 import java.io.File;
 
 public abstract class DomainBaseModuleContextSensitive_2_7_Test extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Override
 	public void initModules() {
 		{

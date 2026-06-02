@@ -27,10 +27,10 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a person
  */
 public class PersonShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -40,7 +40,7 @@ public class PersonShortSerializationTest extends BaseModuleContextSensitiveTest
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PersonShortSerializationTest.xml");
 		authenticate();
-		
+
 		PersonAddress pa = Context.getPersonService().getPersonAddressByUuid("3350d0b5-821c-4e5e-ad1d-a9bce331e118");
 		String xmlOutput = Context.getSerializationService().serialize(pa, XStreamShortSerializer.class);
 		//should only serialize "uuid"
@@ -48,24 +48,24 @@ public class PersonShortSerializationTest extends BaseModuleContextSensitiveTest
 		//with short serialization, the "person" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/personAddress/person/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void shouldPersonShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "PersonShortSerializationTest.xml" here 
+		 * We also need to use the "PersonShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/PersonShortSerializationTest.xml");
 		authenticate();
-		
+
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<personAddress id=\"1\" uuid=\"3350d0b5-821c-4e5e-ad1d-a9bce331e118\" voided=\"false\">\n");
 		xmlBuilder.append("  <creator id=\"2\" uuid=\"6adb7c42-cfd2-4301-b53b-ff17c5654ff7\"/>\n");
@@ -80,7 +80,7 @@ public class PersonShortSerializationTest extends BaseModuleContextSensitiveTest
 		xmlBuilder.append("  <country>USA</country>\n");
 		xmlBuilder.append("  <postalCode>46202</postalCode>\n");
 		xmlBuilder.append("</personAddress>\n");
-		
+
 		PersonAddress pa = Context.getSerializationService().deserialize(xmlBuilder.toString(), PersonAddress.class,
 		    XStreamShortSerializer.class);
 		assertEquals("da7f524f-27ce-4bb2-86d6-6d1d05312bd5", pa.getPerson().getUuid());

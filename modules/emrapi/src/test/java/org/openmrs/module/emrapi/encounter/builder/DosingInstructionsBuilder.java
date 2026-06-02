@@ -12,7 +12,7 @@ package org.openmrs.module.emrapi.encounter.builder;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
 public class DosingInstructionsBuilder {
-	
+
 	public static EncounterTransaction.DosingInstructions sample() {
 		EncounterTransaction.DosingInstructions dosingInstructions = new EncounterTransaction.DosingInstructions();
 		dosingInstructions.setDose(2.0);

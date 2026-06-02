@@ -26,14 +26,14 @@ import org.openmrs.util.OpenmrsClassLoader;
  * Tests the ScriptedCohortDefinitionEvaluator
  */
 public class ScriptedCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Test
 	public void evaluate_shouldRunScript() throws Exception {
 		InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream(
 		    "org/openmrs/module/reporting/report/script/ScriptedCohortDefinition.txt");
 		String script = new String(IOUtils.toByteArray(is), "UTF-8");
 		IOUtils.closeQuietly(is);
-		
+
 		ScriptedCohortDefinition cohortDefinition = new ScriptedCohortDefinition(new ScriptingLanguage("Groovy"), script);
 		Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(cohortDefinition, null);
 		Assert.assertEquals(4, cohort.size());

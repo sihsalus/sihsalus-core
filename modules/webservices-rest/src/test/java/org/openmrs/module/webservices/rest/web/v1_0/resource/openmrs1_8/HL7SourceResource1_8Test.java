@@ -16,17 +16,17 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class HL7SourceResource1_8Test extends BaseDelegatingResourceTest<HL7SourceResource1_8, HL7Source> {
-	
+
 	@BeforeEach
 	public void before() throws Exception {
 		executeDataSet(RestTestConstants1_8.RESOURCE_TEST_DATASET);
 	}
-	
+
 	@Override
 	public HL7Source newObject() {
 		return Context.getHL7Service().getHL7SourceByName(RestTestConstants1_8.HL7_SOURCE_NAME);
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -34,7 +34,7 @@ public class HL7SourceResource1_8Test extends BaseDelegatingResourceTest<HL7Sour
 		assertPropEquals("description", getObject().getDescription());
 		assertPropEquals("retired", getObject().isRetired());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -43,15 +43,15 @@ public class HL7SourceResource1_8Test extends BaseDelegatingResourceTest<HL7Sour
 		assertPropEquals("retired", getObject().isRetired());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "TEST";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return getObject().getUuid();
 	}
-	
+
 }

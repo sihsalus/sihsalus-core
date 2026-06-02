@@ -40,14 +40,14 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore({ "javax.management.*" })
 @PrepareForTest({ Util.class, Context.class })
 public class FullTextQueryCreatedEventListenerTest {
-	
+
 	@Mock
 	private FullTextQuery fullTextQuery;
-	
+
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 	}
-	
+
 	@Test
 	public void onApplicationEvent_shouldNotEnableFiltersForWhichTheAuthenticatedUserHasASpecificByPassPrivilege() {
 		mockStatic(Util.class);
@@ -66,12 +66,12 @@ public class FullTextQueryCreatedEventListenerTest {
 		when(Util.skipFilter(anyString())).thenCallRealMethod();
 		when(Context.isAuthenticated()).thenReturn(true);
 		when(Context.hasPrivilege(eq(filter1 + DataFilterConstants.BYPASS_PRIV_SUFFIX))).thenReturn(true);
-		
+
 		new FullTextQueryCreatedEventListener()
 		        .onApplicationEvent(new FullTextQueryCreatedEvent(new FullTextQueryAndEntityClass(fullTextQuery, clazz)));
-		
+
 		verify(fullTextQuery, never()).enableFullTextFilter(eq(filter1));
 		verify(fullTextQuery, times(1)).enableFullTextFilter(eq(filter2));
 	}
-	
+
 }

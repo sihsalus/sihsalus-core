@@ -24,77 +24,77 @@ import org.openmrs.module.fhir2.model.FhirReference;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReferenceTranslatorImplTest {
-	
+
 	private static final String REFERENCE = "0dab1109-829c-4695-b738-eeae2c9a51b6";
-	
+
 	private static final String TYPE = FhirConstants.PRACTITIONER;
-	
+
 	private ReferenceTranslatorImpl referenceTranslator;
-	
+
 	@Before
 	public void setup() {
 		referenceTranslator = new ReferenceTranslatorImpl();
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldConvertFhirReferenceToReference() {
 		FhirReference openmrsReference = new FhirReference();
 		openmrsReference.setReference(REFERENCE);
 		openmrsReference.setType(TYPE);
-		
+
 		Reference result = referenceTranslator.toFhirResource(openmrsReference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(TYPE));
 		assertThat(result.getReference(), equalTo(REFERENCE));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldReturnNullIfFhirReferenceNull() {
 		Reference result = referenceTranslator.toFhirResource(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldConvertReferenceToFhirReference() {
 		Reference reference = new Reference().setReference(REFERENCE).setType(TYPE);
-		
+
 		FhirReference result = referenceTranslator.toOpenmrsType(reference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getReference(), equalTo(REFERENCE));
 		assertThat(result.getType(), equalTo(TYPE));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
 		FhirReference result = referenceTranslator.toOpenmrsType(null);
-		
+
 		assertThat(result, nullValue());
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldUpdateFhirReferenceWithReference() {
 		Reference reference = new Reference().setReference(REFERENCE).setType(TYPE);
-		
+
 		FhirReference openmrsReference = new FhirReference();
 		openmrsReference.setReference("some-uuid");
 		openmrsReference.setType(FhirConstants.SERVICE_REQUEST);
-		
+
 		FhirReference result = referenceTranslator.toOpenmrsType(openmrsReference, reference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getReference(), equalTo(REFERENCE));
 		assertThat(result.getType(), equalTo(TYPE));
 	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldCreateFhirReferenceIfNull() {
 		Reference reference = new Reference().setReference(REFERENCE).setType(TYPE);
-		
+
 		FhirReference result = referenceTranslator.toOpenmrsType(null, reference);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getReference(), equalTo(REFERENCE));
 		assertThat(result.getType(), equalTo(TYPE));

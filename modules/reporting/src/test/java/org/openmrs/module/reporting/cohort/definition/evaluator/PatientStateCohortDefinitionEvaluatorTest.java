@@ -30,19 +30,19 @@ import org.openmrs.test.Verifies;
 import org.openmrs.util.OpenmrsUtil;
 
 public class PatientStateCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	ProgramWorkflowService ps;
-	
+
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(XML_DATASET_PATH + new TestUtil().getTestDatasetFilename(XML_REPORT_TEST_DATASET));
 		ps = Context.getProgramWorkflowService();
 	}
-	
+
 	/**
 	 * @see {@link PatientStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -53,22 +53,22 @@ public class PatientStateCohortDefinitionEvaluatorTest extends BaseModuleContext
 		patientState.setStartDate(DateUtil.getDateTime(2008, 8, 1, 12, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		PatientStateCohortDefinition cd = new PatientStateCohortDefinition();
 		cd.setStartedOnOrAfter(DateUtil.getDateTime(2008, 8, 1, 11, 0, 0, 0));
 		cd.setStates(Collections.singletonList(patientState.getState()));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
-		
+
 		//Check that a patient that started the state before is excluded
 		patientState.setStartDate(DateUtil.getDateTime(2008, 8, 1, 10, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
 	}
-	
+
 	/**
 	 * @see {@link PatientStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -79,21 +79,21 @@ public class PatientStateCohortDefinitionEvaluatorTest extends BaseModuleContext
 		patientState.setEndDate(DateUtil.getDateTime(2008, 12, 15, 10, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		PatientStateCohortDefinition cd = new PatientStateCohortDefinition();
 		cd.setEndedOnOrBefore(DateUtil.getDateTime(2008, 12, 15, 11, 0, 0, 0));
 		cd.setStates(Collections.singletonList(patientState.getState()));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
-		
+
 		patientState.setEndDate(DateUtil.getDateTime(2008, 12, 15, 12, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
 	}
-	
+
 	/**
 	 * @see {@link PatientStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -104,21 +104,21 @@ public class PatientStateCohortDefinitionEvaluatorTest extends BaseModuleContext
 		patientState.setEndDate(DateUtil.getDateTime(2008, 12, 15, 12, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		PatientStateCohortDefinition cd = new PatientStateCohortDefinition();
 		cd.setEndedOnOrAfter(DateUtil.getDateTime(2008, 12, 15, 11, 0, 0, 0));
 		cd.setStates(Collections.singletonList(patientState.getState()));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
-		
+
 		patientState.setEndDate(DateUtil.getDateTime(2008, 12, 15, 10, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
 	}
-	
+
 	/**
 	 * @see {@link PatientStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -129,21 +129,21 @@ public class PatientStateCohortDefinitionEvaluatorTest extends BaseModuleContext
 		patientState.setStartDate(DateUtil.getDateTime(2008, 8, 1, 10, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		PatientStateCohortDefinition cd = new PatientStateCohortDefinition();
 		cd.setStartedOnOrBefore(DateUtil.getDateTime(2008, 8, 1, 11, 0, 0, 0));
 		cd.setStates(Collections.singletonList(patientState.getState()));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
-		
+
 		patientState.setStartDate(DateUtil.getDateTime(2008, 8, 1, 15, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertFalse(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
 	}
-	
+
 	/**
 	 * @see {@link PatientStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -154,14 +154,14 @@ public class PatientStateCohortDefinitionEvaluatorTest extends BaseModuleContext
 		patientState.setEndDate(DateUtil.getDateTime(2008, 12, 15, 10, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		PatientStateCohortDefinition cd = new PatientStateCohortDefinition();
 		cd.setEndedOnOrBefore(DateUtil.getDateTime(2008, 12, 15));
 		cd.setStates(Collections.singletonList(patientState.getState()));
 		Cohort c = Context.getService(CohortDefinitionService.class).evaluate(cd, null);
 		Assert.assertTrue(c.contains(patientState.getPatientProgram().getPatient().getPatientId()));
 	}
-	
+
 	/**
 	 * @see {@link PatientStateCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */
@@ -173,7 +173,7 @@ public class PatientStateCohortDefinitionEvaluatorTest extends BaseModuleContext
 		patientState.setStartDate(DateUtil.getDateTime(2008, 8, 1, 10, 0, 0, 0));
 		ps.savePatientProgram(patientState.getPatientProgram());
 		Context.flushSession();
-		
+
 		PatientStateCohortDefinition cd = new PatientStateCohortDefinition();
 		cd.setStartedOnOrBefore(DateUtil.getDateTime(2008, 8, 1));
 		cd.setStates(Collections.singletonList(patientState.getState()));

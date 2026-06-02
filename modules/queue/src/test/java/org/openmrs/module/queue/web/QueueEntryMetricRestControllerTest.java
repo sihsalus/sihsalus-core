@@ -55,43 +55,43 @@ import org.openmrs.module.webservices.rest.web.RestUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class QueueEntryMetricRestControllerTest {
-	
+
 	private QueueEntryMetricRestController controller;
-	
+
 	@Mock
 	private QueueService queueService;
-	
+
 	@Mock
 	private QueueEntryService queueEntryService;
-	
+
 	@Mock
 	private QueueRoomService queueRoomService;
-	
+
 	@Mock
 	private RoomProviderMapService roomProviderMapService;
-	
+
 	@Mock
 	private ConceptService conceptService;
-	
+
 	@Mock
 	private LocationService locationService;
-	
+
 	@Mock
 	private PatientService patientService;
-	
+
 	@Mock
 	private QueueServicesWrapper queueServicesWrapper;
-	
+
 	private MockedStatic<RestUtil> restUtil;
-	
+
 	private MockedStatic<Context> context;
-	
+
 	HttpServletRequest request;
-	
+
 	Map<String, String[]> parameterMap;
-	
+
 	ArgumentCaptor<QueueEntrySearchCriteria> queueEntryArgumentCaptor;
-	
+
 	@BeforeEach
 	public void prepareMocks() {
 		restUtil = mockStatic(RestUtil.class);
@@ -103,32 +103,32 @@ public class QueueEntryMetricRestControllerTest {
 		lenient().when(queueServicesWrapper.getConceptService()).thenReturn(conceptService);
 		lenient().when(queueServicesWrapper.getLocationService()).thenReturn(locationService);
 		lenient().when(queueServicesWrapper.getPatientService()).thenReturn(patientService);
-		
+
 		//By pass authentication
 		context.when(Context::isAuthenticated).thenReturn(true);
-		
+
 		QueueEntrySearchCriteriaParser searchCriteriaParser = new QueueEntrySearchCriteriaParser(queueServicesWrapper);
 		context.when(() -> Context.getRegisteredComponents(QueueEntrySearchCriteriaParser.class))
 		        .thenReturn(Collections.singletonList(searchCriteriaParser));
-		
+
 		context.when(() -> Context.getRegisteredComponents(QueueServicesWrapper.class))
 		        .thenReturn(Collections.singletonList(queueServicesWrapper));
-		
+
 		controller = new QueueEntryMetricRestController(searchCriteriaParser, queueServicesWrapper);
-		
+
 		request = mock(HttpServletRequest.class);
 		parameterMap = new HashMap<>();
 		when(request.getParameterMap()).thenReturn(parameterMap);
 		queueEntryArgumentCaptor = ArgumentCaptor.forClass(QueueEntrySearchCriteria.class);
 		when(queueEntryService.getCountOfQueueEntries(any())).thenReturn(50L);
 	}
-	
+
 	@AfterEach
 	public void cleanup() {
 		restUtil.close();
 		context.close();
 	}
-	
+
 	@Test
 	public void shouldRetrieveCountOfQueueEntriesByStatus() {
 		List<Concept> vals = Arrays.asList(new Concept(), new Concept());

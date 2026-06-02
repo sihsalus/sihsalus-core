@@ -33,28 +33,28 @@ import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_
 import static org.openmrs.module.initializer.InitializerConstants.PROPS_STARTUP_LOAD_FAIL_ON_ERROR;
 
 public class InitializerActivatorTest {
-	
+
 	private InitializerService iniz;
-	
+
 	private InitializerActivator activator;
-	
+
 	private MockLoader conceptsLoader = Mockito.spy(new MockLoader(CONCEPTS));
-	
+
 	private MockLoader encounterTypesLoader = Mockito.spy(new MockLoader(ENCOUNTER_TYPES, true));
-	
+
 	private MockLoader drugsLoader = Mockito.spy(new MockLoader(DRUGS));
-	
+
 	private InitializerConfig cfg = new InitializerConfig();
-	
+
 	private Properties props;
-	
+
 	private Exception exceptionThrown;
-	
+
 	@BeforeEach
 	public void setup() {
 		final List<Loader> loaders = Arrays.asList(conceptsLoader, encounterTypesLoader, drugsLoader);
 		iniz = new InitializerServiceImpl() {
-			
+
 			@Override
 			public List<Loader> getLoaders() {
 				return loaders;
@@ -62,17 +62,17 @@ public class InitializerActivatorTest {
 		};
 		((InitializerServiceImpl) iniz).setConfig(cfg);
 		activator = new InitializerActivator() {
-			
+
 			@Override
 			protected InitializerService getInitializerService() {
 				return iniz;
 			}
-			
+
 			@Override
 			protected List<InitializerLogConfigurator> getInitializerLogConfigurator() {
 				return null;
 			}
-			
+
 			@Override
 			protected InitializerMessageSource getInitializerMessageSource() {
 				return new InitializerMessageSource();
@@ -81,11 +81,11 @@ public class InitializerActivatorTest {
 		props = new Properties();
 		System.clearProperty(PROPS_STARTUP_LOAD);
 	}
-	
+
 	protected void startActivator(String startupLoadConfiguration) {
 		startActivator(startupLoadConfiguration, false);
 	}
-	
+
 	protected void startActivator(String startupLoadConfiguration, boolean useSystemProperty) {
 		if (startupLoadConfiguration != null) {
 			if (useSystemProperty) {
@@ -104,80 +104,80 @@ public class InitializerActivatorTest {
 			exceptionThrown = e;
 		}
 	}
-	
+
 	@Test
 	public void started_shouldLoadAllDomainsEvenIfOneThrowsAnErrorByDefault() {
-		
+
 		startActivator(null);
 		Assertions.assertNull(System.getProperty(PROPS_STARTUP_LOAD));
 		Assertions.assertNull(props.get(PROPS_STARTUP_LOAD));
-		
+
 		Assertions.assertEquals(1, conceptsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(1, encounterTypesLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(1, drugsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertNull(exceptionThrown);
 	}
-	
+
 	@Test
 	public void started_shouldLoadAllDomainsEvenIfOneThrowsAnErrorIfConfigured() {
-		
+
 		startActivator(PROPS_STARTUP_LOAD_CONTINUE_ON_ERROR);
 		Assertions.assertNull(System.getProperty(PROPS_STARTUP_LOAD));
 		Assertions.assertEquals(PROPS_STARTUP_LOAD_CONTINUE_ON_ERROR, props.get(PROPS_STARTUP_LOAD));
-		
+
 		Assertions.assertEquals(1, conceptsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(1, encounterTypesLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(1, drugsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertNull(exceptionThrown);
 	}
-	
+
 	@Test
 	public void started_shouldStopLoadingDomainsOnFailureIfConfigured() {
-		
+
 		startActivator(PROPS_STARTUP_LOAD_FAIL_ON_ERROR);
 		Assertions.assertNull(System.getProperty(PROPS_STARTUP_LOAD));
 		Assertions.assertEquals(PROPS_STARTUP_LOAD_FAIL_ON_ERROR, props.get(PROPS_STARTUP_LOAD));
-		
+
 		Assertions.assertEquals(1, conceptsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(0, encounterTypesLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(0, drugsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertNotNull(exceptionThrown);
 		Assertions.assertEquals(ModuleException.class, exceptionThrown.getClass());
 	}
-	
+
 	@Test
 	public void started_shouldNotLoadAnyDomainsIfConfigured() {
-		
+
 		startActivator(PROPS_STARTUP_LOAD_DISABLED);
 		Assertions.assertNull(System.getProperty(PROPS_STARTUP_LOAD));
 		Assertions.assertEquals(PROPS_STARTUP_LOAD_DISABLED, props.get(PROPS_STARTUP_LOAD));
-		
+
 		Assertions.assertEquals(0, conceptsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(0, encounterTypesLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(0, drugsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertNull(exceptionThrown);
 	}
-	
+
 	@Test
 	public void started_shouldLoadAllDomainsEvenIfOneThrowsAnErrorIfConfiguredWithSystemProperty() {
-		
+
 		startActivator(PROPS_STARTUP_LOAD_CONTINUE_ON_ERROR, true);
 		Assertions.assertEquals(PROPS_STARTUP_LOAD_CONTINUE_ON_ERROR, System.getProperty(PROPS_STARTUP_LOAD));
 		Assertions.assertNull(props.get(PROPS_STARTUP_LOAD));
-		
+
 		Assertions.assertEquals(1, conceptsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(1, encounterTypesLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(1, drugsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertNull(exceptionThrown);
 	}
-	
+
 	@Test
 	public void started_shouldNotLoadAnyDomainsIfConfiguredWithSystemProperty() {
-		
+
 		startActivator(PROPS_STARTUP_LOAD_DISABLED, true);
 		Assertions.assertEquals(PROPS_STARTUP_LOAD_DISABLED, System.getProperty(PROPS_STARTUP_LOAD));
 		Assertions.assertNull(props.get(PROPS_STARTUP_LOAD));
-		
+
 		Assertions.assertEquals(0, conceptsLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(0, encounterTypesLoader.getNumberOfTimesLoadUnsafeCompleted());
 		Assertions.assertEquals(0, drugsLoader.getNumberOfTimesLoadUnsafeCompleted());

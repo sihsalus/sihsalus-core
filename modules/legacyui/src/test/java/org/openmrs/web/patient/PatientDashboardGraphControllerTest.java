@@ -27,10 +27,10 @@ import java.util.Iterator;
  * Test for graphs on the patient dashboard
  */
 public class PatientDashboardGraphControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	/**
 	 * Test getting a concept by name and by partial name.
-	 * 
+	 *
 	 * @see PatientDashboardGraphController#showGraphData(Integer, Integer, ModelMap)
 	 */
 	@Test
@@ -38,34 +38,34 @@ public class PatientDashboardGraphControllerTest extends BaseModuleWebContextSen
 	public void shouldReturnJSONWithPatientObservationDetails() throws Exception {
 		executeDataSet("org/openmrs/api/include/ObsServiceTest-initial.xml");
 		PatientDashboardGraphController controller = new PatientDashboardGraphController();
-		
+
 		long firstObsDate = new GregorianCalendar(2006, Calendar.FEBRUARY, 9).getTimeInMillis();
 		long secondObsDate = new GregorianCalendar(2006, Calendar.FEBRUARY, 10).getTimeInMillis();
 		long thirdObsDate = new GregorianCalendar(2006, Calendar.FEBRUARY, 10).getTimeInMillis();
-		
+
 		ModelMap map = new ModelMap();
 		controller.showGraphData(2, 1, map);
 		PatientGraphData graph = (PatientGraphData) map.get("graph");
-		
+
 		String expectedData = String
 		        .format(
 		            "{\"absolute\":{\"high\":50.0,\"low\":2.0},\"critical\":{\"high\":null,\"low\":null},\"name\":\"Some concept name\",\"normal\":{\"high\":null,\"low\":null},\"data\":[[%d,null],[%d, null],[%d,1.0]],\"units\":\"\"}",
 		            secondObsDate, thirdObsDate, firstObsDate);
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode expectedJson = mapper.readTree(expectedData);
 		JsonNode actualJson = mapper.readTree(graph.toString());
-		
+
 		Assertions.assertEquals(expectedJson.size(), actualJson.size());
 		for (Iterator<String> fieldNames = expectedJson.fieldNames(); fieldNames.hasNext();) {
 			String field = fieldNames.next();
 			Assertions.assertEquals(expectedJson.get(field), actualJson.get(field));
 		}
 	}
-	
+
 	/**
 	 * Test the path of the form for rendering the json data
-	 * 
+	 *
 	 * @see PatientDashboardGraphController#showGraphData(Integer, Integer, ModelMap)
 	 */
 	@Test

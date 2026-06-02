@@ -60,7 +60,7 @@ public class IdentifierResourceTest extends MainResourceControllerTest {
 
         assertEquals("0-0", result.get(IdentifierResource.IDENTIFIER_KEY));
     }
-    
+
 	@Override
 	public long getAllCount() {
 		return 8;

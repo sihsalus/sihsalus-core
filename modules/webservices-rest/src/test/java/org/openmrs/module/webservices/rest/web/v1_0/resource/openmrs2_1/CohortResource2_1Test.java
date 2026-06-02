@@ -17,9 +17,9 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.openmrs.module.webservices.rest.web.v1_0.RestTestConstants2_1;
 
 public class CohortResource2_1Test extends BaseDelegatingResourceTest<CohortResource2_1, Cohort> {
-	
+
 	public static final String COHORT_NAME = "A cohort";
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		Cohort cohort = new Cohort();
@@ -30,7 +30,7 @@ public class CohortResource2_1Test extends BaseDelegatingResourceTest<CohortReso
 		cohort.setUuid(getUuidProperty());
 		Context.getCohortService().saveCohort(cohort);
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -40,20 +40,20 @@ public class CohortResource2_1Test extends BaseDelegatingResourceTest<CohortReso
 		assertPropEquals("size", getObject().size());
 		assertPropNotPresent("memberIds");
 	}
-	
+
 	@Override
 	public Cohort newObject() {
 		return Context.getCohortService().getCohortByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return COHORT_NAME;
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants2_1.COHORT_UUID;
 	}
-	
+
 }

@@ -43,39 +43,39 @@ public class SqlEncounterQueryEvaluatorTest extends BaseModuleContextSensitiveTe
 		EncounterQueryResult s = evaluate(d, new EvaluationContext());
 		Assert.assertEquals(8, s.getSize());
 	}
-	
+
 	@Test
 	public void evaluate_shouldFilterResultsGivenABaseEncounterQueryInAnEvaluationContext() throws Exception {
-	
+
 		EncounterEvaluationContext context = new EncounterEvaluationContext();
 		EncounterQueryResult baseEncounterIds = new EncounterQueryResult();
 		baseEncounterIds.add(3, 4, 5, 6, 7, 8);
 		context.setBaseEncounters(baseEncounterIds);
-		
+
 		SqlEncounterQuery d = new SqlEncounterQuery();
 		d.setQuery("select encounter_id from encounter where location_id = 2");
 		Assert.assertEquals(4, evaluate(d, context).getSize());
 	}
-	
+
 	@Test
 	public void evaluate_shouldFilterResultsGivenABaseCohortInAnEvaluationContext() throws Exception {
-	
+
 		EncounterEvaluationContext context = new EncounterEvaluationContext();
 		EncounterQueryResult baseEncounterIds = new EncounterQueryResult();
 		baseEncounterIds.add(3, 4, 5, 6, 7, 8);
 		context.setBaseEncounters(baseEncounterIds);
-		
+
 		Cohort baseCohort = new Cohort("20,21");
 		context.setBaseCohort(baseCohort);
-		
+
 		SqlEncounterQuery d = new SqlEncounterQuery();
 		d.setQuery("select encounter_id from encounter where location_id = 2");
 		Assert.assertEquals(3, evaluate(d, context).getSize());
 
 	}
-	
+
 	public EncounterQueryResult evaluate(SqlEncounterQuery definition, EvaluationContext context) throws Exception {
 		return Context.getService(EncounterQueryService.class).evaluate(definition, context);
 	}
-	
+
 }

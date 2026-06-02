@@ -33,47 +33,47 @@ import org.openmrs.scheduler.TaskDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class TaskActionController1_8Test extends MainResourceControllerTest {
-	
+
 	@Autowired
 	RestService restService;
-	
+
 	protected static int count = 1;
-	
+
 	private TaskDefinition testTask = new TaskDefinition(1, "TestTask", "TestTask Description",
 	        "org.openmrs.scheduler.tasks.TestTask");
-	
+
 	private TaskDefinition testDummyTask = new TaskDefinition(5, "TestDummy", "TestTask Description",
 	        DummyTask.class.getName());
-	
+
 	private TaskDefinition tempTask = new TaskDefinition(3, "TempTask", "TempTask Description",
 	        "org.openmrs.scheduler.tasks.TestTask");
-	
+
 	private MockTaskServiceWrapper mockTaskServiceWrapper = new MockTaskServiceWrapper();
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		mockTaskServiceWrapper.registeredTasks.addAll(Arrays.asList(testTask, tempTask, testDummyTask));
-		
+
 		TaskActionResource1_8 taskActionResource = (TaskActionResource1_8) restService
 		        .getResourceBySupportedClass(TaskAction.class);
 		taskActionResource.setTaskServiceWrapper(mockTaskServiceWrapper);
-		
+
 		TaskDefinitionResource1_8 taskResource = (TaskDefinitionResource1_8) restService
 		        .getResourceBySupportedClass(TaskDefinition.class);
 		taskResource.setTaskServiceWrapper(mockTaskServiceWrapper);
 	}
-	
+
 	@AfterEach
 	public void cleanup() {
 		TaskActionResource1_8 taskActionResource = (TaskActionResource1_8) restService
 		        .getResourceBySupportedClass(TaskAction.class);
 		taskActionResource.setTaskServiceWrapper(new TaskServiceWrapper());
-		
+
 		TaskDefinitionResource1_8 taskDefResource = (TaskDefinitionResource1_8) restService
 		        .getResourceBySupportedClass(TaskDefinition.class);
 		taskDefResource.setTaskServiceWrapper(new TaskServiceWrapper());
 	}
-	
+
 	@Test
 	public void shouldScheduleTask() throws Exception {
 		//sanity check
@@ -82,7 +82,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 		        + "\"]}")));
 		assertThat(mockTaskServiceWrapper.scheduledTasks, hasItem(testTask));
 	}
-	
+
 	@Test
 	public void shouldShutdownTask() throws Exception {
 		mockTaskServiceWrapper.scheduledTasks.add(testTask);
@@ -91,7 +91,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 		        + "\"]}")));
 		assertThat(mockTaskServiceWrapper.scheduledTasks, not(hasItem(testTask)));
 	}
-	
+
 	@Test
 	public void scheduleTask_shouldDoNothingIfTaskAlreadyScheduled() throws Exception {
 		mockTaskServiceWrapper.scheduledTasks.add(testTask);
@@ -104,7 +104,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 		assertThat(mockTaskServiceWrapper.scheduledTasks, hasItem(testTask));
 		assertThat(mockTaskServiceWrapper.registeredTasks, hasItem(testTask));
 	}
-	
+
 	@Test
 	public void shutdownTask_shouldDoNothingIfTaskAlreadyShutdown() throws Exception {
 		//sanity check
@@ -116,7 +116,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 		assertThat(mockTaskServiceWrapper.scheduledTasks, not(hasItem(testTask)));
 		assertThat(mockTaskServiceWrapper.registeredTasks, hasItem(testTask));
 	}
-	
+
 	@Test
 	public void shouldDeleteTask() throws Exception {
 		//sanity check
@@ -124,7 +124,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 		deserialize(handle(newPostRequest(getURI(), "{\"action\": \"delete\", \"tasks\":[\"" + getTestTaskName() + "\"]}")));
 		assertThat(mockTaskServiceWrapper.registeredTasks, not(hasItem(testTask)));
 	}
-	
+
 	@Test
 	@Disabled// see: https://openmrs.atlassian.net/browse/RESTWS-1032
 	public void shouldRunTask() throws Exception {
@@ -141,7 +141,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 		int countAfter = count;
 		Assertions.assertEquals(++countBefore, countAfter);
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetDefaultByUuid() throws Exception {
@@ -149,7 +149,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 			super.shouldGetDefaultByUuid();
 		});
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetRefByUuid() throws Exception {
@@ -157,7 +157,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 			super.shouldGetRefByUuid();
 		});
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetFullByUuid() throws Exception {
@@ -165,7 +165,7 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 			super.shouldGetFullByUuid();
 		});
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetAll() throws Exception {
@@ -173,51 +173,51 @@ public class TaskActionController1_8Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Override
 	public String getURI() {
 		return "taskaction";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return null;
 	}
-	
+
 	public String getTestTaskName() {
 		return "TestTask";
 	}
-	
+
 	public String getTestDummyTaskName() {
 		return "TestDummy";
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	public static class DummyTask implements Task {
-		
+
 		@Override
 		public void execute() {
 			count = count + 1;
 		}
-		
+
 		@Override
 		public TaskDefinition getTaskDefinition() {
 			return null;
 		}
-		
+
 		@Override
 		public void initialize(TaskDefinition definition) {
 		}
-		
+
 		@Override
 		public boolean isExecuting() {
 			return false;
 		}
-		
+
 		@Override
 		public void shutdown() {
 		}

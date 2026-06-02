@@ -33,31 +33,31 @@ import java.util.Map;
 
 @Ignore
 public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
-	
+
 	@Autowired
 	protected RequestMappingHandlerAdapter handlerAdapter;
-	
+
 	@Autowired
 	protected List<RequestMappingHandlerMapping> handlerMappings;
-	
+
 	public MockHttpServletRequest request(RequestMethod method, String requestURI) {
 		MockHttpServletRequest request = new MockHttpServletRequest(method.toString(), requestURI);
 		request.addHeader("content-type", "application/json");
 		return request;
 	}
-	
+
 	public static class Parameter {
-		
+
 		public String name;
-		
+
 		public String value;
-		
+
 		public Parameter(String name, String value) {
 			this.name = name;
 			this.value = value;
 		}
 	}
-	
+
 	public MockHttpServletRequest newRequest(RequestMethod method, String requestURI, Parameter... parameters) {
 		MockHttpServletRequest request = request(method, requestURI);
 		for (Parameter parameter : parameters) {
@@ -65,34 +65,34 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
 		}
 		return request;
 	}
-	
+
 	public MockHttpServletRequest newRequest(RequestMethod method, String requestURI, Map<String, String> headers,
 	        Parameter... parameters) {
 		MockHttpServletRequest request = newRequest(method, requestURI, parameters);
 		headers.forEach(request::addHeader);
 		return request;
 	}
-	
+
 	public MockHttpServletRequest newDeleteRequest(String requestURI, Parameter... parameters) {
 		return newRequest(RequestMethod.DELETE, requestURI, parameters);
 	}
-	
+
 	public MockHttpServletRequest newGetRequest(String requestURI, Parameter... parameters) {
 		return newRequest(RequestMethod.GET, requestURI, parameters);
 	}
-	
+
 	public MockHttpServletRequest newGetRequest(String requestURI, Map<String, String> headers, Parameter... parameters) {
 		return newRequest(RequestMethod.GET, requestURI, headers, parameters);
 	}
-	
+
 	public MockHttpServletRequest newPostRequest(String requestURI, Object content) {
 		return newWriteRequest(requestURI, content, RequestMethod.POST);
 	}
-	
+
 	public MockHttpServletRequest newPutRequest(String requestURI, Object content) {
 		return newWriteRequest(requestURI, content, RequestMethod.PUT);
 	}
-	
+
 	private MockHttpServletRequest newWriteRequest(String requestURI, Object content, RequestMethod requestMethod) {
 		MockHttpServletRequest request = request(requestMethod, requestURI);
 		try {
@@ -104,7 +104,7 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
 		}
 		return request;
 	}
-	
+
 	public MockHttpServletRequest newPostRequest(String requestURI, Map<String, String> params) {
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", requestURI);
 		for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -112,7 +112,7 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
 		}
 		return request;
 	}
-	
+
 	public MockHttpServletRequest newPostRequest(String requestURI, MultipartFile file, int configurationId) {
 		MockHttpServletRequest request = request(RequestMethod.POST, requestURI);
 		request.setMethod("POST");
@@ -121,7 +121,7 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
 		request.setAttribute("file", file); // simulate @RequestParam("file")
 		return request;
 	}
-	
+
 	public MockHttpServletRequest newPutRequest(String requestURI, String content) {
 		MockHttpServletRequest request = request(RequestMethod.PUT, requestURI);
 		try {
@@ -133,10 +133,10 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
 		}
 		return request;
 	}
-	
+
 	public MockHttpServletResponse handle(HttpServletRequest request) throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		
+
 		HandlerExecutionChain handlerExecutionChain = null;
 		for (RequestMappingHandlerMapping handlerMapping : handlerMappings) {
 			handlerExecutionChain = handlerMapping.getHandler(request);
@@ -145,16 +145,16 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
 			}
 		}
 		Assert.assertNotNull("The request URI does not exist", handlerExecutionChain);
-		
+
 		handlerAdapter.handle(request, response, handlerExecutionChain.getHandler());
-		
+
 		return response;
 	}
-	
+
 	public SimpleObject deserialize(MockHttpServletResponse response) throws Exception {
 		String content = response.getContentAsString();
 		Assert.assertFalse("Response is empty", content.isEmpty());
 		return new ObjectMapper().readValue(response.getContentAsString(), SimpleObject.class);
 	}
-	
+
 }

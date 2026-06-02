@@ -28,9 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveTest {
-	
+
 	private CashierItemPriceService cashierItemPriceService;
-	
+
 	@BeforeEach
 	public void setup() {
 		cashierItemPriceService = Context.getService(CashierItemPriceService.class);
@@ -39,7 +39,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillableServiceTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#getCashierItemPrice(Integer)
 	 */
@@ -50,7 +50,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 		assertEquals(1, cashierItemPrice.getId());
 		assertEquals("Standard Price", cashierItemPrice.getName());
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#getCashierItemPrice(Integer)
 	 */
@@ -58,7 +58,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 	public void getCashierItemPrice_shouldReturnNullIfIdNotFound() {
 		assertNull(cashierItemPriceService.getCashierItemPrice(999));
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#getCashierItemPriceByUuid(String)
 	 */
@@ -69,7 +69,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 		assertNotNull(cashierItemPrice);
 		assertEquals("8631b434-78aa-102b-91a0-001e378eb680", cashierItemPrice.getUuid());
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#getCashierItemPriceByUuid(String)
 	 */
@@ -77,7 +77,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 	public void getCashierItemPriceByUuid_shouldReturnNullIfUuidNotFound() {
 		assertNull(cashierItemPriceService.getCashierItemPriceByUuid("wrong-uuid"));
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#saveCashierItemPrice(CashierItemPrice)
 	 */
@@ -88,7 +88,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 		cashierItemPrice.setPrice(BigDecimal.valueOf(100));
 		cashierItemPriceService.saveCashierItemPrice(cashierItemPrice);
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#saveCashierItemPrice(CashierItemPrice)
 	 */
@@ -96,7 +96,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 	public void saveCashierItemPriceShouldThrowAnIllegalArgumentExceptionIfCashierItemPriceIsNull() {
 		assertThrows(IllegalArgumentException.class, () -> cashierItemPriceService.saveCashierItemPrice(null));
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#retireCashierItemPrice(CashierItemPrice, String)
 	 */
@@ -106,12 +106,12 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 		assertNotNull(cashierItemPrice);
 		assertFalse(cashierItemPrice.getRetired());
 		cashierItemPriceService.retireCashierItemPrice(cashierItemPrice, "Retire reason");
-		
+
 		CashierItemPrice retiredItemPrice = cashierItemPriceService.getCashierItemPrice(0);
 		assertNotNull(retiredItemPrice);
 		assertTrue(retiredItemPrice.getRetired());
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#retireCashierItemPrice(CashierItemPrice, String)
 	 */
@@ -122,7 +122,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 		assertThrows(IllegalArgumentException.class,
 		    () -> cashierItemPriceService.retireCashierItemPrice(cashierItemPrice, ""));
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#unretireCashierItemPrice(CashierItemPrice)
 	 */
@@ -131,12 +131,12 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 		CashierItemPrice retiredItemPrice = cashierItemPriceService.getCashierItemPrice(2);
 		assertNotNull(retiredItemPrice);
 		assertTrue(retiredItemPrice.getRetired());
-		
+
 		CashierItemPrice cashierItemPrice = cashierItemPriceService.unretireCashierItemPrice(retiredItemPrice);
 		assertNotNull(cashierItemPrice);
 		assertFalse(cashierItemPrice.getRetired());
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#purgeCashierItemPrice(CashierItemPrice)
 	 */
@@ -144,12 +144,12 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 	public void purgeCashierItemPrice_shouldPurgeCashierItemPrice() {
 		CashierItemPrice cashierItemPrice = cashierItemPriceService.getCashierItemPrice(0);
 		assertNotNull(cashierItemPrice);
-		
+
 		cashierItemPriceService.purgeCashierItemPrice(cashierItemPrice);
-		
+
 		assertNull(cashierItemPriceService.getCashierItemPrice(0));
 	}
-	
+
 	/**
 	 * @see CashierItemPriceService#getCashierItemPrices(boolean)
 	 */
@@ -158,7 +158,7 @@ public class CashierItemPriceServiceImplTest extends BaseModuleContextSensitiveT
 		List<CashierItemPrice> unretiredItems = cashierItemPriceService.getCashierItemPrices(false);
 		assertNotNull(unretiredItems);
 		assertEquals(2, unretiredItems.size());
-		
+
 		List<CashierItemPrice> allItems = cashierItemPriceService.getCashierItemPrices(true);
 		assertNotNull(allItems);
 		assertEquals(3, allItems.size());

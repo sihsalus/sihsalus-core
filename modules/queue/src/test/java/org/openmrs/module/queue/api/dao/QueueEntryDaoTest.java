@@ -44,21 +44,21 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SpringTestConfiguration.class, inheritLocations = false)
 public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	private static final String QUEUE_ENTRY_UUID = "4eb8fe43-2813-4kbc-80dc-2e5d30252cc6";
-	
+
 	private static final String VOIDED_QUEUE_ENTRY_UUID = "4gb8fe43-2813-4kbc-80dc-2e5d30252ff0";
-	
+
 	private static final String NEW_QUEUE_ENTRY_UUID = "5kb8fe43-2813-4kbc-80dc-2e5d30252cc87";
-	
+
 	private static final String PATIENT_UUID = "90b38324-e2fd-4feb-95b7-9e9a2a8876fg";
-	
+
 	private static final String QUEUE_UUID = "3eb7fe43-2813-4kbc-80dc-2e5d30252bb5";
-	
+
 	private static final String QUEUE_STATUS_CONCEPT_UUID = "31b910bd-298c-4ecf-a632-661ae2f4460y";
-	
+
 	private static final String QUEUE_PRIORITY_CONCEPT_UUID = "90b910bd-298c-4ecf-a632-661ae2f446op";
-	
+
 	private static final List<String> QUEUE_INITIAL_DATASET_XML = Arrays.asList(
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_locationInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_conceptsInitialDataset.xml",
@@ -66,57 +66,57 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 	    "org/openmrs/module/queue/api/dao/VisitQueueEntryDaoTest_visitInitialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueDaoTest_initialDataset.xml",
 	    "org/openmrs/module/queue/api/dao/QueueEntryDaoTest_initialDataset.xml");
-	
+
 	@Autowired
 	@Qualifier("queueEntryDao")
 	private QueueEntryDao dao;
-	
+
 	@Autowired
 	private QueueServicesWrapper services;
-	
+
 	private QueueEntrySearchCriteria criteria;
-	
+
 	@Before
 	public void setup() {
 		QUEUE_INITIAL_DATASET_XML.forEach(this::executeDataSet);
 		criteria = new QueueEntrySearchCriteria();
 	}
-	
+
 	@Test
 	public void shouldGetQueueEntryByUuid() {
 		Optional<QueueEntry> queueEntry = dao.get(QUEUE_ENTRY_UUID);
-		
+
 		assertThat(queueEntry, notNullValue());
 		assertThat(queueEntry.isPresent(), is(true));
 		queueEntry.ifPresent(queueEntry1 -> assertThat(queueEntry1.getUuid(), is(QUEUE_ENTRY_UUID)));
 	}
-	
+
 	@Test
 	public void shouldReturnNullForRetiredQueueEntry() {
 		Optional<QueueEntry> queueEntry = dao.get(VOIDED_QUEUE_ENTRY_UUID);
 		assertThat(queueEntry.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void shouldCreateNewQueueEntry() {
 		//Verify queue created
 		Optional<Queue> optionalQueue = services.getQueueService().getQueueByUuid(QUEUE_UUID);
 		assertThat(optionalQueue.isPresent(), is(true));
-		
+
 		QueueEntry queueEntry = new QueueEntry();
 		queueEntry.setUuid(NEW_QUEUE_ENTRY_UUID);
 		queueEntry.setQueue(optionalQueue.get());
 		queueEntry.setStartedAt(new Date());
 		queueEntry.setSortWeight(Double.parseDouble("0"));
-		
+
 		verifyQueueEntryPatientProperty(queueEntry);
 		verifyQueueEntryConceptStatusProperty(queueEntry);
 		verifyQueueEntryConceptPriorityProperty(queueEntry);
-		
+
 		QueueEntry result = dao.createOrUpdate(queueEntry);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(NEW_QUEUE_ENTRY_UUID));
-		
+
 		//Get the saved queue version
 		Optional<QueueEntry> newlyCreatedQueue = dao.get(NEW_QUEUE_ENTRY_UUID);
 		assertThat(newlyCreatedQueue.isPresent(), is(true));
@@ -127,7 +127,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 			assertThat(newlyCreatedQueueEntry.getStatus().getUuid(), is(QUEUE_STATUS_CONCEPT_UUID));
 		});
 	}
-	
+
 	@Test
 	public void shouldUpdateQueueEntry() {
 		//Get saved queue entry
@@ -138,7 +138,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 			assertThat(queueEntryDb.getUuid(), is(QUEUE_ENTRY_UUID));
 			assertThat(queueEntryDb.getPriorityComment(), nullValue());
 		});
-		
+
 		//Update Queue name
 		QueueEntry queueEntry = queueEntryFromDatabase.get();
 		queueEntry.setPriorityComment("Priority comment");
@@ -148,56 +148,56 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		assertThat(updatedQueue.isPresent(), is(true));
 		updatedQueue.ifPresent(revisedQueue -> assertThat(revisedQueue.getPriorityComment(), is("Priority comment")));
 	}
-	
+
 	@Test
 	public void shouldFindAllQueueEntries() {
 		Collection<QueueEntry> queues = dao.findAll();
 		assertThat(queues.isEmpty(), is(false));
 		assertThat(queues, hasSize(4));
 	}
-	
+
 	@Test
 	public void shouldFindAllQueueEntriesIncludingRetired() {
 		Collection<QueueEntry> queues = dao.findAll(true);
 		assertThat(queues.isEmpty(), is(false));
 		assertThat(queues, hasSize(5));
 	}
-	
+
 	@Test
 	public void shouldDeleteQueueEntryByUuid() {
 		dao.delete(QUEUE_ENTRY_UUID);
 		Optional<QueueEntry> result = dao.get(QUEUE_ENTRY_UUID);
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	@Test
 	public void shouldDeleteQueueEntryByEntity() {
 		dao.get(QUEUE_ENTRY_UUID).ifPresent((queueEntry) -> dao.delete(queueEntry));
 		Optional<QueueEntry> result = dao.get(QUEUE_ENTRY_UUID);
 		assertThat(result.isPresent(), is(false));
 	}
-	
+
 	void verifyQueueEntryPatientProperty(QueueEntry queueEntry) {
 		Patient patient = Context.getPatientService().getPatientByUuid(PATIENT_UUID);
 		assertThat(patient, notNullValue());
 		assertThat(patient.getUuid(), is(PATIENT_UUID));
 		queueEntry.setPatient(patient);
 	}
-	
+
 	void verifyQueueEntryConceptStatusProperty(QueueEntry queueEntry) {
 		Concept conceptStatus = Context.getConceptService().getConceptByUuid(QUEUE_STATUS_CONCEPT_UUID);
 		assertThat(conceptStatus, notNullValue());
 		assertThat(conceptStatus.getUuid(), is(QUEUE_STATUS_CONCEPT_UUID));
 		queueEntry.setStatus(conceptStatus);
 	}
-	
+
 	void verifyQueueEntryConceptPriorityProperty(QueueEntry queueEntry) {
 		Concept conceptQueuePriority = Context.getConceptService().getConceptByUuid(QUEUE_PRIORITY_CONCEPT_UUID);
 		assertThat(conceptQueuePriority, notNullValue());
 		assertThat(conceptQueuePriority.getUuid(), is(QUEUE_PRIORITY_CONCEPT_UUID));
 		queueEntry.setPriority(conceptQueuePriority);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByQueue() {
 		Queue queue1 = services.getQueueService().getQueueById(1).orElse(null);
@@ -217,7 +217,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setIncludedVoided(true);
 		assertResults(criteria, 2, 3, 4, 10);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByQueueLocation() {
 		Location location1 = services.getLocationService().getLocation(1);
@@ -234,7 +234,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setIncludedVoided(true);
 		assertResults(criteria, 1, 2, 3, 4, 10);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByQueueService() {
 		Concept service1 = services.getConceptService().getConcept(2001);
@@ -251,7 +251,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setIncludedVoided(true);
 		assertResults(criteria, 1, 2, 3, 4, 10);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByPatient() {
 		Patient patient1 = services.getPatientService().getPatient(100);
@@ -262,7 +262,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setPatient(patient2);
 		assertResults(criteria, 4);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByVisit() {
 		Visit visit1 = services.getVisitService().getVisit(101);
@@ -278,7 +278,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setHasVisit(false);
 		assertResults(criteria, 4);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByPriority() {
 		Concept priority1 = services.getConceptService().getConcept(1001);
@@ -298,7 +298,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setIncludedVoided(true);
 		assertResults(criteria, 1, 2, 3, 4, 10);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByStatus() {
 		Concept status1 = services.getConceptService().getConcept(3001);
@@ -318,7 +318,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setIncludedVoided(true);
 		assertResults(criteria, 1, 2, 3, 4, 10);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByLocationWaitingFor() {
 		Location location1 = services.getLocationService().getLocation(1);
@@ -333,7 +333,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setLocationsWaitingFor(Arrays.asList(location1, location3));
 		assertResults(criteria, 1, 2, 4);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByProviderWaitingFor() {
 		Provider provider1 = services.getProviderService().getProvider(1);
@@ -343,7 +343,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setProvidersWaitingFor(Collections.singletonList(provider1));
 		assertResults(criteria, 1, 3);
 	}
-	
+
 	@Test
 	public void shouldSearchAndCountQueueEntriesByQueueComingFrom() {
 		Queue queue1 = services.getQueueService().getQueueById(1).orElse(null);
@@ -353,7 +353,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setQueuesComingFrom(Collections.singletonList(queue1));
 		assertResults(criteria, 2);
 	}
-	
+
 	@Test
 	// 2022-02-02 16:40:56.0, 2022-02-02 18:40:56.0, 2022-02-03 16:40:56.0, 2022-03-02 16:40:56.0
 	public void shouldSearchAndCountQueueEntriesStartedOnOrAfterDate() {
@@ -375,7 +375,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setStartedOnOrAfter(date("2022-03-02 16:40:57"));
 		assertNumberOfResults(criteria, 0);
 	}
-	
+
 	@Test
 	// 2022-02-02 16:40:56.0, 2022-02-02 18:40:56.0, 2022-02-03 16:40:56.0, 2022-03-02 16:40:56.0
 	public void shouldSearchAndCountQueueEntriesStartedOnOrBeforeDate() {
@@ -391,7 +391,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setStartedOnOrBefore(date("2022-03-02 16:40:56"));
 		assertResults(criteria, 1, 2, 3, 4);
 	}
-	
+
 	@Test
 	// 2022-02-02 18:40:56.0, 2022-02-02 18:41:56.0
 	public void shouldSearchAndCountQueueEntriesEndedOnOrBeforeDate() {
@@ -408,7 +408,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setIsEnded(false);
 		assertResults(criteria, 2, 3);
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void updateIfUnmodified_shouldRejectEndedAtBeforeStartedAt() {
 		QueueEntry queueEntry = dao.get(QUEUE_ENTRY_UUID).orElseThrow(IllegalStateException::new);
@@ -416,30 +416,30 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		queueEntry.setEndedAt(new Date(startedAt.getTime() - 1000L));
 		dao.updateIfUnmodified(queueEntry, queueEntry.getDateChanged());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void updateIfUnmodified_shouldRejectEndedAtEqualToStartedAt() {
 		QueueEntry queueEntry = dao.get(QUEUE_ENTRY_UUID).orElseThrow(IllegalStateException::new);
 		queueEntry.setEndedAt(new Date(queueEntry.getStartedAt().getTime()));
 		dao.updateIfUnmodified(queueEntry, queueEntry.getDateChanged());
 	}
-	
+
 	@Test
 	public void updateIfUnmodified_shouldClearEndedAtWhenSetToNull() {
 		// Entry 1 has ended_at set; this mirrors what undoTransition does when re-opening a previous entry
 		QueueEntry queueEntry = dao.get(QUEUE_ENTRY_UUID).orElseThrow(IllegalStateException::new);
 		assertThat(queueEntry.getEndedAt(), notNullValue());
-		
+
 		queueEntry.setEndedAt(null);
-		
+
 		// date_changed is null in the dataset, so expectedDateChanged is null
 		boolean updated = dao.updateIfUnmodified(queueEntry, queueEntry.getDateChanged());
-		
+
 		assertThat(updated, is(true));
 		QueueEntry reloaded = dao.get(QUEUE_ENTRY_UUID).orElseThrow(IllegalStateException::new);
 		assertThat(reloaded.getEndedAt(), nullValue());
 	}
-	
+
 	@Test
 	// 2022-02-02 18:40:56.0, 2022-02-02 18:41:56.0
 	public void shouldSearchAndCountQueueEntriesEndedOnOrAfterDate() {
@@ -456,20 +456,20 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		criteria.setIsEnded(false);
 		assertResults(criteria, 2, 3);
 	}
-	
+
 	@Test
 	// Dataset entries for queue=3, patient=2: only entry 4 [2022-03-02 16:40:56 → 2022-03-02 18:41:56]
 	public void getOverlappingQueueEntries_shouldReturnEntriesOverlappingWithGivenRange() {
 		Queue queue3 = services.getQueueService().getQueueById(3).orElseThrow(IllegalStateException::new);
 		Patient patient2 = services.getPatientService().getPatient(2);
-		
+
 		// Open-ended new entry: endedAt=null — entry 4 overlaps (its endedAt > new startedAt)
 		QueueEntrySearchCriteria openCriteria = QueueEntrySearchCriteria.builder().queues(Collections.singletonList(queue3))
 		        .patient(patient2).startedOn(date("2022-03-02 10:00:00")).build();
 		List<QueueEntry> openResults = dao.getOverlappingQueueEntries(openCriteria);
 		assertThat(openResults, hasSize(1));
 		assertThat(openResults.get(0).getQueueEntryId(), is(4));
-		
+
 		// Finite new entry whose range overlaps entry 4: new [10:00 → 17:00], entry 4 starts at 16:40 < 17:00
 		QueueEntrySearchCriteria overlapCriteria = QueueEntrySearchCriteria.builder()
 		        .queues(Collections.singletonList(queue3)).patient(patient2).startedOn(date("2022-03-02 10:00:00"))
@@ -477,7 +477,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		List<QueueEntry> overlapResults = dao.getOverlappingQueueEntries(overlapCriteria);
 		assertThat(overlapResults, hasSize(1));
 		assertThat(overlapResults.get(0).getQueueEntryId(), is(4));
-		
+
 		// Finite new entry that ends BEFORE entry 4 starts: new [10:00 → 15:00], entry 4 starts at 16:40 — no overlap
 		QueueEntrySearchCriteria noOverlapCriteria = QueueEntrySearchCriteria.builder()
 		        .queues(Collections.singletonList(queue3)).patient(patient2).startedOn(date("2022-03-02 10:00:00"))
@@ -485,7 +485,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		List<QueueEntry> noOverlapResults = dao.getOverlappingQueueEntries(noOverlapCriteria);
 		assertThat(noOverlapResults, hasSize(0));
 	}
-	
+
 	/**
 	 * Utility method that tests criteria against both DAO methods to getQueueEntries and
 	 * getCountOfQueueEntries
@@ -496,7 +496,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		Long numResults = dao.getCountOfQueueEntries(criteria);
 		assertThat(numResults.intValue(), equalTo(expectedNumber));
 	}
-	
+
 	/**
 	 * Utility method that tests criteria against both DAO methods to getQueueEntries and
 	 * getCountOfQueueEntries
@@ -512,7 +512,7 @@ public class QueueEntryDaoTest extends BaseModuleContextSensitiveTest {
 		Long numResults = dao.getCountOfQueueEntries(criteria);
 		assertThat(numResults.intValue(), equalTo(queueEntryIds.length));
 	}
-	
+
 	/**
 	 * @return the date for the given string value
 	 */

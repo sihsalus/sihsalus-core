@@ -10,7 +10,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class HtmlWidgetsServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * @see HtmlWidgetsService#getAllMetadataByType(Class,boolean)
 	 * @verifies return only unretired

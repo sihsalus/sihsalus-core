@@ -34,55 +34,55 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({ Context.class, CustomDatatypeUtil.class })
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class ConceptAttributeLineProcessorTest {
-	
+
 	private ConceptService cs;
-	
+
 	private ConceptAttributeLineProcessor processor;
-	
+
 	private static final String AUDIT_DATE_ATT_TYPE_UUID = "nb803h59-a1b8-4da9-969a-9a18sf3241f0";
-	
+
 	private static final String EMAIL_ATT_TYPE_UUID = "ghe03f57-ty5f-4dav-960a-4a18df3241fe";
-	
+
 	private DateDatatype dateDatatype;
-	
+
 	@Before
 	public void setup() {
 		PowerMockito.mockStatic(Context.class);
 		PowerMockito.mockStatic(CustomDatatypeUtil.class);
-		
+
 		when(CustomDatatypeUtil.getDatatype(eq(FreeTextDatatype.class.getName()), anyString()))
 		        .thenReturn((CustomDatatype) new FreeTextDatatype());
 		when(CustomDatatypeUtil.getDatatype(eq(DateDatatype.class.getName()), anyString()))
 		        .thenReturn((CustomDatatype) new DateDatatype());
 		when(Context.getRuntimeProperties()).thenReturn(new Properties());
-		
+
 		cs = mock(ConceptService.class);
 		processor = new ConceptAttributeLineProcessor(cs);
 		dateDatatype = new DateDatatype();
-		
+
 		ConceptAttributeType autditDateAttType = new ConceptAttributeType();
 		autditDateAttType.setName("Audit Date");
 		autditDateAttType.setUuid(AUDIT_DATE_ATT_TYPE_UUID);
 		autditDateAttType.setDatatypeClassname(DateDatatype.class.getName());
-		
+
 		ConceptAttributeType emailAttrType = new ConceptAttributeType();
 		emailAttrType.setName("Email Address");
 		emailAttrType.setDatatypeClassname(FreeTextDatatype.class.getName());
-		
+
 		when(cs.getConceptAttributeTypeByUuid(AUDIT_DATE_ATT_TYPE_UUID)).thenReturn(autditDateAttType);
 		when(cs.getConceptAttributeTypeByUuid(EMAIL_ATT_TYPE_UUID)).thenReturn(emailAttrType);
 	}
-	
+
 	@Test
 	public void fill_shouldParseConceptAttributes() {
 		// Setup
 		String[] headerLine = { HEADER_ATTRIBUTE_PREFIX + AUDIT_DATE_ATT_TYPE_UUID,
 		        HEADER_ATTRIBUTE_PREFIX + EMAIL_ATT_TYPE_UUID };
 		String[] line = { "2013-03-19", "jdoe@example.com" };
-		
+
 		// Replay
 		Concept concept = processor.fill(new Concept(), new CsvLine(headerLine, line));
-		
+
 		// Verify
 		Collection<ConceptAttribute> attributes = concept.getActiveAttributes();
 		Assert.assertEquals(2, attributes.size());

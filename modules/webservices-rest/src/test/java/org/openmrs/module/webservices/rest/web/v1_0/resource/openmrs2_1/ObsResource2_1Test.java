@@ -15,34 +15,34 @@ import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
 public class ObsResource2_1Test extends BaseDelegatingResourceTest<ObsResource2_1, Obs> {
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
 		assertPropPresent("status");
 		assertPropPresent("interpretation");
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
 		assertPropPresent("status");
 		assertPropPresent("interpretation");
 	}
-	
+
 	@Override
 	public Obs newObject() {
 		return Context.getObsService().getObsByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "WEIGHT (KG): 50.0";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.OBS_UUID;
 	}
-	
+
 }

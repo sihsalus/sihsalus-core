@@ -20,5 +20,3 @@ public class WebServicesRestTestConfig {
         return mock(RestHelperService.class);
     }
 }
-
-

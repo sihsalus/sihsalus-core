@@ -53,17 +53,17 @@ import static org.junit.Assert.*;
  * BaseModuleContextSensitiveTest, thus it is run without the in-memory DB and Spring context.
  */
 public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
-	
+
 	@InjectMocks
 	StockManagementServiceImpl stockManagementService;
-	
+
 	@Autowired
 	DbSessionFactory sessionFactory;
-	
+
 	private StockManagementDao daoInstance;
-	
+
 	private static EntityUtil entityUtil;
-	
+
 	private StockManagementDao dao() {
 		if (daoInstance == null) {
 			daoInstance = new StockManagementDao();
@@ -71,13 +71,13 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
 		}
 		return daoInstance;
 	}
-	
+
 	@Before
 	public void setup() throws Exception {
 		initializeInMemoryDatabase();
 		executeDataSet(EntityUtil.STOCK_OPERATION_TYPE_DATA_SET);
 	}
-	
+
 	private EntityUtil eu() {
 		if (entityUtil == null) {
 			Drug drug = Context.getConceptService().getDrug(3);
@@ -90,18 +90,18 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
 		}
 		return entityUtil;
 	}
-	
+
 	//	@Mock
 	//	StockManagementDao dao;
 	//
 	//	@Mock
 	//	UserService userService;
-	
+
 	@Before
 	public void setupMocks() {
 		MockitoAnnotations.initMocks(this);
 	}
-	
+
 	@Test
     public void findUserRoleScopes_shouldFilterOnAllCriteria() {
         stockManagementService.setDao(dao());
@@ -174,7 +174,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         assertFalse(result.getData().stream().filter(p -> p.getUuid() .equals(userRoleScopeLocation.getUserRoleScope().getUuid())).findFirst().isPresent());
         assertFalse(result.getData().stream().filter(p -> p.getUuid() .equals(finalUserRoleScopeOperationType.getUserRoleScope().getUuid())).findFirst().isPresent());
     }
-	
+
 	@Test
 	public void findStockOperations_shouldFilterOnAllCriteria() {
 		stockManagementService.setDao(dao());
@@ -336,7 +336,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = dao().findStockOperations(filter, recordPrivilegeFilters);
         assertFalse(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(so.getUuid())));
     }
-	
+
 	@Test
     public void findStockSources_shouldFilterOnAllCriteria() {
         stockManagementService.setDao(dao());
@@ -379,19 +379,19 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = stockManagementService.findStockSources(filter);
         assertTrue(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(so.getUuid())));
     }
-	
+
 	@Test
 	public void getAllDTOS_shouldHaveAllLocations() {
 		stockManagementService.setDao(dao());
 		List<PartyDTO> partyDTOs = stockManagementService.getAllParties();
 	}
-	
+
 	@Test
 	public void getFlattenedUserRoleScopesByUser_shouldHaveAllLocations() {
 		stockManagementService.setDao(dao());
 		dao().getFlattenedUserRoleScopesByUser(eu().getUser(), new HashSet<Role>(Arrays.asList(eu().getRole())), null, null);
 	}
-	
+
 	@Test
     public void findStockItemPackagingUOMs_shouldFilterOnAllCriteria(){
         stockManagementService.setDao(dao());
@@ -414,7 +414,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = stockManagementService.findStockItemPackagingUOMs(filter);
         assertTrue(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(so.getUuid())));
     }
-	
+
 	@Test
     public void findStockOperationItems_shouldFilterOnAllCriteria(){
         stockManagementService.setDao(dao());
@@ -450,7 +450,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = stockManagementService.findStockOperationItems(filter);
         assertTrue(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(so.getUuid())));
     }
-	
+
 	@Test
     public void findStockOperationItemCosts_shouldFilterOnAllCriteria(){
         stockManagementService.setDao(dao());
@@ -486,7 +486,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = stockManagementService.getStockOperationItemCosts(filter);
         assertTrue(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(so.getUuid())));
     }
-	
+
 	@Test
     public void findStockBatchs_shouldFilterOnAllCriteria(){
         stockManagementService.setDao(dao());
@@ -510,7 +510,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = stockManagementService.findStockBatches(filter);
         assertTrue(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(so.getUuid())));
     }
-	
+
 	@Test
     public void findStockItems_shouldFilterOnAllCriteria(){
         stockManagementService.setDao(dao());
@@ -546,13 +546,13 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = stockManagementService.findStockItems(filter);
         assertTrue(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(so.getUuid())));
     }
-	
+
 	@Test
 	public void findStockOperationLinks_shouldFilterOnAllCriteria() {
 		stockManagementService.setDao(dao());
 		Result<StockOperationLinkDTO> result = stockManagementService.findStockOperationLinks(UUID.randomUUID().toString());
 	}
-	
+
 	@Test
     public void getStockInventory_shouldFilterOnAllCriteria(){
         stockManagementService.setDao(dao());
@@ -592,20 +592,20 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         //assertEquals(result.getData().get(0).getQuantity().setScale(2, BigDecimal.ROUND_HALF_EVEN),so.getQuantity().setScale(2, BigDecimal.ROUND_HALF_EVEN).multiply(packagingUom.getFactor()));
         //assertTrue(result.getData().get(0).getQuantity().setScale(2, BigDecimal.ROUND_HALF_EVEN).compareTo(so.getQuantity().setScale(2, BigDecimal.ROUND_HALF_EVEN)) == 0);
     }
-	
+
 	@Test
 	public void findStockItemTransactions_shouldFilterOnAllCriteria() {
 		stockManagementService.setDao(dao());
 		StockItemTransaction so = eu().newStockItemTransaction(dao());
 		so.setQuantity(BigDecimal.TEN);
 		dao().saveStockItemTransaction(so);
-		
+
 		StockItemTransactionSearchFilter filter = new StockItemTransactionSearchFilter();
 		filter.setStockItemId(so.getStockItem().getId());
 		Result<StockItemTransactionDTO> result = dao().findStockItemTransactions(filter, null);
 		assertThat(result.getData().size(), greaterThanOrEqualTo(1));
 		assertTrue(result.getData().get(0).getQuantity().setScale(2, BigDecimal.ROUND_HALF_EVEN).compareTo(so.getQuantity()) == 0);
-		
+
 		filter = new StockItemTransactionSearchFilter();
 		filter.setUuid(so.getUuid());
 		result = dao().findStockItemTransactions(filter, null);
@@ -613,7 +613,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
 		assertTrue(result.getData().get(0).getQuantity().setScale(2, BigDecimal.ROUND_HALF_EVEN).compareTo(so.getQuantity()) == 0);
 		assertEquals(result.getData().get(0).getUuid(), so.getUuid());
 	}
-	
+
 	@Test
     public void  dispenseStockItems(){
         StockItem stockItem = eu().newStockItem(dao(), false);
@@ -670,7 +670,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         assertEquals(entity.size(), 2);
         assertTrue(entity.stream().anyMatch(p -> dispenseRequests.stream().anyMatch(x -> p.getQuantity().multiply(BigDecimal.valueOf(-1)).setScale(2, BigDecimal.ROUND_HALF_EVEN).compareTo(x.getQuantity()) == 0)));
     }
-	
+
 	@Test
 	public void importStockItems() throws Exception {
 		URL resource = getClass().getClassLoader().getResource(EntityUtil.STOCK_ITEMS_IMPORT_CSV);
@@ -718,110 +718,110 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         assertEquals(stockItem.getPurchasePriceConceptId(), (Integer) 20);
 
 	}
-	
+
 	private void deleteAllStockItems() {
 		DbSession session = dao().getSession();
 		Query query = session.createQuery("delete from stockmanagement.StockItem");
 		query.executeUpdate();
 	}
-	
+
 	@Test
 	public void getStockItemByDrug() {
 		deleteAllStockItems();
 		Context.flushSession();
 		Context.flushSession();
-		
+
 		StockItem stockItem = eu().newStockItem(dao(), false);
 		dao().saveStockItem(stockItem);
-		
+
 		stockManagementService.setDao(dao());
         List<StockItem> stockItemLeft = stockManagementService.getStockItemByDrug(stockItem.getDrug().getId());
 		assertNotNull(stockItemLeft);
         assertTrue(stockItemLeft.stream().map(StockItem::getUuid).collect(Collectors.toList()).contains(stockItem.getUuid()));
 	}
-	
+
 	@Test
 	public void getStockItemByConcept() {
 		StockItem stockItem = eu().newStockItem(dao(), true);
 		stockItem.setDrug(null);
 		dao().saveStockItem(stockItem);
-		
+
 		stockManagementService.setDao(dao());
         List<StockItem> stockItemLeft = stockManagementService.getStockItemByConcept(stockItem.getConcept().getId());
 		assertNotNull(stockItemLeft);
         assertTrue(stockItemLeft.stream().map(StockItem::getUuid).collect(Collectors.toList()).contains(stockItem.getUuid()));
 	}
-	
+
 	@Test
 	public void getStockItemPackagingUOMByConcept() {
 		stockManagementService.setDao(dao());
 		StockItem stockItem = eu().newStockItem(dao(), false);
 		dao().saveStockItem(stockItem);
-		
+
 		StockItemPackagingUOM packagingUom = eu().newStockItemPackagingUOM(dao(), false, stockItem);
 		packagingUom.setFactor(BigDecimal.valueOf(2));
 		dao().saveStockItemPackagingUOM(packagingUom);
-		
+
 		StockItemPackagingUOM packagingUomLeft = stockManagementService.getStockItemPackagingUOMByConcept(stockItem.getId(),
 		    packagingUom.getPackagingUom().getConceptId());
 		assertNotNull(packagingUomLeft);
 		assertEquals(packagingUom.getUuid(), packagingUomLeft.getUuid());
 	}
-	
+
 	@Test
 	public void getStockItemPackagingUOMByConceptStockItemIdAndConceptUuid() {
 		stockManagementService.setDao(dao());
 		StockItem stockItem = eu().newStockItem(dao(), false);
 		dao().saveStockItem(stockItem);
-		
+
 		StockItemPackagingUOM packagingUom = eu().newStockItemPackagingUOM(dao(), false, stockItem);
 		packagingUom.setFactor(BigDecimal.valueOf(2));
 		dao().saveStockItemPackagingUOM(packagingUom);
-		
+
 		StockItemPackagingUOM packagingUomLeft = stockManagementService.getStockItemPackagingUOMByConcept(stockItem.getId(),
 		    packagingUom.getPackagingUom().getUuid());
 		assertNotNull(packagingUomLeft);
 		assertEquals(packagingUom.getUuid(), packagingUomLeft.getUuid());
 	}
-	
+
 	@Test
 	public void getStockItemPackagingUOMByConceptByStockItemUuidAndConceptId() {
 		stockManagementService.setDao(dao());
 		StockItem stockItem = eu().newStockItem(dao(), false);
 		dao().saveStockItem(stockItem);
-		
+
 		StockItemPackagingUOM packagingUom = eu().newStockItemPackagingUOM(dao(), false, stockItem);
 		packagingUom.setFactor(BigDecimal.valueOf(2));
 		dao().saveStockItemPackagingUOM(packagingUom);
-		
+
 		StockItemPackagingUOM packagingUomLeft = stockManagementService.getStockItemPackagingUOMByConcept(
 		    stockItem.getUuid(), packagingUom.getPackagingUom().getConceptId());
 		assertNotNull(packagingUomLeft);
 		assertEquals(packagingUom.getUuid(), packagingUomLeft.getUuid());
 	}
-	
+
 	@Test
 	public void getStockItemPackagingUOMByConceptByStockItemUuidAndConceptUuid() {
 		stockManagementService.setDao(dao());
 		StockItem stockItem = eu().newStockItem(dao(), false);
 		dao().saveStockItem(stockItem);
-		
+
 		StockItemPackagingUOM packagingUom = eu().newStockItemPackagingUOM(dao(), false, stockItem);
 		packagingUom.setFactor(BigDecimal.valueOf(2));
 		dao().saveStockItemPackagingUOM(packagingUom);
-		
+
 		StockItemPackagingUOM packagingUomLeft = stockManagementService.getStockItemPackagingUOMByConcept(
 		    stockItem.getUuid(), packagingUom.getPackagingUom().getUuid());
 		assertNotNull(packagingUomLeft);
 		assertEquals(packagingUom.getUuid(), packagingUomLeft.getUuid());
 	}
-	
+
 	@Test
 	public void getOrderItemsByOrderByOrderIds() {
 		stockManagementService.setDao(dao());
 		StockItem stockItem = eu().newStockItem(dao(), false);
 		dao().saveStockItem(stockItem);
-		
+
 		StockItemPackagingUOM packagingUom = eu().newStockItemPackagingUOM(dao(), false, stockItem);
 		packagingUom.setFactor(BigDecimal.valueOf(2));
 		dao().saveStockItemPackagingUOM(packagingUom);
@@ -833,13 +833,13 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
 		assertEquals(orderItems.size(), 1);
 		assertEquals(orderItems.get(0).getUuid(), orderItem.getUuid());
 	}
-	
+
 	@Test
 	public void getOrderItemsByEncounterByEncounterIds() {
 		stockManagementService.setDao(dao());
 		StockItem stockItem = eu().newStockItem(dao(), false);
 		dao().saveStockItem(stockItem);
-		
+
 		StockItemPackagingUOM packagingUom = eu().newStockItemPackagingUOM(dao(), false, stockItem);
 		packagingUom.setFactor(BigDecimal.valueOf(2));
 		dao().saveStockItemPackagingUOM(packagingUom);
@@ -852,7 +852,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
 		assertEquals(orderItems.size(), 1);
 		assertEquals(orderItems.get(0).getUuid(), orderItem.getUuid());
 	}
-	
+
 	private void updateOrderScheduledDate(Order order, Date scheduledDate) {
 		DbSession session = dao().getSession();
 		Query query = session.createQuery("Update Order set scheduledDate = :scheduledDate where orderId = :orderId");
@@ -862,7 +862,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
 		Context.flushSession();
 		Context.flushSession();
 	}
-	
+
 	@Test
     public void findOrderItems(){
         stockManagementService.setDao(dao());
@@ -1148,7 +1148,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = stockManagementService.findOrderItems(filter, null);
         assertTrue(result.getData().isEmpty());
     }
-	
+
 	@Test
 	public void synchronizeTags() {
 		LocationTagsSynchronize locationTagsSynchronize = new LocationTagsSynchronize();
@@ -1163,7 +1163,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
 		assertTrue(!locationService.getLocationsHavingAnyTag(Arrays.asList(mainPharmacy)).isEmpty());
 		assertTrue(!locationService.getLocationsHavingAnyTag(Arrays.asList(mainStore)).isEmpty());
 	}
-	
+
 	@Test
     public void findStockRules(){
         stockManagementService.setDao(dao());
@@ -1261,7 +1261,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         filter.setLastEvaluationMax(stockRule.getLastEvaluation());
         result = stockManagementService.findStockRules(filter, null);
         assertTrue(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(stockRule.getUuid())));
-        
+
         filter = new StockRuleSearchFilter();
         filter.setNextEvaluationMin(DateUtils.addDays(stockRule.getNextEvaluation(), 1));
         result = stockManagementService.findStockRules(filter, null);
@@ -1299,7 +1299,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         filter.setLastActionDateMax(stockRule.getLastActionDate());
         result = stockManagementService.findStockRules(filter, null);
         assertTrue(result.getData().stream().anyMatch(p -> p.getUuid().equalsIgnoreCase(stockRule.getUuid())));
-        
+
         filter = new StockRuleSearchFilter();
         filter.setId(stockRule.getId());
         filter.setUuids(Arrays.asList(stockRule.getUuid()));
@@ -1311,7 +1311,7 @@ public class StockManagementServiceTest extends BaseModuleContextSensitiveTest {
         result = stockManagementService.findStockRules(filter, null);
         assertTrue(result.getData().isEmpty());
     }
-	
+
 	@Test
     public void findBatchJobs(){
         stockManagementService.setDao(dao());

@@ -46,29 +46,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests CRUD operations for {@link Person}s via web service calls
  */
 public class PersonController1_9Test extends MainResourceControllerTest {
-	
+
 	private PersonService service;
-	
+
 	@Override
 	public String getURI() {
 		return "person";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_8.PERSON_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 0;
 	}
-	
+
 	@BeforeEach
 	public void before() {
 		this.service = Context.getPersonService();
 	}
-	
+
 	@Override
 	@Test
 	public void shouldGetAll() throws Exception {
@@ -76,59 +76,59 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 			super.shouldGetAll();
 		});
 	}
-	
+
 	@Test
 	public void shouldGetAPersonByUuid() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Person person = service.getPersonByUuid(getUuid());
 		assertEquals(person.getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertNotNull(PropertyUtils.getProperty(result, "preferredName"));
 		assertEquals(person.getGender(), PropertyUtils.getProperty(result, "gender"));
 		assertNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	@Test
 	public void shouldGetPersonDateCreated() throws Exception {
 		Person person = service.getPersonByUuid(getUuid());
 		service.savePerson(person);
-		
+
 		MockHttpServletRequest req = newGetRequest(getURI() + "/" + getUuid(), new Parameter("v",
 		        RestConstants.REPRESENTATION_FULL));
 		SimpleObject result = deserialize(handle(req));
-		
+
 		Map<String, String> auditInfo = (Map<String, String>) PropertyUtils.getProperty(result, "auditInfo");
-		
+
 		assertEquals(ConversionUtil.convertToRepresentation(person.getPersonDateCreated(), Representation.FULL),
 		    auditInfo.get("dateCreated"));
 	}
-	
+
 	@Test
 	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
 		SimpleObject result = deserialize(handle(req));
-		
+
 		assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
 	}
-	
+
 	@Test
 	public void shouldCreateAPerson() throws Exception {
 		long originalCount = service.getPeople("", false).size();
 		String json = "{ \"names\": [{ \"givenName\":\"Helen\", \"familyName\":\"of Troy\" }, "
 		        + "{\"givenName\":\"Leda\", \"familyName\":\"Nemesis\"} ], "
 		        + "\"birthdate\":\"2003-01-01\", \"gender\":\"F\" }";
-		
+
 		SimpleObject newPerson = deserialize(handle(newPostRequest(getURI(), json)));
-		
+
 		String uuid = PropertyUtils.getProperty(newPerson, "uuid").toString();
 		Person person = Context.getPersonService().getPersonByUuid(uuid);
 		assertEquals(2, person.getNames().size());
 		assertEquals("Helen of Troy", person.getPersonName().getFullName());
 		assertEquals(++originalCount, service.getPeople("", false).size());
 	}
-	
+
 	@Test
 	public void shouldCreateAPersonWithAttributes() throws Exception {
 		long originalCount = service.getPeople("", false).size();
@@ -136,15 +136,15 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		String json = "{ \"names\": [{ \"givenName\":\"Helen\", \"familyName\":\"of Troy\" }], "
 		        + "\"birthdate\":\"2003-01-01\", \"gender\":\"F\", \"attributes\":"
 		        + "[{\"attributeType\":\"54fc8400-1683-4d71-a1ac-98d40836ff7c\",\"value\": \"" + birthPlace + "\"}] }";
-		
+
 		SimpleObject newPerson = deserialize(handle(newPostRequest(getURI(), json)));
-		
+
 		String uuid = PropertyUtils.getProperty(newPerson, "uuid").toString();
 		Person person = Context.getPersonService().getPersonByUuid(uuid);
 		assertEquals(++originalCount, service.getPeople("", false).size());
 		assertEquals(birthPlace, person.getAttribute("Birthplace").getValue());
 	}
-	
+
 	@Test
 	public void shouldEditAPerson() throws Exception {
 		Person person = service.getPersonByUuid(getUuid());
@@ -161,21 +161,21 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		assertTrue(person.isDead());
 		assertNotNull(person.getCauseOfDeath());
 	}
-	
+
 	@Test
 	public void shouldNotAllowUpdatingNamesProperty() throws Exception {
 		assertThrows(ConversionException.class, () -> {
 			handle(newPostRequest(getURI() + "/" + getUuid(), "{\"names\":\"[]\"}"));
 		});
 	}
-	
+
 	@Test
 	public void shouldNotAllowUpdatingAddressesProperty() throws Exception {
 		assertThrows(ConversionException.class, () -> {
 			handle(newPostRequest(getURI() + "/" + getUuid(), "{\"addresses\":\"[]\"}"));
 		});
 	}
-	
+
 	@Test
 	public void shouldSetThePreferredAddressAndUnmarkTheOldOne() throws Exception {
 		executeDataSet("PersonControllerTest-otherPersonData.xml");
@@ -188,15 +188,15 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		//sanity check that the addresses belong to the person
 		assertEquals(person, preferredAddress.getPerson());
 		assertEquals(person, notPreferredAddress.getPerson());
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), "{ \"preferredAddress\":\"" + notPreferredAddress.getUuid()
 		        + "\" }"));
-		
+
 		assertEquals(notPreferredAddress, person.getPersonAddress());
 		assertTrue(notPreferredAddress.isPreferred());
 		assertFalse(preferredAddress.isPreferred());
 	}
-	
+
 	@Test
 	public void shouldSetThePreferredNameAndUnmarkTheOldOne() throws Exception {
 		executeDataSet("PersonControllerTest-otherPersonData.xml");
@@ -209,14 +209,14 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		//sanity check that the names belong to the person
 		assertEquals(person, preferredName.getPerson());
 		assertEquals(person, notPreferredName.getPerson());
-		
+
 		handle(newPostRequest(getURI() + "/" + getUuid(), "{ \"preferredName\":\"" + notPreferredName.getUuid() + "\" }"));
-		
+
 		assertEquals(notPreferredName, person.getPersonName());
 		assertTrue(notPreferredName.isPreferred());
 		assertFalse(preferredName.isPreferred());
 	}
-	
+
 	@Test
 	public void shouldVoidAPerson() throws Exception {
 		Person person = service.getPersonByUuid(getUuid());
@@ -229,23 +229,23 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		assertTrue(person.isVoided());
 		assertEquals(reason, person.getVoidReason());
 	}
-	
+
 	@Test
 	public void shouldUnVoidAPerson() throws Exception {
 		Person person = service.getPersonByUuid(getUuid());
 		service.voidPerson(person, "some random reason");
 		person = service.getPersonByUuid(getUuid());
 		assertTrue(person.isVoided());
-		
+
 		String json = "{\"deleted\": \"false\"}";
 		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
-		
+
 		person = service.getPersonByUuid(getUuid());
 		assertFalse(person.isVoided());
 		assertEquals("false", PropertyUtils.getProperty(response, "voided").toString());
-		
+
 	}
-	
+
 	@Test
 	public void shouldPurgeAPerson() throws Exception {
 		final String uuid = "86526ed6-3c11-11de-a0ba-001e378eb67e";
@@ -254,7 +254,7 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		handle(req);
 		assertNull(service.getPersonByUuid(uuid));
 	}
-	
+
 	@Test
 	public void shouldSearchAndReturnAListOfPersonsMatchingTheQueryString() throws Exception {
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
@@ -263,7 +263,7 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		assertEquals(1, Util.getResultsSize(result));
 		assertEquals(getUuid(), PropertyUtils.getProperty(Util.getResultsList(result).get(0), "uuid"));
 	}
-	
+
 	@Test
 	public void shouldFailIfThePreferreNameBeingSetIsNew() throws Exception {
 		assertThrows(ConversionException.class, () -> {
@@ -271,7 +271,7 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 			handle(newPostRequest(getURI() + "/" + getUuid(), json));
 		});
 	}
-	
+
 	@Test
 	public void shouldFailIfThePreferreAddressBeingSetIsNew() throws Exception {
 		assertThrows(ConversionException.class, () -> {
@@ -279,7 +279,7 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 			handle(newPostRequest(getURI() + "/" + getUuid(), json));
 		});
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldNotShowVoidedNamesInFullRepresentation() throws Exception {
@@ -294,18 +294,18 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 			    new Parameter("reason", "none")));
 		}
 		assertTrue(nameToVoid.isVoided());
-		
+
 		MockHttpServletRequest req = newGetRequest(getURI() + "/" + getUuid(), new Parameter(
 		        RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL));
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
-		
+
 		SimpleObject result = deserialize(handle(req));
-		
+
 		List<SimpleObject> names = (List<SimpleObject>) PropertyUtils.getProperty(result, "names");
 		assertEquals(3, names.size());
 		assertFalse(nameToVoidUuid.equals(PropertyUtils.getProperty(names.get(0), "uuid")));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldNotShowVoidedAddressesInFullRepresentation() throws Exception {
@@ -315,18 +315,18 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		PersonAddress voidedAddress = service.getPersonAddressByUuid("8a806d8c-822d-11e0-872f-18a905e044dc");
 		String voidedAddressUuid = voidedAddress.getUuid();
 		assertTrue(voidedAddress.isVoided());
-		
+
 		MockHttpServletRequest req = newGetRequest(getURI() + "/" + getUuid(), new Parameter(
 		        RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL));
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
-		
+
 		SimpleObject result = deserialize(handle(req));
-		
+
 		List<SimpleObject> addresses = (List<SimpleObject>) PropertyUtils.getProperty(result, "addresses");
 		assertEquals(1, addresses.size());
 		assertFalse(voidedAddressUuid.equals(PropertyUtils.getProperty(addresses.get(0), "uuid")));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldNotShowVoidedAttributesInFullRepresentation() throws Exception {
@@ -340,20 +340,20 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 			    new Parameter("!purge", ""), new Parameter("reason", "none")));
 		}
 		assertTrue(attributeToVoid.isVoided());
-		
+
 		MockHttpServletRequest req = newGetRequest(getURI() + "/" + getUuid(), new Parameter(
 		        RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL));
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
-		
+
 		SimpleObject result = deserialize(handle(req));
-		
+
 		List<SimpleObject> attributes = (List<SimpleObject>) PropertyUtils.getProperty(result, "attributes");
 		assertEquals(2, attributes.size());
 		List<Object> uuids = Arrays.asList(PropertyUtils.getProperty(attributes.get(0), "uuid"),
 		    PropertyUtils.getProperty(attributes.get(1), "uuid"));
 		assertFalse(uuids.contains(attributeToVoidUuid));
 	}
-	
+
 	@Test
 	public void shouldRespectStartIndexAndLimit() throws Exception {
 		MockHttpServletRequest req = newGetRequest(getURI());
@@ -361,19 +361,19 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		SimpleObject results = deserialize(handle(req));
 		int fullCount = Util.getResultsSize(results);
 		assertTrue(fullCount > 2, "This test assumes > 2 matching persons");
-		
+
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_LIMIT, "2");
 		results = deserialize(handle(req));
 		int firstCount = Util.getResultsSize(results);
 		assertEquals(2, firstCount);
-		
+
 		req.removeParameter(RestConstants.REQUEST_PROPERTY_FOR_LIMIT);
 		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_START_INDEX, "2");
 		results = deserialize(handle(req));
 		int restCount = Util.getResultsSize(results);
 		assertEquals(fullCount, firstCount + restCount);
 	}
-	
+
 	@Test
 	public void shouldCreateAPersonWithBooleanAttributeWithoutQuotes() throws Exception {
 		executeDataSet("personAttributeTypeWithConcept.xml");
@@ -390,7 +390,7 @@ public class PersonController1_9Test extends MainResourceControllerTest {
 		assertEquals(givenName, person.getGivenName());
 		assertEquals("true", person.getAttribute(attributeId).getValue());
 	}
-	
+
 	@Test
 	public void shouldCreateAPersonWithBooleanAttributeWithQuotes() throws Exception {
 		executeDataSet("personAttributeTypeWithConcept.xml");

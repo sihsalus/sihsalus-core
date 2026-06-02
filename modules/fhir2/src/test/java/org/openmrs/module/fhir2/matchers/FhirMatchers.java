@@ -13,7 +13,7 @@ import org.hamcrest.Matcher;
 import org.hl7.fhir.r4.model.Patient;
 
 public class FhirMatchers {
-	
+
 	public static Matcher<Patient> isDeceased() {
 		return new IsDeceasedMatcher();
 	}

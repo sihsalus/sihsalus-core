@@ -39,23 +39,23 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<GroupFhirResourceProvider, Group> {
-	
+
 	private static final String COHORT_UUID = "1d64befb-3b2e-48e5-85f5-353d43e23e46";
-	
+
 	private static final String BAD_COHORT_UUID = "5c9d032b-6092-4052-93d2-a04202b98462";
-	
+
 	private static final String JSON_CREATE_GROUP_DOCUMENT = "org/openmrs/module/fhir2/providers/GroupWebTest_create.json";
-	
+
 	private static final String JSON_UPDATE_GROUP_DOCUMENT = "org/openmrs/module/fhir2/providers/GroupWebTest_update.json";
-	
+
 	private static final String JSON_UPDATE_GROUP_DOCUMENT_NO_ID = "org/openmrs/module/fhir2/providers/GroupWebTest_updateWithoutId.json";
-	
+
 	@Mock
 	private FhirGroupService groupService;
-	
+
 	@Getter(AccessLevel.PUBLIC)
 	private GroupFhirResourceProvider resourceProvider;
-	
+
 	@Before
 	@Override
 	public void setup() throws ServletException {
@@ -63,27 +63,27 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 		resourceProvider.setGroupService(groupService);
 		super.setup();
 	}
-	
+
 	@Test
 	public void getGroupByUuid_shouldReturnGroup() throws Exception {
 		org.hl7.fhir.r4.model.Group group = new org.hl7.fhir.r4.model.Group();
 		group.setId(COHORT_UUID);
 		when(groupService.get(COHORT_UUID)).thenReturn(group);
-		
+
 		MockHttpServletResponse response = get("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(COHORT_UUID));
 	}
-	
+
 	@Test
 	public void shouldReturn404IfGroupNotFound() throws Exception {
 		MockHttpServletResponse response = get("/Group/" + BAD_COHORT_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isNotFound());
 	}
-	
+
 	@Test
 	public void createGroup_shouldCreateGroup() throws Exception {
 		String jsonGroup;
@@ -91,17 +91,17 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 			Objects.requireNonNull(is);
 			jsonGroup = inputStreamToString(is, UTF_8);
 		}
-		
+
 		org.hl7.fhir.r4.model.Group group = new org.hl7.fhir.r4.model.Group();
 		group.setId(COHORT_UUID);
-		
+
 		when(groupService.create(any(org.hl7.fhir.r4.model.Group.class))).thenReturn(group);
-		
+
 		MockHttpServletResponse response = post("/Group").accept(FhirMediaTypes.JSON).jsonContent(jsonGroup).go();
-		
+
 		assertThat(response, isCreated());
 	}
-	
+
 	@Test
 	public void updateGroup_shouldUpdateExistingGroup() throws Exception {
 		String jsonGroup;
@@ -109,18 +109,18 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 			Objects.requireNonNull(is);
 			jsonGroup = inputStreamToString(is, UTF_8);
 		}
-		
+
 		org.hl7.fhir.r4.model.Group group = new org.hl7.fhir.r4.model.Group();
 		group.setId(COHORT_UUID);
-		
+
 		when(groupService.update(anyString(), any(org.hl7.fhir.r4.model.Group.class))).thenReturn(group);
-		
+
 		MockHttpServletResponse response = put("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).jsonContent(jsonGroup)
 		        .go();
-		
+
 		assertThat(response, isOk());
 	}
-	
+
 	@Test
 	public void updateGroup_shouldRaiseExceptionForNoId() throws Exception {
 		String jsonGroup;
@@ -128,28 +128,28 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 			Objects.requireNonNull(is);
 			jsonGroup = inputStreamToString(is, UTF_8);
 		}
-		
+
 		MockHttpServletResponse response = put("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).jsonContent(jsonGroup)
 		        .go();
-		
+
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
 	}
-	
+
 	@Test
 	public void deleteGroup_shouldDeleteGroup() throws Exception {
 		MockHttpServletResponse response = delete("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}
-	
+
 	@Test
 	public void deleteGroup_shouldReturn404ForNonExistingGroup() throws Exception {
 		doThrow(new ResourceNotFoundException("")).when(groupService).delete(BAD_COHORT_UUID);
-		
+
 		MockHttpServletResponse response = delete("/Group/" + BAD_COHORT_UUID).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}

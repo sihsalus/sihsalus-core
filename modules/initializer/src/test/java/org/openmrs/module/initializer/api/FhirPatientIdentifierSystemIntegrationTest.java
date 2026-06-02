@@ -17,24 +17,24 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 public class FhirPatientIdentifierSystemIntegrationTest extends DomainBaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	private PatientService patientService;
-	
+
 	@Autowired
 	private FhirPatientIdentifierSystemService service;
-	
+
 	@Autowired
 	private FhirPatientIdentifierSystemLoader loader;
-	
+
 	PatientIdentifierType firstType;
-	
+
 	PatientIdentifierType secondType;
-	
+
 	PatientIdentifierType thirdType;
-	
+
 	FhirPatientIdentifierSystem thirdSystem;
-	
+
 	@Before
 	public void setup() {
 		{
@@ -52,7 +52,7 @@ public class FhirPatientIdentifierSystemIntegrationTest extends DomainBaseModule
 			thirdType = new PatientIdentifierType();
 			thirdType.setName("Third ID");
 			patientService.savePatientIdentifierType(thirdType);
-			
+
 			thirdSystem = new FhirPatientIdentifierSystem();
 			thirdSystem.setName("Third System");
 			thirdSystem.setPatientIdentifierType(thirdType);
@@ -61,29 +61,29 @@ public class FhirPatientIdentifierSystemIntegrationTest extends DomainBaseModule
 			service.saveFhirPatientIdentifierSystem(thirdSystem);
 		}
 	}
-	
+
 	@Test
 	public void loader_shouldLoadFhirPatientIdentifierSystemsAccordingToCSVFiles() {
 		// Replay
 		loader.load();
-		
+
 		FhirPatientIdentifierSystem firstSystem = assertSystem(firstType);
 		FhirPatientIdentifierSystem secondSystem = assertSystem(secondType);
 		FhirPatientIdentifierSystem thirdSystem = assertSystem(thirdType);
-		
+
 		// Confirm contents
 		assertThat(firstSystem.getUrl(), equalTo("http://openmrs.org/identifier"));
 		assertThat(firstSystem.getUuid(), equalTo("87c87473-b394-430b-93d3-b46d0faca26e"));
 		assertThat(firstSystem.getName(), equalTo(firstType.getName()));
 		assertThat(firstSystem.getRetired(), equalTo(false));
-		
+
 		assertThat(secondSystem.getUrl(), equalTo("http://openmrs.org/identifier/2"));
 		assertThat(secondSystem.getName(), equalTo(secondType.getName()));
 		assertThat(secondSystem.getRetired(), equalTo(false));
-		
+
 		assertThat(thirdSystem.getRetired(), equalTo(true));
 	}
-	
+
 	protected FhirPatientIdentifierSystem assertSystem(PatientIdentifierType type) {
 		Optional<FhirPatientIdentifierSystem> system = service.getFhirPatientIdentifierSystem(type);
 		assertThat(system.isPresent(), is(true));

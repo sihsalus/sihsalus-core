@@ -27,12 +27,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class PersonResource1_8Test extends BaseDelegatingResourceTest<PersonResource1_8, Person> {
-	
+
 	@Override
 	public Person newObject() {
 		return Context.getPersonService().getPersonByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -48,7 +48,7 @@ public class PersonResource1_8Test extends BaseDelegatingResourceTest<PersonReso
 		assertPropPresent("attributes");
 		assertPropEquals("voided", getObject().getVoided());
 	}
-	
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -67,30 +67,30 @@ public class PersonResource1_8Test extends BaseDelegatingResourceTest<PersonReso
 		assertPropEquals("voided", getObject().getVoided());
 		assertPropPresent("auditInfo");
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "Horatio Test Hornblower";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_8.PERSON_UUID;
 	}
-	
+
 	@Test
 	public void getAttributes_shouldReturnAllAttributes() throws Exception {
 		PersonResource1_8 resource = getResource();
-		
+
 		List<PersonAttribute> attributes1 = PersonResource1_8.getAttributes(resource
 		        .getByUniqueId("df8ae447-6745-45be-b859-403241d9913c"));
 		Assertions.assertEquals(2, attributes1.size());
-		
+
 		List<PersonAttribute> attributes2 = PersonResource1_8.getAttributes(resource
 		        .getByUniqueId("341b4e41-790c-484f-b6ed-71dc8da222de"));
 		Assertions.assertEquals(3, attributes2.size());
 	}
-	
+
 	/**
 	 * @see {@link https://issues.openmrs.org/browse/RESTWS-426}
 	 * @throws Exception
@@ -100,15 +100,15 @@ public class PersonResource1_8Test extends BaseDelegatingResourceTest<PersonReso
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("q", "Che");
 		RequestContext context = RestUtil.getRequestContext(request, new MockHttpServletResponse());
-		
+
 		SimpleObject simple = getResource().search(context);
 		List<SimpleObject> results = (List<SimpleObject>) simple.get("results");
-		
+
 		assertFalse(results.isEmpty(), "A non-empty list is expected.");
 		for (SimpleObject result : results) {
 			String selfLink = findSelfLink(result);
 			assertFalse(selfLink.contains("/patient/"), "Resource should be person, but is " + selfLink);
 		}
 	}
-	
+
 }

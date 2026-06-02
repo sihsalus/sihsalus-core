@@ -27,48 +27,48 @@ import static org.junit.Assert.assertEquals;
  * Test class that test the short serialization and short deserialization of a orderType
  */
 public class OrderTypeShortSerializationTest extends BaseModuleContextSensitiveTest {
-	
+
 	/**
 	 * generate the relative objects and make sure the short serialization can work
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldOrderTypeShortSerialization() throws Exception {
-		
+
 		//prepare the necessary data
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/OrderTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		Order o = Context.getOrderService().getOrderByUuid("921de0a3-05c4-444a-be03-e01b4c4b9142");
-		
+
 		String xmlOutput = Context.getSerializationService().serialize(o, XStreamShortSerializer.class);
 		//should only serialize "uuid"
 		XMLAssert.assertXpathEvaluatesTo("f149b5e1-4314-4d0d-a95f-1c4f8031161d", "/order/orderType/@uuid", xmlOutput);
 		//with short serialization, the "orderType" element shouldn't contain any child element in the serialized xml
 		XMLAssert.assertXpathNotExists("/order/orderType/*", xmlOutput);
 	}
-	
+
 	/**
 	 * give a expected xml string and make sure it can be shortly deserialized
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	@SkipBaseSetup
 	public void shouldOrderTypeShortDeserialization() throws Exception {
 		//prepare the necessary data
-		
+
 		/*
 		 * Because "XXXShortConverter.unmarshal(HierarchicalStreamReader, UnmarshallingContext)" has operations accessing data in database,
-		 * We also need to use the "OrderTypeShortSerializationTest.xml" here 
+		 * We also need to use the "OrderTypeShortSerializationTest.xml" here
 		 */
 		initializeInMemoryDatabase();
 		executeDataSet("org/openmrs/module/xstream/include/OrderTypeShortSerializationTest.xml");
 		authenticate();
-		
+
 		//prepare the necessary data
 		StringBuilder xmlBuilder = new StringBuilder();
 		xmlBuilder.append("<order id=\"1\" uuid=\"921de0a3-05c4-444a-be03-e01b4c4b9142\" voided=\"false\">\n");
@@ -84,7 +84,7 @@ public class OrderTypeShortSerializationTest extends BaseModuleContextSensitiveT
 		xmlBuilder
 		        .append("  <discontinuedDate class=\"sql-timestamp\" id=\"8\">2008-08-15 00:00:00 CST</discontinuedDate>\n");
 		xmlBuilder.append("</order>\n");
-		
+
 		Order o = Context.getSerializationService().deserialize(xmlBuilder.toString(), Order.class,
 		    XStreamShortSerializer.class);
 		assertEquals("f149b5e1-4314-4d0d-a95f-1c4f8031161d", o.getOrderType().getUuid());

@@ -32,15 +32,15 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 
 public class TextObsCohortDefinitionEvaluatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	protected static final String XML_DATASET_PATH = "org/openmrs/module/reporting/include/";
-	
+
 	protected static final String XML_REPORT_TEST_DATASET = "ReportTestDataset";
-	
+
 	/**
 	 * Run this before each unit test in this class. The "@Before" method in
 	 * {@link BaseContextSensitiveTest} is run right before this method.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -66,7 +66,7 @@ public class TextObsCohortDefinitionEvaluatorTest extends BaseModuleContextSensi
 		Assert.assertEquals(1, cohort.size());
 		Assert.assertTrue(cohort.contains(7));
 	}
-	
+
 	/**
 	 * @see {@link TextObsCohortDefinitionEvaluator#evaluate(CohortDefinition,EvaluationContext)}
 	 */

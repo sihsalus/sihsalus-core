@@ -58,139 +58,139 @@ import org.springframework.web.context.WebApplicationContext;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, inheritLocations = false)
 public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U extends IDomainResource> extends BaseModuleWebContextSensitiveTest {
-	
+
 	private ServletConfig servletConfig;
-	
+
 	private IParser jsonParser;
-	
+
 	private IParser xmlParser;
-	
+
 	private FhirRestServlet servlet;
-	
+
 	@Autowired
 	CacheConfig cacheConfig;
-	
+
 	@Autowired
 	private ConfigurableApplicationContext ctx;
-	
+
 	// This must be implemented by subclasses
 	public abstract T getResourceProvider();
-	
+
 	// These are expected to be implemented by version-specific sub-classes
 	public abstract String getServletName();
-	
+
 	public abstract FhirContext getFhirContext();
-	
+
 	public abstract FhirRestServlet getRestfulServer();
-	
+
 	public abstract void describeOperationOutcome(Description mismatchDescription, IBaseOperationOutcome operationOutcome);
-	
+
 	public abstract Class<? extends IBaseOperationOutcome> getOperationOutcomeClass();
-	
+
 	public abstract U removeNarrativeAndContained(U item);
-	
+
 	@Before
 	public void setup() throws Exception {
 		// Needed until TRUNK-6299 in place
 		org.springframework.cache.CacheManager cm = cacheConfig.apiCacheManager();
 		cm.getCacheNames().forEach(name -> cm.getCache(name).clear());
-		
+
 		FhirGlobalPropertyHolder.reset();
 		jsonParser = getFhirContext().newJsonParser();
 		xmlParser = getFhirContext().newXmlParser();
-		
+
 		MockServletContext servletContext = new MockServletContext();
 		WebApplicationContext wac = new DelegatingWebApplicationContext(applicationContext, servletContext);
 		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
-		
+
 		servletConfig = new MockServletConfig(servletContext, getServletName());
-		
+
 		setupFhirServlet();
 	}
-	
+
 	public void setupFhirServlet() throws ServletException {
 		servlet = getRestfulServer();
 		new FhirActivator().setApplicationContext(ctx);
 		servlet.setFhirContext(getFhirContext());
 		servlet.init(servletConfig);
 	}
-	
+
 	public FhirValidator getValidator() {
 		return getFhirContext().newValidator().setValidateAgainstStandardSchema(true);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isOk() {
 		return new IsOkMatcher();
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isNotFound() {
 		return statusEquals(HttpStatus.NOT_FOUND);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isCreated() {
 		return statusEquals(HttpStatus.CREATED);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isBadRequest() {
 		return statusEquals(HttpStatus.BAD_REQUEST);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> isMethodNotAllowed() {
 		return statusEquals(HttpStatus.METHOD_NOT_ALLOWED);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> statusEquals(final int status) {
 		return new StatusEqualsMatcher(status);
 	}
-	
+
 	public Matcher<MockHttpServletResponse> statusEquals(HttpStatus status) {
 		return statusEquals(status.value());
 	}
-	
+
 	public Matcher<U> validResource() {
 		return new IsValidResourceMatcher();
 	}
-	
+
 	public FhirRequestBuilder get(@Nonnull String uri) throws MalformedURLException {
 		if (!uri.startsWith("/")) {
 			uri = "/" + uri;
 		}
-		
+
 		return new FhirRequestBuilder(RequestTypeEnum.GET, "http://localhost:8080/ms/" + getServletName() + uri);
 	}
-	
+
 	public FhirRequestBuilder post(@Nonnull String uri) throws MalformedURLException {
 		if (!uri.startsWith("/")) {
 			uri = "/" + uri;
 		}
-		
+
 		return new FhirRequestBuilder(RequestTypeEnum.POST, "http://localhost:8080/ms/" + getServletName() + uri);
 	}
-	
+
 	public FhirRequestBuilder put(@Nonnull String uri) throws MalformedURLException {
 		if (!uri.startsWith("/")) {
 			uri = "/" + uri;
 		}
-		
+
 		return new FhirRequestBuilder(RequestTypeEnum.PUT, "http://localhost:8080/ms/" + getServletName() + uri);
 	}
-	
+
 	public FhirRequestBuilder patch(@Nonnull String uri) throws MalformedURLException {
 		if (!uri.startsWith("/")) {
 			uri = "/" + uri;
 		}
-		
+
 		return new FhirRequestBuilder(RequestTypeEnum.PATCH, "http://localhost:8080/ms/" + getServletName() + uri);
 	}
-	
+
 	public FhirRequestBuilder delete(@Nonnull String uri) throws MalformedURLException {
 		if (!uri.startsWith("/")) {
 			uri = "/" + uri;
 		}
-		
+
 		return new FhirRequestBuilder(RequestTypeEnum.DELETE, "http://localhost:8080/ms/" + getServletName() + uri);
 	}
-	
+
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
 		try {
@@ -212,7 +212,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			throw e;
 		}
 	}
-	
+
 	public IBaseBundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
 		try {
@@ -228,7 +228,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			throw e;
 		}
 	}
-	
+
 	private void handleDataFormatException(MockHttpServletResponse response, DataFormatException e) {
 		// DataFormatException usually indicates that you've requested the parser parse the wrong resource type, but
 		// the most common reason for having the wrong resource type here is that the response contained an
@@ -237,11 +237,11 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		while (e.getCause() != null && e.getCause() instanceof DataFormatException) {
 			e = (DataFormatException) e.getCause();
 		}
-		
+
 		if (e.getMessage() == null || !e.getMessage().contains("OperationOutcome")) {
 			return;
 		}
-		
+
 		// in case we cannot parse the OperationOutcome or there isn't actually one, just return the original exception
 		IBaseOperationOutcome operationOutcome;
 		try {
@@ -250,15 +250,15 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		catch (Exception ignored) {
 			return;
 		}
-		
+
 		Description errorDescription = new StringDescription();
 		errorDescription.appendText("Received unexpected OperationOutcome");
-		
+
 		describeOperationOutcome(errorDescription, operationOutcome);
-		
+
 		throw new RuntimeException(errorDescription.toString());
 	}
-	
+
 	public IBaseOperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
 		if (mediaType.isCompatibleWith(FhirMediaTypes.XML) || mediaType.isCompatibleWith(MediaType.APPLICATION_XML)
@@ -268,27 +268,27 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			return jsonParser.parseResource(getOperationOutcomeClass(), response.getContentAsString());
 		}
 	}
-	
+
 	public String toJson(U resource) {
 		return jsonParser.encodeResourceToString(resource);
 	}
-	
+
 	public String toXML(U resource) {
 		return xmlParser.encodeResourceToString(resource);
 	}
-	
+
 	public static class FhirMediaTypes {
-		
+
 		public static final MediaType JSON;
-		
+
 		public static final MediaType XML;
-		
+
 		public static final MediaType JSON_MERGE_PATCH;
-		
+
 		public static final MediaType JSON_PATCH;
-		
+
 		public static final MediaType XML_PATCH;
-		
+
 		static {
 			JSON = MediaType.valueOf("application/fhir+json");
 			XML = MediaType.valueOf("application/fhir+xml");
@@ -297,72 +297,72 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			JSON_PATCH = MediaType.valueOf("application/json-patch+json");
 			XML_PATCH = MediaType.valueOf("application/xml-patch+xml");
 		}
-		
+
 		private FhirMediaTypes() {
 		}
 	}
-	
+
 	private abstract class HttpResponseMatcher extends TypeSafeMatcher<MockHttpServletResponse> {
-		
+
 		@SneakyThrows
 		@Override
 		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
 			IBaseOperationOutcome operationOutcome = readOperationOutcome(item);
-			
+
 			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
-			
+
 			if (operationOutcome != null) {
 				describeOperationOutcome(mismatchDescription, operationOutcome);
 			}
 		}
 	}
-	
+
 	private class IsOkMatcher extends HttpResponseMatcher {
-		
+
 		@Override
 		protected boolean matchesSafely(MockHttpServletResponse item) {
 			int status = item.getStatus();
 			return status >= HttpStatus.OK.value() && status < HttpStatus.BAD_REQUEST.value();
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("response with HTTP status indicating request was handled successfully");
 		}
 	}
-	
+
 	private class StatusEqualsMatcher extends HttpResponseMatcher {
-		
+
 		private final int status;
-		
+
 		private StatusEqualsMatcher(int status) {
 			this.status = status;
 		}
-		
+
 		@Override
 		protected boolean matchesSafely(MockHttpServletResponse item) {
 			return item.getStatus() == status;
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("response with HTTP status ").appendValue(status);
 		}
 	}
-	
+
 	private class IsValidResourceMatcher extends TypeSafeMatcher<U> {
-		
+
 		@Override
 		protected boolean matchesSafely(U item) {
 			item = removeNarrativeAndContained(item);
 			return getValidator().validateWithResult(item).isSuccessful();
 		}
-		
+
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("is a valid FHIR resource");
 		}
-		
+
 		@Override
 		protected void describeMismatchSafely(U item, Description mismatchDescription) {
 			item = removeNarrativeAndContained(item);
@@ -371,11 +371,11 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			        .map(SingleValidationMessage::getMessage).collect(Collectors.joining(", ")));
 		}
 	}
-	
+
 	public class FhirRequestBuilder {
-		
+
 		private final MockHttpServletRequest request;
-		
+
 		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) throws MalformedURLException {
 			request = new MockHttpServletRequest();
 			request.setMethod(requestType.toString());
@@ -384,52 +384,52 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			request.setQueryString(url.getQuery());
 			request.setServletPath("/ms/");
 		}
-		
+
 		public FhirRequestBuilder accept(@Nonnull MediaType mediaType) {
 			request.addHeader(ACCEPT, mediaType.toString());
 			return this;
 		}
-		
+
 		public FhirRequestBuilder ifNoneMatchHeader(@Nonnull String etag) {
 			request.addHeader(IF_NONE_MATCH, etag.toString());
 			return this;
 		}
-		
+
 		public FhirRequestBuilder ifMatchHeader(@Nonnull String etag) {
 			request.addHeader(IF_MATCH, etag.toString());
 			return this;
 		}
-		
+
 		public FhirRequestBuilder jsonContent(@Nonnull String json) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.JSON.toString());
 			request.setContent(json.getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
-		
+
 		public FhirRequestBuilder jsonMergePatch(@Nonnull String json) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.JSON_MERGE_PATCH.toString());
 			request.setContent(json.getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
-		
+
 		public FhirRequestBuilder jsonPatch(@Nonnull String json) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.JSON_PATCH.toString());
 			request.setContent(json.getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
-		
+
 		public FhirRequestBuilder xmlPatch(@Nonnull String xml) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.XML_PATCH.toString());
 			request.setContent(xml.getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
-		
+
 		public FhirRequestBuilder xmlContent(@Nonnull String xml) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.XML.toString());
 			request.setContent(xml.getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
-		
+
 		public MockHttpServletResponse go() throws ServletException, IOException {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			servlet.service(request, response);

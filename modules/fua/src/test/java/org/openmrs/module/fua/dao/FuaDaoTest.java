@@ -15,13 +15,13 @@ import static org.junit.Assert.*;
 import org.apache.poi.hssf.record.formula.functions.True;
 
 public class FuaDaoTest extends BaseModuleContextSensitiveTest {
-	
+
 	@Autowired
 	FuaDao dao;
-	
+
 	@Autowired
 	UserService userService;
-	
+
 	@Test
 	@Ignore("Unignore if you want to make the Item class persistable, see also Item and liquibase.xml")
 	public void saveItem_shouldSaveAllPropertiesInDb() {

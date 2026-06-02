@@ -49,10 +49,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class XStreamShortSerializerTest extends BaseModuleContextSensitiveTest{
 	/**
-	 * 
+	 *
 	 * should fully serialize a short-serialized object while it exists sole, not as a member of other object.
-	 * 
-	 * @throws Exception 
+	 *
+	 * @throws Exception
 	 */
 	@Test
 	public void shouldFullySerializeObject() throws Exception{
@@ -63,11 +63,11 @@ public class XStreamShortSerializerTest extends BaseModuleContextSensitiveTest{
 		XMLAssert.assertXpathEvaluatesTo("501", "/user/userId", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("bruno", "/user/username", xmlOutput);
 	}
-	
+
 	/**
-	 * 
+	 *
      * should shortly serialize a short-serialized object while it exists as a member of other object.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -79,9 +79,9 @@ public class XStreamShortSerializerTest extends BaseModuleContextSensitiveTest{
 		XMLAssert.assertXpathEvaluatesTo("1010d442-e134-11de-babe-001e378eb67e", "/patient/creator/@uuid", xmlOutput);
 		XMLAssert.assertXpathNotExists("/patient/creator/*", xmlOutput);
 	}
-	
+
 	/**
-	 * 
+	 *
      * should fully serialize a short-serialized object's CGLib proxy while it exists sole, not as a member of other object.
 	 *
 	 * @throws Exception
@@ -95,9 +95,9 @@ public class XStreamShortSerializerTest extends BaseModuleContextSensitiveTest{
 		XMLAssert.assertXpathEvaluatesTo("501", "/person/personId", xmlOutput);
 		XMLAssert.assertXpathEvaluatesTo("F", "/person/gender", xmlOutput);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * should shortly serialize a short-serialized object's CGLib proxy while it exists as a member of other object.
 	 *
 	 * @throws Exception
@@ -110,13 +110,13 @@ public class XStreamShortSerializerTest extends BaseModuleContextSensitiveTest{
 		XMLAssert.assertXpathEvaluatesTo("da7f524f-27ce-4bb2-86d6-6d1d05312bd5", "/personAddress/person/@uuid", xmlOutput);
 		XMLAssert.assertXpathNotExists("/personAddress/person/*", xmlOutput);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * should fully deserialize a short-serialized object while it exists sole as the root node of serialized xml string
-	 * 
-	 * @throws Exception 
-	 * 
+	 *
+	 * @throws Exception
+	 *
 	 */
 	@Test
 	public void shouldFullyDeserializeObject() throws Exception{
@@ -133,18 +133,18 @@ public class XStreamShortSerializerTest extends BaseModuleContextSensitiveTest{
 		xmlBuilder.append("  <format>java.lang.String</format>\n");
 		xmlBuilder.append("  <searchable>false</searchable>\n");
 		xmlBuilder.append("</personAttributeType>\n");
-		
+
 		PersonAttributeType pat = Context.getSerializationService().deserialize(xmlBuilder.toString(), PersonAttributeType.class, XStreamShortSerializer.class);
 		assertEquals(1, pat.getPersonAttributeTypeId().intValue());
 		assertEquals("b3b6d540-a32e-44c7-91b3-292d97667518", pat.getUuid());
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * should shortly deserialize a short-serialized object while it exists as a child node of serialized xml string
-	 * 
-	 * @throws Exception 
-	 * 
+	 *
+	 * @throws Exception
+	 *
 	 */
 	@Test
 	public void shouldShortlyDeserializeObject() throws Exception{
@@ -161,12 +161,12 @@ public class XStreamShortSerializerTest extends BaseModuleContextSensitiveTest{
 		assertEquals(1, pa.getAttributeType().getPersonAttributeTypeId().intValue());
 		assertEquals("b3b6d540-a32e-44c7-91b3-292d97667518", pa.getAttributeType().getUuid());
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * should shortly serialize a short-serialized object while it exist as the element of a Collection
 	 *
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@Test
 	public void shouldShortlySerializeElementInCollection() throws Exception{
@@ -185,12 +185,12 @@ public class XStreamShortSerializerTest extends BaseModuleContextSensitiveTest{
 		XMLAssert.assertXpathEvaluatesTo(user2.getUuid(), "/list/user[2]/@uuid", xmlOutput);
 		XMLAssert.assertXpathNotExists("/list/user[2]/*", xmlOutput);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * should shortly serialize a short-serialized object while it exist as the key/value of a Map
 	 *
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@Test
 	public void shouldShortlySerializeKeyInMap() throws Exception{

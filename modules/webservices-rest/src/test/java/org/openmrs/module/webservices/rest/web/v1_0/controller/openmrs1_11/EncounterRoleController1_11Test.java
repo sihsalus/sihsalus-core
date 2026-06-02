@@ -22,32 +22,32 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 public class EncounterRoleController1_11Test extends MainResourceControllerTest {
-	
+
 	@Override
 	public String getURI() {
 		return "encounterrole";
 	}
-	
+
 	@Override
 	public String getUuid() {
 		return RestTestConstants1_11.ENCOUNTER_ROLE_UUID;
 	}
-	
+
 	@Override
 	public long getAllCount() {
 		return 1;
 	}
-	
+
 	@Test
 	public void shouldGetAnEncounterRoleByName() throws Exception {
 		final String ROLE_NAME = "Unknown";
-		
+
 		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
 		req.setParameter("q", ROLE_NAME);
 		req.setParameter("v", "default");
 		SimpleObject result = deserialize(handle(req));
 		Object encounterRoleObject = Util.getResultsList(result).get(0);
-		
+
 		EncounterRole encounterRole = Context.getEncounterService().getEncounterRoleByName(ROLE_NAME);
 		Assertions.assertEquals(encounterRole.getUuid(), PropertyUtils.getProperty(encounterRoleObject, "uuid"));
 		Assertions.assertEquals(encounterRole.getName(), PropertyUtils.getProperty(encounterRoleObject, "name"));

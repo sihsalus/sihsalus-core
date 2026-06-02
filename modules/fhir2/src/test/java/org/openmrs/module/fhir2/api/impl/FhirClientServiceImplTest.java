@@ -20,21 +20,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class FhirClientServiceImplTest {
-	
+
 	private static final String R3_URL = "https://demo.openmrs.org/openmrs/ws/fhir2/R3";
-	
+
 	private static final String R4_URL = "https://demo.openmrs.org/openmrs/ws/fhir2/R4";
-	
+
 	private FhirClientServiceImpl fhirClientService;
-	
+
 	@Before
 	public void setup() {
 		FhirContext fhirR3 = FhirContext.forDstu3Cached();
 		FhirContext fhirR4 = FhirContext.forR4Cached();
-		
+
 		fhirClientService = new FhirClientServiceImpl(fhirR3, fhirR4);
 	}
-	
+
 	@Test
 	public void getClientForR3_shouldReturnAValidClient() {
 		IGenericClient client3 = fhirClientService.getClientForR3(R3_URL);
@@ -42,7 +42,7 @@ public class FhirClientServiceImplTest {
 		assertThat(client3.getFhirContext().getVersion().getVersion(), equalTo(FhirVersionEnum.DSTU3));
 		assertThat(client3.getServerBase(), equalTo(R3_URL));
 	}
-	
+
 	@Test
 	public void getClientForR4_shouldReturnaValidClient() {
 		IGenericClient client4 = fhirClientService.getClientForR4(R4_URL);
@@ -50,5 +50,5 @@ public class FhirClientServiceImplTest {
 		assertThat(client4.getFhirContext().getVersion().getVersion(), equalTo(FhirVersionEnum.R4));
 		assertThat(client4.getServerBase(), equalTo(R4_URL));
 	}
-	
+
 }

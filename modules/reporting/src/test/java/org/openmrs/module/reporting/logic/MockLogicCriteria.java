@@ -23,9 +23,9 @@ import org.openmrs.logic.op.Operator;
  * Mock implementation of Logic Criteria to get around issues using the actual Logic Service implementations
  */
 public class MockLogicCriteria implements LogicCriteria {
-	
+
 	private String token;
-	
+
 	public MockLogicCriteria(String token) {
 		this.token = token;
 	}
@@ -36,7 +36,7 @@ public class MockLogicCriteria implements LogicCriteria {
 	public String getRootToken() {
 		return token;
 	}
-	
+
 	/**
 	 * @see LogicCriteria#getExpression()
 	 */

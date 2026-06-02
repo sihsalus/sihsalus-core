@@ -30,25 +30,25 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class OrderFrequencyResource1_10Test extends BaseDelegatingResourceTest<OrderFrequencyResource1_10, OrderFrequency> {
-	
+
 	@Autowired
 	ConceptService conceptService;
-	
+
 	@Override
 	public OrderFrequency newObject() {
 		return Context.getOrderService().getOrderFrequencyByUuid(getUuidProperty());
 	}
-	
+
 	@Override
 	public String getDisplayProperty() {
 		return "1/day x 7 days/week";
 	}
-	
+
 	@Override
 	public String getUuidProperty() {
 		return RestTestConstants1_10.ORDER_FREQUENCY_UUID;
 	}
-	
+
 	@Test
 	public void testFullConceptRepresentation() throws Exception {
 		SimpleObject rep = getResource().asRepresentation(getObject(), new NamedRepresentation("fullconcept"));
@@ -57,17 +57,17 @@ public class OrderFrequencyResource1_10Test extends BaseDelegatingResourceTest<O
 		SimpleObject name = (SimpleObject) names.get(0);
 		assertThat(name.get("locale"), notNullValue());
 	}
-	
+
 	@Test
 	public void testGetByUniqueIdWorksWithConceptMappings() throws Exception {
 		ConceptSource snomed = conceptService.getConceptSource(2);
 		ConceptReferenceTerm term = new ConceptReferenceTerm(snomed, "307486002", null);
 		conceptService.saveConceptReferenceTerm(term);
-		
+
 		Concept concept = conceptService.getConcept(113);
 		concept.addConceptMapping(new ConceptMap(term, conceptService.getConceptMapType(2)));
 		conceptService.saveConcept(concept);
-		
+
 		OrderFrequency orderFrequency = getResource().getByUniqueId("SNOMED CT:307486002");
 		assertThat(orderFrequency.getConcept(), is(concept));
 	}

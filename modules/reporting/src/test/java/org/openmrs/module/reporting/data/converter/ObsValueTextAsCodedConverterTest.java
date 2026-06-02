@@ -34,9 +34,9 @@ public class ObsValueTextAsCodedConverterTest extends BaseModuleContextSensitive
         Location expectedLocation = locationService.getLocation(2);
         Obs obs = new Obs();
         obs.setValueText("2");
-        
+
         DataConverter converter = new ObsValueTextAsCodedConverter<Location>(Location.class);
-        
+
         assertThat((Location) converter.convert(obs), is(expectedLocation));
     }
 
@@ -52,7 +52,7 @@ public class ObsValueTextAsCodedConverterTest extends BaseModuleContextSensitive
     }
 
     // TODO we can remove test below once we support other OpenmrsObjects
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailIfTypeOtherThanLocation() {
         ObsValueTextAsCodedConverter converter = new ObsValueTextAsCodedConverter<Patient>(Patient.class);

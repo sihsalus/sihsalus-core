@@ -29,48 +29,48 @@ import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VisitPeriodTranslatorImplTest extends TestCase {
-	
+
 	private EncounterPeriodTranslator<Visit> visitPeriodTranslator;
-	
+
 	Date periodStart, periodEnd;
-	
+
 	@SneakyThrows
 	@Before
 	public void setup() {
 		visitPeriodTranslator = new VisitPeriodTranslatorImpl();
-		
+
 		periodStart = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("10-Jan-2019 10:11:00");
 		periodEnd = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("10-Jan-2019 11:00:00");
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldMapPairOfDatesToPeriod() {
 		Visit visit = new Visit();
 		visit.setStartDatetime(periodStart);
 		visit.setStopDatetime(periodEnd);
-		
+
 		Period result = visitPeriodTranslator.toFhirResource(visit);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getStart(), equalTo(periodStart));
 		assertThat(result.getEnd(), equalTo(periodEnd));
 	}
-	
+
 	@Test
 	public void toOpenmrsObject_shouldMapPeriodToVisit() {
 		Encounter fhirEncounter = new Encounter();
-		
+
 		Period period = new Period();
 		period.setStart(periodStart);
 		period.setEnd(periodEnd);
-		
+
 		fhirEncounter.setPeriod(period);
-		
+
 		Visit result = visitPeriodTranslator.toOpenmrsType(new Visit(), period);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getStartDatetime(), equalTo(periodStart));
 		assertThat(result.getStopDatetime(), equalTo(periodEnd));
 	}
-	
+
 }

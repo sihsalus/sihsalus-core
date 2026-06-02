@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitiveTest {
-	
+
 	private CashierItemPriceDAO cashierItemPriceDAO;
-	
+
 	@BeforeEach
 	public void setup() {
 		cashierItemPriceDAO = Context.getRegisteredComponent("cashierItemPriceDAO", CashierItemPriceDAO.class);
@@ -36,7 +36,7 @@ public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitive
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillableServiceTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
 	}
-	
+
 	/**
 	 * @see CashierItemPriceDAO#getCashierItemPrice(Integer)
 	 */
@@ -46,7 +46,7 @@ public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitive
 		assertNotNull(cashierItemPrice);
 		assertEquals("Standard Price", cashierItemPrice.getName());
 	}
-	
+
 	/**
 	 * @see CashierItemPriceDAO#getCashierItemPrice(Integer)
 	 */
@@ -54,7 +54,7 @@ public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitive
 	public void getCashierItemPrice_shouldReturnNullIfIdNotFound() {
 		assertNull(cashierItemPriceDAO.getCashierItemPrice(999));
 	}
-	
+
 	/**
 	 * @see CashierItemPriceDAO#getCashierItemPriceByUuid(String)
 	 */
@@ -65,7 +65,7 @@ public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitive
 		assertNotNull(cashierItemPrice);
 		assertEquals("8631b434-78aa-102b-91a0-001e378eb680", cashierItemPrice.getUuid());
 	}
-	
+
 	/**
 	 * @see CashierItemPriceDAO#getCashierItemPriceByUuid(String)
 	 */
@@ -73,7 +73,7 @@ public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitive
 	public void getCashierItemPriceByUuid_shouldReturnNullIfUuidNotFound() {
 		assertNull(cashierItemPriceDAO.getCashierItemPriceByUuid("wrong-uuid"));
 	}
-	
+
 	/**
 	 * @see CashierItemPriceDAO#saveCashierItemPrice(CashierItemPrice)
 	 */
@@ -84,7 +84,7 @@ public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitive
 		cashierItemPrice.setPrice(BigDecimal.valueOf(100));
 		cashierItemPriceDAO.saveCashierItemPrice(cashierItemPrice);
 	}
-	
+
 	/**
 	 * @see CashierItemPriceDAO#purgeCashierItemPrice(CashierItemPrice)
 	 */
@@ -92,12 +92,12 @@ public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitive
 	public void purgeCashierItemPrice_shouldPurgeCashierItemPrice() {
 		CashierItemPrice cashierItemPrice = cashierItemPriceDAO.getCashierItemPrice(0);
 		assertNotNull(cashierItemPrice);
-		
+
 		cashierItemPriceDAO.purgeCashierItemPrice(cashierItemPrice);
-		
+
 		assertNull(cashierItemPriceDAO.getCashierItemPrice(0));
 	}
-	
+
 	/**
 	 * @see CashierItemPriceDAO#getCashierItemPrices(boolean)
 	 */
@@ -106,10 +106,10 @@ public class HibernateCashierItemPriceDAOTest extends BaseModuleContextSensitive
 		List<CashierItemPrice> unretiredItems = cashierItemPriceDAO.getCashierItemPrices(false);
 		assertNotNull(unretiredItems);
 		assertEquals(2, unretiredItems.size());
-		
+
 		List<CashierItemPrice> allItems = cashierItemPriceDAO.getCashierItemPrices(true);
 		assertNotNull(allItems);
 		assertEquals(3, allItems.size());
 	}
-	
+
 }

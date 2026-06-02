@@ -319,12 +319,12 @@ public class ObsController1_9Test extends MainResourceControllerTest {
 
     @Test
     public void shouldGetObsByUuid() throws Exception {
-    	MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-    	SimpleObject result = deserialize(handle(req));
+	MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+	SimpleObject result = deserialize(handle(req));
 
-    	ObsService obsService = Context.getObsService();
-    	Obs obs = obsService.getObsByUuid(getUuid());
-    	assertEquals(obs.getUuid(), PropertyUtils.getProperty(result, "uuid"));
+	ObsService obsService = Context.getObsService();
+	Obs obs = obsService.getObsByUuid(getUuid());
+	assertEquals(obs.getUuid(), PropertyUtils.getProperty(result, "uuid"));
     }
 
     private ConceptComplex newConceptComplex() {
