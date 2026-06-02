@@ -1,0 +1,15 @@
+<dataset>
+    <imaging_OrthancConfiguration
+        ID="1"
+        orthancBaseUrl="http://localhost:8072"
+        orthancUsername="orthanc"
+        orthancPassword="orthanc"
+        lastChangedIndex="-1" />
+
+<!--    <imaging_OrthancConfiguration-->
+<!--            ID="2"-->
+<!--            orthancBaseUrl="http://localhost:8062"-->
+<!--            orthancUsername="orthanc"-->
+<!--            orthancPassword="orthanc"-->
+<!--            lastChangedIndex="-1"/>-->
+</dataset>

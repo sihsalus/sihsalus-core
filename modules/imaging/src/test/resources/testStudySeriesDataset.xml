@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dateset>
+    <DicomSeries
+            seriesInstanceUID="seriesInstanceUID111"
+            orthancSeriesUID="series-uid-001"
+            orthancConfiguration='{"ID": "1", "orthancBaseUrl":"http://localhost:8052","orthancUsername":"orthanc","orthancPassword":"orthanc", "lastChangedIndex": "-1"}'
+            seriesDescription="Brain MRI T1"
+            seriesNumber="1"
+            modality="MR"
+            seriesDate="2025-07-04"
+            seriesTime="09:00:00"
+    />
+    <DicomSeries
+            seriesInstanceUID="seriesInstanceUID222"
+            orthancSeriesUID="series-uid-002"
+            orthancConfiguration='{"ID": "1", "orthancBaseUrl":"http://localhost:8052","orthancUsername":"orthanc","orthancPassword":"orthanc", "lastChangedIndex": "-1"}'
+            seriesDescription="Chest CT"
+            seriesNumber="2"
+            modality="CT"
+            seriesDate="2025-07-04"
+            seriesTime="09:00:00"
+    />
+    <DicomSeries
+            seriesInstanceUID="seriesInstanceUID333"
+            orthancSeriesUID="series-uid-003"
+            orthancConfiguration='{"ID": "1", "orthancBaseUrl":"http://localhost:8052","orthancUsername":"orthanc","orthancPassword":"orthanc", "lastChangedIndex": "-1"}'
+            seriesDescription="Abdomen Ultrasound"
+            seriesNumber="3"
+            modality="US"
+            seriesDate="2025-07-04"
+            seriesTime="11:45:00"
+    />
+</dateset>

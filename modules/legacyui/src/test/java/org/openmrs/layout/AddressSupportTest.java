@@ -1,0 +1,65 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.layout;
+
+import java.lang.reflect.Field;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.openmrs.api.context.Context;
+import org.openmrs.layout.address.AddressSupport;
+import org.openmrs.layout.address.AddressTemplate;
+import org.openmrs.test.Verifies;
+import org.openmrs.util.OpenmrsConstants;
+import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
+import org.springframework.test.context.transaction.AfterTransaction;
+
+public class AddressSupportTest extends BaseModuleWebContextSensitiveTest {
+	
+	private static final String PERSON_ADDRESS_VALIDATOR_DATASET_PACKAGE_PATH = "org/openmrs/include/personAddressValidatorTestDataset.xml";
+	
+	/**
+	 * As described in TRUNK-3849, when AddressSupport was copied from package
+	 * org.openmrs.layout.web.address to org.openmrs.layout.address, and the AddressTemplate in the
+	 * database was updated, the web AddressSupport class stopped working with ClassCastExceptions.
+	 * A fix was made for backward-compatibility; this test ensures that the fix is working.
+	 */
+	@Test
+	@Verifies(value = "should succeed even if db AddressTemplate class has changed", method = "getAddressTemplate()")
+	public void getAddressTemplate_shouldSucceedEvenIfDBAddressTemplateClassHasChanged() throws Exception {
+		
+		executeDataSet(PERSON_ADDRESS_VALIDATOR_DATASET_PACKAGE_PATH);
+		
+		//first make sure the test setup is correct even if the dataset changes -- the AddressTemplate class used by this AddressSupport class
+		//(in the 'web' package differs from the updated classname in the DB
+		String newAddressTemplateClass = "org.openmrs.layout.address.AddressTemplate";
+		String xml = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_ADDRESS_TEMPLATE);
+		Assertions.assertTrue(StringUtils.contains(xml, newAddressTemplateClass));
+		Assertions.assertEquals(newAddressTemplateClass, AddressTemplate.class.getName());
+		
+		AddressSupport addressSupport = AddressSupport.getInstance();
+		List<AddressTemplate> addressTemplates = addressSupport.getAddressTemplate();
+		Assertions.assertNotNull(addressTemplates.get(0));
+	}
+
+	// AddressSupport caches the template in a static singleton that outlives the test's
+	// transaction rollback. Null the cache after rollback so it lazy-loads from the restored
+	// global property on the next call; otherwise later tests inherit the test's required-fields
+	// template and fail PersonAddress validation. No public reset API, hence reflection.
+	@AfterTransaction
+	public void resetAddressSupportSingleton() throws Exception {
+		Field field = AddressSupport.class.getSuperclass().getDeclaredField("layoutTemplates");
+		field.setAccessible(true);
+		field.set(AddressSupport.getInstance(), null);
+	}
+
+}

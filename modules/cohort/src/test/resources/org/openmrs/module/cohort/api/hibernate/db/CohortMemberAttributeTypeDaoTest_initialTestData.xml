@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <cohort_member_attribute_type cohort_member_attribute_type_id="1" name="cohort member attribute type" datatype="String"
+                            description="This is description" creator="1" date_created="2021-01-01 00:00:00.0" retired="false"
+                            min_occurs="1" uuid="9eb7fe43-2813-4ebc-80dc-2e5d30251bb7"/>
+    <cohort_member_attribute_type cohort_member_attribute_type_id="2" name="Voided cohort member attribute type" datatype="String"
+                                  description="This is voided cohort member attribute type description" creator="1" date_created="2021-01-01 00:00:00.0" retired="true"
+                                  retired_by="1" date_retired="2020-01-01 00:00:00.0" retire_reason="This is retired"
+                                  min_occurs="1" uuid="8gh7fe43-2813-4ebc-80dc-2e5d30251lk2"/>
+</dataset>

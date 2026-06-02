@@ -1,0 +1,341 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<!-- ############################################################################################################## -->
+	<!-- Metadata sources -->
+	<!-- ############################################################################################################## -->
+	<metadatamapping_metadata_source metadata_source_id="1"
+									 uuid="df29a160-0add-4598-8ac2-b11a9eb3cdb8"
+									 name="Integration Test Metadata Source 1"
+									 creator="1"
+									 date_created="2015-10-25 17:00:00.0"
+									 retired="false" />
+	<metadatamapping_metadata_source metadata_source_id="2"
+									 uuid="9cace0bd-6f2a-4cc3-a26d-6fa292f1f2c1"
+									 name="Integration Test Metadata Source 2"
+									 creator="1"
+									 date_created="2015-10-25 19:00:00.0"
+									 retired="false" />
+	<metadatamapping_metadata_source metadata_source_id="3"
+									 uuid="055aeb3a-da49-439e-a735-da28f26d9118"
+									 name="Integration Test Metadata Source 3"
+									 creator="1"
+									 date_created="2016-01-18 22:21:00.0"
+									 retired="true"
+									 retired_by="1"
+									 retire_reason="Invalid code"
+									 date_retired="2015-10-25 18:00:00.0" />
+
+	<!-- ############################################################################################################## -->
+	<!-- Metadata terms for source 1 -->
+	<!-- ############################################################################################################## -->
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="1"
+										   uuid="ca6b1024-42e9-48f2-8656-3757527ddf8c"
+										   name="Location Xanadu"
+										   metadata_source_id="1"
+										   code="mdt-xan"
+										   metadata_class="org.openmrs.Location"
+										   metadata_uuid="9356400c-a5a2-4532-8f2b-2361b3446eb8"
+										   creator="1"
+										   date_created="2015-10-25 17:00:00.0"
+										   retired="false" />
+	<!-- The Location Never Never Land is retired -->
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="2"
+										   uuid="2d93cda0-1316-4ed1-82ff-47f78068efaa"
+										   name="Location Never Never Land"
+										   metadata_source_id="1"
+										   code="mdt-nnl"
+										   metadata_class="org.openmrs.Location"
+										   metadata_uuid="167ce20c-4785-4285-9119-d197268f7f4a"
+										   creator="1"
+										   date_created="2015-10-25 17:00:00.0"
+										   retired="false" />
+	<!-- The Location Never Never Land is retired -->
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="3"
+										   uuid="a6830197-b0a6-4b21-8b72-de7a1ec9dfab"
+										   name="Location Never Never Land (Term Retired)"
+										   metadata_source_id="1"
+										   code="xyz"
+										   metadata_class="org.openmrs.Location"
+										   metadata_uuid="167ce20c-4785-4285-9119-d197268f7f4a"
+										   creator="1"
+										   date_created="2015-10-25 17:00:00.0"
+										   retired="true"
+										   retired_by="1"
+										   retire_reason="Invalid code"
+										   date_retired="2015-10-25 18:00:00.0" />
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="5"
+										   uuid="c8d56f38-682c-4460-af0b-4cfd5328bedb"
+										   name="Location Xanadu (Term Retired)"
+										   metadata_source_id="1"
+										   code="abc"
+										   metadata_class="org.openmrs.Location"
+										   metadata_uuid="9356400c-a5a2-4532-8f2b-2361b3446eb8"
+										   creator="1"
+										   date_created="2015-10-25 17:00:00.0"
+										   retired="true"
+										   retired_by="1"
+										   retire_reason="Invalid code"
+										   date_retired="2015-10-25 18:00:00.0" />
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="9"
+										   uuid="61774ac8-ac82-4fd9-b496-fd2016a016f7"
+										   name="Location Väinölä"
+										   metadata_source_id="1"
+										   code="mdt-väi"
+										   metadata_class="org.openmrs.Location"
+										   metadata_uuid="6a65bd39-a7be-43c0-b09f-d536026d6ff1"
+										   creator="1"
+										   date_created="2015-11-22 17:00:00.0"
+										   retired="false" />
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="10"
+										   uuid="749cf6eb-0d3b-4e09-9b7e-e31f07437f5e"
+										   name="Location Pohjola"
+										   metadata_source_id="1"
+										   code="mdt-poh"
+										   metadata_class="org.openmrs.Location"
+										   metadata_uuid="d3d180c6-d5fb-4202-b1a6-80a06273c158"
+										   creator="1"
+										   date_created="2015-11-22 17:01:00.0"
+										   retired="false" />
+	
+	<!-- ############################################################################################################## -->
+	<!-- Metadata sets for source 1 -->
+	<!-- ############################################################################################################## -->
+	<metadatamapping_metadata_set metadata_set_id="1"
+								  uuid="2fb06283-befc-4273-9448-2fcbbe4c99d5"
+								  creator="1"
+								  date_created="2015-11-14 22:02:00.0"
+								  retired="false" />
+	<!-- The MetadataTermMapping 5 is retired -->
+	<metadatamapping_metadata_set_member metadata_set_member_id="1"
+										 metadata_set_id="1"
+										 sort_weight="3.0"
+										 uuid="f75d45fb-f478-438a-970c-1a6b4f61f503"
+										 metadata_class="org.openmrs.Location"
+										 metadata_uuid="9356400c-a5a2-4532-8f2b-2361b3446eb8"
+										 creator="1"
+										 date_created="2015-11-14 22:02:00.0"
+										 retired="false" />
+	<metadatamapping_metadata_set_member metadata_set_member_id="2"
+										 metadata_set_id="1"
+										 sort_weight="1.0"
+										 uuid="e9bed2b0-2828-44b3-a499-e3a307600197"
+										 metadata_class="org.openmrs.Location"
+										 metadata_uuid="6a65bd39-a7be-43c0-b09f-d536026d6ff1"
+										 creator="1"
+										 date_created="2015-11-14 22:02:00.0"
+										 retired="false" />
+	<!-- The metadata item of MetadataTermMapping 2 is retired -->
+	<metadatamapping_metadata_set_member metadata_set_member_id="3"
+										 metadata_set_id="1"
+										 sort_weight="2.0"
+										 uuid="b0c99f16-14b8-49b2-8d14-1e7447ad6aa9"
+										 metadata_class="org.openmrs.Location"
+										 metadata_uuid="d3d180c6-d5fb-4202-b1a6-80a06273c158"
+										 creator="1"
+										 date_created="2015-11-14 22:02:00.0"
+										 retired="false" />
+	<metadatamapping_metadata_set_member metadata_set_member_id="6"
+										 metadata_set_id="1"
+										 sort_weight="9.0"
+										 uuid="e1e2cc7d-dfb4-4e26-85b1-727666ff066d"
+										 metadata_class="org.openmrs.EncounterType"
+										 metadata_uuid="06087e80-d565-11e3-9c1a-0800200c9a66"
+										 creator="1"
+										 date_created="2015-11-22 22:02:00.0"
+										 retired="false" />
+	<metadatamapping_metadata_set_member metadata_set_member_id="7"
+										 metadata_set_id="1"
+										 sort_weight="7.0"
+										 uuid="0bc57eff-3088-460d-880b-56988d02851b"
+										 metadata_class="org.openmrs.EncounterType"
+										 metadata_uuid="06087111-222-11e3-9c1a-0800200c9a66"
+										 creator="1"
+										 date_created="2015-11-22 22:02:00.0"
+										 retired="false" />
+	
+	<metadatamapping_metadata_set metadata_set_id="2"
+								  uuid="b3f4aa58-ab02-4379-ae61-ec2e15c29c1e"
+								  creator="1"
+								  date_created="2015-11-14 22:02:00.0"
+								  retired="true"
+								  retired_by="1"
+								  retire_reason="Invalid code"
+								  date_retired="2015-11-15 18:00:00.0" />
+	
+	<metadatamapping_metadata_set metadata_set_id="3"
+								  uuid="552b694b-c493-43ee-810a-16ab5542ee83"
+								  creator="1"
+								  date_created="2015-11-18 22:02:00.0"
+								  retired="false" />
+
+	<!-- location 20, defined below -->
+	<metadatamapping_metadata_set_member metadata_set_member_id="4"
+										 metadata_set_id="3"
+										 sort_weight="3.0"
+										 uuid="4c51deee-0c27-4991-92de-e09f8ae79c4d"
+										 metadata_class="org.openmrs.Location"
+										 metadata_uuid="r2d180c6-d5fb-4202-b1a6-80a06273c158"
+										 creator="1"
+										 date_created="2015-11-18 22:02:00.0"
+										 retired="false" />
+
+	<!-- location 2, Xanadu (but member is retired) -->
+	<metadatamapping_metadata_set_member metadata_set_member_id="5"
+										 metadata_set_id="3"
+										 sort_weight="1.0"
+										 uuid="0f41f557-f360-4d20-bc51-b6a1c4b547ac"
+										 metadata_class="org.openmrs.Location"
+										 metadata_uuid="9356400c-a5a2-4532-8f2b-2361b3446eb8"
+										 creator="1"
+										 date_created="2015-11-18 22:02:00.0"
+										 retired="true"
+										 retired_by="1"
+										 retire_reason="Invalid code"
+										 date_retired="2015-11-18 22:20:00.0" />
+
+	<metadatamapping_metadata_set metadata_set_id="4"
+								  uuid="efad9246-8346-4288-9d74-fd81dda3568b"
+								  creator="1"
+								  date_created="2015-11-18 22:02:00.0"
+								  retired="false" />
+
+	<!-- location 5, defined below -->
+	<metadatamapping_metadata_set_member metadata_set_member_id="10"
+										 metadata_set_id="4"
+										 sort_weight="3.0"
+										 uuid="58c0cf9d-c883-45e3-884e-92fc2e73566c"
+										 metadata_class="org.openmrs.Location"
+										 metadata_uuid="d3d180c6-d5fb-4202-b1a6-80a06273c158"
+										 creator="1"
+										 date_created="2015-11-18 22:02:00.0"
+										 retired="false" />
+
+	<!-- location 2, Xanadu (but member is retired) -->
+	<metadatamapping_metadata_set_member metadata_set_member_id="11"
+										 metadata_set_id="4"
+										 sort_weight="1.0"
+										 uuid="41f994e0-dec7-40dc-8ca2-c08c6b9aa88d"
+										 metadata_class="org.openmrs.Location"
+										 metadata_uuid="9356400c-a5a2-4532-8f2b-2361b3446eb8"
+										 creator="1"
+										 date_created="2015-11-18 22:02:00.0"
+										 retired="true"
+										 retired_by="1"
+										 retire_reason="Invalid code"
+										 date_retired="2015-11-18 22:20:00.0" />
+
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="20"
+										   uuid="3bd2888a-80ea-496a-ada5-cf6e6c5c02b0"
+										   name="Location Set"
+										   metadata_source_id="1"
+										   code="location-set"
+										   metadata_class="org.openmrs.module.metadatamapping.MetadataSet"
+										   metadata_uuid="efad9246-8346-4288-9d74-fd81dda3568b"
+										   creator="1"
+										   date_created="2015-11-22 17:01:00.0"
+										   retired="false" />
+	
+	<!-- ############################################################################################################## -->
+	<!-- Metadata terms for source 2 -->
+	<!-- ############################################################################################################## -->
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="6"
+										   uuid="08bbe6b9-6240-4e9b-92ab-e3e6c07a0d2c"
+										   name="Location Xanadu"
+										   metadata_source_id="2"
+										   code="mdt-xan"
+										   metadata_class="org.openmrs.Location"
+										   metadata_uuid="9356400c-a5a2-4532-8f2b-2361b3446eb8"
+										   creator="1"
+										   date_created="2015-10-28 17:00:00.0"
+										   retired="false" />
+	<!-- The Location Never Never Land is retired -->
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="4"
+										   uuid="a1e82994-7b78-4a40-96e5-b12b09d02b75"
+										   name="Location Never Never Land"
+										   metadata_source_id="2"
+										   code="mdt-nnl"
+										   metadata_class="org.openmrs.Location"
+										   metadata_uuid="167ce20c-4785-4285-9119-d197268f7f4a"
+										   creator="1"
+										   date_created="2015-10-25 19:00:00.0"
+										   retired="false" />
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="7"
+										   uuid="f03b3f7c-e2af-4428-8bdf-c1361f03d6ef"
+										   name="Triomune-30"
+										   metadata_source_id="2"
+										   code="drug-tri"
+										   metadata_class="org.openmrs.Drug"
+										   metadata_uuid="3cfcf118-931c-46f7-8ff6-7b876f0d4202"
+										   creator="1"
+										   date_created="2015-10-28 19:00:00.0"
+										   retired="false" />
+	<metadatamapping_metadata_term_mapping metadata_term_mapping_id="8"
+										   uuid="7c4d921c-9694-4b5a-a56c-3cfb3b7c7f06"
+										   name="ASPIRIN"
+										   metadata_source_id="2"
+										   code="drug-asp"
+										   metadata_class="org.openmrs.Drug"
+										   metadata_uuid="05ec820a-d297-44e3-be6e-698531d9dd3f"
+										   creator="1"
+										   date_created="2015-10-28 19:00:00.0"
+										   retired="false" />
+	
+	<!-- ############################################################################################################## -->
+	<!-- Additional metadata items -->
+	<!-- ############################################################################################################## -->
+	<location location_id="4"
+			  name="Väinölä"
+			  description="Home of Väinämöinen and other good guys in Kalevala"
+			  address1=""
+			  address2=""
+			  city_village="Väinölä"
+			  state_province=""
+			  postal_code=""
+			  country="Finland"
+			  latitude=""
+			  longitude=""
+			  creator="1"
+			  date_created="2015-11-22 13:46:50.0"
+			  retired="false"
+			  uuid="6a65bd39-a7be-43c0-b09f-d536026d6ff1" />
+	<location location_id="5"
+			  name="Pohjola"
+			  description="Home of Louhi, the evil witch in Kalevala"
+			  address1=""
+			  address2=""
+			  city_village="Unknown"
+			  state_province=""
+			  postal_code=""
+			  country="Finland"
+			  latitude=""
+			  longitude=""
+			  creator="1"
+			  date_created="2015-11-22 13:48:50.0"
+			  retired="false"
+			  uuid="d3d180c6-d5fb-4202-b1a6-80a06273c158" />
+
+	<location location_id="20"
+			  name="PPNT"
+			  description="Home"
+			  address1=""
+			  address2=""
+			  city_village="Unknown"
+			  state_province=""
+			  postal_code=""
+			  country="Bologna"
+			  latitude=""
+			  longitude=""
+			  creator="1"
+			  date_created="2015-11-22 13:48:50.0"
+			  retired="true"
+			  uuid="r2d180c6-d5fb-4202-b1a6-80a06273c158" />
+
+	<encounter_type encounter_type_id="1002" name="Discharge" description="Discharge from Inpatient (allows autoclosing visits)" creator="1"
+					date_created="2012-10-23 18:04:14" retired="0" uuid="3bbdc54a-b8eb-11e2-9426-3edb8e345d35"/>
+
+	<encounter_type encounter_type_id="1003" name="Visit Note" description="Consult With Physican" creator="1"
+					date_created="2012-10-23 18:04:14" retired="0" uuid="06087e80-d565-11e3-9c1a-0800200c9a66"/>
+
+	<encounter_type encounter_type_id="1004" name="Admission" description="Admit to Inpatient" creator="1"
+					date_created="2012-10-23 18:04:14" retired="0" uuid="06087111-222-11e3-9c1a-0800200c9a66"/>
+</dataset>

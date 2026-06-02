@@ -1,0 +1,612 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.fhir2.providers.r4;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
+import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
+
+@RunWith(MockitoJUnitRunner.class)
+public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Patient> {
+	
+	private static final String PATIENT_UUID = "017312a1-cf56-43ab-ae87-44070b801d1c";
+	
+	private static final String WRONG_PATIENT_UUID = "017312a1-cf56-43ab-ae87-44070b801d1c";
+	
+	private static final String NAME = "Rick";
+	
+	private static final String GIVEN_NAME = "Nihilism";
+	
+	private static final String FAMILY_NAME = "Sanchez";
+	
+	private static final String GENDER = "male";
+	
+	private static final String IDENTIFIER = "M10000";
+	
+	private static final String BIRTH_DATE = "1947-04-01";
+	
+	private static final String DEATH_DATE = "2019-12-15";
+	
+	private static final String CITY = "Seattle";
+	
+	private static final String STATE = "Washington";
+	
+	private static final String COUNTRY = "Washington";
+	
+	private static final String POSTAL_CODE = "98136";
+	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	
+	private static final String GROUP_A = "dfb29c44-2e39-46c4-8cd7-18f21c6d47b1";
+	
+	private static final String GROUP_B = "284b505e-798c-4711-8c8f-64d3aa6c0bc1";
+	
+	private static final String PATIENT_1_GROUP_A = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
+	
+	private static final String PATIENT_2_GROUP_A = "5c521595-4e12-46b0-8248-b8f2d3697766";
+	
+	@Mock
+	private FhirPatientService patientService;
+	
+	private PatientFhirResourceProvider resourceProvider;
+	
+	private Patient patient;
+	
+	@Before
+	public void setup() {
+		resourceProvider = new PatientFhirResourceProvider();
+		resourceProvider.setPatientService(patientService);
+	}
+	
+	@Before
+	public void initPatient() {
+		HumanName name = new HumanName();
+		name.addGiven(GIVEN_NAME);
+		name.setFamily(FAMILY_NAME);
+		
+		patient = new Patient();
+		patient.setId(PATIENT_UUID);
+		patient.addName(name);
+		patient.setActive(true);
+		patient.setBirthDate(new Date());
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		setProvenanceResources(patient);
+	}
+	
+	@Test
+	public void getResourceType_shouldReturnResourceType() {
+		assertThat(resourceProvider.getResourceType(), equalTo(Patient.class));
+		assertThat(resourceProvider.getResourceType().getName(), equalTo(Patient.class.getName()));
+	}
+	
+	@Test
+	public void getPatientById_shouldReturnPatient() {
+		IdType id = new IdType();
+		id.setValue(PATIENT_UUID);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
+		
+		Patient result = resourceProvider.getPatientById(id);
+		assertThat(result.isResource(), is(true));
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void getPatientByWithWrongId_shouldThrowResourceNotFoundException() {
+		IdType idType = new IdType();
+		idType.setValue(WRONG_PATIENT_UUID);
+		assertThat(resourceProvider.getPatientById(idType).isResource(), is(true));
+		assertThat(resourceProvider.getPatientById(idType), nullValue());
+	}
+	
+	@Test
+	public void createPatient_shouldCreateNewPatient() {
+		when(patientService.create(patient)).thenReturn(patient);
+		
+		MethodOutcome result = resourceProvider.createPatient(patient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(patient));
+	}
+	
+	@Test
+	public void updatePatient_shouldUpdateRequestedPatient() {
+		when(patientService.update(PATIENT_UUID, patient)).thenReturn(patient);
+		
+		MethodOutcome result = resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), patient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(patient));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestExceptionForMissingId() {
+		Patient noIdPatient = new Patient();
+		
+		when(patientService.update(PATIENT_UUID, noIdPatient)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), noIdPatient);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updatePatient_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		patient.setId(WRONG_PATIENT_UUID);
+		
+		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+	}
+	
+	@Test
+	public void deletePatient_shouldDeleteRequestedPatient() {
+		OperationOutcome result = resourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+	
+	@Test
+	public void searchPatients_shouldReturnMatchingBundleOfPatientsByName() {
+		StringAndListParam nameParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(NAME)));
+		when(patientService.searchForPatients(new PatientSearchParams(nameParam, null, null, null, null, null, null, null,
+		        null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(nameParam, null, null, null, null, null, null, null, null,
+		    null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchPatients_shouldReturnMatchingBundleOfPatientsByGivenName() {
+		StringAndListParam givenNameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(NAME)));
+		when(patientService.searchForPatients(new PatientSearchParams(null, givenNameParam, null, null, null, null, null,
+		        null, null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, givenNameParam, null, null, null, null, null, null,
+		    null, null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchPatients_shouldReturnMatchingBundleOfPatientsByFamilyName() {
+		StringAndListParam familyNameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(FAMILY_NAME)));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, familyNameParam, null, null, null, null,
+		        null, null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, familyNameParam, null, null, null, null, null,
+		    null, null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchPatients_shouldReturnMatchingBundleOfPatientsByIdentifier() {
+		TokenAndListParam identifierParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(IDENTIFIER));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, identifierParam, null, null, null,
+		        null, null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, identifierParam, null, null, null, null,
+		    null, null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByGender() {
+		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, genderParam, null, null, null,
+		        null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, genderParam, null, null, null,
+		    null, null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByBirthDate() {
+		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, birthDateParam, null,
+		        null, null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, birthDateParam, null, null,
+		    null, null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeathDate() {
+		DateRangeParam deathDateParam = new DateRangeParam().setLowerBound(DEATH_DATE).setUpperBound(DEATH_DATE);
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, deathDateParam,
+		        null, null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, deathDateParam, null,
+		    null, null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeceased() {
+		TokenAndListParam deceasedParam = new TokenAndListParam().addAnd(new TokenOrListParam().add("true"));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null,
+		        deceasedParam, null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, deceasedParam,
+		    null, null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCity() {
+		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+		        cityParam, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, cityParam,
+		    null, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByState() {
+		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        stateParam, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null,
+		    stateParam, null, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByPostalCode() {
+		StringAndListParam postalCodeParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, postalCodeParam, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
+		    postalCodeParam, null, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCountry() {
+		StringAndListParam countryParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, countryParam, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
+		    null, countryParam, null, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByUUID() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_UUID));
+		
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, uuid, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
+		    null, null, uuid, null, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByLastUpdated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
+		
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, null, lastUpdated, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
+		    null, null, null, null, lastUpdated, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldAddRelatedResourcesForRevInclude() {
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("Observation:patient"));
+		
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, null, null, null, revIncludes)))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(patient, new Observation()), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
+		    null, null, null, null, null, null, revIncludes);
+		
+		List<IBaseResource> resultList = getResources(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(2));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));
+		assertThat(resultList.get(1).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(((Patient) resultList.iterator().next()).getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldNotAddResourcesForEmptyRevInclude() {
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		HashSet<Include> revIncludes = new HashSet<>();
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
+		    null, null, null, null, null, null, revIncludes);
+		
+		List<IBaseResource> resultList = getResources(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));
+		assertThat(((Patient) resultList.iterator().next()).getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByGroup() {
+		// Prepare patient and group
+		Group group = new Group();
+		group.setActive(true);
+		group.addMember(new Group.GroupMemberComponent(new Reference("Patient/" + patient.getId())));
+		
+		HasAndListParam groupParam = new HasAndListParam().addAnd(
+		    new HasOrListParam().add(new HasParam(FhirConstants.GROUP, FhirConstants.INCLUDE_MEMBER_PARAM, "id", GROUP_B)));
+		
+		when(patientService.searchForPatients(any(PatientSearchParams.class)))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
+		    null, null, null, groupParam, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsInGroups() {
+		// Prepare patients and groups
+		Patient patient1_grpA = new Patient();
+		Patient patient2_grpA = new Patient();
+		patient1_grpA.setId(PATIENT_1_GROUP_A);
+		patient2_grpA.setId(PATIENT_2_GROUP_A);
+		
+		Group groupA = new Group();
+		groupA.setActive(true);
+		groupA.addMember(new Group.GroupMemberComponent(new Reference("Patient/" + patient1_grpA.getId())));
+		groupA.addMember(new Group.GroupMemberComponent(new Reference("Patient/" + patient2_grpA.getId())));
+		
+		Group groupB = new Group();
+		groupB.setActive(true);
+		groupB.addMember(new Group.GroupMemberComponent(new Reference("Patient/" + patient.getId())));
+		
+		HasAndListParam groupParam = new HasAndListParam().addAnd(new HasOrListParam()
+		        .add(new HasParam(FhirConstants.GROUP, FhirConstants.INCLUDE_MEMBER_PARAM, "id", GROUP_A + "," + GROUP_B)));
+		
+		when(patientService.searchForPatients(any(PatientSearchParams.class)))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(patient, patient1_grpA, patient2_grpA), 10, 3));
+		
+		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
+		    null, null, null, groupParam, null, null, null);
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, hasSize(equalTo(3)));
+		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
+		assertThat(resources.get(1).getIdElement().getIdPart(), is(PATIENT_1_GROUP_A));
+		assertThat(resources.get(2).getIdElement().getIdPart(), is(PATIENT_2_GROUP_A));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnPatientEverything() {
+		when(patientService.getPatientEverything(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.getPatientEverything(new IdType(PATIENT_UUID));
+		
+		List<IBaseResource> resultList = getAllResources(results);
+		
+		assertThat(resultList, notNullValue());
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));
+		assertThat(((Patient) resultList.iterator().next()).getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnNullForPatientEverythingWhenIdParamIsMissing() {
+		IBundleProvider results = resourceProvider.getPatientEverything(null);
+		
+		assertThat(results, nullValue());
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnNullForPatientEverythingWhenIdPartIsMissingInIdParam() {
+		IBundleProvider results = resourceProvider.getPatientEverything(new IdType());
+		
+		assertThat(results, nullValue());
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnNullPatientEverythingWhenIdPartIsEmptyInIdParam() {
+		IBundleProvider results = resourceProvider.getPatientEverything(new IdType(""));
+		
+		assertThat(results, nullValue());
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnPatientEverythingForTypeLevel() {
+		when(patientService.getPatientEverything())
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.getPatientEverything();
+		
+		List<IBaseResource> resultList = getAllResources(results);
+		
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasSize(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));
+		assertThat(((Patient) resultList.iterator().next()).getId(), equalTo(PATIENT_UUID));
+	}
+	
+	private List<IBaseResource> getResources(IBundleProvider result) {
+		return result.getResources(0, 10);
+	}
+	
+	private List<IBaseResource> getAllResources(IBundleProvider result) {
+		return result.getAllResources();
+	}
+}

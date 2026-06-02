@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <location location_id="101" name="Cohort-21 Location" creator="1" date_created="2021-10-14 00:00:00.0" retired="false"
+              uuid="65ab9667-7432-49af-8be8-65a4b58fc78k"/>
+
+    <cohort cohort_id="12" name="COVID-19 patients" description="COVID-19 patients" is_group_cohort="0" creator="1"
+            definition_handler="org.openmrs.module.cohort.definition.handler.DefaultCohortDefinitionHandler"
+            location_id="101" date_created="2005-01-01 00:00:00.0" voided="false" uuid="7f9a2479-c14a-4bfc-bcaa-632860258519"/>
+    <cohort cohort_id="13" name="Low VL patients" description="Patients with Low viral load count" is_group_cohort="0" creator="1"
+            definition_handler="org.openmrs.module.cohort.definition.handler.DefaultCohortDefinitionHandler"
+            location_id="101" date_created="2021-10-14 00:00:00.0" voided="true" uuid="3f5a7487-c14a-4bfc-bcaa-541860258321"/>
+</dataset>
