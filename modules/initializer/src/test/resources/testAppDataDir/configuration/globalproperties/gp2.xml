@@ -1,8 +1,0 @@
-<config>
-  <globalProperties>
-    <globalProperty>
-      <property>gp.gp21</property>
-      <value>GP two one</value>
-    </globalProperty>
-  </globalProperties>
-</config>

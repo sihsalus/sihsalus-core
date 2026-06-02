@@ -1,1 +1,0 @@
-insert into global_property (uuid, property, property_value) values (uuid(), 'test_changes_1', 'true');
