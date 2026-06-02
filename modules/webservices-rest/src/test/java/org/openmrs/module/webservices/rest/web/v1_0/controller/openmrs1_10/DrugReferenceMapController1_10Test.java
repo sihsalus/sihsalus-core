@@ -1,18 +1,18 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.controller.openmrs1_10;
 
-import java.util.Set;
-
-import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Set;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Drug;
@@ -30,70 +30,90 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 public class DrugReferenceMapController1_10Test extends MainResourceControllerTest {
 
-	private ConceptService conceptService;
+  private ConceptService conceptService;
 
-	@BeforeEach
-	public void before() throws Exception {
-		conceptService = Context.getConceptService();
-		executeDataSet(RestTestConstants1_10.DRUG_REFERENCE_MAP_TEST_DATASET);
-	}
+  @BeforeEach
+  public void before() throws Exception {
+    conceptService = Context.getConceptService();
+    executeDataSet(RestTestConstants1_10.DRUG_REFERENCE_MAP_TEST_DATASET);
+  }
 
-	@Override
-	public String getURI() {
-		return "drugreferencemap";
-	}
+  @Override
+  public String getURI() {
+    return "drugreferencemap";
+  }
 
-	@Override
-	public String getUuid() {
-		return RestTestConstants1_10.DRUG_REFERENCE_MAP_UUID;
-	}
+  @Override
+  public String getUuid() {
+    return RestTestConstants1_10.DRUG_REFERENCE_MAP_UUID;
+  }
 
-	@Override
-	public long getAllCount() {
-		return 0;
-	}
+  @Override
+  public long getAllCount() {
+    return 0;
+  }
 
-	@Test
-	public void shouldCreateNewDruReferenceMap() throws Exception {
-		final String JSON = "{\n" + "  \"conceptReferenceTerm\":\"" + RestTestConstants1_10.CONCEPT_REF_TERM_UUID + "\"\n"
-		        + ",\n" + "  \"conceptMapType\": \"" + RestTestConstants1_10.CONCEPT_MAP_TYPE_UUID + "\"\n" + ",\n"
-		        + "  \"drug\": \"" + RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID + "\"\n" + "}";
+  @Test
+  public void shouldCreateNewDruReferenceMap() throws Exception {
+    final String JSON =
+        "{\n"
+            + "  \"conceptReferenceTerm\":\""
+            + RestTestConstants1_10.CONCEPT_REF_TERM_UUID
+            + "\"\n"
+            + ",\n"
+            + "  \"conceptMapType\": \""
+            + RestTestConstants1_10.CONCEPT_MAP_TYPE_UUID
+            + "\"\n"
+            + ",\n"
+            + "  \"drug\": \""
+            + RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID
+            + "\"\n"
+            + "}";
 
-		Drug drug = conceptService.getDrugByUuid(RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID);
-		Set<DrugReferenceMap> maps = drug.getDrugReferenceMaps();
-		Assertions.assertEquals(1, maps.size());
+    Drug drug = conceptService.getDrugByUuid(RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID);
+    Set<DrugReferenceMap> maps = drug.getDrugReferenceMaps();
+    Assertions.assertEquals(1, maps.size());
 
-		MockHttpServletRequest req = newPostRequest(getURI(), JSON);
-		MockHttpServletResponse resp = handle(req);
-		Drug updatedDrug = conceptService.getDrugByUuid(RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID);
-		Set<DrugReferenceMap> updatedMaps = updatedDrug.getDrugReferenceMaps();
-		Assertions.assertEquals(2, updatedMaps.size());
+    MockHttpServletRequest req = newPostRequest(getURI(), JSON);
+    MockHttpServletResponse resp = handle(req);
+    Drug updatedDrug = conceptService.getDrugByUuid(RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID);
+    Set<DrugReferenceMap> updatedMaps = updatedDrug.getDrugReferenceMaps();
+    Assertions.assertEquals(2, updatedMaps.size());
 
-		SimpleObject result = deserialize(resp);
-		Assertions.assertEquals(RestTestConstants1_10.CONCEPT_REF_TERM_UUID,
-		    Util.getByPath(result, "conceptReferenceTerm/uuid"));
-		Assertions.assertEquals(RestTestConstants1_10.CONCEPT_MAP_TYPE_UUID, Util.getByPath(result, "conceptMapType/uuid"));
-		Assertions.assertEquals(RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID, Util.getByPath(result, "drug/uuid"));
-		Assertions.assertEquals("Panadol - concept_map_type2", Util.getByPath(result, "display"));
-	}
+    SimpleObject result = deserialize(resp);
+    Assertions.assertEquals(
+        RestTestConstants1_10.CONCEPT_REF_TERM_UUID,
+        Util.getByPath(result, "conceptReferenceTerm/uuid"));
+    Assertions.assertEquals(
+        RestTestConstants1_10.CONCEPT_MAP_TYPE_UUID, Util.getByPath(result, "conceptMapType/uuid"));
+    Assertions.assertEquals(
+        RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID, Util.getByPath(result, "drug/uuid"));
+    Assertions.assertEquals("Panadol - concept_map_type2", Util.getByPath(result, "display"));
+  }
 
-	@Test
-	public void shouldGetAdrugReferenceMapByUuid() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET,
-		    getURI() + "/" + RestTestConstants1_10.DRUG_REFERENCE_MAP_UUID);
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  public void shouldGetAdrugReferenceMapByUuid() throws Exception {
+    MockHttpServletRequest req =
+        request(RequestMethod.GET, getURI() + "/" + RestTestConstants1_10.DRUG_REFERENCE_MAP_UUID);
+    SimpleObject result = deserialize(handle(req));
 
-		Assertions.assertEquals(RestTestConstants1_10.DRUG_REFERENCE_MAP_UUID, Util.getByPath(result, "uuid"));
-		Assertions.assertEquals(RestTestConstants1_10.CONCEPT_MAP_TYPE_UUID2, Util.getByPath(result, "conceptMapType/uuid"));
-		Assertions.assertEquals(RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID, Util.getByPath(result, "drug/uuid"));
-		Assertions.assertEquals("Panadol - concept_map_type", Util.getByPath(result, "display"));
-	}
+    Assertions.assertEquals(
+        RestTestConstants1_10.DRUG_REFERENCE_MAP_UUID, Util.getByPath(result, "uuid"));
+    Assertions.assertEquals(
+        RestTestConstants1_10.CONCEPT_MAP_TYPE_UUID2,
+        Util.getByPath(result, "conceptMapType/uuid"));
+    Assertions.assertEquals(
+        RestTestConstants1_10.DRUG_REFERENCE_DRUG_UUID, Util.getByPath(result, "drug/uuid"));
+    Assertions.assertEquals("Panadol - concept_map_type", Util.getByPath(result, "display"));
+  }
 
-	@Override
-	@Test
-	public void shouldGetAll() throws Exception {
-		assertThrows(ResourceDoesNotSupportOperationException.class, () -> {
-			super.shouldGetAll();
-		});
-	}
+  @Override
+  @Test
+  public void shouldGetAll() throws Exception {
+    assertThrows(
+        ResourceDoesNotSupportOperationException.class,
+        () -> {
+          super.shouldGetAll();
+        });
+  }
 }

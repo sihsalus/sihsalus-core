@@ -1,22 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.controller.openmrs1_8;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.PatientIdentifierType;
@@ -30,159 +30,160 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-/**
- * Tests CRUD operations for {@link PatientIdentifierType}s via web service calls
- */
+/** Tests CRUD operations for {@link PatientIdentifierType}s via web service calls */
 public class PatientIdentifierTypeController1_8Test extends MainResourceControllerTest {
 
-	private PatientService service;
+  private PatientService service;
 
-	@Override
-	public String getURI() {
-		return "patientidentifiertype";
-	}
+  @Override
+  public String getURI() {
+    return "patientidentifiertype";
+  }
 
-	@Override
-	public String getUuid() {
-		return RestTestConstants1_8.PATIENT_IDENTIFIER_TYPE_UUID;
-	}
+  @Override
+  public String getUuid() {
+    return RestTestConstants1_8.PATIENT_IDENTIFIER_TYPE_UUID;
+  }
 
-	@Override
-	public long getAllCount() {
-		return service.getAllPatientIdentifierTypes(false).size();
-	}
+  @Override
+  public long getAllCount() {
+    return service.getAllPatientIdentifierTypes(false).size();
+  }
 
-	@BeforeEach
-	public void before() {
-		this.service = Context.getPatientService();
-	}
+  @BeforeEach
+  public void before() {
+    this.service = Context.getPatientService();
+  }
 
-	@Test
-	public void shouldGetAPatientIdentifierTypeByUuid() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  public void shouldGetAPatientIdentifierTypeByUuid() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    SimpleObject result = deserialize(handle(req));
 
-		PatientIdentifierType patientIdentifierType = service.getPatientIdentifierTypeByUuid(getUuid());
-		assertEquals(patientIdentifierType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
-		assertEquals(patientIdentifierType.getName(), PropertyUtils.getProperty(result, "name"));
-	}
+    PatientIdentifierType patientIdentifierType = service.getPatientIdentifierTypeByUuid(getUuid());
+    assertEquals(patientIdentifierType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
+    assertEquals(patientIdentifierType.getName(), PropertyUtils.getProperty(result, "name"));
+  }
 
-	@Test
-	public void shouldGetAPatientIdentifierTypeByName() throws Exception {
-		final String name = "OpenMRS Identification Number";
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + name);
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  public void shouldGetAPatientIdentifierTypeByName() throws Exception {
+    final String name = "OpenMRS Identification Number";
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + name);
+    SimpleObject result = deserialize(handle(req));
 
-		PatientIdentifierType patientIdentifierType = service.getPatientIdentifierTypeByName(name);
-		assertEquals(patientIdentifierType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
-		assertEquals(patientIdentifierType.getName(), PropertyUtils.getProperty(result, "name"));
-	}
+    PatientIdentifierType patientIdentifierType = service.getPatientIdentifierTypeByName(name);
+    assertEquals(patientIdentifierType.getUuid(), PropertyUtils.getProperty(result, "uuid"));
+    assertEquals(patientIdentifierType.getName(), PropertyUtils.getProperty(result, "name"));
+  }
 
-	@Test
-	public void shouldListAllPatientIdentifierTypes() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  public void shouldListAllPatientIdentifierTypes() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI());
+    SimpleObject result = deserialize(handle(req));
 
-		assertNotNull(result);
-		assertEquals(getAllCount(), Util.getResultsSize(result));
-	}
+    assertNotNull(result);
+    assertEquals(getAllCount(), Util.getResultsSize(result));
+  }
 
-	@Test
-	public void shouldCreateAPatientIdentifierType() throws Exception {
-		long originalCount = getAllCount();
+  @Test
+  public void shouldCreateAPatientIdentifierType() throws Exception {
+    long originalCount = getAllCount();
 
-		SimpleObject patientIdentifierType = new SimpleObject();
-		patientIdentifierType.add("name", "test name");
-		patientIdentifierType.add("description", "test description");
+    SimpleObject patientIdentifierType = new SimpleObject();
+    patientIdentifierType.add("name", "test name");
+    patientIdentifierType.add("description", "test description");
 
-		String json = new ObjectMapper().writeValueAsString(patientIdentifierType);
+    String json = new ObjectMapper().writeValueAsString(patientIdentifierType);
 
-		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
-		req.setContent(json.getBytes());
+    MockHttpServletRequest req = request(RequestMethod.POST, getURI());
+    req.setContent(json.getBytes());
 
-		SimpleObject newPatientIdentifierType = deserialize(handle(req));
+    SimpleObject newPatientIdentifierType = deserialize(handle(req));
 
-		assertNotNull(PropertyUtils.getProperty(newPatientIdentifierType, "uuid"));
-		assertEquals(originalCount + 1, getAllCount());
-	}
+    assertNotNull(PropertyUtils.getProperty(newPatientIdentifierType, "uuid"));
+    assertEquals(originalCount + 1, getAllCount());
+  }
 
-	@Test
-	public void shouldEditingAPatientIdentifierType() throws Exception {
-		final String newName = "updated name";
-		SimpleObject patientIdentifierType = new SimpleObject();
-		patientIdentifierType.add("name", newName);
+  @Test
+  public void shouldEditingAPatientIdentifierType() throws Exception {
+    final String newName = "updated name";
+    SimpleObject patientIdentifierType = new SimpleObject();
+    patientIdentifierType.add("name", newName);
 
-		String json = new ObjectMapper().writeValueAsString(patientIdentifierType);
+    String json = new ObjectMapper().writeValueAsString(patientIdentifierType);
 
-		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
-		req.setContent(json.getBytes());
-		handle(req);
-		assertEquals(newName, service.getPatientIdentifierTypeByUuid(getUuid()).getName());
-	}
+    MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
+    req.setContent(json.getBytes());
+    handle(req);
+    assertEquals(newName, service.getPatientIdentifierTypeByUuid(getUuid()).getName());
+  }
 
-	@Test
-	public void shouldRetireAPatientIdentifierType() throws Exception {
-		assertEquals(false, service.getPatientIdentifierTypeByUuid(getUuid()).isRetired());
-		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
-		req.addParameter("!purge", "");
-		final String reason = "none";
-		req.addParameter("reason", reason);
-		handle(req);
-		assertEquals(true, service.getPatientIdentifierTypeByUuid(getUuid()).isRetired());
-		assertEquals(reason, service.getPatientIdentifierTypeByUuid(getUuid()).getRetireReason());
-	}
+  @Test
+  public void shouldRetireAPatientIdentifierType() throws Exception {
+    assertEquals(false, service.getPatientIdentifierTypeByUuid(getUuid()).isRetired());
+    MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
+    req.addParameter("!purge", "");
+    final String reason = "none";
+    req.addParameter("reason", reason);
+    handle(req);
+    assertEquals(true, service.getPatientIdentifierTypeByUuid(getUuid()).isRetired());
+    assertEquals(reason, service.getPatientIdentifierTypeByUuid(getUuid()).getRetireReason());
+  }
 
-	@Test
-	public void shouldUnRetireAPatientIdentifierType() throws Exception {
-		PatientIdentifierType patientIdentifierType = service.getPatientIdentifierTypeByUuid(getUuid());
-		patientIdentifierType.setRetired(true);
-		patientIdentifierType.setRetireReason("random reason");
-		service.savePatientIdentifierType(patientIdentifierType);
-		patientIdentifierType = service.getPatientIdentifierTypeByUuid(getUuid());
-		assertTrue(patientIdentifierType.isRetired());
+  @Test
+  public void shouldUnRetireAPatientIdentifierType() throws Exception {
+    PatientIdentifierType patientIdentifierType = service.getPatientIdentifierTypeByUuid(getUuid());
+    patientIdentifierType.setRetired(true);
+    patientIdentifierType.setRetireReason("random reason");
+    service.savePatientIdentifierType(patientIdentifierType);
+    patientIdentifierType = service.getPatientIdentifierTypeByUuid(getUuid());
+    assertTrue(patientIdentifierType.isRetired());
 
-		String json = "{\"deleted\": \"false\"}";
-		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
+    String json = "{\"deleted\": \"false\"}";
+    SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
 
-		patientIdentifierType = service.getPatientIdentifierTypeByUuid(getUuid());
-		assertFalse(patientIdentifierType.isRetired());
-		assertEquals("false", PropertyUtils.getProperty(response, "retired").toString());
+    patientIdentifierType = service.getPatientIdentifierTypeByUuid(getUuid());
+    assertFalse(patientIdentifierType.isRetired());
+    assertEquals("false", PropertyUtils.getProperty(response, "retired").toString());
+  }
 
-	}
+  @Test
+  public void shouldPurgeAPatientIdentifierType() throws Exception {
+    final String uuid = "158d6b17-a8ab-435b-8fe3-952a04bda757";
+    assertNotNull(service.getPatientIdentifierTypeByUuid(uuid));
+    MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + uuid);
+    req.addParameter("purge", "true");
+    handle(req);
+    assertNull(service.getPatientIdentifierTypeByUuid(uuid));
+  }
 
-	@Test
-	public void shouldPurgeAPatientIdentifierType() throws Exception {
-		final String uuid = "158d6b17-a8ab-435b-8fe3-952a04bda757";
-		assertNotNull(service.getPatientIdentifierTypeByUuid(uuid));
-		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + uuid);
-		req.addParameter("purge", "true");
-		handle(req);
-		assertNull(service.getPatientIdentifierTypeByUuid(uuid));
-	}
+  @Test
+  public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    req.addParameter(
+        RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
+    SimpleObject result = deserialize(handle(req));
 
-	@Test
-	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		req.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
-		SimpleObject result = deserialize(handle(req));
+    assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
+  }
 
-		assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
-	}
+  @Test
+  public void shouldReturnCustomRepresentationForAuditInfo() throws Exception {
+    SimpleObject result =
+        deserialize(
+            handle(
+                newGetRequest(
+                    getURI() + "/" + getUuid(),
+                    new Parameter("v", "custom:(auditInfo:(creator:(uuid),dateCreated))"))));
 
-	@Test
-	public void shouldReturnCustomRepresentationForAuditInfo() throws Exception {
-		SimpleObject result = deserialize(
-				handle(newGetRequest(getURI() + "/" + getUuid(),
-						new Parameter("v", "custom:(auditInfo:(creator:(uuid),dateCreated))"))));
+    assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
+    assertNotNull(PropertyUtils.getProperty(result, "auditInfo.creator"));
+    assertNotNull(PropertyUtils.getProperty(result, "auditInfo.creator.uuid"));
+    assertNotNull(PropertyUtils.getProperty(result, "auditInfo.dateCreated"));
 
-		assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
-		assertNotNull(PropertyUtils.getProperty(result, "auditInfo.creator"));
-		assertNotNull(PropertyUtils.getProperty(result, "auditInfo.creator.uuid"));
-		assertNotNull(PropertyUtils.getProperty(result, "auditInfo.dateCreated"));
-
-		assertNull(PropertyUtils.getProperty(result, "name"));
-		assertNull(PropertyUtils.getProperty(result, "links"));
-		assertNull(PropertyUtils.getProperty(result, "auditInfo.creator.display"));
-		assertNull(PropertyUtils.getProperty(result, "auditInfo.creator.links"));
-	}
+    assertNull(PropertyUtils.getProperty(result, "name"));
+    assertNull(PropertyUtils.getProperty(result, "links"));
+    assertNull(PropertyUtils.getProperty(result, "auditInfo.creator.display"));
+    assertNull(PropertyUtils.getProperty(result, "auditInfo.creator.links"));
+  }
 }

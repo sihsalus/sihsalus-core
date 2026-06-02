@@ -1,14 +1,19 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_10;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
@@ -23,52 +28,47 @@ import org.openmrs.module.webservices.rest.web.representation.NamedRepresentatio
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
+public class OrderFrequencyResource1_10Test
+    extends BaseDelegatingResourceTest<OrderFrequencyResource1_10, OrderFrequency> {
 
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+  @Autowired ConceptService conceptService;
 
-public class OrderFrequencyResource1_10Test extends BaseDelegatingResourceTest<OrderFrequencyResource1_10, OrderFrequency> {
+  @Override
+  public OrderFrequency newObject() {
+    return Context.getOrderService().getOrderFrequencyByUuid(getUuidProperty());
+  }
 
-	@Autowired
-	ConceptService conceptService;
+  @Override
+  public String getDisplayProperty() {
+    return "1/day x 7 days/week";
+  }
 
-	@Override
-	public OrderFrequency newObject() {
-		return Context.getOrderService().getOrderFrequencyByUuid(getUuidProperty());
-	}
+  @Override
+  public String getUuidProperty() {
+    return RestTestConstants1_10.ORDER_FREQUENCY_UUID;
+  }
 
-	@Override
-	public String getDisplayProperty() {
-		return "1/day x 7 days/week";
-	}
+  @Test
+  public void testFullConceptRepresentation() throws Exception {
+    SimpleObject rep =
+        getResource().asRepresentation(getObject(), new NamedRepresentation("fullconcept"));
+    SimpleObject concept = (SimpleObject) rep.get("concept");
+    List names = (List) concept.get("names");
+    SimpleObject name = (SimpleObject) names.get(0);
+    assertThat(name.get("locale"), notNullValue());
+  }
 
-	@Override
-	public String getUuidProperty() {
-		return RestTestConstants1_10.ORDER_FREQUENCY_UUID;
-	}
+  @Test
+  public void testGetByUniqueIdWorksWithConceptMappings() throws Exception {
+    ConceptSource snomed = conceptService.getConceptSource(2);
+    ConceptReferenceTerm term = new ConceptReferenceTerm(snomed, "307486002", null);
+    conceptService.saveConceptReferenceTerm(term);
 
-	@Test
-	public void testFullConceptRepresentation() throws Exception {
-		SimpleObject rep = getResource().asRepresentation(getObject(), new NamedRepresentation("fullconcept"));
-		SimpleObject concept = (SimpleObject) rep.get("concept");
-		List names = (List) concept.get("names");
-		SimpleObject name = (SimpleObject) names.get(0);
-		assertThat(name.get("locale"), notNullValue());
-	}
+    Concept concept = conceptService.getConcept(113);
+    concept.addConceptMapping(new ConceptMap(term, conceptService.getConceptMapType(2)));
+    conceptService.saveConcept(concept);
 
-	@Test
-	public void testGetByUniqueIdWorksWithConceptMappings() throws Exception {
-		ConceptSource snomed = conceptService.getConceptSource(2);
-		ConceptReferenceTerm term = new ConceptReferenceTerm(snomed, "307486002", null);
-		conceptService.saveConceptReferenceTerm(term);
-
-		Concept concept = conceptService.getConcept(113);
-		concept.addConceptMapping(new ConceptMap(term, conceptService.getConceptMapType(2)));
-		conceptService.saveConcept(concept);
-
-		OrderFrequency orderFrequency = getResource().getByUniqueId("SNOMED CT:307486002");
-		assertThat(orderFrequency.getConcept(), is(concept));
-	}
+    OrderFrequency orderFrequency = getResource().getByUniqueId("SNOMED CT:307486002");
+    assertThat(orderFrequency.getConcept(), is(concept));
+  }
 }

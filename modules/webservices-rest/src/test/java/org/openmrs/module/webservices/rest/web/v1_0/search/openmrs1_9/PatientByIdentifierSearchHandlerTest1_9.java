@@ -1,14 +1,15 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.search.openmrs1_9;
 
+import java.util.List;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,86 +20,86 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.List;
-
 public class PatientByIdentifierSearchHandlerTest1_9 extends MainResourceControllerTest {
 
-	/**
-	 * @see MainResourceControllerTest#getURI()
-	 */
-	@Override
-	public String getURI() {
-		return "patient";
-	}
+  /**
+   * @see MainResourceControllerTest#getURI()
+   */
+  @Override
+  public String getURI() {
+    return "patient";
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getAllCount()
-	 */
-	@Override
-	public long getAllCount() {
-		return Context.getPatientService().getAllPatients(false).size();
-	}
+  /**
+   * @see MainResourceControllerTest#getAllCount()
+   */
+  @Override
+  public long getAllCount() {
+    return Context.getPatientService().getAllPatients(false).size();
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getUuid()
-	 */
-	@Override
-	public String getUuid() {
-		return RestTestConstants1_8.PATIENT_UUID;
-	}
+  /**
+   * @see MainResourceControllerTest#getUuid()
+   */
+  @Override
+  public String getUuid() {
+    return RestTestConstants1_8.PATIENT_UUID;
+  }
 
-	@Override
-	public void shouldGetAll() throws Exception {
-		// not supported
-	}
+  @Override
+  public void shouldGetAll() throws Exception {
+    // not supported
+  }
 
-	@Test
-	public void getSearchConfig_shouldReturnPatientByIdentifier() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
-		req.addParameter("identifier", "7TU-8");
+  @Test
+  public void getSearchConfig_shouldReturnPatientByIdentifier() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI());
+    req.addParameter("identifier", "7TU-8");
 
-		SimpleObject result = deserialize(handle(req));
-		List<Object> hits = (List<Object>) result.get("results");
-		Assertions.assertEquals(Context.getPatientService().getPatient(8).getUuid(),
-		    PropertyUtils.getProperty(hits.get(0), "uuid"));
-	}
+    SimpleObject result = deserialize(handle(req));
+    List<Object> hits = (List<Object>) result.get("results");
+    Assertions.assertEquals(
+        Context.getPatientService().getPatient(8).getUuid(),
+        PropertyUtils.getProperty(hits.get(0), "uuid"));
+  }
 
-	@Test
-	public void getSearchConfig_shouldReturnPatientByIdentifier_matchExact() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
-		req.addParameter("identifier", "7TU-8");
-		req.addParameter("searchType", "exact");
+  @Test
+  public void getSearchConfig_shouldReturnPatientByIdentifier_matchExact() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI());
+    req.addParameter("identifier", "7TU-8");
+    req.addParameter("searchType", "exact");
 
-		SimpleObject result = deserialize(handle(req));
-		List<Object> hits = (List<Object>) result.get("results");
-		Assertions.assertEquals(Context.getPatientService().getPatient(8).getUuid(),
-		    PropertyUtils.getProperty(hits.get(0), "uuid"));
-	}
+    SimpleObject result = deserialize(handle(req));
+    List<Object> hits = (List<Object>) result.get("results");
+    Assertions.assertEquals(
+        Context.getPatientService().getPatient(8).getUuid(),
+        PropertyUtils.getProperty(hits.get(0), "uuid"));
+  }
 
-	@Test
-	public void getSearchConfig_shouldReturnPatientByIdentifier_matchStart() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
-		req.addParameter("identifier", "7T");
-		req.addParameter("searchType", "start");
+  @Test
+  public void getSearchConfig_shouldReturnPatientByIdentifier_matchStart() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI());
+    req.addParameter("identifier", "7T");
+    req.addParameter("searchType", "start");
 
-		SimpleObject result = deserialize(handle(req));
-		List<Object> hits = (List<Object>) result.get("results");
-		Assertions.assertEquals(1, hits.size());
-	}
+    SimpleObject result = deserialize(handle(req));
+    List<Object> hits = (List<Object>) result.get("results");
+    Assertions.assertEquals(1, hits.size());
+  }
 
-	/**
-	 * Same as previous test, but invokes the patientByIdentifier SearchHandler
-	 * explicitly via the URI
-	 */
-	@Test
-	public void patientByIdentifierSearchHandler_shouldReturnPatientByIdentifier_matchStart() throws Exception {
-		String searchHandlerURI = getURI() + "/search/patientByIdentifier";
-		MockHttpServletRequest req = request(RequestMethod.GET, searchHandlerURI);
-		req.addParameter("identifier", "7T");
-		req.addParameter("searchType", "start");
+  /**
+   * Same as previous test, but invokes the patientByIdentifier SearchHandler explicitly via the URI
+   */
+  @Test
+  public void patientByIdentifierSearchHandler_shouldReturnPatientByIdentifier_matchStart()
+      throws Exception {
+    String searchHandlerURI = getURI() + "/search/patientByIdentifier";
+    MockHttpServletRequest req = request(RequestMethod.GET, searchHandlerURI);
+    req.addParameter("identifier", "7T");
+    req.addParameter("searchType", "start");
 
-		SimpleObject result = deserialize(handle(req));
-		List<Object> hits = (List<Object>) result.get("results");
-		Assertions.assertEquals(1, hits.size());
-	}
+    SimpleObject result = deserialize(handle(req));
+    List<Object> hits = (List<Object>) result.get("results");
+    Assertions.assertEquals(1, hits.size());
+  }
 }

@@ -1,14 +1,19 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.controller.openmrs1_9;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,176 +32,177 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-/**
- * Tests functionality of Program CRUD by MainResourceController
- */
+/** Tests functionality of Program CRUD by MainResourceController */
 public class ProgramEnrollmentController1_9Test extends MainResourceControllerTest {
 
-	private ProgramWorkflowService service;
+  private ProgramWorkflowService service;
 
-	private PatientService patientService;
+  private PatientService patientService;
 
-	@BeforeEach
-	public void before() {
-		this.service = Context.getProgramWorkflowService();
-		this.patientService = Context.getPatientService();
-	}
+  @BeforeEach
+  public void before() {
+    this.service = Context.getProgramWorkflowService();
+    this.patientService = Context.getPatientService();
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getURI()
-	 */
-	@Override
-	public String getURI() {
-		return "programenrollment";
-	}
+  /**
+   * @see MainResourceControllerTest#getURI()
+   */
+  @Override
+  public String getURI() {
+    return "programenrollment";
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getAllCount()
-	 */
-	@Override
-	public long getAllCount() {
-		return 0;
-	}
+  /**
+   * @see MainResourceControllerTest#getAllCount()
+   */
+  @Override
+  public long getAllCount() {
+    return 0;
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getUuid()
-	 */
-	@Override
-	public String getUuid() {
-		return RestTestConstants1_8.PATIENT_PROGRAM_UUID;
-	}
+  /**
+   * @see MainResourceControllerTest#getUuid()
+   */
+  @Override
+  public String getUuid() {
+    return RestTestConstants1_8.PATIENT_PROGRAM_UUID;
+  }
 
-	@Test
-	@Override
-	public void shouldGetAll() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
-		req.setParameter("patient", RestTestConstants1_8.PATIENT_IN_A_PROGRAM_UUID);
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  @Override
+  public void shouldGetAll() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI());
+    req.setParameter("patient", RestTestConstants1_8.PATIENT_IN_A_PROGRAM_UUID);
+    SimpleObject result = deserialize(handle(req));
 
-		Patient patient = patientService.getPatientByUuid(RestTestConstants1_8.PATIENT_IN_A_PROGRAM_UUID);
-		List<PatientProgram> patientPrograms = service.getPatientPrograms(patient, null, null, null, null, null, true);
-		Assertions.assertEquals(patientPrograms.size(), Util.getResultsSize(result));
-	}
+    Patient patient =
+        patientService.getPatientByUuid(RestTestConstants1_8.PATIENT_IN_A_PROGRAM_UUID);
+    List<PatientProgram> patientPrograms =
+        service.getPatientPrograms(patient, null, null, null, null, null, true);
+    Assertions.assertEquals(patientPrograms.size(), Util.getResultsSize(result));
+  }
 
-	@Test
-	public void shouldExcludeVoided() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
-		req.setParameter("patient", RestTestConstants1_8.PATIENT_WITH_VOIDED_PROGRAM_UUID);
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  public void shouldExcludeVoided() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI());
+    req.setParameter("patient", RestTestConstants1_8.PATIENT_WITH_VOIDED_PROGRAM_UUID);
+    SimpleObject result = deserialize(handle(req));
 
-		Patient patient = patientService.getPatientByUuid(RestTestConstants1_8.PATIENT_WITH_VOIDED_PROGRAM_UUID);
-		List<PatientProgram> patientPrograms = service.getPatientPrograms(patient, null, null, null, null, null, false);
-		Assertions.assertEquals(patientPrograms.size(), Util.getResultsSize(result));
-	}
+    Patient patient =
+        patientService.getPatientByUuid(RestTestConstants1_8.PATIENT_WITH_VOIDED_PROGRAM_UUID);
+    List<PatientProgram> patientPrograms =
+        service.getPatientPrograms(patient, null, null, null, null, null, false);
+    Assertions.assertEquals(patientPrograms.size(), Util.getResultsSize(result));
+  }
 
-	@Test
-	public void shouldGetTheDefaultRepresentationOfPatientProgram() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  public void shouldGetTheDefaultRepresentationOfPatientProgram() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    SimpleObject result = deserialize(handle(req));
 
-		Assertions.assertEquals(getUuid(), PropertyUtils.getProperty(result, "uuid"));
-		Assertions.assertNotNull(PropertyUtils.getProperty(result, "display"));
-		Assertions.assertNotNull(PropertyUtils.getProperty(result, "patient"));
-		Assertions.assertNotNull(PropertyUtils.getProperty(result, "program"));
-	}
+    Assertions.assertEquals(getUuid(), PropertyUtils.getProperty(result, "uuid"));
+    Assertions.assertNotNull(PropertyUtils.getProperty(result, "display"));
+    Assertions.assertNotNull(PropertyUtils.getProperty(result, "patient"));
+    Assertions.assertNotNull(PropertyUtils.getProperty(result, "program"));
+  }
 
-	@Test
-	public void shouldGetReferenceRepresentationOfPatientProgram() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		req.setParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, Representation.REF.getRepresentation());
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  public void shouldGetReferenceRepresentationOfPatientProgram() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    req.setParameter(
+        RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, Representation.REF.getRepresentation());
+    SimpleObject result = deserialize(handle(req));
 
-		Assertions.assertEquals(getUuid(), PropertyUtils.getProperty(result, "uuid"));
-		Assertions.assertNotNull(PropertyUtils.getProperty(result, "display"));
-		Assertions.assertNull(PropertyUtils.getProperty(result, "patient"));
-	}
+    Assertions.assertEquals(getUuid(), PropertyUtils.getProperty(result, "uuid"));
+    Assertions.assertNotNull(PropertyUtils.getProperty(result, "display"));
+    Assertions.assertNull(PropertyUtils.getProperty(result, "patient"));
+  }
 
-	@Test
-	public void shouldGetAPatientProgramByUuid() throws Exception {
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		SimpleObject result = deserialize(handle(req));
+  @Test
+  public void shouldGetAPatientProgramByUuid() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    SimpleObject result = deserialize(handle(req));
 
-		PatientProgram patientProgram = service.getPatientProgramByUuid(getUuid());
-		Assertions.assertNotNull(result);
-		Assertions.assertEquals(patientProgram.getUuid(), PropertyUtils.getProperty(result, "uuid"));
-		Assertions.assertEquals(patientProgram.getPatient().getUuid(),
-		    ((Map) PropertyUtils.getProperty(result, "patient")).get("uuid"));
-		Assertions.assertEquals(patientProgram.getProgram().getUuid(),
-		    ((Map) PropertyUtils.getProperty(result, "program")).get("uuid"));
-	}
+    PatientProgram patientProgram = service.getPatientProgramByUuid(getUuid());
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(patientProgram.getUuid(), PropertyUtils.getProperty(result, "uuid"));
+    Assertions.assertEquals(
+        patientProgram.getPatient().getUuid(),
+        ((Map) PropertyUtils.getProperty(result, "patient")).get("uuid"));
+    Assertions.assertEquals(
+        patientProgram.getProgram().getUuid(),
+        ((Map) PropertyUtils.getProperty(result, "program")).get("uuid"));
+  }
 
-	@Test
-	public void shouldEnrollAPatientToAProgram() throws Exception {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-		SimpleObject params = new SimpleObject();
-		params.add("patient", RestTestConstants1_8.PATIENT_UUID);
-		params.add("program", RestTestConstants1_8.PROGRAM_UUID);
-		params.add("dateEnrolled", dateFormat.format(new Date()));
+  @Test
+  public void shouldEnrollAPatientToAProgram() throws Exception {
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    SimpleObject params = new SimpleObject();
+    params.add("patient", RestTestConstants1_8.PATIENT_UUID);
+    params.add("program", RestTestConstants1_8.PROGRAM_UUID);
+    params.add("dateEnrolled", dateFormat.format(new Date()));
 
-		MockHttpServletRequest req = newPostRequest(getURI(), params);
-		SimpleObject result = deserialize(handle(req));
+    MockHttpServletRequest req = newPostRequest(getURI(), params);
+    SimpleObject result = deserialize(handle(req));
 
-		Patient patient = patientService.getPatientByUuid(RestTestConstants1_8.PATIENT_IN_A_PROGRAM_UUID);
-		List<PatientProgram> patientPrograms = service.getPatientPrograms(patient, null, null, null, null, null, true);
-		PatientProgram newEnrollment = patientPrograms.get(patientPrograms.size() - 1);
-		Assertions.assertEquals(newEnrollment.getProgram().getUuid(), ((Map) result.get("program")).get("uuid"));
-		Assertions.assertEquals(newEnrollment.getPatient().getUuid(), ((Map) result.get("patient")).get("uuid"));
-		Assertions.assertNotNull(result.get("dateEnrolled"));
-	}
+    Patient patient =
+        patientService.getPatientByUuid(RestTestConstants1_8.PATIENT_IN_A_PROGRAM_UUID);
+    List<PatientProgram> patientPrograms =
+        service.getPatientPrograms(patient, null, null, null, null, null, true);
+    PatientProgram newEnrollment = patientPrograms.get(patientPrograms.size() - 1);
+    Assertions.assertEquals(
+        newEnrollment.getProgram().getUuid(), ((Map) result.get("program")).get("uuid"));
+    Assertions.assertEquals(
+        newEnrollment.getPatient().getUuid(), ((Map) result.get("patient")).get("uuid"));
+    Assertions.assertNotNull(result.get("dateEnrolled"));
+  }
 
-	@Test
-	public void shouldUpdateTheDatesOfAProgramEnrollment() throws Exception {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		SimpleObject params = new SimpleObject();
-		String date = dateFormat.format(new Date());
-		params.add("dateEnrolled", date);
+  @Test
+  public void shouldUpdateTheDatesOfAProgramEnrollment() throws Exception {
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    SimpleObject params = new SimpleObject();
+    String date = dateFormat.format(new Date());
+    params.add("dateEnrolled", date);
 
-		MockHttpServletRequest req = newPostRequest(getURI() + "/" + getUuid(), params);
-		SimpleObject result = deserialize(handle(req));
+    MockHttpServletRequest req = newPostRequest(getURI() + "/" + getUuid(), params);
+    SimpleObject result = deserialize(handle(req));
 
-		PatientProgram patientProgram = service.getPatientProgramByUuid(getUuid());
-		Assertions.assertNotNull(result);
-		Assertions.assertEquals(dateFormat.format(patientProgram.getDateEnrolled()), date);
-	}
+    PatientProgram patientProgram = service.getPatientProgramByUuid(getUuid());
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(dateFormat.format(patientProgram.getDateEnrolled()), date);
+  }
 
-	@Test
-	public void shouldVoidAPatientProgram() throws Exception {
-		PatientProgram patientProgram = service.getPatientProgramByUuid(getUuid());
-		Assertions.assertTrue(!patientProgram.isVoided());
+  @Test
+  public void shouldVoidAPatientProgram() throws Exception {
+    PatientProgram patientProgram = service.getPatientProgramByUuid(getUuid());
+    Assertions.assertTrue(!patientProgram.isVoided());
 
-		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("!purge", "random reason")));
+    handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("!purge", "random reason")));
 
-		patientProgram = service.getPatientProgramByUuid(getUuid());
-		Assertions.assertTrue(patientProgram.isVoided());
-	}
+    patientProgram = service.getPatientProgramByUuid(getUuid());
+    Assertions.assertTrue(patientProgram.isVoided());
+  }
 
-	@Test
-	public void shouldUnVoidAPatientProgram() throws Exception {
-		PatientProgram patientProgram = service.getPatientProgramByUuid(getUuid());
-		service.voidPatientProgram(patientProgram, "some random reason");
-		patientProgram = service.getPatientProgramByUuid(getUuid());
-		Assertions.assertTrue(patientProgram.isVoided());
+  @Test
+  public void shouldUnVoidAPatientProgram() throws Exception {
+    PatientProgram patientProgram = service.getPatientProgramByUuid(getUuid());
+    service.voidPatientProgram(patientProgram, "some random reason");
+    patientProgram = service.getPatientProgramByUuid(getUuid());
+    Assertions.assertTrue(patientProgram.isVoided());
 
-		String json = "{\"deleted\": \"false\"}";
-		SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
+    String json = "{\"deleted\": \"false\"}";
+    SimpleObject response = deserialize(handle(newPostRequest(getURI() + "/" + getUuid(), json)));
 
-		patientProgram = service.getPatientProgramByUuid(getUuid());
-		Assertions.assertFalse(patientProgram.isVoided());
-		Assertions.assertEquals("false", PropertyUtils.getProperty(response, "voided").toString());
+    patientProgram = service.getPatientProgramByUuid(getUuid());
+    Assertions.assertFalse(patientProgram.isVoided());
+    Assertions.assertEquals("false", PropertyUtils.getProperty(response, "voided").toString());
+  }
 
-	}
-
-	@Test
-	public void shouldPurgeAPatientProgram() throws Exception {
-		Assertions.assertNotNull(service.getPatientProgramByUuid(getUuid()));
-		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("purge", "true")));
-		Assertions.assertNull(service.getPatientProgramByUuid(getUuid()));
-	}
-
+  @Test
+  public void shouldPurgeAPatientProgram() throws Exception {
+    Assertions.assertNotNull(service.getPatientProgramByUuid(getUuid()));
+    handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("purge", "true")));
+    Assertions.assertNull(service.getPatientProgramByUuid(getUuid()));
+  }
 }

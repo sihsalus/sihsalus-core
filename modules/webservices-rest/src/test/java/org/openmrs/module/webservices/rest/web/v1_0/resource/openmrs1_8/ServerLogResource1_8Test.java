@@ -1,17 +1,18 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8;
 
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.ArrayList;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmrs.module.webservices.helper.ServerLogActionWrapper;
 import org.openmrs.module.webservices.helper.openmrs2_4.ServerLogActionWrapper2_4;
@@ -23,68 +24,67 @@ import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs2_4.ServerLo
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.util.ArrayList;
-
-/**
- * Integration tests for the ServerLogResource class
- */
+/** Integration tests for the ServerLogResource class */
 public class ServerLogResource1_8Test extends BaseModuleWebContextSensitiveTest {
 
-	@Autowired
-	RestService restService;
+  @Autowired RestService restService;
 
-	@Autowired
-	private MainResourceController mainResourceController;
+  @Autowired private MainResourceController mainResourceController;
 
-	private final MockServerLogActionWrapper<ServerLogActionWrapper2_4> mockServerLogActionWrapper = new MockServerLogActionWrapper<ServerLogActionWrapper2_4>(
-			new ServerLogActionWrapper2_4());
+  private final MockServerLogActionWrapper<ServerLogActionWrapper2_4> mockServerLogActionWrapper =
+      new MockServerLogActionWrapper<ServerLogActionWrapper2_4>(new ServerLogActionWrapper2_4());
 
-	public String getURI() {
-		return "serverlog";
-	}
+  public String getURI() {
+    return "serverlog";
+  }
 
-	@Test
-	public void testGetAll() {
-		ServerLogResource2_4 serverLogResource = (ServerLogResource2_4) restService
-				.getResourceBySupportedClass(ServerLogActionWrapper.class);
-		serverLogResource.setServerLogActionWrapper(mockServerLogActionWrapper);
+  @Test
+  public void testGetAll() {
+    ServerLogResource2_4 serverLogResource =
+        (ServerLogResource2_4)
+            restService.getResourceBySupportedClass(ServerLogActionWrapper.class);
+    serverLogResource.setServerLogActionWrapper(mockServerLogActionWrapper);
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setMethod("GET");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		SimpleObject result = mainResourceController.get(getURI(), request, response);
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.setMethod("GET");
+    MockHttpServletResponse response = new MockHttpServletResponse();
+    SimpleObject result = mainResourceController.get(getURI(), request, response);
 
-		ArrayList<String[]> serverLog = result.get("serverLog");
-		Assertions.assertEquals(0, serverLog.size());
+    ArrayList<String[]> serverLog = result.get("serverLog");
+    Assertions.assertEquals(0, serverLog.size());
 
-		String mockLogLine1 = "INFO - Simple.appender(115) |2018-03-03 15:44:54,834| Info Message";
-		// Add some mock log lines to mockMemoryAppenderBuffer
-		mockServerLogActionWrapper.mockMemoryAppenderBuffer.add(mockLogLine1);
-		result = mainResourceController.get(getURI(), request, response);
-		serverLog = result.get("serverLog");
-		Assertions.assertNotEquals(serverLog.size(), 0);
+    String mockLogLine1 = "INFO - Simple.appender(115) |2018-03-03 15:44:54,834| Info Message";
+    // Add some mock log lines to mockMemoryAppenderBuffer
+    mockServerLogActionWrapper.mockMemoryAppenderBuffer.add(mockLogLine1);
+    result = mainResourceController.get(getURI(), request, response);
+    serverLog = result.get("serverLog");
+    Assertions.assertNotEquals(serverLog.size(), 0);
 
-		String[] logLine1 = serverLog.get(0);
-		Assertions.assertNotEquals(logLine1[0], null);
-		Assertions.assertNotEquals(logLine1[1], null);
-		Assertions.assertNotEquals(logLine1[2], null);
-		Assertions.assertNotEquals(logLine1[3], null);
-	}
+    String[] logLine1 = serverLog.get(0);
+    Assertions.assertNotEquals(logLine1[0], null);
+    Assertions.assertNotEquals(logLine1[1], null);
+    Assertions.assertNotEquals(logLine1[2], null);
+    Assertions.assertNotEquals(logLine1[3], null);
+  }
 
-	@Test
-	public void shouldThrowExceptionWhenRequestGetDefaultByUuid() {
-		assertThrows(Exception.class, () -> {
-			MockHttpServletRequest request = new MockHttpServletRequest();
-			request.setMethod("GET");
-			MockHttpServletResponse response = new MockHttpServletResponse();
-			SimpleObject result = mainResourceController.get(getURI() + "/" + getUuid(), request, response);
+  @Test
+  public void shouldThrowExceptionWhenRequestGetDefaultByUuid() {
+    assertThrows(
+        Exception.class,
+        () -> {
+          MockHttpServletRequest request = new MockHttpServletRequest();
+          request.setMethod("GET");
+          MockHttpServletResponse response = new MockHttpServletResponse();
+          SimpleObject result =
+              mainResourceController.get(getURI() + "/" + getUuid(), request, response);
 
-			ArrayList<String[]> serverLog = result.get("serverLog");
-		});
-	}
+          ArrayList<String[]> serverLog = result.get("serverLog");
+        });
+  }
 
-	public String getUuid() {
-		return "log1";
-	}
+  public String getUuid() {
+    return "log1";
+  }
 }

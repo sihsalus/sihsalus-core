@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.unrelatedtest.rest.resource;
 
@@ -22,36 +22,39 @@ import org.openmrs.module.webservices.rest.web.v1_0.test.openmrs2_4.GenericChild
  *
  * @see SwaggerSpecificationCreatorTest#testUnrelatedResourceDefinitions()
  */
-@Resource(name = RestConstants.VERSION_1 + "/unrelated", supportedClass = UnrelatedGenericChild.class, supportedOpenmrsVersions = { "1.9.* - 9.*" })
+@Resource(
+    name = RestConstants.VERSION_1 + "/unrelated",
+    supportedClass = UnrelatedGenericChild.class,
+    supportedOpenmrsVersions = {"1.9.* - 9.*"})
 public class UnrelatedGenericChildResource extends GenericChildResource {
 
-	public static boolean getGETCalled = false;
+  public static boolean getGETCalled = false;
 
-	public static boolean getCREATECalled = false;
+  public static boolean getCREATECalled = false;
 
-	public static boolean getUPDATECalled = false;
+  public static boolean getUPDATECalled = false;
 
-	/*******************************
-	 * TEST METHOD IMPLEMENTATIONS * These methods are the ones we want to test against. There
-	 * implementaion is unimportant, they just set flags so we can assert the methods were called
-	 * correctly by the reflector.
-	 */
+  /*******************************
+   * TEST METHOD IMPLEMENTATIONS * These methods are the ones we want to test against. There
+   * implementaion is unimportant, they just set flags so we can assert the methods were called
+   * correctly by the reflector.
+   */
 
-	@Override
-	public Model getGETModel(Representation rep) {
-		getGETCalled = true;
-		return super.getGETModel(rep);
-	}
+  @Override
+  public Model getGETModel(Representation rep) {
+    getGETCalled = true;
+    return super.getGETModel(rep);
+  }
 
-	@Override
-	public Model getCREATEModel(Representation rep) {
-		getCREATECalled = true;
-		return super.getCREATEModel(rep);
-	}
+  @Override
+  public Model getCREATEModel(Representation rep) {
+    getCREATECalled = true;
+    return super.getCREATEModel(rep);
+  }
 
-	@Override
-	public Model getUPDATEModel(Representation rep) {
-		getUPDATECalled = true;
-		return super.getUPDATEModel(rep);
-	}
+  @Override
+  public Model getUPDATEModel(Representation rep) {
+    getUPDATECalled = true;
+    return super.getUPDATEModel(rep);
+  }
 }

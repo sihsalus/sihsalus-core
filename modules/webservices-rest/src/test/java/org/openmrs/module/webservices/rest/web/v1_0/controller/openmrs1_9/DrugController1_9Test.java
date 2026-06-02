@@ -1,16 +1,16 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.controller.openmrs1_9;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,143 +25,134 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceContr
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-/**
- * Tests functionality of {@link DrugController}.
- */
+/** Tests functionality of {@link DrugController}. */
 public class DrugController1_9Test extends MainResourceControllerTest {
 
-	private ConceptService service;
+  private ConceptService service;
 
-	@BeforeEach
-	public void init() throws Exception {
-		service = Context.getConceptService();
-	}
+  @BeforeEach
+  public void init() throws Exception {
+    service = Context.getConceptService();
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getURI()
-	 */
-	@Override
-	public String getURI() {
-		return "drug";
-	}
+  /**
+   * @see MainResourceControllerTest#getURI()
+   */
+  @Override
+  public String getURI() {
+    return "drug";
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getAllCount()
-	 */
-	@Override
-	public long getAllCount() {
-		return service.getAllDrugs(false).size();
-	}
+  /**
+   * @see MainResourceControllerTest#getAllCount()
+   */
+  @Override
+  public long getAllCount() {
+    return service.getAllDrugs(false).size();
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getUuid()
-	 */
-	@Override
-	public String getUuid() {
-		return RestTestConstants1_8.DRUG_UUID;
-	}
+  /**
+   * @see MainResourceControllerTest#getUuid()
+   */
+  @Override
+  public String getUuid() {
+    return RestTestConstants1_8.DRUG_UUID;
+  }
 
-	@Test
-	public void shouldGetADrugByUuid() throws Exception {
+  @Test
+  public void shouldGetADrugByUuid() throws Exception {
 
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		SimpleObject result = deserialize(handle(req));
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    SimpleObject result = deserialize(handle(req));
 
-		Drug drug = service.getDrugByUuid(getUuid());
-		Assertions.assertNotNull(result);
-		Assertions.assertEquals(drug.getUuid(), PropertyUtils.getProperty(result, "uuid"));
-		Assertions.assertEquals(drug.getName(), PropertyUtils.getProperty(result, "name"));
+    Drug drug = service.getDrugByUuid(getUuid());
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(drug.getUuid(), PropertyUtils.getProperty(result, "uuid"));
+    Assertions.assertEquals(drug.getName(), PropertyUtils.getProperty(result, "name"));
+  }
 
-	}
+  @Test
+  public void shouldListAllUnRetiredDrugs() throws Exception {
 
-	@Test
-	public void shouldListAllUnRetiredDrugs() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI());
+    SimpleObject result = deserialize(handle(req));
 
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
-		SimpleObject result = deserialize(handle(req));
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(getAllCount(), Util.getResultsSize(result));
+  }
 
-		Assertions.assertNotNull(result);
-		Assertions.assertEquals(getAllCount(), Util.getResultsSize(result));
+  @Test
+  public void shouldCreateADrug() throws Exception {
 
-	}
+    long originalCount = getAllCount();
 
-	@Test
-	public void shouldCreateADrug() throws Exception {
+    SimpleObject drug = new SimpleObject();
+    drug.add("name", "Drug name");
+    drug.add("description", "Drug description");
+    drug.add("combination", "false");
+    drug.add("concept", service.getConcept(3).getUuid());
 
-		long originalCount = getAllCount();
+    String json = new ObjectMapper().writeValueAsString(drug);
 
-		SimpleObject drug = new SimpleObject();
-		drug.add("name", "Drug name");
-		drug.add("description", "Drug description");
-		drug.add("combination", "false");
-		drug.add("concept", service.getConcept(3).getUuid());
+    MockHttpServletRequest req = request(RequestMethod.POST, getURI());
+    req.setContent(json.getBytes());
 
-		String json = new ObjectMapper().writeValueAsString(drug);
+    SimpleObject newDrug = deserialize(handle(req));
 
-		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
-		req.setContent(json.getBytes());
+    Assertions.assertNotNull(PropertyUtils.getProperty(newDrug, "uuid"));
+    Assertions.assertEquals(originalCount + 1, getAllCount());
+  }
 
-		SimpleObject newDrug = deserialize(handle(req));
+  @Test
+  public void shouldEditADrug() throws Exception {
 
-		Assertions.assertNotNull(PropertyUtils.getProperty(newDrug, "uuid"));
-		Assertions.assertEquals(originalCount + 1, getAllCount());
+    final String editedName = "Aspirin Edited";
+    String json = "{ \"name\":\"" + editedName + "\" }";
+    MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
+    req.setContent(json.getBytes());
+    handle(req);
 
-	}
+    Drug editedDrug = service.getDrugByUuid(getUuid());
+    Assertions.assertNotNull(editedDrug);
+    Assertions.assertEquals(editedName, editedDrug.getName());
+  }
 
-	@Test
-	public void shouldEditADrug() throws Exception {
+  @Test
+  public void shouldRetireADrug() throws Exception {
 
-		final String editedName = "Aspirin Edited";
-		String json = "{ \"name\":\"" + editedName + "\" }";
-		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
-		req.setContent(json.getBytes());
-		handle(req);
+    Drug drug = service.getDrugByUuid(getUuid());
+    Assertions.assertFalse(drug.isRetired());
 
-		Drug editedDrug = service.getDrugByUuid(getUuid());
-		Assertions.assertNotNull(editedDrug);
-		Assertions.assertEquals(editedName, editedDrug.getName());
+    MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + drug.getUuid());
+    req.addParameter("!purge", "");
+    req.addParameter("reason", "random reason");
+    handle(req);
 
-	}
+    Drug retiredDrug = service.getDrugByUuid(getUuid());
+    Assertions.assertTrue(retiredDrug.isRetired());
+    Assertions.assertEquals("random reason", retiredDrug.getRetireReason());
+  }
 
-	@Test
-	public void shouldRetireADrug() throws Exception {
+  @Test
+  public void shouldPurgeADrug() throws Exception {
 
-		Drug drug = service.getDrugByUuid(getUuid());
-		Assertions.assertFalse(drug.isRetired());
+    Drug drug = service.getDrug(11);
+    MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + drug.getUuid());
+    req.addParameter("purge", "true");
+    handle(req);
 
-		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + drug.getUuid());
-		req.addParameter("!purge", "");
-		req.addParameter("reason", "random reason");
-		handle(req);
+    Assertions.assertNull(service.getDrug(11));
+  }
 
-		Drug retiredDrug = service.getDrugByUuid(getUuid());
-		Assertions.assertTrue(retiredDrug.isRetired());
-		Assertions.assertEquals("random reason", retiredDrug.getRetireReason());
+  @Test
+  public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
 
-	}
+    MockHttpServletRequest httpReq = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    httpReq.addParameter(
+        RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
+    SimpleObject result = deserialize(handle(httpReq));
 
-	@Test
-	public void shouldPurgeADrug() throws Exception {
-
-		Drug drug = service.getDrug(11);
-		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + drug.getUuid());
-		req.addParameter("purge", "true");
-		handle(req);
-
-		Assertions.assertNull(service.getDrug(11));
-
-	}
-
-	@Test
-	public void shouldReturnTheAuditInfoForTheFullRepresentation() throws Exception {
-
-		MockHttpServletRequest httpReq = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		httpReq.addParameter(RestConstants.REQUEST_PROPERTY_FOR_REPRESENTATION, RestConstants.REPRESENTATION_FULL);
-		SimpleObject result = deserialize(handle(httpReq));
-
-		Assertions.assertNotNull(result);
-		Assertions.assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
-
-	}
-
+    Assertions.assertNotNull(result);
+    Assertions.assertNotNull(PropertyUtils.getProperty(result, "auditInfo"));
+  }
 }

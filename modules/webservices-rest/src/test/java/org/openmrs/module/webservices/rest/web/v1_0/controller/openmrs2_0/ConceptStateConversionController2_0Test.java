@@ -1,13 +1,17 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.controller.openmrs2_0;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,116 +25,123 @@ import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RestTestConstants1_8;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceControllerTest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 public class ConceptStateConversionController2_0Test extends MainResourceControllerTest {
 
-	private static String uuid;
+  private static String uuid;
 
-	@BeforeEach
-	public void setUp() {
-		ProgramWorkflowState state = createWorkflowState(RestTestConstants1_8.CONCEPT2_UUID);
-		ProgramWorkflow workflow = Context.getProgramWorkflowService().getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
+  @BeforeEach
+  public void setUp() {
+    ProgramWorkflowState state = createWorkflowState(RestTestConstants1_8.CONCEPT2_UUID);
+    ProgramWorkflow workflow =
+        Context.getProgramWorkflowService().getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
 
-		ConceptStateConversion conceptStateConversion = new ConceptStateConversion();
-		conceptStateConversion.setConcept(state.getConcept());
-		conceptStateConversion.setProgramWorkflow(workflow);
-		conceptStateConversion.setProgramWorkflowState(state);
+    ConceptStateConversion conceptStateConversion = new ConceptStateConversion();
+    conceptStateConversion.setConcept(state.getConcept());
+    conceptStateConversion.setProgramWorkflow(workflow);
+    conceptStateConversion.setProgramWorkflowState(state);
 
-		Context.getProgramWorkflowService().saveConceptStateConversion(conceptStateConversion);
-		uuid = conceptStateConversion.getUuid();
-	}
+    Context.getProgramWorkflowService().saveConceptStateConversion(conceptStateConversion);
+    uuid = conceptStateConversion.getUuid();
+  }
 
-	/**
-	 * Creates a new ProgramWorkflowState for the given concept UUID, saves it,
-	 * and returns a clean re-fetched instance. The flush/clear/re-fetch cycle
-	 * is needed because Hibernate 6 is stricter about transient references.
-	 */
-	private ProgramWorkflowState createWorkflowState(String conceptUuid) {
-		Concept concept = Context.getConceptService().getConceptByUuid(conceptUuid);
-		ProgramWorkflow workflow = Context.getProgramWorkflowService().getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
+  /**
+   * Creates a new ProgramWorkflowState for the given concept UUID, saves it, and returns a clean
+   * re-fetched instance. The flush/clear/re-fetch cycle is needed because Hibernate 6 is stricter
+   * about transient references.
+   */
+  private ProgramWorkflowState createWorkflowState(String conceptUuid) {
+    Concept concept = Context.getConceptService().getConceptByUuid(conceptUuid);
+    ProgramWorkflow workflow =
+        Context.getProgramWorkflowService().getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
 
-		ProgramWorkflowState state = new ProgramWorkflowState();
-		state.setConcept(concept);
-		state.setInitial(true);
-		state.setTerminal(false);
+    ProgramWorkflowState state = new ProgramWorkflowState();
+    state.setConcept(concept);
+    state.setInitial(true);
+    state.setTerminal(false);
 
-		workflow.addState(state);
-		Context.getProgramWorkflowService().saveProgram(workflow.getProgram());
-		Context.flushSession();
-		Context.clearSession();
+    workflow.addState(state);
+    Context.getProgramWorkflowService().saveProgram(workflow.getProgram());
+    Context.flushSession();
+    Context.clearSession();
 
-		workflow = Context.getProgramWorkflowService().getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
-		for (ProgramWorkflowState s : workflow.getStates()) {
-			if (concept.equals(s.getConcept())) {
-				return s;
-			}
-		}
-		throw new IllegalStateException("Could not find state for concept " + conceptUuid);
-	}
+    workflow =
+        Context.getProgramWorkflowService().getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
+    for (ProgramWorkflowState s : workflow.getStates()) {
+      if (concept.equals(s.getConcept())) {
+        return s;
+      }
+    }
+    throw new IllegalStateException("Could not find state for concept " + conceptUuid);
+  }
 
-	@Override
-	public String getURI() {
-		return "conceptstateconversion";
-	}
+  @Override
+  public String getURI() {
+    return "conceptstateconversion";
+  }
 
-	@Override
-	public String getUuid() {
-		return uuid;
-	}
+  @Override
+  public String getUuid() {
+    return uuid;
+  }
 
-	@Override
-	public long getAllCount() {
-		return 2;
-	}
+  @Override
+  public long getAllCount() {
+    return 2;
+  }
 
-	@Test
-	public void shouldCreateStateConversion() throws Exception {
-		ProgramWorkflowService service = Context.getProgramWorkflowService();
+  @Test
+  public void shouldCreateStateConversion() throws Exception {
+    ProgramWorkflowService service = Context.getProgramWorkflowService();
 
-		int countBefore = service.getAllConceptStateConversions().size();
+    int countBefore = service.getAllConceptStateConversions().size();
 
-		ProgramWorkflowState state = createWorkflowState("0955b484-b364-43dd-909b-1fa3655eaad2");
-		ProgramWorkflow workflow = service.getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
-		Concept concept = state.getConcept();
+    ProgramWorkflowState state = createWorkflowState("0955b484-b364-43dd-909b-1fa3655eaad2");
+    ProgramWorkflow workflow = service.getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
+    Concept concept = state.getConcept();
 
-		String json =
-				"{\"concept\": \"" + concept.getUuid() + "\",\"programWorkflow\": \"" + workflow.getUuid()
-						+ "\",\"programWorkflowState\": \"" + state.getUuid() + "\"}";
+    String json =
+        "{\"concept\": \""
+            + concept.getUuid()
+            + "\",\"programWorkflow\": \""
+            + workflow.getUuid()
+            + "\",\"programWorkflowState\": \""
+            + state.getUuid()
+            + "\"}";
 
-		SimpleObject newStateConversion = deserialize(handle(newPostRequest(getURI(), json)));
+    SimpleObject newStateConversion = deserialize(handle(newPostRequest(getURI(), json)));
 
-		assertNotNull(newStateConversion);
-		String uuid = newStateConversion.get("uuid");
+    assertNotNull(newStateConversion);
+    String uuid = newStateConversion.get("uuid");
 
-		ConceptStateConversion createdStateConversion = service.getConceptStateConversionByUuid(uuid);
-		assertEquals(countBefore + 1, service.getAllConceptStateConversions().size());
-		assertEquals(workflow.getUuid(), createdStateConversion.getProgramWorkflow().getUuid());
-		assertEquals(state.getUuid(), createdStateConversion.getProgramWorkflowState().getUuid());
-		assertEquals(concept.getUuid(), createdStateConversion.getProgramWorkflow().getConcept().getUuid());
-	}
+    ConceptStateConversion createdStateConversion = service.getConceptStateConversionByUuid(uuid);
+    assertEquals(countBefore + 1, service.getAllConceptStateConversions().size());
+    assertEquals(workflow.getUuid(), createdStateConversion.getProgramWorkflow().getUuid());
+    assertEquals(state.getUuid(), createdStateConversion.getProgramWorkflowState().getUuid());
+    assertEquals(
+        concept.getUuid(), createdStateConversion.getProgramWorkflow().getConcept().getUuid());
+  }
 
-	@Test
-	public void shouldPurgeStateConversion() throws Exception {
-		ProgramWorkflowService service = Context.getProgramWorkflowService();
+  @Test
+  public void shouldPurgeStateConversion() throws Exception {
+    ProgramWorkflowService service = Context.getProgramWorkflowService();
 
-		ProgramWorkflowState state = createWorkflowState("0955b484-b364-43dd-909b-1fa3655eaad2");
-		ProgramWorkflow workflow = service.getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
+    ProgramWorkflowState state = createWorkflowState("0955b484-b364-43dd-909b-1fa3655eaad2");
+    ProgramWorkflow workflow = service.getWorkflowByUuid(RestTestConstants1_8.WORKFLOW_UUID);
 
-		ConceptStateConversion conceptStateConversion = new ConceptStateConversion();
-		conceptStateConversion.setConcept(state.getConcept());
-		conceptStateConversion.setProgramWorkflow(workflow);
-		conceptStateConversion.setProgramWorkflowState(state);
-		service.saveConceptStateConversion(conceptStateConversion);
+    ConceptStateConversion conceptStateConversion = new ConceptStateConversion();
+    conceptStateConversion.setConcept(state.getConcept());
+    conceptStateConversion.setProgramWorkflow(workflow);
+    conceptStateConversion.setProgramWorkflowState(state);
+    service.saveConceptStateConversion(conceptStateConversion);
 
-		int countBefore = service.getAllConceptStateConversions().size();
-		assertNotNull(service.getConceptStateConversionByUuid(conceptStateConversion.getUuid()));
+    int countBefore = service.getAllConceptStateConversions().size();
+    assertNotNull(service.getConceptStateConversionByUuid(conceptStateConversion.getUuid()));
 
-		handle(newDeleteRequest(getURI() + "/" + conceptStateConversion.getUuid(), new Parameter("purge", "true")));
+    handle(
+        newDeleteRequest(
+            getURI() + "/" + conceptStateConversion.getUuid(), new Parameter("purge", "true")));
 
-		assertNull(service.getConceptStateConversionByUuid(conceptStateConversion.getUuid()));
-		assertEquals(countBefore - 1, service.getAllConceptStateConversions().size());
-	}
+    assertNull(service.getConceptStateConversionByUuid(conceptStateConversion.getUuid()));
+    assertEquals(countBefore - 1, service.getAllConceptStateConversions().size());
+  }
 }

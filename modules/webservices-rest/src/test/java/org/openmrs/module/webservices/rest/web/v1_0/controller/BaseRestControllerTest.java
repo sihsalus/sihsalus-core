@@ -1,151 +1,159 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.controller;
 
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.lang.reflect.Field;
-
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 import org.apache.commons.logging.Log;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Person;
 import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.ValidationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.webservices.rest.SimpleObject;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.IllegalPropertyException;
-import org.openmrs.api.ValidationException;
 import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
-import org.openmrs.module.webservices.rest.web.response.ConversionException;
-import java.util.LinkedHashMap;
 
 public class BaseRestControllerTest extends BaseModuleWebContextSensitiveTest {
 
-	BaseRestController controller;
+  BaseRestController controller;
 
-	MockHttpServletRequest request;
+  MockHttpServletRequest request;
 
-	MockHttpServletResponse response;
+  MockHttpServletResponse response;
 
-	Log spyOnLog;
+  Log spyOnLog;
 
-	@BeforeEach
-	public void before() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		controller = new BaseRestController();
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-		spyOnLog = mock(Log.class);
-		// Need to get the logger using reflection
-		Field log;
-		log = controller.getClass().getDeclaredField("log");
-		log.setAccessible(true);
-		log.set(controller, spyOnLog);
-	}
+  @BeforeEach
+  public void before()
+      throws NoSuchFieldException,
+          SecurityException,
+          IllegalArgumentException,
+          IllegalAccessException {
+    controller = new BaseRestController();
+    request = new MockHttpServletRequest();
+    response = new MockHttpServletResponse();
+    spyOnLog = mock(Log.class);
+    // Need to get the logger using reflection
+    Field log;
+    log = controller.getClass().getDeclaredField("log");
+    log.setAccessible(true);
+    log.set(controller, spyOnLog);
+  }
 
-	/**
-	 * @verifies return unauthorized if not logged in
-	 * @see BaseRestController#apiAuthenticationExceptionHandler(Exception,
-	 *      jakarta.servlet.http.HttpServletRequest, HttpServletResponse)
-	 */
-	@Test
-	public void apiAuthenticationExceptionHandler_shouldReturnUnauthorizedIfNotLoggedIn() throws Exception {
-		Context.logout();
+  /**
+   * @verifies return unauthorized if not logged in
+   * @see BaseRestController#apiAuthenticationExceptionHandler(Exception,
+   *     jakarta.servlet.http.HttpServletRequest, HttpServletResponse)
+   */
+  @Test
+  public void apiAuthenticationExceptionHandler_shouldReturnUnauthorizedIfNotLoggedIn()
+      throws Exception {
+    Context.logout();
 
-		controller.apiAuthenticationExceptionHandler(new APIAuthenticationException(), request, response);
+    controller.apiAuthenticationExceptionHandler(
+        new APIAuthenticationException(), request, response);
 
-		assertThat(response.getStatus(), is(HttpServletResponse.SC_UNAUTHORIZED));
-	}
+    assertThat(response.getStatus(), is(HttpServletResponse.SC_UNAUTHORIZED));
+  }
 
-	/**
-	 * @verifies return forbidden if logged in
-	 * @see BaseRestController#apiAuthenticationExceptionHandler(Exception,
-	 *      jakarta.servlet.http.HttpServletRequest, HttpServletResponse)
-	 */
-	@Test
-	public void apiAuthenticationExceptionHandler_shouldReturnForbiddenIfLoggedIn() throws Exception {
-		controller.apiAuthenticationExceptionHandler(new APIAuthenticationException(), request, response);
+  /**
+   * @verifies return forbidden if logged in
+   * @see BaseRestController#apiAuthenticationExceptionHandler(Exception,
+   *     jakarta.servlet.http.HttpServletRequest, HttpServletResponse)
+   */
+  @Test
+  public void apiAuthenticationExceptionHandler_shouldReturnForbiddenIfLoggedIn() throws Exception {
+    controller.apiAuthenticationExceptionHandler(
+        new APIAuthenticationException(), request, response);
 
-		assertThat(response.getStatus(), is(HttpServletResponse.SC_FORBIDDEN));
-	}
+    assertThat(response.getStatus(), is(HttpServletResponse.SC_FORBIDDEN));
+  }
 
-	@Test
-	public void validationException_shouldReturnBadRequestResponse() throws Exception {
-		Errors ex = new BindException(new Person(), "");
-		ex.reject("error.message");
+  @Test
+  public void validationException_shouldReturnBadRequestResponse() throws Exception {
+    Errors ex = new BindException(new Person(), "");
+    ex.reject("error.message");
 
-		SimpleObject responseSimpleObject = controller.validationExceptionHandler(new ValidationException(ex), request,
-		    response);
-		assertThat(response.getStatus(), is(HttpServletResponse.SC_BAD_REQUEST));
+    SimpleObject responseSimpleObject =
+        controller.validationExceptionHandler(new ValidationException(ex), request, response);
+    assertThat(response.getStatus(), is(HttpServletResponse.SC_BAD_REQUEST));
 
-		SimpleObject errors = (SimpleObject) responseSimpleObject.get("error");
-		Assertions.assertEquals("webservices.rest.error.invalid.submission", errors.get("code"));
-	}
+    SimpleObject errors = (SimpleObject) responseSimpleObject.get("error");
+    Assertions.assertEquals("webservices.rest.error.invalid.submission", errors.get("code"));
+  }
 
-	@Test
-	public void handleException_shouldLogUnannotatedAsErrors() throws Exception {
+  @Test
+  public void handleException_shouldLogUnannotatedAsErrors() throws Exception {
 
-		String message = "ErrorMessage";
-		Exception ex = new Exception(message);
-		controller.handleException(ex, request, response);
+    String message = "ErrorMessage";
+    Exception ex = new Exception(message);
+    controller.handleException(ex, request, response);
 
-		verify(spyOnLog).error(message, ex);
+    verify(spyOnLog).error(message, ex);
+  }
 
-	}
+  @Test
+  public void handleException_shouldLog500AndAboveAsErrors() throws Exception {
+    String message = "ErrorMessage";
+    Exception ex = new GenericRestException(message);
 
-	@Test
-	public void handleException_shouldLog500AndAboveAsErrors() throws Exception {
-		String message = "ErrorMessage";
-		Exception ex = new GenericRestException(message);
+    controller.handleException(ex, request, response);
 
-		controller.handleException(ex, request, response);
+    verify(spyOnLog).error(message, ex);
+  }
 
-		verify(spyOnLog).error(message, ex);
+  @Test
+  public void handleException_shouldLogBelow500AsInfo() throws Exception {
 
-	}
+    String message = "ErrorMessage";
+    Exception ex = new IllegalPropertyException(message);
 
-	@Test
-	public void handleException_shouldLogBelow500AsInfo() throws Exception {
+    controller.handleException(ex, request, response);
 
-		String message = "ErrorMessage";
-		Exception ex = new IllegalPropertyException(message);
+    verify(spyOnLog).info(message, ex);
+  }
 
-		controller.handleException(ex, request, response);
+  @Test
+  public void handleConversionException_shouldLogConversionErrorAsInfo() throws Exception {
+    String message = "conversion error";
+    ConversionException ex = new ConversionException(message);
+    SimpleObject responseSimpleObject =
+        controller.conversionExceptionHandler(ex, request, response);
+    assertThat(response.getStatus(), is(HttpServletResponse.SC_BAD_REQUEST));
+    LinkedHashMap errors = (LinkedHashMap) responseSimpleObject.get("error");
+    Assertions.assertEquals("[" + message + "]", errors.get("message"));
+  }
 
-		verify(spyOnLog).info(message, ex);
-	}
-
-	@Test
-	public void handleConversionException_shouldLogConversionErrorAsInfo() throws Exception {
-		String message = "conversion error";
-		ConversionException ex = new ConversionException(message);
-		SimpleObject responseSimpleObject = controller.conversionExceptionHandler(ex, request, response);
-		assertThat(response.getStatus(), is(HttpServletResponse.SC_BAD_REQUEST));
-		LinkedHashMap errors = (LinkedHashMap) responseSimpleObject.get("error");
-		Assertions.assertEquals("[" + message + "]", errors.get("message"));
-	}
-
-	@Test
-	public void httpMessageNotReadableExceptionHandler_shouldReturnBadRequestIfEmptyBody() throws Exception {
-		controller.httpMessageNotReadableExceptionHandler(new HttpMessageNotReadableException("", (org.springframework.http.HttpInputMessage) null), request, response);
-		assertThat(response.getStatus(), is(HttpServletResponse.SC_BAD_REQUEST));
-	}
+  @Test
+  public void httpMessageNotReadableExceptionHandler_shouldReturnBadRequestIfEmptyBody()
+      throws Exception {
+    controller.httpMessageNotReadableExceptionHandler(
+        new HttpMessageNotReadableException("", (org.springframework.http.HttpInputMessage) null),
+        request,
+        response);
+    assertThat(response.getStatus(), is(HttpServletResponse.SC_BAD_REQUEST));
+  }
 }

@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web;
 
@@ -15,7 +15,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
@@ -42,207 +41,229 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.ReflectionUtils;
 
-/**
- * Contains tests for Representation Descriptions of all resources
- */
+/** Contains tests for Representation Descriptions of all resources */
 public class DelegatingCrudResourceTest extends BaseModuleWebContextSensitiveTest {
 
-	/**
-	 * This test looks at all subclasses of DelegatingCrudResource, and test all {@link RepHandler}
-	 * methods to make sure they are all capable of running without exceptions. It also checks that
-	 */
-	@SuppressWarnings("rawtypes")
-	@Test
-	@Disabled
-	public void testAllReprsentationDescriptions() throws Exception {
-		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
-		//only match subclasses of BaseDelegatingResource
-		provider.addIncludeFilter(new AssignableTypeFilter(BaseDelegatingResource.class));
+  /**
+   * This test looks at all subclasses of DelegatingCrudResource, and test all {@link RepHandler}
+   * methods to make sure they are all capable of running without exceptions. It also checks that
+   */
+  @SuppressWarnings("rawtypes")
+  @Test
+  @Disabled
+  public void testAllReprsentationDescriptions() throws Exception {
+    ClassPathScanningCandidateComponentProvider provider =
+        new ClassPathScanningCandidateComponentProvider(true);
+    // only match subclasses of BaseDelegatingResource
+    provider.addIncludeFilter(new AssignableTypeFilter(BaseDelegatingResource.class));
 
-		// scan in org.openmrs.module.webservices.rest.web.resource package
-		Set<BeanDefinition> components = provider
-		        .findCandidateComponents("org.openmrs.module.webservices.rest.web.resource");
-		if (CollectionUtils.isEmpty(components))
-			Assertions.fail("Faile to load any resource classes");
+    // scan in org.openmrs.module.webservices.rest.web.resource package
+    Set<BeanDefinition> components =
+        provider.findCandidateComponents("org.openmrs.module.webservices.rest.web.resource");
+    if (CollectionUtils.isEmpty(components)) Assertions.fail("Faile to load any resource classes");
 
-		for (BeanDefinition component : components) {
-			Class resourceClass = Class.forName(component.getBeanClassName());
-			for (Method method : ReflectionUtils.getAllDeclaredMethods(resourceClass)) {
-				ParameterizedType parameterizedType = (ParameterizedType) resourceClass.getGenericSuperclass();
-				Class openmrsClass = (Class) parameterizedType.getActualTypeArguments()[0];
-				//User Resource is special in that the Actual parameterized Type isn't a standard domain object, so we also
-				//need to look up fields and methods from the org.openmrs.User class
-				boolean isUserResource = resourceClass.equals(UserResource1_8.class);
-				List<Object> refDescriptions = new ArrayList<Object>();
+    for (BeanDefinition component : components) {
+      Class resourceClass = Class.forName(component.getBeanClassName());
+      for (Method method : ReflectionUtils.getAllDeclaredMethods(resourceClass)) {
+        ParameterizedType parameterizedType =
+            (ParameterizedType) resourceClass.getGenericSuperclass();
+        Class openmrsClass = (Class) parameterizedType.getActualTypeArguments()[0];
+        // User Resource is special in that the Actual parameterized Type isn't a standard domain
+        // object, so we also
+        // need to look up fields and methods from the org.openmrs.User class
+        boolean isUserResource = resourceClass.equals(UserResource1_8.class);
+        List<Object> refDescriptions = new ArrayList<Object>();
 
-				if (method.getName().equals("getRepresentationDescription")
-				        && method.getDeclaringClass().equals(resourceClass)) {
-					//get all the rep definitions for all representations
-					refDescriptions.add(method.invoke(resourceClass.newInstance(), new Object[] { Representation.REF }));
-					refDescriptions.add(method.invoke(resourceClass.newInstance(), new Object[] { Representation.DEFAULT }));
-					refDescriptions.add(method.invoke(resourceClass.newInstance(), new Object[] { Representation.FULL }));
-				}
+        if (method.getName().equals("getRepresentationDescription")
+            && method.getDeclaringClass().equals(resourceClass)) {
+          // get all the rep definitions for all representations
+          refDescriptions.add(
+              method.invoke(resourceClass.newInstance(), new Object[] {Representation.REF}));
+          refDescriptions.add(
+              method.invoke(resourceClass.newInstance(), new Object[] {Representation.DEFAULT}));
+          refDescriptions.add(
+              method.invoke(resourceClass.newInstance(), new Object[] {Representation.FULL}));
+        }
 
-				for (Object value : refDescriptions) {
-					if (value != null) {
-						DelegatingResourceDescription des = (DelegatingResourceDescription) value;
-						for (String key : des.getProperties().keySet()) {
-							if (!key.equals("uri") && !key.equals("display") && !key.equals("auditInfo")) {
-								boolean hasFieldOrPropertySetter = (ReflectionUtils.findField(openmrsClass, key) != null);
-								if (!hasFieldOrPropertySetter) {
-									hasFieldOrPropertySetter = hasSetterMethod(key, resourceClass);
-									if (!hasFieldOrPropertySetter && isUserResource)
-										hasFieldOrPropertySetter = (ReflectionUtils.findField(User.class, key) != null);
-								}
-								if (!hasFieldOrPropertySetter)
-									hasFieldOrPropertySetter = hasSetterMethod(key, resourceClass);
+        for (Object value : refDescriptions) {
+          if (value != null) {
+            DelegatingResourceDescription des = (DelegatingResourceDescription) value;
+            for (String key : des.getProperties().keySet()) {
+              if (!key.equals("uri") && !key.equals("display") && !key.equals("auditInfo")) {
+                boolean hasFieldOrPropertySetter =
+                    (ReflectionUtils.findField(openmrsClass, key) != null);
+                if (!hasFieldOrPropertySetter) {
+                  hasFieldOrPropertySetter = hasSetterMethod(key, resourceClass);
+                  if (!hasFieldOrPropertySetter && isUserResource)
+                    hasFieldOrPropertySetter = (ReflectionUtils.findField(User.class, key) != null);
+                }
+                if (!hasFieldOrPropertySetter)
+                  hasFieldOrPropertySetter = hasSetterMethod(key, resourceClass);
 
-								//TODO replace this hacky way that we are using to check if there is a get method for a
-								//collection that has no actual getter e.g activeIdentifers and activeAttributes for Patient
-								if (!hasFieldOrPropertySetter) {
-									hasFieldOrPropertySetter = (ReflectionUtils.findMethod(openmrsClass,
-									    "get" + StringUtils.capitalize(key)) != null);
-									if (!hasFieldOrPropertySetter && isUserResource)
-										hasFieldOrPropertySetter = (ReflectionUtils.findMethod(User.class, "get"
-										        + StringUtils.capitalize(key)) != null);
-								}
+                // TODO replace this hacky way that we are using to check if there is a get method
+                // for a
+                // collection that has no actual getter e.g activeIdentifers and activeAttributes
+                // for Patient
+                if (!hasFieldOrPropertySetter) {
+                  hasFieldOrPropertySetter =
+                      (ReflectionUtils.findMethod(openmrsClass, "get" + StringUtils.capitalize(key))
+                          != null);
+                  if (!hasFieldOrPropertySetter && isUserResource)
+                    hasFieldOrPropertySetter =
+                        (ReflectionUtils.findMethod(User.class, "get" + StringUtils.capitalize(key))
+                            != null);
+                }
 
-								if (!hasFieldOrPropertySetter)
-									hasFieldOrPropertySetter = isallowedMissingProperty(resourceClass, key);
+                if (!hasFieldOrPropertySetter)
+                  hasFieldOrPropertySetter = isallowedMissingProperty(resourceClass, key);
 
-								Assertions.assertTrue(hasFieldOrPropertySetter, "No property found for '" + key + "' for " + openmrsClass
-								        + " nor setter method on resource " + resourceClass);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+                Assertions.assertTrue(
+                    hasFieldOrPropertySetter,
+                    "No property found for '"
+                        + key
+                        + "' for "
+                        + openmrsClass
+                        + " nor setter method on resource "
+                        + resourceClass);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
-	/**
-	 * Convenience method that checks of the specified resource class has a method for setting the
-	 * given property
-	 *
-	 * @param propName
-	 * @param resource
-	 * @return
-	 */
-	@SuppressWarnings("rawtypes")
-	private static boolean hasSetterMethod(String propName, Class resourceClass) {
-		for (Method candidate : resourceClass.getMethods()) {
-			PropertySetter ann = candidate.getAnnotation(PropertySetter.class);
-			if (ann != null && ann.value().equals(propName)) {
-				return true;
-			}
-		}
+  /**
+   * Convenience method that checks of the specified resource class has a method for setting the
+   * given property
+   *
+   * @param propName
+   * @param resource
+   * @return
+   */
+  @SuppressWarnings("rawtypes")
+  private static boolean hasSetterMethod(String propName, Class resourceClass) {
+    for (Method candidate : resourceClass.getMethods()) {
+      PropertySetter ann = candidate.getAnnotation(PropertySetter.class);
+      if (ann != null && ann.value().equals(propName)) {
+        return true;
+      }
+    }
 
-		return false;
-	}
+    return false;
+  }
 
-	/**
-	 * Convenience method that checks if the specified property is included among the allowed
-	 * missing properties of the given resource class via reflection
-	 *
-	 * @param clazz
-	 * @param fieldName
-	 * @return
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 */
-	@SuppressWarnings("rawtypes")
-	private static boolean isallowedMissingProperty(Class resourceClass, String propName) throws IllegalArgumentException,
-	        IllegalAccessException, InstantiationException {
-		List<Field> fields = Reflect.getAllFields(resourceClass);
-		if (CollectionUtils.isNotEmpty(fields)) {
-			for (Field field : fields) {
-				if (field.getName().equals("allowedMissingProperties"))
-					return ((Set) field.get(resourceClass.newInstance())).contains(propName);
-			}
-		}
-		return false;
-	}
+  /**
+   * Convenience method that checks if the specified property is included among the allowed missing
+   * properties of the given resource class via reflection
+   *
+   * @param clazz
+   * @param fieldName
+   * @return
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   */
+  @SuppressWarnings("rawtypes")
+  private static boolean isallowedMissingProperty(Class resourceClass, String propName)
+      throws IllegalArgumentException, IllegalAccessException, InstantiationException {
+    List<Field> fields = Reflect.getAllFields(resourceClass);
+    if (CollectionUtils.isNotEmpty(fields)) {
+      for (Field field : fields) {
+        if (field.getName().equals("allowedMissingProperties"))
+          return ((Set) field.get(resourceClass.newInstance())).contains(propName);
+      }
+    }
+    return false;
+  }
 
-	@Test
-	public void convert_shouldConvertASimpleObjectThatIncludesAUuid() {
-		final String uuid = "91f6c840-da25-11e8-ae91-0242ac110002";
-		SimpleObject so = new SimpleObject();
-		so.add("uuid", uuid);
-		so.add("name", "Location name");
-		so.add("description", "Location description");
-		DelegatingCrudResource<Location> resource = new LocationResource1_8();
-		Location location = resource.convert(so);
-		Assertions.assertEquals(uuid, location.getUuid());
-	}
+  @Test
+  public void convert_shouldConvertASimpleObjectThatIncludesAUuid() {
+    final String uuid = "91f6c840-da25-11e8-ae91-0242ac110002";
+    SimpleObject so = new SimpleObject();
+    so.add("uuid", uuid);
+    so.add("name", "Location name");
+    so.add("description", "Location description");
+    DelegatingCrudResource<Location> resource = new LocationResource1_8();
+    Location location = resource.convert(so);
+    Assertions.assertEquals(uuid, location.getUuid());
+  }
 
-	@Test
-	public void convert_shouldAllowCreatableFieldsIfCreatable() {
-		SimpleObject so = new SimpleObject();
-		so.add("name", "Location name");
-		so.add("dateCreated", "2018-04-18T14:15:16.000+0000");
-		so.add("creator", "1");
-		DelegatingCrudResource<Location> resource = new LocationResource1_8();
-		resource.convert(so);
-	}
+  @Test
+  public void convert_shouldAllowCreatableFieldsIfCreatable() {
+    SimpleObject so = new SimpleObject();
+    so.add("name", "Location name");
+    so.add("dateCreated", "2018-04-18T14:15:16.000+0000");
+    so.add("creator", "1");
+    DelegatingCrudResource<Location> resource = new LocationResource1_8();
+    resource.convert(so);
+  }
 
-	@Test
-	public void convert_shouldAllowChangeableFieldsIfChangeable() {
-		SimpleObject so = new SimpleObject();
-		so.add("name", "Location name");
-		so.add("dateChanged", "2018-04-18T14:15:16.000+0000");
-		so.add("changedBy", "1");
-		DelegatingCrudResource<Location> resource = new LocationResource1_8();
-		resource.convert(so);
-	}
+  @Test
+  public void convert_shouldAllowChangeableFieldsIfChangeable() {
+    SimpleObject so = new SimpleObject();
+    so.add("name", "Location name");
+    so.add("dateChanged", "2018-04-18T14:15:16.000+0000");
+    so.add("changedBy", "1");
+    DelegatingCrudResource<Location> resource = new LocationResource1_8();
+    resource.convert(so);
+  }
 
-	@Test
-	public void convert_shouldAllowRetiredFieldsIfRetireable() {
-		SimpleObject so = new SimpleObject();
-		so.add("name", "Location name");
-		so.add("retired", "true");
-		so.add("dateRetired", "2018-04-18T14:15:16.000+0000");
-		so.add("retiredBy", "1");
-		so.add("retireReason", "test");
-		DelegatingCrudResource<Location> resource = new LocationResource1_8();
-		resource.convert(so);
-	}
+  @Test
+  public void convert_shouldAllowRetiredFieldsIfRetireable() {
+    SimpleObject so = new SimpleObject();
+    so.add("name", "Location name");
+    so.add("retired", "true");
+    so.add("dateRetired", "2018-04-18T14:15:16.000+0000");
+    so.add("retiredBy", "1");
+    so.add("retireReason", "test");
+    DelegatingCrudResource<Location> resource = new LocationResource1_8();
+    resource.convert(so);
+  }
 
-	@Test
-	public void convert_shouldNotAllowRetiredFieldsNotRetireable() {
-		SimpleObject so = new SimpleObject();
-		so.add("patient", "ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562");
-		so.add("encounterType", "61ae96f4-6afe-4351-b6f8-cd4fc383cce1");
-		so.add("retired", "true");
-		so.add("dateRetired", "2018-04-18T14:15:16.000+0000");
-		so.add("retiredBy", "1");
-		so.add("retireReason", "test");
-		DelegatingCrudResource<Encounter> resource = new EncounterResource1_8();
-		Assertions.assertThrows(ConversionException.class, () -> {resource.convert(so);});
-	}
+  @Test
+  public void convert_shouldNotAllowRetiredFieldsNotRetireable() {
+    SimpleObject so = new SimpleObject();
+    so.add("patient", "ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562");
+    so.add("encounterType", "61ae96f4-6afe-4351-b6f8-cd4fc383cce1");
+    so.add("retired", "true");
+    so.add("dateRetired", "2018-04-18T14:15:16.000+0000");
+    so.add("retiredBy", "1");
+    so.add("retireReason", "test");
+    DelegatingCrudResource<Encounter> resource = new EncounterResource1_8();
+    Assertions.assertThrows(
+        ConversionException.class,
+        () -> {
+          resource.convert(so);
+        });
+  }
 
-	@Test
-	public void convert_shouldAllowVoidableFieldsIfVoidable() {
-		SimpleObject so = new SimpleObject();
-		so.add("patient", "ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562");
-		so.add("encounterType", "61ae96f4-6afe-4351-b6f8-cd4fc383cce1");
-		so.add("voided", "true");
-		so.add("dateVoided", "2018-04-18T14:15:16.000+0000");
-		so.add("voidedBy", "1");
-		so.add("voidReason", "test");
-		DelegatingCrudResource<Encounter> resource = new EncounterResource1_8();
-		resource.convert(so);
-	}
+  @Test
+  public void convert_shouldAllowVoidableFieldsIfVoidable() {
+    SimpleObject so = new SimpleObject();
+    so.add("patient", "ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562");
+    so.add("encounterType", "61ae96f4-6afe-4351-b6f8-cd4fc383cce1");
+    so.add("voided", "true");
+    so.add("dateVoided", "2018-04-18T14:15:16.000+0000");
+    so.add("voidedBy", "1");
+    so.add("voidReason", "test");
+    DelegatingCrudResource<Encounter> resource = new EncounterResource1_8();
+    resource.convert(so);
+  }
 
-	@Test
-	public void convert_shouldNotAllowVoidableFieldsIfNotVoidable() {
-		SimpleObject so = new SimpleObject();
-		so.add("name", "Location name");
-		so.add("voided", "true");
-		so.add("dateVoided", "2018-04-18T14:15:16.000+0000");
-		so.add("voidedBy", "1");
-		so.add("voidReason", "test");
-		DelegatingCrudResource<Location> resource = new LocationResource1_8();
-		Assertions.assertThrows(ConversionException.class, () -> {resource.convert(so);});
-	}
+  @Test
+  public void convert_shouldNotAllowVoidableFieldsIfNotVoidable() {
+    SimpleObject so = new SimpleObject();
+    so.add("name", "Location name");
+    so.add("voided", "true");
+    so.add("dateVoided", "2018-04-18T14:15:16.000+0000");
+    so.add("voidedBy", "1");
+    so.add("voidReason", "test");
+    DelegatingCrudResource<Location> resource = new LocationResource1_8();
+    Assertions.assertThrows(
+        ConversionException.class,
+        () -> {
+          resource.convert(so);
+        });
+  }
 }

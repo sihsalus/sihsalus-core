@@ -1,19 +1,19 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.webservices.rest.web.v1_0.controller.openmrs1_8;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Cohort;
@@ -28,167 +28,165 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-/**
- * Tests functionality of {@link CohortController}.
- */
+/** Tests functionality of {@link CohortController}. */
 public class CohortController1_8Test extends MainResourceControllerTest {
 
-	private static final String DATASET_FILENAME = "customTestDataset.xml";
+  private static final String DATASET_FILENAME = "customTestDataset.xml";
 
-	private CohortService service;
+  private CohortService service;
 
-	@BeforeEach
-	public void before() throws Exception {
-		this.service = Context.getCohortService();
-		executeDataSet(DATASET_FILENAME);
-	}
+  @BeforeEach
+  public void before() throws Exception {
+    this.service = Context.getCohortService();
+    executeDataSet(DATASET_FILENAME);
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getURI()
-	 */
-	@Override
-	public String getURI() {
-		return "cohort";
-	}
+  /**
+   * @see MainResourceControllerTest#getURI()
+   */
+  @Override
+  public String getURI() {
+    return "cohort";
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getAllCount()
-	 */
-	@Override
-	public long getAllCount() {
-		return 2;
-	}
+  /**
+   * @see MainResourceControllerTest#getAllCount()
+   */
+  @Override
+  public long getAllCount() {
+    return 2;
+  }
 
-	/**
-	 * @see MainResourceControllerTest#getUuid()
-	 */
-	@Override
-	public String getUuid() {
-		return RestTestConstants1_8.COHORT_UUID;
-	}
+  /**
+   * @see MainResourceControllerTest#getUuid()
+   */
+  @Override
+  public String getUuid() {
+    return RestTestConstants1_8.COHORT_UUID;
+  }
 
-	@Test
-	public void createCohort_shouldCreateANewCohort() throws Exception {
+  @Test
+  public void createCohort_shouldCreateANewCohort() throws Exception {
 
-		SimpleObject cohort = new SimpleObject();
-		cohort.add("name", "New cohort");
-		cohort.add("description", "New cohort description");
-		cohort.add("memberIds", new Integer[] { 2, 6 });
+    SimpleObject cohort = new SimpleObject();
+    cohort.add("name", "New cohort");
+    cohort.add("description", "New cohort description");
+    cohort.add("memberIds", new Integer[] {2, 6});
 
-		String json = new ObjectMapper().writeValueAsString(cohort);
+    String json = new ObjectMapper().writeValueAsString(cohort);
 
-		MockHttpServletRequest req = request(RequestMethod.POST, getURI());
-		req.setContent(json.getBytes());
+    MockHttpServletRequest req = request(RequestMethod.POST, getURI());
+    req.setContent(json.getBytes());
 
-		SimpleObject newCohort = deserialize(handle(req));
-		Util.log("Created cohort", newCohort);
+    SimpleObject newCohort = deserialize(handle(req));
+    Util.log("Created cohort", newCohort);
 
-		// Check existence in database
-		String uuid = (String) newCohort.get("uuid");
-		Assertions.assertNotNull(service.getCohortByUuid(uuid));
-	}
+    // Check existence in database
+    String uuid = (String) newCohort.get("uuid");
+    Assertions.assertNotNull(service.getCohortByUuid(uuid));
+  }
 
-	@Test
-	public void getCohort_shouldGetADefaultRepresentationOfACohort() throws Exception {
+  @Test
+  public void getCohort_shouldGetADefaultRepresentationOfACohort() throws Exception {
 
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		SimpleObject result = deserialize(handle(req));
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    SimpleObject result = deserialize(handle(req));
 
-		Assertions.assertNotNull(result);
-		Util.log("Cohort fetched (default)", result);
-		Assertions.assertEquals(getUuid(), result.get("uuid"));
-	}
+    Assertions.assertNotNull(result);
+    Util.log("Cohort fetched (default)", result);
+    Assertions.assertEquals(getUuid(), result.get("uuid"));
+  }
 
-	@Test
-	public void getCohort_shouldGetADefaultRepresentationInXML() throws Exception {
+  @Test
+  public void getCohort_shouldGetADefaultRepresentationInXML() throws Exception {
 
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
-		req.addHeader("Accept", "application/xml");
-		MockHttpServletResponse result = handle(req);
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + getUuid());
+    req.addHeader("Accept", "application/xml");
+    MockHttpServletResponse result = handle(req);
 
-		String xml = result.getContentAsString();
+    String xml = result.getContentAsString();
 
-		Assertions.assertEquals(getUuid(), evaluateXPath(xml, "//uuid"));
-	}
+    Assertions.assertEquals(getUuid(), evaluateXPath(xml, "//uuid"));
+  }
 
-	@Test
-	public void getCohortByExactName_shouldGetADefaultRepresentationOfACohort() throws Exception {
+  @Test
+  public void getCohortByExactName_shouldGetADefaultRepresentationOfACohort() throws Exception {
 
-		String cohortName = "B13 deficit";
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + cohortName);
-		SimpleObject result = deserialize(handle(req));
+    String cohortName = "B13 deficit";
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI() + "/" + cohortName);
+    SimpleObject result = deserialize(handle(req));
 
-		Assertions.assertNotNull(result);
-		Util.log("Cohort fetched (default)", result);
-		Assertions.assertEquals(cohortName, result.get("name"));
-	}
+    Assertions.assertNotNull(result);
+    Util.log("Cohort fetched (default)", result);
+    Assertions.assertEquals(cohortName, result.get("name"));
+  }
 
-	@Test
-	public void getCohorts_shouldSearchForCohortsByName() throws Exception {
+  @Test
+  public void getCohorts_shouldSearchForCohortsByName() throws Exception {
 
-		MockHttpServletRequest req = request(RequestMethod.GET, getURI());
-		req.addParameter("q", "B13");
-		SimpleObject result = deserialize(handle(req));
+    MockHttpServletRequest req = request(RequestMethod.GET, getURI());
+    req.addParameter("q", "B13");
+    SimpleObject result = deserialize(handle(req));
 
-		List<Object> results = (List<Object>) result.get("results");
-		Assertions.assertEquals(2, results.size());
-		Util.log("Found " + results.size() + " cohort(s)", results);
-	}
+    List<Object> results = (List<Object>) result.get("results");
+    Assertions.assertEquals(2, results.size());
+    Util.log("Found " + results.size() + " cohort(s)", results);
+  }
 
-	@Test
-	public void voidCohort_shouldVoidACohort() throws Exception {
-		Cohort cohort = service.getCohort(1);
-		Assertions.assertFalse(cohort.isVoided());
+  @Test
+  public void voidCohort_shouldVoidACohort() throws Exception {
+    Cohort cohort = service.getCohort(1);
+    Assertions.assertFalse(cohort.isVoided());
 
-		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
-		req.addParameter("reason", "unit test");
-		handle(req);
+    MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
+    req.addParameter("reason", "unit test");
+    handle(req);
 
-		cohort = service.getCohort(1);
-		Assertions.assertTrue(cohort.isVoided());
-		Assertions.assertEquals("unit test", cohort.getVoidReason());
-	}
+    cohort = service.getCohort(1);
+    Assertions.assertTrue(cohort.isVoided());
+    Assertions.assertEquals("unit test", cohort.getVoidReason());
+  }
 
-	@Test
-	public void updateCohort_shouldChangeAPropertyOnACohort() throws Exception {
+  @Test
+  public void updateCohort_shouldChangeAPropertyOnACohort() throws Exception {
 
-		SimpleObject attributes = new SimpleObject();
-		attributes.add("name", "Updated cohort name");
+    SimpleObject attributes = new SimpleObject();
+    attributes.add("name", "Updated cohort name");
 
-		String json = new ObjectMapper().writeValueAsString(attributes);
+    String json = new ObjectMapper().writeValueAsString(attributes);
 
-		MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
-		req.setContent(json.getBytes());
-		handle(req);
+    MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
+    req.setContent(json.getBytes());
+    handle(req);
 
-		Cohort editedCohort = service.getCohortByUuid(getUuid());
-		Assertions.assertEquals("Updated cohort name", editedCohort.getName());
-	}
+    Cohort editedCohort = service.getCohortByUuid(getUuid());
+    Assertions.assertEquals("Updated cohort name", editedCohort.getName());
+  }
 
-	@Test
-	public void updateCohort_shouldFailToOverwriteMemberIdsOnACohort() throws Exception {
-		assertThrows(ConversionException.class, () -> {
-			Assertions.assertEquals(3, service.getCohortByUuid(getUuid()).getMemberIds().size());
+  @Test
+  public void updateCohort_shouldFailToOverwriteMemberIdsOnACohort() throws Exception {
+    assertThrows(
+        ConversionException.class,
+        () -> {
+          Assertions.assertEquals(3, service.getCohortByUuid(getUuid()).getMemberIds().size());
 
-			SimpleObject attributes = new SimpleObject();
-			attributes.add("memberIds", new Integer[] { 2, 6 });
-			String json = new ObjectMapper().writeValueAsString(attributes);
+          SimpleObject attributes = new SimpleObject();
+          attributes.add("memberIds", new Integer[] {2, 6});
+          String json = new ObjectMapper().writeValueAsString(attributes);
 
-			MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
-			req.setContent(json.getBytes());
-			handle(req);
+          MockHttpServletRequest req = request(RequestMethod.POST, getURI() + "/" + getUuid());
+          req.setContent(json.getBytes());
+          handle(req);
+        });
+  }
 
-		});
-	}
+  @Test
+  public void purgeCohort_shouldPurgeCohort() throws Exception {
 
-	@Test
-	public void purgeCohort_shouldPurgeCohort() throws Exception {
+    MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
+    req.addParameter("purge", "true");
+    handle(req);
 
-		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + getUuid());
-		req.addParameter("purge", "true");
-		handle(req);
-
-		Assertions.assertNull(service.getCohortByUuid(getUuid()));
-	}
-
+    Assertions.assertNull(service.getCohortByUuid(getUuid()));
+  }
 }
