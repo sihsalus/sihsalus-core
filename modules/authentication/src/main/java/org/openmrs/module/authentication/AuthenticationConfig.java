@@ -396,6 +396,9 @@ public class AuthenticationConfig implements Serializable {
    */
   public static synchronized void reloadConfigFromRuntimeProperties(String applicationName) {
     Properties runtimeProperties = OpenmrsUtil.getRuntimeProperties(applicationName);
+    if (runtimeProperties == null) {
+      runtimeProperties = new Properties();
+    }
     config = AuthenticationUtil.getPropertiesWithPrefix(runtimeProperties, PREFIX, false);
   }
 }
