@@ -99,7 +99,8 @@ public class DefaultMailSender implements MailSender {
           Properties sessionProperties = mailSessionPropertiesFromPath();
           if (sessionProperties == null) {
             log.info(
-                "Could not load mail properties from application data directory. Loading from OMRS settings.");
+                "Could not load mail properties from application data directory. Loading from OMRS"
+                    + " settings.");
             sessionProperties = mailSessionPropertiesFromOMRS();
           }
           final String user = sessionProperties.getProperty("mail.user");

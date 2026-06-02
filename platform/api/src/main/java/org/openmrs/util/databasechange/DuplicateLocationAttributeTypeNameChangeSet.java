@@ -78,9 +78,9 @@ public class DuplicateLocationAttributeTypeNameChangeSet implements CustomTaskCh
       stmt = connection.createStatement();
       rs =
           stmt.executeQuery(
-              "SELECT * FROM location_attribute_type "
-                  + "INNER JOIN (SELECT name FROM location_attribute_type GROUP BY name HAVING count(name) > 1) "
-                  + "dup ON location_attribute_type.name = dup.name");
+              "SELECT * FROM location_attribute_type INNER JOIN (SELECT name FROM"
+                  + " location_attribute_type GROUP BY name HAVING count(name) > 1) dup ON"
+                  + " location_attribute_type.name = dup.name");
       Integer id;
       String name;
 
@@ -128,7 +128,8 @@ public class DuplicateLocationAttributeTypeNameChangeSet implements CustomTaskCh
           } while (duplicateName);
           pStmt =
               connection.prepareStatement(
-                  "update location_attribute_type set name = ?, changed_by = ?, date_changed = ? where location_attribute_type_id = ?");
+                  "update location_attribute_type set name = ?, changed_by = ?, date_changed = ?"
+                      + " where location_attribute_type_id = ?");
           pStmt.setString(1, newName);
           pStmt.setInt(2, DatabaseUpdater.getAuthenticatedUserId());
 
@@ -178,7 +179,8 @@ public class DuplicateLocationAttributeTypeNameChangeSet implements CustomTaskCh
           stmt.close();
         } catch (SQLException e) {
           log.warn(
-              "Failed to close the select statement used to identify duplicate LocationAttributeType object names");
+              "Failed to close the select statement used to identify duplicate"
+                  + " LocationAttributeType object names");
         }
       }
 
@@ -187,7 +189,8 @@ public class DuplicateLocationAttributeTypeNameChangeSet implements CustomTaskCh
           pStmt.close();
         } catch (SQLException e) {
           log.warn(
-              "Failed to close the prepared statement used to update duplicate LocationAttributeType object names");
+              "Failed to close the prepared statement used to update duplicate"
+                  + " LocationAttributeType object names");
         }
       }
     }

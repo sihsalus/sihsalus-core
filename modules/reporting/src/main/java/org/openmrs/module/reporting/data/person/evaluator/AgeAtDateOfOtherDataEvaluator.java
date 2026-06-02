@@ -58,7 +58,8 @@ public class AgeAtDateOfOtherDataEvaluator implements PersonDataEvaluator {
               .evaluate((MappedData<PatientDataDefinition>) effectiveDateDefinition, context);
     } else {
       throw new EvaluationException(
-          "Can only handle PersonDataDefinition and PatientDataDefinition for effectiveDataDefinition");
+          "Can only handle PersonDataDefinition and PatientDataDefinition for"
+              + " effectiveDataDefinition");
     }
 
     List<DataConverter> converters = effectiveDateDefinition.getConverters();

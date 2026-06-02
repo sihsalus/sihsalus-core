@@ -190,7 +190,8 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
     Query<MetadataTermMapping> query =
         getCurrentSession()
             .createQuery(
-                "from MetadataTermMapping mapping where mapping.metadataSource = :metadataSource and mapping.code = :code",
+                "from MetadataTermMapping mapping where mapping.metadataSource = :metadataSource"
+                    + " and mapping.code = :code",
                 MetadataTermMapping.class);
     query.setParameter("metadataSource", metadataSource);
     query.setParameter("code", metadataTermCode);
@@ -366,7 +367,8 @@ public class HibernateMetadataMappingDAO implements MetadataMappingDAO {
       Integer maxResults) {
     StringBuilder hql =
         new StringBuilder(
-            "from MetadataTermMapping mapping where mapping.retired = false and mapping.metadataSource.name = :sourceName");
+            "from MetadataTermMapping mapping where mapping.retired = false and"
+                + " mapping.metadataSource.name = :sourceName");
     if (metadataClass != null) {
       hql.append(" and mapping.metadataClass = :metadataClass");
     }

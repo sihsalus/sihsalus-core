@@ -102,7 +102,8 @@ public class VisitValidator extends BaseCustomizableValidator implements Validat
           errors.rejectValue(
               "startDatetime",
               "Visit.encountersCannotBeBeforeStartDate",
-              "This visit has encounters whose dates cannot be before the start date of the visit.");
+              "This visit has encounters whose dates cannot be before the start date of the"
+                  + " visit.");
           break;
         } else if (stopDateTime != null && encounter.getEncounterDatetime().after(stopDateTime)) {
           errors.rejectValue(

@@ -23,7 +23,8 @@ public class AttachmentsServiceImpl extends BaseOpenmrsService implements Attach
   private final Log log = LogFactory.getLog(getClass());
 
   protected static final String NON_COMPLEX_OBS_ERR =
-      "A non-complex obs was returned while fetching attachments, are the concepts complex configured properly?";
+      "A non-complex obs was returned while fetching attachments, are the concepts complex"
+          + " configured properly?";
 
   private AttachmentsContext ctx;
 

@@ -52,10 +52,10 @@ public class CreateDiscontinueOrders implements CustomTaskChange {
       connection.setAutoCommit(false);
       insertStatement =
           connection.prepareStatement(
-              "Insert into orders(previous_order_id, concept_id, patient_id, encounter_id, "
-                  + "creator, date_created, discontinued_reason, discontinued_reason_non_coded, "
-                  + "uuid, order_action, orderer, order_number, order_type_id, start_date, auto_expire_date) "
-                  + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+              "Insert into orders(previous_order_id, concept_id, patient_id, encounter_id, creator,"
+                  + " date_created, discontinued_reason, discontinued_reason_non_coded, uuid,"
+                  + " order_action, orderer, order_number, order_type_id, start_date,"
+                  + " auto_expire_date) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
       for (DiscontinuedOrder discontinuedOrder : discontinuedOrders) {
         insertStatement.setInt(1, discontinuedOrder.previousOrderId);
         insertStatement.setInt(2, discontinuedOrder.conceptId);
@@ -113,9 +113,9 @@ public class CreateDiscontinueOrders implements CustomTaskChange {
     List<DiscontinuedOrder> dcOrders = new ArrayList<>();
     try (PreparedStatement statement =
         connection.prepareStatement(
-            "select order_id, concept_id, patient_id, encounter_id, date_stopped, "
-                + "discontinued_by, discontinued_reason, discontinued_reason_non_coded, order_type_id "
-                + "from orders where discontinued = ?")) {
+            "select order_id, concept_id, patient_id, encounter_id, date_stopped, discontinued_by,"
+                + " discontinued_reason, discontinued_reason_non_coded, order_type_id from orders"
+                + " where discontinued = ?")) {
       statement.setBoolean(1, true);
       ResultSet rs = null;
       try {

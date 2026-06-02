@@ -631,7 +631,8 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
                   e);
             } else {
               log.warn(
-                  "Exception caught while trying to load translations in locale {} from resource {}",
+                  "Exception caught while trying to load translations in locale {} from resource"
+                      + " {}",
                   locale.toLanguageTag(),
                   resource.getUuid(),
                   e);
@@ -908,7 +909,8 @@ public class O3FormsServiceImpl extends BaseOpenmrsService implements O3FormsSer
               Object sectionsObj = page.get(SCHEMA_KEY_SECTIONS);
               if (!(sectionsObj instanceof List)) {
                 log.error(
-                    "Form compilation - referenced page {} in form {} does not define pages as a JSON array: {}",
+                    "Form compilation - referenced page {} in form {} does not define pages as a"
+                        + " JSON array: {}",
                     pageLabel,
                     formSchema.get("name"),
                     sectionsObj);

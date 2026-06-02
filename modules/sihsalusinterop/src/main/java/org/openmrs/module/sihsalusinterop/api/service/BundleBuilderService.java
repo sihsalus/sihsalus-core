@@ -286,7 +286,8 @@ public class BundleBuilderService {
           }
         } catch (Exception e2) {
           log.warn(
-              "No se pudo obtener alergias del paciente. AllergyService puede no estar disponible.");
+              "No se pudo obtener alergias del paciente. AllergyService puede no estar"
+                  + " disponible.");
         }
       }
 

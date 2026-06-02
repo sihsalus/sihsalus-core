@@ -24,7 +24,8 @@ public class ConceptInUseException extends APIException {
    */
   public ConceptInUseException() {
     this(
-        "The concepts datatype cannot be changed if it is already used/associated to an observation");
+        "The concepts datatype cannot be changed if it is already used/associated to an"
+            + " observation");
   }
 
   /**

@@ -91,7 +91,8 @@ public class EmrApiConstants {
   public static final String PRIVILEGE_LEVEL_HIGH_ROLE = ROLE_PREFIX_PRIVILEGE_LEVEL + "High";
 
   public static final String PRIVILEGE_LEVEL_HIGH_DESCRIPTION =
-      "A role that has all API privileges except administrative privileges with security implications";
+      "A role that has all API privileges except administrative privileges with security"
+          + " implications";
 
   public static final String PRIVILEGE_LEVEL_HIGH_UUID = "f089471c-e00b-468e-96e8-46aea1b339af";
 

@@ -120,7 +120,8 @@ public class ModuleUtil {
               log.error(
                   "Unable to load module at path: "
                       + modulePath
-                      + " because no file exists there and it is not found on the classpath. (absolute path tried: "
+                      + " because no file exists there and it is not found on the classpath."
+                      + " (absolute path tried: "
                       + file.getAbsolutePath()
                       + ")");
             }
@@ -642,7 +643,8 @@ public class ModuleUtil {
               throw new UnsupportedOperationException(
                   "Attempted to create directory '"
                       + entryName
-                      + "' rejected as it attempts to write outside the chosen directory. This may be the result of a zip-slip style attack.");
+                      + "' rejected as it attempts to write outside the chosen directory. This may"
+                      + " be the result of a zip-slip style attack.");
             }
             parent.mkdirs();
             log.debug("Creating parent dirs: " + parent.getAbsolutePath());
@@ -687,7 +689,8 @@ public class ModuleUtil {
       throw new UnsupportedOperationException(
           "Attempted to write file '"
               + name
-              + "' rejected as it attempts to write outside the chosen directory. This may be the result of a zip-slip style attack.");
+              + "' rejected as it attempts to write outside the chosen directory. This may be the"
+              + " result of a zip-slip style attack.");
     }
 
     try (FileOutputStream outStream = new FileOutputStream(file)) {
@@ -1088,10 +1091,10 @@ public class ModuleUtil {
       }
 
       log.warn(
-          "Service bean '{}' ({}) appears to be declared via XML "
-              + "and also uses @Autowired annotations. This combination can lead to "
-              + "slow context refresh when mixing XML-declared services with "
-              + "annotation-based injection. Please remove @Autowired annotations from the bean. See TRUNK-6363.",
+          "Service bean '{}' ({}) appears to be declared via XML and also uses @Autowired"
+              + " annotations. This combination can lead to slow context refresh when mixing"
+              + " XML-declared services with annotation-based injection. Please remove @Autowired"
+              + " annotations from the bean. See TRUNK-6363.",
           beanName,
           beanClassName);
     }

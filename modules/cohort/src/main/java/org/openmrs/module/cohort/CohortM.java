@@ -79,7 +79,8 @@ public class CohortM extends BaseCustomizableData<CohortAttribute>
 
   @OneToMany(mappedBy = "cohort", cascade = CascadeType.ALL)
   @SQLRestriction(
-      "voided = 0 and (start_date is null or start_date <= current_timestamp()) and (end_date is null or end_date >= current_timestamp())")
+      "voided = 0 and (start_date is null or start_date <= current_timestamp()) and (end_date is"
+          + " null or end_date >= current_timestamp())")
   private Set<CohortMember> activeCohortMembers;
 
   @Column(name = "is_group_cohort")

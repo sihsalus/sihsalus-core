@@ -468,9 +468,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
       if (id == null) {
         id = nextLevelId++;
         jdbcTemplate.update(
-            "insert into address_hierarchy_level "
-                + "(address_hierarchy_level_id, name, parent_level_id, address_field, uuid, required) "
-                + "values (?, ?, ?, ?, ?, ?)",
+            "insert into address_hierarchy_level (address_hierarchy_level_id, name,"
+                + " parent_level_id, address_field, uuid, required) values (?, ?, ?, ?, ?, ?)",
             id,
             limit(component.nameMapping(), 160),
             parentId,
@@ -537,9 +536,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
           if (id == null) {
             id = nextEntryId++;
             jdbcTemplate.update(
-                "insert into address_hierarchy_entry "
-                    + "(address_hierarchy_entry_id, name, level_id, parent_id, user_generated_id, uuid) "
-                    + "values (?, ?, ?, ?, ?, ?)",
+                "insert into address_hierarchy_entry (address_hierarchy_entry_id, name, level_id,"
+                    + " parent_id, user_generated_id, uuid) values (?, ?, ?, ?, ?, ?)",
                 id,
                 name,
                 levelId,
@@ -692,7 +690,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
   private Integer findAddressHierarchyLevelId(String field, String name) {
     Integer id =
         queryInteger(
-            "select address_hierarchy_level_id from address_hierarchy_level where address_field = ?",
+            "select address_hierarchy_level_id from address_hierarchy_level where address_field ="
+                + " ?",
             field);
     if (id == null) {
       id =
@@ -1188,9 +1187,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "insert into datafilter_entity_basis_map "
-            + "(entity_identifier, entity_type, basis_identifier, basis_type, creator, date_created, uuid) "
-            + "values (?, ?, ?, ?, ?, ?, ?)",
+        "insert into datafilter_entity_basis_map (entity_identifier, entity_type, basis_identifier,"
+            + " basis_type, creator, date_created, uuid) values (?, ?, ?, ?, ?, ?, ?)",
         entity.identifier(),
         entity.className(),
         basis.identifier(),
@@ -1534,9 +1532,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into concept_class "
-              + "(name, description, creator, date_created, retired, retired_by, date_retired, retire_reason, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into concept_class (name, description, creator, date_created, retired,"
+              + " retired_by, date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?,"
+              + " ?)",
           limit(name, 255),
           limit(record.value("Description"), 255),
           SYSTEM_USER_ID,
@@ -1550,8 +1548,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update concept_class set name = ?, description = ?, changed_by = ?, date_changed = ?, retired = ?, "
-            + "retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where concept_class_id = ?",
+        "update concept_class set name = ?, description = ?, changed_by = ?, date_changed = ?,"
+            + " retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where"
+            + " concept_class_id = ?",
         limit(name, 255),
         limit(record.value("Description"), 255),
         SYSTEM_USER_ID,
@@ -1577,9 +1576,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into concept_reference_source "
-              + "(name, description, hl7_code, creator, date_created, retired, retired_by, date_retired, "
-              + "retire_reason, uuid, unique_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into concept_reference_source (name, description, hl7_code, creator,"
+              + " date_created, retired, retired_by, date_retired, retire_reason, uuid, unique_id)"
+              + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 50),
           description,
           limit(record.value("HL7 Code"), 50),
@@ -1595,9 +1594,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update concept_reference_source set name = ?, description = ?, hl7_code = ?, changed_by = ?, "
-            + "date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?, "
-            + "unique_id = ? where concept_source_id = ?",
+        "update concept_reference_source set name = ?, description = ?, hl7_code = ?, changed_by ="
+            + " ?, date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason ="
+            + " ?, uuid = ?, unique_id = ? where concept_source_id = ?",
         limit(name, 50),
         description,
         limit(record.value("HL7 Code"), 50),
@@ -1624,9 +1623,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into metadatamapping_metadata_source "
-              + "(metadata_source_id, name, description, creator, date_created, retired, retired_by, "
-              + "date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into metadatamapping_metadata_source (metadata_source_id, name, description,"
+              + " creator, date_created, retired, retired_by, date_retired, retire_reason, uuid)"
+              + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           nextMetadataMappingId(
               "metadatamapping_metadata_source",
               "metadata_source_id",
@@ -1644,9 +1643,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update metadatamapping_metadata_source set name = ?, description = ?, changed_by = ?, "
-            + "date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? "
-            + "where metadata_source_id = ?",
+        "update metadatamapping_metadata_source set name = ?, description = ?, changed_by = ?,"
+            + " date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?,"
+            + " uuid = ? where metadata_source_id = ?",
         limit(record.name(), 255),
         limit(record.description(), 1024),
         SYSTEM_USER_ID,
@@ -1671,9 +1670,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into visit_type "
-              + "(name, description, creator, date_created, retired, retired_by, date_retired, retire_reason, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into visit_type (name, description, creator, date_created, retired, retired_by,"
+              + " date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 255),
           limit(record.value("Description"), 1024),
           SYSTEM_USER_ID,
@@ -1687,8 +1685,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update visit_type set name = ?, description = ?, changed_by = ?, date_changed = ?, retired = ?, "
-            + "retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where visit_type_id = ?",
+        "update visit_type set name = ?, description = ?, changed_by = ?, date_changed = ?, retired"
+            + " = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where"
+            + " visit_type_id = ?",
         limit(name, 255),
         limit(record.value("Description"), 1024),
         SYSTEM_USER_ID,
@@ -1714,10 +1713,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into patient_identifier_type "
-              + "(name, description, format, check_digit, creator, date_created, required, format_description, "
-              + "validator, location_behavior, retired, retired_by, date_retired, retire_reason, uuid, "
-              + "uniqueness_behavior) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into patient_identifier_type (name, description, format, check_digit, creator,"
+              + " date_created, required, format_description, validator, location_behavior,"
+              + " retired, retired_by, date_retired, retire_reason, uuid, uniqueness_behavior)"
+              + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 50),
           record.value("Description"),
           limit(record.value("Format"), 255),
@@ -1738,10 +1737,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update patient_identifier_type set name = ?, description = ?, format = ?, required = ?, "
-            + "format_description = ?, validator = ?, location_behavior = ?, changed_by = ?, date_changed = ?, "
-            + "retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?, "
-            + "uniqueness_behavior = ? where patient_identifier_type_id = ?",
+        "update patient_identifier_type set name = ?, description = ?, format = ?, required = ?,"
+            + " format_description = ?, validator = ?, location_behavior = ?, changed_by = ?,"
+            + " date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?,"
+            + " uuid = ?, uniqueness_behavior = ? where patient_identifier_type_id = ?",
         limit(name, 50),
         record.value("Description"),
         limit(record.value("Format"), 255),
@@ -1774,9 +1773,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into relationship_type "
-              + "(a_is_to_b, b_is_to_a, preferred, weight, description, creator, date_created, retired, "
-              + "retired_by, date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into relationship_type (a_is_to_b, b_is_to_a, preferred, weight, description,"
+              + " creator, date_created, retired, retired_by, date_retired, retire_reason, uuid)"
+              + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(aIsToB, 50),
           limit(bIsToA, 50),
           toBoolean(record.value("Preferred")),
@@ -1879,9 +1878,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into encounter_type "
-              + "(name, description, creator, date_created, retired, retired_by, date_retired, retire_reason, uuid, "
-              + "view_privilege, edit_privilege) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into encounter_type (name, description, creator, date_created, retired,"
+              + " retired_by, date_retired, retire_reason, uuid, view_privilege, edit_privilege)"
+              + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 50),
           record.value("Description"),
           SYSTEM_USER_ID,
@@ -1897,9 +1896,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update encounter_type set name = ?, description = ?, changed_by = ?, date_changed = ?, retired = ?, "
-            + "retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?, view_privilege = ?, "
-            + "edit_privilege = ? where encounter_type_id = ?",
+        "update encounter_type set name = ?, description = ?, changed_by = ?, date_changed = ?,"
+            + " retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?,"
+            + " view_privilege = ?, edit_privilege = ? where encounter_type_id = ?",
         limit(name, 50),
         record.value("Description"),
         SYSTEM_USER_ID,
@@ -1926,9 +1925,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into encounter_role "
-              + "(name, description, creator, date_created, retired, retired_by, date_retired, retire_reason, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into encounter_role (name, description, creator, date_created, retired,"
+              + " retired_by, date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?,"
+              + " ?)",
           limit(name, 255),
           limit(record.value("Description"), 1024),
           SYSTEM_USER_ID,
@@ -1942,8 +1941,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update encounter_role set name = ?, description = ?, changed_by = ?, date_changed = ?, retired = ?, "
-            + "retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where encounter_role_id = ?",
+        "update encounter_role set name = ?, description = ?, changed_by = ?, date_changed = ?,"
+            + " retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where"
+            + " encounter_role_id = ?",
         limit(name, 255),
         limit(record.value("Description"), 1024),
         SYSTEM_USER_ID,
@@ -1961,7 +1961,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     if (countRows("select count(*) from global_property where property = ?", record.property())
         == 0) {
       jdbcTemplate.update(
-          "insert into global_property (property, property_value, description, uuid) values (?, ?, ?, ?)",
+          "insert into global_property (property, property_value, description, uuid) values (?, ?,"
+              + " ?, ?)",
           record.property(),
           record.value(),
           record.description(),
@@ -1970,8 +1971,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update global_property set property_value = ?, description = ?, changed_by = ?, date_changed = ?, uuid = ? "
-            + "where property = ?",
+        "update global_property set property_value = ?, description = ?, changed_by = ?,"
+            + " date_changed = ?, uuid = ? where property = ?",
         record.value(),
         record.description(),
         SYSTEM_USER_ID,
@@ -2005,9 +2006,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
       jdbcTemplate.update(
           "insert into "
               + attributeTypeTable.table()
-              + " (name, description, datatype, datatype_config, preferred_handler, handler_config, "
-              + "min_occurs, max_occurs, creator, date_created, retired, retired_by, date_retired, "
-              + "retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              + " (name, description, datatype, datatype_config, preferred_handler, handler_config,"
+              + " min_occurs, max_occurs, creator, date_created, retired, retired_by, date_retired,"
+              + " retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 255),
           limit(record.value("Description"), 1024),
           limit(record.value("Datatype classname"), 255),
@@ -2029,9 +2030,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     jdbcTemplate.update(
         "update "
             + attributeTypeTable.table()
-            + " set name = ?, description = ?, datatype = ?, datatype_config = ?, preferred_handler = ?, "
-            + "handler_config = ?, min_occurs = ?, max_occurs = ?, changed_by = ?, date_changed = ?, "
-            + "retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where "
+            + " set name = ?, description = ?, datatype = ?, datatype_config = ?, preferred_handler"
+            + " = ?, handler_config = ?, min_occurs = ?, max_occurs = ?, changed_by = ?,"
+            + " date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?,"
+            + " uuid = ? where "
             + attributeTypeTable.idColumn()
             + " = ?",
         limit(name, 255),
@@ -2064,9 +2066,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     String retireReason = retired ? "Retired by SIH Salus content package" : null;
     if (id == null) {
       jdbcTemplate.update(
-          "insert into location_tag "
-              + "(name, description, creator, date_created, retired, retired_by, date_retired, retire_reason, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into location_tag (name, description, creator, date_created, retired, retired_by,"
+              + " date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 50),
           limit(description, 255),
           SYSTEM_USER_ID,
@@ -2080,8 +2081,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update location_tag set name = ?, description = ?, changed_by = ?, date_changed = ?, retired = ?, "
-            + "retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where location_tag_id = ?",
+        "update location_tag set name = ?, description = ?, changed_by = ?, date_changed = ?,"
+            + " retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where"
+            + " location_tag_id = ?",
         limit(name, 50),
         limit(description, 255),
         SYSTEM_USER_ID,
@@ -2115,11 +2117,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into location "
-              + "(name, description, address1, address2, address3, address4, address5, address6, "
-              + "city_village, county_district, state_province, postal_code, country, creator, date_created, "
-              + "retired, retired_by, date_retired, retire_reason, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into location (name, description, address1, address2, address3, address4,"
+              + " address5, address6, city_village, county_district, state_province, postal_code,"
+              + " country, creator, date_created, retired, retired_by, date_retired, retire_reason,"
+              + " uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 255),
           limit(record.value("Description"), 255),
           limit(record.value("Address 1"), 255),
@@ -2144,10 +2145,11 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update location set name = ?, description = ?, address1 = ?, address2 = ?, address3 = ?, address4 = ?, "
-            + "address5 = ?, address6 = ?, city_village = ?, county_district = ?, state_province = ?, "
-            + "postal_code = ?, country = ?, changed_by = ?, date_changed = ?, retired = ?, retired_by = ?, "
-            + "date_retired = ?, retire_reason = ?, uuid = ? where location_id = ?",
+        "update location set name = ?, description = ?, address1 = ?, address2 = ?, address3 = ?,"
+            + " address4 = ?, address5 = ?, address6 = ?, city_village = ?, county_district = ?,"
+            + " state_province = ?, postal_code = ?, country = ?, changed_by = ?, date_changed = ?,"
+            + " retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where"
+            + " location_id = ?",
         limit(name, 255),
         limit(record.value("Description"), 255),
         limit(record.value("Address 1"), 255),
@@ -2186,7 +2188,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update location set parent_location = ?, changed_by = ?, date_changed = ? where location_id = ?",
+        "update location set parent_location = ?, changed_by = ?, date_changed = ? where"
+            + " location_id = ?",
         parentId,
         SYSTEM_USER_ID,
         now(),
@@ -2218,7 +2221,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
       if (enabled) {
         if (countRows(
-                "select count(*) from location_tag_map where location_id = ? and location_tag_id = ?",
+                "select count(*) from location_tag_map where location_id = ? and location_tag_id ="
+                    + " ?",
                 locationId,
                 tagId)
             == 0) {
@@ -2252,10 +2256,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into person_attribute_type "
-              + "(name, description, format, foreign_key, searchable, creator, date_created, retired, retired_by, "
-              + "date_retired, retire_reason, edit_privilege, sort_weight, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into person_attribute_type (name, description, format, foreign_key, searchable,"
+              + " creator, date_created, retired, retired_by, date_retired, retire_reason,"
+              + " edit_privilege, sort_weight, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"
+              + " ?)",
           limit(name, 50),
           record.value("Description"),
           limit(record.value("Format"), 50),
@@ -2274,9 +2278,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update person_attribute_type set name = ?, description = ?, format = ?, foreign_key = ?, searchable = ?, "
-            + "changed_by = ?, date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, "
-            + "retire_reason = ?, edit_privilege = ?, sort_weight = ?, uuid = ? where person_attribute_type_id = ?",
+        "update person_attribute_type set name = ?, description = ?, format = ?, foreign_key = ?,"
+            + " searchable = ?, changed_by = ?, date_changed = ?, retired = ?, retired_by = ?,"
+            + " date_retired = ?, retire_reason = ?, edit_privilege = ?, sort_weight = ?, uuid = ?"
+            + " where person_attribute_type_id = ?",
         limit(name, 50),
         record.value("Description"),
         limit(record.value("Format"), 50),
@@ -2307,9 +2312,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into order_type "
-              + "(name, description, creator, date_created, retired, retired_by, date_retired, retire_reason, uuid, "
-              + "java_class_name) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into order_type (name, description, creator, date_created, retired, retired_by,"
+              + " date_retired, retire_reason, uuid, java_class_name) values (?, ?, ?, ?, ?, ?, ?,"
+              + " ?, ?, ?)",
           limit(name, 255),
           record.value("Description"),
           SYSTEM_USER_ID,
@@ -2324,9 +2329,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update order_type set name = ?, description = ?, changed_by = ?, date_changed = ?, retired = ?, "
-            + "retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?, java_class_name = ? "
-            + "where order_type_id = ?",
+        "update order_type set name = ?, description = ?, changed_by = ?, date_changed = ?, retired"
+            + " = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?, java_class_name"
+            + " = ? where order_type_id = ?",
         limit(name, 255),
         record.value("Description"),
         SYSTEM_USER_ID,
@@ -2356,7 +2361,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update order_type set parent = ?, changed_by = ?, date_changed = ? where order_type_id = ?",
+        "update order_type set parent = ?, changed_by = ?, date_changed = ? where order_type_id ="
+            + " ?",
         parentId,
         SYSTEM_USER_ID,
         now(),
@@ -2384,7 +2390,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
             "Order type concept class '" + conceptClass + "' was not loaded.");
       }
       if (countRows(
-              "select count(*) from order_type_class_map where order_type_id = ? and concept_class_id = ?",
+              "select count(*) from order_type_class_map where order_type_id = ? and"
+                  + " concept_class_id = ?",
               orderTypeId,
               conceptClassId)
           == 0) {
@@ -2419,9 +2426,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into cashier_billable_service "
-              + "(name, short_name, concept_id, service_type, service_category, service_status, creator, "
-              + "date_created, "
+          "insert into cashier_billable_service (name, short_name, concept_id, service_type,"
+              + " service_category, service_status, creator, date_created, "
               + retiredColumn
               + ", "
               + retiredByColumn
@@ -2448,8 +2454,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update cashier_billable_service set name = ?, short_name = ?, concept_id = ?, service_type = ?, "
-            + "service_category = ?, service_status = ?, changed_by = ?, date_changed = ?, "
+        "update cashier_billable_service set name = ?, short_name = ?, concept_id = ?, service_type"
+            + " = ?, service_category = ?, service_status = ?, changed_by = ?, date_changed = ?, "
             + retiredColumn
             + " = ?, "
             + retiredByColumn
@@ -2485,9 +2491,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into cashier_payment_mode "
-              + "(name, description, creator, date_created, retired, retired_by, date_retired, retire_reason, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into cashier_payment_mode (name, description, creator, date_created, retired,"
+              + " retired_by, date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?,"
+              + " ?)",
           limit(name, 255),
           limit(record.value("Description"), 1024),
           SYSTEM_USER_ID,
@@ -2500,9 +2506,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
       id = queryInteger("select payment_mode_id from cashier_payment_mode where uuid = ?", uuid);
     } else {
       jdbcTemplate.update(
-          "update cashier_payment_mode set name = ?, description = ?, changed_by = ?, date_changed = ?, "
-              + "retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? "
-              + "where payment_mode_id = ?",
+          "update cashier_payment_mode set name = ?, description = ?, changed_by = ?, date_changed"
+              + " = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?"
+              + " where payment_mode_id = ?",
           limit(name, 255),
           limit(record.value("Description"), 1024),
           SYSTEM_USER_ID,
@@ -2573,7 +2579,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     String foreignKeyColumn = paymentModeAttributeForeignKeyColumn();
     Integer id =
         queryInteger(
-            "select payment_mode_attribute_type_id from cashier_payment_mode_attribute_type where uuid = ?",
+            "select payment_mode_attribute_type_id from cashier_payment_mode_attribute_type where"
+                + " uuid = ?",
             attribute.uuid());
     if (id == null) {
       List<Integer> ids =
@@ -2610,12 +2617,12 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update cashier_payment_mode_attribute_type set payment_mode_id = ?, attribute_order = ?, name = ?, "
-            + "description = ?, "
+        "update cashier_payment_mode_attribute_type set payment_mode_id = ?, attribute_order = ?,"
+            + " name = ?, description = ?, "
             + foreignKeyColumn
-            + " = ?, format = ?, reg_exp = ?, required = ?, changed_by = ?, "
-            + "date_changed = ?, retired = false, retired_by = null, date_retired = null, retire_reason = null, "
-            + "uuid = ? where payment_mode_attribute_type_id = ?",
+            + " = ?, format = ?, reg_exp = ?, required = ?, changed_by = ?, date_changed = ?,"
+            + " retired = false, retired_by = null, date_retired = null, retire_reason = null, uuid"
+            + " = ? where payment_mode_attribute_type_id = ?",
         paymentModeId,
         attribute.attributeOrder(),
         limit(attribute.name(), 255),
@@ -2656,9 +2663,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into cashier_cash_point "
-              + "(name, description, creator, date_created, retired, retired_by, date_retired, retire_reason, "
-              + "uuid, location_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into cashier_cash_point (name, description, creator, date_created, retired,"
+              + " retired_by, date_retired, retire_reason, uuid, location_id) values (?, ?, ?, ?,"
+              + " ?, ?, ?, ?, ?, ?)",
           limit(name, 255),
           limit(record.value("Description"), 1024),
           SYSTEM_USER_ID,
@@ -2673,9 +2680,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update cashier_cash_point set name = ?, description = ?, changed_by = ?, date_changed = ?, retired = ?, "
-            + "retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?, location_id = ? "
-            + "where cash_point_id = ?",
+        "update cashier_cash_point set name = ?, description = ?, changed_by = ?, date_changed = ?,"
+            + " retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ?,"
+            + " location_id = ? where cash_point_id = ?",
         limit(name, 255),
         limit(record.value("Description"), 1024),
         SYSTEM_USER_ID,
@@ -2712,8 +2719,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update appointment_speciality set name = ?, changed_by = ?, date_changed = ?, uuid = ?, voided = ? "
-            + "where speciality_id = ?",
+        "update appointment_speciality set name = ?, changed_by = ?, date_changed = ?, uuid = ?,"
+            + " voided = ? where speciality_id = ?",
         limit(name, 50),
         SYSTEM_USER_ID,
         now,
@@ -2746,11 +2753,11 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into appointment_service "
-              + "(name, description, start_time, end_time, location_id, speciality_id, max_appointments_limit, "
-              + "duration_mins, date_created, creator, date_changed, changed_by, voided, voided_by, date_voided, "
-              + "void_reason, uuid, color, initial_appointment_status) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into appointment_service (name, description, start_time, end_time, location_id,"
+              + " speciality_id, max_appointments_limit, duration_mins, date_created, creator,"
+              + " date_changed, changed_by, voided, voided_by, date_voided, void_reason, uuid,"
+              + " color, initial_appointment_status) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"
+              + " ?, ?, ?, ?, ?, ?)",
           limit(name, 50),
           record.value("Description"),
           toSqlTime(record.value("Start Time")),
@@ -2774,10 +2781,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update appointment_service set name = ?, description = ?, start_time = ?, end_time = ?, "
-            + "location_id = ?, speciality_id = ?, max_appointments_limit = ?, duration_mins = ?, "
-            + "date_changed = ?, changed_by = ?, voided = ?, voided_by = ?, date_voided = ?, void_reason = ?, "
-            + "uuid = ?, color = ? where appointment_service_id = ?",
+        "update appointment_service set name = ?, description = ?, start_time = ?, end_time = ?,"
+            + " location_id = ?, speciality_id = ?, max_appointments_limit = ?, duration_mins = ?,"
+            + " date_changed = ?, changed_by = ?, voided = ?, voided_by = ?, date_voided = ?,"
+            + " void_reason = ?, uuid = ?, color = ? where appointment_service_id = ?",
         limit(name, 50),
         record.value("Description"),
         toSqlTime(record.value("Start Time")),
@@ -2809,9 +2816,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into cohort_type "
-              + "(name, description, date_created, creator, changed_by, date_changed, voided, voided_by, "
-              + "date_voided, void_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into cohort_type (name, description, date_created, creator, changed_by,"
+              + " date_changed, voided, voided_by, date_voided, void_reason, uuid) values (?, ?, ?,"
+              + " ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 255),
           limit(record.value("Description"), 255),
           now,
@@ -2827,8 +2834,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update cohort_type set name = ?, description = ?, changed_by = ?, date_changed = ?, voided = ?, "
-            + "voided_by = ?, date_voided = ?, void_reason = ?, uuid = ? where cohort_type_id = ?",
+        "update cohort_type set name = ?, description = ?, changed_by = ?, date_changed = ?, voided"
+            + " = ?, voided_by = ?, date_voided = ?, void_reason = ?, uuid = ? where cohort_type_id"
+            + " = ?",
         limit(name, 255),
         limit(record.value("Description"), 255),
         SYSTEM_USER_ID,
@@ -2854,10 +2862,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into cohort_attribute_type "
-              + "(name, description, datatype, datatype_config, preferred_handler, handler_config, min_occurs, "
-              + "max_occurs, date_created, creator, changed_by, date_changed, retired, retired_by, date_retired, "
-              + "retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into cohort_attribute_type (name, description, datatype, datatype_config,"
+              + " preferred_handler, handler_config, min_occurs, max_occurs, date_created, creator,"
+              + " changed_by, date_changed, retired, retired_by, date_retired, retire_reason, uuid)"
+              + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           limit(name, 255),
           limit(record.value("Description"), 255),
           limit(record.value("Datatype classname"), 255),
@@ -2879,10 +2887,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update cohort_attribute_type set name = ?, description = ?, datatype = ?, datatype_config = ?, "
-            + "preferred_handler = ?, handler_config = ?, min_occurs = ?, max_occurs = ?, changed_by = ?, "
-            + "date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? "
-            + "where cohort_attribute_type_id = ?",
+        "update cohort_attribute_type set name = ?, description = ?, datatype = ?, datatype_config"
+            + " = ?, preferred_handler = ?, handler_config = ?, min_occurs = ?, max_occurs = ?,"
+            + " changed_by = ?, date_changed = ?, retired = ?, retired_by = ?, date_retired = ?,"
+            + " retire_reason = ?, uuid = ? where cohort_attribute_type_id = ?",
         limit(name, 255),
         limit(record.value("Description"), 255),
         limit(record.value("Datatype classname"), 255),
@@ -2937,9 +2945,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into fhir_concept_source "
-              + "(concept_source_id, url, name, description, creator, date_created, retired, retired_by, "
-              + "date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into fhir_concept_source (concept_source_id, url, name, description, creator,"
+              + " date_created, retired, retired_by, date_retired, retire_reason, uuid) values (?,"
+              + " ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           conceptSourceId,
           limit(url, 255),
           limit(conceptSourceName, 255),
@@ -2955,9 +2963,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update fhir_concept_source set concept_source_id = ?, url = ?, name = ?, changed_by = ?, "
-            + "date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? "
-            + "where fhir_concept_source_id = ?",
+        "update fhir_concept_source set concept_source_id = ?, url = ?, name = ?, changed_by = ?,"
+            + " date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?,"
+            + " uuid = ? where fhir_concept_source_id = ?",
         conceptSourceId,
         limit(url, 255),
         limit(conceptSourceName, 255),
@@ -2996,7 +3004,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     if (id == null) {
       id =
           queryInteger(
-              "select fhir_patient_identifier_system_id from fhir_patient_identifier_system where uuid = ?",
+              "select fhir_patient_identifier_system_id from fhir_patient_identifier_system where"
+                  + " uuid = ?",
               uuid);
     }
 
@@ -3013,9 +3022,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into fhir_patient_identifier_system "
-              + "(patient_identifier_type_id, url, name, description, creator, date_created, retired, retired_by, "
-              + "date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into fhir_patient_identifier_system (patient_identifier_type_id, url, name,"
+              + " description, creator, date_created, retired, retired_by, date_retired,"
+              + " retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           identifierTypeId,
           limit(url, 255),
           limit(identifierTypeName, 255),
@@ -3031,9 +3040,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update fhir_patient_identifier_system set patient_identifier_type_id = ?, url = ?, name = ?, "
-            + "changed_by = ?, date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, "
-            + "retire_reason = ?, uuid = ? where fhir_patient_identifier_system_id = ?",
+        "update fhir_patient_identifier_system set patient_identifier_type_id = ?, url = ?, name ="
+            + " ?, changed_by = ?, date_changed = ?, retired = ?, retired_by = ?, date_retired = ?,"
+            + " retire_reason = ?, uuid = ? where fhir_patient_identifier_system_id = ?",
         identifierTypeId,
         limit(url, 255),
         limit(identifierTypeName, 255),
@@ -3083,9 +3092,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into idgen_identifier_source "
-              + "(uuid, name, description, identifier_type, creator, date_created, retired, retired_by, "
-              + "date_retired, retire_reason) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into idgen_identifier_source (uuid, name, description, identifier_type, creator,"
+              + " date_created, retired, retired_by, date_retired, retire_reason) values (?, ?, ?,"
+              + " ?, ?, ?, ?, ?, ?, ?)",
           uuid,
           limit(name, 255),
           limit(record.value("Description"), 1000),
@@ -3099,9 +3108,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
       id = queryInteger("select id from idgen_identifier_source where uuid = ?", uuid);
     } else {
       jdbcTemplate.update(
-          "update idgen_identifier_source set uuid = ?, name = ?, description = ?, identifier_type = ?, "
-              + "changed_by = ?, date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, "
-              + "retire_reason = ? where id = ?",
+          "update idgen_identifier_source set uuid = ?, name = ?, description = ?, identifier_type"
+              + " = ?, changed_by = ?, date_changed = ?, retired = ?, retired_by = ?, date_retired"
+              + " = ?, retire_reason = ? where id = ?",
           uuid,
           limit(name, 255),
           limit(record.value("Description"), 1000),
@@ -3124,9 +3133,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (!exists && hasMaxLength) {
       jdbcTemplate.update(
-          "insert into idgen_seq_id_gen "
-              + "(id, base_character_set, first_identifier_base, prefix, suffix, min_length, max_length) "
-              + "values (?, ?, ?, ?, ?, ?, ?)",
+          "insert into idgen_seq_id_gen (id, base_character_set, first_identifier_base, prefix,"
+              + " suffix, min_length, max_length) values (?, ?, ?, ?, ?, ?, ?)",
           sourceId,
           requiredValue(record, "Base character set"),
           limit(requiredValue(record, "First identifier base"), 50),
@@ -3153,8 +3161,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (hasMaxLength) {
       jdbcTemplate.update(
-          "update idgen_seq_id_gen set base_character_set = ?, first_identifier_base = ?, prefix = ?, "
-              + "suffix = ?, min_length = ?, max_length = ? where id = ?",
+          "update idgen_seq_id_gen set base_character_set = ?, first_identifier_base = ?, prefix ="
+              + " ?, suffix = ?, min_length = ?, max_length = ? where id = ?",
           requiredValue(record, "Base character set"),
           limit(requiredValue(record, "First identifier base"), 50),
           stringOrEmpty(record.value("Prefix")),
@@ -3166,8 +3174,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update idgen_seq_id_gen set base_character_set = ?, first_identifier_base = ?, prefix = ?, "
-            + "suffix = ?, min_length = ? where id = ?",
+        "update idgen_seq_id_gen set base_character_set = ?, first_identifier_base = ?, prefix = ?,"
+            + " suffix = ?, min_length = ? where id = ?",
         requiredValue(record, "Base character set"),
         limit(requiredValue(record, "First identifier base"), 50),
         stringOrEmpty(record.value("Prefix")),
@@ -3215,9 +3223,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     boolean hasLocation = columnExists("idgen_auto_generation_option", "location");
     if (id == null && hasLocation) {
       jdbcTemplate.update(
-          "insert into idgen_auto_generation_option "
-              + "(uuid, identifier_type, location, source, manual_entry_enabled, automatic_generation_enabled) "
-              + "values (?, ?, ?, ?, ?, ?)",
+          "insert into idgen_auto_generation_option (uuid, identifier_type, location, source,"
+              + " manual_entry_enabled, automatic_generation_enabled) values (?, ?, ?, ?, ?, ?)",
           uuid,
           identifierTypeId,
           locationId,
@@ -3229,9 +3236,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into idgen_auto_generation_option "
-              + "(uuid, identifier_type, source, manual_entry_enabled, automatic_generation_enabled) "
-              + "values (?, ?, ?, ?, ?)",
+          "insert into idgen_auto_generation_option (uuid, identifier_type, source,"
+              + " manual_entry_enabled, automatic_generation_enabled) values (?, ?, ?, ?, ?)",
           uuid,
           identifierTypeId,
           sourceId,
@@ -3242,8 +3248,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (hasLocation) {
       jdbcTemplate.update(
-          "update idgen_auto_generation_option set uuid = ?, identifier_type = ?, location = ?, source = ?, "
-              + "manual_entry_enabled = ?, automatic_generation_enabled = ? where id = ?",
+          "update idgen_auto_generation_option set uuid = ?, identifier_type = ?, location = ?,"
+              + " source = ?, manual_entry_enabled = ?, automatic_generation_enabled = ? where id ="
+              + " ?",
           uuid,
           identifierTypeId,
           locationId,
@@ -3273,7 +3280,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
     if (locationId == null) {
       return queryInteger(
-          "select id from idgen_auto_generation_option where identifier_type = ? and location is null",
+          "select id from idgen_auto_generation_option where identifier_type = ? and location is"
+              + " null",
           identifierTypeId);
     }
     return queryInteger(
@@ -3297,8 +3305,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into concept_set (concept_id, concept_set, sort_weight, creator, date_created, uuid) "
-              + "values (?, ?, ?, ?, ?, ?)",
+          "insert into concept_set (concept_id, concept_set, sort_weight, creator, date_created,"
+              + " uuid) values (?, ?, ?, ?, ?, ?)",
           memberConceptId,
           setConceptId,
           toDouble(record.value("Sort Weight")),
@@ -3337,9 +3345,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into order_frequency "
-              + "(concept_id, frequency_per_day, creator, date_created, retired, retired_by, date_retired, "
-              + "retire_reason, uuid) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into order_frequency (concept_id, frequency_per_day, creator, date_created,"
+              + " retired, retired_by, date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?,"
+              + " ?, ?, ?)",
           conceptId,
           toDouble(record.value("Frequency per day")),
           SYSTEM_USER_ID,
@@ -3353,9 +3361,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update order_frequency set concept_id = ?, frequency_per_day = ?, changed_by = ?, date_changed = ?, "
-            + "retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? "
-            + "where order_frequency_id = ?",
+        "update order_frequency set concept_id = ?, frequency_per_day = ?, changed_by = ?,"
+            + " date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?,"
+            + " uuid = ? where order_frequency_id = ?",
         conceptId,
         toDouble(record.value("Frequency per day")),
         SYSTEM_USER_ID,
@@ -3488,9 +3496,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into program "
-              + "(concept_id, outcomes_concept_id, creator, date_created, retired, name, description, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into program (concept_id, outcomes_concept_id, creator, date_created, retired,"
+              + " name, description, uuid) values (?, ?, ?, ?, ?, ?, ?, ?)",
           conceptId,
           outcomesConceptId,
           SYSTEM_USER_ID,
@@ -3503,8 +3510,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update program set concept_id = ?, outcomes_concept_id = ?, changed_by = ?, date_changed = ?, "
-            + "retired = ?, name = ?, description = ?, uuid = ? where program_id = ?",
+        "update program set concept_id = ?, outcomes_concept_id = ?, changed_by = ?, date_changed ="
+            + " ?, retired = ?, name = ?, description = ?, uuid = ? where program_id = ?",
         conceptId,
         outcomesConceptId,
         SYSTEM_USER_ID,
@@ -3529,7 +3536,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     if (id == null) {
       id =
           queryInteger(
-              "select program_workflow_id from program_workflow where program_id = ? and concept_id = ?",
+              "select program_workflow_id from program_workflow where program_id = ? and concept_id"
+                  + " = ?",
               programId,
               conceptId);
     }
@@ -3538,8 +3546,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     boolean retired = toBoolean(record.value("Void/Retire"));
     if (id == null) {
       jdbcTemplate.update(
-          "insert into program_workflow "
-              + "(program_id, concept_id, creator, date_created, retired, uuid) values (?, ?, ?, ?, ?, ?)",
+          "insert into program_workflow (program_id, concept_id, creator, date_created, retired,"
+              + " uuid) values (?, ?, ?, ?, ?, ?)",
           programId,
           conceptId,
           SYSTEM_USER_ID,
@@ -3550,8 +3558,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update program_workflow set program_id = ?, concept_id = ?, changed_by = ?, date_changed = ?, "
-            + "retired = ?, uuid = ? where program_workflow_id = ?",
+        "update program_workflow set program_id = ?, concept_id = ?, changed_by = ?, date_changed ="
+            + " ?, retired = ?, uuid = ? where program_workflow_id = ?",
         programId,
         conceptId,
         SYSTEM_USER_ID,
@@ -3588,9 +3596,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     boolean retired = toBoolean(record.value("Void/Retire"));
     if (id == null) {
       jdbcTemplate.update(
-          "insert into program_workflow_state "
-              + "(program_workflow_id, concept_id, initial, terminal, creator, date_created, retired, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into program_workflow_state (program_workflow_id, concept_id, initial, terminal,"
+              + " creator, date_created, retired, uuid) values (?, ?, ?, ?, ?, ?, ?, ?)",
           workflowId,
           conceptId,
           toBoolean(record.value("Initial")),
@@ -3811,9 +3818,9 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update metadatamapping_metadata_set set name = ?, description = ?, changed_by = ?, "
-            + "date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? "
-            + "where metadata_set_id = ?",
+        "update metadatamapping_metadata_set set name = ?, description = ?, changed_by = ?,"
+            + " date_changed = ?, retired = ?, retired_by = ?, date_retired = ?, retire_reason = ?,"
+            + " uuid = ? where metadata_set_id = ?",
         limit(record.value("Name"), 255),
         limit(record.value("Description"), 1024),
         SYSTEM_USER_ID,
@@ -3851,7 +3858,8 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
             record.value("Uuid"), "metadata-term-mapping", mappingSource + ":" + mappingCode);
     Integer id =
         queryInteger(
-            "select metadata_term_mapping_id from metadatamapping_metadata_term_mapping where uuid = ?",
+            "select metadata_term_mapping_id from metadatamapping_metadata_term_mapping where uuid"
+                + " = ?",
             uuid);
     if (id == null) {
       id =
@@ -3870,10 +3878,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
 
     if (id == null) {
       jdbcTemplate.update(
-          "insert into metadatamapping_metadata_term_mapping "
-              + "(metadata_term_mapping_id, metadata_source_id, code, metadata_class, metadata_uuid, creator, "
-              + "date_created, retired, retired_by, date_retired, retire_reason, uuid) "
-              + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "insert into metadatamapping_metadata_term_mapping (metadata_term_mapping_id,"
+              + " metadata_source_id, code, metadata_class, metadata_uuid, creator, date_created,"
+              + " retired, retired_by, date_retired, retire_reason, uuid) values (?, ?, ?, ?, ?, ?,"
+              + " ?, ?, ?, ?, ?, ?)",
           nextMetadataMappingId(
               "metadatamapping_metadata_term_mapping",
               "metadata_term_mapping_id",
@@ -3893,9 +3901,10 @@ public final class StaticSihsalusContentLoader extends AbstractStaticContentLoad
     }
 
     jdbcTemplate.update(
-        "update metadatamapping_metadata_term_mapping set metadata_source_id = ?, code = ?, metadata_class = ?, "
-            + "metadata_uuid = ?, changed_by = ?, date_changed = ?, retired = ?, retired_by = ?, "
-            + "date_retired = ?, retire_reason = ?, uuid = ? where metadata_term_mapping_id = ?",
+        "update metadatamapping_metadata_term_mapping set metadata_source_id = ?, code = ?,"
+            + " metadata_class = ?, metadata_uuid = ?, changed_by = ?, date_changed = ?, retired ="
+            + " ?, retired_by = ?, date_retired = ?, retire_reason = ?, uuid = ? where"
+            + " metadata_term_mapping_id = ?",
         sourceId,
         limit(mappingCode, 255),
         limit(metadataClass, 1024),

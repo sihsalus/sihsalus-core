@@ -193,7 +193,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
               nr -> {
                 String notificationMsg =
                     String.format(
-                        "Appointment Notification Result - medium: %s, uuid: %s, status: %d, message: %s",
+                        "Appointment Notification Result - medium: %s, uuid: %s, status: %d,"
+                            + " message: %s",
                         nr.getMedium(), nr.getUuid(), nr.getStatus(), nr.getMessage());
                 log.info(notificationMsg);
               });

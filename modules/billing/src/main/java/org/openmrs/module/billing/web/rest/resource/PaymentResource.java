@@ -141,7 +141,8 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
       Provider cashier = ProviderUtil.getCurrentProvider();
       if (cashier == null) {
         throw new APIException(
-            "The authenticated user is not associated with a Provider and cannot process payments.");
+            "The authenticated user is not associated with a Provider and cannot process"
+                + " payments.");
       }
       delegate.setCashier(cashier);
     }

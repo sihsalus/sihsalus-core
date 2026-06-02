@@ -135,18 +135,21 @@ public class SihsalusPatientFlagsConfiguration {
           administrationService,
           GP_PATIENT_HEADER_DISPLAY,
           "true",
-          "DO NOT MODIFY HERE: use \"manage flag global properties\" to modify; true/false whether or not to display flags in the Patient Dashboard overview");
+          "DO NOT MODIFY HERE: use \"manage flag global properties\" to modify; true/false whether"
+              + " or not to display flags in the Patient Dashboard overview");
       ensureGlobalProperty(
           administrationService,
           GP_PATIENT_OVERVIEW_DISPLAY,
           "true",
-          "DO NOT MODIFY HERE: use \"manage flag global properties\" to modify; true/false whether or not to display flags in the Patient Dashboard header");
+          "DO NOT MODIFY HERE: use \"manage flag global properties\" to modify; true/false whether"
+              + " or not to display flags in the Patient Dashboard header");
       String schedulerUsername = administrationService.getGlobalProperty("scheduler.username");
       ensureGlobalProperty(
           administrationService,
           GP_USERNAME,
           schedulerUsername == null ? "" : schedulerUsername,
-          "DO NOT MODIFY HERE: user \"manage flag global properties\" to modify; Username for the OpenMRS user that will evaluate Groovy flags");
+          "DO NOT MODIFY HERE: user \"manage flag global properties\" to modify; Username for the"
+              + " OpenMRS user that will evaluate Groovy flags");
     } finally {
       Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES);
       Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);

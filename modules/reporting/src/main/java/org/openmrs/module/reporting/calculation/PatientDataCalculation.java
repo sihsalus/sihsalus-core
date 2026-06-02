@@ -68,7 +68,8 @@ public class PatientDataCalculation extends DataCalculation implements PatientCa
         data = service.evaluate((PersonDataDefinition) getDataDefinition(), ec).getData();
       } else {
         throw new APIException(
-            "You must specify either a PersonDataDefinition or a PatientDataDefinition within a PatientCalculation");
+            "You must specify either a PersonDataDefinition or a PatientDataDefinition within a"
+                + " PatientCalculation");
       }
     } catch (EvaluationException e) {
       throw new APIException(

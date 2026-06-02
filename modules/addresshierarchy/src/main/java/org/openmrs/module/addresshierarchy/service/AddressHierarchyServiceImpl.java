@@ -991,7 +991,8 @@ public class AddressHierarchyServiceImpl implements AddressHierarchyService {
           }
         } catch (Exception e) {
           log.error(
-              "Unable to access Name Phonetics service for address search.  Is the Name Phonetics module installed and up-to-date?",
+              "Unable to access Name Phonetics service for address search.  Is the Name Phonetics"
+                  + " module installed and up-to-date?",
               e);
           phoneticProcessor = null;
         }
@@ -1012,7 +1013,8 @@ public class AddressHierarchyServiceImpl implements AddressHierarchyService {
             namePhoneticsUtilClass.getMethod("encodeString", String.class, String.class);
       } catch (Exception e) {
         log.error(
-            "Unable to access Name Phonetics service for address search.  Is the Name Phonetics module installed and up-to-date?",
+            "Unable to access Name Phonetics service for address search.  Is the Name Phonetics"
+                + " module installed and up-to-date?",
             e);
       }
     }
@@ -1177,7 +1179,8 @@ public class AddressHierarchyServiceImpl implements AddressHierarchyService {
       List<AddressHierarchyLevel> orderedLevels = getOrderedAddressHierarchyLevels(false);
       if (CollectionUtils.isEmpty(orderedLevels)) {
         log.info(
-            "The Address Hierarchy reverse translation cache was not initialized because there are no mapped address hierarchy levels.");
+            "The Address Hierarchy reverse translation cache was not initialized because there are"
+                + " no mapped address hierarchy levels.");
         return;
       }
       List<String> orderedAddressFields = new ArrayList<String>();

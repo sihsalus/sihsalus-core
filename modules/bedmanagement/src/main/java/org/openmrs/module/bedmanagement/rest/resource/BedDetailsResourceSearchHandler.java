@@ -35,7 +35,8 @@ public class BedDetailsResourceSearchHandler implements SearchHandler {
   public SearchConfig getSearchConfig() {
     SearchQuery searchQuery =
         new SearchQuery.Builder(
-                "Allows you to fetch bed details of a patient by visit uuid, even if the patient is discharged")
+                "Allows you to fetch bed details of a patient by visit uuid, even if the patient is"
+                    + " discharged")
             .withRequiredParameters("visitUuid")
             .build();
     return new SearchConfig(

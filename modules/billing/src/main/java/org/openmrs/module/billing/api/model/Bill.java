@@ -244,7 +244,8 @@ public class Bill extends BaseOpenmrsData {
       // non-zero payment silently flip the bill to PAID.
       if (hasDiscountDrift()) {
         log.warn(
-            "Bill {} has discount drift (total={}, effectiveTotal={}); staying POSTED for manual review",
+            "Bill {} has discount drift (total={}, effectiveTotal={}); staying POSTED for manual"
+                + " review",
             getUuid(),
             getTotal(),
             effectiveTotal());

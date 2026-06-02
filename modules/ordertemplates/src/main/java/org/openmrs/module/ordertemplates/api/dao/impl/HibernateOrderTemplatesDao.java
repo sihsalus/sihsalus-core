@@ -42,7 +42,8 @@ public class HibernateOrderTemplatesDao implements OrderTemplatesDao {
     if (drug.getDrugId() != null) {
       return currentSession()
           .createQuery(
-              "select ot from OrderTemplate ot where ot.drug = :drug order by ot.orderTemplateId desc",
+              "select ot from OrderTemplate ot where ot.drug = :drug order by ot.orderTemplateId"
+                  + " desc",
               OrderTemplate.class)
           .setParameter("drug", drug)
           .getResultList();
@@ -60,7 +61,8 @@ public class HibernateOrderTemplatesDao implements OrderTemplatesDao {
     if (concept.getConceptId() != null) {
       return currentSession()
           .createQuery(
-              "select ot from OrderTemplate ot where ot.concept = :concept order by ot.orderTemplateId desc",
+              "select ot from OrderTemplate ot where ot.concept = :concept order by"
+                  + " ot.orderTemplateId desc",
               OrderTemplate.class)
           .setParameter("concept", concept)
           .getResultList();

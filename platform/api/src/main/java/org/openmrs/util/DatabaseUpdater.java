@@ -132,7 +132,8 @@ public class DatabaseUpdater {
       final String version =
           changeLogDetective.getInitialLiquibaseSnapshotVersion(CONTEXT, liquibaseProvider);
       log.debug(
-          "updating the database with versions of liquibase-update-to-latest files greater than '{}'",
+          "updating the database with versions of liquibase-update-to-latest files greater than"
+              + " '{}'",
           version);
 
       changeLogs =
@@ -441,12 +442,16 @@ public class DatabaseUpdater {
       connection = getConnection();
     } catch (SQLException e) {
       throw new Exception(
-          "Unable to get a connection to the database.  Please check your openmrs runtime properties file and make sure you have the correct connection.username and connection.password set",
+          "Unable to get a connection to the database.  Please check your openmrs runtime"
+              + " properties file and make sure you have the correct connection.username and"
+              + " connection.password set",
           e);
     }
     if (connection == null) {
       throw new Exception(
-          "Unable to get a connection to the database.  Please check your openmrs runtime properties file and make sure you have the correct connection.username and connection.password set");
+          "Unable to get a connection to the database.  Please check your openmrs runtime"
+              + " properties file and make sure you have the correct connection.username and"
+              + " connection.password set");
     }
     Connection nonNullConnection = connection;
     if (cl == null) {

@@ -24,7 +24,8 @@ public class RoleConstants {
 
   @AddOnStartup(
       description =
-          "Assigned to Administrators of OpenMRS. Gives additional access to change core aspects of the system.")
+          "Assigned to Administrators of OpenMRS. Gives additional access to change core aspects of"
+              + " the system.")
   public static final String SUPERUSER = "System Developer";
 
   @AddOnStartup(description = "Privileges for non-authenticated users.")
