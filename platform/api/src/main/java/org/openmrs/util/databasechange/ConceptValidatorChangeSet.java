@@ -207,7 +207,8 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
                       + nameInLocale.getName()
                       + "' in locale '"
                       + getDisplayName(conceptNameLocale)
-                      + "' has been dropped as the preferred name because there is already another preferred name in the same locale");
+                      + "' has been dropped as the preferred name because there is already another"
+                      + " preferred name in the same locale");
             }
           } else {
             // Enforce not-null on locale preferred field constraint from the database table
@@ -562,7 +563,8 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
     int duplicates =
         getInt(
             connection,
-            "SELECT count(*) FROM concept_name cn, concept c WHERE cn.concept_id = c.concept_id  AND (cn.concept_name_type = '"
+            "SELECT count(*) FROM concept_name cn, concept c WHERE cn.concept_id = c.concept_id "
+                + " AND (cn.concept_name_type = '"
                 + ConceptNameType.FULLY_SPECIFIED
                 + "' OR cn.locale_preferred = true) AND cn.voided = false AND cn.name = '"
                 + HibernateUtil.escapeSqlWildcards(
@@ -679,7 +681,8 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
     try {
       pStmt =
           connection.prepareStatement(
-              "SELECT concept_name_id, name, concept_name_type, locale, locale_preferred FROM concept_name WHERE voided = false AND concept_id = ?");
+              "SELECT concept_name_id, name, concept_name_type, locale, locale_preferred FROM"
+                  + " concept_name WHERE voided = false AND concept_id = ?");
       pStmt.setInt(1, conceptId);
 
       rs = pStmt.executeQuery();
@@ -739,7 +742,9 @@ public class ConceptValidatorChangeSet implements CustomTaskChange {
       connection.setAutoCommit(false);
       pStmt =
           connection.prepareStatement(
-              "UPDATE concept_name SET locale = ?, concept_name_type = ?, locale_preferred = ?, voided = ?, date_voided = ?, void_reason = ?, voided_by = ? WHERE concept_name_id = ?");
+              "UPDATE concept_name SET locale = ?, concept_name_type = ?, locale_preferred = ?,"
+                  + " voided = ?, date_voided = ?, void_reason = ?, voided_by = ? WHERE"
+                  + " concept_name_id = ?");
 
       Integer userId = DatabaseUpdater.getAuthenticatedUserId();
       // is we have no authenticated user(for API users), set as Daemon

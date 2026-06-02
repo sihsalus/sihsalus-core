@@ -105,7 +105,8 @@ public class SqlDataSetEvaluator implements DataSetEvaluator {
         }
       } else {
         log.warn(
-            "Unable to restrict result by base cohort since no patient_id column in result set. Returning empty set.");
+            "Unable to restrict result by base cohort since no patient_id column in result set."
+                + " Returning empty set.");
       }
     } else {
       for (Object[] row : results) {

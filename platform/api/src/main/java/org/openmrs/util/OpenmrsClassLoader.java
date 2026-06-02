@@ -511,7 +511,8 @@ public class OpenmrsClassLoader extends URLClassLoader {
             Class<?> valueClass = value.getClass();
             if (!loadedByThisOrChild(valueClass)) {
               log.debug(
-                  "Not setting field {} to null in object of class {} because the referenced object was of type {} which was not loaded by this WebappClassLoader.",
+                  "Not setting field {} to null in object of class {} because the referenced object"
+                      + " was of type {} which was not loaded by this WebappClassLoader.",
                   field.getName(),
                   instance.getClass().getName(),
                   valueClass.getName());

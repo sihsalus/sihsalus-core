@@ -85,8 +85,8 @@ public class AddConceptMapTypesChangeset implements CustomTaskChange {
       // userId is not a param, because it's easier this way if it's null
       pStmt =
           connection.prepareStatement(
-              "INSERT INTO concept_map_type "
-                  + "(concept_map_type_id, name, is_hidden, retired, creator, date_created, uuid) VALUES(?,?,?,?,"
+              "INSERT INTO concept_map_type (concept_map_type_id, name, is_hidden, retired,"
+                  + " creator, date_created, uuid) VALUES(?,?,?,?,"
                   + userId
                   + ",?,?)");
 

@@ -219,7 +219,8 @@ final class SihsalusOpenConceptLabStaticContentImporter
       }
       ignoreImportErrors(lastImport);
       log.warn(
-          "Static Open Concept Lab package {} completed with {} item errors; marked them as ignored",
+          "Static Open Concept Lab package {} completed with {} item errors; marked them as"
+              + " ignored",
           zipPath.getFileName(),
           errorCount);
       return errorCount;

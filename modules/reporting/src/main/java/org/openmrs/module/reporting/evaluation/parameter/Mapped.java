@@ -235,7 +235,8 @@ public class Mapped<T extends Parameterizable> implements Serializable {
       return parameterizable.getUuid();
     } else {
       log.warn(
-          "Mapped.getUuidOfMappedOpenmrsObject is null or called for a mapped object that is not an OpenmrsObject.");
+          "Mapped.getUuidOfMappedOpenmrsObject is null or called for a mapped object that is not an"
+              + " OpenmrsObject.");
       return null; // should this throw an exception instead?
     }
   }

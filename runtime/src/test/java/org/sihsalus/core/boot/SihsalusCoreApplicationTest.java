@@ -391,8 +391,9 @@ class SihsalusCoreApplicationTest {
     assertTrue(
         handlesLegacyTaskDefinition,
         () ->
-            "No TaskHandler<TaskDefinition> (LegacyTask) registered; legacy scheduled tasks would "
-                + "fail with 'No handler found for org.openmrs.scheduler.TaskDefinition'. Handlers: "
+            "No TaskHandler<TaskDefinition> (LegacyTask) registered; legacy scheduled tasks would"
+                + " fail with 'No handler found for org.openmrs.scheduler.TaskDefinition'."
+                + " Handlers: "
                 + handlers.keySet());
   }
 
@@ -815,11 +816,13 @@ class SihsalusCoreApplicationTest {
 
   @Test
   @Disabled(
-      "Covered by SihsalusStaticContentImportTest; keep the general boot suite off the heavy OCL import path")
+      "Covered by SihsalusStaticContentImportTest; keep the general boot suite off the heavy OCL"
+          + " import path")
   void sihsalusContentPackageIsLoadedIntoStaticBootDatabase() {
     assumeTrue(
         sihsalusContentConfigurationAvailable(),
-        ".dev/reference-sources/sihsalus-content is a local reference clone and is not present in this checkout");
+        ".dev/reference-sources/sihsalus-content is a local reference clone and is not present in"
+            + " this checkout");
 
     assertSihsalusContentPackageLoaded();
 
@@ -908,7 +911,8 @@ class SihsalusCoreApplicationTest {
     assertEquals(
         1,
         countRows(
-            "select count(*) from cashier_payment_mode_attribute_type where name = ? and required = true",
+            "select count(*) from cashier_payment_mode_attribute_type where name = ? and required ="
+                + " true",
             "Maximum"));
     assertEquals(
         1,
@@ -998,10 +1002,10 @@ class SihsalusCoreApplicationTest {
     assertEquals(
         1,
         countRows(
-            "select count(*) from concept_set conceptSet "
-                + "join concept parentConcept on parentConcept.concept_id = conceptSet.concept_set "
-                + "join concept memberConcept on memberConcept.concept_id = conceptSet.concept_id "
-                + "where parentConcept.uuid = ? and memberConcept.uuid = ? and conceptSet.sort_weight = ?",
+            "select count(*) from concept_set conceptSet join concept parentConcept on"
+                + " parentConcept.concept_id = conceptSet.concept_set join concept memberConcept on"
+                + " memberConcept.concept_id = conceptSet.concept_id where parentConcept.uuid = ?"
+                + " and memberConcept.uuid = ? and conceptSet.sort_weight = ?",
             "4bf3f465-ac91-44fa-9b1f-173daf0c89a0",
             "7ba3aa21-cc56-47ca-bb4d-a60549f666c0",
             1.0));
@@ -1021,7 +1025,8 @@ class SihsalusCoreApplicationTest {
     assertEquals(
         1,
         countRows(
-            "select count(*) from program where uuid = ? and concept_id is not null and retired = false",
+            "select count(*) from program where uuid = ? and concept_id is not null and retired ="
+                + " false",
             "b9db5c39-2855-4c61-9f25-9a7ec2d564bc"));
     assertEquals(
         1,
@@ -1073,7 +1078,8 @@ class SihsalusCoreApplicationTest {
             .getMessage("coreapps.app.activeVisits.label", null, Locale.forLanguageTag("es")));
     assertTrue(
         jdbcTemplate.queryForObject(
-                "select character_maximum_length from information_schema.columns where lower(table_name) = 'concept_name' and lower(column_name) = 'name'",
+                "select character_maximum_length from information_schema.columns where"
+                    + " lower(table_name) = 'concept_name' and lower(column_name) = 'name'",
                 Integer.class)
             >= 500);
   }
@@ -1157,7 +1163,8 @@ class SihsalusCoreApplicationTest {
             post("/rest/v1/queueutil/assignticket")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"servicePointName\":\"Room 1\",\"ticketNumber\":\"A-001\",\"status\":\"called\"}"))
+                    "{\"servicePointName\":\"Room"
+                        + " 1\",\"ticketNumber\":\"A-001\",\"status\":\"called\"}"))
         .andExpect(status().isUnauthorized());
     mockMvc.perform(get("/rest/v1/queueutil/active-tickets")).andExpect(status().isUnauthorized());
     mockMvc
@@ -2179,14 +2186,15 @@ class SihsalusCoreApplicationTest {
                   TEST_ADMIN_USERNAME);
           Integer conceptId =
               jdbcTemplate.queryForObject(
-                  "select concept_id from concept where retired = false order by concept_id limit 1",
+                  "select concept_id from concept where retired = false order by concept_id limit"
+                      + " 1",
                   Integer.class);
           String stockItemUuid = UUID.randomUUID().toString();
 
           jdbcTemplate.update(
-              "insert into stockmgmt_stock_item "
-                  + "(concept_id, has_expiration, common_name, is_drug, creator, date_created, voided, uuid) "
-                  + "values (?, false, ?, false, ?, current_timestamp, false, ?)",
+              "insert into stockmgmt_stock_item (concept_id, has_expiration, common_name, is_drug,"
+                  + " creator, date_created, voided, uuid) values (?, false, ?, false, ?,"
+                  + " current_timestamp, false, ?)",
               conceptId,
               "Test stock item " + stockItemUuid,
               adminUserId,
@@ -2199,9 +2207,9 @@ class SihsalusCoreApplicationTest {
 
           String voidedUomUuid = UUID.randomUUID().toString();
           jdbcTemplate.update(
-              "insert into stockmgmt_stock_item_packaging_uom "
-                  + "(stock_item_id, packaging_uom_id, factor, creator, date_created, voided, uuid) "
-                  + "values (?, ?, 1, ?, current_timestamp, true, ?)",
+              "insert into stockmgmt_stock_item_packaging_uom (stock_item_id, packaging_uom_id,"
+                  + " factor, creator, date_created, voided, uuid) values (?, ?, 1, ?,"
+                  + " current_timestamp, true, ?)",
               stockItemId,
               conceptId,
               adminUserId,
@@ -2209,16 +2217,17 @@ class SihsalusCoreApplicationTest {
 
           String activeUomUuid = UUID.randomUUID().toString();
           jdbcTemplate.update(
-              "insert into stockmgmt_stock_item_packaging_uom "
-                  + "(stock_item_id, packaging_uom_id, factor, creator, date_created, voided, uuid) "
-                  + "values (?, ?, 1, ?, current_timestamp, false, ?)",
+              "insert into stockmgmt_stock_item_packaging_uom (stock_item_id, packaging_uom_id,"
+                  + " factor, creator, date_created, voided, uuid) values (?, ?, 1, ?,"
+                  + " current_timestamp, false, ?)",
               stockItemId,
               conceptId,
               adminUserId,
               activeUomUuid);
           Integer activeUomId =
               jdbcTemplate.queryForObject(
-                  "select stock_item_packaging_uom_id from stockmgmt_stock_item_packaging_uom where uuid = ?",
+                  "select stock_item_packaging_uom_id from stockmgmt_stock_item_packaging_uom where"
+                      + " uuid = ?",
                   Integer.class,
                   activeUomUuid);
 
@@ -3041,13 +3050,15 @@ class SihsalusCoreApplicationTest {
     assertEquals(
         1,
         jdbcTemplate.queryForObject(
-            "select count(*) from global_property where property = 'attachments.defaultConceptComplexUuid'",
+            "select count(*) from global_property where property ="
+                + " 'attachments.defaultConceptComplexUuid'",
             Integer.class));
     List<String> allowedAttachmentExtensions =
         Arrays.asList(
             jdbcTemplate
                 .queryForObject(
-                    "select property_value from global_property where property = 'attachments.allowedFileExtensions'",
+                    "select property_value from global_property where property ="
+                        + " 'attachments.allowedFileExtensions'",
                     String.class)
                 .split(","));
     assertEquals(4, allowedAttachmentExtensions.size());
@@ -3382,7 +3393,8 @@ class SihsalusCoreApplicationTest {
             "update global_property set property_value = ? where property = ?", value, property);
     if (updated == 0) {
       jdbcTemplate.update(
-          "insert into global_property (property, property_value, description, uuid) values (?, ?, ?, ?)",
+          "insert into global_property (property, property_value, description, uuid) values (?, ?,"
+              + " ?, ?)",
           property,
           value,
           "Test override",
@@ -3583,11 +3595,10 @@ class SihsalusCoreApplicationTest {
             "select coalesce(max(patient_identifier_type_id), 0) + 1 from patient_identifier_type",
             Integer.class);
     jdbcTemplate.update(
-        "insert into patient_identifier_type "
-            + "(patient_identifier_type_id, name, description, format, check_digit, creator, "
-            + "date_created, required, format_description, validator, location_behavior, "
-            + "retired, uuid, uniqueness_behavior) "
-            + "values (?, ?, ?, null, false, ?, current_timestamp, false, null, null, ?, false, ?, ?)",
+        "insert into patient_identifier_type (patient_identifier_type_id, name, description,"
+            + " format, check_digit, creator, date_created, required, format_description,"
+            + " validator, location_behavior, retired, uuid, uniqueness_behavior) values (?, ?, ?,"
+            + " null, false, ?, current_timestamp, false, null, null, ?, false, ?, ?)",
         nextIdentifierTypeId,
         "SIH Salus test identifier",
         "Identifier type used by REST/FHIR boot smoke tests",

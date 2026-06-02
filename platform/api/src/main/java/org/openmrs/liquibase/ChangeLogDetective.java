@@ -94,13 +94,15 @@ public class ChangeLogDetective {
     }
 
     log.info(
-        "identifying the Liquibase snapshot version that had been used to initialize the OpenMRS database...");
+        "identifying the Liquibase snapshot version that had been used to initialize the OpenMRS"
+            + " database...");
     Map<String, List<String>> snapshotCombinations =
         changeLogVersionFinder.getSnapshotCombinations();
 
     if (snapshotCombinations.isEmpty()) {
       throw new IllegalStateException(
-          "identifying the Liqubase snapshot version that had been used to initialize the OpenMRS database failed as no candidate change sets were found");
+          "identifying the Liqubase snapshot version that had been used to initialize the OpenMRS"
+              + " database failed as no candidate change sets were found");
     }
 
     List<String> snapshotVersions = getSnapshotVersionsInDescendingOrder(snapshotCombinations);
@@ -128,7 +130,8 @@ public class ChangeLogDetective {
 
       if (unrunChangeSetsCount == 0) {
         log.info(
-            "the Liquibase snapshot version that had been used to initialize the OpenMRS database is '{}'",
+            "the Liquibase snapshot version that had been used to initialize the OpenMRS database"
+                + " is '{}'",
             version);
 
         initialSnapshotVersion = version;
@@ -137,7 +140,8 @@ public class ChangeLogDetective {
     }
 
     log.info(
-        "the snapshot version that had been used to initialize the OpenMRS database could not be identified, falling back to the default version '{}'",
+        "the snapshot version that had been used to initialize the OpenMRS database could not be"
+            + " identified, falling back to the default version '{}'",
         DEFAULT_SNAPSHOT_VERSION);
 
     initialSnapshotVersion = DEFAULT_SNAPSHOT_VERSION;

@@ -99,7 +99,8 @@ public class AddressConfigurationLoader {
       if (!isMatchableLevelConfig(addressConfiguration.getAddressComponents())
           && !addressConfiguration.mustWipe()) {
         log.warn(
-            "The address hierarchy configuration was not loaded because of a mismatch between the exisiting and provided address hierarchy levels.");
+            "The address hierarchy configuration was not loaded because of a mismatch between the"
+                + " exisiting and provided address hierarchy levels.");
         return updatedChecksums;
       }
 
@@ -194,7 +195,8 @@ public class AddressConfigurationLoader {
       if (!isMatchableLevelConfig(addressConfiguration.getAddressComponents())
           && !addressConfiguration.mustWipe()) {
         log.warn(
-            "The address hierarchy configuration was not loaded because of a mismatch between the exisiting and provided address hierarchy levels.");
+            "The address hierarchy configuration was not loaded because of a mismatch between the"
+                + " exisiting and provided address hierarchy levels.");
         return;
       }
 
@@ -347,7 +349,8 @@ public class AddressConfigurationLoader {
       return readFromString(configuration);
     } catch (IOException e) {
       throw new IllegalArgumentException(
-          "Unable to load address configuration from configuration file.  Please check the format of this file",
+          "Unable to load address configuration from configuration file.  Please check the format"
+              + " of this file",
           e);
     }
   }
@@ -360,7 +363,8 @@ public class AddressConfigurationLoader {
       return (AddressConfiguration) getSerializer().fromXML(configuration);
     } catch (Exception e) {
       throw new IllegalArgumentException(
-          "Unable to load address configuration from configuration file.  Please check the format of this file",
+          "Unable to load address configuration from configuration file.  Please check the format"
+              + " of this file",
           e);
     }
   }

@@ -89,7 +89,8 @@ public class HibernateEmrPatientDAO implements EmrPatientDAO {
         sessionFactory
             .getCurrentSession()
             .createQuery(
-                "from Visit visit where visit.patient = :patient and visit.voided = false order by visit.startDatetime desc");
+                "from Visit visit where visit.patient = :patient and visit.voided = false order by"
+                    + " visit.startDatetime desc");
     query.setParameter("patient", patient);
     if (startIndex != null) {
       query.setFirstResult(startIndex);
@@ -110,7 +111,8 @@ public class HibernateEmrPatientDAO implements EmrPatientDAO {
         sessionFactory
             .getCurrentSession()
             .createQuery(
-                "from Obs obs where obs.encounter.visit in :visits and obs.encounter.encounterType = :encounterType and obs.voided = false");
+                "from Obs obs where obs.encounter.visit in :visits and obs.encounter.encounterType"
+                    + " = :encounterType and obs.voided = false");
     query.setParameter("visits", visits);
     query.setParameter("encounterType", emrApiProperties.getVisitNoteEncounterType());
     return query.getResultList();

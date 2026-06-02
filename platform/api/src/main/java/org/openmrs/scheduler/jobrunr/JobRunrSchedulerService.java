@@ -222,7 +222,8 @@ public class JobRunrSchedulerService extends BaseOpenmrsService implements Sched
           }
         } else {
           log.warn(
-              "Scheduled legacy task {} [{}] without updating task_definition because creator is null",
+              "Scheduled legacy task {} [{}] without updating task_definition because creator is"
+                  + " null",
               name,
               task.getUuid());
         }

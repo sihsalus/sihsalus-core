@@ -61,7 +61,8 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
     AdminUserRecord adminUser = records.get(0);
     if (StringUtils.isBlank(adminPassword) && hasDefaultOpenmrsAdminPassword(adminUser)) {
       throw new IllegalStateException(
-          "SIHSALUS_ADMIN_PASSWORD must be set; refusing to keep the default OpenMRS admin password");
+          "SIHSALUS_ADMIN_PASSWORD must be set; refusing to keep the default OpenMRS admin"
+              + " password");
     }
 
     if (!adminUsername.equals(adminUser.username())) {
@@ -74,8 +75,8 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
       String salt = StringUtils.defaultIfBlank(adminUser.salt(), Security.getRandomToken());
       String hashedPassword = Security.encodeString(adminPassword + salt);
       jdbcTemplate.update(
-          "update users set password = ?, salt = ?, changed_by = ?, date_changed = current_timestamp "
-              + "where user_id = ?",
+          "update users set password = ?, salt = ?, changed_by = ?, date_changed ="
+              + " current_timestamp where user_id = ?",
           hashedPassword,
           salt,
           adminUser.userId(),
@@ -112,7 +113,8 @@ final class OpenmrsAdminUserBootstrapper implements ApplicationRunner {
             "update global_property set property_value = ? where property = ?", value, property);
     if (updated == 0) {
       jdbcTemplate.update(
-          "insert into global_property (property, property_value, description, uuid) values (?, ?, ?, ?)",
+          "insert into global_property (property, property_value, description, uuid) values (?, ?,"
+              + " ?, ?)",
           property,
           value,
           "Configured by SIH Salus static runtime",

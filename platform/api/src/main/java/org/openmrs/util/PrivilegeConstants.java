@@ -369,7 +369,8 @@ public class PrivilegeConstants {
 
   @AddOnStartup(
       description =
-          "Able to view the navigation menu (Home, View Patients, Dictionary, Administration, My Profile")
+          "Able to view the navigation menu (Home, View Patients, Dictionary, Administration, My"
+              + " Profile")
   public static final String VIEW_NAVIGATION_MENU = "View Navigation Menu";
 
   @AddOnStartup(description = "Able to view the 'Administration' link in the navigation bar")

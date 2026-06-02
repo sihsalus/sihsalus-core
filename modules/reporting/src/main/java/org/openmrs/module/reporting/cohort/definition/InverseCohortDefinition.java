@@ -61,7 +61,8 @@ public class InverseCohortDefinition extends BaseCohortDefinition {
   public void addParameter(Parameter parameter) {
     if (baseDefinition == null) {
       throw new RuntimeException(
-          "You cannot add a parameter to an InverseCohortDefinition until you set the baseDefinition");
+          "You cannot add a parameter to an InverseCohortDefinition until you set the"
+              + " baseDefinition");
     }
     getBaseDefinition().addParameter(parameter);
   }
@@ -73,7 +74,8 @@ public class InverseCohortDefinition extends BaseCohortDefinition {
   public void addParameters(List<Parameter> parameters) {
     if (baseDefinition == null) {
       throw new RuntimeException(
-          "You cannot add a parameter to an InverseCohortDefinition until you set the baseDefinition");
+          "You cannot add a parameter to an InverseCohortDefinition until you set the"
+              + " baseDefinition");
     }
     getBaseDefinition().getParameters().addAll(parameters);
   }

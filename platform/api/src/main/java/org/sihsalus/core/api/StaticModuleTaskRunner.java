@@ -88,7 +88,8 @@ public final class StaticModuleTaskRunner {
 
     if (!StringUtils.isNotBlank(username) || !StringUtils.isNotBlank(password)) {
       throw new APIAuthenticationException(
-          "Static module background tasks require scheduler.username and scheduler.password global properties");
+          "Static module background tasks require scheduler.username and scheduler.password global"
+              + " properties");
     }
 
     Context.authenticate(new UsernamePasswordCredentials(username, password));

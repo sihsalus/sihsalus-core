@@ -204,7 +204,8 @@ public class Provider extends BaseCustomizableMetadata<ProviderAttribute> {
       return getPerson().getPersonName().getFullName();
     } else {
       log.warn(
-          "We no longer support providers who are not linked to person. Set the name on the linked person");
+          "We no longer support providers who are not linked to person. Set the name on the linked"
+              + " person");
       return null;
     }
   }

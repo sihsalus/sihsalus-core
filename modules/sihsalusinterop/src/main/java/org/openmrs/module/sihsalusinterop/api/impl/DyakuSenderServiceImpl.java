@@ -69,7 +69,8 @@ public class DyakuSenderServiceImpl extends BaseOpenmrsService implements DyakuS
         && !targetEndpoint.trim().isEmpty()
         && !configuredEndpoint.equals(targetEndpoint.trim())) {
       log.warn(
-          ">>> Ignorando targetEndpoint recibido por request; se usará el endpoint RENHICE configurado.");
+          ">>> Ignorando targetEndpoint recibido por request; se usará el endpoint RENHICE"
+              + " configurado.");
     }
 
     InteropQueueItem item = new InteropQueueItem();

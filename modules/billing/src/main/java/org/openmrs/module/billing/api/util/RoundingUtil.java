@@ -94,7 +94,8 @@ public class RoundingUtil {
 
     if (options.getRoundingItemUuid() == null) {
       throw new APIException(
-          "No rounding item specified in options. This must be set in order to use rounding for bill totals.");
+          "No rounding item specified in options. This must be set in order to use rounding for"
+              + " bill totals.");
     }
 
     // Get rounding item

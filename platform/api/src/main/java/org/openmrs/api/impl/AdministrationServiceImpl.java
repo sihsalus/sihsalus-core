@@ -1156,7 +1156,8 @@ public class AdministrationServiceImpl extends BaseOpenmrsService
     if (updatesRequired) {
       if (!DatabaseUpdater.allowAutoUpdate()) {
         throw new DatabaseUpdateException(
-            "Database updates are required. Call Context.updateDatabase() before .startup() to continue.");
+            "Database updates are required. Call Context.updateDatabase() before .startup() to"
+                + " continue.");
       }
     }
 

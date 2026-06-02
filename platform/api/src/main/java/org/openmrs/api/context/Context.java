@@ -195,16 +195,20 @@ public class Context {
               .getApplicationContext()
               .getBean(AuthenticationScheme.class); // manual autowiring (from a module)
       log.info(
-          "An authentication scheme override was provided. Using this one in place of the OpenMRS default authentication scheme.");
+          "An authentication scheme override was provided. Using this one in place of the OpenMRS"
+              + " default authentication scheme.");
     } catch (NoUniqueBeanDefinitionException e) {
       log.error(
-          "Multiple authentication schemes overrides are being provided, this is currently not supported. Sticking to OpenMRS default authentication scheme.");
+          "Multiple authentication schemes overrides are being provided, this is currently not"
+              + " supported. Sticking to OpenMRS default authentication scheme.");
     } catch (NoSuchBeanDefinitionException e) {
       log.debug(
-          "No authentication scheme override was provided. Sticking to OpenMRS default authentication scheme.");
+          "No authentication scheme override was provided. Sticking to OpenMRS default"
+              + " authentication scheme.");
     } catch (BeansException e) {
       log.error(
-          "Fatal error encountered when injecting the authentication scheme override. Sticking to OpenMRS default authentication scheme.");
+          "Fatal error encountered when injecting the authentication scheme override. Sticking to"
+              + " OpenMRS default authentication scheme.");
     }
   }
 
@@ -266,7 +270,8 @@ public class Context {
     if (arr == null) {
       log.trace("userContext is null.");
       throw new APIException(
-          "A user context must first be passed to setUserContext()...use Context.openSession() (and closeSession() to prevent memory leaks!) before using the API");
+          "A user context must first be passed to setUserContext()...use Context.openSession() (and"
+              + " closeSession() to prevent memory leaks!) before using the API");
     }
     return (UserContext) userContextHolder.get()[0];
   }
@@ -696,7 +701,8 @@ public class Context {
         return getAuthenticatedUser() != null;
       } catch (APIException e) {
         log.info(
-            "Could not get authenticated user inside called to isAuthenticated(), assuming no user context has been defined",
+            "Could not get authenticated user inside called to isAuthenticated(), assuming no user"
+                + " context has been defined",
             e);
         return false;
       }

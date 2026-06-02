@@ -73,8 +73,8 @@ public class HibernateConditionDAO implements ConditionDAO {
         sessionFactory
             .getCurrentSession()
             .createQuery(
-                "from Condition c where c.encounter.encounterId = :encounterId and c.voided = false order "
-                    + "by c.dateCreated desc",
+                "from Condition c where c.encounter.encounterId = :encounterId and c.voided = false"
+                    + " order by c.dateCreated desc",
                 Condition.class);
     query.setParameter("encounterId", encounter.getId());
     return query.getResultList();

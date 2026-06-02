@@ -474,7 +474,8 @@ public class FlagServiceImpl extends BaseOpenmrsService implements FlagService {
     if (patientHeaderDisplay == null) {
       properties.setPatientHeaderDisplay(null);
       log.error(
-          "Unable to initialize patientHeaderDisplay parameter, invalid or missing value in global_properties table.");
+          "Unable to initialize patientHeaderDisplay parameter, invalid or missing value in"
+              + " global_properties table.");
     } else if (patientHeaderDisplay.equals("true")) {
       properties.setPatientHeaderDisplay(true);
     } else if (patientHeaderDisplay.equals("false")) {
@@ -482,7 +483,8 @@ public class FlagServiceImpl extends BaseOpenmrsService implements FlagService {
     } else {
       properties.setPatientHeaderDisplay(null);
       log.error(
-          "Unable to initialize patientHeaderDisplay parameter, invalid or missing value in global_properties table.");
+          "Unable to initialize patientHeaderDisplay parameter, invalid or missing value in"
+              + " global_properties table.");
     }
 
     String patientOverviewDisplay =
@@ -490,7 +492,8 @@ public class FlagServiceImpl extends BaseOpenmrsService implements FlagService {
     if (patientOverviewDisplay == null) {
       properties.setPatientOverviewDisplay(null);
       log.error(
-          "Unable to initialize patientOverviewDisplay parameter, invalid or missing value in global_properties table.");
+          "Unable to initialize patientOverviewDisplay parameter, invalid or missing value in"
+              + " global_properties table.");
     } else if (patientOverviewDisplay.equals("true")) {
       properties.setPatientOverviewDisplay(true);
     } else if (patientOverviewDisplay.equals("false")) {
@@ -498,14 +501,16 @@ public class FlagServiceImpl extends BaseOpenmrsService implements FlagService {
     } else {
       properties.setPatientOverviewDisplay(null);
       log.error(
-          "Unable to initialize patientOverviewDisplay parameter, invalid or missing value in global_properties table.");
+          "Unable to initialize patientOverviewDisplay parameter, invalid or missing value in"
+              + " global_properties table.");
     }
 
     String username = Context.getAdministrationService().getGlobalProperty("patientflags.username");
     if (username == null) {
       properties.setUsername(null);
       log.error(
-          "Unable to initialize username parameter, invalid or missing value in global_properties table.");
+          "Unable to initialize username parameter, invalid or missing value in global_properties"
+              + " table.");
     } else {
       properties.setUsername(username);
     }
@@ -542,7 +547,8 @@ public class FlagServiceImpl extends BaseOpenmrsService implements FlagService {
         refreshCache();
       } catch (Throwable t) {
         throw new APIException(
-            "Unable to update Patient Flags global properties. Try restarting Patient Flags module.",
+            "Unable to update Patient Flags global properties. Try restarting Patient Flags"
+                + " module.",
             t);
       }
     } else {

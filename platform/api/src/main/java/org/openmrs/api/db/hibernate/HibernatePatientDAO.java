@@ -165,7 +165,8 @@ public class HibernatePatientDAO implements PatientDAO {
       }
 
       String insert =
-          "INSERT INTO patient (patient_id, creator, voided, date_created) VALUES (:patientId, :creator, :voided, :dateCreated)";
+          "INSERT INTO patient (patient_id, creator, voided, date_created) VALUES (:patientId,"
+              + " :creator, :voided, :dateCreated)";
       MutationQuery query = sessionFactory.getCurrentSession().createNativeMutationQuery(insert);
       query.setParameter("patientId", patient.getPatientId());
       query.setParameter("creator", patient.getCreator().getUserId());
@@ -707,8 +708,9 @@ public class HibernatePatientDAO implements PatientDAO {
     // switched this to an hql query so the hibernate cache can be considered as well as the
     // database
     String hql =
-        "select count(*) from PatientIdentifier pi, Patient p where pi.patient.patientId = p.patientId "
-            + "and p.voided = false and pi.voided = false and pi.identifier = :identifier and pi.identifierType.patientIdentifierTypeId = :idType";
+        "select count(*) from PatientIdentifier pi, Patient p where pi.patient.patientId ="
+            + " p.patientId and p.voided = false and pi.voided = false and pi.identifier ="
+            + " :identifier and pi.identifierType.patientIdentifierTypeId = :idType";
 
     if (checkPatient) {
       hql += " and p.patientId != :ptId";

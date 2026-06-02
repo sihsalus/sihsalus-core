@@ -74,7 +74,8 @@ public class LegacyUIImpl extends BaseOpenmrsService implements LegacyUIService 
     }
     if (reasonForExit == null) {
       throw new APIException(
-          "Must supply a valid reasonForExit (even if 'Unknown') when indicating that a patient has left care");
+          "Must supply a valid reasonForExit (even if 'Unknown') when indicating that a patient has"
+              + " left care");
     }
 
     // need to create an observation to represent this (otherwise how
@@ -160,7 +161,8 @@ public class LegacyUIImpl extends BaseOpenmrsService implements LegacyUIService 
       }
     } else {
       log.debug(
-          "Reason for exit is null - should not have gotten here without throwing an error on the form.");
+          "Reason for exit is null - should not have gotten here without throwing an error on the"
+              + " form.");
     }
   }
 

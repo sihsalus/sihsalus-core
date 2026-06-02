@@ -296,26 +296,34 @@ public class StockRuleEvaluationJob extends AbstractTask {
           stringBuilder.append("<tr>");
           stringBuilder.append(
               String.format(
-                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;'>%1s</td>",
+                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                      + " 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;'>%1s</td>",
                   locationNames.getOrDefault(rule.getLocationId(), "")));
           stringBuilder.append(
-              "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid 1px grey;'>&nbsp;</td>");
+              "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid"
+                  + " 1px grey;'>&nbsp;</td>");
           stringBuilder.append(
               String.format(
-                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;'>%1s</td>",
+                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                      + " 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;'>%1s</td>",
                   stockItemNames.getOrDefault(rule.getStockItemId(), "")));
           stringBuilder.append(
-              "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid 1px grey;'>&nbsp;</td>");
+              "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid"
+                  + " 1px grey;'>&nbsp;</td>");
           stringBuilder.append(
               String.format(
-                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;'>%1s %2s</td>",
+                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                      + " 95%%;border-bottom:solid 1px grey;border-right:solid 1px grey;'>%1s"
+                      + " %2s</td>",
                   NumberFormatUtil.qtyDisplayFormat(quantityRule),
                   conceptNames.getOrDefault(rule.getPackagingConceptId(), "")));
           stringBuilder.append(
-              "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid 1px grey;'>&nbsp;</td>");
+              "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;border-bottom:solid"
+                  + " 1px grey;'>&nbsp;</td>");
           stringBuilder.append(
               String.format(
-                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-bottom:solid 1px grey;'>%1s %2s</td>",
+                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                      + " 95%%;border-bottom:solid 1px grey;'>%1s %2s</td>",
                   NumberFormatUtil.qtyDisplayFormat(currentQuantity),
                   conceptNames.getOrDefault(rule.getPackagingConceptId(), "")));
           stringBuilder.append("</tr>");
@@ -323,19 +331,22 @@ public class StockRuleEvaluationJob extends AbstractTask {
           stringBuilder.append("<tr>");
           stringBuilder.append(
               String.format(
-                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-right:solid 1px grey;'>%1s</td>",
+                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                      + " 95%%;border-right:solid 1px grey;'>%1s</td>",
                   locationNames.getOrDefault(rule.getLocationId(), "")));
           stringBuilder.append(
               "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;'>&nbsp;</td>");
           stringBuilder.append(
               String.format(
-                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-right:solid 1px grey;'>%1s</td>",
+                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                      + " 95%%;border-right:solid 1px grey;'>%1s</td>",
                   stockItemNames.getOrDefault(rule.getStockItemId(), "")));
           stringBuilder.append(
               "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%;'>&nbsp;</td>");
           stringBuilder.append(
               String.format(
-                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size: 95%%;border-right:solid 1px grey;'>%1s %2s</td>",
+                  "<td style='padding: 0.2rem 0.5rem 0.2rem 0.5rem; font-size:"
+                      + " 95%%;border-right:solid 1px grey;'>%1s %2s</td>",
                   NumberFormatUtil.qtyDisplayFormat(quantityRule),
                   conceptNames.getOrDefault(rule.getPackagingConceptId(), "")));
           stringBuilder.append(

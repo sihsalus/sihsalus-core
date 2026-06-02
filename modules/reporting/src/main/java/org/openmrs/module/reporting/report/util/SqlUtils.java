@@ -130,8 +130,8 @@ public class SqlUtils {
           throw new ParameterException(
               "Cannot bind an empty value to parameter "
                   + paramName
-                  + ". "
-                  + "Please provide a real value or use the 'IS NULL' constraint in your query (e.g. 'table.columnName IS NULL').");
+                  + ". Please provide a real value or use the 'IS NULL' constraint in your query"
+                  + " (e.g. 'table.columnName IS NULL').");
         }
 
         int i = 0;

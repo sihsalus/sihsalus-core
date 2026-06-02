@@ -464,7 +464,8 @@ public class ExcelTemplateRenderer extends ReportTemplateRenderer {
           m.put(key, value);
         } catch (Exception e) {
           log.warn(
-              "Error in configuration of repeating sections of ExcelTemplateRenderer.  Please check your configuration.",
+              "Error in configuration of repeating sections of ExcelTemplateRenderer.  Please check"
+                  + " your configuration.",
               e);
         }
       }

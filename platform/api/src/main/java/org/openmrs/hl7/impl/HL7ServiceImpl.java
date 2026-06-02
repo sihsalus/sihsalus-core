@@ -858,7 +858,8 @@ public class HL7ServiceImpl extends BaseOpenmrsService implements HL7Service, Re
         throw new HL7Exception(
             "No route for hl7 message: "
                 + message.getName()
-                + ". Make sure you have a module installed that registers a hl7handler for this type");
+                + ". Make sure you have a module installed that registers a hl7handler for this"
+                + " type");
       }
       response = router.processMessage(message);
     } catch (ApplicationException e) {

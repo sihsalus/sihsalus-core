@@ -412,7 +412,8 @@ public class HibernateFlagDAO implements FlagDAO {
         sessionFactory
             .getCurrentSession()
             .createQuery(
-                "from PatientFlag pf where pf.patient = :patient and pf.flag = :flag and pf.voided = false",
+                "from PatientFlag pf where pf.patient = :patient and pf.flag = :flag and pf.voided"
+                    + " = false",
                 PatientFlag.class)
             .setParameter("patient", patient)
             .setParameter("flag", flag)

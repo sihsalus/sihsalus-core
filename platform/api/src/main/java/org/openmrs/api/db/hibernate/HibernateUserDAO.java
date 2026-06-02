@@ -235,7 +235,9 @@ public class HibernateUserDAO implements UserDAO {
         sessionFactory
             .getCurrentSession()
             .createQuery(
-                "select count(*) from User u where (u.username = :uname1 or u.systemId = :uname2 or u.username = :sysid1 or u.systemId = :sysid2 or u.systemId = :uname3) and u.userId <> :uid",
+                "select count(*) from User u where (u.username = :uname1 or u.systemId = :uname2 or"
+                    + " u.username = :sysid1 or u.systemId = :sysid2 or u.systemId = :uname3) and"
+                    + " u.userId <> :uid",
                 Long.class);
     query.setParameter("uname1", username);
     query.setParameter("uname2", username);

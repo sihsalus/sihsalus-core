@@ -38,7 +38,8 @@ public class PostgreSQLUuidType extends CharType {
     }
 
     log.debug(
-        "delegating the choice of char(38) type for database '{}' to super class of PostgreSQLUuidType",
+        "delegating the choice of char(38) type for database '{}' to super class of"
+            + " PostgreSQLUuidType",
         database.getDatabaseProductName());
 
     return super.toDatabaseDataType(database);

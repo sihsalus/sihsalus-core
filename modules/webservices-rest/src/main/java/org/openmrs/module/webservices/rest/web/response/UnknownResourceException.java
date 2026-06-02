@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(
     value = HttpStatus.NOT_FOUND,
     reason =
-        "Resource does not exist. Please check documentation for implemented resources and their paths")
+        "Resource does not exist. Please check documentation for implemented resources and their"
+            + " paths")
 public class UnknownResourceException extends ResponseException {
 
   private static final long serialVersionUID = 1L;

@@ -50,7 +50,10 @@ public class HighlightSubscribedConcept extends Extension {
     if (service.isSubscribedConcept(concept.getUuid())) {
 
       message =
-          "<div class=\"highlight\">This concept was downloaded from your Open Concept Lab subscription. Any local changes that you make to this concept here will be lost the next time you download updates from the OCL server. \n\n We strongly recommend that you do not edit this concept locally.</div>";
+          "<div class=\"highlight\">This concept was downloaded from your Open Concept Lab"
+              + " subscription. Any local changes that you make to this concept here will be lost"
+              + " the next time you download updates from the OCL server. \n\n"
+              + " We strongly recommend that you do not edit this concept locally.</div>";
     }
 
     return message;
