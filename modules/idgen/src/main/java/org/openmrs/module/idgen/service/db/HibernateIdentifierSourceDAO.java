@@ -361,15 +361,14 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
    */
   @Override
   public Long getSequenceValue(SequentialIdentifierGenerator generator) {
-    Number val =
+    Object val =
         sessionFactory
             .getHibernateSessionFactory()
             .getCurrentSession()
-            .createNativeQuery(
-                "select next_sequence_value from idgen_seq_id_gen where id = :id", Number.class)
+            .createNativeQuery("select next_sequence_value from idgen_seq_id_gen where id = :id")
             .setParameter("id", generator.getId())
             .uniqueResult();
-    return val == null ? null : val.longValue();
+    return val == null ? null : ((Number) val).longValue();
   }
 
   public void refreshIdentifierSource(IdentifierSource source) {
