@@ -29,7 +29,8 @@ public class UsernamePasswordAuthenticationScheme extends DaoAuthenticationSchem
 
     if (!(credentials instanceof UsernamePasswordCredentials)) {
       throw new ContextAuthenticationException(
-          "The provided credentials could not be used to authenticated with the specified authentication scheme.");
+          "The provided credentials could not be used to authenticated with the specified"
+              + " authentication scheme.");
     }
 
     UsernamePasswordCredentials userPassCreds = (UsernamePasswordCredentials) credentials;

@@ -45,7 +45,8 @@ public class PatientFlagsModuleActivator extends BaseModuleActivator implements 
               new GlobalProperty(
                   "patientflags.patientHeaderDisplay",
                   "true",
-                  "DO NOT MODIFY HERE: use \"manage flag global properties\" to modify; true/false whether or not to display flags in the Patient Dashboard overview"));
+                  "DO NOT MODIFY HERE: use \"manage flag global properties\" to modify; true/false"
+                      + " whether or not to display flags in the Patient Dashboard overview"));
     }
 
     if ((Context.getAdministrationService()
@@ -56,7 +57,8 @@ public class PatientFlagsModuleActivator extends BaseModuleActivator implements 
               new GlobalProperty(
                   "patientflags.patientOverviewDisplay",
                   "true",
-                  "DO NOT MODIFY HERE: use \"manage flag global properties\" to modify; true/false whether or not to display flags in the Patient Dashboard header"));
+                  "DO NOT MODIFY HERE: use \"manage flag global properties\" to modify; true/false"
+                      + " whether or not to display flags in the Patient Dashboard header"));
     }
 
     // if no username has been defined, as a default use the username used by the scheduler
@@ -66,7 +68,8 @@ public class PatientFlagsModuleActivator extends BaseModuleActivator implements 
               new GlobalProperty(
                   "patientflags.username",
                   Context.getAdministrationService().getGlobalProperty("scheduler.username"),
-                  "DO NOT MODIFY HERE: user \"manage flag global properties\" to modify; Username for the OpenMRS user that will evaluate Groovy flags"));
+                  "DO NOT MODIFY HERE: user \"manage flag global properties\" to modify; Username"
+                      + " for the OpenMRS user that will evaluate Groovy flags"));
     }
 
     // configure extension points based on global properties

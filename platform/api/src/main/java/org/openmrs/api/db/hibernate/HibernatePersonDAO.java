@@ -738,7 +738,8 @@ public class HibernatePersonDAO implements PersonDAO {
         sessionFactory
             .getCurrentSession()
             .createNativeQuery(
-                "select name from person_attribute_type where person_attribute_type_id = :personAttributeTypeId",
+                "select name from person_attribute_type where person_attribute_type_id ="
+                    + " :personAttributeTypeId",
                 String.class);
     sql.setParameter("personAttributeTypeId", personAttributeType.getId());
     return sql.uniqueResult();
@@ -750,7 +751,8 @@ public class HibernatePersonDAO implements PersonDAO {
         sessionFactory
             .getCurrentSession()
             .createNativeQuery(
-                "select searchable from person_attribute_type where person_attribute_type_id = :personAttributeTypeId",
+                "select searchable from person_attribute_type where person_attribute_type_id ="
+                    + " :personAttributeTypeId",
                 Boolean.class);
     sql.setParameter("personAttributeTypeId", personAttributeType.getId());
     return sql.uniqueResult();

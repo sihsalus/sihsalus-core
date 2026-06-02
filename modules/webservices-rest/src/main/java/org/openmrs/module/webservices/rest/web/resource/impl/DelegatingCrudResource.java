@@ -95,7 +95,8 @@ public abstract class DelegatingCrudResource<T> extends BaseDelegatingResource<T
       String type = (String) propertiesToCreate.remove(RestConstants.PROPERTY_FOR_TYPE);
       if (type == null)
         throw new IllegalArgumentException(
-            "When creating a resource that supports subclasses, you must indicate the particular subclass with a "
+            "When creating a resource that supports subclasses, you must indicate the particular"
+                + " subclass with a "
                 + RestConstants.PROPERTY_FOR_TYPE
                 + " property");
       handler = getResourceHandler(type);

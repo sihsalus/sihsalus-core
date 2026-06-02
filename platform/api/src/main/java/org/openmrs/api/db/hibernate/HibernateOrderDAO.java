@@ -394,8 +394,8 @@ public class HibernateOrderDAO implements OrderDAO {
 
     if (isOrderADrugOrder) {
       sql =
-          " SELECT o.patient_id, o.care_setting, o.concept_id, d.drug_inventory_id "
-              + " FROM orders o, drug_order d WHERE o.order_id = d.order_id AND o.order_id = :orderId";
+          " SELECT o.patient_id, o.care_setting, o.concept_id, d.drug_inventory_id  FROM orders o,"
+              + " drug_order d WHERE o.order_id = d.order_id AND o.order_id = :orderId";
     }
     NativeQuery<Object[]> query =
         sessionFactory.getCurrentSession().createNativeQuery(sql, Object[].class);

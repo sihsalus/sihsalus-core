@@ -52,7 +52,8 @@ public class EncounterSavedListener {
   private static void processEncounter(Integer encounterId) {
     if (!isEnabled()) {
       log.debug(
-          ">>> [EVENT] Listener deshabilitado (Global Property sihsalusinterop.renhice.enabled = false)");
+          ">>> [EVENT] Listener deshabilitado (Global Property sihsalusinterop.renhice.enabled ="
+              + " false)");
       return;
     }
 
@@ -86,7 +87,8 @@ public class EncounterSavedListener {
                   + " no procesado: "
                   + e.getMessage());
           log.warn(
-              ">>> [EVENT] El paciente debe tener DNI para enviar a RENHICE. Agregar DNI al paciente en OpenMRS.");
+              ">>> [EVENT] El paciente debe tener DNI para enviar a RENHICE. Agregar DNI al"
+                  + " paciente en OpenMRS.");
         } else {
           log.error(
               ">>> [EVENT] Error de interoperabilidad al construir Bundle: " + e.getMessage(), e);

@@ -77,7 +77,8 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
   @DatabaseChangeProperty(
       mustEqualExisting = "column",
       description =
-          "Column constraint and foreign key information. Setting the \"defaultValue\" attribute will specify a default value for the column.")
+          "Column constraint and foreign key information. Setting the \"defaultValue\" attribute"
+              + " will specify a default value for the column.")
   public List<ColumnConfig> getColumns() {
     return columns;
   }

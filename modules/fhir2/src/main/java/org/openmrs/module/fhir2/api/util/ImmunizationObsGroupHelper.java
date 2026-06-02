@@ -82,7 +82,8 @@ public class ImmunizationObsGroupHelper {
         .orElseThrow(
             () ->
                 createImmunizationRequestSetupError(
-                    "The Immunization resource requires an immunizations encounter type to be defined in the global property '"
+                    "The Immunization resource requires an immunizations encounter type to be"
+                        + " defined in the global property '"
                         + IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY
                         + "', but no immunizations encounter type is defined for this instance."));
   }
@@ -93,7 +94,8 @@ public class ImmunizationObsGroupHelper {
         .orElseThrow(
             () ->
                 createImmunizationRequestSetupError(
-                    "The Immunization resource requires an administering encounter role to be defined in the global property '"
+                    "The Immunization resource requires an administering encounter role to be"
+                        + " defined in the global property '"
                         + ADMINISTERING_ENCOUNTER_ROLE_PROPERTY
                         + "', but no administering encounter role is defined for this instance."));
   }
@@ -117,7 +119,8 @@ public class ImmunizationObsGroupHelper {
                 createImmunizationRequestSetupError(
                     "The Immunization resource requires a concept mapped to '"
                         + refTerm
-                        + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term."));
+                        + "', however either multiple concepts are mapped to that term or not"
+                        + " concepts are mapped to that term."));
   }
 
   public Obs newImmunizationObsGroup() {
@@ -164,7 +167,8 @@ public class ImmunizationObsGroupHelper {
         .orElseThrow(
             () ->
                 createImmunizationRequestValidationError(
-                    "The Immunization resource is required to be attached to an OpenMRS encounter involving a single encounter provider with the role '"
+                    "The Immunization resource is required to be attached to an OpenMRS encounter"
+                        + " involving a single encounter provider with the role '"
                         + role.getName()
                         + "'. This is not the case for immunization '"
                         + obs.getUuid()
@@ -176,7 +180,8 @@ public class ImmunizationObsGroupHelper {
   public void validateImmunizationObsGroup(Obs obs) {
     if (!concept(IMMUNIZATION_GROUPING_CONCEPT).equals(obs.getConcept())) {
       throw createImmunizationRequestSetupError(
-          "The Immunization resource requires the underlying OpenMRS immunization obs group to be defined by a concept mapped as same as "
+          "The Immunization resource requires the underlying OpenMRS immunization obs group to be"
+              + " defined by a concept mapped as same as "
               + IMMUNIZATION_GROUPING_CONCEPT
               + ". That is not the case for obs '"
               + obs.getUuid()

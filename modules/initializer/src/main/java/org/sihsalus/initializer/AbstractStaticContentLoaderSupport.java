@@ -377,7 +377,8 @@ abstract class AbstractStaticContentLoaderSupport {
     if (id == null && !isBlank(aIsToB) && !isBlank(bIsToA)) {
       List<Integer> ids =
           jdbcTemplate.queryForList(
-              "select relationship_type_id from relationship_type where a_is_to_b = ? and b_is_to_a = ?",
+              "select relationship_type_id from relationship_type where a_is_to_b = ? and b_is_to_a"
+                  + " = ?",
               Integer.class,
               aIsToB,
               bIsToA);

@@ -330,7 +330,8 @@ public class HibernateReportDAO implements ReportDAO {
     }
     if (select.startsWith("from ")) {
       hql.append(
-          " order by r.requestDate desc, r.evaluateStartDatetime desc, r.evaluateCompleteDatetime desc, r.priority desc");
+          " order by r.requestDate desc, r.evaluateStartDatetime desc, r.evaluateCompleteDatetime"
+              + " desc, r.priority desc");
     }
     Query<T> query = sessionFactory.getCurrentSession().createQuery(hql.toString(), resultClass);
     if (reportDefinition != null) {

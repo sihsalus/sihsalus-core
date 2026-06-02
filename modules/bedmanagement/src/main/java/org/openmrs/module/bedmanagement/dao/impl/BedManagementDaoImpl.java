@@ -67,8 +67,8 @@ public class BedManagementDaoImpl implements BedManagementDao {
     Object[] row =
         session
             .createQuery(
-                "select bpa.bed.bedNumber, bpa.bed.id from BedPatientAssignment bpa "
-                    + "where bpa.patient = :patient and bpa.endDatetime is null AND bpa.voided is false",
+                "select bpa.bed.bedNumber, bpa.bed.id from BedPatientAssignment bpa where"
+                    + " bpa.patient = :patient and bpa.endDatetime is null AND bpa.voided is false",
                 Object[].class)
             .setParameter("patient", patient)
             .uniqueResult();
@@ -176,7 +176,8 @@ public class BedManagementDaoImpl implements BedManagementDao {
     List<BedPatientAssignment> assignments =
         session
             .createQuery(
-                "from BedPatientAssignment where bed=:bed and endDatetime is null and voided is false",
+                "from BedPatientAssignment where bed=:bed and endDatetime is null and voided is"
+                    + " false",
                 BedPatientAssignment.class)
             .setParameter("bed", bed)
             .getResultList();
@@ -188,9 +189,9 @@ public class BedManagementDaoImpl implements BedManagementDao {
     Session session = sessionFactory.getCurrentSession();
     return session
         .createQuery(
-            "select bpa.bed from BedPatientAssignment bpa "
-                + "inner join bpa.encounter enc "
-                + "inner join enc.visit v where v.uuid = :visitUuid and bpa.voided is false order by bpa.startDatetime DESC",
+            "select bpa.bed from BedPatientAssignment bpa inner join bpa.encounter enc inner join"
+                + " enc.visit v where v.uuid = :visitUuid and bpa.voided is false order by"
+                + " bpa.startDatetime DESC",
             Bed.class)
         .setParameter("visitUuid", visitUuid)
         .setMaxResults(1)
@@ -235,9 +236,9 @@ public class BedManagementDaoImpl implements BedManagementDao {
     }
 
     String hql =
-        "select count(blm.bed) as totalBeds ,"
-            + " COALESCE(sum(CASE WHEN blm.bed IS NOT NULL AND blm.bed.status = :occupied THEN 1 ELSE 0 END), 0) as occupiedBeds"
-            + " from BedLocationMapping blm where blm.location in (:locations)";
+        "select count(blm.bed) as totalBeds , COALESCE(sum(CASE WHEN blm.bed IS NOT NULL AND"
+            + " blm.bed.status = :occupied THEN 1 ELSE 0 END), 0) as occupiedBeds from"
+            + " BedLocationMapping blm where blm.location in (:locations)";
 
     Object[] row =
         session

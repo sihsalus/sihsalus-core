@@ -166,8 +166,9 @@ public class SourceMySqldiffFile implements CustomTaskChange {
       throw new CustomChangeException(
           "There was an error while running the "
               + commands.get(0)
-              + " command. See your server's error log for the full error output. As an alternative, you"
-              + " can run this command manually on your database to skip over this error.  Run this at the command line "
+              + " command. See your server's error log for the full error output. As an"
+              + " alternative, you can run this command manually on your database to skip over this"
+              + " error.  Run this at the command line "
               + errorCommand
               + "  ");
     } else {

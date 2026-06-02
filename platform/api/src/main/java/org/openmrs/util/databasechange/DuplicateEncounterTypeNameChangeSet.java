@@ -81,7 +81,8 @@ public class DuplicateEncounterTypeNameChangeSet implements CustomTaskChange {
       stmt = connection.createStatement();
       rs =
           stmt.executeQuery(
-              "SELECT * FROM encounter_type INNER JOIN (SELECT name FROM encounter_type GROUP BY name HAVING count(name) > 1) dup ON encounter_type.name = dup.name");
+              "SELECT * FROM encounter_type INNER JOIN (SELECT name FROM encounter_type GROUP BY"
+                  + " name HAVING count(name) > 1) dup ON encounter_type.name = dup.name");
 
       Integer id;
       String name;
@@ -177,7 +178,8 @@ public class DuplicateEncounterTypeNameChangeSet implements CustomTaskChange {
           stmt.close();
         } catch (SQLException e) {
           log.warn(
-              "Failed to close the select statement used to identify duplicate EncounterType object names");
+              "Failed to close the select statement used to identify duplicate EncounterType object"
+                  + " names");
         }
       }
 
@@ -186,7 +188,8 @@ public class DuplicateEncounterTypeNameChangeSet implements CustomTaskChange {
           pStmt.close();
         } catch (SQLException e) {
           log.warn(
-              "Failed to close the prepared statement used to update duplicate EncounterType object names");
+              "Failed to close the prepared statement used to update duplicate EncounterType object"
+                  + " names");
         }
       }
     }

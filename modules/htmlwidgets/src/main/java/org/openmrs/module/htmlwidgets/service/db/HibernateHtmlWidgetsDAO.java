@@ -193,7 +193,8 @@ public class HibernateHtmlWidgetsDAO implements HtmlWidgetsDAO {
     List<Integer> limitPersonIds = null;
     if (roleNames != null && roleNames.size() > 0) {
       String roleQuery =
-          "select u.person_id from user_role r, users u where u.user_id = r.user_id and r.role in (:roleNames)";
+          "select u.person_id from user_role r, users u where u.user_id = r.user_id and r.role in"
+              + " (:roleNames)";
       limitPersonIds =
           currentSession()
               .createNativeQuery(roleQuery, Integer.class)

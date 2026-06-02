@@ -56,7 +56,10 @@ public class SimpleIndicatorResult implements IndicatorResult {
             indicatorResult.getDenominatorResult().intValue());
       } else {
         throw new RuntimeException(
-            "FRACTION indicator type is not currently supported by SimpleIndicatorResult if your numerator and denominator are not whole numbers.  If you are returning decimals in your queries, try changing your queries to use the samllest possible units.");
+            "FRACTION indicator type is not currently supported by SimpleIndicatorResult if your"
+                + " numerator and denominator are not whole numbers.  If you are returning decimals"
+                + " in your queries, try changing your queries to use the samllest possible"
+                + " units.");
       }
     }
   }

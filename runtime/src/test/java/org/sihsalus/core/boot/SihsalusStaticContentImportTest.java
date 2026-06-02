@@ -32,7 +32,8 @@ class SihsalusStaticContentImportTest {
   void staticContentAndOclPackagesLoadIntoBootDatabase() {
     assumeTrue(
         sihsalusContentConfigurationAvailable(),
-        ".dev/reference-sources/sihsalus-content is a local reference clone and is not present in this checkout");
+        ".dev/reference-sources/sihsalus-content is a local reference clone and is not present in"
+            + " this checkout");
 
     assertEquals(
         1,
@@ -60,7 +61,8 @@ class SihsalusStaticContentImportTest {
         "OCL import should leave an idempotency marker");
     assertTrue(
         countRows(
-                "select count(*) from global_property where property = ? and property_value is not null",
+                "select count(*) from global_property where property = ? and property_value is not"
+                    + " null",
                 OpenConceptLabConstants.GP_OCL_LOAD_AT_STARTUP_PATH)
             > 0,
         "OCL load-at-startup path should be configured");

@@ -248,7 +248,8 @@ public final class XmlPatcher {
           short kt = k.getNodeType();
           if (kt == Node.ELEMENT_NODE) {
             throw new XmlPatchException(
-                "Cannot add elements before/after the document root; only comments and processing instructions are allowed");
+                "Cannot add elements before/after the document root; only comments and processing"
+                    + " instructions are allowed");
           }
           if (kt == Node.TEXT_NODE && !((Text) k).getData().trim().isEmpty()) {
             throw new XmlPatchException("Cannot add text before/after the document root");
@@ -463,7 +464,8 @@ public final class XmlPatcher {
 
     if (ws != null) {
       throw new XmlPatchException(
-          "'ws' attribute is only valid when removing Element, Comment, or Processing Instruction nodes");
+          "'ws' attribute is only valid when removing Element, Comment, or Processing Instruction"
+              + " nodes");
     }
 
     if (type == Node.ATTRIBUTE_NODE) {

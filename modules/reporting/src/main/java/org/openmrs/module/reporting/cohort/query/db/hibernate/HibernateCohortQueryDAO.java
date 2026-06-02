@@ -550,7 +550,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
 
     StringBuilder sb = new StringBuilder();
     sb.append(
-        " select e.patient_id from encounter e inner join patient p on e.patient_id = p.patient_id");
+        " select e.patient_id from encounter e inner join patient p on e.patient_id ="
+            + " p.patient_id");
 
     if (providerIds != null && ReportUtil.isOpenmrsVersionOnePointNineAndAbove()) {
       sb.append(" inner join encounter_provider ep on ep.encounter_id = e.encounter_id ");
@@ -800,8 +801,8 @@ public class HibernateCohortQueryDAO implements CohortQueryDAO {
           throw new ParameterException(
               "Cannot bind an empty value to parameter "
                   + paramName
-                  + ". "
-                  + "Please provide a real value or use the 'IS NULL' constraint in your query (e.g. 'table.columnName IS NULL').");
+                  + ". Please provide a real value or use the 'IS NULL' constraint in your query"
+                  + " (e.g. 'table.columnName IS NULL').");
         }
 
         // Cohort (needs to be first, otherwise it will resolve as OpenmrsObject)

@@ -51,7 +51,8 @@ final class RequestTraceFilter extends OncePerRequestFilter implements Ordered {
       int status = response.getStatus();
       if (status >= 500 && !failedRequest) {
         log.error(
-            "HTTP request completed with server error requestId={} method={} uri={} status={} durationMs={}",
+            "HTTP request completed with server error requestId={} method={} uri={} status={}"
+                + " durationMs={}",
             requestId,
             request.getMethod(),
             request.getRequestURI(),

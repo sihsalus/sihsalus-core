@@ -745,7 +745,8 @@ public class RestUtil implements GlobalPropertyListener {
             pkgname
                 + " ("
                 + resource
-                + ") does not appear to be a valid URL / URI.  Strange, since we got it from the system...",
+                + ") does not appear to be a valid URL / URI.  Strange, since we got it from the"
+                + " system...",
             e);
       } catch (IllegalArgumentException ex) {
       }

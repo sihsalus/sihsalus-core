@@ -1147,7 +1147,8 @@ public class PatientServiceImpl extends BaseOpenmrsService implements PatientSer
       }
     } else {
       log.debug(
-          "Reason for exit is null - should not have gotten here without throwing an error on the form.");
+          "Reason for exit is null - should not have gotten here without throwing an error on the"
+              + " form.");
     }
   }
 
@@ -1309,7 +1310,8 @@ public class PatientServiceImpl extends BaseOpenmrsService implements PatientSer
       }
     } else {
       log.debug(
-          "Cause of death is null - should not have gotten here without throwing an error on the form.");
+          "Cause of death is null - should not have gotten here without throwing an error on the"
+              + " form.");
     }
   }
 

@@ -86,8 +86,8 @@ final class StaticModuleRuntimeInspector {
     try {
       Integer count =
           jdbcTemplate.queryForObject(
-              "select count(*) from scheduler_task_config "
-                  + "where schedulable_class like ? and (started = true or start_on_startup = true)",
+              "select count(*) from scheduler_task_config where schedulable_class like ? and"
+                  + " (started = true or start_on_startup = true)",
               Integer.class,
               classPrefix + "%");
       return count == null ? 0 : count;

@@ -65,7 +65,8 @@ public class AppointmentServiceDefinitionServiceImpl
         appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition);
     if (allFutureAppointmentsForService.size() > 0) {
       throw new RuntimeException(
-          "Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it");
+          "Please cancel all future appointments for this service to proceed. After deleting this"
+              + " service, you will not be able to see any appointments for it");
     }
     setVoidInfoForAppointmentService(appointmentServiceDefinition, voidReason);
     return appointmentServiceDao.save(appointmentServiceDefinition);

@@ -72,8 +72,8 @@ public class MigrateAllergiesChangeSet implements CustomTaskChange {
 
       try (PreparedStatement allergyInsertStatement =
               connection.prepareStatement(
-                  "insert into allergy (patient_id, coded_allergen, severity_concept_id, creator, date_created, uuid, comment, allergen_type) "
-                      + "values(?,?,?,?,?,?,?,?)");
+                  "insert into allergy (patient_id, coded_allergen, severity_concept_id, creator,"
+                      + " date_created, uuid, comment, allergen_type) values(?,?,?,?,?,?,?,?)");
           PreparedStatement reactionInsertStatement =
               connection.prepareStatement(
                   "insert into allergy_reaction (allergy_id, reaction_concept_id, uuid) "
@@ -82,9 +82,10 @@ public class MigrateAllergiesChangeSet implements CustomTaskChange {
               connection.prepareStatement("select allergy_id from allergy where uuid = ?");
           PreparedStatement activeListStmt =
               connection.prepareStatement(
-                  "select person_id, concept_id, comments, creator, date_created, uuid, reaction_concept_id, severity, allergy_type "
-                      + "from active_list al inner join active_list_allergy ala on al.active_list_id=ala.active_list_id "
-                      + "where voided = 0 and active_list_type_id = ?")) {
+                  "select person_id, concept_id, comments, creator, date_created, uuid,"
+                      + " reaction_concept_id, severity, allergy_type from active_list al inner"
+                      + " join active_list_allergy ala on al.active_list_id=ala.active_list_id"
+                      + " where voided = 0 and active_list_type_id = ?")) {
 
         activeListStmt.setInt(1, allergyTypeId);
         try (ResultSet rs = activeListStmt.executeQuery()) {

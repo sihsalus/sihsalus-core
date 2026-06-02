@@ -42,7 +42,8 @@ public class QueueEntryDaoImpl extends AbstractBaseQueueDaoImpl<QueueEntry>
     QueryParts queryParts = queryPartsFromSearchCriteria("select qe", searchCriteria);
     return list(
         queryParts.hql()
-            + " order by qe.sortWeight desc, qe.startedAt asc, qe.dateCreated asc, qe.queueEntryId asc",
+            + " order by qe.sortWeight desc, qe.startedAt asc, qe.dateCreated asc, qe.queueEntryId"
+            + " asc",
         QueueEntry.class,
         queryParts.parameters());
   }

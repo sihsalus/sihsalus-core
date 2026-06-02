@@ -106,7 +106,8 @@ public class HibernateContextDAO implements ContextDAO {
         candidateUser =
             session
                 .createQuery(
-                    "from User u where (u.username = ?1 or u.systemId = ?2 or u.systemId = ?3) and u.retired = false",
+                    "from User u where (u.username = ?1 or u.systemId = ?2 or u.systemId = ?3) and"
+                        + " u.retired = false",
                     User.class)
                 .setParameter(1, login)
                 .setParameter(2, login)
@@ -209,7 +210,8 @@ public class HibernateContextDAO implements ContextDAO {
                       .trim());
         } catch (Exception ex) {
           log.error(
-              "Unable to convert the global property {} to a valid integer. Using default value of 7.",
+              "Unable to convert the global property {} to a valid integer. Using default value of"
+                  + " 7.",
               OpenmrsConstants.GP_ALLOWED_FAILED_LOGINS_BEFORE_LOCKOUT);
         } finally {
           Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
@@ -376,7 +378,8 @@ public class HibernateContextDAO implements ContextDAO {
       }
     } else {
       log.debug(
-          "Participating in existing session, so not releasing session through synchronization manager");
+          "Participating in existing session, so not releasing session through synchronization"
+              + " manager");
       participate.remove();
     }
   }

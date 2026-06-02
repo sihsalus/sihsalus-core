@@ -139,7 +139,8 @@ public class HibernateEmrConceptDAO implements EmrConceptDAO {
       Integer limit) {
     StringBuilder hql =
         new StringBuilder(
-            "select distinct cn from ConceptName cn join cn.concept c where cn.voided = false and c.retired = false");
+            "select distinct cn from ConceptName cn join cn.concept c where cn.voided = false and"
+                + " c.retired = false");
 
     boolean countrySpecificLocale =
         StringUtils.isNotBlank(locale.getCountry()) || StringUtils.isNotBlank(locale.getVariant());
@@ -150,15 +151,16 @@ public class HibernateEmrConceptDAO implements EmrConceptDAO {
     }
     if (!CollectionUtils.isEmpty(inSets)) {
       hql.append(
-          " and c in (select conceptSet.concept from ConceptSet conceptSet where conceptSet.conceptSet in :inSets)");
+          " and c in (select conceptSet.concept from ConceptSet conceptSet where"
+              + " conceptSet.conceptSet in :inSets)");
     }
     if (!CollectionUtils.isEmpty(classes) && CollectionUtils.isEmpty(inSets)) {
       hql.append(" and c.conceptClass in :classes");
     }
     if (!CollectionUtils.isEmpty(sources) && CollectionUtils.isEmpty(inSets)) {
       hql.append(
-          " and exists (select mapping from ConceptMap mapping "
-              + "where mapping.concept = c and mapping.conceptReferenceTerm.conceptSource in :sources)");
+          " and exists (select mapping from ConceptMap mapping where mapping.concept = c and"
+              + " mapping.conceptReferenceTerm.conceptSource in :sources)");
     }
     for (int i = 0; i < uniqueWords.size(); i++) {
       hql.append(" and lower(cn.name) like :word").append(i);

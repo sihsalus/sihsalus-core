@@ -45,7 +45,8 @@ public abstract class AbstractAddressHierarchyTask extends TimerTask {
       Context.authenticate(new UsernamePasswordCredentials(userName, password));
     } catch (ContextAuthenticationException e) {
       log.error(
-          "Error authenticating user. Please ensure you scheduler username and password are configured correctly in your global properties",
+          "Error authenticating user. Please ensure you scheduler username and password are"
+              + " configured correctly in your global properties",
           e);
     }
   }

@@ -155,7 +155,8 @@ public class DyakuConditionMapper {
                 + concept.getDisplayString()
                 + "] no tiene mapeo CIE-10.");
         log.warn(
-            "  → Para corregir: Agregar ConceptMap con ConceptSource 'CIE-10' o 'ICD-10' en OpenMRS.");
+            "  → Para corregir: Agregar ConceptMap con ConceptSource 'CIE-10' o 'ICD-10' en"
+                + " OpenMRS.");
         log.warn("  → Usando UUID de Concept como fallback (NO es un código CIE-10 válido).");
         code.addCoding()
             .setSystem(SYSTEM_CIE10)

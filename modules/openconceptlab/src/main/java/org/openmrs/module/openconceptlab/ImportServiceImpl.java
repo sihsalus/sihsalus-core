@@ -226,7 +226,8 @@ public class ImportServiceImpl extends BaseOpenmrsService implements ImportServi
     Query query =
         getSession()
             .createQuery(
-                "update OclItem i set i.state = :newState where i.anImport = :anImport and i.state = :oldState");
+                "update OclItem i set i.state = :newState where i.anImport = :anImport and i.state"
+                    + " = :oldState");
     query.setParameter("newState", ItemState.IGNORED_ERROR);
     query.setParameter("anImport", anImport);
     query.setParameter("oldState", ItemState.ERROR);
