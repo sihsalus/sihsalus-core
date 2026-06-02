@@ -258,7 +258,7 @@ public class PatientChartCompatibilityController {
         "setMembers", concept.getSetMembers(false).stream().map(this::conceptMember).toList());
     response.put(
         "answers",
-        concept.getAnswers().stream()
+        concept.getAnswers(false).stream()
             .map(answer -> reference(answer.getAnswerConcept()))
             .filter(value -> value != null)
             .toList());
