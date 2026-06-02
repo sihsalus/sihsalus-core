@@ -90,7 +90,8 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
   public List<PooledIdentifier> getAvailableIdentifiers(IdentifierPool pool, int quantity) {
     Query<PooledIdentifier> query =
         query(
-            "from PooledIdentifier identifier where identifier.dateUsed is null and identifier.pool = :pool"
+            "from PooledIdentifier identifier where identifier.dateUsed is null and identifier.pool"
+                + " = :pool"
                 + (pool.isSequential()
                     ? " order by identifier.identifier"
                     : " order by identifier.uuid"),
@@ -144,7 +145,9 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
   @Override
   public AutoGenerationOption getAutoGenerationOptionByUuid(String uuid) {
     Query<AutoGenerationOption> query =
-        query("from AutoGenerationOption option where option.uuid = :uuid", AutoGenerationOption.class);
+        query(
+            "from AutoGenerationOption option where option.uuid = :uuid",
+            AutoGenerationOption.class);
     query.setParameter("uuid", uuid);
     return uniqueResult(query);
   }
@@ -170,7 +173,9 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
   public List<AutoGenerationOption> getAutoGenerationOptions(PatientIdentifierType type)
       throws APIException {
     Query<AutoGenerationOption> query =
-        query("from AutoGenerationOption option where option.identifierType = :type", AutoGenerationOption.class);
+        query(
+            "from AutoGenerationOption option where option.identifierType = :type",
+            AutoGenerationOption.class);
     query.setParameter("type", type);
     return query.getResultList();
   }
@@ -181,7 +186,9 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
   public AutoGenerationOption getAutoGenerationOption(PatientIdentifierType type)
       throws APIException {
     Query<AutoGenerationOption> query =
-        query("from AutoGenerationOption option where option.identifierType = :type", AutoGenerationOption.class);
+        query(
+            "from AutoGenerationOption option where option.identifierType = :type",
+            AutoGenerationOption.class);
     query.setParameter("type", type);
     return uniqueResult(query);
   }
@@ -285,7 +292,8 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
     Query<LogEntry> query =
         query(
             "from LogEntry entry where entry.source = :source"
-                + " order by entry.dateGenerated desc, entry.id desc", LogEntry.class);
+                + " order by entry.dateGenerated desc, entry.id desc",
+            LogEntry.class);
     query.setParameter("source", source);
     query.setMaxResults(1);
     List<LogEntry> entries = query.getResultList();
@@ -311,7 +319,8 @@ public class HibernateIdentifierSourceDAO implements IdentifierSourceDAO {
       PatientIdentifierType patientIdentifierType) {
     Query<IdentifierSource> query =
         query(
-            "from IdentifierSource source where source.identifierType = :type and source.retired = false",
+            "from IdentifierSource source where source.identifierType = :type and source.retired ="
+                + " false",
             IdentifierSource.class);
     query.setParameter("type", patientIdentifierType);
     return query.getResultList();

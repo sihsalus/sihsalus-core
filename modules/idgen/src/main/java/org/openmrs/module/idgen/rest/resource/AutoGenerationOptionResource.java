@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.api.ValidationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.AutoGenerationOption;
 import org.openmrs.module.idgen.IdentifierSource;
@@ -42,7 +43,6 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-import org.openmrs.api.ValidationException;
 
 @Resource(
     name = RestConstants.VERSION_1 + IdgenRestController.IDGEN_NAMESPACE + "/autogenerationoption",
@@ -184,7 +184,8 @@ public class AutoGenerationOptionResource
         && automaticGenerationEnabled == null
         && manualEntryEnabled == null) {
       throw new ResourceDoesNotSupportOperationException(
-          "You must provide at least a location, or a source, or an automaticGenerationEnabled, or a manualEntryEnabled parameter  to update an autoGenerationOption");
+          "You must provide at least a location, or a source, or an automaticGenerationEnabled, or"
+              + " a manualEntryEnabled parameter  to update an autoGenerationOption");
     }
     if (manualEntryEnabled != null) {
       autoGenerationOption.setManualEntryEnabled(this.parseBoolean(manualEntryEnabled));
