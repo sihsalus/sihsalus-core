@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.emrapi.patient;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Cohort;
@@ -23,48 +27,43 @@ import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-
 public class EmrApiPatientDataLibraryComponentTest extends BaseReportingTest {
 
-	@Autowired
-	private PatientDataService pds;
+  @Autowired private PatientDataService pds;
 
-	@Autowired
-	private PatientService patientService;
+  @Autowired private PatientService patientService;
 
-	@Autowired
-	private EmrApiPatientDataLibrary library;
+  @Autowired private EmrApiPatientDataLibrary library;
 
-	@Before
-	public void setup() throws Exception {
-		executeDataSet("baseTestDataset.xml");
-	}
+  @Before
+  public void setup() throws Exception {
+    executeDataSet("baseTestDataset.xml");
+  }
 
-	@Test
-	public void shouldFetchPrimaryIdentifier() throws Exception {
-		test(library.getPrimaryIdentifier(), patientService.getPatientIdentifier(4)); // primary key of patient identifier 6TS-4 in standard test dataset
-	}
+  @Test
+  public void shouldFetchPrimaryIdentifier() throws Exception {
+    test(
+        library.getPrimaryIdentifier(),
+        patientService.getPatientIdentifier(
+            4)); // primary key of patient identifier 6TS-4 in standard test dataset
+  }
 
-	// TODO:
+  // TODO:
 
-	private Object eval(PatientDataDefinition definition) throws EvaluationException {
-		Cohort cohort = new Cohort(Arrays.asList(7));
+  private Object eval(PatientDataDefinition definition) throws EvaluationException {
+    Cohort cohort = new Cohort(Arrays.asList(7));
 
-		EvaluationContext context = new EvaluationContext();
-		context.setBaseCohort(cohort);
-		context.addParameterValue("startDate", DateUtil.parseYmd("2013-01-01"));
-		context.addParameterValue("endDate", DateUtil.parseYmd("2013-12-31"));
-		EvaluatedPatientData data = pds.evaluate(definition, context);
-		return data.getData().get(7);
-	}
+    EvaluationContext context = new EvaluationContext();
+    context.setBaseCohort(cohort);
+    context.addParameterValue("startDate", DateUtil.parseYmd("2013-01-01"));
+    context.addParameterValue("endDate", DateUtil.parseYmd("2013-12-31"));
+    EvaluatedPatientData data = pds.evaluate(definition, context);
+    return data.getData().get(7);
+  }
 
-	private void test(PatientDataDefinition definition, Object expectedValue) throws EvaluationException {
-		Object actualValue = eval(definition);
-		assertThat(actualValue, is(expectedValue));
-	}
-
+  private void test(PatientDataDefinition definition, Object expectedValue)
+      throws EvaluationException {
+    Object actualValue = eval(definition);
+    assertThat(actualValue, is(expectedValue));
+  }
 }

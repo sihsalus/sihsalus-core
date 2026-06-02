@@ -14,10 +14,8 @@ import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 public class DispositionDescriptorComponentTest extends BaseModuleContextSensitiveTest {
 
-	@Test
-	public void setupNewDispositionDescriptor() {
-		new DispositionDescriptor();
-
-	}
-
+  @Test
+  public void setupNewDispositionDescriptor() {
+    new DispositionDescriptor();
+  }
 }

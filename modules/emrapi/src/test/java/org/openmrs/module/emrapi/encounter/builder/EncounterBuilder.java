@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.emrapi.encounter.builder;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterProvider;
 import org.openmrs.EncounterType;
@@ -20,66 +23,62 @@ import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.VisitType;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 public class EncounterBuilder {
 
-	private final Encounter encounter;
+  private final Encounter encounter;
 
-	public EncounterBuilder() {
-		encounter = new Encounter();
-		Visit visit = new Visit();
-		Location visitLocation = new Location();
-		visitLocation.setUuid(UUID.randomUUID().toString());
-		visit.setLocation(visitLocation);
-		VisitType visitType = new VisitType();
-		visitType.setUuid(UUID.randomUUID().toString());
-		visit.setVisitType(visitType);
-		visit.setUuid(UUID.randomUUID().toString());
-		encounter.setVisit(visit);
-		encounter.setUuid(UUID.randomUUID().toString());
+  public EncounterBuilder() {
+    encounter = new Encounter();
+    Visit visit = new Visit();
+    Location visitLocation = new Location();
+    visitLocation.setUuid(UUID.randomUUID().toString());
+    visit.setLocation(visitLocation);
+    VisitType visitType = new VisitType();
+    visitType.setUuid(UUID.randomUUID().toString());
+    visit.setVisitType(visitType);
+    visit.setUuid(UUID.randomUUID().toString());
+    encounter.setVisit(visit);
+    encounter.setUuid(UUID.randomUUID().toString());
 
-		Patient patient = new Patient();
-		patient.setUuid(UUID.randomUUID().toString());
-		encounter.setPatient(patient);
+    Patient patient = new Patient();
+    patient.setUuid(UUID.randomUUID().toString());
+    encounter.setPatient(patient);
 
-		EncounterType encounterType = new EncounterType();
-		encounterType.setUuid(UUID.randomUUID().toString());
-		encounter.setEncounterType(encounterType);
+    EncounterType encounterType = new EncounterType();
+    encounterType.setUuid(UUID.randomUUID().toString());
+    encounter.setEncounterType(encounterType);
 
-		Location location = new Location();
-		location.setUuid(UUID.randomUUID().toString());
-		encounter.setLocation(location);
+    Location location = new Location();
+    location.setUuid(UUID.randomUUID().toString());
+    encounter.setLocation(location);
 
-		encounter.setEncounterProviders(createEncounterProviders());
-	}
+    encounter.setEncounterProviders(createEncounterProviders());
+  }
 
-	private Set<EncounterProvider> createEncounterProviders() {
-		EncounterProvider encounterprovider = new EncounterProvider();
-		Provider provider = new Provider(1234);
+  private Set<EncounterProvider> createEncounterProviders() {
+    EncounterProvider encounterprovider = new EncounterProvider();
+    Provider provider = new Provider(1234);
 
-		Person person = new Person(2345);
-		Set<PersonName> personNames = new HashSet<PersonName>();
-		PersonName name = new PersonName("Yogesh", "", "Jain");
-		name.setPreferred(true);
-		personNames.add(name);
-		person.setNames(personNames);
+    Person person = new Person(2345);
+    Set<PersonName> personNames = new HashSet<PersonName>();
+    PersonName name = new PersonName("Yogesh", "", "Jain");
+    name.setPreferred(true);
+    personNames.add(name);
+    person.setNames(personNames);
 
-		provider.setPerson(person);
-		encounterprovider.setProvider(provider);
-		Set<EncounterProvider> encounterProviders = new HashSet<EncounterProvider>();
-		encounterProviders.add(encounterprovider);
-		return encounterProviders;
-	}
+    provider.setPerson(person);
+    encounterprovider.setProvider(provider);
+    Set<EncounterProvider> encounterProviders = new HashSet<EncounterProvider>();
+    encounterProviders.add(encounterprovider);
+    return encounterProviders;
+  }
 
-	public Encounter build() {
-		return encounter;
-	}
+  public Encounter build() {
+    return encounter;
+  }
 
-	public EncounterBuilder withEncounterType(EncounterType encounterType) {
-		encounter.setEncounterType(encounterType);
-		return this;
-	}
+  public EncounterBuilder withEncounterType(EncounterType encounterType) {
+    encounter.setEncounterType(encounterType);
+    return this;
+  }
 }

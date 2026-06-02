@@ -18,9 +18,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Location;
@@ -51,349 +50,381 @@ import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 
 public class PatientDomainWrapperTest {
 
-	private PatientDomainWrapper patientDomainWrapper;
+  private PatientDomainWrapper patientDomainWrapper;
 
-	private EmrApiProperties emrApiProperties;
+  private EmrApiProperties emrApiProperties;
 
-	private Patient patient;
+  private Patient patient;
 
-	private VisitService visitService;
+  private VisitService visitService;
 
-	private DomainWrapperFactory domainWrapperFactory;
+  private DomainWrapperFactory domainWrapperFactory;
 
-	@Before
-	public void setUp() throws Exception {
-		patient = new Patient();
-		emrApiProperties = mock(EmrApiProperties.class);
-		visitService = mock(VisitService.class);
-		domainWrapperFactory = mock(DomainWrapperFactory.class);
-		patientDomainWrapper = new PatientDomainWrapper(patient, emrApiProperties, mock(AdtService.class), visitService,
-		        mock(EncounterService.class), mock(DiagnosisService.class), domainWrapperFactory);
-	}
+  @Before
+  public void setUp() throws Exception {
+    patient = new Patient();
+    emrApiProperties = mock(EmrApiProperties.class);
+    visitService = mock(VisitService.class);
+    domainWrapperFactory = mock(DomainWrapperFactory.class);
+    patientDomainWrapper =
+        new PatientDomainWrapper(
+            patient,
+            emrApiProperties,
+            mock(AdtService.class),
+            visitService,
+            mock(EncounterService.class),
+            mock(DiagnosisService.class),
+            domainWrapperFactory);
+  }
 
-	@Test
-	public void shouldVerifyIfPatientIsUnknown() {
+  @Test
+  public void shouldVerifyIfPatientIsUnknown() {
 
-		PersonAttributeType personAttributeType = new PersonAttributeType();
-		personAttributeType.setPersonAttributeTypeId(10);
-		personAttributeType.setName(EmrApiConstants.UNKNOWN_PATIENT_PERSON_ATTRIBUTE_TYPE_NAME);
-		personAttributeType.setFormat("java.lang.String");
+    PersonAttributeType personAttributeType = new PersonAttributeType();
+    personAttributeType.setPersonAttributeTypeId(10);
+    personAttributeType.setName(EmrApiConstants.UNKNOWN_PATIENT_PERSON_ATTRIBUTE_TYPE_NAME);
+    personAttributeType.setFormat("java.lang.String");
 
-		PersonAttribute newAttribute = new PersonAttribute(personAttributeType, "true");
-		patient.addAttribute(newAttribute);
+    PersonAttribute newAttribute = new PersonAttribute(personAttributeType, "true");
+    patient.addAttribute(newAttribute);
 
-		when(emrApiProperties.getUnknownPatientPersonAttributeType()).thenReturn(personAttributeType);
+    when(emrApiProperties.getUnknownPatientPersonAttributeType()).thenReturn(personAttributeType);
 
-		assertTrue(patientDomainWrapper.isUnknownPatient());
+    assertTrue(patientDomainWrapper.isUnknownPatient());
+  }
 
-	}
+  @Test
+  public void shouldVerifyIfPatientIsATest() {
 
-	@Test
-	public void shouldVerifyIfPatientIsATest() {
+    PersonAttributeType personAttributeType = new PersonAttributeType();
+    personAttributeType.setPersonAttributeTypeId(11);
+    personAttributeType.setName("Test Patient");
+    personAttributeType.setFormat("java.lang.Boolean");
+    personAttributeType.setUuid(EmrApiConstants.TEST_PATIENT_ATTRIBUTE_UUID);
 
-		PersonAttributeType personAttributeType = new PersonAttributeType();
-		personAttributeType.setPersonAttributeTypeId(11);
-		personAttributeType.setName("Test Patient");
-		personAttributeType.setFormat("java.lang.Boolean");
-		personAttributeType.setUuid(EmrApiConstants.TEST_PATIENT_ATTRIBUTE_UUID);
+    PersonAttribute newAttribute = new PersonAttribute(personAttributeType, "true");
 
-		PersonAttribute newAttribute = new PersonAttribute(personAttributeType, "true");
+    patient.addAttribute(newAttribute);
 
-		patient.addAttribute(newAttribute);
+    when(emrApiProperties.getTestPatientPersonAttributeType()).thenReturn(personAttributeType);
 
-		when(emrApiProperties.getTestPatientPersonAttributeType()).thenReturn(personAttributeType);
+    assertTrue(patientDomainWrapper.isTestPatient());
+  }
 
-		assertTrue(patientDomainWrapper.isTestPatient());
+  @Test
+  public void shouldVerifyIfPatientIsNotATest() {
 
-	}
+    PersonAttributeType personAttributeType = new PersonAttributeType();
+    personAttributeType.setPersonAttributeTypeId(11);
+    personAttributeType.setName("Test Patient");
+    personAttributeType.setFormat("java.lang.Boolean");
+    personAttributeType.setUuid(EmrApiConstants.TEST_PATIENT_ATTRIBUTE_UUID);
 
-	@Test
-	public void shouldVerifyIfPatientIsNotATest() {
+    PersonAttribute newAttribute = new PersonAttribute(personAttributeType, "false");
 
-		PersonAttributeType personAttributeType = new PersonAttributeType();
-		personAttributeType.setPersonAttributeTypeId(11);
-		personAttributeType.setName("Test Patient");
-		personAttributeType.setFormat("java.lang.Boolean");
-		personAttributeType.setUuid(EmrApiConstants.TEST_PATIENT_ATTRIBUTE_UUID);
+    patient.addAttribute(newAttribute);
 
-		PersonAttribute newAttribute = new PersonAttribute(personAttributeType, "false");
+    when(emrApiProperties.getTestPatientPersonAttributeType()).thenReturn(personAttributeType);
 
-		patient.addAttribute(newAttribute);
+    assertFalse(patientDomainWrapper.isTestPatient());
+  }
 
-		when(emrApiProperties.getTestPatientPersonAttributeType()).thenReturn(personAttributeType);
+  @Test
+  public void shouldCreateAListOfVisitDomainWrappersBasedOnVisitListFromVisitService() {
+    when(visitService.getVisitsByPatient(patient, true, false))
+        .thenReturn(asList(new Visit(), new Visit(), new Visit()));
+    when(domainWrapperFactory.newVisitDomainWrapper(any(Visit.class)))
+        .thenReturn(new VisitDomainWrapper());
 
-		assertFalse(patientDomainWrapper.isTestPatient());
+    List<VisitDomainWrapper> visitDomainWrappers = patientDomainWrapper.getAllVisitsUsingWrappers();
 
-	}
+    assertThat(visitDomainWrappers.size(), is(3));
+  }
 
-	@Test
-	public void shouldCreateAListOfVisitDomainWrappersBasedOnVisitListFromVisitService() {
-		when(visitService.getVisitsByPatient(patient, true, false))
-		        .thenReturn(asList(new Visit(), new Visit(), new Visit()));
-		when(domainWrapperFactory.newVisitDomainWrapper(any(Visit.class))).thenReturn(new VisitDomainWrapper());
+  @Test
+  public void shouldReturnFormattedName() {
+    patient = mock(Patient.class);
 
-		List<VisitDomainWrapper> visitDomainWrappers = patientDomainWrapper.getAllVisitsUsingWrappers();
+    patientDomainWrapper =
+        new PatientDomainWrapper(
+            patient,
+            emrApiProperties,
+            mock(AdtService.class),
+            visitService,
+            mock(EncounterService.class),
+            mock(DiagnosisService.class),
+            mock(DomainWrapperFactory.class));
 
-		assertThat(visitDomainWrappers.size(), is(3));
-	}
+    Set<PersonName> personNames = new HashSet<PersonName>();
 
-	@Test
-	public void shouldReturnFormattedName() {
-		patient = mock(Patient.class);
+    PersonName personNamePreferred = createPreferredPersonName("John", "Dover");
+    personNames.add(personNamePreferred);
 
-		patientDomainWrapper = new PatientDomainWrapper(patient, emrApiProperties, mock(AdtService.class), visitService,
-		        mock(EncounterService.class), mock(DiagnosisService.class), mock(DomainWrapperFactory.class));
+    when(patient.getNames()).thenReturn(personNames);
 
-		Set<PersonName> personNames = new HashSet<PersonName>();
+    String formattedName = patientDomainWrapper.getFormattedName();
 
-		PersonName personNamePreferred = createPreferredPersonName("John", "Dover");
-		personNames.add(personNamePreferred);
+    assertThat(formattedName, is("Dover, John"));
+  }
 
-		when(patient.getNames()).thenReturn(personNames);
+  @Test
+  public void shouldReturnPersonNameWhenThereAreTwoNamesAndOneOfThemIsPreferred() {
+    patient = mock(Patient.class);
 
-		String formattedName = patientDomainWrapper.getFormattedName();
+    patientDomainWrapper =
+        new PatientDomainWrapper(
+            patient,
+            emrApiProperties,
+            mock(AdtService.class),
+            visitService,
+            mock(EncounterService.class),
+            mock(DiagnosisService.class),
+            mock(DomainWrapperFactory.class));
 
-		assertThat(formattedName, is("Dover, John"));
-	}
+    Set<PersonName> personNames = new HashSet<PersonName>();
 
-	@Test
-	public void shouldReturnPersonNameWhenThereAreTwoNamesAndOneOfThemIsPreferred() {
-		patient = mock(Patient.class);
+    PersonName personNamePreferred = createPreferredPersonName("mario", "neissi");
+    personNames.add(personNamePreferred);
 
-		patientDomainWrapper = new PatientDomainWrapper(patient, emrApiProperties, mock(AdtService.class), visitService,
-		        mock(EncounterService.class), mock(DiagnosisService.class), mock(DomainWrapperFactory.class));
+    PersonName personNameNonPreferred = createNonPreferredPersonName("Ana", "emerson");
+    personNames.add(personNameNonPreferred);
 
-		Set<PersonName> personNames = new HashSet<PersonName>();
+    when(patient.getNames()).thenReturn(personNames);
+    PersonName returnedName = patientDomainWrapper.getPersonName();
 
-		PersonName personNamePreferred = createPreferredPersonName("mario", "neissi");
-		personNames.add(personNamePreferred);
+    assertSame(personNamePreferred, returnedName);
+  }
 
-		PersonName personNameNonPreferred = createNonPreferredPersonName("Ana", "emerson");
-		personNames.add(personNameNonPreferred);
+  @Test
+  public void shouldReturnPersonNameWhenThereAreTwoNamesAndNoneOfThemIsPreferred() {
+    patient = mock(Patient.class);
 
-		when(patient.getNames()).thenReturn(personNames);
-		PersonName returnedName = patientDomainWrapper.getPersonName();
+    patientDomainWrapper =
+        new PatientDomainWrapper(
+            patient,
+            emrApiProperties,
+            mock(AdtService.class),
+            visitService,
+            mock(EncounterService.class),
+            mock(DiagnosisService.class),
+            mock(DomainWrapperFactory.class));
 
-		assertSame(personNamePreferred, returnedName);
+    Set<PersonName> personNames = new HashSet<PersonName>();
 
-	}
+    PersonName personNamePreferred = createNonPreferredPersonName("mario", "neissi");
+    personNames.add(personNamePreferred);
 
-	@Test
-	public void shouldReturnPersonNameWhenThereAreTwoNamesAndNoneOfThemIsPreferred() {
-		patient = mock(Patient.class);
+    PersonName personNameNonPreferred = createNonPreferredPersonName("Ana", "emerson");
+    personNames.add(personNameNonPreferred);
 
-		patientDomainWrapper = new PatientDomainWrapper(patient, emrApiProperties, mock(AdtService.class), visitService,
-		        mock(EncounterService.class), mock(DiagnosisService.class), mock(DomainWrapperFactory.class));
+    when(patient.getNames()).thenReturn(personNames);
+    PersonName returnedName = patientDomainWrapper.getPersonName();
 
-		Set<PersonName> personNames = new HashSet<PersonName>();
+    assertNotNull(returnedName);
+  }
 
-		PersonName personNamePreferred = createNonPreferredPersonName("mario", "neissi");
-		personNames.add(personNamePreferred);
+  @Test
+  public void shouldCalculateCorrectAgeInMonthsForDeceasedPatient() {
+    patient.setDead(true);
 
-		PersonName personNameNonPreferred = createNonPreferredPersonName("Ana", "emerson");
-		personNames.add(personNameNonPreferred);
+    Calendar cal = Calendar.getInstance();
+    cal.set(2012, 11, 4);
+    patient.setBirthdate(cal.getTime());
 
-		when(patient.getNames()).thenReturn(personNames);
-		PersonName returnedName = patientDomainWrapper.getPersonName();
+    cal.set(2013, 2, 1);
+    patient.setDeathDate(cal.getTime());
 
-		assertNotNull(returnedName);
+    assertThat(patientDomainWrapper.getAgeInMonths(), is(2));
+  }
 
-	}
+  @Test
+  public void shouldCalculateCorrectAgeInDaysForDeceasedPatient() {
+    patient.setDead(true);
 
-	@Test
-	public void shouldCalculateCorrectAgeInMonthsForDeceasedPatient() {
-		patient.setDead(true);
+    Calendar cal = Calendar.getInstance();
+    cal.set(2013, 1, 26);
+    patient.setBirthdate(cal.getTime());
 
-		Calendar cal = Calendar.getInstance();
-		cal.set(2012, 11, 4);
-		patient.setBirthdate(cal.getTime());
+    cal.set(2013, 2, 1);
+    patient.setDeathDate(cal.getTime());
 
-		cal.set(2013, 2, 1);
-		patient.setDeathDate(cal.getTime());
+    assertThat(patientDomainWrapper.getAgeInDays(), is(3));
+  }
 
-		assertThat(patientDomainWrapper.getAgeInMonths(), is(2));
-	}
+  @Test
+  public void shouldReturnExtraPatientIdentifiers() {
 
-	@Test
-	public void shouldCalculateCorrectAgeInDaysForDeceasedPatient() {
-		patient.setDead(true);
+    PatientIdentifierType pit1 = new PatientIdentifierType();
+    PatientIdentifierType pit2 = new PatientIdentifierType();
+    PatientIdentifierType pit3 = new PatientIdentifierType();
 
-		Calendar cal = Calendar.getInstance();
-		cal.set(2013, 1, 26);
-		patient.setBirthdate(cal.getTime());
+    PatientIdentifier identifier1 = new PatientIdentifier();
+    identifier1.setIdentifierType(pit1);
+    PatientIdentifier identifier2 = new PatientIdentifier();
+    identifier2.setIdentifierType(pit2);
+    PatientIdentifier identifier3 = new PatientIdentifier();
+    identifier3.setIdentifierType(pit3);
 
-		cal.set(2013, 2, 1);
-		patient.setDeathDate(cal.getTime());
+    patient.addIdentifier(identifier1);
+    patient.addIdentifier(identifier2);
+    patient.addIdentifier(identifier3);
 
-		assertThat(patientDomainWrapper.getAgeInDays(), is(3));
-	}
+    when(emrApiProperties.getExtraPatientIdentifierTypes()).thenReturn(Arrays.asList(pit1, pit2));
 
-	@Test
-	public void shouldReturnExtraPatientIdentifiers() {
+    List<PatientIdentifier> identifiers = patientDomainWrapper.getExtraIdentifiers();
 
-		PatientIdentifierType pit1 = new PatientIdentifierType();
-		PatientIdentifierType pit2 = new PatientIdentifierType();
-		PatientIdentifierType pit3 = new PatientIdentifierType();
+    assertThat(identifiers.size(), is(2));
+    assertThat(identifiers, hasItems(identifier1, identifier2));
+  }
 
-		PatientIdentifier identifier1 = new PatientIdentifier();
-		identifier1.setIdentifierType(pit1);
-		PatientIdentifier identifier2 = new PatientIdentifier();
-		identifier2.setIdentifierType(pit2);
-		PatientIdentifier identifier3 = new PatientIdentifier();
-		identifier3.setIdentifierType(pit3);
+  @Test
+  public void shouldReturnExtraPatientIdentifiersRestrictedByLocation() {
 
-		patient.addIdentifier(identifier1);
-		patient.addIdentifier(identifier2);
-		patient.addIdentifier(identifier3);
+    Location parentLocation = new Location();
+    Location childLocation1 = new Location();
+    Location childLocation2 = new Location();
 
-		when(emrApiProperties.getExtraPatientIdentifierTypes()).thenReturn(Arrays.asList(pit1, pit2));
+    parentLocation.addChildLocation(childLocation1);
+    parentLocation.addChildLocation(childLocation2);
 
-		List<PatientIdentifier> identifiers = patientDomainWrapper.getExtraIdentifiers();
+    PatientIdentifierType pit = new PatientIdentifierType();
+    pit.setLocationBehavior(PatientIdentifierType.LocationBehavior.REQUIRED);
 
-		assertThat(identifiers.size(), is(2));
-		assertThat(identifiers, hasItems(identifier1, identifier2));
+    PatientIdentifier identifier1 = new PatientIdentifier();
+    identifier1.setIdentifierType(pit);
+    identifier1.setLocation(parentLocation);
 
-	}
+    PatientIdentifier identifier2 = new PatientIdentifier();
+    identifier2.setIdentifierType(pit);
+    identifier2.setLocation(childLocation1);
 
-	@Test
-	public void shouldReturnExtraPatientIdentifiersRestrictedByLocation() {
+    PatientIdentifier identifier3 = new PatientIdentifier();
+    identifier3.setIdentifierType(pit);
+    identifier3.setLocation(childLocation2);
 
-		Location parentLocation = new Location();
-		Location childLocation1 = new Location();
-		Location childLocation2 = new Location();
+    patient.addIdentifier(identifier1);
+    patient.addIdentifier(identifier2);
+    patient.addIdentifier(identifier3);
 
-		parentLocation.addChildLocation(childLocation1);
-		parentLocation.addChildLocation(childLocation2);
+    when(emrApiProperties.getExtraPatientIdentifierTypes())
+        .thenReturn(Collections.singletonList(pit));
 
-		PatientIdentifierType pit = new PatientIdentifierType();
-		pit.setLocationBehavior(PatientIdentifierType.LocationBehavior.REQUIRED);
+    List<PatientIdentifier> identifiers = patientDomainWrapper.getExtraIdentifiers(childLocation2);
 
-		PatientIdentifier identifier1 = new PatientIdentifier();
-		identifier1.setIdentifierType(pit);
-		identifier1.setLocation(parentLocation);
+    assertThat(identifiers.size(), is(2));
+    assertThat(
+        identifiers,
+        hasItems(
+            identifier1,
+            identifier3)); // should not have the identifier at the other child locations
+  }
 
-		PatientIdentifier identifier2 = new PatientIdentifier();
-		identifier2.setIdentifierType(pit);
-		identifier2.setLocation(childLocation1);
+  @Test
+  public void
+      shouldReturnExtraPatientIdentifiersShouldNotRestrictLocationsForTypesWhereLocationIsNotRequired() {
 
-		PatientIdentifier identifier3 = new PatientIdentifier();
-		identifier3.setIdentifierType(pit);
-		identifier3.setLocation(childLocation2);
+    Location parentLocation = new Location();
+    Location childLocation1 = new Location();
+    Location childLocation2 = new Location();
 
-		patient.addIdentifier(identifier1);
-		patient.addIdentifier(identifier2);
-		patient.addIdentifier(identifier3);
+    parentLocation.addChildLocation(childLocation1);
+    parentLocation.addChildLocation(childLocation2);
 
-		when(emrApiProperties.getExtraPatientIdentifierTypes()).thenReturn(Collections.singletonList(pit));
+    PatientIdentifierType pit = new PatientIdentifierType();
 
-		List<PatientIdentifier> identifiers = patientDomainWrapper.getExtraIdentifiers(childLocation2);
+    PatientIdentifier identifier1 = new PatientIdentifier();
+    identifier1.setIdentifierType(pit);
+    identifier1.setLocation(parentLocation);
 
-		assertThat(identifiers.size(), is(2));
-		assertThat(identifiers, hasItems(identifier1, identifier3)); // should not have the identifier at the other child locations
+    PatientIdentifier identifier2 = new PatientIdentifier();
+    identifier2.setIdentifierType(pit);
+    identifier2.setLocation(childLocation1);
 
-	}
+    PatientIdentifier identifier3 = new PatientIdentifier();
+    identifier3.setIdentifierType(pit);
+    identifier3.setLocation(childLocation2);
 
-	@Test
-	public void shouldReturnExtraPatientIdentifiersShouldNotRestrictLocationsForTypesWhereLocationIsNotRequired() {
+    patient.addIdentifier(identifier1);
+    patient.addIdentifier(identifier2);
+    patient.addIdentifier(identifier3);
 
-		Location parentLocation = new Location();
-		Location childLocation1 = new Location();
-		Location childLocation2 = new Location();
+    when(emrApiProperties.getExtraPatientIdentifierTypes())
+        .thenReturn(Collections.singletonList(pit));
 
-		parentLocation.addChildLocation(childLocation1);
-		parentLocation.addChildLocation(childLocation2);
+    List<PatientIdentifier> identifiers = patientDomainWrapper.getExtraIdentifiers(childLocation2);
 
-		PatientIdentifierType pit = new PatientIdentifierType();
+    assertThat(identifiers.size(), is(3));
+    assertThat(
+        identifiers,
+        hasItems(
+            identifier1,
+            identifier2,
+            identifier3)); // should not have the identifier at the other child locations
+  }
 
-		PatientIdentifier identifier1 = new PatientIdentifier();
-		identifier1.setIdentifierType(pit);
-		identifier1.setLocation(parentLocation);
+  @Test
+  public void shouldReturnExtraPatientIdentifiersMappedByType() {
 
-		PatientIdentifier identifier2 = new PatientIdentifier();
-		identifier2.setIdentifierType(pit);
-		identifier2.setLocation(childLocation1);
+    PatientIdentifierType pit1 = new PatientIdentifierType();
+    PatientIdentifierType pit2 = new PatientIdentifierType();
+    PatientIdentifierType pit3 = new PatientIdentifierType();
 
-		PatientIdentifier identifier3 = new PatientIdentifier();
-		identifier3.setIdentifierType(pit);
-		identifier3.setLocation(childLocation2);
+    PatientIdentifier identifier1 = new PatientIdentifier();
+    identifier1.setId(1);
+    identifier1.setIdentifier("1");
+    identifier1.setIdentifierType(pit1);
 
-		patient.addIdentifier(identifier1);
-		patient.addIdentifier(identifier2);
-		patient.addIdentifier(identifier3);
+    PatientIdentifier identifier2 = new PatientIdentifier();
+    identifier2.setId(2);
+    identifier2.setIdentifier("2");
+    identifier2.setIdentifierType(pit2);
 
-		when(emrApiProperties.getExtraPatientIdentifierTypes()).thenReturn(Collections.singletonList(pit));
+    PatientIdentifier identifier3 = new PatientIdentifier();
+    identifier3.setId(3);
+    identifier3.setIdentifier("3");
+    identifier3.setIdentifierType(pit2);
 
-		List<PatientIdentifier> identifiers = patientDomainWrapper.getExtraIdentifiers(childLocation2);
+    PatientIdentifier identifier4 = new PatientIdentifier();
+    identifier4.setId(4);
+    identifier4.setIdentifier("4");
+    identifier4.setIdentifierType(pit3);
 
-		assertThat(identifiers.size(), is(3));
-		assertThat(identifiers, hasItems(identifier1, identifier2, identifier3)); // should not have the identifier at the other child locations
+    patient.addIdentifier(identifier1);
+    patient.addIdentifier(identifier2);
+    patient.addIdentifier(identifier3);
+    patient.addIdentifier(identifier4);
 
-	}
+    when(emrApiProperties.getExtraPatientIdentifierTypes()).thenReturn(Arrays.asList(pit1, pit2));
 
-	@Test
-	public void shouldReturnExtraPatientIdentifiersMappedByType() {
+    Map<PatientIdentifierType, List<PatientIdentifier>> identifierMap =
+        patientDomainWrapper.getExtraIdentifiersMappedByType();
 
-		PatientIdentifierType pit1 = new PatientIdentifierType();
-		PatientIdentifierType pit2 = new PatientIdentifierType();
-		PatientIdentifierType pit3 = new PatientIdentifierType();
+    assertThat(identifierMap.keySet().size(), is(2));
+    assertTrue(identifierMap.containsKey(pit1));
+    assertTrue(identifierMap.containsKey(pit2));
 
-		PatientIdentifier identifier1 = new PatientIdentifier();
-		identifier1.setId(1);
-		identifier1.setIdentifier("1");
-		identifier1.setIdentifierType(pit1);
+    assertThat(identifierMap.get(pit1).size(), is(1));
+    assertThat(identifierMap.get(pit1), hasItem(identifier1));
 
-		PatientIdentifier identifier2 = new PatientIdentifier();
-		identifier2.setId(2);
-		identifier2.setIdentifier("2");
-		identifier2.setIdentifierType(pit2);
+    assertThat(identifierMap.get(pit2).size(), is(2));
+    assertThat(identifierMap.get(pit2), hasItems(identifier2, identifier3));
+  }
 
-		PatientIdentifier identifier3 = new PatientIdentifier();
-		identifier3.setId(3);
-		identifier3.setIdentifier("3");
-		identifier3.setIdentifierType(pit2);
+  private PersonName createPreferredPersonName(String givenName, String familyName) {
+    PersonName personNamePreferred = createPersonName(givenName, familyName, true);
+    return personNamePreferred;
+  }
 
-		PatientIdentifier identifier4 = new PatientIdentifier();
-		identifier4.setId(4);
-		identifier4.setIdentifier("4");
-		identifier4.setIdentifierType(pit3);
+  private PersonName createNonPreferredPersonName(String givenName, String familyName) {
+    PersonName personNameNonPreferred = createPersonName(givenName, familyName, false);
+    return personNameNonPreferred;
+  }
 
-		patient.addIdentifier(identifier1);
-		patient.addIdentifier(identifier2);
-		patient.addIdentifier(identifier3);
-		patient.addIdentifier(identifier4);
-
-		when(emrApiProperties.getExtraPatientIdentifierTypes()).thenReturn(Arrays.asList(pit1, pit2));
-
-		Map<PatientIdentifierType, List<PatientIdentifier>> identifierMap = patientDomainWrapper
-		        .getExtraIdentifiersMappedByType();
-
-		assertThat(identifierMap.keySet().size(), is(2));
-		assertTrue(identifierMap.containsKey(pit1));
-		assertTrue(identifierMap.containsKey(pit2));
-
-		assertThat(identifierMap.get(pit1).size(), is(1));
-		assertThat(identifierMap.get(pit1), hasItem(identifier1));
-
-		assertThat(identifierMap.get(pit2).size(), is(2));
-		assertThat(identifierMap.get(pit2), hasItems(identifier2, identifier3));
-	}
-
-	private PersonName createPreferredPersonName(String givenName, String familyName) {
-		PersonName personNamePreferred = createPersonName(givenName, familyName, true);
-		return personNamePreferred;
-	}
-
-	private PersonName createNonPreferredPersonName(String givenName, String familyName) {
-		PersonName personNameNonPreferred = createPersonName(givenName, familyName, false);
-		return personNameNonPreferred;
-	}
-
-	private PersonName createPersonName(String givenName, String familyName, boolean preferred) {
-		PersonName personNameNonPreferred = new PersonName();
-		personNameNonPreferred.setGivenName(givenName);
-		personNameNonPreferred.setFamilyName(familyName);
-		personNameNonPreferred.setPreferred(preferred);
-		return personNameNonPreferred;
-	}
-
+  private PersonName createPersonName(String givenName, String familyName, boolean preferred) {
+    PersonName personNameNonPreferred = new PersonName();
+    personNameNonPreferred.setGivenName(givenName);
+    personNameNonPreferred.setFamilyName(familyName);
+    personNameNonPreferred.setPreferred(preferred);
+    return personNameNonPreferred;
+  }
 }

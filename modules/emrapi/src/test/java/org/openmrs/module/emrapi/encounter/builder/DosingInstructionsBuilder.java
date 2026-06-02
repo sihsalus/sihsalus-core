@@ -13,17 +13,18 @@ import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 
 public class DosingInstructionsBuilder {
 
-	public static EncounterTransaction.DosingInstructions sample() {
-		EncounterTransaction.DosingInstructions dosingInstructions = new EncounterTransaction.DosingInstructions();
-		dosingInstructions.setDose(2.0);
-		dosingInstructions.setDoseUnits("Capsule");
-		dosingInstructions.setRoute("PO");
-		dosingInstructions.setFrequency("QDS");
-		dosingInstructions.setAsNeeded(false);
-		dosingInstructions.setAdministrationInstructions("AC");
-		dosingInstructions.setQuantity(1.0);
-		dosingInstructions.setQuantityUnits("bottle");
-		dosingInstructions.setNumberOfRefills(1);
-		return dosingInstructions;
-	}
+  public static EncounterTransaction.DosingInstructions sample() {
+    EncounterTransaction.DosingInstructions dosingInstructions =
+        new EncounterTransaction.DosingInstructions();
+    dosingInstructions.setDose(2.0);
+    dosingInstructions.setDoseUnits("Capsule");
+    dosingInstructions.setRoute("PO");
+    dosingInstructions.setFrequency("QDS");
+    dosingInstructions.setAsNeeded(false);
+    dosingInstructions.setAdministrationInstructions("AC");
+    dosingInstructions.setQuantity(1.0);
+    dosingInstructions.setQuantityUnits("bottle");
+    dosingInstructions.setNumberOfRefills(1);
+    return dosingInstructions;
+  }
 }

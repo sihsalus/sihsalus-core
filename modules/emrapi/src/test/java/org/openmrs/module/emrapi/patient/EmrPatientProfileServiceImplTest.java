@@ -9,6 +9,13 @@
  */
 package org.openmrs.module.emrapi.patient;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Patient;
@@ -18,85 +25,77 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.emrapi.person.image.EmrPersonImageService;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class EmrPatientProfileServiceImplTest {
 
-	private EmrPatientProfileServiceImpl emrPatientProfileService;
+  private EmrPatientProfileServiceImpl emrPatientProfileService;
 
-	private PatientService patientService;
+  private PatientService patientService;
 
-	private PersonService personService;
+  private PersonService personService;
 
-	private EmrPersonImageService emrPersonImageService;
+  private EmrPersonImageService emrPersonImageService;
 
-	@Before
-	public void setup() {
-		emrPatientProfileService = new EmrPatientProfileServiceImpl();
-		patientService = mock(PatientService.class);
-		personService = mock(PersonService.class);
-		emrPersonImageService = mock(EmrPersonImageService.class);
+  @Before
+  public void setup() {
+    emrPatientProfileService = new EmrPatientProfileServiceImpl();
+    patientService = mock(PatientService.class);
+    personService = mock(PersonService.class);
+    emrPersonImageService = mock(EmrPersonImageService.class);
 
-		emrPatientProfileService.setPatientService(patientService);
-		emrPatientProfileService.setPersonService(personService);
-		emrPatientProfileService.setEmrPersonImageService(emrPersonImageService);
+    emrPatientProfileService.setPatientService(patientService);
+    emrPatientProfileService.setPersonService(personService);
+    emrPatientProfileService.setEmrPersonImageService(emrPersonImageService);
 
-		when(patientService.getPatientByUuid("patient_uuid")).thenReturn(constructPatient());
-		Person person = constructPerson();
-		when(personService.getPerson(1)).thenReturn(person);
-		when(personService.getRelationshipsByPerson(person)).thenReturn(constructRelationships());
-	}
+    when(patientService.getPatientByUuid("patient_uuid")).thenReturn(constructPatient());
+    Person person = constructPerson();
+    when(personService.getPerson(1)).thenReturn(person);
+    when(personService.getRelationshipsByPerson(person)).thenReturn(constructRelationships());
+  }
 
-	@Test
-	public void shouldSavePatientProfile() throws Exception {
-		PatientProfile patientProfile = emrPatientProfileService.save(constructPatientProfile());
-		assertNotNull(patientProfile);
-		assertEquals(patientProfile.getRelationships().size(), 1);
-	}
+  @Test
+  public void shouldSavePatientProfile() throws Exception {
+    PatientProfile patientProfile = emrPatientProfileService.save(constructPatientProfile());
+    assertNotNull(patientProfile);
+    assertEquals(patientProfile.getRelationships().size(), 1);
+  }
 
-	@Test
-	public void shouldGetPatientProfile() throws Exception {
-		PatientProfile patientProfile = emrPatientProfileService.get("patient_uuid");
-		assertNotNull(patientProfile.getPatient());
-		assertEquals(patientProfile.getPatient().getUuid(), "patient_uuid");
-		assertEquals(patientProfile.getRelationships().size(), 1);
-	}
+  @Test
+  public void shouldGetPatientProfile() throws Exception {
+    PatientProfile patientProfile = emrPatientProfileService.get("patient_uuid");
+    assertNotNull(patientProfile.getPatient());
+    assertEquals(patientProfile.getPatient().getUuid(), "patient_uuid");
+    assertEquals(patientProfile.getRelationships().size(), 1);
+  }
 
-	private PatientProfile constructPatientProfile() {
-		PatientProfile patientProfile = new PatientProfile();
-		List<Relationship> relationships = new ArrayList<Relationship>();
-		relationships.add(new Relationship());
-		patientProfile.setRelationships(relationships);
+  private PatientProfile constructPatientProfile() {
+    PatientProfile patientProfile = new PatientProfile();
+    List<Relationship> relationships = new ArrayList<Relationship>();
+    relationships.add(new Relationship());
+    patientProfile.setRelationships(relationships);
 
-		return patientProfile;
-	}
+    return patientProfile;
+  }
 
-	private Patient constructPatient() {
-		Patient patient = new Patient();
-		patient.setUuid("patient_uuid");
-		patient.setPersonId(1);
+  private Patient constructPatient() {
+    Patient patient = new Patient();
+    patient.setUuid("patient_uuid");
+    patient.setPersonId(1);
 
-		return patient;
-	}
+    return patient;
+  }
 
-	private Person constructPerson() {
-		Person person = new Person();
-		person.setId(1);
-		person.setUuid("person_uuid");
+  private Person constructPerson() {
+    Person person = new Person();
+    person.setId(1);
+    person.setUuid("person_uuid");
 
-		return person;
-	}
+    return person;
+  }
 
-	private List<Relationship> constructRelationships() {
-		List<Relationship> relationships = new ArrayList<Relationship>();
-		relationships.add(new Relationship());
+  private List<Relationship> constructRelationships() {
+    List<Relationship> relationships = new ArrayList<Relationship>();
+    relationships.add(new Relationship());
 
-		return relationships;
-	}
+    return relationships;
+  }
 }

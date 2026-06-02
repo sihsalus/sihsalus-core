@@ -9,59 +9,56 @@
  */
 package org.openmrs.module.emrapi.utils;
 
+import static org.junit.Assert.*;
+
+import java.util.Date;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.junit.Test;
 
-import java.util.Date;
-
-import static org.junit.Assert.*;
-
 public class CustomJsonDateSerializerAndDeserializerTest {
 
-	@Test
-	public void serializeAndDeserializeDateInExpectedFormat() throws Exception {
-		DateSerializeExample dateSerializeExample = new DateSerializeExample();
-		dateSerializeExample.setExampleDate(new Date());
+  @Test
+  public void serializeAndDeserializeDateInExpectedFormat() throws Exception {
+    DateSerializeExample dateSerializeExample = new DateSerializeExample();
+    dateSerializeExample.setExampleDate(new Date());
 
-		String jsonString = new ObjectMapper().writeValueAsString(dateSerializeExample);
+    String jsonString = new ObjectMapper().writeValueAsString(dateSerializeExample);
 
-		DateSerializeExample deserializedData = new ObjectMapper().readValue(jsonString, DateSerializeExample.class);
+    DateSerializeExample deserializedData =
+        new ObjectMapper().readValue(jsonString, DateSerializeExample.class);
 
-		assertEquals(dateSerializeExample, deserializedData);
-	}
+    assertEquals(dateSerializeExample, deserializedData);
+  }
 }
 
 class DateSerializeExample {
 
-	private Date exampleDate;
+  private Date exampleDate;
 
-	@JsonSerialize(using = CustomJsonDateSerializer.class)
-	public Date getExampleDate() {
-		return exampleDate;
-	}
+  @JsonSerialize(using = CustomJsonDateSerializer.class)
+  public Date getExampleDate() {
+    return exampleDate;
+  }
 
-	@JsonDeserialize(using = CustomJsonDateDeserializer.class)
-	public void setExampleDate(Date exampleDate) {
-		this.exampleDate = exampleDate;
-	}
+  @JsonDeserialize(using = CustomJsonDateDeserializer.class)
+  public void setExampleDate(Date exampleDate) {
+    this.exampleDate = exampleDate;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
 
-		DateSerializeExample that = (DateSerializeExample) o;
+    DateSerializeExample that = (DateSerializeExample) o;
 
-		return exampleDate.equals(that.exampleDate);
+    return exampleDate.equals(that.exampleDate);
+  }
 
-	}
-
-	@Override
-	public int hashCode() {
-		return exampleDate.hashCode();
-	}
+  @Override
+  public int hashCode() {
+    return exampleDate.hashCode();
+  }
 }

@@ -56,7 +56,7 @@ public class MapConverterTest {
   private void checkVal(MapConverter converter, String expected, Object... keyVals) {
     Assert.assertEquals("keyVals must contain key/value pairs", 0, keyVals.length % 2);
     Map<Object, Object> m = new LinkedHashMap<Object, Object>();
-    for (int i = 0; i < keyVals.length; i += 2) {
+    for (int i = 0; i + 1 < keyVals.length; i += 2) {
       m.put(keyVals[i], keyVals[i + 1]);
     }
     Object val = converter.convert(m);

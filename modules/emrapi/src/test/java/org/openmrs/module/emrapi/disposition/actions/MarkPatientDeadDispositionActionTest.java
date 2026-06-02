@@ -9,6 +9,13 @@
  */
 package org.openmrs.module.emrapi.disposition.actions;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,85 +36,76 @@ import org.openmrs.module.emrapi.encounter.EncounterDomainWrapper;
 import org.openmrs.module.emrapi.exitfromcare.ExitFromCareService;
 import org.openmrs.module.emrapi.test.AuthenticatedUserTestHelper;
 
-import java.util.Date;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- *
- */
+/** */
 public class MarkPatientDeadDispositionActionTest extends AuthenticatedUserTestHelper {
 
-	private MarkPatientDeadDispositionAction action;
+  private MarkPatientDeadDispositionAction action;
 
-	private PatientService patientService;
+  private PatientService patientService;
 
-	private DispositionService dispositionService;
+  private DispositionService dispositionService;
 
-	private DispositionDescriptor dispositionDescriptor;
+  private DispositionDescriptor dispositionDescriptor;
 
-	private ExitFromCareService exitFromCareService;
+  private ExitFromCareService exitFromCareService;
 
-	private EmrApiProperties emrApiProperties;
+  private EmrApiProperties emrApiProperties;
 
-	private Concept dispositionObsGroupConcept = new Concept();
+  private Concept dispositionObsGroupConcept = new Concept();
 
-	private Concept dateOfDeathConcept = new Concept();
+  private Concept dateOfDeathConcept = new Concept();
 
-	@Before
-	public void setUp() throws Exception {
-		dispositionService = mock(DispositionService.class);
-		dispositionDescriptor = mock(DispositionDescriptor.class);
-		exitFromCareService = mock(ExitFromCareService.class);
-		emrApiProperties = mock(EmrApiProperties.class);
+  @Before
+  public void setUp() throws Exception {
+    dispositionService = mock(DispositionService.class);
+    dispositionDescriptor = mock(DispositionDescriptor.class);
+    exitFromCareService = mock(ExitFromCareService.class);
+    emrApiProperties = mock(EmrApiProperties.class);
 
-		when(dispositionService.getDispositionDescriptor()).thenReturn(dispositionDescriptor);
+    when(dispositionService.getDispositionDescriptor()).thenReturn(dispositionDescriptor);
 
-		patientService = mock(PatientService.class);
-		when(patientService.savePatient(any(Patient.class))).thenAnswer(new Answer<Object>() {
+    patientService = mock(PatientService.class);
+    when(patientService.savePatient(any(Patient.class)))
+        .thenAnswer(
+            new Answer<Object>() {
 
-			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
-				return invocation.getArguments()[0];
-			}
-		});
+              @Override
+              public Object answer(InvocationOnMock invocation) throws Throwable {
+                return invocation.getArguments()[0];
+              }
+            });
 
-		action = new MarkPatientDeadDispositionAction();
-		action.setEmrApiProperties(emrApiProperties);
-		action.setExitFromCareService(exitFromCareService);
-		action.setDispositionService(dispositionService);
-	}
+    action = new MarkPatientDeadDispositionAction();
+    action.setEmrApiProperties(emrApiProperties);
+    action.setExitFromCareService(exitFromCareService);
+    action.setDispositionService(dispositionService);
+  }
 
-	@Test
-	public void testActionShouldMarkPatientAsDead() throws Exception {
-		Concept unknown = new Concept();
-		when(emrApiProperties.getUnknownCauseOfDeathConcept()).thenReturn(unknown);
+  @Test
+  public void testActionShouldMarkPatientAsDead() throws Exception {
+    Concept unknown = new Concept();
+    when(emrApiProperties.getUnknownCauseOfDeathConcept()).thenReturn(unknown);
 
-		Date expectedDeathDate = (new DateTime(2013, 05, 10, 20, 26)).toDate();
+    Date expectedDeathDate = (new DateTime(2013, 05, 10, 20, 26)).toDate();
 
-		Patient patient = new Patient();
+    Patient patient = new Patient();
 
-		final Visit visit = new Visit();
-		final Encounter encounter = new Encounter();
-		final Date encounterDate = (new DateTime(2013, 05, 13, 20, 26)).toDate();
-		encounter.setVisit(visit);
-		encounter.addProvider(new EncounterRole(), new Provider());
-		encounter.setEncounterDatetime(encounterDate);
-		encounter.setPatient(patient);
+    final Visit visit = new Visit();
+    final Encounter encounter = new Encounter();
+    final Date encounterDate = (new DateTime(2013, 05, 13, 20, 26)).toDate();
+    encounter.setVisit(visit);
+    encounter.addProvider(new EncounterRole(), new Provider());
+    encounter.setEncounterDatetime(encounterDate);
+    encounter.setPatient(patient);
 
-		final Obs dispositionObsGroup = new Obs();
-		dispositionObsGroup.setConcept(dispositionObsGroupConcept);
-		encounter.addObs(dispositionObsGroup);
+    final Obs dispositionObsGroup = new Obs();
+    dispositionObsGroup.setConcept(dispositionObsGroupConcept);
+    encounter.addObs(dispositionObsGroup);
 
-		when(dispositionDescriptor.getDateOfDeath(dispositionObsGroup)).thenReturn(expectedDeathDate);
+    when(dispositionDescriptor.getDateOfDeath(dispositionObsGroup)).thenReturn(expectedDeathDate);
 
-		action.action(new EncounterDomainWrapper(encounter), dispositionObsGroup, null);
+    action.action(new EncounterDomainWrapper(encounter), dispositionObsGroup, null);
 
-		verify(exitFromCareService, times(1)).markPatientDead(patient, unknown, expectedDeathDate);
-	}
-
+    verify(exitFromCareService, times(1)).markPatientDead(patient, unknown, expectedDeathDate);
+  }
 }

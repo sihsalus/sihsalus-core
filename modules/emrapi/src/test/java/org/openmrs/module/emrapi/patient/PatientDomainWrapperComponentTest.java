@@ -9,26 +9,22 @@
  */
 package org.openmrs.module.emrapi.patient;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsNull.notNullValue;
+
 import org.junit.jupiter.api.Test;
 import org.openmrs.module.emrapi.domainwrapper.DomainWrapperFactory;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNull.notNullValue;
-
-/**
- *
- */
+/** */
 public class PatientDomainWrapperComponentTest extends BaseModuleContextSensitiveTest {
 
-	@Autowired
-	private DomainWrapperFactory factory;
+  @Autowired private DomainWrapperFactory factory;
 
-	@Test
-	public void testThatBeanCanHavePropertiesAutowired() throws Exception {
-		PatientDomainWrapper patientDomainWrapper = factory.newPatientDomainWrapper();
-		assertThat(patientDomainWrapper.emrApiProperties, notNullValue());
-	}
-
+  @Test
+  public void testThatBeanCanHavePropertiesAutowired() throws Exception {
+    PatientDomainWrapper patientDomainWrapper = factory.newPatientDomainWrapper();
+    assertThat(patientDomainWrapper.emrApiProperties, notNullValue());
+  }
 }

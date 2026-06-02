@@ -265,6 +265,9 @@ public class ReportRequestResourceTest extends BaseModuleWebContextSensitiveTest
   }
 
   protected RequestContext buildRequestContext(String... paramNamesAndValues) {
+    if (paramNamesAndValues.length % 2 != 0) {
+      throw new IllegalArgumentException("paramNamesAndValues must contain name/value pairs");
+    }
     MockHttpServletRequest request = new MockHttpServletRequest();
     for (int i = 0; i < paramNamesAndValues.length; i += 2) {
       request.addParameter(paramNamesAndValues[i], paramNamesAndValues[i + 1]);

@@ -9,6 +9,16 @@
  */
 package org.openmrs.module.emrapi.exitfromcare;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import org.apache.commons.lang.time.DateUtils;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,169 +36,161 @@ import org.openmrs.api.VisitService;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class ExitFromCareServiceComponentTest extends BaseModuleContextSensitiveTest {
 
-	@Autowired
-	private ExitFromCareService exitFromCareService;
+  @Autowired private ExitFromCareService exitFromCareService;
 
-	@Autowired
-	private VisitService visitService;
+  @Autowired private VisitService visitService;
 
-	@Autowired
-	private PatientService patientService;
+  @Autowired private PatientService patientService;
 
-	@Autowired
-	private ProgramWorkflowService programWorkflowService;
+  @Autowired private ProgramWorkflowService programWorkflowService;
 
-	@Autowired
-	private ConceptService conceptService;
+  @Autowired private ConceptService conceptService;
 
-	private Concept died;
+  private Concept died;
 
-	Date now = DateUtils.setMilliseconds(new Date(), 0);
+  Date now = DateUtils.setMilliseconds(new Date(), 0);
 
-	@BeforeEach
-	public void setUp() throws Exception {
-		executeDataSet("baseTestDataset.xml");
+  @BeforeEach
+  public void setUp() throws Exception {
+    executeDataSet("baseTestDataset.xml");
 
-		// hack in adding a outcome concept to the MDR-TB programs, as none of the test programs have outcomes
-		Program mdrTBProgram = programWorkflowService.getProgram(2);
-		died = conceptService.getConcept(16); // DIED concept in the standard test dataset
-		Concept outcomeSet = new Concept();
-		outcomeSet.addSetMember(died);
-		outcomeSet.setSet(true);
-		ConceptName outcomeSetName = new ConceptName();
-		outcomeSetName.setName("Program Outcomes");
-		outcomeSetName.setLocale(Locale.ENGLISH);
-		outcomeSet.setFullySpecifiedName(outcomeSetName);
-		outcomeSet.setDatatype(conceptService.getConceptDatatype(4));
-		outcomeSet.setConceptClass(conceptService.getConceptClass(10));
-		conceptService.saveConcept(outcomeSet);
-		mdrTBProgram.setOutcomesConcept(outcomeSet);
-		programWorkflowService.saveProgram(mdrTBProgram);
+    // hack in adding a outcome concept to the MDR-TB programs, as none of the test programs have
+    // outcomes
+    Program mdrTBProgram = programWorkflowService.getProgram(2);
+    died = conceptService.getConcept(16); // DIED concept in the standard test dataset
+    Concept outcomeSet = new Concept();
+    outcomeSet.addSetMember(died);
+    outcomeSet.setSet(true);
+    ConceptName outcomeSetName = new ConceptName();
+    outcomeSetName.setName("Program Outcomes");
+    outcomeSetName.setLocale(Locale.ENGLISH);
+    outcomeSet.setFullySpecifiedName(outcomeSetName);
+    outcomeSet.setDatatype(conceptService.getConceptDatatype(4));
+    outcomeSet.setConceptClass(conceptService.getConceptClass(10));
+    conceptService.saveConcept(outcomeSet);
+    mdrTBProgram.setOutcomesConcept(outcomeSet);
+    programWorkflowService.saveProgram(mdrTBProgram);
+  }
 
-	}
+  @Test
+  public void shouldMarkPatientDiedAndCloseActiveProgramsAndVisits() {
 
-	@Test
-	public void shouldMarkPatientDiedAndCloseActiveProgramsAndVisits() {
+    Program mdrTBProgram = programWorkflowService.getProgram(2);
+    Program hivProgram = programWorkflowService.getProgram(1);
 
-		Program mdrTBProgram = programWorkflowService.getProgram(2);
-		Program hivProgram = programWorkflowService.getProgram(1);
+    Patient patient = patientService.getPatient(2);
+    Concept unknown = conceptService.getConcept(22);
 
-		Patient patient = patientService.getPatient(2);
-		Concept unknown = conceptService.getConcept(22);
+    // sanity checks
+    assertFalse(patient.isDead());
+    List<Visit> visits = visitService.getVisitsByPatient(patient);
+    assertThat(visits.size(), is(3));
+    List<PatientProgram> patientPrograms =
+        programWorkflowService.getPatientPrograms(patient, null, null, null, null, null, false);
+    assertThat(patientPrograms.size(), is(2));
+    for (PatientProgram pp : patientPrograms) {
+      assertNull(pp.getDateCompleted());
+      assertNull(pp.getOutcome());
+    }
 
-		// sanity checks
-		assertFalse(patient.isDead());
-		List<Visit> visits = visitService.getVisitsByPatient(patient);
-		assertThat(visits.size(), is(3));
-		List<PatientProgram> patientPrograms = programWorkflowService.getPatientPrograms(patient, null, null, null, null,
-		    null, false);
-		assertThat(patientPrograms.size(), is(2));
-		for (PatientProgram pp : patientPrograms) {
-			assertNull(pp.getDateCompleted());
-			assertNull(pp.getOutcome());
-		}
+    exitFromCareService.markPatientDead(patient, unknown, now);
 
-		exitFromCareService.markPatientDead(patient, unknown, now);
+    assertTrue(patient.isDead());
+    assertThat(patient.getCauseOfDeath(), is(unknown));
+    assertThat(patient.getDeathDate(), is(now));
 
-		assertTrue(patient.isDead());
-		assertThat(patient.getCauseOfDeath(), is(unknown));
-		assertThat(patient.getDeathDate(), is(now));
+    // all the visits in the test dataset were open, so they should now be closed
+    for (Visit visit : visitService.getVisitsByPatient(patient)) {
+      assertNotNull(visit.getStopDatetime());
+    }
 
-		// all the visits in the test dataset were open, so they should now be closed
-		for (Visit visit : visitService.getVisitsByPatient(patient)) {
-			assertNotNull(visit.getStopDatetime());
-		}
+    // confirm the MDR-TB program has been closed with the specified outcome
+    patientPrograms =
+        programWorkflowService.getPatientPrograms(
+            patient, mdrTBProgram, null, null, null, null, false);
+    assertThat(patientPrograms.size(), is(1));
+    assertThat(patientPrograms.get(0).getDateCompleted(), is(now));
+    assertThat(patientPrograms.get(0).getOutcome(), is(died));
 
-		// confirm the MDR-TB program has been closed with the specified outcome
-		patientPrograms = programWorkflowService.getPatientPrograms(patient, mdrTBProgram, null, null, null, null, false);
-		assertThat(patientPrograms.size(), is(1));
-		assertThat(patientPrograms.get(0).getDateCompleted(), is(now));
-		assertThat(patientPrograms.get(0).getOutcome(), is(died));
+    // assert that Malaria program has not been closed
+    patientPrograms =
+        programWorkflowService.getPatientPrograms(
+            patient, hivProgram, null, null, null, null, false);
+    assertThat(patientPrograms.size(), is(1));
+    assertNull(patientPrograms.get(0).getDateCompleted());
+    assertNull(patientPrograms.get(0).getOutcome());
+  }
 
-		// assert that Malaria program has not been closed
-		patientPrograms = programWorkflowService.getPatientPrograms(patient, hivProgram, null, null, null, null, false);
-		assertThat(patientPrograms.size(), is(1));
-		assertNull(patientPrograms.get(0).getDateCompleted());
-		assertNull(patientPrograms.get(0).getOutcome());
+  @Test
+  public void shouldMarkPatientAsNotDiedAndReopenActiveProgramClosedByDeath() {
 
-	}
+    Program mdrTBProgram = programWorkflowService.getProgram(2);
 
-	@Test
-	public void shouldMarkPatientAsNotDiedAndReopenActiveProgramClosedByDeath() {
+    Patient patient = patientService.getPatient(2);
+    Concept unknown = conceptService.getConcept(22);
 
-		Program mdrTBProgram = programWorkflowService.getProgram(2);
+    // there are no patients in test data set that are dead, so mark this patient as dead
+    exitFromCareService.markPatientDead(patient, unknown, now);
 
-		Patient patient = patientService.getPatient(2);
-		Concept unknown = conceptService.getConcept(22);
+    // sanity checks
+    assertTrue(patient.isDead());
+    List<PatientProgram> patientPrograms =
+        programWorkflowService.getPatientPrograms(
+            patient, mdrTBProgram, null, null, null, null, false);
+    assertThat(patientPrograms.size(), is(1));
+    assertThat(patientPrograms.get(0).getDateCompleted(), is(now));
+    assertThat(patientPrograms.get(0).getOutcome(), is(died));
 
-		// there are no patients in test data set that are dead, so mark this patient as dead
-		exitFromCareService.markPatientDead(patient, unknown, now);
+    // now let's mark the patient as "not dead" and test the functionality this test is meant to
+    // handle
+    exitFromCareService.markPatientNotDead(patient);
 
-		// sanity checks
-		assertTrue(patient.isDead());
-		List<PatientProgram> patientPrograms = programWorkflowService.getPatientPrograms(patient, mdrTBProgram, null, null,
-		    null, null, false);
-		assertThat(patientPrograms.size(), is(1));
-		assertThat(patientPrograms.get(0).getDateCompleted(), is(now));
-		assertThat(patientPrograms.get(0).getOutcome(), is(died));
+    // patient should no longer be marked as dead
+    assertFalse(patient.isDead());
+    assertNull(patient.getCauseOfDeath());
+    assertNull(patient.getDeathDate());
 
-		// now let's mark the patient as "not dead" and test the functionality this test is meant to handle
-		exitFromCareService.markPatientNotDead(patient);
+    // program should be reopened
+    patientPrograms =
+        programWorkflowService.getPatientPrograms(
+            patient, mdrTBProgram, null, null, null, null, false);
+    assertThat(patientPrograms.size(), is(1));
+    assertNull(patientPrograms.get(0).getDateCompleted());
+    assertNull(patientPrograms.get(0).getOutcome());
+  }
 
-		// patient should no longer be marked as dead
-		assertFalse(patient.isDead());
-		assertNull(patient.getCauseOfDeath());
-		assertNull(patient.getDeathDate());
+  @Test
+  public void shoulUpdateProgramCompletionDatesClosedByDeath() {
 
-		// program should be reopened
-		patientPrograms = programWorkflowService.getPatientPrograms(patient, mdrTBProgram, null, null, null, null, false);
-		assertThat(patientPrograms.size(), is(1));
-		assertNull(patientPrograms.get(0).getDateCompleted());
-		assertNull(patientPrograms.get(0).getOutcome());
+    Program mdrTBProgram = programWorkflowService.getProgram(2);
 
-	}
+    Patient patient = patientService.getPatient(2);
 
-	@Test
-	public void shoulUpdateProgramCompletionDatesClosedByDeath() {
+    Concept unknown = conceptService.getConcept(22);
 
-		Program mdrTBProgram = programWorkflowService.getProgram(2);
+    // there are no patients in test data set that are dead, so mark this patient as dead
+    exitFromCareService.markPatientDead(patient, unknown, now);
 
-		Patient patient = patientService.getPatient(2);
+    // sanity checks
+    assertTrue(patient.isDead());
+    List<PatientProgram> patientPrograms =
+        programWorkflowService.getPatientPrograms(
+            patient, mdrTBProgram, null, null, null, null, false);
+    assertThat(patientPrograms.size(), is(1));
+    assertThat(patientPrograms.get(0).getDateCompleted(), is(now));
+    assertThat(patientPrograms.get(0).getOutcome(), is(died));
 
-		Concept unknown = conceptService.getConcept(22);
+    // now let's mark the patient as dead again but use a different date
+    Date newDeathDate = new DateTime(2021, 6, 6, 0, 0, 0, 0).toDate();
+    exitFromCareService.markPatientDead(patient, unknown, newDeathDate);
 
-		// there are no patients in test data set that are dead, so mark this patient as dead
-		exitFromCareService.markPatientDead(patient, unknown, now);
-
-		// sanity checks
-		assertTrue(patient.isDead());
-		List<PatientProgram> patientPrograms = programWorkflowService.getPatientPrograms(patient, mdrTBProgram, null, null,
-		    null, null, false);
-		assertThat(patientPrograms.size(), is(1));
-		assertThat(patientPrograms.get(0).getDateCompleted(), is(now));
-		assertThat(patientPrograms.get(0).getOutcome(), is(died));
-
-		// now let's mark the patient as dead again but use a different date
-		Date newDeathDate = new DateTime(2021, 6, 6, 0, 0, 0, 0).toDate();
-		exitFromCareService.markPatientDead(patient, unknown, newDeathDate);
-
-		// program completion date should be updated
-		patientPrograms = programWorkflowService.getPatientPrograms(patient, mdrTBProgram, null, null, null, null, false);
-		assertThat(patientPrograms.size(), is(1));
-		assertThat(patientPrograms.get(0).getDateCompleted(), is(newDeathDate));
-
-	}
+    // program completion date should be updated
+    patientPrograms =
+        programWorkflowService.getPatientPrograms(
+            patient, mdrTBProgram, null, null, null, null, false);
+    assertThat(patientPrograms.size(), is(1));
+    assertThat(patientPrograms.get(0).getDateCompleted(), is(newDeathDate));
+  }
 }

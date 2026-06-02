@@ -9,15 +9,15 @@
  */
 package org.openmrs.module.emrapi.test;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.junit.After;
 import org.junit.Before;
 import org.openmrs.Person;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Sets up a mock UserContext, which lets you write unit tests that call methods that do
@@ -26,23 +26,23 @@ import static org.mockito.Mockito.when;
  */
 public abstract class AuthenticatedUserTestHelper {
 
-	protected User authenticatedUser;
+  protected User authenticatedUser;
 
-	protected UserContext mockUserContext;
+  protected UserContext mockUserContext;
 
-	@Before
-	public void setUpMockUserContext() throws Exception {
-		authenticatedUser = new User();
-		authenticatedUser.setPerson(new Person());
+  @Before
+  public void setUpMockUserContext() throws Exception {
+    authenticatedUser = new User();
+    authenticatedUser.setPerson(new Person());
 
-		mockUserContext = mock(UserContext.class);
-		when(mockUserContext.getAuthenticatedUser()).thenReturn(authenticatedUser);
+    mockUserContext = mock(UserContext.class);
+    when(mockUserContext.getAuthenticatedUser()).thenReturn(authenticatedUser);
 
-		Context.setUserContext(mockUserContext);
-	}
+    Context.setUserContext(mockUserContext);
+  }
 
-	@After
-	public void tearDownMockUserContext() throws Exception {
-		Context.clearUserContext();
-	}
+  @After
+  public void tearDownMockUserContext() throws Exception {
+    Context.clearUserContext();
+  }
 }

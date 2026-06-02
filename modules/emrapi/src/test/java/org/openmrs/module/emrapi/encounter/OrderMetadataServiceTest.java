@@ -9,6 +9,14 @@
  */
 package org.openmrs.module.emrapi.encounter;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -19,150 +27,144 @@ import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.when;
-
 public class OrderMetadataServiceTest extends BaseModuleContextSensitiveTest {
 
-	public static final String DAYS_CONCEPT_NAME = "Days";
+  public static final String DAYS_CONCEPT_NAME = "Days";
 
-	public static final String WEEKS_CONCEPT_NAME = "Weeks";
+  public static final String WEEKS_CONCEPT_NAME = "Weeks";
 
-	public static final String ONCE_A_DAY_CONCEPT_NAME = "Once A Day";
+  public static final String ONCE_A_DAY_CONCEPT_NAME = "Once A Day";
 
-	public static final String TWICE_A_DAY_CONCEPT_NAME = "Twice A Day";
+  public static final String TWICE_A_DAY_CONCEPT_NAME = "Twice A Day";
 
-	public static final String MG = "mg";
+  public static final String MG = "mg";
 
-	public static final String ML = "ml";
+  public static final String ML = "ml";
 
-	public static final String TABLET = "tablet";
+  public static final String TABLET = "tablet";
 
-	@Mock
-	private OrderService orderService;
+  @Mock private OrderService orderService;
 
-	private OrderMetadataService orderMetadataService;
+  private OrderMetadataService orderMetadataService;
 
-	@BeforeEach
-	public void setUp() throws Exception {
-		OrderService orderService = Context.getOrderService();
-		orderMetadataService = new OrderMetadataService(orderService);
-	}
+  @BeforeEach
+  public void setUp() throws Exception {
+    OrderService orderService = Context.getOrderService();
+    orderMetadataService = new OrderMetadataService(orderService);
+  }
 
-	@Test
-	public void shouldGetDurationConceptByName() throws Exception {
-		Concept days = createConcept(DAYS_CONCEPT_NAME);
-		Concept weeks = createConcept(WEEKS_CONCEPT_NAME);
-		when(orderService.getDurationUnits()).thenReturn(Arrays.asList(days, weeks));
+  @Test
+  public void shouldGetDurationConceptByName() throws Exception {
+    Concept days = createConcept(DAYS_CONCEPT_NAME);
+    Concept weeks = createConcept(WEEKS_CONCEPT_NAME);
+    when(orderService.getDurationUnits()).thenReturn(Arrays.asList(days, weeks));
 
-		Concept durationUnitsConcept = orderMetadataService.getDurationUnitsConceptByName(DAYS_CONCEPT_NAME);
+    Concept durationUnitsConcept =
+        orderMetadataService.getDurationUnitsConceptByName(DAYS_CONCEPT_NAME);
 
-		assertThat(durationUnitsConcept, is(days));
-	}
+    assertThat(durationUnitsConcept, is(days));
+  }
 
-	@Test
-	public void shouldReturnNullIfDurationConceptDoesNotExist() throws Exception {
-		when(orderService.getDurationUnits()).thenReturn(new ArrayList<Concept>());
+  @Test
+  public void shouldReturnNullIfDurationConceptDoesNotExist() throws Exception {
+    when(orderService.getDurationUnits()).thenReturn(new ArrayList<Concept>());
 
-		Concept durationUnitsConcept = orderMetadataService.getDurationUnitsConceptByName(DAYS_CONCEPT_NAME);
+    Concept durationUnitsConcept =
+        orderMetadataService.getDurationUnitsConceptByName(DAYS_CONCEPT_NAME);
 
-		assertNull(durationUnitsConcept);
-	}
+    assertNull(durationUnitsConcept);
+  }
 
-	@Test
-	public void shouldReturnNullDurationUnitsForNullInput() {
-		assertNull(orderMetadataService.getDurationUnitsConceptByName(null));
-	}
+  @Test
+  public void shouldReturnNullDurationUnitsForNullInput() {
+    assertNull(orderMetadataService.getDurationUnitsConceptByName(null));
+  }
 
-	@Test
-	public void shouldGetOrderFrequencyByName() throws Exception {
-		OrderFrequency onceADayOrderFrequency = new OrderFrequency();
-		onceADayOrderFrequency.setConcept(createConcept(ONCE_A_DAY_CONCEPT_NAME));
+  @Test
+  public void shouldGetOrderFrequencyByName() throws Exception {
+    OrderFrequency onceADayOrderFrequency = new OrderFrequency();
+    onceADayOrderFrequency.setConcept(createConcept(ONCE_A_DAY_CONCEPT_NAME));
 
-		OrderFrequency twiceADayOrderFrequency = new OrderFrequency();
-		twiceADayOrderFrequency.setConcept(createConcept(TWICE_A_DAY_CONCEPT_NAME));
+    OrderFrequency twiceADayOrderFrequency = new OrderFrequency();
+    twiceADayOrderFrequency.setConcept(createConcept(TWICE_A_DAY_CONCEPT_NAME));
 
-		when(orderService.getOrderFrequencies(false))
-		        .thenReturn(Arrays.asList(onceADayOrderFrequency, twiceADayOrderFrequency));
+    when(orderService.getOrderFrequencies(false))
+        .thenReturn(Arrays.asList(onceADayOrderFrequency, twiceADayOrderFrequency));
 
-		OrderFrequency orderFrequency = orderMetadataService.getOrderFrequencyByName(ONCE_A_DAY_CONCEPT_NAME, false);
+    OrderFrequency orderFrequency =
+        orderMetadataService.getOrderFrequencyByName(ONCE_A_DAY_CONCEPT_NAME, false);
 
-		assertThat(orderFrequency, is(onceADayOrderFrequency));
-	}
+    assertThat(orderFrequency, is(onceADayOrderFrequency));
+  }
 
-	@Test
-	public void shouldReturnNullIfOrderFrequencyNotPresent() throws Exception {
-		when(orderService.getOrderFrequencies(false)).thenReturn(new ArrayList<OrderFrequency>());
+  @Test
+  public void shouldReturnNullIfOrderFrequencyNotPresent() throws Exception {
+    when(orderService.getOrderFrequencies(false)).thenReturn(new ArrayList<OrderFrequency>());
 
-		OrderFrequency orderFrequency = orderMetadataService.getOrderFrequencyByName(ONCE_A_DAY_CONCEPT_NAME, false);
+    OrderFrequency orderFrequency =
+        orderMetadataService.getOrderFrequencyByName(ONCE_A_DAY_CONCEPT_NAME, false);
 
-		assertNull(orderFrequency);
-	}
+    assertNull(orderFrequency);
+  }
 
-	@Test
-	public void shouldReturnNullOrderFrequencyForNullInput() {
-		assertNull(orderMetadataService.getOrderFrequencyByName(null, false));
-	}
+  @Test
+  public void shouldReturnNullOrderFrequencyForNullInput() {
+    assertNull(orderMetadataService.getOrderFrequencyByName(null, false));
+  }
 
-	@Test
-	public void shouldGetDoseUnitsConceptByName() throws Exception {
-		Concept mgConcept = createConcept(MG);
-		Concept mlConcept = createConcept(ML);
-		when(orderService.getDrugDosingUnits()).thenReturn(Arrays.asList(mgConcept, mlConcept));
+  @Test
+  public void shouldGetDoseUnitsConceptByName() throws Exception {
+    Concept mgConcept = createConcept(MG);
+    Concept mlConcept = createConcept(ML);
+    when(orderService.getDrugDosingUnits()).thenReturn(Arrays.asList(mgConcept, mlConcept));
 
-		Concept doseUnitsConcept = orderMetadataService.getDoseUnitsConceptByName(MG);
+    Concept doseUnitsConcept = orderMetadataService.getDoseUnitsConceptByName(MG);
 
-		assertThat(doseUnitsConcept, is(mgConcept));
-	}
+    assertThat(doseUnitsConcept, is(mgConcept));
+  }
 
-	@Test
-	public void shouldReturnNullIfDoseUnitsConceptDoesNotExist() throws Exception {
-		when(orderService.getDrugDosingUnits()).thenReturn(new ArrayList<Concept>());
+  @Test
+  public void shouldReturnNullIfDoseUnitsConceptDoesNotExist() throws Exception {
+    when(orderService.getDrugDosingUnits()).thenReturn(new ArrayList<Concept>());
 
-		Concept doseUnitsConcept = orderMetadataService.getDoseUnitsConceptByName(MG);
+    Concept doseUnitsConcept = orderMetadataService.getDoseUnitsConceptByName(MG);
 
-		assertNull(doseUnitsConcept);
-	}
+    assertNull(doseUnitsConcept);
+  }
 
-	@Test
-	public void shouldReturnNullDoseUnitsForNullInput() {
-		assertNull(orderMetadataService.getDoseUnitsConceptByName(null));
-	}
+  @Test
+  public void shouldReturnNullDoseUnitsForNullInput() {
+    assertNull(orderMetadataService.getDoseUnitsConceptByName(null));
+  }
 
-	@Test
-	public void shouldGetDispenseUnitsConceptByName() throws Exception {
-		Concept tabletConcept = createConcept(TABLET);
-		Concept mlConcept = createConcept(ML);
-		when(orderService.getDrugDispensingUnits()).thenReturn(Arrays.asList(tabletConcept, mlConcept));
+  @Test
+  public void shouldGetDispenseUnitsConceptByName() throws Exception {
+    Concept tabletConcept = createConcept(TABLET);
+    Concept mlConcept = createConcept(ML);
+    when(orderService.getDrugDispensingUnits()).thenReturn(Arrays.asList(tabletConcept, mlConcept));
 
-		Concept dispensingUnitsConcept = orderMetadataService.getDispenseUnitsConceptByName(TABLET);
+    Concept dispensingUnitsConcept = orderMetadataService.getDispenseUnitsConceptByName(TABLET);
 
-		assertThat(dispensingUnitsConcept, is(tabletConcept));
-	}
+    assertThat(dispensingUnitsConcept, is(tabletConcept));
+  }
 
-	@Test
-	public void shouldReturnNullIfDispenseUnitsConceptDoesNotExist() throws Exception {
-		when(orderService.getDrugDispensingUnits()).thenReturn(new ArrayList<Concept>());
+  @Test
+  public void shouldReturnNullIfDispenseUnitsConceptDoesNotExist() throws Exception {
+    when(orderService.getDrugDispensingUnits()).thenReturn(new ArrayList<Concept>());
 
-		Concept dispensingUnitsConcept = orderMetadataService.getDispenseUnitsConceptByName(TABLET);
+    Concept dispensingUnitsConcept = orderMetadataService.getDispenseUnitsConceptByName(TABLET);
 
-		assertNull(dispensingUnitsConcept);
-	}
+    assertNull(dispensingUnitsConcept);
+  }
 
-	@Test
-	public void shouldReturnNullDispenseUnitsForNullInput() {
-		assertNull(orderMetadataService.getDispenseUnitsConceptByName(null));
-	}
+  @Test
+  public void shouldReturnNullDispenseUnitsForNullInput() {
+    assertNull(orderMetadataService.getDispenseUnitsConceptByName(null));
+  }
 
-	private Concept createConcept(String conceptName) {
-		Concept concept = new Concept();
-		concept.setPreferredName(new ConceptName(conceptName, Locale.getDefault()));
-		return concept;
-	}
+  private Concept createConcept(String conceptName) {
+    Concept concept = new Concept();
+    concept.setPreferredName(new ConceptName(conceptName, Locale.getDefault()));
+    return concept;
+  }
 }

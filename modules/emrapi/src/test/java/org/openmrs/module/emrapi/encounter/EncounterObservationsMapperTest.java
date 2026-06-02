@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.emrapi.encounter;
 
+import static junit.framework.TestCase.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Arrays;
+import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -18,77 +24,75 @@ import org.openmrs.module.emrapi.diagnosis.DiagnosisMetadata;
 import org.openmrs.module.emrapi.encounter.domain.EncounterTransaction;
 import org.openmrs.module.emrapi.encounter.matcher.ObservationTypeMatcher;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
-import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class EncounterObservationsMapperTest {
 
-	private EncounterObservationsMapper encounterObservationsMapper;
+  private EncounterObservationsMapper encounterObservationsMapper;
 
-	@Mock
-	private DiagnosisMetadata diagnosisMetadata;
+  @Mock private DiagnosisMetadata diagnosisMetadata;
 
-	@Mock
-	private ObservationMapper observationMapper;
+  @Mock private ObservationMapper observationMapper;
 
-	@Mock
-	private DiagnosisMapper diagnosisMapper;
+  @Mock private DiagnosisMapper diagnosisMapper;
 
-	@Mock
-	private DispositionMapper dispositionMapper;
+  @Mock private DispositionMapper dispositionMapper;
 
-	@Mock
-	private EmrApiProperties emrApiProperties;
+  @Mock private EmrApiProperties emrApiProperties;
 
-	@Mock
-	private ObservationTypeMatcher observationTypeMatcher;
+  @Mock private ObservationTypeMatcher observationTypeMatcher;
 
-	@Before
-	public void setUp() {
-		initMocks(this);
-		encounterObservationsMapper = new EncounterObservationsMapper(observationMapper, diagnosisMapper, dispositionMapper,
-		        emrApiProperties, observationTypeMatcher);
-		when(emrApiProperties.getDiagnosisMetadata()).thenReturn(diagnosisMetadata);
-	}
+  @Before
+  public void setUp() {
+    initMocks(this);
+    encounterObservationsMapper =
+        new EncounterObservationsMapper(
+            observationMapper,
+            diagnosisMapper,
+            dispositionMapper,
+            emrApiProperties,
+            observationTypeMatcher);
+    when(emrApiProperties.getDiagnosisMetadata()).thenReturn(diagnosisMetadata);
+  }
 
-	@Test
-	public void testUpdateMapsDiagnosis() throws Exception {
-		EncounterTransaction encounterTransaction = new EncounterTransaction();
-		Obs obs1 = new Obs();
-		Obs obs2 = new Obs();
-		Obs obs3 = new Obs();
-		Obs obs4 = new Obs();
-		HashSet<Obs> allObs = new HashSet<Obs>(Arrays.asList(obs1, obs2, obs3, obs4));
-		when(observationTypeMatcher.getObservationType(obs1)).thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
-		when(observationTypeMatcher.getObservationType(obs2)).thenReturn(ObservationTypeMatcher.ObservationType.OBSERVATION);
-		when(observationTypeMatcher.getObservationType(obs3)).thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
+  @Test
+  public void testUpdateMapsDiagnosis() throws Exception {
+    EncounterTransaction encounterTransaction = new EncounterTransaction();
+    Obs obs1 = new Obs();
+    Obs obs2 = new Obs();
+    Obs obs3 = new Obs();
+    Obs obs4 = new Obs();
+    HashSet<Obs> allObs = new HashSet<Obs>(Arrays.asList(obs1, obs2, obs3, obs4));
+    when(observationTypeMatcher.getObservationType(obs1))
+        .thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
+    when(observationTypeMatcher.getObservationType(obs2))
+        .thenReturn(ObservationTypeMatcher.ObservationType.OBSERVATION);
+    when(observationTypeMatcher.getObservationType(obs3))
+        .thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
 
-		EncounterTransaction.Disposition disposition = new EncounterTransaction.Disposition();
-		when(observationTypeMatcher.getObservationType(obs4)).thenReturn(ObservationTypeMatcher.ObservationType.DISPOSITION);
-		when(dispositionMapper.getDisposition(obs4)).thenReturn(disposition);
+    EncounterTransaction.Disposition disposition = new EncounterTransaction.Disposition();
+    when(observationTypeMatcher.getObservationType(obs4))
+        .thenReturn(ObservationTypeMatcher.ObservationType.DISPOSITION);
+    when(dispositionMapper.getDisposition(obs4)).thenReturn(disposition);
 
-		encounterObservationsMapper.update(encounterTransaction, allObs);
+    encounterObservationsMapper.update(encounterTransaction, allObs);
 
-		assertEquals(2, encounterTransaction.getDiagnoses().size());
-		assertEquals(disposition, encounterTransaction.getDisposition());
-		assertEquals(1, encounterTransaction.getObservations().size());
-	}
+    assertEquals(2, encounterTransaction.getDiagnoses().size());
+    assertEquals(disposition, encounterTransaction.getDisposition());
+    assertEquals(1, encounterTransaction.getObservations().size());
+  }
 
-	@Test
-	public void updateShouldNotMapVoidedDiagnosis() throws Exception {
-		EncounterTransaction encounterTransaction = new EncounterTransaction();
-		Obs obs1 = new Obs();
-		Obs obs2 = new Obs();
-		obs2.setVoided(Boolean.TRUE);
-		HashSet<Obs> allObs = new HashSet<Obs>(Arrays.asList(obs1, obs2));
-		when(observationTypeMatcher.getObservationType(obs1)).thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
-		when(observationTypeMatcher.getObservationType(obs2)).thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
-		encounterObservationsMapper.update(encounterTransaction, allObs);
+  @Test
+  public void updateShouldNotMapVoidedDiagnosis() throws Exception {
+    EncounterTransaction encounterTransaction = new EncounterTransaction();
+    Obs obs1 = new Obs();
+    Obs obs2 = new Obs();
+    obs2.setVoided(Boolean.TRUE);
+    HashSet<Obs> allObs = new HashSet<Obs>(Arrays.asList(obs1, obs2));
+    when(observationTypeMatcher.getObservationType(obs1))
+        .thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
+    when(observationTypeMatcher.getObservationType(obs2))
+        .thenReturn(ObservationTypeMatcher.ObservationType.DIAGNOSIS);
+    encounterObservationsMapper.update(encounterTransaction, allObs);
 
-		assertEquals(1, encounterTransaction.getDiagnoses().size());
-	}
+    assertEquals(1, encounterTransaction.getDiagnoses().size());
+  }
 }
