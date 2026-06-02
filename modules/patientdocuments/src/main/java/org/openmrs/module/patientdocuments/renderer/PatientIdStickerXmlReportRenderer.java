@@ -569,10 +569,7 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
       return null;
     }
 
-    return values.stream()
-        .map(this::asStringObjectMap)
-        .filter(item -> item != null)
-        .toList();
+    return values.stream().map(this::asStringObjectMap).filter(item -> item != null).toList();
   }
 
   private Map<String, Object> asStringObjectMap(Object value) {
