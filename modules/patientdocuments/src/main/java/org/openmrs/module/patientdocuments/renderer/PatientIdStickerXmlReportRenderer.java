@@ -213,7 +213,7 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
     Element templatePIDElement = doc.createElement("patientIdSticker");
 
     // Set Label names to use in template layouts
-    MessageSourceService messageSourceService = Context.getMessageSourceService();
+    MessageSourceService messageSourceService = getMessageSourceService();
     String patientIdKey =
         messageSourceService.getMessage("patientdocuments.patientIdSticker.fields.identifier");
     String patientSecondaryIdKey =
@@ -434,7 +434,7 @@ public class PatientIdStickerXmlReportRenderer extends ReportDesignRenderer {
       Element fields = doc.createElement("fields");
       templatePIDElement.appendChild(fields);
 
-      MessageSourceService messageSourceService = Context.getMessageSourceService();
+      MessageSourceService messageSourceService = getMessageSourceService();
       String patientIdKey =
           messageSourceService.getMessage("patientdocuments.patientIdSticker.fields.identifier");
       String patientSecondaryIdKey =
