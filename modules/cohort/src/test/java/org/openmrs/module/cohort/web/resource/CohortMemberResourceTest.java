@@ -102,7 +102,9 @@ public class CohortMemberResourceTest
   @Test
   public void shouldCreateNewResource() {
     CohortM cohort = mock(CohortM.class);
+    Patient patient = mock(Patient.class);
     cohortMember.setCohort(cohort);
+    cohortMember.setPatient(patient);
 
     when(cohortMemberService.saveCohortMember(getObject())).thenReturn(getObject());
     when(cohort.getVoided()).thenReturn(false);
