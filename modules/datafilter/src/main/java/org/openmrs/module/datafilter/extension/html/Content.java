@@ -36,7 +36,7 @@ public class Content {
     this.styles =
         "<style>.listItemBoxCustom {width: 440px;"
             + "padding: 2px;"
-            + "border: 1px solid lightgray; "
+            + "border: 1px solid lightgray;"
             + "float: left;"
             + "background-color: #EFEFEF;"
             + "overflow-x: scroll;"
