@@ -19,6 +19,7 @@ import org.openmrs.api.context.BasicAuthenticated;
 
 public class UserLoginTest extends BaseAuthenticationTest {
 
+  @Override
   @BeforeEach
   public void setup() {
     super.setup();
