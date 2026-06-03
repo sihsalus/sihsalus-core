@@ -25,7 +25,6 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptDatatype;
 import org.openmrs.Obs;
 import org.openmrs.PatientProgram;
-import org.openmrs.test.Verifies;
 
 public class ResultUtilTest {
 
@@ -33,9 +32,6 @@ public class ResultUtilTest {
    * @see {@link ResultUtil#getFirst(CalculationResult)}
    */
   @Test
-  @Verifies(
-      value = "should get the first result if the value of the result is a list",
-      method = "getFirst(CalculationResult)")
   public void getFirst_shouldGetTheFirstResultIfTheValueOfTheResultIsAList() throws Exception {
     ListResult listResult = new ListResult();
     List<CalculationResult> results = new ArrayList<CalculationResult>();
@@ -51,9 +47,6 @@ public class ResultUtilTest {
    * @see {@link ResultUtil#getFirst(CalculationResult)}
    */
   @Test
-  @Verifies(
-      value = "should return the same result if the value of the result is a not a list",
-      method = "getFirst(CalculationResult)")
   public void getFirst_shouldReturnTheSameResultIfTheValueOfTheResultIsANotAList()
       throws Exception {
     CalculationResult result = new SimpleResult("result", null);
@@ -64,9 +57,6 @@ public class ResultUtilTest {
    * @see {@link ResultUtil#convert(CalculationResult,Class<T>)}
    */
   @Test
-  @Verifies(
-      value = "should return null if the passed in result is null",
-      method = "convert(CalculationResult,Class<T>)")
   public void convert_shouldReturnNullIfThePassedInResultIsNull() throws Exception {
     Assert.assertNull(ResultUtil.convert(null, String.class));
   }
@@ -76,10 +66,6 @@ public class ResultUtilTest {
    */
   @SuppressWarnings("rawtypes")
   @Test
-  @Verifies(
-      value =
-          "should return an empty collection if the result has a null value and class is a list",
-      method = "convert(CalculationResult,Class<T>)")
   public void convert_shouldReturnAnEmptyCollectionIfTheResultHasANullValueAndClassIsAList()
       throws Exception {
     List list = ResultUtil.convert(new SimpleResult(null, null), List.class);
@@ -92,9 +78,6 @@ public class ResultUtilTest {
    */
   @SuppressWarnings("rawtypes")
   @Test
-  @Verifies(
-      value = "should return an empty collection if the result is null and class is a list",
-      method = "convert(CalculationResult,Class<T>)")
   public void convert_shouldReturnAnEmptyCollectionIfTheResultIsNullAndClassIsAList()
       throws Exception {
     List list = ResultUtil.convert(null, List.class);
@@ -107,9 +90,6 @@ public class ResultUtilTest {
    */
   @SuppressWarnings("rawtypes")
   @Test
-  @Verifies(
-      value = "should return an empty map if the result has a null value and class is a map",
-      method = "convert(CalculationResult,Class<T>)")
   public void convert_shouldReturnAnEmptyMapIfTheResultHasANullValueAndClassIsAMap()
       throws Exception {
     Map map = ResultUtil.convert(new SimpleResult(null, null), Map.class);
@@ -122,9 +102,6 @@ public class ResultUtilTest {
    */
   @SuppressWarnings("rawtypes")
   @Test
-  @Verifies(
-      value = "should return an empty map if the result is null and class is a map",
-      method = "convert(CalculationResult,Class<T>)")
   public void convert_shouldReturnAnEmptyMapIfTheResultIsNullAndClassIsAMap() throws Exception {
     Map map = ResultUtil.convert(null, Map.class);
     Assert.assertNotNull(map);
@@ -136,9 +113,6 @@ public class ResultUtilTest {
    */
   @SuppressWarnings("rawtypes")
   @Test
-  @Verifies(
-      value = "should return an empty collection if the result has a null value and class is a set",
-      method = "convert(CalculationResult,Class<T>)")
   public void convert_shouldReturnAnEmptyCollectionIfTheResultHasANullValueAndClassIsASet()
       throws Exception {
     Set set = ResultUtil.convert(new SimpleResult(null, null), Set.class);
@@ -151,9 +125,6 @@ public class ResultUtilTest {
    */
   @SuppressWarnings("rawtypes")
   @Test
-  @Verifies(
-      value = "should return an empty collection if the result is null and class is a set",
-      method = "convert(CalculationResult,Class<T>)")
   public void convert_shouldReturnAnEmptyCollectionIfTheResultIsNullAndClassIsASet()
       throws Exception {
     Set set = ResultUtil.convert(null, Set.class);

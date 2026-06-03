@@ -7,16 +7,12 @@ import static org.openmrs.module.attachments.obs.ValueComplex.buildValueComplex;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.openmrs.module.attachments.AttachmentsConstants;
-import org.openmrs.test.Verifies;
 
 public class ValueComplexTest {
 
   // going forward, we are replacing all "|" fields with an underscore, but
   // keeping these tests as we want to try to maintain backwards compatibility
   @Test
-  @Verifies(
-      value = "ValueComplex should handle file names even when containing the reserved separator.",
-      method = "ValueComplex(String, String, String)")
   public void valueComplex_shouldHandleFileNamesWithSeparator() {
 
     // Setup
