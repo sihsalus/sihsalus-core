@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,115 +40,139 @@ import org.openmrs.module.webservices.rest.web.representation.FullRepresentation
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 
 @ExtendWith(MockitoExtension.class)
-public class QueueEntrySubResourceTest extends BaseQueueResourceTest<QueueEntry, QueueEntrySubResource> {
+public class QueueEntrySubResourceTest
+    extends BaseQueueResourceTest<QueueEntry, QueueEntrySubResource> {
 
-	private static final String QUEUE_ENTRY_UUID = "6hje567a-fca0-11e5-9e59-08002719a7";
+  private static final String QUEUE_ENTRY_UUID = "6hje567a-fca0-11e5-9e59-08002719a7";
 
-	@Mock
-	private QueueService queueService;
+  @Mock private QueueService queueService;
 
-	@Mock
-	private QueueEntryService queueEntryService;
+  @Mock private QueueEntryService queueEntryService;
 
-	@Mock
-	private QueueRoomService queueRoomService;
+  @Mock private QueueRoomService queueRoomService;
 
-	@Mock
-	private RoomProviderMapService roomProviderMapService;
+  @Mock private RoomProviderMapService roomProviderMapService;
 
-	@Mock
-	private ConceptService conceptService;
+  @Mock private ConceptService conceptService;
 
-	@Mock
-	private LocationService locationService;
+  @Mock private LocationService locationService;
 
-	@Mock
-	private PatientService patientService;
+  @Mock private PatientService patientService;
 
-	@Mock
-	private QueueServicesWrapper queueServicesWrapper;
+  @Mock private QueueServicesWrapper queueServicesWrapper;
 
-	private QueueEntry queueEntry;
+  private QueueEntry queueEntry;
 
-	@BeforeEach
-	public void setup() {
-		this.cleanup();
-		this.prepareMocks();
-		queueEntry = mock(QueueEntry.class);
-		lenient().when(queueServicesWrapper.getQueueService()).thenReturn(queueService);
-		lenient().when(queueServicesWrapper.getQueueEntryService()).thenReturn(queueEntryService);
-		lenient().when(queueServicesWrapper.getQueueRoomService()).thenReturn(queueRoomService);
-		lenient().when(queueServicesWrapper.getRoomProviderMapService()).thenReturn(roomProviderMapService);
-		lenient().when(queueServicesWrapper.getConceptService()).thenReturn(conceptService);
-		lenient().when(queueServicesWrapper.getLocationService()).thenReturn(locationService);
-		lenient().when(queueServicesWrapper.getPatientService()).thenReturn(patientService);
+  @BeforeEach
+  public void setup() {
+    this.cleanup();
+    this.prepareMocks();
+    queueEntry = mock(QueueEntry.class);
+    lenient().when(queueServicesWrapper.getQueueService()).thenReturn(queueService);
+    lenient().when(queueServicesWrapper.getQueueEntryService()).thenReturn(queueEntryService);
+    lenient().when(queueServicesWrapper.getQueueRoomService()).thenReturn(queueRoomService);
+    lenient()
+        .when(queueServicesWrapper.getRoomProviderMapService())
+        .thenReturn(roomProviderMapService);
+    lenient().when(queueServicesWrapper.getConceptService()).thenReturn(conceptService);
+    lenient().when(queueServicesWrapper.getLocationService()).thenReturn(locationService);
+    lenient().when(queueServicesWrapper.getPatientService()).thenReturn(patientService);
 
-		lenient().when(queueEntry.getUuid()).thenReturn(QUEUE_ENTRY_UUID);
-		getContext().when(() -> Context.getRegisteredComponents(QueueServicesWrapper.class))
-		        .thenReturn(Collections.singletonList(queueServicesWrapper));
+    lenient().when(queueEntry.getUuid()).thenReturn(QUEUE_ENTRY_UUID);
+    getContext()
+        .when(() -> Context.getRegisteredComponents(QueueServicesWrapper.class))
+        .thenReturn(Collections.singletonList(queueServicesWrapper));
 
-		this.setResource(new QueueEntrySubResource());
-		this.setObject(queueEntry);
-	}
+    this.setResource(new QueueEntrySubResource());
+    this.setObject(queueEntry);
+  }
 
-	@Test
-	public void shouldReturnDefaultRepresentation() {
-		verifyDefaultRepresentation("uuid", "status", "visit", "priority", "priorityComment", "sortWeight", "patient",
-		    "locationWaitingFor", "providerWaitingFor", "startedAt", "endedAt", "display");
-	}
+  @Test
+  public void shouldReturnDefaultRepresentation() {
+    verifyDefaultRepresentation(
+        "uuid",
+        "status",
+        "visit",
+        "priority",
+        "priorityComment",
+        "sortWeight",
+        "patient",
+        "locationWaitingFor",
+        "providerWaitingFor",
+        "startedAt",
+        "endedAt",
+        "display");
+  }
 
-	@Test
-	public void shouldReturnFullRepresentation() {
-		verifyFullRepresentation("status", "priority", "priorityComment", "sortWeight", "patient", "locationWaitingFor",
-		    "providerWaitingFor", "startedAt", "endedAt", "display", "uuid", "display", "auditInfo");
-	}
+  @Test
+  public void shouldReturnFullRepresentation() {
+    verifyFullRepresentation(
+        "status",
+        "priority",
+        "priorityComment",
+        "sortWeight",
+        "patient",
+        "locationWaitingFor",
+        "providerWaitingFor",
+        "startedAt",
+        "endedAt",
+        "display",
+        "uuid",
+        "display",
+        "auditInfo");
+  }
 
-	@Test
-	public void shouldReturnNullForCustomRepresentation() {
-		CustomRepresentation customRepresentation = new CustomRepresentation("custom-representation");
-		assertThat(getResource().getRepresentationDescription(customRepresentation), is(nullValue()));
-	}
+  @Test
+  public void shouldReturnNullForCustomRepresentation() {
+    CustomRepresentation customRepresentation = new CustomRepresentation("custom-representation");
+    assertThat(getResource().getRepresentationDescription(customRepresentation), is(nullValue()));
+  }
 
-	@Test
-	public void shouldNOTReturnNullForDefaultRepresentation() {
-		assertThat(getResource().getRepresentationDescription(new DefaultRepresentation()), is(notNullValue()));
-	}
+  @Test
+  public void shouldNOTReturnNullForDefaultRepresentation() {
+    assertThat(
+        getResource().getRepresentationDescription(new DefaultRepresentation()),
+        is(notNullValue()));
+  }
 
-	@Test
-	public void shouldNOTReturnNullForFullRepresentation() {
-		assertThat(getResource().getRepresentationDescription(new FullRepresentation()), is(notNullValue()));
-	}
+  @Test
+  public void shouldNOTReturnNullForFullRepresentation() {
+    assertThat(
+        getResource().getRepresentationDescription(new FullRepresentation()), is(notNullValue()));
+  }
 
-	@Test
-	public void shouldNOTReturnNullForRefRepresentation() {
-		assertThat(getResource().getRepresentationDescription(new RefRepresentation()), is(notNullValue()));
-	}
+  @Test
+  public void shouldNOTReturnNullForRefRepresentation() {
+    assertThat(
+        getResource().getRepresentationDescription(new RefRepresentation()), is(notNullValue()));
+  }
 
-	@Test
-	public void shouldGetResourceByUniqueUuid() {
-		when(queueEntryService.getQueueEntryByUuid(QUEUE_ENTRY_UUID)).thenReturn(Optional.of(queueEntry));
+  @Test
+  public void shouldGetResourceByUniqueUuid() {
+    when(queueEntryService.getQueueEntryByUuid(QUEUE_ENTRY_UUID))
+        .thenReturn(Optional.of(queueEntry));
 
-		QueueEntry result = getResource().getByUniqueId(QUEUE_ENTRY_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), is(QUEUE_ENTRY_UUID));
-	}
+    QueueEntry result = getResource().getByUniqueId(QUEUE_ENTRY_UUID);
+    assertThat(result, notNullValue());
+    assertThat(result.getUuid(), is(QUEUE_ENTRY_UUID));
+  }
 
-	@Test
-	public void shouldCreateNewResource() {
-		when(queueEntryService.saveQueueEntry(getObject())).thenReturn(getObject());
+  @Test
+  public void shouldCreateNewResource() {
+    when(queueEntryService.saveQueueEntry(getObject())).thenReturn(getObject());
 
-		QueueEntry newlyCreatedObject = getResource().save(getObject());
-		assertThat(newlyCreatedObject, notNullValue());
-		assertThat(newlyCreatedObject.getUuid(), is(QUEUE_ENTRY_UUID));
-	}
+    QueueEntry newlyCreatedObject = getResource().save(getObject());
+    assertThat(newlyCreatedObject, notNullValue());
+    assertThat(newlyCreatedObject.getUuid(), is(QUEUE_ENTRY_UUID));
+  }
 
-	@Test
-	public void shouldInstantiateNewDelegate() {
-		assertThat(getResource().newDelegate(), notNullValue());
-	}
+  @Test
+  public void shouldInstantiateNewDelegate() {
+    assertThat(getResource().newDelegate(), notNullValue());
+  }
 
-	@Test
-	public void verifyResourceVersion() {
-		assertThat(getResource().getResourceVersion(), is("2.3"));
-	}
+  @Test
+  public void verifyResourceVersion() {
+    assertThat(getResource().getResourceVersion(), is("2.3"));
+  }
 }

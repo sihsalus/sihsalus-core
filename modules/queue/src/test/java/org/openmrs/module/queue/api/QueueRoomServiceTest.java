@@ -19,7 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,86 +38,84 @@ import org.openmrs.module.queue.model.QueueRoom;
 @RunWith(MockitoJUnitRunner.class)
 public class QueueRoomServiceTest {
 
-	private static final String QUEUE_ROOM_UUID = "4eb8fe43-2813-4kbc-80dc-2e5d30252cc6";
+  private static final String QUEUE_ROOM_UUID = "4eb8fe43-2813-4kbc-80dc-2e5d30252cc6";
 
-	private static final String QUEUE_ROOM_NAME = "Triage Room 1";
+  private static final String QUEUE_ROOM_NAME = "Triage Room 1";
 
-	private static final String QUEUE_UUID = "3eb7fe43-2813-4kbc-80dc-2e5d30252bb5";
+  private static final String QUEUE_UUID = "3eb7fe43-2813-4kbc-80dc-2e5d30252bb5";
 
-	private static final String LOCATION_UUID = "d0938432-1691-11df-97a5-7038c098";
+  private static final String LOCATION_UUID = "d0938432-1691-11df-97a5-7038c098";
 
-	private QueueRoomServiceImpl queueRoomService;
+  private QueueRoomServiceImpl queueRoomService;
 
-	@Mock
-	private QueueRoomDao dao;
+  @Mock private QueueRoomDao dao;
 
-	@Captor
-	ArgumentCaptor<QueueRoomSearchCriteria> queueRoomSearchCriteriaArgumentCaptor;
+  @Captor ArgumentCaptor<QueueRoomSearchCriteria> queueRoomSearchCriteriaArgumentCaptor;
 
-	@Before
-	public void setupMocks() {
-		MockitoAnnotations.openMocks(this);
-		queueRoomService = new QueueRoomServiceImpl();
-		queueRoomService.setDao(dao);
-	}
+  @Before
+  public void setupMocks() {
+    MockitoAnnotations.openMocks(this);
+    queueRoomService = new QueueRoomServiceImpl();
+    queueRoomService.setDao(dao);
+  }
 
-	@Test
-	public void shouldGetByUuid() {
-		QueueRoom queueRoom = mock(QueueRoom.class);
-		when(queueRoom.getUuid()).thenReturn(QUEUE_ROOM_UUID);
-		when(dao.get(QUEUE_ROOM_UUID)).thenReturn(Optional.of(queueRoom));
+  @Test
+  public void shouldGetByUuid() {
+    QueueRoom queueRoom = mock(QueueRoom.class);
+    when(queueRoom.getUuid()).thenReturn(QUEUE_ROOM_UUID);
+    when(dao.get(QUEUE_ROOM_UUID)).thenReturn(Optional.of(queueRoom));
 
-		Optional<QueueRoom> result = queueRoomService.getQueueRoomByUuid(QUEUE_ROOM_UUID);
-		assertThat(result.isPresent(), is(true));
-		result.ifPresent(q -> assertThat(q.getUuid(), is(QUEUE_ROOM_UUID)));
-	}
+    Optional<QueueRoom> result = queueRoomService.getQueueRoomByUuid(QUEUE_ROOM_UUID);
+    assertThat(result.isPresent(), is(true));
+    result.ifPresent(q -> assertThat(q.getUuid(), is(QUEUE_ROOM_UUID)));
+  }
 
-	@Test
-	public void shouldCreateNewQueueRoom() {
-		QueueRoom queueRoom = mock(QueueRoom.class);
-		when(queueRoom.getUuid()).thenReturn(QUEUE_ROOM_UUID);
-		when(queueRoom.getName()).thenReturn(QUEUE_ROOM_NAME);
-		when(dao.createOrUpdate(queueRoom)).thenReturn(queueRoom);
+  @Test
+  public void shouldCreateNewQueueRoom() {
+    QueueRoom queueRoom = mock(QueueRoom.class);
+    when(queueRoom.getUuid()).thenReturn(QUEUE_ROOM_UUID);
+    when(queueRoom.getName()).thenReturn(QUEUE_ROOM_NAME);
+    when(dao.createOrUpdate(queueRoom)).thenReturn(queueRoom);
 
-		QueueRoom result = queueRoomService.saveQueueRoom(queueRoom);
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), is(QUEUE_ROOM_UUID));
-		assertThat(result.getName(), is(QUEUE_ROOM_NAME));
-	}
+    QueueRoom result = queueRoomService.saveQueueRoom(queueRoom);
+    assertThat(result, notNullValue());
+    assertThat(result.getUuid(), is(QUEUE_ROOM_UUID));
+    assertThat(result.getName(), is(QUEUE_ROOM_NAME));
+  }
 
-	@Test
-	public void shouldRetireQueueRoom() {
-		User user = new User(1);
-		UserContext userContext = mock(UserContext.class);
-		when(userContext.getAuthenticatedUser()).thenReturn(user);
-		Context.setUserContext(userContext);
-		QueueRoom queueRoom = new QueueRoom();
-		when(dao.createOrUpdate(queueRoom)).thenReturn(queueRoom);
-		assertThat(queueRoom.getRetired(), equalTo(false));
-		assertThat(queueRoom.getDateRetired(), nullValue());
-		assertThat(queueRoom.getRetiredBy(), nullValue());
-		assertThat(queueRoom.getRetireReason(), nullValue());
-		queueRoomService.retireQueueRoom(queueRoom, "retireReason");
-		assertThat(queueRoom.getRetired(), equalTo(true));
-		assertThat(queueRoom.getDateRetired(), notNullValue());
-		assertThat(queueRoom.getRetiredBy(), equalTo(user));
-		assertThat(queueRoom.getRetireReason(), equalTo("retireReason"));
-	}
+  @Test
+  public void shouldRetireQueueRoom() {
+    User user = new User(1);
+    UserContext userContext = mock(UserContext.class);
+    when(userContext.getAuthenticatedUser()).thenReturn(user);
+    Context.setUserContext(userContext);
+    QueueRoom queueRoom = new QueueRoom();
+    when(dao.createOrUpdate(queueRoom)).thenReturn(queueRoom);
+    assertThat(queueRoom.getRetired(), equalTo(false));
+    assertThat(queueRoom.getDateRetired(), nullValue());
+    assertThat(queueRoom.getRetiredBy(), nullValue());
+    assertThat(queueRoom.getRetireReason(), nullValue());
+    queueRoomService.retireQueueRoom(queueRoom, "retireReason");
+    assertThat(queueRoom.getRetired(), equalTo(true));
+    assertThat(queueRoom.getDateRetired(), notNullValue());
+    assertThat(queueRoom.getRetiredBy(), equalTo(user));
+    assertThat(queueRoom.getRetireReason(), equalTo("retireReason"));
+  }
 
-	@Test
-	public void shouldPurgeQueueRoom() {
-		QueueRoom queueRoom = mock(QueueRoom.class);
-		when(dao.get(QUEUE_ROOM_UUID)).thenReturn(Optional.empty());
-		queueRoomService.purgeQueueRoom(queueRoom);
-		assertThat(queueRoomService.getQueueRoomByUuid(QUEUE_ROOM_UUID).isPresent(), is(false));
-	}
+  @Test
+  public void shouldPurgeQueueRoom() {
+    QueueRoom queueRoom = mock(QueueRoom.class);
+    when(dao.get(QUEUE_ROOM_UUID)).thenReturn(Optional.empty());
+    queueRoomService.purgeQueueRoom(queueRoom);
+    assertThat(queueRoomService.getQueueRoomByUuid(QUEUE_ROOM_UUID).isPresent(), is(false));
+  }
 
-	@Test
-	public void shouldGetQueueRoomsByCriteria() {
-		QueueRoomSearchCriteria criteria = new QueueRoomSearchCriteria();
-		queueRoomService.getQueueRooms(criteria);
-		verify(dao).getQueueRooms(queueRoomSearchCriteriaArgumentCaptor.capture());
-		QueueRoomSearchCriteria daoCriteria = queueRoomSearchCriteriaArgumentCaptor.getValue();
-		assertThat(daoCriteria, equalTo(criteria));
-	}
+  @Test
+  public void shouldGetQueueRoomsByCriteria() {
+    QueueRoomSearchCriteria criteria = new QueueRoomSearchCriteria();
+    queueRoomService.getQueueRooms(criteria);
+    verify(dao).getQueueRooms(queueRoomSearchCriteriaArgumentCaptor.capture());
+    QueueRoomSearchCriteria daoCriteria = queueRoomSearchCriteriaArgumentCaptor.getValue();
+    assertThat(daoCriteria, equalTo(criteria));
+  }
 }

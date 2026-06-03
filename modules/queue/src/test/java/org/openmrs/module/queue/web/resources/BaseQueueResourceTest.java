@@ -31,67 +31,68 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceH
 
 @Getter(AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
-public class BaseQueueResourceTest<Q extends OpenmrsObject, O extends DelegatingResourceHandler<Q>> {
+public class BaseQueueResourceTest<
+    Q extends OpenmrsObject, O extends DelegatingResourceHandler<Q>> {
 
-	private O resource;
+  private O resource;
 
-	@Getter(AccessLevel.PACKAGE)
-	@Setter(AccessLevel.PACKAGE)
-	private Q object;
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
+  private Q object;
 
-	@Getter(AccessLevel.PACKAGE)
-	@Setter(AccessLevel.PACKAGE)
-	private MockedStatic<RestUtil> restUtil;
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
+  private MockedStatic<RestUtil> restUtil;
 
-	@Getter(AccessLevel.PACKAGE)
-	@Setter(AccessLevel.PACKAGE)
-	private MockedStatic<Context> context;
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
+  private MockedStatic<Context> context;
 
-	@BeforeEach
-	public void prepareMocks() {
-		restUtil = mockStatic(RestUtil.class);
-		context = mockStatic(Context.class);
-		//By pass authentication
-		context.when(Context::isAuthenticated).thenReturn(true);
-	}
+  @BeforeEach
+  public void prepareMocks() {
+    restUtil = mockStatic(RestUtil.class);
+    context = mockStatic(Context.class);
+    // By pass authentication
+    context.when(Context::isAuthenticated).thenReturn(true);
+  }
 
-	@AfterEach
-	public void cleanup() {
-		restUtil.close();
-		context.close();
-	}
+  @AfterEach
+  public void cleanup() {
+    restUtil.close();
+    context.close();
+  }
 
-	public void verifyDefaultRepresentation(String... properties) {
-		DelegatingResourceDescription defaultResourceDescription = resource
-		        .getRepresentationDescription(new DefaultRepresentation());
+  public void verifyDefaultRepresentation(String... properties) {
+    DelegatingResourceDescription defaultResourceDescription =
+        resource.getRepresentationDescription(new DefaultRepresentation());
 
-		assertThat(defaultResourceDescription, notNullValue());
-		for (String prop : properties) {
-			assertThat(defaultResourceDescription.getProperties(), hasKey(prop));
-		}
-	}
+    assertThat(defaultResourceDescription, notNullValue());
+    for (String prop : properties) {
+      assertThat(defaultResourceDescription.getProperties(), hasKey(prop));
+    }
+  }
 
-	public void verifyFullRepresentation(String... properties) {
-		DelegatingResourceDescription fullResourceDescription = resource
-		        .getRepresentationDescription(new FullRepresentation());
+  public void verifyFullRepresentation(String... properties) {
+    DelegatingResourceDescription fullResourceDescription =
+        resource.getRepresentationDescription(new FullRepresentation());
 
-		assertThat(fullResourceDescription, notNullValue());
-		for (String prop : properties) {
-			assertThat(fullResourceDescription.getProperties(), hasKey(prop));
-		}
-	}
+    assertThat(fullResourceDescription, notNullValue());
+    for (String prop : properties) {
+      assertThat(fullResourceDescription.getProperties(), hasKey(prop));
+    }
+  }
 
-	public void verifyCreatableProperties(String... properties) {
-		DelegatingResourceDescription creatableProperties = resource.getCreatableProperties();
+  public void verifyCreatableProperties(String... properties) {
+    DelegatingResourceDescription creatableProperties = resource.getCreatableProperties();
 
-		assertThat(creatableProperties, notNullValue());
-		assertThat(creatableProperties.getProperties().keySet(), contains(properties));
-	}
+    assertThat(creatableProperties, notNullValue());
+    assertThat(creatableProperties.getProperties().keySet(), contains(properties));
+  }
 
-	public void verifyUpdatableProperties(String... properties) {
-		DelegatingResourceDescription updatableProperties = resource.getUpdatableProperties();
+  public void verifyUpdatableProperties(String... properties) {
+    DelegatingResourceDescription updatableProperties = resource.getUpdatableProperties();
 
-		assertThat(updatableProperties, notNullValue());
-		assertThat(updatableProperties.getProperties().keySet(), contains(properties));
-	}
+    assertThat(updatableProperties, notNullValue());
+    assertThat(updatableProperties.getProperties().keySet(), contains(properties));
+  }
 }

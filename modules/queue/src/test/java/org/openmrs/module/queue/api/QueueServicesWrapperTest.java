@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,129 +33,138 @@ import org.openmrs.module.queue.model.Queue;
 @RunWith(MockitoJUnitRunner.class)
 public class QueueServicesWrapperTest {
 
-	QueueServicesWrapper wrapper;
+  QueueServicesWrapper wrapper;
 
-	@Mock
-	private QueueService queueService;
+  @Mock private QueueService queueService;
 
-	@Mock
-	private QueueEntryService queueEntryService;
+  @Mock private QueueEntryService queueEntryService;
 
-	@Mock
-	private QueueRoomService queueRoomService;
+  @Mock private QueueRoomService queueRoomService;
 
-	@Mock
-	private RoomProviderMapService roomProviderMapService;
+  @Mock private RoomProviderMapService roomProviderMapService;
 
-	@Mock
-	private AdministrationService administrationService;
+  @Mock private AdministrationService administrationService;
 
-	@Mock
-	private ConceptService conceptService;
+  @Mock private ConceptService conceptService;
 
-	@Mock
-	private LocationService locationService;
+  @Mock private LocationService locationService;
 
-	@Mock
-	private PatientService patientService;
+  @Mock private PatientService patientService;
 
-	@Mock
-	private VisitService visitService;
+  @Mock private VisitService visitService;
 
-	@Mock
-	private ProviderService providerService;
+  @Mock private ProviderService providerService;
 
-	private Queue queue;
+  private Queue queue;
 
-	private Concept conceptSet1;
+  private Concept conceptSet1;
 
-	private Concept conceptSet2;
+  private Concept conceptSet2;
 
-	@Before
-	public void setupMocks() {
-		MockitoAnnotations.openMocks(this);
-		wrapper = new QueueServicesWrapper(queueService, queueEntryService, queueRoomService, roomProviderMapService,
-		        administrationService, conceptService, locationService, patientService, visitService, providerService);
-		conceptSet1 = new Concept();
-		conceptSet1.addSetMember(new Concept());
-		conceptSet1.addSetMember(new Concept());
-		conceptSet2 = new Concept();
-		conceptSet2.addSetMember(new Concept());
-		when(conceptService.getConceptByUuid(conceptSet1.getUuid())).thenReturn(conceptSet1);
-		queue = new Queue();
-	}
+  @Before
+  public void setupMocks() {
+    MockitoAnnotations.openMocks(this);
+    wrapper =
+        new QueueServicesWrapper(
+            queueService,
+            queueEntryService,
+            queueRoomService,
+            roomProviderMapService,
+            administrationService,
+            conceptService,
+            locationService,
+            patientService,
+            visitService,
+            providerService);
+    conceptSet1 = new Concept();
+    conceptSet1.addSetMember(new Concept());
+    conceptSet1.addSetMember(new Concept());
+    conceptSet2 = new Concept();
+    conceptSet2.addSetMember(new Concept());
+    when(conceptService.getConceptByUuid(conceptSet1.getUuid())).thenReturn(conceptSet1);
+    queue = new Queue();
+  }
 
-	@Test(expected = IllegalStateException.class)
-	public void getAllowedServices_shouldThrowErrorIfNoGpConfigured() {
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_SERVICE)).thenReturn(null);
-		wrapper.getAllowedServices();
-	}
+  @Test(expected = IllegalStateException.class)
+  public void getAllowedServices_shouldThrowErrorIfNoGpConfigured() {
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_SERVICE))
+        .thenReturn(null);
+    wrapper.getAllowedServices();
+  }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void getAllowedServices_shouldThrowErrorIfInvalidGpConfigured() {
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_SERVICE)).thenReturn("invalid");
-		wrapper.getAllowedServices();
-	}
+  @Test(expected = IllegalArgumentException.class)
+  public void getAllowedServices_shouldThrowErrorIfInvalidGpConfigured() {
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_SERVICE))
+        .thenReturn("invalid");
+    wrapper.getAllowedServices();
+  }
 
-	@Test
-	public void getAllowedServices_shouldSucceedIfValidGpConfigured() {
-		String conceptSetUuid = conceptSet1.getUuid();
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_SERVICE)).thenReturn(conceptSetUuid);
-		List<Concept> services = wrapper.getAllowedServices();
-		assertThat(services.size(), equalTo(2));
-	}
+  @Test
+  public void getAllowedServices_shouldSucceedIfValidGpConfigured() {
+    String conceptSetUuid = conceptSet1.getUuid();
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_SERVICE))
+        .thenReturn(conceptSetUuid);
+    List<Concept> services = wrapper.getAllowedServices();
+    assertThat(services.size(), equalTo(2));
+  }
 
-	@Test(expected = IllegalStateException.class)
-	public void getAllowedPriorities_shouldThrowErrorIfNoGpConfigured() {
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_PRIORITY)).thenReturn(null);
-		wrapper.getAllowedPriorities(queue);
-	}
+  @Test(expected = IllegalStateException.class)
+  public void getAllowedPriorities_shouldThrowErrorIfNoGpConfigured() {
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_PRIORITY))
+        .thenReturn(null);
+    wrapper.getAllowedPriorities(queue);
+  }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void getAllowedPriorities_shouldThrowErrorIfInvalidGpConfigured() {
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_PRIORITY)).thenReturn("invalid");
-		wrapper.getAllowedPriorities(queue);
-	}
+  @Test(expected = IllegalArgumentException.class)
+  public void getAllowedPriorities_shouldThrowErrorIfInvalidGpConfigured() {
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_PRIORITY))
+        .thenReturn("invalid");
+    wrapper.getAllowedPriorities(queue);
+  }
 
-	@Test
-	public void getAllowedPriorities_shouldSucceedIfValidGpConfigured() {
-		String conceptSetUuid = conceptSet1.getUuid();
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_PRIORITY)).thenReturn(conceptSetUuid);
-		List<Concept> priorities = wrapper.getAllowedPriorities(queue);
-		assertThat(priorities.size(), equalTo(2));
-	}
+  @Test
+  public void getAllowedPriorities_shouldSucceedIfValidGpConfigured() {
+    String conceptSetUuid = conceptSet1.getUuid();
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_PRIORITY))
+        .thenReturn(conceptSetUuid);
+    List<Concept> priorities = wrapper.getAllowedPriorities(queue);
+    assertThat(priorities.size(), equalTo(2));
+  }
 
-	@Test
-	public void getAllowedPriorities_shouldSucceedIfConceptConfiguredOnQueue() {
-		queue.setPriorityConceptSet(conceptSet2);
-		List<Concept> priorities = wrapper.getAllowedPriorities(queue);
-		assertThat(priorities.size(), equalTo(1));
-	}
+  @Test
+  public void getAllowedPriorities_shouldSucceedIfConceptConfiguredOnQueue() {
+    queue.setPriorityConceptSet(conceptSet2);
+    List<Concept> priorities = wrapper.getAllowedPriorities(queue);
+    assertThat(priorities.size(), equalTo(1));
+  }
 
-	@Test(expected = IllegalStateException.class)
-	public void getAllowedStatuses_shouldThrowErrorIfNoGpConfigured() {
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_STATUS)).thenReturn(null);
-		wrapper.getAllowedStatuses(queue);
-	}
+  @Test(expected = IllegalStateException.class)
+  public void getAllowedStatuses_shouldThrowErrorIfNoGpConfigured() {
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_STATUS))
+        .thenReturn(null);
+    wrapper.getAllowedStatuses(queue);
+  }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void getAllowedStatuses_shouldThrowErrorIfInvalidGpConfigured() {
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_STATUS)).thenReturn("invalid");
-		wrapper.getAllowedStatuses(queue);
-	}
+  @Test(expected = IllegalArgumentException.class)
+  public void getAllowedStatuses_shouldThrowErrorIfInvalidGpConfigured() {
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_STATUS))
+        .thenReturn("invalid");
+    wrapper.getAllowedStatuses(queue);
+  }
 
-	@Test
-	public void getAllowedStatuses_shouldSucceedIfValidGpConfigured() {
-		String conceptSetUuid = conceptSet1.getUuid();
-		when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_STATUS)).thenReturn(conceptSetUuid);
-		List<Concept> statuses = wrapper.getAllowedStatuses(queue);
-		assertThat(statuses.size(), equalTo(2));
-	}
+  @Test
+  public void getAllowedStatuses_shouldSucceedIfValidGpConfigured() {
+    String conceptSetUuid = conceptSet1.getUuid();
+    when(administrationService.getGlobalProperty(QueueModuleConstants.QUEUE_STATUS))
+        .thenReturn(conceptSetUuid);
+    List<Concept> statuses = wrapper.getAllowedStatuses(queue);
+    assertThat(statuses.size(), equalTo(2));
+  }
 
-	@Test
-	public void getAllowedStatuses_shouldSucceedIfConceptConfiguredOnQueue() {
-		queue.setStatusConceptSet(conceptSet2);
-		List<Concept> statuses = wrapper.getAllowedStatuses(queue);
-		assertThat(statuses.size(), equalTo(1));
-	}
+  @Test
+  public void getAllowedStatuses_shouldSucceedIfConceptConfiguredOnQueue() {
+    queue.setStatusConceptSet(conceptSet2);
+    List<Concept> statuses = wrapper.getAllowedStatuses(queue);
+    assertThat(statuses.size(), equalTo(1));
+  }
 }
