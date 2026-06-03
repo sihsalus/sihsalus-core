@@ -50,8 +50,13 @@ public abstract class BaseAuthenticationTest {
   protected File createAppDataDir() {
     try {
       File appDataDir = File.createTempFile(UUID.randomUUID().toString(), "");
-      appDataDir.delete();
-      appDataDir.mkdir();
+      if (!appDataDir.delete()) {
+        throw new RuntimeException("Could not delete temp file at " + appDataDir.getAbsolutePath());
+      }
+      if (!appDataDir.mkdir()) {
+        throw new RuntimeException(
+            "Could not create temp app data directory at " + appDataDir.getAbsolutePath());
+      }
       appDataDir.deleteOnExit();
       return appDataDir;
     } catch (Exception e) {

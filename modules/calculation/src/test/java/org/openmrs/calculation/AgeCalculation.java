@@ -37,7 +37,8 @@ import org.openmrs.util.OpenmrsUtil;
 public class AgeCalculation extends PatientAtATimeCalculation {
 
   /** Stores pre-processed birth date data for the input cohort */
-  public class BirthdateData extends HashMap<Integer, Date> implements EvaluationInstanceData {
+  public static class BirthdateData extends HashMap<Integer, Date>
+      implements EvaluationInstanceData {
 
     private static final long serialVersionUID = 1L;
   }

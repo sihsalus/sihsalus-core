@@ -715,7 +715,6 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
     Appointment appointment3 = new Appointment();
     Appointment appointment4 = new Appointment();
     Appointment appointment5 = new Appointment();
-    List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
     Set<Appointment> appointments = new HashSet<>();
     appointment1.setStartDateTime(getDate(2020, Calendar.FEBRUARY, 01, 8, 45, 0));
     appointment1.setEndDateTime(getDate(2020, Calendar.FEBRUARY, 01, 9, 15, 0));

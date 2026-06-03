@@ -42,7 +42,10 @@ public class TestResources {
     File zipFile = new File(getSimpleResponseZipFileUrl().toURI());
     File newZipFile = new File(getSimpleResponseZipFileUrl().getPath() + "new_file.zip");
 
-    IOUtils.copy(new FileInputStream(zipFile), new FileOutputStream(newZipFile));
+    try (FileInputStream in = new FileInputStream(zipFile);
+        FileOutputStream out = new FileOutputStream(newZipFile)) {
+      IOUtils.copy(in, out);
+    }
 
     return new ZipFile(newZipFile);
   }
