@@ -323,7 +323,7 @@ public class ResultUtilTest {
   /**
    * Creates a mock concept with a mock concept datatype with the given uuid
    *
-   * @param numericUuid
+   * @param conceptDatatypeUuid
    * @return
    */
   private Concept mockConcept(String conceptDatatypeUuid) {
