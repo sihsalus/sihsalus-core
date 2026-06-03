@@ -29,69 +29,70 @@ import org.openmrs.module.webservices.rest.web.representation.FullRepresentation
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceHandler;
 
-public class BaseCohortResourceTest<K extends OpenmrsObject, T extends DelegatingResourceHandler<K>> {
+public class BaseCohortResourceTest<
+    K extends OpenmrsObject, T extends DelegatingResourceHandler<K>> {
 
-	@Getter(AccessLevel.PACKAGE)
-	@Setter(AccessLevel.PACKAGE)
-	private T resource;
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
+  private T resource;
 
-	@Getter(AccessLevel.PACKAGE)
-	@Setter(AccessLevel.PACKAGE)
-	private K object;
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
+  private K object;
 
-	@Getter(AccessLevel.PACKAGE)
-	@Setter(AccessLevel.PACKAGE)
-	private MockedStatic<RestUtil> restUtilMock;
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
+  private MockedStatic<RestUtil> restUtilMock;
 
-	@Getter(AccessLevel.PACKAGE)
-	@Setter(AccessLevel.PACKAGE)
-	private MockedStatic<Context> contextMock;
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
+  private MockedStatic<Context> contextMock;
 
-	@BeforeEach
-	public void prepareMocks() {
-		restUtilMock = mockStatic(RestUtil.class);
-		contextMock = mockStatic(Context.class);
-		//By pass authentication
-		contextMock.when(Context::isAuthenticated).thenReturn(true);
-	}
+  @BeforeEach
+  public void prepareMocks() {
+    restUtilMock = mockStatic(RestUtil.class);
+    contextMock = mockStatic(Context.class);
+    // By pass authentication
+    contextMock.when(Context::isAuthenticated).thenReturn(true);
+  }
 
-	@AfterEach
-	public void cleanup() {
-		restUtilMock.close();
-		contextMock.close();
-	}
+  @AfterEach
+  public void cleanup() {
+    restUtilMock.close();
+    contextMock.close();
+  }
 
-	public void verifyDefaultRepresentation(String... properties) {
-		DelegatingResourceDescription defaultResourceDescription = resource
-		        .getRepresentationDescription(new DefaultRepresentation());
+  public void verifyDefaultRepresentation(String... properties) {
+    DelegatingResourceDescription defaultResourceDescription =
+        resource.getRepresentationDescription(new DefaultRepresentation());
 
-		assertThat(defaultResourceDescription, notNullValue());
-		for (String p : properties) {
-			assertThat(defaultResourceDescription.getProperties(), hasKey(p));
-		}
-	}
+    assertThat(defaultResourceDescription, notNullValue());
+    for (String p : properties) {
+      assertThat(defaultResourceDescription.getProperties(), hasKey(p));
+    }
+  }
 
-	public void verifyFullRepresentation(String... properties) {
-		DelegatingResourceDescription fullResourceDescription = resource
-		        .getRepresentationDescription(new FullRepresentation());
+  public void verifyFullRepresentation(String... properties) {
+    DelegatingResourceDescription fullResourceDescription =
+        resource.getRepresentationDescription(new FullRepresentation());
 
-		assertThat(fullResourceDescription, notNullValue());
-		for (String p : properties) {
-			assertThat(fullResourceDescription.getProperties(), hasKey(p));
-		}
-	}
+    assertThat(fullResourceDescription, notNullValue());
+    for (String p : properties) {
+      assertThat(fullResourceDescription.getProperties(), hasKey(p));
+    }
+  }
 
-	public void verifyCreatableProperties(String... properties) {
-		DelegatingResourceDescription creatableProperties = resource.getCreatableProperties();
+  public void verifyCreatableProperties(String... properties) {
+    DelegatingResourceDescription creatableProperties = resource.getCreatableProperties();
 
-		assertThat(creatableProperties, notNullValue());
-		assertThat(creatableProperties.getProperties().keySet(), contains(properties));
-	}
+    assertThat(creatableProperties, notNullValue());
+    assertThat(creatableProperties.getProperties().keySet(), contains(properties));
+  }
 
-	public void verifyUpdatableProperties(String... properties) {
-		DelegatingResourceDescription updatableProperties = resource.getUpdatableProperties();
+  public void verifyUpdatableProperties(String... properties) {
+    DelegatingResourceDescription updatableProperties = resource.getUpdatableProperties();
 
-		assertThat(updatableProperties, notNullValue());
-		assertThat(updatableProperties.getProperties().keySet(), contains(properties));
-	}
+    assertThat(updatableProperties, notNullValue());
+    assertThat(updatableProperties.getProperties().keySet(), contains(properties));
+  }
 }

@@ -17,52 +17,52 @@ import org.openmrs.module.cohort.CohortType;
 
 public class TestDataUtils {
 
-	public static CohortType COHORT_TYPE() {
-		CohortType cohortType = new CohortType();
-		cohortType.setId(1);
-		cohortType.setCohortTypeId(100);
-		cohortType.setName("TestCohortType");
-		cohortType.setDescription("Test cohort description");
-		return cohortType;
-	}
+  public static CohortType COHORT_TYPE() {
+    CohortType cohortType = new CohortType();
+    cohortType.setId(1);
+    cohortType.setCohortTypeId(100);
+    cohortType.setName("TestCohortType");
+    cohortType.setDescription("Test cohort description");
+    return cohortType;
+  }
 
-	public static CohortAttributeType COHORT_ATTRIBUTE_TYPE() {
-		CohortAttributeType cohortAttributeType = new CohortAttributeType();
-		cohortAttributeType.setUuid("32816782-d578-401c-8475-8ccbb26ce001");
-		cohortAttributeType.setName("cohortAttributeType");
-		cohortAttributeType.setDescription("test cohort attribute type");
-		cohortAttributeType.setDatatypeClassname("java.lang.String");
-		cohortAttributeType.setCohortAttributeTypeId(400);
-		return cohortAttributeType;
-	}
+  public static CohortAttributeType COHORT_ATTRIBUTE_TYPE() {
+    CohortAttributeType cohortAttributeType = new CohortAttributeType();
+    cohortAttributeType.setUuid("32816782-d578-401c-8475-8ccbb26ce001");
+    cohortAttributeType.setName("cohortAttributeType");
+    cohortAttributeType.setDescription("test cohort attribute type");
+    cohortAttributeType.setDatatypeClassname("java.lang.String");
+    cohortAttributeType.setCohortAttributeTypeId(400);
+    return cohortAttributeType;
+  }
 
-	public static CohortAttribute COHORT_ATTRIBUTE() {
-		CohortAttribute cohortAttribute = new CohortAttribute();
-		cohortAttribute.setId(1);
-		cohortAttribute.setUuid("");
-		cohortAttribute.setCohortAttributeId(200);
-		cohortAttribute.setValue("cohortAttribute");
-		cohortAttribute.setAttributeType(COHORT_ATTRIBUTE_TYPE());
-		return cohortAttribute;
-	}
+  public static CohortAttribute COHORT_ATTRIBUTE() {
+    CohortAttribute cohortAttribute = new CohortAttribute();
+    cohortAttribute.setId(1);
+    cohortAttribute.setUuid("");
+    cohortAttribute.setCohortAttributeId(200);
+    cohortAttribute.setValue("cohortAttribute");
+    cohortAttribute.setAttributeType(COHORT_ATTRIBUTE_TYPE());
+    return cohortAttribute;
+  }
 
-	public static CohortMemberAttributeType COHORT_MEMBER_ATTRIBUTE_TYPE() {
-		CohortMemberAttributeType cohortMemberAttributeType = new CohortMemberAttributeType();
-		cohortMemberAttributeType.setId(1);
-		cohortMemberAttributeType.setId(103);
-		cohortMemberAttributeType.setName("cohort member attributeType Name");
-		cohortMemberAttributeType.setDescription("test cohort member attribute type");
-		cohortMemberAttributeType.setDatatypeClassname("java.lang.String");
-		return cohortMemberAttributeType;
-	}
+  public static CohortMemberAttributeType COHORT_MEMBER_ATTRIBUTE_TYPE() {
+    CohortMemberAttributeType cohortMemberAttributeType = new CohortMemberAttributeType();
+    cohortMemberAttributeType.setId(1);
+    cohortMemberAttributeType.setId(103);
+    cohortMemberAttributeType.setName("cohort member attributeType Name");
+    cohortMemberAttributeType.setDescription("test cohort member attribute type");
+    cohortMemberAttributeType.setDatatypeClassname("java.lang.String");
+    return cohortMemberAttributeType;
+  }
 
-	public static CohortMemberAttribute COHORT_MEMBER_ATTRIBUTE() {
-		CohortMemberAttribute cohortMemberAttribute = new CohortMemberAttribute();
-		cohortMemberAttribute.setId(1);
-		cohortMemberAttribute.setUuid("32816782-d578-401c-8475-8ccbb26ce001");
-		cohortMemberAttribute.setAttributeType(COHORT_MEMBER_ATTRIBUTE_TYPE());
-		cohortMemberAttribute.setValue("cohortMemberAttribute");
-		cohortMemberAttribute.setId(100);
-		return cohortMemberAttribute;
-	}
+  public static CohortMemberAttribute COHORT_MEMBER_ATTRIBUTE() {
+    CohortMemberAttribute cohortMemberAttribute = new CohortMemberAttribute();
+    cohortMemberAttribute.setId(1);
+    cohortMemberAttribute.setUuid("32816782-d578-401c-8475-8ccbb26ce001");
+    cohortMemberAttribute.setAttributeType(COHORT_MEMBER_ATTRIBUTE_TYPE());
+    cohortMemberAttribute.setValue("cohortMemberAttribute");
+    cohortMemberAttribute.setId(100);
+    return cohortMemberAttribute;
+  }
 }

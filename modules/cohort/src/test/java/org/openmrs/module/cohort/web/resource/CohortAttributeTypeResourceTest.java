@@ -17,7 +17,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
@@ -29,94 +28,96 @@ import org.openmrs.module.webservices.rest.web.representation.NamedRepresentatio
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 
-public class CohortAttributeTypeResourceTest extends BaseCohortResourceTest<CohortAttributeType, CohortAttributeTypeResource> {
+public class CohortAttributeTypeResourceTest
+    extends BaseCohortResourceTest<CohortAttributeType, CohortAttributeTypeResource> {
 
-	private static final String COHORT_ATTRIBUTE_TYPE_UUID = "8tae735a-fca0-11e5-9e59-08002719a786";
+  private static final String COHORT_ATTRIBUTE_TYPE_UUID = "8tae735a-fca0-11e5-9e59-08002719a786";
 
-	private static final String COHORT_ATTRIBUTE_TYPE_NAME = "Test cohort attribute type";
+  private static final String COHORT_ATTRIBUTE_TYPE_NAME = "Test cohort attribute type";
 
-	private CohortService cohortService;
+  private CohortService cohortService;
 
-	CohortAttributeType cohortAttributeType;
+  CohortAttributeType cohortAttributeType;
 
-	@BeforeEach
-	public void setup() {
-		cohortService = mock(CohortService.class);
-		cohortAttributeType = new CohortAttributeType();
-		cohortAttributeType.setUuid(COHORT_ATTRIBUTE_TYPE_UUID);
-		cohortAttributeType.setName(COHORT_ATTRIBUTE_TYPE_NAME);
+  @BeforeEach
+  public void setup() {
+    cohortService = mock(CohortService.class);
+    cohortAttributeType = new CohortAttributeType();
+    cohortAttributeType.setUuid(COHORT_ATTRIBUTE_TYPE_UUID);
+    cohortAttributeType.setName(COHORT_ATTRIBUTE_TYPE_NAME);
 
-		//Mocks
-		getContextMock().when(() -> Context.getService(CohortService.class)).thenReturn(cohortService);
+    // Mocks
+    getContextMock().when(() -> Context.getService(CohortService.class)).thenReturn(cohortService);
 
-		this.setResource(new CohortAttributeTypeResource());
-		this.setObject(cohortAttributeType);
-	}
+    this.setResource(new CohortAttributeTypeResource());
+    this.setObject(cohortAttributeType);
+  }
 
-	@Test
-	public void shouldGetRegisteredService() {
-		assertThat(cohortService, notNullValue());
-	}
+  @Test
+  public void shouldGetRegisteredService() {
+    assertThat(cohortService, notNullValue());
+  }
 
-	@Test
-	public void shouldReturnDefaultRepresentation() {
-		verifyDefaultRepresentation("name", "description", "uuid");
-	}
+  @Test
+  public void shouldReturnDefaultRepresentation() {
+    verifyDefaultRepresentation("name", "description", "uuid");
+  }
 
-	@Test
-	public void shouldReturnFullRepresentation() {
-		verifyFullRepresentation("name", "description", "uuid", "auditInfo");
-	}
+  @Test
+  public void shouldReturnFullRepresentation() {
+    verifyFullRepresentation("name", "description", "uuid", "auditInfo");
+  }
 
-	@Test
-	public void shouldReturnNullForRepresentationOtherThenDefaultOrFull() {
-		CustomRepresentation customRepresentation = new CustomRepresentation("some-rep");
-		assertThat(getResource().getRepresentationDescription(customRepresentation), is(nullValue()));
+  @Test
+  public void shouldReturnNullForRepresentationOtherThenDefaultOrFull() {
+    CustomRepresentation customRepresentation = new CustomRepresentation("some-rep");
+    assertThat(getResource().getRepresentationDescription(customRepresentation), is(nullValue()));
 
-		NamedRepresentation namedRepresentation = new NamedRepresentation("some-named-rep");
-		assertThat(getResource().getRepresentationDescription(namedRepresentation), is(nullValue()));
+    NamedRepresentation namedRepresentation = new NamedRepresentation("some-named-rep");
+    assertThat(getResource().getRepresentationDescription(namedRepresentation), is(nullValue()));
 
-		RefRepresentation refRepresentation = new RefRepresentation();
-		assertThat(getResource().getRepresentationDescription(refRepresentation), is(nullValue()));
-	}
+    RefRepresentation refRepresentation = new RefRepresentation();
+    assertThat(getResource().getRepresentationDescription(refRepresentation), is(nullValue()));
+  }
 
-	@Test
-	public void shouldGetResourceByUniqueUuid() {
-		when(cohortService.getCohortAttributeTypeByUuid(COHORT_ATTRIBUTE_TYPE_UUID)).thenReturn(cohortAttributeType);
+  @Test
+  public void shouldGetResourceByUniqueUuid() {
+    when(cohortService.getCohortAttributeTypeByUuid(COHORT_ATTRIBUTE_TYPE_UUID))
+        .thenReturn(cohortAttributeType);
 
-		CohortAttributeType result = getResource().getByUniqueId(COHORT_ATTRIBUTE_TYPE_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), is(COHORT_ATTRIBUTE_TYPE_UUID));
-		assertThat(result.getName(), is(COHORT_ATTRIBUTE_TYPE_NAME));
-	}
+    CohortAttributeType result = getResource().getByUniqueId(COHORT_ATTRIBUTE_TYPE_UUID);
+    assertThat(result, notNullValue());
+    assertThat(result.getUuid(), is(COHORT_ATTRIBUTE_TYPE_UUID));
+    assertThat(result.getName(), is(COHORT_ATTRIBUTE_TYPE_NAME));
+  }
 
-	@Test
-	public void shouldCreateNewResource() {
-		when(cohortService.saveCohortAttributeType(getObject())).thenReturn(getObject());
+  @Test
+  public void shouldCreateNewResource() {
+    when(cohortService.saveCohortAttributeType(getObject())).thenReturn(getObject());
 
-		CohortAttributeType newlyCreatedObject = getResource().save(getObject());
-		assertThat(newlyCreatedObject, notNullValue());
-		assertThat(newlyCreatedObject.getUuid(), is(COHORT_ATTRIBUTE_TYPE_UUID));
-		assertThat(newlyCreatedObject.getName(), is(COHORT_ATTRIBUTE_TYPE_NAME));
-	}
+    CohortAttributeType newlyCreatedObject = getResource().save(getObject());
+    assertThat(newlyCreatedObject, notNullValue());
+    assertThat(newlyCreatedObject.getUuid(), is(COHORT_ATTRIBUTE_TYPE_UUID));
+    assertThat(newlyCreatedObject.getName(), is(COHORT_ATTRIBUTE_TYPE_NAME));
+  }
 
-	@Test
-	public void shouldGetAllResources() {
-		when(cohortService.findAllCohortAttributeTypes()).thenReturn(Collections.singletonList(getObject()));
+  @Test
+  public void shouldGetAllResources() {
+    when(cohortService.findAllCohortAttributeTypes())
+        .thenReturn(Collections.singletonList(getObject()));
 
-		PageableResult results = getResource().doGetAll(new RequestContext());
+    PageableResult results = getResource().doGetAll(new RequestContext());
 
-		assertThat(results, notNullValue());
-	}
+    assertThat(results, notNullValue());
+  }
 
-	@Test
-	public void shouldInstantiateNewDelegate() {
-		assertThat(getResource().newDelegate(), notNullValue());
-	}
+  @Test
+  public void shouldInstantiateNewDelegate() {
+    assertThat(getResource().newDelegate(), notNullValue());
+  }
 
-	@Test
-	public void verifyResourceVersion() {
-		assertThat(getResource().getResourceVersion(), is("1.9"));
-	}
-
+  @Test
+  public void verifyResourceVersion() {
+    assertThat(getResource().getResourceVersion(), is("1.9"));
+  }
 }

@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,117 +35,120 @@ import org.openmrs.module.cohort.api.dao.search.PropValue;
 @RunWith(MockitoJUnitRunner.class)
 public class CohortServiceImplTest {
 
-	private static final String COHORT_UUID = "5c28c01f-199a-48c7-8693-2a504dd1f4ab";
+  private static final String COHORT_UUID = "5c28c01f-199a-48c7-8693-2a504dd1f4ab";
 
-	private static final String COHORT_ATTRIBUTE_UUID = "06036a52-cf51-4182-9283-dedb15fea65a";
+  private static final String COHORT_ATTRIBUTE_UUID = "06036a52-cf51-4182-9283-dedb15fea65a";
 
-	@Mock
-	private GenericDao<CohortM> cohortDao;
+  @Mock private GenericDao<CohortM> cohortDao;
 
-	@Mock
-	private GenericDao<CohortAttribute> cohortAttributeDao;
+  @Mock private GenericDao<CohortAttribute> cohortAttributeDao;
 
-	@Mock
-	private GenericDao<CohortAttributeType> cohortAttributeTypeDao;
+  @Mock private GenericDao<CohortAttributeType> cohortAttributeTypeDao;
 
-	private CohortServiceImpl cohortService;
+  private CohortServiceImpl cohortService;
 
-	@Before
-	public void setup() {
-		cohortService = new CohortServiceImpl(cohortDao, cohortAttributeDao, cohortAttributeTypeDao);
-	}
+  @Before
+  public void setup() {
+    cohortService = new CohortServiceImpl(cohortDao, cohortAttributeDao, cohortAttributeTypeDao);
+  }
 
-	@Test
-	public void createOrUpdate_shouldCreateNewCohort() {
-		CohortType cohortType = mock(CohortType.class);
-		CohortM cohortM = new CohortM();
-		cohortM.setCohortId(12);
-		cohortM.setCohortType(cohortType);
+  @Test
+  public void createOrUpdate_shouldCreateNewCohort() {
+    CohortType cohortType = mock(CohortType.class);
+    CohortM cohortM = new CohortM();
+    cohortM.setCohortId(12);
+    cohortM.setCohortType(cohortType);
 
-		when(cohortDao.createOrUpdate(cohortM)).thenReturn(cohortM);
+    when(cohortDao.createOrUpdate(cohortM)).thenReturn(cohortM);
 
-		CohortM result = cohortService.saveCohortM(cohortM);
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), equalTo(12));
-	}
+    CohortM result = cohortService.saveCohortM(cohortM);
+    assertThat(result, notNullValue());
+    assertThat(result.getId(), equalTo(12));
+  }
 
-	@Test
-	public void getAllCohortAttributeTypes_shouldGetAllCohortAttributeTypes() {
-		CohortAttributeType attributeType = mock(CohortAttributeType.class);
+  @Test
+  public void getAllCohortAttributeTypes_shouldGetAllCohortAttributeTypes() {
+    CohortAttributeType attributeType = mock(CohortAttributeType.class);
 
-		when(cohortAttributeTypeDao.findAll()).thenReturn(Collections.singletonList(attributeType));
+    when(cohortAttributeTypeDao.findAll()).thenReturn(Collections.singletonList(attributeType));
 
-		Collection<CohortAttributeType> allAttributeTypes = cohortService.findAllCohortAttributeTypes();
-		assertThat(allAttributeTypes, notNullValue());
-		assertThat(allAttributeTypes.size(), equalTo(1));
-	}
+    Collection<CohortAttributeType> allAttributeTypes = cohortService.findAllCohortAttributeTypes();
+    assertThat(allAttributeTypes, notNullValue());
+    assertThat(allAttributeTypes.size(), equalTo(1));
+  }
 
-	@Test
-	public void getAllCohorts_shouldGetAllCohorts() {
-		CohortM cohort = mock(CohortM.class);
+  @Test
+  public void getAllCohorts_shouldGetAllCohorts() {
+    CohortM cohort = mock(CohortM.class);
 
-		when(cohortDao.findAll()).thenReturn(Collections.singletonList(cohort));
+    when(cohortDao.findAll()).thenReturn(Collections.singletonList(cohort));
 
-		Collection<CohortM> resultList = cohortService.findAll();
-		assertThat(resultList, notNullValue());
-		assertThat(resultList, hasSize(1));
-	}
+    Collection<CohortM> resultList = cohortService.findAll();
+    assertThat(resultList, notNullValue());
+    assertThat(resultList, hasSize(1));
+  }
 
-	@Test
-	public void shouldCreateNewCohortAttribute() {
-		CohortAttribute cohortAttribute = mock(CohortAttribute.class);
+  @Test
+  public void shouldCreateNewCohortAttribute() {
+    CohortAttribute cohortAttribute = mock(CohortAttribute.class);
 
-		when(cohortAttribute.getCohortAttributeId()).thenReturn(345);
-		when(cohortAttributeDao.createOrUpdate(cohortAttribute)).thenReturn(cohortAttribute);
+    when(cohortAttribute.getCohortAttributeId()).thenReturn(345);
+    when(cohortAttributeDao.createOrUpdate(cohortAttribute)).thenReturn(cohortAttribute);
 
-		CohortAttribute attribute = cohortService.saveCohortAttribute(cohortAttribute);
-		assertThat(attribute, notNullValue());
-		assertThat(attribute.getCohortAttributeId(), equalTo(345));
-	}
+    CohortAttribute attribute = cohortService.saveCohortAttribute(cohortAttribute);
+    assertThat(attribute, notNullValue());
+    assertThat(attribute.getCohortAttributeId(), equalTo(345));
+  }
 
-	@Test
-	public void shouldGetCohortByUuid() {
-		CohortM cohortM = mock(CohortM.class);
+  @Test
+  public void shouldGetCohortByUuid() {
+    CohortM cohortM = mock(CohortM.class);
 
-		when(cohortM.getUuid()).thenReturn(COHORT_UUID);
-		when(cohortDao.get(COHORT_UUID)).thenReturn(cohortM);
+    when(cohortM.getUuid()).thenReturn(COHORT_UUID);
+    when(cohortDao.get(COHORT_UUID)).thenReturn(cohortM);
 
-		CohortM result = cohortService.getCohortMByUuid(COHORT_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(COHORT_UUID));
-	}
+    CohortM result = cohortService.getCohortMByUuid(COHORT_UUID);
+    assertThat(result, notNullValue());
+    assertThat(result.getUuid(), equalTo(COHORT_UUID));
+  }
 
-	@Test
-	public void shouldGetCohortAttributeByUuid() {
-		CohortAttribute cohortAttribute = mock(CohortAttribute.class);
+  @Test
+  public void shouldGetCohortAttributeByUuid() {
+    CohortAttribute cohortAttribute = mock(CohortAttribute.class);
 
-		when(cohortAttribute.getCohortAttributeId()).thenReturn(12);
-		when(cohortAttribute.getUuid()).thenReturn(COHORT_ATTRIBUTE_UUID);
-		when(cohortAttributeDao.get(COHORT_ATTRIBUTE_UUID)).thenReturn(cohortAttribute);
+    when(cohortAttribute.getCohortAttributeId()).thenReturn(12);
+    when(cohortAttribute.getUuid()).thenReturn(COHORT_ATTRIBUTE_UUID);
+    when(cohortAttributeDao.get(COHORT_ATTRIBUTE_UUID)).thenReturn(cohortAttribute);
 
-		CohortAttribute result = cohortService.getCohortAttributeByUuid(COHORT_ATTRIBUTE_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getCohortAttributeId(), equalTo(12));
-		assertThat(result.getUuid(), equalTo(COHORT_ATTRIBUTE_UUID));
-	}
+    CohortAttribute result = cohortService.getCohortAttributeByUuid(COHORT_ATTRIBUTE_UUID);
+    assertThat(result, notNullValue());
+    assertThat(result.getCohortAttributeId(), equalTo(12));
+    assertThat(result.getUuid(), equalTo(COHORT_ATTRIBUTE_UUID));
+  }
 
-	@Test
-	public void shouldGetCohortsByLocationUuid() {
-		String locationUuid = "4834jk3-n34nm30-34nm34-348nl";
-		CohortM cohort = mock(CohortM.class);
-		Location location = mock(Location.class);
+  @Test
+  public void shouldGetCohortsByLocationUuid() {
+    String locationUuid = "4834jk3-n34nm30-34nm34-348nl";
+    CohortM cohort = mock(CohortM.class);
+    Location location = mock(Location.class);
 
-		when(cohort.getLocation()).thenReturn(location);
-		when(cohortDao.findBy(
-		    PropValue.builder().associationPath(Optional.of("location")).property("uuid").value(locationUuid).build()))
-		            .thenReturn(Collections.singletonList(cohort));
+    when(cohort.getLocation()).thenReturn(location);
+    when(cohortDao.findBy(
+            PropValue.builder()
+                .associationPath(Optional.of("location"))
+                .property("uuid")
+                .value(locationUuid)
+                .build()))
+        .thenReturn(Collections.singletonList(cohort));
 
-		Collection<CohortM> cohortsByLocationUuid = cohortService.findCohortMByLocationUuid(locationUuid);
-		assertThat(cohortsByLocationUuid, notNullValue());
-		assertThat(cohortsByLocationUuid, hasSize(1));
+    Collection<CohortM> cohortsByLocationUuid =
+        cohortService.findCohortMByLocationUuid(locationUuid);
+    assertThat(cohortsByLocationUuid, notNullValue());
+    assertThat(cohortsByLocationUuid, hasSize(1));
 
-		cohortsByLocationUuid.forEach(cohortM -> {
-			assertThat(cohortM.getLocation(), equalTo(location));
-		});
-	}
+    cohortsByLocationUuid.forEach(
+        cohortM -> {
+          assertThat(cohortM.getLocation(), equalTo(location));
+        });
+  }
 }
