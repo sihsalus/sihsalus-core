@@ -1,11 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License,
- * v. 2.0. If a copy of the MPL was not distributed with this file, You can
- * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
- * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of
+ * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
+ * http://openmrs.org/license.
  *
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
- * graphic logo is a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
 package org.openmrs.module.openconceptlab;
 
@@ -19,79 +19,81 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.zip.ZipFile;
-
 import org.apache.commons.io.IOUtils;
 import org.openmrs.module.DaemonToken;
 import org.openmrs.module.ModuleFactory;
 import org.openmrs.module.openconceptlab.client.OclClient;
 
-
 public class TestResources {
 
-	public static InputStream getSimpleResponseAsStream() {
-		return TestResources.class.getClassLoader().getResourceAsStream("response.zip");
-	}
+  public static InputStream getSimpleResponseAsStream() {
+    return TestResources.class.getClassLoader().getResourceAsStream("response.zip");
+  }
 
-	public static InputStream getResponseAsStream(String testResourcePath) {
-		return TestResources.class.getClassLoader().getResourceAsStream(testResourcePath);
-	}
+  public static InputStream getResponseAsStream(String testResourcePath) {
+    return TestResources.class.getClassLoader().getResourceAsStream(testResourcePath);
+  }
 
-	public static URL getSimpleResponseZipFileUrl() {
-		return TestResources.class.getClassLoader().getResource("response.zip");
-	}
+  public static URL getSimpleResponseZipFileUrl() {
+    return TestResources.class.getClassLoader().getResource("response.zip");
+  }
 
-	public static ZipFile getSimpleZipFile() throws IOException, URISyntaxException {
-		File zipFile = new File(getSimpleResponseZipFileUrl().toURI());
-		File newZipFile = new File(getSimpleResponseZipFileUrl().getPath() + "new_file.zip");
+  public static ZipFile getSimpleZipFile() throws IOException, URISyntaxException {
+    File zipFile = new File(getSimpleResponseZipFileUrl().toURI());
+    File newZipFile = new File(getSimpleResponseZipFileUrl().getPath() + "new_file.zip");
 
-		IOUtils.copy(new FileInputStream(zipFile), new FileOutputStream(newZipFile));
+    IOUtils.copy(new FileInputStream(zipFile), new FileOutputStream(newZipFile));
 
-		return new ZipFile(newZipFile);
-	}
+    return new ZipFile(newZipFile);
+  }
 
-	public static ZipFile getZipFileFromResource(String resource) throws IOException, URISyntaxException {
-		URL zipFileUrl = TestResources.class.getClassLoader().getResource(resource);
-		File zipFile = new File(zipFileUrl.toURI());
-		return new ZipFile(zipFile);
-	}
+  public static ZipFile getZipFileFromResource(String resource)
+      throws IOException, URISyntaxException {
+    URL zipFileUrl = TestResources.class.getClassLoader().getResource(resource);
+    File zipFile = new File(zipFileUrl.toURI());
+    return new ZipFile(zipFile);
+  }
 
-	public static InputStream getSimpleResponseAsJsonStream() {
-		InputStream inputStream = getSimpleResponseAsStream();
-		OclClient oclClient = new OclClient();
-		try {
-			OclClient.OclResponse oclResponse = oclClient.unzipResponse(inputStream, null);
-			return oclResponse.getContentStream();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static InputStream getInitialResponseAsStream() {
-		return TestResources.class.getClassLoader().getResourceAsStream("CIEL_20150514-testdata.20150622121229.tar");
-	}
-
-	@SuppressWarnings("unchecked")
-    public static void setupDaemonToken() {
-		Map<String, DaemonToken> daemonTokens;
-	    try {
-		Field field = ModuleFactory.class.getDeclaredField("daemonTokens");
-		field.setAccessible(true);
-		Object daemonTokensObj = field.get(null);
-
-		// Handle both Map and Guava Cache types
-		if (daemonTokensObj instanceof Map) {
-			daemonTokens = (Map<String, DaemonToken>) daemonTokensObj;
-		} else if (daemonTokensObj instanceof com.google.common.cache.Cache) {
-			daemonTokens = ((com.google.common.cache.Cache<String, DaemonToken>) daemonTokensObj).asMap();
-		} else {
-			throw new RuntimeException("Unexpected daemonTokens type: " + daemonTokensObj.getClass());
-		}
-	    } catch (Exception e) {
-		throw new RuntimeException(e);
-	    }
-
-		DaemonToken daemonToken = new DaemonToken("openconceptlab");
-		daemonTokens.put(daemonToken.getId(), daemonToken);
-		new OpenConceptLabActivator().setDaemonToken(daemonToken);
+  public static InputStream getSimpleResponseAsJsonStream() {
+    InputStream inputStream = getSimpleResponseAsStream();
+    OclClient oclClient = new OclClient();
+    try {
+      OclClient.OclResponse oclResponse = oclClient.unzipResponse(inputStream, null);
+      return oclResponse.getContentStream();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  public static InputStream getInitialResponseAsStream() {
+    return TestResources.class
+        .getClassLoader()
+        .getResourceAsStream("CIEL_20150514-testdata.20150622121229.tar");
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void setupDaemonToken() {
+    Map<String, DaemonToken> daemonTokens;
+    try {
+      Field field = ModuleFactory.class.getDeclaredField("daemonTokens");
+      field.setAccessible(true);
+      Object daemonTokensObj = field.get(null);
+
+      // Handle both Map and Guava Cache types
+      if (daemonTokensObj instanceof Map) {
+        daemonTokens = (Map<String, DaemonToken>) daemonTokensObj;
+      } else if (daemonTokensObj instanceof com.google.common.cache.Cache) {
+        daemonTokens =
+            ((com.google.common.cache.Cache<String, DaemonToken>) daemonTokensObj).asMap();
+      } else {
+        throw new RuntimeException("Unexpected daemonTokens type: " + daemonTokensObj.getClass());
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    DaemonToken daemonToken = new DaemonToken("openconceptlab");
+    daemonTokens.put(daemonToken.getId(), daemonToken);
+    new OpenConceptLabActivator().setDaemonToken(daemonToken);
+  }
 }
