@@ -7,8 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.AfterEach;
@@ -102,7 +102,8 @@ class AttachmentResourceTest {
     ObsService obsService = mock(ObsService.class);
     Patient patient = patient();
     mockedContext.when(Context::getObsService).thenReturn(obsService);
-    when(obsService.getObsByUuid(ATTACHMENT_UUID)).thenReturn(attachmentObs("filename.png", patient));
+    when(obsService.getObsByUuid(ATTACHMENT_UUID))
+        .thenReturn(attachmentObs("filename.png", patient));
 
     resource.getByUniqueId(ATTACHMENT_UUID);
 
@@ -115,7 +116,8 @@ class AttachmentResourceTest {
     ObsService obsService = mock(ObsService.class);
     Patient patient = patient();
     mockedContext.when(Context::getObsService).thenReturn(obsService);
-    when(obsService.getObsByUuid(ATTACHMENT_UUID)).thenReturn(attachmentObs("filename.png", patient));
+    when(obsService.getObsByUuid(ATTACHMENT_UUID))
+        .thenReturn(attachmentObs("filename.png", patient));
     doThrow(new PatientObjectAccessDeniedException(PATIENT_UUID))
         .when(patientAuthorization)
         .requireCanReadPatient(PATIENT_UUID);
