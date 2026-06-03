@@ -1,6 +1,8 @@
 package org.openmrs.module.bedmanagement.validator;
 
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.openmrs.module.bedmanagement.entity.BedTag;
 import org.openmrs.module.bedmanagement.service.BedManagementService;
@@ -10,103 +12,96 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class BedTagValidatorTest extends BaseModuleContextSensitiveTest {
 
-	@Autowired
-	private Validator bedTagValidator;
+  @Autowired private Validator bedTagValidator;
 
-	@Autowired
-	private BedManagementService bedManagementService;
+  @Autowired private BedManagementService bedManagementService;
 
-	@Test
-	public void validate_shouldFailValidationIfNameIsNullOrEmptyOrWhitespace() {
-		BedTag tag = new BedTag();
-		Errors errors;
+  @Test
+  public void validate_shouldFailValidationIfNameIsNullOrEmptyOrWhitespace() {
+    BedTag tag = new BedTag();
+    Errors errors;
 
-		tag.setName(null);
-		errors = new BindException(tag, "tag");
-		bedTagValidator.validate(tag, errors);
-		assertTrue(errors.hasFieldErrors("name"));
+    tag.setName(null);
+    errors = new BindException(tag, "tag");
+    bedTagValidator.validate(tag, errors);
+    assertTrue(errors.hasFieldErrors("name"));
 
-		tag.setName("");
-		errors = new BindException(tag, "tag");
-		bedTagValidator.validate(tag, errors);
-		assertTrue(errors.hasFieldErrors("name"));
+    tag.setName("");
+    errors = new BindException(tag, "tag");
+    bedTagValidator.validate(tag, errors);
+    assertTrue(errors.hasFieldErrors("name"));
 
-		tag.setName(" ");
-		errors = new BindException(tag, "tag");
-		bedTagValidator.validate(tag, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-	}
+    tag.setName(" ");
+    errors = new BindException(tag, "tag");
+    bedTagValidator.validate(tag, errors);
+    assertTrue(errors.hasFieldErrors("name"));
+  }
 
-	@Test
-	public void validate_shouldFailValidationIfBedTagNameAlreadyInUse() {
-		BedTag existing = new BedTag();
-		existing.setName("VIP");
-		bedManagementService.saveBedTag(existing);
+  @Test
+  public void validate_shouldFailValidationIfBedTagNameAlreadyInUse() {
+    BedTag existing = new BedTag();
+    existing.setName("VIP");
+    bedManagementService.saveBedTag(existing);
 
-		BedTag duplicate = new BedTag();
-		duplicate.setName("VIP");
+    BedTag duplicate = new BedTag();
+    duplicate.setName("VIP");
 
-		Errors errors = new BindException(duplicate, "tag");
-		bedTagValidator.validate(duplicate, errors);
+    Errors errors = new BindException(duplicate, "tag");
+    bedTagValidator.validate(duplicate, errors);
 
-		assertTrue(errors.hasFieldErrors("name"));
-	}
+    assertTrue(errors.hasFieldErrors("name"));
+  }
 
-	@Test
-	public void validate_shouldPassValidationIfExistingTagWithSameNameIsVoided() {
-		BedTag existing = new BedTag();
-		existing.setName("Emergency");
-		existing.setVoided(true);
-		bedManagementService.saveBedTag(existing);
+  @Test
+  public void validate_shouldPassValidationIfExistingTagWithSameNameIsVoided() {
+    BedTag existing = new BedTag();
+    existing.setName("Emergency");
+    existing.setVoided(true);
+    bedManagementService.saveBedTag(existing);
 
-		BedTag newTag = new BedTag();
-		newTag.setName("Emergency");
-		bedManagementService.saveBedTag(newTag);
+    BedTag newTag = new BedTag();
+    newTag.setName("Emergency");
+    bedManagementService.saveBedTag(newTag);
 
-		Errors errors = new BindException(newTag, "tag");
-		bedTagValidator.validate(newTag, errors);
+    Errors errors = new BindException(newTag, "tag");
+    bedTagValidator.validate(newTag, errors);
 
-		assertFalse(errors.hasFieldErrors("name"));
-	}
+    assertFalse(errors.hasFieldErrors("name"));
+  }
 
-	@Test
-	public void validate_shouldPassValidationIfNameIsValid() {
-		BedTag tag = new BedTag();
-		tag.setName("Isolation");
+  @Test
+  public void validate_shouldPassValidationIfNameIsValid() {
+    BedTag tag = new BedTag();
+    tag.setName("Isolation");
 
-		Errors errors = new BindException(tag, "tag");
-		bedTagValidator.validate(tag, errors);
+    Errors errors = new BindException(tag, "tag");
+    bedTagValidator.validate(tag, errors);
 
-		assertFalse(errors.hasErrors());
-	}
+    assertFalse(errors.hasErrors());
+  }
 
-	@Test
-	public void validate_shouldFailValidationIfFieldLengthIsTooLong() {
-		BedTag tag = new BedTag();
-		String longName = new String(new char[260]).replace('\0', 'A');
-		tag.setName(longName);
+  @Test
+  public void validate_shouldFailValidationIfFieldLengthIsTooLong() {
+    BedTag tag = new BedTag();
+    String longName = new String(new char[260]).replace('\0', 'A');
+    tag.setName(longName);
 
-		Errors errors = new BindException(tag, "tag");
-		bedTagValidator.validate(tag, errors);
+    Errors errors = new BindException(tag, "tag");
+    bedTagValidator.validate(tag, errors);
 
-		assertTrue(errors.hasFieldErrors("name"));
-	}
+    assertTrue(errors.hasFieldErrors("name"));
+  }
 
-	@Test
-	public void validate_shouldPassValidationIfFieldLengthIsWithinLimit() {
-		BedTag tag = new BedTag();
-		tag.setName("General Ward");
+  @Test
+  public void validate_shouldPassValidationIfFieldLengthIsWithinLimit() {
+    BedTag tag = new BedTag();
+    tag.setName("General Ward");
 
-		Errors errors = new BindException(tag, "tag");
-		bedTagValidator.validate(tag, errors);
+    Errors errors = new BindException(tag, "tag");
+    bedTagValidator.validate(tag, errors);
 
-		assertFalse(errors.hasErrors());
-	}
+    assertFalse(errors.hasErrors());
+  }
 }
