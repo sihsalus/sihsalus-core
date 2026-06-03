@@ -25,7 +25,7 @@ __pycache__/
 
 # Generated local analysis artifacts.
 docs/generated/
-reports/
+/reports/
 .mvn/wrapper/maven-wrapper.jar
 .mvn/wrapper/
 mvnw

@@ -1,0 +1,55 @@
+{
+  "name": "form",
+  "uuid": "xxxx",
+  "processor": "EncounterFormProcessor",
+  "pages": [
+    {
+      "label": "Root Page",
+      "sections": [
+        {
+          "label": "Root Section",
+          "questions": [
+            {
+              "label": "Question 1",
+              "id": "weight",
+              "type": "obs",
+              "concept": "c607c80f-1ea9-4da3-bb88-6276ce8868dd",
+              "questionOptions": {
+                "concept": "a09ab2c5-878e-4905-b25d-5784167d0216",
+                "answers": [
+                  {
+                    "concept": "b055abd8-a420-4a11-8b98-02ee170a7b54",
+                    "label": "YES"
+                  },
+                  {
+                    "concept": "934d8ef1-ea43-4f98-906e-dd03d5faaeb4",
+                    "label": "NO"
+                  }
+                ],
+                "rendering": "select"
+              }
+            },
+            {
+              "id": "Question Obs Group",
+              "type": "obsGroup",
+              "questionOptions": {
+                "concept": "6e02d1a0-7869-11e4-981f-0800200c9a89",
+                "rendering": "group"
+              },
+              "questions": [
+                {
+                  "id": "Question 2",
+                  "type": "obs",
+                  "questionOptions": {
+                    "concept": "e10ffe54-5184-4efe-8960-cd565ec1cdf8",
+                    "rendering": "text"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

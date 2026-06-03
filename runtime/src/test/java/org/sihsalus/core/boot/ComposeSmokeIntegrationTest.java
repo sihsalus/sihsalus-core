@@ -20,7 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "sihsalus.ocl.static-import.enabled=false",
       "sihsalus.admin.password=test-admin-password"
     })
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 public class ComposeSmokeIntegrationTest {
 
   @Container

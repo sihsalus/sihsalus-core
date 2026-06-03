@@ -1,0 +1,16 @@
+{
+  "name": "root_form",
+  "uuid": "xxxx",
+  "processor": "EncounterFormProcessor",
+  "pages": [
+    {
+      "label": "Root Page",
+      "sections": [
+        {
+          "label": "Root Section",
+          "questions": []
+        }
+      ]
+    }
+  ]
+}

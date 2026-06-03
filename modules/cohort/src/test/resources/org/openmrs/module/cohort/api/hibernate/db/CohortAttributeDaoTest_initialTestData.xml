@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <cohort cohort_id="2" name="COVID-19 patients" description="COVID-19 patients" is_group_cohort="0" creator="1"
+            definition_handler="org.openmrs.module.cohort.definition.handler.DefaultCohortDefinitionHandler"
+            date_created="2005-01-01 00:00:00.0" voided="false" uuid="7f9a2479-c14a-4bfc-bcaa-632860258519"/>
+    <cohort_attribute_type cohort_attribute_type_id="100" name="cohort attribute type" datatype="java.lang.String" min_occurs="1"
+                            description="This is description" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+                            uuid="9eb7fe43-2813-4ebc-80dc-2e5d30251bb7"/>
+    <cohort_attribute cohort_attribute_id="1" attribute_type_id="100" value_reference="Test cohort attribute" creator="1" cohort_id="2"
+                      date_created="2005-01-01 00:00:00.0" voided="true" voided_by="1" date_voided="2021-05-01 00:00:00.0"
+                      void_reason="retired by test" uuid="ddadadd8-8034-4a28-9441-2eb2e7679e10"/>
+    <cohort_attribute cohort_attribute_id="2" attribute_type_id="100" value_reference="System generated patient" creator="1" cohort_id="2"
+                      date_created="2021-10-14 00:00:00.0" voided="false" uuid="99ada908-8034-4a28-9441-2eb2e8979e32"/>
+</dataset>
