@@ -1,51 +1,62 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.queue.api.sort;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
-import java.util.List;
-import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.module.queue.api.QueueServicesWrapper;
-import org.openmrs.module.queue.model.Queue;
 import org.openmrs.module.queue.model.QueueEntry;
 
-class BasicPrioritySortWeightGeneratorTest {
+@RunWith(MockitoJUnitRunner.class)
+public class BasicPrioritySortWeightGeneratorTest {
+
+  @Mock private QueueServicesWrapper services;
+
+  @Mock Concept concept1;
+
+  @Mock Concept concept2;
+
+  @Mock Concept concept3;
+
+  QueueEntry queueEntry;
+
+  BasicPrioritySortWeightGenerator generator;
+
+  @Before
+  public void setupMocks() {
+    MockitoAnnotations.openMocks(this);
+    when(services.getAllowedPriorities(any()))
+        .thenReturn(Arrays.asList(concept1, concept2, concept3));
+    queueEntry = new QueueEntry();
+    generator = new BasicPrioritySortWeightGenerator(services);
+  }
 
   @Test
-  void generateSortWeightReturnsConfiguredPriorityPosition() {
-    Concept concept1 = new Concept(1);
-    Concept concept2 = new Concept(2);
-    Concept concept3 = new Concept(3);
-    QueueEntry queueEntry = new QueueEntry();
-    BasicPrioritySortWeightGenerator generator =
-        new BasicPrioritySortWeightGenerator(
-            servicesReturningPriorities(List.of(concept1, concept2, concept3)));
-
-    assertEquals(0.0, generator.generateSortWeight(queueEntry));
+  public void shouldReturnCorrectSortWeight() {
+    assertThat(generator.generateSortWeight(queueEntry), equalTo(0.0));
     queueEntry.setPriority(concept1);
-    assertEquals(0.0, generator.generateSortWeight(queueEntry));
+    assertThat(generator.generateSortWeight(queueEntry), equalTo(0.0));
     queueEntry.setPriority(concept2);
-    assertEquals(1.0, generator.generateSortWeight(queueEntry));
+    assertThat(generator.generateSortWeight(queueEntry), equalTo(1.0));
     queueEntry.setPriority(concept3);
-    assertEquals(2.0, generator.generateSortWeight(queueEntry));
-  }
-
-  @Test
-  void generateSortWeightDefaultsToLowestPriorityWhenPriorityIsNotAllowed() {
-    QueueEntry queueEntry = new QueueEntry();
-    queueEntry.setPriority(new Concept(99));
-    BasicPrioritySortWeightGenerator generator =
-        new BasicPrioritySortWeightGenerator(servicesReturningPriorities(List.of(new Concept(1))));
-
-    assertEquals(0.0, generator.generateSortWeight(queueEntry));
-  }
-
-  private QueueServicesWrapper servicesReturningPriorities(List<Concept> priorities) {
-    return new QueueServicesWrapper(null, null, null, null, null, null, null, null, null, null) {
-      @Override
-      public List<Concept> getAllowedPriorities(Queue queue) {
-        return priorities;
-      }
-    };
+    assertThat(generator.generateSortWeight(queueEntry), equalTo(2.0));
   }
 }

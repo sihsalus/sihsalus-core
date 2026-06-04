@@ -1,21 +1,56 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.queue.api.sort;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.queue.model.QueueEntry;
 
-class ExistingValueSortWeightGeneratorTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ExistingValueSortWeightGeneratorTest {
+
+  AutoCloseable mockCloseable = null;
+
+  QueueEntry queueEntry;
+
+  ExistingValueSortWeightGenerator generator;
+
+  @Before
+  public void setupMocks() {
+    mockCloseable = MockitoAnnotations.openMocks(this);
+    queueEntry = new QueueEntry();
+    generator = new ExistingValueSortWeightGenerator();
+  }
+
+  @After
+  public void tearDownMocks() {
+    if (mockCloseable != null) {
+      try {
+        mockCloseable.close();
+      } catch (Exception ignored) {
+      }
+    }
+  }
 
   @Test
-  void generateSortWeightReturnsExistingSortWeight() {
-    QueueEntry queueEntry = new QueueEntry();
-    ExistingValueSortWeightGenerator generator = new ExistingValueSortWeightGenerator();
-
-    for (double sortWeight = 0.0; sortWeight < 20.0; sortWeight += 1.0) {
-      queueEntry.setSortWeight(sortWeight);
-
-      assertEquals(sortWeight, generator.generateSortWeight(queueEntry));
+  public void shouldReturnCorrectSortWeight() {
+    for (double d = 0.0; d < 20.0; d += 1) {
+      queueEntry.setSortWeight(d);
+      assertThat(generator.generateSortWeight(queueEntry), equalTo(d));
     }
   }
 }
